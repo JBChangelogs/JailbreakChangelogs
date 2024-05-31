@@ -506,6 +506,88 @@
 - Fixed Plasma Pistol not registering player heads.
 - Cargo Ship now “closes” the robbery round just before leaving the map.
 
+# March 08, 2024 / Version 1295 / Apocalypse Part 2
+
+## Community Note
+> Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code ***~~hammerhead~~*** for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+## Tier 3 Police Safe, V2
+- New Vehicle: Hammerhead. With custom physics. 
+- New Wing: Police Pointer.
+- New Rims: SRT and Webbed Hero.
+- New Furniture: Missile Sofa.
+- New Tire: Radar Sticker.
+- Retired and made tradable: Rally Rims, Aerial Wing, Propeller Rim, Plane Seat Item, and Cyber Couch.
+- Added "Pity System" to all safes for fairer rolling.
+- Tightened amount of cash you can win, or lose, from Safes.
+
+## Weapons Revamp 2024
+- New models for AK47, Rifle, Shotgun, Pistol, SWAT Pistol, Uzi, Revolver, Rocket Launcher, Sniper, Forcefield Gun, Plasma Pistol, and Revolver with multicolored skin support.
+- 5 new Gun Skins: Manga, Aquatic, Wooden Toy, Aurora, and Camo Radar.
+- New muzzle flash particles with world light.
+- Added world lights to Plasma lightning bolts.
+- New sounds on all new weapons, except Shotgun.
+- Added reload sound to Plasma Pistol and Forcefield Gun.
+- Forcefields now appear in the ground.
+- Forcefield ammo is now shot ahead of the player.
+- Forcefields now have health, and minimum active time of 3 seconds.
+- Binoculars now force first person.
+- Fixed Binocular UI from not covering the screen.
+- Fixed the Binocular model from not disappearing in use.
+- Updated Flashlight with bigger dual light.
+- Added "Equip Times" to most weapons based on their fire rates and reloads. This prevents spam unloading a ton of ammo in a fraction of a second.
+- Added equip times to Taser.
+- Added visible reload to Taser.
+- New Hotbar images for weapon models.
+- Updated the Hotbar system code.
+- Weapons now automatically reload when you weapon switch to an empty clip.
+- Increased Plasma Pistol ammo.
+- Increased Revolver fire rate.
+- Shotgun is now a free weapon.
+- New reload and firing ammo animations on Shotgun, most notable in first person. 
+- Fixed an old bug related to Shotgun reloading.
+- Removed Gun Skin button when holding a weapon. 
+- Added blue Gun Skin zones in Gun Shops.
+- Touched up Gun Skins UI.
+
+## Jetpacks
+- New Jetpack model with built in fuel bar and new particles.
+- New physics with slow takeoff, and increased speed the longer you fly. 
+- Removed Jetpack Fuel UI, Premium Fuel, and Refill Bar.
+- Added automatic refueling once you run out.
+- Bullets and Tasers now take away fuel.
+- Increased "Standard Fuel" amount.
+
+## Tutorial
+- A new tutorial has been released! Only a tiny percentage of new players will see it. If data looks great, we'll force this on for all.
+- New joins now spawn outside the prison, with a vehicle worth about $100k. The vehicle disappears once they're caught.
+- New joins are given extra health and a keycard.
+- New joins are guided with waypoints to nearby open robberies and gun shops.
+- Added new sub-text to Waypoint guidance, providing more direction. 
+
+## Game
+- New Private Server commands for FriendlyFire, BanGun, AnnouncePlayerArrests, and AnnouncePlayerKills.
+- Buffed Striker to be similar to Celestial. 
+- New per-car "Ram Duration" for popping tires. Faster vehicles will be popped longer.
+- Added Brickset Drift to owners of Ski Mask.
+- Adjusted scale and positioning of Scythes Spoiler.
+- Top Bar buttons on Mobile have been scaled down and pushed to the right to avoid Roblox's new mobile UI. 
+- Added mobile reload button.
+- Shortened Season 20 end date.
+- Reduced Turret Furniture health.
+- Added health to Furniture items without any.
+- Scaled XRK model up ~10%, adjusted tires.
+- Reduced reflectance on Model 3.
+- Skull Wing fire particles are now locked to the wing.
+- Disabled shadows on transparent decal parts.
+- Fixed a bug where high FPS players would give different Heli speeds.
+- Fixed a bug where high FPS players would skydive faster.
+- Fixed a bug where high FPS vehicles would recover traction too quickly.
+- Fixed a bug where high FPS players with guns had extra recoil. 
+- Fixed Radio playlists from not saving. 
+- Fixed a bug related to crosshair placement.
+- Fixed the Ray9 License Plate.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
