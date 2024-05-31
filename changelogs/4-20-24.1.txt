@@ -417,6 +417,33 @@
 - Removed unused mansion code.
 - Updated Minimap.
 
+# December 22, 2023 / Version 1257 / One More Thing!
+## Community Note
+> This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have **5 Days** to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+## New Car
+- Added "Carbonara" limited vehicle. On sale for 5 days only! Offsale Dec 27th.
+- Added "Carbonara V12" engine sounds.
+- Added "Carbonara Startup" sound.
+
+## World Map
+- Updated both trains to be snow themed.
+- The basic frame of the Oil Rig is now always visible to StreamingEnabled players.
+- Removed the floating bricks behind the mansion.
+
+## Misc
+- Raised bounty for Oil Rig to 1750.
+- Added a "No Go" zone to the top of the Oil Rig ladders for NPCs
+- Updated brakelight colors on Ambulance, Laviolette, Successor. 
+- Fixed a few vehicle license plates not being bold text.
+- Fixed Brulee and Torero brakelights.
+- Moved Bandit rear passenger seat lower.
+- Fixed a doorframe hopping trick in the CEO battle room.
+- Fixed the size and positioning of the Eclaire tires.
+- Fixed collisions to the Eclaire for a less bouncy ride.
+- Fixed PlasmaPistol newly introduced damage issues.
+- Fixed an arrest avoidance bug with vehicles.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
