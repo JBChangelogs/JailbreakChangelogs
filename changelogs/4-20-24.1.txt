@@ -306,6 +306,56 @@
 - Jetpacks are now removed on Battle Royale start.
 - Dropped items in the map are now removed on Battle Royale start.
 
+# November 8, 2023 / Version 1246 / 5 Days - Day 5!
+## Community Note
+> Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+- Added new Falcon S Sport Bike and Falcon Spawns.
+- New “Sport Bike” engine sound (Thank you Migue!)
+- - Revamped our Bike Chassis
+- - New physics with support for ramps, jumps, and Rocket Fuel.
+- - New gearing support with proper gear changing while driving.
+- - New leaning animations for bike vehicles.
+- - New passenger animations for passengers riding bikes.
+- - New leaning and idle animations for players riding bikes.
+- - Tire popping support was added to bike chassis
+- - Drift customization was added to bike chassis.
+- - Window Tint support now works on bike chassis.
+- - Improved bike handling at low framerates.
+- - Bike sounds and animations are now networked to other players.
+- - Fixed a headlight bug related to Bike Chassis
+- - HyperChrome and HyperShift support on bikes and Dune Buggy.
+- Added InsideCamera to Patrol
+- Updated Successor engine tune.
+- Added SecondBody support to DirtBike
+- Updated Eclaire engine tune.
+- Updated default Eclaire color scheme.
+- Centered wing part on the Eclaire.
+- Darkened the vent areas of the Eclaire.
+- Updated the Eclaire plate to “BY PIZZA”
+- Fixed Eclaire default height when nobody is inside.
+- Added Volt trails to Volt4x4.
+- Volt engine sound is now networked to other clients.
+- Added new Volt4x4 tires to better fit rims.
+- Fixed Stunt Plane flaps from being the wrong color in garages.
+- Updated Patrol tune to support new physics.
+- Updated Dirtbike tune to support new physics.
+- Updated Dune Buggy tune to support new physics. (Thank you Shadow for all the tunes!)
+- Updated Beignet tune to continue to match Eclaire.
+- Updated ShellMark5 tune.
+- Fixed an issue with ATV headlights not glowing.
+- Fixed Gunfire rims from being off center.
+- Updated the ColorsOfItaly spoiler with brighter smoke colors.
+- Fixed a bug related to vehicle suspension networking.
+- Fixed a bug related to FOV camera settings.
+- Fixed a Bank open issue within Crew Battle servers.
+- Fixed Reload from bringing up Radio as a vehicle passenger.
+- Fixed checkbox positioning in the Ban World.
+- Updated Battle Royale item weights.
+- Fixed bouncing off water when falling through the air.
+- Updated Streaming models to be made up of many small models instead of large building sized models. This should remove some FPS hiccups and possibly improve performance for slower machines. This could also reduce the possibility of entire buildings not loading in.
+- Updated 1,171 MeshParts to use Automatic LevelOfDetail instead of Precise. 627 came from Vehicle meshes, 28 Rims, 32 Spoilers, and 484 from the map. This may improve performance as these meshes are no longer rendered at highest quality when far away.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
