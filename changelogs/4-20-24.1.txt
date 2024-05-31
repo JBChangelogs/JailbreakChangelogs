@@ -217,6 +217,36 @@
 - Updated messaging for “Switch to Police” chat alert.
 - Raised Max Bounty to 20k.
 
+# November 3, 2023 / Version-1242 / 5 Days - Day 2
+## Community Note
+> Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+- Added Laviolette Lowrider with Lowriding effects and sounds.
+- Added Mystic and Landmine Rims.
+- Added Nitro and Wingo Spoilers.
+- Added 10 second penalty cooldown for crew battles.
+- Moved Construction Tire, Spares Spoiler, Forged Rims and RFX Rims to Garage.
+- Greatly reduced, and in some cases fixed, the infamous “Car Bounce” bug. 
+- Added a sliding door to the new Jewelry escape to prevent exterior entry.
+- Removed furniture placement in front of doors in both Penthouses.
+- Removed saving and loading of unplaced or misplaced home items.
+- Removed SWAT Phone collisions.
+- Removed driving large vehicles into the Museum entrance.
+- Increased “NoJetpack” region near the Museum entrance.
+- "NoJetpack" zones now completely disable jetpack thrust.
+- Potentially fixed an issue where the CEO can end up in the ground.
+- Banned another no-clip emote.
+- Fixed an issue where non-VIP players could visually use VIP save slots.
+- Fixed Nightclub seats from kicking players out.
+- Fixed a teleport region issue at the top of the Jewelry Store.
+- Fixed roll cooldowns from triggering when rolling backwards while holding a weapon.
+- Fixed the Radio button on mobile from disappearing.
+- Fixed an issue where players die on team selection.
+- Fixed a running animation bug with Tomb Carts and Jetpacks.
+- Filled a terrain gap near the Tomb cart track switch.
+- Filled a terrain gap under the tracks near the gas station.
+- Filled missing railings at Trade Hub Dragway.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
