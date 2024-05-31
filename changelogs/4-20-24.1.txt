@@ -247,6 +247,33 @@
 - Filled a terrain gap under the tracks near the gas station.
 - Filled missing railings at Trade Hub Dragway.
 
+# November 6, 2023 / Version 1243 / 5 Days - Day 3
+## Community Note
+> After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code ***~~5days23~~*** for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+- Added Successor vehicle with startup sound and animated wing.
+- Added off-road path behind Bounty Bay Airport.
+- Added further reinforcing to the Museum entry to keep cars out.
+- Added driveway spawn for Successor.
+- Added HyperShift trails to Volt.
+- Added Hyper particles to Volt.
+- Added new camera FOV animations to vehicle passengers.
+- Fixed a Jewelry floor with lasers sticking outside the building.
+- Fixed multiple Jewelry floors with light colored brick walls.
+- Fixed clipping issues with a vault in a Jewelry floor.
+- Added regions to Casino for teleporting players out on close.
+- Fixed the trade teleport countdown appearing through walls.
+- Fixed the city tunnel near the bank from thinking you’re in a bank robbery.
+- Fixed un-equipping tools from moving mobile crouch and punch buttons.
+- Fixed a mobile control button placement issue when picking up another player's item.
+- Fixed an exploit that allowed items outside home boundaries.
+- Fixed an issue where dropping an item would remove your robbery money collection.
+- Made a second attempt fix for walking animations on carts/jetpacks.
+- Free players can now only save garage loadouts in the first 10 slots instead of 10 slots randomly. 
+- Fixed ammo accounts on Grenades and other items from exceeding their max value.
+- Fixed an issue where banned players might not be teleported to the ban world.
+- Crew member markers are now hidden if the crew member is on the opposite team.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
