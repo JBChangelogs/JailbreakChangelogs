@@ -1,0 +1,63 @@
+# April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
+
+## Community Note
+- Hey friends! Nice to see you again. We finally got the long-awaited LIVE EVENT! If you missed it, remember replays happen later today and tomorrow morning. Also, redeem code 7years for 14k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official Discord server, where these updates are also posted.The most recent Changelogs will always be pinned, so make sure to check back on the next update!
+
+## Live Event
+- New Plasma Shotgun weapon, found from nearby alien encounters.
+- Added morse code hype dish.
+- Added support for Boss Health.
+- New: Players entering the event late are now brought up to sync instead of being met with a broken view.
+- New: 2024 Event Rims, exclusive to attendees of the main event or replays.
+- Added support for automatic replays post-event. 
+- Added support to pause day/night, and rain before the event begins.
+- New pre-event hype countdown with music and reminder to raise your volume.
+
+## OG Jailbreak 
+- OG Jailbreak has returned for a limited time! This required a ton of "surgery" as we modified purposely scrambled code and brought this game back to working order. 
+- New "Save The World" "Event" taking place now. 
+- - Cross server syncing of total cash earn.
+- - Live progress board, find it in front of the prison.
+- - New: OG Matador with original tune. Reward to everybody who participates. Keep forever and drive it in the modern game.
+- "Event dialog" support, playing for a limited time on join of OG Jailbreak.
+- Portal back to Jailbreak 2024 in front of the prison.
+
+## Season 21: REWIND
+- New Vehicle: OG Monster Truck! He has finally returned!
+- New Rims: Heli Blade and Handcuff Chain Rims
+- New Spoilers: OG Thrusters and OG Glider Shop Wing
+- New Tire: Donut Shop Tires
+- New Furniture: OG Snow Machine and Giant OG Snowman
+- New Drift: OG Rocket Fuel Drift
+- Season Pass, now 20% off.
+
+## UI + Servers
+- New Main Menu design with nearly complete update history. We collected every version we had!
+- Support for alternate servers.
+- - Added OG Jailbreak Server with countdown.
+- - New Voicechat Server, with verification.
+- - Trade World Server button finally has a proper home.
+
+## Main World
+- Added Season 21 hype zones.
+- Repainted and sculpted much of the world for an OG Desert feel.
+- Removed many low poly mesas from the southern map.
+- Dave the Cave is back!
+- New room within The Mansion.
+- Glitched buildings and flickering portals, these will dissapear as players work together in OG Jailbreak.
+- Alien debris and smoke.
+- Temporary OG Volt in Museum (Named Cone for simplicity on our end hahaha)
+- Added back the Museum ticket booth.
+- New purple "OG" meteor.
+- New surface on PowerPlant Exterior.
+- OG Skybox and lighting.
+
+## Misc
+- New Soccerball reward: The Laser Wing
+- New "Eric's Starship" furniture item, for penthouses.
+- Mansion now opens at night instead of when it rains.
+- Fixed a bug that made Shotgun hits extremely loud.
+- Crew Battle ratings no longer update if the battle was brief.
+- Removed Bank Truck bounty due to abuse. 
+
+> > To all of our players over all of these years, we love this game. Thank you! Keep up the fight for Jailbreak forever! It'll never go away. Have a great weekend! Replays happen later today and tomorrow morning. HAVE FUN IN OG!
