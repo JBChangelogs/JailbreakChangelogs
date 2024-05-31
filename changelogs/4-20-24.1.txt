@@ -179,6 +179,44 @@
 - Fixed a problem where free vehicles might end up in a Garage Sale.
 - Fixed spoilers from incorrectly removing speed.
 
+# November 2, 2023 / Version-1241 / 5 Days - Day 1
+
+## Community Note
+> Welcome! 5 Days of Vehicles 2023 has begun! Use code ~~***5days23***~~ for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+---
+
+- Added Stunt Plane revamp with Machine Gun support.
+- Changed Stunt price from 200,000 to 300,000.
+- Replaced jet spawn at casino airport with Stunt.
+- Added first person camera support to planes.
+- Added Horn support to planes.
+- Added black smoke particles to planes for falling out of the sky.
+- Added “Vehicle Damage” indicators in black. Orange if you shoot them down or pop tires.
+- Added damage to helicopters if a player isn’t inside, like other vehicles.
+- New: Cargo Plane now closes for the robbery system when 70% near the end of the voyage, preventing excessive waiting for the robbery to close.
+- New: Cargo Ship now closes for the robbery system when 80% near the end of the voyage, preventing excessive waiting for the robbery to close.
+- Resized door regions in Mansion exits to prevent crawl openings.
+- Added fourth door to PowerPlant exits.
+- Added glass cutout escape near the top ramp of the jewelry store.
+- Added redesigned tomb exits with sliding exit doors and updated regions and drop-off areas.
+- Added 40% more tomb gems to the treasure room.
+- Radios are now disabled if an equipped tool can be reloaded.
+- Removed additional emotes being abused for no-clip.
+- Silenced an error related to falling out of the world.
+- Red Robbery Markers are now hidden to reduce noise.
+- Robbery names are now announced to all players on open.
+- Changed robbery rounds from 10 minutes to 8, with up to 4 extra minutes if a robbery is ongoing.
+- Decreased time between robbery rounds.
+- Added support for skipping Tomb/Museum if server does not have enough players.
+- Increased drop chance of keycards by 20%.
+- Increased HyperChrome odds by 12.5% in response to increased average time between robberies.
+- Fixed a bug where C4 placement allowed some vehicles to fly sky high.
+- Fixed a bug related to Tips.
+- Fixed Longhorn tagged Vehicle Seat issue.
+- Updated messaging for “Switch to Police” chat alert.
+- Raised Max Bounty to 20k.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
