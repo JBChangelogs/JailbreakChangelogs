@@ -274,6 +274,38 @@
 - Fixed an issue where banned players might not be teleported to the ban world.
 - Crew member markers are now hidden if the crew member is on the opposite team.
 
+# November 7, 2023 / Version 1245 / 5 Days - Day 4
+## Community Note
+> 5 Days of Vehicles 2023 - day 4 is here! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+- Added Eclaire revamp with functional doors and engine start.
+- Increased Eclaire price to 600,000.
+- Updated Successor tune with more high-end.
+- Added new weapon camera system that prevents peeking through walls.
+- Added reload sounds from other players in the server.
+- Cleaned up weapon reloads.
+- Fixed camera sensitivty slider for controllers.
+- Moved Jet Yaw from DPad to Joystick on controllers.
+- Fixed characters not hiding when scrolling into first person inside a vehicle.
+- Removed a light appearing above the tunnel near the Prison.
+- Removed server control “Spawn Train”.
+- Removed rogue palm tree at the bay airport.
+- Added “NoVehicles” region to PowerPlant entry.
+- Improved wheel sizing on the Volt4x4.
+- Fixed the Powerplant puzzle appearing behind Crew Battle UI.
+- Fixed the server control Disco Party positions.
+- Fixed being unable to enter a vehicle after arrest in a Crew battle.
+- Fixed C4 velocity buildup and fling, allowing seated prison escapes.
+- Fixed a server crash bug from cuttable glass.
+- Silenced many non harmful errors from our consoles.
+- Fixed wheels from not using model defined scales on vehicles without a tire mesh.
+- Fixed a third method that allowed furniture to be placed outside home bounds.
+- Fixed a glider bug that caused players to get stuck after jumping.
+- Removed the 1.25k bounty cap on unbanned players.
+- Dogs are now removed on Battle Royale start.
+- Jetpacks are now removed on Battle Royale start.
+- Dropped items in the map are now removed on Battle Royale start.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
