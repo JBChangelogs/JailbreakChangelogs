@@ -35,6 +35,42 @@
 - Fixed an issue with double space sending jetpacks infinitely upwards. 
 - Fixed an error related to DefaultActions.
 
+# August 4, 2023 / Version-1205:
+ New Season System with universally shared contracts and timers. 
+- - Refreshed portions of the Season UI for a fresh but familiar user experience.
+- - Added Level Bar UI with support for a silver Daily XP bar.
+- - Added XP rewards for killing another player, arresting, and robbing.
+- - Added Cash, Safe, and Rocket Fuel rewards to Levels 1-9. 
+- - Added new Season 17 Rewards. Increased Season Pass $1 for Season 17.
+- - Removed “Failed Timers” on Contracts.
+- - Changed existing Contracts for more difficulty, more XP, and new progress saving. 
+- - Removed the duplicate Season Button above the Minimap. 
+- - Increased price for ReRolls now that contracts are Weekly from 15,000 to 25,000.
+- Added New Power1 Vehicle with new Power1 Engine Sound.
+- Added New Aperture Vehicle with new V12 Engine Sound.
+- Added New Max Security Prison with new obstacles, Cellevator, and Prison connection. 
+- - Removed the old Max Security Prison.
+- - Removed the ability to team switch while in the Max Security Prison.
+- - Increased Bounty requirement for Security Prison from 2500 to 3500.
+- Added Crew Reports. This included new backend to field reports live from servers.
+- - Added new backend automation for Crew Rewards.
+- Added “Featured” to Garages with synced timers and items across servers.
+- - Added temporary spawning support for Lite Garage users for the Featured Vehicle.
+- - Added new “Sales Tracker” to backend to measure Featured impact.
+- Added new Season hype zone within the Prison.
+- Added sleeping NPCs at the Prison, Donut Shop, and Gas Station. Credit to Lucatacos!
+- Added Brickset Drift rewarding for the Hiding in Plain Sight toy.
+- Changed Attachments to scale correctly on all spoilers automatically.
+- Changed Casino keycode numbers to be larger, more visible, and removed 4 locations.
+- Fixed a glitch that caused shot down planes to restore their health on exit.
+- Fixed an exploit related to loopkill.
+- Fixed high Volume Distance on Elevators.
+- Fixed a rare issue related to HyperChrome Pity %.
+- Fixed an issue allowing multiple Vaults in Homes.
+- Fixed collisions on the Tiki Tea Bar.
+- Fixed Conch Shell Wing particles.
+- Updated Minimap.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
