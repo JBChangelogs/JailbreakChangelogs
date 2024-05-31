@@ -356,6 +356,67 @@
 - Updated Streaming models to be made up of many small models instead of large building sized models. This should remove some FPS hiccups and possibly improve performance for slower machines. This could also reduce the possibility of entire buildings not loading in.
 - Updated 1,171 MeshParts to use Automatic LevelOfDetail instead of Precise. 627 came from Vehicle meshes, 28 Rims, 32 Spoilers, and 484 from the map. This may improve performance as these meshes are no longer rendered at highest quality when far away.
 
+# December 15, 2023 / Version 1253 / The Winter Update
+## Community Note
+> The winter update is finally here! Use code ***~~WINTER23~~*** for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+## New Robbery
+- Added Oil Rig Robbery.
+- New "Explosive Barrels" world item.
+- New support to pickup Barrels with Helicopters. 
+- New "CEO Laser Turret" weapon.
+- New "Undercover Exports" Ship at Crime Port for Oil delivery.
+- Added Oil Rig music to Heist Radio.
+- Added "Docile" state to Guards that allow us to control when they become hostile.
+- Fixed an issue where bullets would hit already dead players.
+- Extended ocean to fit the Oil Rig.
+## Season 19
+- Added Season 19 and Season 19 Hype zone.
+- New Frost Crawler 6-wheel vehicle prize with tow hitch.
+- New Ski Wing, Marshmallow Rim, Aurora Chandelier, Snow Cannon Wing, Peppermint Rim, Snowchain Tire, Aurora Skin, Frostburn Rim, and Aurora Drift.
+- Added season reward support for Drifts and Tire categories.
+- Added "Radiant Pink".
+## Boats
+- New SpeedYacht boat.
+- Cruiser is now a Free vehicle.
+- JetSki price has doubled from 25k to 50k.
+- Boats can now be disabled by weapons.
+- Sloops now have new customization.
+- Updated Sloop turning angles.
+- New boat driving and turning physics.
+- Added Left/Right turning animations on boats.
+- Fixed wrist breaking on Sloop.
+- Fixed Sloop light visuals.
+- Fixed Cruiser being land drivable.
+- Fixed Cruiser sinking.
+- Fixed speedometer lock appearing for Cruiser passenger.
+- Fixed horns being activated by boat passengers.
+- Fixed drivability issues when raining on a boat.
+- Fixed an FPS speed based bug on boats.
+- Fixed boat texture issues in garages.
+- Reduced uncontrollable shake on boats in reverse.
+- Reduced boat reverse speeds.
+- Added new boat tunes by Shadow.
+## World Map
+- Added 2023 Winter Map with northern lights, ice track, and more.
+- New always falling light snow, and occasional heavy snow.
+- Added new Crater Airport road extension with highway bridge.
+- Added the new Eclaire model.
+- Added "Gun Shop" world markers. What other locations should we mark?
+- Moved the van spawn to the Crater Beach parking lot.
+## Misc
+- Fixed an issue where player heads would twitch while holding items.
+- Fixed a memory leak related to Vehicles.
+- Fixed Streaming visuals for the Mansion.
+- Fixed the "Smooth Criminal" badge.
+- Fixed "Wanted Poster" furniture item.
+- Moved to Blender4 for texture generation.
+- Improved performance on custom materials.
+- Updated the start position of the Menu camera.
+- Silenced more unimportant errors.
+- Removed unused mansion code.
+- Updated Minimap.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
