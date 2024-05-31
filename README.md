@@ -15,3 +15,11 @@ You can access the changelog website [here](https://jbchangelogs.github.io/Jailb
 - **Up-to-Date Changelogs**: Stay informed about the latest changes in Roblox Jailbreak.
 - **User-Friendly Interface**: Easily navigate through the changelogs with a clean and simple design.
 - **Responsive Design**: Access the website on any device, whether it’s a desktop, tablet, or mobile phone.
+
+## Credits
+
+Special thanks to the following contributors:
+
+Owner: [Jalenzz16](https://github.com/Jalenzzz)
+
+Collaborator: [v3kmw](https://github.com/v3kmww/)
