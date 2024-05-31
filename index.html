@@ -1,68 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Changelog</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <h1 id="main-title">Changelog</h1>
-        </header>
-        <section id="content">
-            <!-- Dynamic content will be inserted here -->
-        </section>
-        <footer>
-            <p id="footer-text">Thank you for playing!</p>
-            <p id="footer-text">Note: This website is not affiliated with Badimo. This is ran seperately by members of the community.</p>
-            <div class="button-container">
-                <button class="blue-button" onclick="redirectToReddit()">Unofficial Reddit</button>
-                <button class="orange-button" onclick="redirectToTradingDiscord()">Unofficial Trading Server</button>
-                <button class="blue-button" onclick="redirectToDiscord()">Jailbreak's Discord</button>
-            </div>
-        </footer>
+      <header>
+        <h1 id="main-title">Changelog</h1>
+      </header>
+      <section id="content">
+        <!-- Dynamic content will be inserted here -->
+      </section>
+      <footer>
+        <p id="footer-text">Thank you for playing!</p>
+        <p id="footer-text">
+          Note: This website is
+          <strong>not affiliated with Badimo.</strong> This is ran seperately by
+          v3kmw and Jalenzz16.
+        </p>
+        <div class="button-container">
+          <button class="blue-button" onclick="redirectToReddit()">
+            Unofficial Reddit
+          </button>
+          <button class="orange-button" onclick="redirectToTradingDiscord()">
+            Unofficial Trading Server
+          </button>
+          <button class="blue-button" onclick="redirectToDiscord()">
+            Jailbreak's Discord
+          </button>
+        </div>
+      </footer>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/4-20-24.1.txt')
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split('\n');
-                    let contentHtml = '';
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch(
+          "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/4-20-24.1.txt"
+        )
+          .then((response) => response.text())
+          .then((data) => {
+            const lines = data.split("\n");
+            let contentHtml = "";
 
-                    lines.forEach(line => {
-                        if (line.startsWith('# ')) {
-                            contentHtml += `<h1>${line.substring(2)}</h1>`;
-                        } else if (line.startsWith('## ')) {
-                            contentHtml += `<h2>${line.substring(3)}</h2>`;
-                        } else if (line.startsWith('- ')) {
-                            contentHtml += `<li>${line.substring(2)}</li>`;
-                        } else if (line.startsWith('- - ')) {
-                            contentHtml += `<ul><li>${line.substring(4)}</li></ul>`;
-                        } else if (line.startsWith('> > ')) {
-                            contentHtml += `<h3 class="centered-line">${line.substring(4)}</h3>`;
+            lines.forEach((line) => {
+              if (line.startsWith("# ")) {
+                contentHtml += `<h1>${line.substring(2)}</h1>`;
+              } else if (line.startsWith("## ")) {
+                contentHtml += `<h2>${line.substring(3)}</h2>`;
+              } else if (line.startsWith("- ")) {
+                contentHtml += `<li>${line.substring(2)}</li>`;
+              } else if (line.startsWith("- - ")) {
+                contentHtml += `<ul><li>${line.substring(4)}</li></ul>`;
+              } else if (line.startsWith("- - - ")) {
+                contentHtml += `<ul><ul><li>${line.substring(
+                  6
+                )}</li></ul></ul>`;
+              } else if (line.startsWith("> > ")) {
+                contentHtml += `<h3 class="centered-line">${line.substring(
+                  4
+                )}</h3>`;
+              }
+            });
 
-                        }
-                    });
+            document.getElementById(
+              "content"
+            ).innerHTML = `<ul>${contentHtml}</ul>`;
+          })
+          .catch((error) =>
+            console.error("Error fetching the changelog:", error)
+          );
+      });
 
-                    document.getElementById('content').innerHTML = `<ul>${contentHtml}</ul>`;
-                })
-                .catch(error => console.error('Error fetching the changelog:', error));
-        });
+      function redirectToReddit() {
+        window.location.href = "https://www.reddit.com/r/robloxjailbreak/";
+      }
 
-        function redirectToReddit() {
-            window.location.href = 'https://www.reddit.com/r/robloxjailbreak/';
-        }
+      function redirectToTradingDiscord() {
+        window.location.href = "https://discord.gg/jailbreaktrading";
+      }
 
-        function redirectToTradingDiscord() {
-            window.location.href = 'https://discord.gg/jailbreaktrading';
-        }
-
-        function redirectToDiscord() {
-            window.location.href = 'https://discord.gg/jailbreak';
-        }
+      function redirectToDiscord() {
+        window.location.href = "https://discord.gg/jailbreak";
+      }
     </script>
-</body>
+  </body>
 </html>

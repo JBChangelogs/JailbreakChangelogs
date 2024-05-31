@@ -35,10 +35,560 @@
 - Fixed an issue with double space sending jetpacks infinitely upwards. 
 - Fixed an error related to DefaultActions.
 
+# August 4, 2023 / Version-1205:
+- New Season System with universally shared contracts and timers. 
+- - Refreshed portions of the Season UI for a fresh but familiar user experience.
+- - Added Level Bar UI with support for a silver Daily XP bar.
+- - Added XP rewards for killing another player, arresting, and robbing.
+- - Added Cash, Safe, and Rocket Fuel rewards to Levels 1-9. 
+- - Added new Season 17 Rewards. Increased Season Pass $1 for Season 17.
+- - Removed “Failed Timers” on Contracts.
+- - Changed existing Contracts for more difficulty, more XP, and new progress saving. 
+- - Removed the duplicate Season Button above the Minimap. 
+- - Increased price for ReRolls now that contracts are Weekly from 15,000 to 25,000.
+- Added New Power1 Vehicle with new Power1 Engine Sound.
+- Added New Aperture Vehicle with new V12 Engine Sound.
+- Added New Max Security Prison with new obstacles, Cellevator, and Prison connection. 
+- - Removed the old Max Security Prison.
+- - Removed the ability to team switch while in the Max Security Prison.
+- - Increased Bounty requirement for Security Prison from 2500 to 3500.
+- Added Crew Reports. This included new backend to field reports live from servers.
+- - Added new backend automation for Crew Rewards.
+- Added “Featured” to Garages with synced timers and items across servers.
+- - Added temporary spawning support for Lite Garage users for the Featured Vehicle.
+- - Added new “Sales Tracker” to backend to measure Featured impact.
+- Added new Season hype zone within the Prison.
+- Added sleeping NPCs at the Prison, Donut Shop, and Gas Station. Credit to Lucatacos!
+- Added Brickset Drift rewarding for the Hiding in Plain Sight toy.
+- Changed Attachments to scale correctly on all spoilers automatically.
+- Changed Casino keycode numbers to be larger, more visible, and removed 4 locations.
+- Fixed a glitch that caused shot down planes to restore their health on exit.
+- Fixed an exploit related to loopkill.
+- Fixed high Volume Distance on Elevators.
+- Fixed a rare issue related to HyperChrome Pity %.
+- Fixed an issue allowing multiple Vaults in Homes.
+- Fixed collisions on the Tiki Tea Bar.
+- Fixed Conch Shell Wing particles.
+- Updated Minimap.
+
+# September 1, 2023 / Version-1225:
+- Added Battle Royale with new storm, new weapon variety, vehicle ban support, weapon shop bans, vending machine and donut bans, a new holding lobby, and chat based round updates. 
+- Updated Tier 1 Safe contents.
+- - Added: Fiasco Vehicle, LeEclair Vehicle Skin, BoxOCash Wing, and Cosmic Drift.
+- - Made Limited: Terminator Wing and Revolver Rims.
+- - Moved to Catalog: Hot Orange, Badonuts Tire Sticker, Slasher Rim.
+- Added Server Selection Beta for Trade World. 
+- - Added new Server Select building in Trade World.
+- Added new Tire Style category and renamed Tires to Tire Sticker.
+- - Added HelloVG Tire Stickers
+- - Added NoobFreakT Tire Stickers
+- - Added PGHLFilms Tire Stickers
+- - Added DenisDaily Tire Stickers
+- - Added KraoESP Tire Stickers
+- - Added Thin, Thick, Classic versions of Tires.
+- - Added Thin, Thick, Classic versions of new Realism Tires.
+- Changed vehicle Glows to be brighter and evenly lit.
+- Changed vehicle Headlights to be 30% brighter with higher range. 
+- Changed MCL36 Headlight to be higher off the ground.
+- Added support for the Virtual Cursor on Controllers. 
+- Moved Crouch on controllers to the DPad. Roll and Crouch now have their own unique button. 
+- Added Hotbar shuffle support to Controllers.
+- Made potential improvements to performance. Your experience may vary:
+- - Removed half a millon voxels of Terrain underneath the mountains 
+- - Removed 800+ decals and textures from the map and Jewelry/Bank floors.
+- - Added new "Brick" material that much more efficiently replaces the removed old decals. More to come.
+- - Reduced light count across the map. Disabled shadows where important. 
+- - Removed shadow casting on 400+ parts.
+- - Changed 1,200 MeshParts to Box Collisions for better physics performance.
+- - Updated Bank and Jewelry Floors for better performance. 
+- - - Removed 30% of Floor lights and turned Shadows off on all lights.
+- - - Removed a majority of textures and replaced with efficient materials. 
+- - - Slowed some Jewelry Store camera speeds.
+- - - Slowed the laser puzzle on Jewelry Floor 5 for quicker progression. 
+- Added Trade Server Hopping V1 with new UI. 
+- - Lists ~5% of active servers. More to come. 
+- - Exclusive to Trader VIP Gamepass. 
+- Added "Tooltip" Hotbar messages with 100 tips. 
+- - Added setting to turn tips off. 
+- Added Roblox's new Chat UI with all new features including Emoji support. This involved migrating a lot of our custom chat color code over to the new window.
+- Added chatbox hiding when large UI elements are opened.
+- Added new dark grey chat bubbles for players with colored chat.
+- Added clickable Level Bar for mobile ease of use.
+- Looked further into Permadeath in major hopes to fix it, with changes in how we spawn and load characters. 
+- Crew Battles now reset Garage timers when swapping teams. 
+- Fixed a bug that allowed holding E + R to pause Airdrop NPCs.
+- Fixed an audio error within the Tomb.
+- Added "Barrier" around the PowerPlant to prevent terrain noclip tricks.
+
+# October 6, 2023 / Version-1237
+## Community Note
+- Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak,  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- New Season 18 with Wild West themed zone & prizes.
+- - Added: Native Wing, Windmill Wing, Wanted Backdrop, Bull Wing, Gunfire Rim, Tumbleweed Rim, Bandit Bandana Skin, Wagon Wheel, Wagon Furniture, and Longhorn Vehicle.
+- - Easier season difficulty.
+- - Removed simple contracts.
+- - Reduced Season Pass price to 399 Robux.
+- - Automated Double XP. It now begins just under a week before the season ends. 
+- New Trade Island Dragway.
+- New Trade Island Photo Sphere behind the Garage.
+- Added Cinematic Camera for TradeVIP Gamepass.
+- Updated major Robberies to open in controlled "groups" to bring back classic Jailbreak gameplay loops while also buying space for future robberies.
+- Added Crater Bank (Bank 2), with floors Basement, Deductions, Blue Floor and Presidential. 
+- Updated Basement floor to remove Glider tricks.
+- Added destructible overpass railing near Crater Bank
+- Updated Cargo-Plane path for shorter approach and better departure with increased propeller volume distance.
+- Updated Cargo-Ship path to end closer to the dropoff building.
+- Added improvements for the Police Team: 
+- - We now alert players not on the Police team about high bounties available to collect if they switch.
+- - Removed ability to rocket fuel with popped tires. (Pay to win)
+- - Bounty amounts have increased. Your bounty is now 30% of what you stole. 
+- - Reduced Bounty cap to $15,000 to combat farming.
+- - Criminals now keep their bounty even if they've been killed.
+- Added Emote banning to prevent no clips.
+- Added detection for thin bodies, like Stick Bug, and replace them with monster torsos.
+- Added detection for unreasonably short characters, below 3.5 studs, and size them to 5.
+- Added DPad-Up to controllers to open/close Garages.
+- Added Playstation support.
+- Added free-garage support to the Fiasco vehicle.
+- Added lighting in the Tomb arrow room.
+- Added a new exit room to the Mansion with three escapes.
+- Updated Night and Storm lighting.
+- Added closer Helipad to Trade Island.
+- Added Wind to Trade Island.
+- Added new "No Ragdoll" zones to tall bank floors. 
+- We now tell players which small store just opened.
+- Moved the Police Baton in the prison to prevent camera grabbing.
+- Moved Casino dropoff from the whole Volcano to the Collector.
+- Removed ladder on Prison flag.
+- Renamed "City" in fullscreen maps to "Rising City"
+- Bank floors are now randomized.
+- Fixed Police not being able to cycle hotbar items.
+- Fixed a client issue in Trade World where you couldn't run or drive.
+- Fixed Wall Escape not moving debris.
+- Fixed furniture placement errors in Rising City penthouse.
+- Fixed Jewelry Store camera lasers from colliding.
+- Fixed a bug with the Tomb not closing when nobody is inside.
+- Fixed a bug where Hyperchrome Pity weren't shared on trains.
+- Fixed an issue where Poseidon brake lights were backwards.
+- Fixed gun ammo colliding with characters, allowing high jumps.
+- Fixed an issue where Tasers did not use the same Hitbox as Guns and updated Taser range from 96 studs to 86 studs.
+- Fixed Trade Server lists not displaying all servers.
+- Fixed an issue where the Trade Server UI was squashed.
+- Fixed a problem where free vehicles might end up in a Garage Sale.
+- Fixed spoilers from incorrectly removing speed.
+
+# November 2, 2023 / Version-1241 / 5 Days - Day 1
+
+## Community Note
+- Welcome! 5 Days of Vehicles 2023 has begun! Use code 5days23 for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- Added Stunt Plane revamp with Machine Gun support.
+- Changed Stunt price from 200,000 to 300,000.
+- Replaced jet spawn at casino airport with Stunt.
+- Added first person camera support to planes.
+- Added Horn support to planes.
+- Added black smoke particles to planes for falling out of the sky.
+- Added “Vehicle Damage” indicators in black. Orange if you shoot them down or pop tires.
+- Added damage to helicopters if a player isn’t inside, like other vehicles.
+- New: Cargo Plane now closes for the robbery system when 70% near the end of the voyage, preventing excessive waiting for the robbery to close.
+- New: Cargo Ship now closes for the robbery system when 80% near the end of the voyage, preventing excessive waiting for the robbery to close.
+- Resized door regions in Mansion exits to prevent crawl openings.
+- Added fourth door to PowerPlant exits.
+- Added glass cutout escape near the top ramp of the jewelry store.
+- Added redesigned tomb exits with sliding exit doors and updated regions and drop-off areas.
+- Added 40% more tomb gems to the treasure room.
+- Radios are now disabled if an equipped tool can be reloaded.
+- Removed additional emotes being abused for no-clip.
+- Silenced an error related to falling out of the world.
+- Red Robbery Markers are now hidden to reduce noise.
+- Robbery names are now announced to all players on open.
+- Changed robbery rounds from 10 minutes to 8, with up to 4 extra minutes if a robbery is ongoing.
+- Decreased time between robbery rounds.
+- Added support for skipping Tomb/Museum if server does not have enough players.
+- Increased drop chance of keycards by 20%.
+- Increased HyperChrome odds by 12.5% in response to increased average time between robberies.
+- Fixed a bug where C4 placement allowed some vehicles to fly sky high.
+- Fixed a bug related to Tips.
+- Fixed Longhorn tagged Vehicle Seat issue.
+- Updated messaging for “Switch to Police” chat alert.
+- Raised Max Bounty to 20k.
+
+# November 3, 2023 / Version-1242 / 5 Days - Day 2
+## Community Note
+- Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code 5days23 for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- Added Laviolette Lowrider with Lowriding effects and sounds.
+- Added Mystic and Landmine Rims.
+- Added Nitro and Wingo Spoilers.
+- Added 10 second penalty cooldown for crew battles.
+- Moved Construction Tire, Spares Spoiler, Forged Rims and RFX Rims to Garage.
+- Greatly reduced, and in some cases fixed, the infamous “Car Bounce” bug. 
+- Added a sliding door to the new Jewelry escape to prevent exterior entry.
+- Removed furniture placement in front of doors in both Penthouses.
+- Removed saving and loading of unplaced or misplaced home items.
+- Removed SWAT Phone collisions.
+- Removed driving large vehicles into the Museum entrance.
+- Increased “NoJetpack” region near the Museum entrance.
+- "NoJetpack" zones now completely disable jetpack thrust.
+- Potentially fixed an issue where the CEO can end up in the ground.
+- Banned another no-clip emote.
+- Fixed an issue where non-VIP players could visually use VIP save slots.
+- Fixed Nightclub seats from kicking players out.
+- Fixed a teleport region issue at the top of the Jewelry Store.
+- Fixed roll cooldowns from triggering when rolling backwards while holding a weapon.
+- Fixed the Radio button on mobile from disappearing.
+- Fixed an issue where players die on team selection.
+- Fixed a running animation bug with Tomb Carts and Jetpacks.
+- Filled a terrain gap near the Tomb cart track switch.
+- Filled a terrain gap under the tracks near the gas station.
+- Filled missing railings at Trade Hub Dragway.
+
+# November 6, 2023 / Version 1243 / 5 Days - Day 3
+## Community Note
+- After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code 5days23 for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- Added Successor vehicle with startup sound and animated wing.
+- Added off-road path behind Bounty Bay Airport.
+- Added further reinforcing to the Museum entry to keep cars out.
+- Added driveway spawn for Successor.
+- Added HyperShift trails to Volt.
+- Added Hyper particles to Volt.
+- Added new camera FOV animations to vehicle passengers.
+- Fixed a Jewelry floor with lasers sticking outside the building.
+- Fixed multiple Jewelry floors with light colored brick walls.
+- Fixed clipping issues with a vault in a Jewelry floor.
+- Added regions to Casino for teleporting players out on close.
+- Fixed the trade teleport countdown appearing through walls.
+- Fixed the city tunnel near the bank from thinking you’re in a bank robbery.
+- Fixed un-equipping tools from moving mobile crouch and punch buttons.
+- Fixed a mobile control button placement issue when picking up another player's item.
+- Fixed an exploit that allowed items outside home boundaries.
+- Fixed an issue where dropping an item would remove your robbery money collection.
+- Made a second attempt fix for walking animations on carts/jetpacks.
+- Free players can now only save garage loadouts in the first 10 slots instead of 10 slots randomly. 
+- Fixed ammo accounts on Grenades and other items from exceeding their max value.
+- Fixed an issue where banned players might not be teleported to the ban world.
+- Crew member markers are now hidden if the crew member is on the opposite team.
+
+# November 7, 2023 / Version 1245 / 5 Days - Day 4
+## Community Note
+- 5 Days of Vehicles 2023 - day 4 is here! Remember to use code 5days23 for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- Added Eclaire revamp with functional doors and engine start.
+- Increased Eclaire price to 600,000.
+- Updated Successor tune with more high-end.
+- Added new weapon camera system that prevents peeking through walls.
+- Added reload sounds from other players in the server.
+- Cleaned up weapon reloads.
+- Fixed camera sensitivty slider for controllers.
+- Moved Jet Yaw from DPad to Joystick on controllers.
+- Fixed characters not hiding when scrolling into first person inside a vehicle.
+- Removed a light appearing above the tunnel near the Prison.
+- Removed server control “Spawn Train”.
+- Removed rogue palm tree at the bay airport.
+- Added “NoVehicles” region to PowerPlant entry.
+- Improved wheel sizing on the Volt4x4.
+- Fixed the Powerplant puzzle appearing behind Crew Battle UI.
+- Fixed the server control Disco Party positions.
+- Fixed being unable to enter a vehicle after arrest in a Crew battle.
+- Fixed C4 velocity buildup and fling, allowing seated prison escapes.
+- Fixed a server crash bug from cuttable glass.
+- Silenced many non harmful errors from our consoles.
+- Fixed wheels from not using model defined scales on vehicles without a tire mesh.
+- Fixed a third method that allowed furniture to be placed outside home bounds.
+- Fixed a glider bug that caused players to get stuck after jumping.
+- Removed the 1.25k bounty cap on unbanned players.
+- Dogs are now removed on Battle Royale start.
+- Jetpacks are now removed on Battle Royale start.
+- Dropped items in the map are now removed on Battle Royale start.
+
+# November 8, 2023 / Version 1246 / 5 Days - Day 5!
+## Community Note
+- Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code 5days23 for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+- Added new Falcon S Sport Bike and Falcon Spawns.
+- New “Sport Bike” engine sound (Thank you Migue!)
+- - Revamped our Bike Chassis
+- - New physics with support for ramps, jumps, and Rocket Fuel.
+- - New gearing support with proper gear changing while driving.
+- - New leaning animations for bike vehicles.
+- - New passenger animations for passengers riding bikes.
+- - New leaning and idle animations for players riding bikes.
+- - Tire popping support was added to bike chassis
+- - Drift customization was added to bike chassis.
+- - Window Tint support now works on bike chassis.
+- - Improved bike handling at low framerates.
+- - Bike sounds and animations are now networked to other players.
+- - Fixed a headlight bug related to Bike Chassis
+- - HyperChrome and HyperShift support on bikes and Dune Buggy.
+- Added InsideCamera to Patrol
+- Updated Successor engine tune.
+- Added SecondBody support to DirtBike
+- Updated Eclaire engine tune.
+- Updated default Eclaire color scheme.
+- Centered wing part on the Eclaire.
+- Darkened the vent areas of the Eclaire.
+- Updated the Eclaire plate to “BY PIZZA”
+- Fixed Eclaire default height when nobody is inside.
+- Added Volt trails to Volt4x4.
+- Volt engine sound is now networked to other clients.
+- Added new Volt4x4 tires to better fit rims.
+- Fixed Stunt Plane flaps from being the wrong color in garages.
+- Updated Patrol tune to support new physics.
+- Updated Dirtbike tune to support new physics.
+- Updated Dune Buggy tune to support new physics. (Thank you Shadow for all the tunes!)
+- Updated Beignet tune to continue to match Eclaire.
+- Updated ShellMark5 tune.
+- Fixed an issue with ATV headlights not glowing.
+- Fixed Gunfire rims from being off center.
+- Updated the ColorsOfItaly spoiler with brighter smoke colors.
+- Fixed a bug related to vehicle suspension networking.
+- Fixed a bug related to FOV camera settings.
+- Fixed a Bank open issue within Crew Battle servers.
+- Fixed Reload from bringing up Radio as a vehicle passenger.
+- Fixed checkbox positioning in the Ban World.
+- Updated Battle Royale item weights.
+- Fixed bouncing off water when falling through the air.
+- Updated Streaming models to be made up of many small models instead of large building sized models. This should remove some FPS hiccups and possibly improve performance for slower machines. This could also reduce the possibility of entire buildings not loading in.
+- Updated 1,171 MeshParts to use Automatic LevelOfDetail instead of Precise. 627 came from Vehicle meshes, 28 Rims, 32 Spoilers, and 484 from the map. This may improve performance as these meshes are no longer rendered at highest quality when far away.
+
+# December 15, 2023 / Version 1253 / The Winter Update
+## Community Note
+- The winter update is finally here! Use code WINTER23 for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+## New Robbery
+- Added Oil Rig Robbery.
+- New "Explosive Barrels" world item.
+- New support to pickup Barrels with Helicopters. 
+- New "CEO Laser Turret" weapon.
+- New "Undercover Exports" Ship at Crime Port for Oil delivery.
+- Added Oil Rig music to Heist Radio.
+- Added "Docile" state to Guards that allow us to control when they become hostile.
+- Fixed an issue where bullets would hit already dead players.
+- Extended ocean to fit the Oil Rig.
+## Season 19
+- Added Season 19 and Season 19 Hype zone.
+- New Frost Crawler 6-wheel vehicle prize with tow hitch.
+- New Ski Wing, Marshmallow Rim, Aurora Chandelier, Snow Cannon Wing, Peppermint Rim, Snowchain Tire, Aurora Skin, Frostburn Rim, and Aurora Drift.
+- Added season reward support for Drifts and Tire categories.
+- Added "Radiant Pink".
+## Boats
+- New SpeedYacht boat.
+- Cruiser is now a Free vehicle.
+- JetSki price has doubled from 25k to 50k.
+- Boats can now be disabled by weapons.
+- Sloops now have new customization.
+- Updated Sloop turning angles.
+- New boat driving and turning physics.
+- Added Left/Right turning animations on boats.
+- Fixed wrist breaking on Sloop.
+- Fixed Sloop light visuals.
+- Fixed Cruiser being land drivable.
+- Fixed Cruiser sinking.
+- Fixed speedometer lock appearing for Cruiser passenger.
+- Fixed horns being activated by boat passengers.
+- Fixed drivability issues when raining on a boat.
+- Fixed an FPS speed based bug on boats.
+- Fixed boat texture issues in garages.
+- Reduced uncontrollable shake on boats in reverse.
+- Reduced boat reverse speeds.
+- Added new boat tunes by Shadow.
+## World Map
+- Added 2023 Winter Map with northern lights, ice track, and more.
+- New always falling light snow, and occasional heavy snow.
+- Added new Crater Airport road extension with highway bridge.
+- Added the new Eclaire model.
+- Added "Gun Shop" world markers. What other locations should we mark?
+- Moved the van spawn to the Crater Beach parking lot.
+## Misc
+- Fixed an issue where player heads would twitch while holding items.
+- Fixed a memory leak related to Vehicles.
+- Fixed Streaming visuals for the Mansion.
+- Fixed the "Smooth Criminal" badge.
+- Fixed "Wanted Poster" furniture item.
+- Moved to Blender4 for texture generation.
+- Improved performance on custom materials.
+- Updated the start position of the Menu camera.
+- Silenced more unimportant errors.
+- Removed unused mansion code.
+- Updated Minimap.
+
+# December 22, 2023 / Version 1257 / One More Thing!
+## Community Note
+- This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have 5 Days to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+## New Car
+- Added "Carbonara" limited vehicle. On sale for 5 days only! Offsale Dec 27th.
+- Added "Carbonara V12" engine sounds.
+- Added "Carbonara Startup" sound.
+
+## World Map
+- Updated both trains to be snow themed.
+- The basic frame of the Oil Rig is now always visible to StreamingEnabled players.
+- Removed the floating bricks behind the mansion.
+
+## Misc
+- Raised bounty for Oil Rig to 1750.
+- Added a "No Go" zone to the top of the Oil Rig ladders for NPCs
+- Updated brakelight colors on Ambulance, Laviolette, Successor. 
+- Fixed a few vehicle license plates not being bold text.
+- Fixed Brulee and Torero brakelights.
+- Moved Bandit rear passenger seat lower.
+- Fixed a doorframe hopping trick in the CEO battle room.
+- Fixed the size and positioning of the Eclaire tires.
+- Fixed collisions to the Eclaire for a less bouncy ride.
+- Fixed PlasmaPistol newly introduced damage issues.
+- Fixed an arrest avoidance bug with vehicles.
+
+# February 02, 2024 / Version 1271 / Season 20
+## Community Note
+- This marks the first update of 2024! This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+## Season 20: Apocalypse
+- Added Season 20 and Season 20 Hype Zones
+- New Striker vehicle with turret, custom livery, “XRK” engine sound. 
+- New Scythes, Sawblade, and Skull wings.
+- New Biohazard and Jagged rims.
+- New Radiation Machine furniture item.
+- New Rust vehicle skin.
+- New Spiked Tires and Spark Drift.
+
+## Vehicles
+- Added the XRK right-hand-drive sports car.
+- Added XRK engine sounds and startup (Thank you Migue!)
+- Updated “Traction” groups for select vehicles.
+- - Brulee* now slips and slides easier like it did in 2019.
+- - Deja and Shogun drift traction decreased for more fun.
+- Added dynamic health to vehicles. Large vehicles like Tanks get a bunch of health, and small fast vehicles get very little. 
+- - Added dynamic “Duration” to vehicles that controls how long a specific vehicle is disabled.
+- - Vehicle health now gradually refills.
+- - Added Vehicle Health Bar underneath Rocket Fuel UI.
+- - (Major thank you to ShadowSamurai720 and the entire testing team for assisting!)
+- Weapons now deal unique damage to Vehicles than Players.
+- - Sniper deals 40 vehicle damage.
+- - Shotgun deals 15 vehicle damage.
+- - Revolver deals 25 vehicle damage.
+- - Pistol deals 15 vehicle damage.
+- - Rifle deals 9 vehicle damage.
+- - Uzi deals 7 vehicle damage.
+- - AK47 deals 6 vehicle damage.
+- Reduced size of Turrets, would love to implement a new turret model another day!
+- Turrets now deal double the damage to players.
+- Turrets now deal triple the damage to vehicles.
+- Turret bullet speed has been doubled to prevent outdriving your own turret bullets.
+
+## Map
+- Added Spring 2024 map, removed snow trains and falling snow.
+- Added all new mountains and volcano scenery.
+- Added mountain pass roadway with end destination, tunnels, bridges, and more.
+- Added JAILBREAK destructible hollywood sign.
+- Added snow capped pine tree variety.
+- Added Ramp on the mountaintop near the Rising City Airport.
+
+## Game
+- Added “Player Drowning” with “Oxygen UI” above player heads to prevent camping on ocean floors.
+- Added Boat Spawning while swimming in water.
+- Updated rewards for all Robberies to better reflect their difficulty.
+- - Banks are seeing up to 50% more cash depending on the floor.
+- - PowerPlant, Jewelry Store, and Trains all see increases in cash.
+- - Decreased cash amounts for Cargo Ship and Mansion.
+- - Mansion no longer opens at night, but instead when it rains.
+- - Increased rate of money collection for trains and banks.
+- Added Oil Rig to the Casino Robbery Group.
+- Added GameMode Hub in front of the Prison for VIP servers to promote Battle Royale.
+- Updated chat filters.
+- Updated to latest Crew Battles “Season”
+- Fixed Gunshop Markers not saving.
+- Fixed Plasma Pistol not registering player heads.
+- Cargo Ship now “closes” the robbery round just before leaving the map.
+
+# March 08, 2024 / Version 1295 / Apocalypse Part 2
+
+## Community Note
+- Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code hammerhead for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
+## Tier 3 Police Safe, V2
+- New Vehicle: Hammerhead. With custom physics. 
+- New Wing: Police Pointer.
+- New Rims: SRT and Webbed Hero.
+- New Furniture: Missile Sofa.
+- New Tire: Radar Sticker.
+- Retired and made tradable: Rally Rims, Aerial Wing, Propeller Rim, Plane Seat Item, and Cyber Couch.
+- Added "Pity System" to all safes for fairer rolling.
+- Tightened amount of cash you can win, or lose, from Safes.
+
+## Weapons Revamp 2024
+- New models for AK47, Rifle, Shotgun, Pistol, SWAT Pistol, Uzi, Revolver, Rocket Launcher, Sniper, Forcefield Gun, Plasma Pistol, and Revolver with multicolored skin support.
+- 5 new Gun Skins: Manga, Aquatic, Wooden Toy, Aurora, and Camo Radar.
+- New muzzle flash particles with world light.
+- Added world lights to Plasma lightning bolts.
+- New sounds on all new weapons, except Shotgun.
+- Added reload sound to Plasma Pistol and Forcefield Gun.
+- Forcefields now appear in the ground.
+- Forcefield ammo is now shot ahead of the player.
+- Forcefields now have health, and minimum active time of 3 seconds.
+- Binoculars now force first person.
+- Fixed Binocular UI from not covering the screen.
+- Fixed the Binocular model from not disappearing in use.
+- Updated Flashlight with bigger dual light.
+- Added "Equip Times" to most weapons based on their fire rates and reloads. This prevents spam unloading a ton of ammo in a fraction of a second.
+- Added equip times to Taser.
+- Added visible reload to Taser.
+- New Hotbar images for weapon models.
+- Updated the Hotbar system code.
+- Weapons now automatically reload when you weapon switch to an empty clip.
+- Increased Plasma Pistol ammo.
+- Increased Revolver fire rate.
+- Shotgun is now a free weapon.
+- New reload and firing ammo animations on Shotgun, most notable in first person. 
+- Fixed an old bug related to Shotgun reloading.
+- Removed Gun Skin button when holding a weapon. 
+- Added blue Gun Skin zones in Gun Shops.
+- Touched up Gun Skins UI.
+
+## Jetpacks
+- New Jetpack model with built in fuel bar and new particles.
+- New physics with slow takeoff, and increased speed the longer you fly. 
+- Removed Jetpack Fuel UI, Premium Fuel, and Refill Bar.
+- Added automatic refueling once you run out.
+- Bullets and Tasers now take away fuel.
+- Increased "Standard Fuel" amount.
+
+## Tutorial
+- A new tutorial has been released! Only a tiny percentage of new players will see it. If data looks great, we'll force this on for all.
+- New joins now spawn outside the prison, with a vehicle worth about $100k. The vehicle disappears once they're caught.
+- New joins are given extra health and a keycard.
+- New joins are guided with waypoints to nearby open robberies and gun shops.
+- Added new sub-text to Waypoint guidance, providing more direction. 
+
+## Game
+- New Private Server commands for FriendlyFire, BanGun, AnnouncePlayerArrests, and AnnouncePlayerKills.
+- Buffed Striker to be similar to Celestial. 
+- New per-car "Ram Duration" for popping tires. Faster vehicles will be popped longer.
+- Added Brickset Drift to owners of Ski Mask.
+- Adjusted scale and positioning of Scythes Spoiler.
+- Top Bar buttons on Mobile have been scaled down and pushed to the right to avoid Roblox's new mobile UI. 
+- Added mobile reload button.
+- Shortened Season 20 end date.
+- Reduced Turret Furniture health.
+- Added health to Furniture items without any.
+- Scaled XRK model up ~10%, adjusted tires.
+- Reduced reflectance on Model 3.
+- Skull Wing fire particles are now locked to the wing.
+- Disabled shadows on transparent decal parts.
+- Fixed a bug where high FPS players would give different Heli speeds.
+- Fixed a bug where high FPS players would skydive faster.
+- Fixed a bug where high FPS vehicles would recover traction too quickly.
+- Fixed a bug where high FPS players with guns had extra recoil. 
+- Fixed Radio playlists from not saving. 
+- Fixed a bug related to crosshair placement.
+- Fixed the Ray9 License Plate.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
-- Hey friends! Nice to see you again. We finally got the long-awaited LIVE EVENT! If you missed it, remember replays happen later today and tomorrow morning. Also, redeem code 7years for 14k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official Discord server, where these updates are also posted.The most recent Changelogs will always be pinned, so make sure to check back on the next update!
+- Hey friends! Nice to see you again. We finally got the long-awaited LIVE EVENT! If you missed it, remember replays happen later today and tomorrow morning. Also, redeem code 7years for 14k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak, where these updates are also posted.The most recent Changelogs will always be pinned, so make sure to check back on the next update!
 
 ## Live Event
 - New Plasma Shotgun weapon, found from nearby alien encounters.
