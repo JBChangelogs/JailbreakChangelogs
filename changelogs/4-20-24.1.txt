@@ -71,6 +71,55 @@
 - Fixed Conch Shell Wing particles.
 - Updated Minimap.
 
+# September 1, 2023 / Version-1225:
+- Added Battle Royale with new storm, new weapon variety, vehicle ban support, weapon shop bans, vending machine and donut bans, a new holding lobby, and chat based round updates. 
+- Updated Tier 1 Safe contents.
+- - Added: Fiasco Vehicle, LeEclair Vehicle Skin, BoxOCash Wing, and Cosmic Drift.
+- - Made Limited: Terminator Wing and Revolver Rims.
+- - Moved to Catalog: Hot Orange, Badonuts Tire Sticker, Slasher Rim.
+- Added Server Selection Beta for Trade World. 
+- - Added new Server Select building in Trade World.
+- Added new Tire Style category and renamed Tires to Tire Sticker.
+- - Added HelloVG Tire Stickers
+- - Added NoobFreakT Tire Stickers
+- - Added PGHLFilms Tire Stickers
+- - Added DenisDaily Tire Stickers
+- - Added KraoESP Tire Stickers
+- - Added Thin, Thick, Classic versions of Tires.
+- - Added Thin, Thick, Classic versions of new Realism Tires.
+- Changed vehicle Glows to be brighter and evenly lit.
+- Changed vehicle Headlights to be 30% brighter with higher range. 
+- Changed MCL36 Headlight to be higher off the ground.
+- Added support for the Virtual Cursor on Controllers. 
+- Moved Crouch on controllers to the DPad. Roll and Crouch now have their own unique button. 
+- Added Hotbar shuffle support to Controllers.
+- Made potential improvements to performance. Your experience may vary:
+- - Removed half a millon voxels of Terrain underneath the mountains 
+- - Removed 800+ decals and textures from the map and Jewelry/Bank floors.
+- - Added new "Brick" material that much more efficiently replaces the removed old decals. More to come.
+- - Reduced light count across the map. Disabled shadows where important. 
+- - Removed shadow casting on 400+ parts.
+- - Changed 1,200 MeshParts to Box Collisions for better physics performance.
+- - Updated Bank and Jewelry Floors for better performance. 
+- - - Removed 30% of Floor lights and turned Shadows off on all lights.
+- - - Removed a majority of textures and replaced with efficient materials. 
+- - - Slowed some Jewelry Store camera speeds.
+- - - Slowed the laser puzzle on Jewelry Floor 5 for quicker progression. 
+- Added Trade Server Hopping V1 with new UI. 
+- - Lists ~5% of active servers. More to come. 
+- - Exclusive to Trader VIP Gamepass. 
+- Added "Tooltip" Hotbar messages with 100 tips. 
+- - Added setting to turn tips off. 
+- Added Roblox's new Chat UI with all new features including Emoji support. This involved migrating a lot of our custom chat color code over to the new window.
+- Added chatbox hiding when large UI elements are opened.
+- Added new dark grey chat bubbles for players with colored chat.
+- Added clickable Level Bar for mobile ease of use.
+- Looked further into Permadeath in major hopes to fix it, with changes in how we spawn and load characters. 
+- Crew Battles now reset Garage timers when swapping teams. 
+- Fixed a bug that allowed holding E + R to pause Airdrop NPCs.
+- Fixed an audio error within the Tomb.
+- Added "Barrier" around the PowerPlant to prevent terrain noclip tricks.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
