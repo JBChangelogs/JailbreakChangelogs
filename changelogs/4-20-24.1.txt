@@ -1,3 +1,40 @@
+# July 7th 2023 / Version-1186:
+- New Rocket Launchers support aerial vehicle locking with guided rockets.
+- Added 6 new ambient sounds around the world including Beach, Port, City, Cave, Office, and Desert.
+- Added 5 free save slots and 5 VIP save slots to Garages.
+- Added confirmation to delete a save slot.
+- Added purchasing of vehicles to the Garage UI. Purchasing a vehicle greater than $100,000 prompts the Pro Garage Gamepass. 
+- Garages no longer close when purchasing items.
+- Added 6 new items by Zewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
+- Added 5 new items by D4EAMER. [VFX Rim, RX-1 Rim, SPACE-R Rim, Catch Me! Wing, Trouble! Wing]
+- Added new Confetti-Cannon furniture by Poogah.
+- Added “Like the Game” UI for players who earn 100k+ cash.
+- Added magnitude check on normal sized doors to combat door exploits.
+- Added cooldown to breakouts.
+- Added new player logs related to trading. 
+- Added new data to Trade World tracking past-month trades and past-month uniques.
+- Added “High Demand” sort to Trade World inventories based on the new data.
+- Added new data logging related to garages.
+- Added construction progress behind the Prison.
+- Changed default Trade World sort to Newest.
+- Changed vehicle purchase wording.
+- Decreased both train volumes, and moved train sounds to InverseTapered.
+- Airdrop Music now connects to Robbery Music in settings.
+- Removed SecondTexture on Poseidon
+- *Potentially* fixed permadeath in normal servers and battle servers.
+- Server Controls no longer operate in Battle Servers.
+- Improved readability of crew names in UI.
+- Crew Leaderboards should be properly ordered now.
+- Backend changes to Trade World and Inventory categories.
+- Fixed an issue where ghosted vaults could award cash.
+- Fixed an issue where holding R would pause NPCs.
+- Fixed permadeath in Trade World.
+- Fixed for big air jumps using Rolls by rolling backwards. Rolls are now out of Beta.
+- Fixed an issue where monster suspension vehicles didn’t look right on other clients.
+- Fixed an issue with seated players not teleporting when seated.
+- Fixed an issue with double space sending jetpacks infinitely upwards. 
+- Fixed an error related to DefaultActions.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
