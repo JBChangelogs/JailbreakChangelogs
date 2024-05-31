@@ -36,7 +36,7 @@
 - Fixed an error related to DefaultActions.
 
 # August 4, 2023 / Version-1205:
- New Season System with universally shared contracts and timers. 
+- New Season System with universally shared contracts and timers. 
 - - Refreshed portions of the Season UI for a fresh but familiar user experience.
 - - Added Level Bar UI with support for a silver Daily XP bar.
 - - Added XP rewards for killing another player, arresting, and robbing.
@@ -122,7 +122,7 @@
 
 # October 6, 2023 / Version-1237
 ## Community Note
-> Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+- Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
 
 ---
 - New Season 18 with Wild West themed zone & prizes.
@@ -182,9 +182,7 @@
 # November 2, 2023 / Version-1241 / 5 Days - Day 1
 
 ## Community Note
-> Welcome! 5 Days of Vehicles 2023 has begun! Use code ~~***5days23***~~ for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
----
+- Welcome! 5 Days of Vehicles 2023 has begun! Use code ~~***5days23***~~ for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
 
 - Added Stunt Plane revamp with Machine Gun support.
 - Changed Stunt price from 200,000 to 300,000.
@@ -219,8 +217,8 @@
 
 # November 3, 2023 / Version-1242 / 5 Days - Day 2
 ## Community Note
-> Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 - Added Laviolette Lowrider with Lowriding effects and sounds.
 - Added Mystic and Landmine Rims.
 - Added Nitro and Wingo Spoilers.
@@ -249,8 +247,8 @@
 
 # November 6, 2023 / Version 1243 / 5 Days - Day 3
 ## Community Note
-> After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code ***~~5days23~~*** for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code ***~~5days23~~*** for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 - Added Successor vehicle with startup sound and animated wing.
 - Added off-road path behind Bounty Bay Airport.
 - Added further reinforcing to the Museum entry to keep cars out.
@@ -276,8 +274,8 @@
 
 # November 7, 2023 / Version 1245 / 5 Days - Day 4
 ## Community Note
-> 5 Days of Vehicles 2023 - day 4 is here! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- 5 Days of Vehicles 2023 - day 4 is here! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 - Added Eclaire revamp with functional doors and engine start.
 - Increased Eclaire price to 600,000.
 - Updated Successor tune with more high-end.
@@ -308,8 +306,8 @@
 
 # November 8, 2023 / Version 1246 / 5 Days - Day 5!
 ## Community Note
-> Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 - Added new Falcon S Sport Bike and Falcon Spawns.
 - New “Sport Bike” engine sound (Thank you Migue!)
 - - Revamped our Bike Chassis
@@ -358,8 +356,8 @@
 
 # December 15, 2023 / Version 1253 / The Winter Update
 ## Community Note
-> The winter update is finally here! Use code ***~~WINTER23~~*** for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- The winter update is finally here! Use code ***~~WINTER23~~*** for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 ## New Robbery
 - Added Oil Rig Robbery.
 - New "Explosive Barrels" world item.
@@ -419,8 +417,8 @@
 
 # December 22, 2023 / Version 1257 / One More Thing!
 ## Community Note
-> This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have **5 Days** to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have **5 Days** to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 ## New Car
 - Added "Carbonara" limited vehicle. On sale for 5 days only! Offsale Dec 27th.
 - Added "Carbonara V12" engine sounds.
@@ -446,8 +444,8 @@
 
 # February 02, 2024 / Version 1271 / Season 20
 ## Community Note
-> This marks the **first update of 2024!** This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
----
+- This marks the **first update of 2024!** This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+
 ## Season 20: Apocalypse
 - Added Season 20 and Season 20 Hype Zones
 - New Striker vehicle with turret, custom livery, “XRK” engine sound. 
@@ -509,7 +507,7 @@
 # March 08, 2024 / Version 1295 / Apocalypse Part 2
 
 ## Community Note
-> Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code ***~~hammerhead~~*** for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+- Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code ***~~hammerhead~~*** for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
 
 ## Tier 3 Police Safe, V2
 - New Vehicle: Hammerhead. With custom physics. 
