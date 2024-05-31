@@ -124,7 +124,6 @@
 ## Community Note
 - Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the official discord - https://discord.gg/jailbreak,  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
 
----
 - New Season 18 with Wild West themed zone & prizes.
 - - Added: Native Wing, Windmill Wing, Wanted Backdrop, Bull Wing, Gunfire Rim, Tumbleweed Rim, Bandit Bandana Skin, Wagon Wheel, Wagon Furniture, and Longhorn Vehicle.
 - - Easier season difficulty.
