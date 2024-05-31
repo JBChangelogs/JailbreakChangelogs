@@ -53,6 +53,10 @@
                 contentHtml += `<li>${line.substring(2)}</li>`;
               } else if (line.startsWith("- - ")) {
                 contentHtml += `<ul><li>${line.substring(4)}</li></ul>`;
+              } else if (line.startsWith("- - - ")) {
+                contentHtml += `<ul><ul><li>${line.substring(
+                  6
+                )}</li></ul></ul>`;
               } else if (line.startsWith("> > ")) {
                 contentHtml += `<h3 class="centered-line">${line.substring(
                   4
