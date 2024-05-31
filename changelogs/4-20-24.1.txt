@@ -444,6 +444,68 @@
 - Fixed PlasmaPistol newly introduced damage issues.
 - Fixed an arrest avoidance bug with vehicles.
 
+# February 02, 2024 / Version 1271 / Season 20
+## Community Note
+> This marks the **first update of 2024!** This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+---
+## Season 20: Apocalypse
+- Added Season 20 and Season 20 Hype Zones
+- New Striker vehicle with turret, custom livery, “XRK” engine sound. 
+- New Scythes, Sawblade, and Skull wings.
+- New Biohazard and Jagged rims.
+- New Radiation Machine furniture item.
+- New Rust vehicle skin.
+- New Spiked Tires and Spark Drift.
+
+## Vehicles
+- Added the XRK right-hand-drive sports car.
+- Added XRK engine sounds and startup (Thank you Migue!)
+- Updated “Traction” groups for select vehicles.
+- - Brulee* now slips and slides easier like it did in 2019.
+- - Deja and Shogun drift traction decreased for more fun.
+- Added dynamic health to vehicles. Large vehicles like Tanks get a bunch of health, and small fast vehicles get very little. 
+- - Added dynamic “Duration” to vehicles that controls how long a specific vehicle is disabled.
+- - Vehicle health now gradually refills.
+- - Added Vehicle Health Bar underneath Rocket Fuel UI.
+- - (Major thank you to ShadowSamurai720 and the entire testing team for assisting!)
+- Weapons now deal unique damage to Vehicles than Players.
+- - Sniper deals 40 vehicle damage.
+- - Shotgun deals 15 vehicle damage.
+- - Revolver deals 25 vehicle damage.
+- - Pistol deals 15 vehicle damage.
+- - Rifle deals 9 vehicle damage.
+- - Uzi deals 7 vehicle damage.
+- - AK47 deals 6 vehicle damage.
+- Reduced size of Turrets, would love to implement a new turret model another day!
+- Turrets now deal double the damage to players.
+- Turrets now deal triple the damage to vehicles.
+- Turret bullet speed has been doubled to prevent outdriving your own turret bullets.
+
+## Map
+- Added Spring 2024 map, removed snow trains and falling snow.
+- Added all new mountains and volcano scenery.
+- Added mountain pass roadway with end destination, tunnels, bridges, and more.
+- Added JAILBREAK destructible hollywood sign.
+- Added snow capped pine tree variety.
+- Added Ramp on the mountaintop near the Rising City Airport.
+
+## Game
+- Added “Player Drowning” with “Oxygen UI” above player heads to prevent camping on ocean floors.
+- Added Boat Spawning while swimming in water.
+- Updated rewards for all Robberies to better reflect their difficulty.
+- - Banks are seeing up to 50% more cash depending on the floor.
+- - PowerPlant, Jewelry Store, and Trains all see increases in cash.
+- - Decreased cash amounts for Cargo Ship and Mansion.
+- - Mansion no longer opens at night, but instead when it rains.
+- - Increased rate of money collection for trains and banks.
+- Added Oil Rig to the Casino Robbery Group.
+- Added GameMode Hub in front of the Prison for VIP servers to promote Battle Royale.
+- Updated chat filters.
+- Updated to latest Crew Battles “Season”
+- Fixed Gunshop Markers not saving.
+- Fixed Plasma Pistol not registering player heads.
+- Cargo Ship now “closes” the robbery round just before leaving the map.
+
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
