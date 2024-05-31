@@ -20,6 +20,6 @@ You can access the changelog website [here](https://jbchangelogs.github.io/Jailb
 
 Special thanks to the following contributors:
 
-Owner: [Jalenzz16](https://github.com/v3kmww)
+Owner: [Jalenzz16](https://github.com/Jalenzzz)
 
-Collaborator: [v3kmw](https://github.com/Jalenzzz/)
+Collaborator: [v3kmw](https://github.com/v3kmww/)
