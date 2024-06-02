@@ -1,9 +1,25 @@
+#logo {
+  opacity: 0;
+  animation: fadeIn 3s forwards;
+  border-radius: 50%;
+  overflow: hidden;
+  width: 100px;
+  height: 100;
+  display: flex;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background-color: #121212;
-  color: #e0e0e0;
+  background: radial-gradient(orange, rgba(0, 0, 255, 0.493));
+  color: #000000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,13 +81,15 @@ button {
 }
 
 .blue-button {
-  color: #34abf9;
-  border-color: #34abf9;
+  color: #023e66;
+  border-color: #023e66;
+  font-weight: bold;
 }
 
 .orange-button {
   color: #cf5830;
   border-color: #cf5830;
+  font-weight: bold;
 }
 
 button:hover {
@@ -79,13 +97,14 @@ button:hover {
 }
 
 .blue-button:hover {
-  color: #ffffff;
-  background-color: #34abf9;
+  color: #000000;
+  background-color: #005994;
+  font-weight: bold;
 }
 
 .orange-button:hover {
-  color: #ffffff;
-  background-color: #cf5830;
+  color: #000000;
+  background-color: #e76135;
 }
 
 @media (max-width: 600px) {
