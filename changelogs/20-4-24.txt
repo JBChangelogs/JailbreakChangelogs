@@ -647,4 +647,5 @@
 - Crew Battle ratings no longer update if the battle was brief.
 - Removed Bank Truck bounty due to abuse. 
 
-> > To all of our players over all of these years, we love this game. Thank you! Keep up the fight for Jailbreak forever! It'll never go away. Have a great weekend! Replays happen later today and tomorrow morning. HAVE FUN IN OG!
+> > FROM THE DEVS: To all of our players over all of these years, we love this game.
+> >  Thank you. Keep up the fight for Jailbreak forever! It'll never go away.
