@@ -12,7 +12,7 @@
         <a href="https://www.roblox.com/games/606849621/Jailbreak">
           <img src="./images/logo.jpg" alt="Logo" id="logo" />
         </a>
-        <h1 id="main-title">Changelog</h1>
+        <h1 id="main-title">Changelogs</h1>
       </header>
       <section id="content">
         <!-- Dynamic content will be inserted here -->
@@ -29,14 +29,23 @@
           >
         </p>
         <div class="button-container">
-          <button class="blue-button" onclick="redirectToReddit()">
+          <button
+            class="blue-button"
+            onclick="window.open('https://www.reddit.com/r/robloxjailbreak/', '_blank')"
+          >
             Unofficial Reddit
           </button>
-          <button class="orange-button" onclick="redirectToTradingDiscord()">
+          <button
+            class="orange-button"
+            onclick="window.open('https://discord.gg/jailbreaktrading', '_blank')"
+          >
             Unofficial Trading Server
           </button>
-          <button class="blue-button" onclick="redirectToDiscord()">
-            Jailbreak's Discord
+          <button
+            class="blue-button"
+            onclick="window.open('https://discord.gg/jailbreak', '_blank')"
+          >
+            Jailbreak's Official Discord
           </button>
         </div>
       </footer>
@@ -79,18 +88,6 @@
             console.error("Error fetching the changelog:", error)
           );
       });
-
-      function redirectToReddit() {
-        window.location.href = "https://www.reddit.com/r/robloxjailbreak/";
-      }
-
-      function redirectToTradingDiscord() {
-        window.location.href = "https://discord.gg/jailbreaktrading";
-      }
-
-      function redirectToDiscord() {
-        window.location.href = "https://discord.gg/jailbreak";
-      }
     </script>
   </body>
 </html>
