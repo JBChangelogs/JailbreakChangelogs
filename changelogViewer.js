@@ -1,13 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
 
-  const sortSelectElement = document.getElementById("sort-select");
-
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt"
   )
     .then((response) => response.text())
-
     .then((data) => {
       const lines = data.split("\n");
 
@@ -32,27 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       contentElement.innerHTML = `<ul>${contentHtml}</ul>`;
-
-      // Add event listener to the sort select element
-
-      sortSelectElement.addEventListener("change", () => {
-        const sortOrder = sortSelectElement.value;
-
-        const listItems = contentElement.querySelectorAll("li");
-
-        // Sort the list items based on the selected order
-
-        if (sortOrder === "ascending") {
-          listItems.forEach((item, index) => {
-            item.style.order = index;
-          });
-        } else if (sortOrder === "descending") {
-          listItems.forEach((item, index) => {
-            item.style.order = listItems.length - index - 1;
-          });
-        }
-      });
     })
-
     .catch((error) => console.error("Error fetching the changelog:", error));
 });
