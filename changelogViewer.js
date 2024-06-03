@@ -1,3 +1,4 @@
+// Wait for the DOM to finish loading before executing the code
 document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
 
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      // Set the innerHTML of the content element to the rendered changelog
       contentElement.innerHTML = contentHtml;
     })
     .catch((error) => {
