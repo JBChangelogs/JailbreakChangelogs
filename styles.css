@@ -14,10 +14,6 @@
     opacity: 1;
   }
 }
-.blinking {
-  animation: blink 2s ease infinite;
-}
-
 @keyframes blink {
   0% {
     opacity: 1;
