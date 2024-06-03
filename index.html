@@ -12,21 +12,28 @@
         <a href="https://www.roblox.com/games/606849621/Jailbreak">
           <img src="./images/logo.jpg" alt="Logo" id="logo" />
         </a>
-        <h1 id="main-title">Changelogs</h1>
+        <h1 id="main-title">ChangeLogs</h1>
       </header>
       <script src="changelogViewer.js"></script>
       <section id="content"></section>
       <footer>
+        <!-- footer content -->
         <p id="footer-text">Thank you for playing!</p>
+
         <p id="footer-text">
           Note: This website is
-          <strong>not affiliated with Badimo.</strong> This is ran separately by
+
+          <strong>NOT affiliated with Badimo.</strong> This is ran seperately by
+
           <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
+
           and
+
           <a href="https://www.roblox.com/users/1910948809/profile"
             >Jalenzz16</a
           >
         </p>
+
         <div class="button-container">
           <button
             class="blue-button"
@@ -34,12 +41,14 @@
           >
             Unofficial Reddit
           </button>
+
           <button
             class="orange-button"
             onclick="window.open('https://discord.gg/jailbreaktrading', '_blank')"
           >
             Unofficial Trading Server
           </button>
+
           <button
             class="blue-button"
             onclick="window.open('https://discord.gg/jailbreak', '_blank')"
@@ -49,44 +58,5 @@
         </div>
       </footer>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        fetch(
-          "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt"
-        )
-          .then((response) => response.text())
-          .then((data) => {
-            const lines = data.split("\n");
-            let contentHtml = "";
-
-            lines.forEach((line) => {
-              if (line.startsWith("# ")) {
-                contentHtml += `<h1>${line.substring(2)}</h1>`;
-              } else if (line.startsWith("## ")) {
-                contentHtml += `<h2>${line.substring(3)}</h2>`;
-              } else if (line.startsWith("- ")) {
-                contentHtml += `<li>${line.substring(2)}</li>`;
-              } else if (line.startsWith("- - ")) {
-                contentHtml += `<ul><li>${line.substring(4)}</li></ul>`;
-              } else if (line.startsWith("- - - ")) {
-                contentHtml += `<ul><ul><li>${line.substring(
-                  6
-                )}</li></ul></ul>`;
-              } else if (line.startsWith("> > ")) {
-                contentHtml += `<h3 class="centered-line">${line.substring(
-                  4
-                )}</h3>`;
-              }
-            });
-
-            document.getElementById(
-              "content"
-            ).innerHTML = `<ul>${contentHtml}</ul>`;
-          })
-          .catch((error) =>
-            console.error("Error fetching the changelog:", error)
-          );
-      });
-    </script>
   </body>
 </html>
