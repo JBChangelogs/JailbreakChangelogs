@@ -585,6 +585,7 @@
 - Fixed a bug related to crosshair placement.
 - Fixed the Ray9 License Plate.
 
+### LATEST CHANGELOG
 # April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
 
 ## Community Note
