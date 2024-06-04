@@ -2,10 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
 
-  const itemsPerPage = 1; 
+  const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
-  let changelogItems = []; 
+  let changelogItems = [];
 
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt",
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
           currentItem += `<p><span class="bullet">•</span> ${line.substring(
             2
           )}</p>`;
-         } else if (line.startsWith("- - - ")) {
+        } else if (line.startsWith("- - - ")) {
           currentItem += `<p><span class="bullet">•</span> <span class="sub-bullet">•</span>  ${line.substring(
             4
           )}</p>`;
@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
           currentItem += `<p>${line}</p>`;
         }
       });
-
 
       if (currentItem) {
         changelogItems.push(currentItem);
@@ -87,15 +86,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let paginationHtml = "";
 
     if (currentPage > 1) {
-      paginationHtml += `<button onclick="goToPage(${currentPage - 1})">Previous</button>`;
+      paginationHtml += `<button onclick="goToPage(${
+        currentPage - 1
+      })">Previous</button>`;
     }
 
     for (let i = 1; i <= totalPages; i++) {
-      paginationHtml += `<button onclick="goToPage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+      paginationHtml += `<button onclick="goToPage(${i})" ${
+        i === currentPage ? 'class="active"' : ""
+      }>${i}</button>`;
     }
 
     if (currentPage < totalPages) {
-      paginationHtml += `<button onclick="goToPage(${currentPage + 1})">Next</button>`;
+      paginationHtml += `<button onclick="goToPage(${
+        currentPage + 1
+      })">Next</button>`;
       paginationHtml += `<button onclick="goToPage(${totalPages})">>></button>`;
     }
 
