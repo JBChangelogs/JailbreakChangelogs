@@ -1,12 +1,11 @@
-// Wait for the DOM to finish loading before executing the code
 document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
 
-  const itemsPerPage = 1; // Adjust this value to change the number of items per page
+  const itemsPerPage = 1; 
   let currentPage = 1;
   let totalPages;
-  let changelogItems = []; // Array to store the changelog items
+  let changelogItems = []; 
 
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt",
@@ -45,8 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
             2
           )}</p>`;
          } else if (line.startsWith("- - - ")) {
-          currentItem += `<p><span class="bullet">•</span> <span class="sub-bullet">•</span> <span class="sub-sub-bullet">•</span> ${line.substring(
-            6
+          currentItem += `<p><span class="bullet">•</span> <span class="sub-bullet">•</span>  ${line.substring(
+            4
           )}</p>`;
         } else if (line.startsWith("> > ")) {
           currentItem += `<h3 class="centered-line">${line.substring(4)}</h3>`;
