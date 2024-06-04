@@ -84,7 +84,7 @@ footer p {
 button {
   padding: 10px 20px;
   border: 2px solid transparent;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1em;
   cursor: pointer;
   margin: 0 10px;
@@ -93,24 +93,22 @@ button {
 }
 
 .blue-button {
-  color: #023e66;
-  border-color: #023e66;
+  color: #ffffff;
+  background-color: #005994;
+  border-color: #005994;
   font-weight: bold;
 }
 
 .orange-button {
-  color: #cf5830;
-  border-color: #cf5830;
+  color: #ffffff;
+  background-color: #ff5f29;
+  border-color: #ff5f29;
   font-weight: bold;
-}
-
-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .blue-button:hover {
   color: #000000;
-  background-color: #005994;
+  background-color: #00407d;
   font-weight: bold;
 }
 
@@ -120,25 +118,81 @@ button:hover {
 }
 
 @media (max-width: 600px) {
+  body {
+    flex-direction: column;
+  }
+
   .container {
     padding: 10px;
   }
 
+  header,
+  section,
+  footer {
+    margin-bottom: 10px;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   header h1 {
     font-size: 1.5em;
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
   }
 
-  section h2 {
-    font-size: 1.2em;
+  #logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+    margin-right: 10px;
   }
 
-  footer p {
-    font-size: 0.9em;
+  #pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #pagination button {
+    padding: 6px 10px;
+    font-size: 0.8em;
+    margin: 5px;
+  }
+
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
   }
 
   button {
-    font-size: 0.9em;
-    padding: 8px 16px;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 10px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .blue-button:hover {
+    color: #000000;
+    background-color: #00407d;
+    font-weight: bold;
+  }
+
+  .orange-button:hover {
+    color: #000000;
+    background-color: #e76135;
   }
 }
 
