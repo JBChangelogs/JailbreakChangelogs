@@ -23,3 +23,5 @@ Special thanks to the following contributors:
 Owner: [Jalenzz16](https://github.com/Jalenzzz)
 
 Collaborator: [v3kmw](https://github.com/v3kmww/)
+
+hi discord
