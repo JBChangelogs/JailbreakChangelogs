@@ -29,7 +29,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: radial-gradient(orange, rgba(0, 0, 255, 0.493));
+  background: radial-gradient(rgb(60, 91, 111), rgb(148, 137, 121));
+
   color: #000000;
   display: flex;
   justify-content: center;
@@ -145,4 +146,23 @@ button:hover {
   text-align: center;
   margin: 0 auto;
   width: fit-content;
+}
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#pagination button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+}
+
+#pagination button.active {
+  background-color: #007bff;
+  color: white;
 }
