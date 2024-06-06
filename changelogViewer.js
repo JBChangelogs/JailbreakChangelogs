@@ -9,25 +9,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt",
-    { mode: "cors" }
+    {
+      mode: "cors",
+    }
   )
     .then((response) => response.text())
     .then((data) => {
       const lines = data.split("\n");
 
       let currentItem = "";
-      let inCommunityNote = false;
 
       lines.forEach((line) => {
-        if (line.startsWith("## Community Note")) {
-          inCommunityNote = true;
-          currentItem += `<div class="community-note">`;
-        } else if (inCommunityNote && line.trim() === "") {
-          inCommunityNote = false;
-          currentItem += "</div>";
-        } else if (inCommunityNote) {
-          currentItem += `<p>${line}</p>`;
-        } else if (line.startsWith("# ")) {
+        if (line.startsWith("# ")) {
           if (currentItem) {
             changelogItems.push(currentItem);
             currentItem = "";
@@ -58,8 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
         changelogItems.push(currentItem);
       }
 
-      changelogItems.reverse();
-      totalPages = Math.ceil(changelogItems.length / itemsPerPage);
+      changelogItems = changelogItems.reverse();
+      totalPages = Math.ceil(changelogItems.length / itemsPerPage) || 1;
       renderChangelogs();
       renderPagination();
     })
@@ -91,7 +84,16 @@ document.addEventListener("DOMContentLoaded", () => {
       })">Previous</button>`;
     }
 
-    for (let i = 1; i <= totalPages; i++) {
+    const maxPages = 5;
+    const startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+    const endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+    // Add "First Page" button
+    if (startPage > 1) {
+      paginationHtml += `<button onclick="goToPage(1)">First</button>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
       paginationHtml += `<button onclick="goToPage(${i})" ${
         i === currentPage ? 'class="active"' : ""
       }>${i}</button>`;
