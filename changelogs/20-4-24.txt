@@ -79,11 +79,11 @@
 
 # July 29th 2017
 
-- Shoot down helicopters! :tada: :tada: :tada:
+- Shoot down helicopters!
 - Ice skin
 - New garage near donut shop
 - Tire pop now respects gun damage
-- Bug fixes :spider_web:  & optimizations :heart_eyes: 
+- Bug fixes & optimizations
 
 # August 6th 2017
 
@@ -1052,7 +1052,7 @@
 -   Engine sounds have been reduced for improved Voicechat experiences.
 -   Engine sounds now rolloff better when disappearing into the distance (Thanks Phindr!)
 -   Updated headlights of the Ray9 and other vehicles to be reflective and properly black.
--   Vehicles are now _less likely_ to flip when cruising at high speeds, at least when riding alone.
+-   Vehicles are now less likely to flip when cruising at high speeds, at least when riding alone.
 
 ## Vehicle performance:
 
