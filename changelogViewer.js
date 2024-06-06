@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let changelogItems = [];
 
   fetch(
-    "https://raw.githubusercontent.com/Jalenzzz/JailbreakChangelogs-test/master/changelogs/4-20-24-1-test.txt",
+    "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/20-4-24.txt",
     {
       mode: "cors",
     }
