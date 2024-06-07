@@ -1,12 +1,66 @@
-# May 13th 2017
+# April 21st 2017 / PUBLIC BETA RELEASE
 
-- New vehicle, a convertible!
-- Space to disable parachute!
+- The official public beta release of Jailbreak.
+- Added first locations:
+- - Prison
+- - Police Station 1
+- - Visitors building
+- - Rising City
+- - Rising City Bank
+- - Rising City Garage
+- - Rising City Criminal Base
+- - Radio Tower
+- - Train Tunnels
+- - Mountainside Town
+- - Mountainside Town Gas Station
+- - Meteor
+- First robbery added: Bank
+- First vehicles added:
+- - Camaro
+- - Model 3
+- - Helicopter
+- First weapons and items added:
+- - Pistol
+- - Shotgun
+- - Rifle
+- - Key card
+- - Riot Shield
+- First game passes added:
+- - Bigger Duffel Bag
+- - SWAT Team
+- - Extra Storage
+- - Vehicle Stereo
+
+# April 29th 2017 / SUPER  CAR UPDATE
+
+- New vehicle: La Matador
+- Jumping out of a helicopter now deploys a parachute
+- New game pass: VIP Game Pass
+- Volcano Criminal Base added
+- Added a Prison Jumpsuit Rack in both criminal bases to allow criminals to remove their Prison Jumpsuit
+- Other bug fixes & improvements
+
+# May 6th 2017 / SWAT VAN UPDATE
+
+- New vehicles:
+- - Pickup
+- - SWAT Van
+- New map location: Gas Station
+- Cop can no longer enter the bank until a robbery begins
+- Some Bank glitches fixed
+- Other bug fixes & improvements
+
+# May 13th 2017 / CONVERTIBLES UPDATE
+
+- New convertible vehicle: Posh
+- You can now press 'Space' to close the automatically-opened parachute.
 - Police lights on SWAT Van!
 - Pickpocketing/Hijacking available on Mobile/Xbox!
+- Crouch can no longer be spammed.
+- Removed the ability to glitch into the Bank when it's closed.
 - More to come!
 
-# May 19th 2017
+# May 20th 2017 / MINI COOPER UPDATE
 
 - Eject your friends and foes!
 - New sporty car
