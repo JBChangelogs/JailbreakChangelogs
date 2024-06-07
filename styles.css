@@ -25,6 +25,9 @@
     opacity: 1;
   }
 }
+.dev-message {
+  font-size: x-large;
+}
 body {
   margin: 0;
   padding: 0;
@@ -42,8 +45,33 @@ body {
   max-width: 800px;
   padding: 20px;
   margin: auto;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+#content {
+  flex: 1;
+  overflow-y: auto;
+}
+.light-mode {
+  background-color: #f2f2f2;
+  color: #333;
+}
+.dark-mode {
+  background-color: #333;
+  color: #ddd;
+}
+#mode-toggle-btn i {
+  margin-right: 0.5rem;
 }
 
+#mode-toggle-btn.dark-mode i:first-child {
+  display: none;
+}
+
+#mode-toggle-btn.light-mode i:last-child {
+  display: none;
+}
 header,
 section,
 footer {
@@ -97,6 +125,7 @@ button {
   background-color: #005994;
   border-color: #005994;
   font-weight: bold;
+  width: 200px;
 }
 
 .orange-button {
@@ -104,17 +133,7 @@ button {
   background-color: #ff5f29;
   border-color: #ff5f29;
   font-weight: bold;
-}
-
-.blue-button:hover {
-  color: #000000;
-  background-color: #00407d;
-  font-weight: bold;
-}
-
-.orange-button:hover {
-  color: #000000;
-  background-color: #e76135;
+  width: 200px;
 }
 
 @media (max-width: 600px) {
@@ -124,8 +143,9 @@ button {
 
   .container {
     padding: 10px;
+    min-height: 130vh;
+    overflow-y: auto;
   }
-
   header,
   section,
   footer {
@@ -151,7 +171,10 @@ button {
     margin-bottom: 10px;
     margin-right: 10px;
   }
-
+  #content {
+    flex: 1;
+    overflow-y: auto;
+  }
   #pagination {
     flex-wrap: wrap;
     justify-content: center;
@@ -180,10 +203,6 @@ button {
     background-color: transparent;
     transition: all 0.3s ease;
   }
-  button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
   .blue-button:hover {
     color: #000000;
     background-color: #00407d;
@@ -201,11 +220,13 @@ button {
   margin: 0 auto;
   width: fit-content;
 }
-
+h3 p {
+  margin: 0;
+}
 #pagination {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: auto;
 }
 
 #pagination button {
