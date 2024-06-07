@@ -240,85 +240,152 @@
 - Train might be a little more stable! Working with Roblox on this one soon, though.
 - General bug fixes (like not being able to get into cars sometimes, etc.)
 
-# February 3rd 2018 / ROCKET FUEL UPDATE!
+# February 4th 2018 / ROCKET FUEL UPDATE
 
-- Fuel up at gas stations!
-- NEW BINOCULARS!
-- GRASS MAP!
-- Better bounties, faster Mclaren!
+- Added Rocket Fuel: Fuel up at gas stations!
+- New Easter Eggs.
+- New Binoculars item.
+- Map returned to the Grass Map, with snow-capped mountains.
+- VIP Owners now receive free Rocket Fuel every day.
+- New Flower Rims, replacing the Snowflake rims in Vault safes.
+- Police now get $2,000 ($2,400 if VIP) as a paycheck, and 300 (360 as VIP) from arresting.
+- Bigger bounties:
+- - Rising City Bank and Jewelry Store - $1000 bounty Killing a cop, $200 bounty
+- - Gas Station and Donut Shop - $250
+- - Cargo Train - $2,000 bounty ($500 for blowing up the vault and $1000 for robbing successfully.)
+- The Megalodon was given a speed and acceleration boost.
+- Snowman and Penguin Package speed glitch is now patched.
+- Changes to the Meteor Easter Egg.
 
 # February 5th 2018
 
 - Fixed buying rocket fuel with xbox controller
 - Fixed issue with the storage drawers in prison cells
 
-# March 3rd 2018 / ONE BILLION PLAYS!
+# March 3rd 2018 / 1B VISITS UPDATE
 
 - New vehicle: SUV!
-- New bank escape router!
-- Two new rims and more!
-- 1 BILLION PLAYS IN UNDER A YEAR!
-- THANK YOU FOR PLAYING! 
+- New bank escape route!
+- Two new rims:
+- - Billion rims
+- - Bloxy rims
+- Rain changed from rain to confetti and it will also rain through everything.
+- Added a feature where you can fuel up on Rocket Fuel without actually going to a Gas Station by simply pressing the Rocket Fuel bar or pressing Q on an empty tank. (requires the Mobile Garage Game pass)
+- Megalodon speed/acceleration boost.
+- Added cones on top of the 1M Dealership.
 
-# April 1st 2018 /  ALIENS!!
+# March 12th 2018 / READY PLAYER ONE EVENT
 
-- Added the UFO!
-- Play in a limited time alien world!
-- You can now click and drag in your hotbar to move items around
+- Roblox hosts the Ready Player One event in 3 games, Jailbreak being one of them.
+-  Placed a fence in the Bank to stop some vehicles from entering the Bank.
 
-# April 11th 2018
-- Jailbreak is back on earth.
-- Fixed heli rotors not spinning.
+# April 1st 2018 /  ALIENS
+
+- New Vehicle: UFO, meteor cracked and showed the UFO inside.
+- Confetti showers now changed back to rain.
+- Aliens added around the map.
+- Alien themed map, such as a purple map, a galaxy sky, two Suns, an egg-shaped moon, etc.
+- The donut on top of the Donut Shop now only has one eye.
+- The Water Tower now has a crack in it that spills out Rocket Fuel.
+- @badcc and @asimo3089 NPCs at the Donut Shop and Gas Station changed.
+- New alien Easter Eggs added.
+- Hotbar reordering: You can now click and drag in your hotbar to move items around
+- More construction cones added to the 1M Dealership.
+- The Helicopter has a shorter spawn time.
+- Giant alien tentacles are now found at every tunnel at the edge of the map.
+
+# April 10th 2018 / BACK TO EARTH UPDATE
+- Changed map from alien-themed map to classic map. All alien-related changes have been undone.
+- Concrete blocks added to the construction on the 1M Dealership.
+- Fixed the helicopter rotor blades not spinning.
 - Made UFO 20% faster and the height changes smoother.
+- Removed all alien easter eggs.
+- The Giant Rocket Easter Egg that was outside the Prison is now small.
+- Jewelry Store camera and laser lag fixed.
+- There is a new ramp in the Prison, near where the SWAT Van spawns.
 
-# April 22nd 2018 / HAPPY BIRTHDAY JAILBREAK!
+# April 22nd 2018 / 1 YEAR ANNIVERSARY UPDATE
 
-- NEW 1M ARMY HELICOPTER! 🚁
-- ARMY HELI ROPE LADDER!! Use "F" to drop the rope!
+- New vehicle: Black Hawk, spawns on top of the 1M Dealership. It has a rope that can be deployed by pressing F on PC or pressing the icon on mobile devices.
+- Fixed the hotbar not allowing a player to use certain items on mobile devices due to hotbar reordering.
+- The Ready Player One event is over, Copper Key and Crown no longer obtainable.
 - NEW ESCAPE
-- SPANISH SUPPORT!
-- NEW "SAND" COLOR!
-- BETTER CONSOLE CONTROLS!
-- NEW CASH PRICES
+- Added Spanish translation support.
+- Added new Sand body color purchasable for $5,000 in the Garage.
+- More Xbox support.
+- New cash prices.
+- The gates in the Prison parking lot now open to police on foot and prisoners/criminals with key cards on foot, so you don't have to drive into the gate or press the button in the gate control room to open the gate anymore.
+- Moved the exploding wall escape to the fence next to the old location.
+- Changed the Town ground texture to a texture with slightly more grass instead of dirt.
+- Changed paycheck for Police back to $500 ($600 if you own the VIP Game pass).
+- Fixed a glitch where the Camaro lags when using Rocket Fuel.
+- Nerfed bounties to $800 for Rising City Bank and Jewelry Store and $200 for robbing the Donut Shop and Gas Station.
+- Accidentally nerfed Jewelry Store money amounts from $5,000 to $4,500 for Bigger Duffel Bag Gamepass owners and $1,500 for players without the game pass.
+- Accidentally nerfed Donut Shop and Gas Station cash amounts getting the same amount of cash as you would get without the Bigger Duffel Bag Gamepass.
+- Buffed helicopter.
 
-# April 28th 2018 / Surprise Update!
+# April 28th 2018 / BONUS UPDATE!
 
-- GLIDERS! Found in a new town building!
-- HELI ROPE on ALL Helicopters!
-- MISSILES on the Army Helicopter!
-- NEW SKIN + WHEEL
-- Eat donut to heal
+- Added Glider item. Found in a new town building!
+- Added the "Galaxy Wave" texture.
+- Added the "Cyclone" rims.
+- Added Missiles on the Black Hawk. Upon buying the Black Hawk you will receive 8 free missiles.
+- On the Mini Map, the color of the dot that represents you was changed to blue (for the Police team) and red (for Criminals and Prisoners).
+- Ropes on the normal Helicopter.
+- Ropes are now deployed by pressing G instead of F.
+- VIP players receive 100 Rocket Fuel instead of 50.
+- Donuts now give 20 health per bite (they disappear from your inventory after one bite).
+- If you try to no-clip (with exploits), you will be kicked out of the server with the message, "Do Not Cheat".
+- Fixed crouching while parachuting that would previously make you go faster.
+- Eat donuts to heal!
 
-# May 20th 2018 / NEW ESCAPE!
+# May 20th 2018 / SEWER ESCAPE UPDATE
 
-- ALL NEW SEWER DRAIN ESCAPE!
-- WORKING TRAINS!
-- Wall escape returns!
-- JET wheels! Also, Jet, Cyclone and Billion wheels are now in SAFES!
-- Cell storage + item drop improvements!
-- Many small changes 🔧
+- New sewer escape route (located in between Prison Police Station and the Visitors Building)
+- Cargo Train now works more smoothly. You still slide around in them, though.
+- Wall escape returns (fence escape removed).
+- Added jet rims.
+- Jet, Cyclone and Billion rims are now in safes
+- Upgraded Cell storage.
+- Items drop improvements.
+- Removed the "guilty zone" in between the Visitor Building and Police Station 1.
+- You can now get kicked out of the game if you fall out of the map. (Only if using no-clip).
+- As a police officer, you can no longer drop items when you reset or kill yourself. (Another player must kill you in order for any items to drop from your corpse).
+- Nerfed the arrest cash amount from $300 ($360 if VIP) to $200 ($240 if VIP).
 
-# May 26th 2018 / BETTER TRAINS!
+# May 26th 2018 / TRAIN PATCH UPDATE
 
-- No/Less sliding!
-- Better performance!
-- Longer trains!
-- No flinging!
-- No more drifting trains! Stays on track!
+- Cargo Trains are officially fixed, lag has been reduced tremendously.
+- Better Cargo Train performance.
+- Longer Cargo Train lengths.
+- No more flinging!
+- No more Cargo Train drifting. Stays on track!
+- Cargo Trains move faster now.
+- When you lock a vehicle and go into another vehicle, that vehicle will remain locked.
+- Longer Cargo Train Vault opening time, increased by 3.3 seconds.
+- Cargo Trains now make a very loud engine sound.
+- Pickpocketing time shortened.
+- Shorter Cargo Train trapdoor opening time, decreased by 1.1 seconds.
+- Longer Cargo Train side door opening time, increased by 2.0 seconds.
 
-# June 5th 2018 / HYPNO RIMS
+# June 5th 2018 / HYPNO RIMS UPDATE
 
 - Hypno Wheels! Found in Tier-5 Legendary RED safes. Keep them forever!
-- Demolished a building...
-- Expect more mini updates in the future!
+- The Radio Station building has been demolished.
 
-# June 26th 2018 / MUSEUM ROBBERY!
+# June 26th 2018 / MUSEUM ROBBERY
 
 - Check out the NEW Museum and rob rare items!
 - Museum requires two players! Work together!
 - NEW classic car! Check it out at the Museum!
 - SOCCER skins for the World Cup!
+- - Field texture
+- - Ball texture
 - New cash prices!
+- Ragdoll time increased.
+- A bigger version of the soccer ball can now be found outside the Prison.
+- Black Hawk slightly nerfed.
+- Removed La Matador spawn at Radio Station parking lot.
 
 # June 27th 2018
 
@@ -327,26 +394,58 @@
 -  "Already robbed" fixed
 - Various other issues fixed
 
-# July 6th 2018 / WING/SPOILER UPDATE
+# July 6th 2018 / SPOILER/WING CUSTOMIZATION UPDATE
 
-- Wings/Spoilers are in the garage now! With colors!
-- HEADLIGHT COLORS!
-- New SOCCER GOAL challenge! Get the ball into the goal and you'll win a pair of flags for your car!
+- New wings/spoilers were added. With colors!
+- You can now customize the headlight color of your vehicle.
+- New SOCCER GOAL challenge! Get the ball into the goal and you'll win the Dual Flags Spoiler for your car!
+- There’s now an option to make your vehicle’s window color Chrome. (Must have the VIP Game pass).
+- You can no longer lock a vehicle near its spawn points or other vehicle spawns.
+- The default license plate now says "BADIMO" instead of "ABCDEF".
+- The default headlight color that all cars spawn in changed from yellow to white.
+- Weather is more realistic.
 - Brighter nights!
+- Realistic moon.
 - Better rain!
-- Brighter lights and more!
+- Vehicle glows, headlights and flashlights are now brighter and more visible.
+- Cars now slip more when it‘s raining.
+- The pattern on the Ramps have been changed.
+- The Cargo Train's bounty has been nerfed because of bounty farming.
+- Other small improvements.
 
-# August 14th 2018 / HUGE WEAPON UPDATE!
-- Brand NEW guns with new ANIMATIONS, SOUNDS, richochets + more!
+# August 14th 2018 / HUGE WEAPON UPDATE
+
+- Brand NEW guns with new ANIMATIONS, SOUNDS  + more!
 - Grenades are here!
-- Rocket Launchers! Buy both new items at the gun shops!
-- NEW BOSS GAMEPASS! Our first new Gamepass in a year! Receive a unique car, robbery notifications + more!
-- MINIGUNS for SWAT/Boss players!
-- Map updates including new Wind Turbines and new gun store
+- Rocket Launchers & Grenades! Buy both new items at the gun shops!
+- NEW BOSS GAMEPASS! Our first new Gamepass in a year! Receive a unique car: The Celestial, robbery notifications + more!
+- Miniguns on SWAT Van and Celestial for SWAT/Boss players!
+- A new look for the Gun Shop 1, which was once called the “Shooting Range”.
+- The “BANK” text on the Rising City Bank is no longer 3D.
+- Removed the Scoobis Easter Egg.
+- Added a new location, Rising City Gun Shop.
+- There is now recoil when you shoot a weapon.
+- There are numbers that pop up on your screen that tells how much damage is done after you shoot a player.
+- Redesigned Wind Turbines.
+- Removed the crosshairs on the Taser.
+- Removed the ammo count on the bottom right corner of the screen for the Taser.
 - Purchaseable weapons at the gun stores
-- New spoiler
+- Better animations for the Binoculars, Flashlight, Taser, Donut, and Handcuffs.
+- The Most Wanted Board is now the “Top Criminal Board”.
+- The Rifle’s bullets per clip amount has been buffed to 30 bullets per clip (used to be 20 per clip).
+- When you reload a gun, the magazine will drop on the ground (you can not pick it up). The magazine will despawn shortly after being dropped.
+- Bullets will ricochet when you shoot something.
+- Bullets now make a metallic sound when it hits a metal object (e.g: vehicles, metal walls).
+- If you shoot a vehicle without a driver in it enough times, and then enter the driver seat; the vehicle will automatically pop the tires (if an aerial vehicle, the vehicle will automatically be shot down).
+- The Lamborghini, Stallion, and Megalodon speed have been buffed (was not announced officially)
+- Donuts only spawn in the color pink.
+- When shooting a player with a shotgun, it makes a noise when a lot of bullets hit the target.
+- Shotgun’s bullets per clip amount has been buffed to 5 (used to be 4 per clip).
+- Players can no longer equip weapons inside a vehicle via a glitch.
+- Players can no longer equip a keycard inside about every vehicle in order to give it free infinite Rocket Fuel.
+- The arresting position when someone gets arrested was changed.
+- New spoiler (the Boomerang Spoiler).
 - You can now shoot BEHIND YOURSELF!
-- Less recoil on all items.
 - Some potentially big performance improvements
 
 # August 16th 2018 / FEEDBACK UPDATE
@@ -372,31 +471,66 @@
 - Equipping a new item no longer reloads Rockets.
 
 #  September 30th 2018 / FALL UPDATE!
-- LEAN OUT VEHICLES! Use your weapons while riding!
+
+- The map is now fall-themed. Limited time!
+- Fixed some arm bugs for the ATV and Posh.
+- You can now shoot out of vehicle windows which allows players to stick their head out the window and fire weapon.
 - EIGHT new vehicle colors including silver and pastels!
-- ROBLOX TOY rewards! Check thumbnail for more info!
-- FALL MAP! Limited time!
-- Two new spoilers!
-- Retired Storage gamepass. Owners get a cool Spare Tire spoiler!
-- Huge list of fixes, including stronger guns! +more
+- ROBLOX TOY CODES! If you redeem a code, you will get cash, Rocket Fuel and a Brickset spoiler and tire.
+- Re-added Taser crosshair.
+- Taser works on console now.
+- New airplane styled spoilers.
+- Updated the Bank TNT model.
+- New pastel colors for vehicles.
+- Buffed some of the weapons.
+- The Cargo Train has a new color pallet.
+- The oil tanks on the Cargo Train now glow in the night.
+- Retired Extra Storage Game pass. Owners of the Game pass get rocket fuel, a cool Spare Tire spoiler and 10,000$!
+- New moneybag texture.
+- Reordering your inventory in the Museum doesn't remove the bag now.
+- Mini-map has been updated.
+- Fixed some ATV bugs.
+- Accidentally removed the kick feature for VIP Servers.
+- More bug fixes.
 
-# November 8th 2018 / 2B LIVE EVENT + UPDATE
+# November 8th 2018 / 2B VISITS LIVE UPDATE
 
-- All new city + Apartments
-- Volcano Event! +  Replays
-- Ambulance! Hopping in the back heals you!
+- First-ever live event in Roblox +  Replays
+- The volcano in the Volcano Criminal Base has erupted.
+- The original City has sunk and replaced by a new one.
+- Better textures for the buildings in the new City.
+- Stop signs are now octagonal.
+- New Building: Hospital.
+- New Vehicle: Ambulance. Hopping in the back heals you!
+- Added a limited time spoiler: 2 Billion Spoiler (available in the Vault Safe).
+- Replaced the countdown timer with the text, "Live 2B Update!".
+- All new Apartments
+- Other bug fixes.
 - Thank you for 2 billion plays!
 
-# December 22nd 2018 / LEVELS UPDATE!
+# December 22nd 2018 / WINTER UPDATE
 
-- [BETA!] SEASONAL LEVEL SYSTEM! Enter to unlock shop items. Level up as a Criminal + Police for unique items! Can you reach Level 50?
-- AIRDROPS from jets! Free to all players to collect! Get XP, Cash, and a safe!
-- WINTER MAP! It's getting ICY!
-- TWO NEW BASES, Secret Agent and Criminal Lair! Unlock them at Level 20!
-- TWO NEW (LEVEL) VEHICLES, Torpedo and Arachnid!
+- Added winter-themed map. It's getting ICY!
+- [BETA!] SEASONAL LEVEL SYSTEM! Enter to unlock shop items. Each team has their own levels with different prizes. Prizes change every season.
+- A player’s level now appears above their head in red text.
+- Airdrop system. Stealth jets fly around the map every few minutes and drop briefcases containing a rare safe, a handful of cash, and a bit of XP. They are able to be opened by either team.
+- TWO NEW BASES, Secret Agent Base and Criminal Lair! Unlock them at Level 20!
+- Added 2 new vehicles: Torpedo and the Arachnid for Level 30 criminals and police officers respectively.
 - CODES! We'll release codes on our Twitter. Enter them at any ATM found in the game!
-- TWO new wheels, unlocked at Level 10. TWO new spoilers, unlocked at Level 45.
-- BETTER Volt system for players who had issues! +more
+- Rising City Bank lasers have been changed, the ice and water inside the bank is now metal.
+- Added 2 new rims: Star Badge and Spider Leg for Level 10 police officers and criminals respectively.
+- Added 2 new spoilers: 5 Star and Eight legged for Level 45 police officers and criminals respectively.
+- New chassis for the 
+- Volt, meaning it no longer glitches on lower-end devices or internet.
+- Added back the Scoobis Easter Egg, which is now located at the Agent Base.
+- The Cargo Train has a different color pattern.
+- Removed Rising City Gun Shop.
+- The Dune Buggy now spawns at Mini Train Station.
+- New moon and sun.
+- The roof of the Museum has been brought down by a little bit.
+- Removed the small building by the Fire Station.
+- You can now rent a La Matador for only 99R$. This was added only for testing purposes.
+- The Cafeteria's roof was rebuilt. (not officially mentioned)
 
 # December 23rd 2018 /  FEEDBACK UPDATE
 
@@ -2234,6 +2368,4 @@
 - Mansion now opens at night instead of when it rains.
 - Fixed a bug that made Shotgun hits extremely loud.
 - Crew Battle ratings no longer update if the battle was brief.
-- Removed Bank Truck bounty due to abuse. 
-> > From the devs:
-> > To all of our players over all of these years, we love this game. Thank you! Keep up the fight for Jailbreak forever! It'll never go away. Have a great weekend! Replays happen later today and tomorrow morning. HAVE FUN IN OG!
+- Removed Bank Truck bounty due to abuse.
