@@ -33,12 +33,14 @@ body {
   padding: 0;
   font-family: Arial, sans-serif;
   background: radial-gradient(rgb(60, 91, 111), rgb(148, 137, 121));
-
   color: #000000;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .container {
