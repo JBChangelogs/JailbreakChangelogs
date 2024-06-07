@@ -45,7 +45,7 @@ body {
   max-width: 800px;
   padding: 20px;
   margin: auto;
-  height: 80vh;
+  height: 95vh;
   display: flex;
   flex-direction: column;
 }
