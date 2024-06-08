@@ -40,8 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
           currentItem += `<p><span class="bullet">•</span> <span class="sub-bullet">•</span>  ${line.substring(
             4
           )}</p>`;
-        } else if (line.startsWith("> > ")) {
-          currentItem += `<h3 class="centered-line">${line.substring(4)}</h3>`;
         } else {
           currentItem += `<p>${line}</p>`;
         }
