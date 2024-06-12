@@ -1514,10 +1514,10 @@ Two new vehicles were added:
 - - Police can track a criminal robbing something in any of the Police Stations.
 - Use code "WinterUpdate2021" for 5K cash! +much more
 
-# January 7th 2022 / THE MUSEUM UPDATE!
+# January 7th 2022 / THE MUSEUM REVAMP UPDATE
 
 - All new Museum with random puzzles!
-- T-Rex Rims! $50,000 Cash. 4-weeks only!
+- Added limited-time T-Rex rims.
 - Radiant Ice! The new Nuke server reward!
 - Dino-Bone Spoiler! A new soccer reward!
 - New admin-commands for VIP Servers
@@ -1529,59 +1529,88 @@ Two new vehicles were added:
 - - Toggle Pit Maneuvers
 - - Disable Arresting (Hi Youtubers!)
 - Retired the Classic and the AirTail
-- All new game settings!
+- Revamped settings UI, with multiple new settings.
 - - All new design with room for infinite controls!
 - - Vehicle camera-type setting!
 - - Sliders for sound and music!
 - - Mobile server-command support!
+- The Boxer now has another spawn, located on left side of the Museum.
+- Added SWAT Phone, which is used to view Security Cameras anywhere.
+- The Bonded rims, the NASCAR tire, and the Radiant Orange color are now unobtainable.
+- The Camaro no longer spawns at the Secret Agent Base. (replaced by La Matador)
+- Added code "Museum" redeemable for 5,000$, which lasts for one week.
+- Increased the price of the SWAT Gamepass from 350 R$ to 400 R$
 
 # January 8th 2022 / DATA ROLLBACK
 
 - Removed the Time command due to a serious money glitch that was being abused.
 - Players part of this paycheck glitch will have their saves rolled back. 
 
-# February 4th 2022 / SPRING UPDATE!
+# February 4th 2022 / SEASON 8 UPDATE
 
+- New spring themed map.
 - New Season 8 has begun! Welcome to the FUTURE.
-- New GARAGE! With Favs, Sorts + more!
+- Added the Celsior that can be obtained at level 10.
+- Levels and leaderboards refreshed.
+- The Icebreaker is now unobtainable and its spawn has been removed.
+- Revamped the Garage UI, with favorites, sorts and more.
+- Changed the Water Tower to a light green color to match the spring map.
 - New: The Badger! Find @ The Museum for 40k!
-- And our 2022 Spring Map with more color than ever!
+- Reduced spawn range by 20% from the opposing team.
+- Brighter map.
 
-# February 11th 2022 / NEW MCLAREN F1 EVENT!
+# February 11th 2022 / MCLAREN F1 UPDATE
 
+- The McLaren F1 Event has started.
 - Drive the new MCL36 for free for a limited time, or buy it to keep it forever!
-- Race on our new limited time racetrack in the desert!
-- Visit the McLaren Skyscraper to begin!
+- Added two new locations:
+- -  The McLaren F1 Racetrack
+- - The McLaren Skyscraper. (Both locations will be removed after the event.)
+- Fixed a bug preventing non-Premium garage gamepass owners from changing their vehicle license plate.
+- Changing vehicle license plate is now free.
 
 # EXPERIMENTAL FEATURE ALERT!
 
 ## Dev Note
 - We believe in giving players one chance to redeem themselves but if this *experimental feature* is abused, it will be removed. We may restrict future features from them as well. And if they're caught again: Banned forever. 1500 Robux gone.
 
-# March 5th 2022 / THE TOW TRUCK UPDATE!
+# March 5th 2022 / TOW TRUCK UPDATE
 
-- Tow trucks,
-- Waypoints,
-- Fullscreen Maps,
-- One-time unbans
+- Added the Tow Truck.
+- The Minimap can now be expanded.
+- - Waypoints can be added on the Minimap.
+- - Enlarged the player blips on the Minimap.
+- Added a one-time unban pass for 1500 R$
 - - Their items + vehicles will be reset, except season prizes.
 - - Their cash will be reset to $100,000.
 - - Cash drop disabled.
 - - Safes reset. No gifting.
 - - Cost: 1500 Robux.
-- and Custom Horns!
+- Horns can now be customized in the Garage.
+- Added code "TOW", redeemable for 10,000$
+- Added a small detail in the night, every now and then, you can see bullets flying through the sky, or meteors.
 
-# April 2nd 2022 / LIVE EVENT / A NEW JOURNEY!
+# April 2nd 2022 / 5 YEAR ANNIVERSARY LIVE UPDATE
 
-- 50% MORE MAP!
+- Map expanded by 50%, including Crater City, Crater City Airport, Racetrack and Casino and Night club.
 - ALL NEW ROADS to discover!
-- CASINO AND NIGHTCLUB!
-- CASINO ROBBERY!
-- REVAMPED LOCATIONS!
+- New Casino heist location.
+- Relocated the Power Plant.
+- Removed the Fire Station and Mountainside Town Garage (original).
+- Players that were part of 5 Year Anniversary Live Event received Live Glider Spoiler.
+- @badcc and @asimo3089 NPCs return to Donut Shop and Gas Station.
+- Revamped numerous existing Locations.
+- Completely revamped Volcano Criminal Base.
+- Moved Firetruck, Delorean and Ray 9 spawns.
+- The Rising City Bank's exterior is somewhat destroyed.
+- Renamed the International Airport to Bounty Bay Airport, and completely revamped it.
 
 # April 9th 2022 /  SEASON 9 + FEEDBACK UPDATE!
 
-- NEW Season 9!
+- Season 9: A New Journey has began.
+- Added the Jackrabbit that can be obtained at level 8.
+- Levels and leaderboards refreshed.
+- Redesigned the Season Hypezone.
 - Top 2% prize raised to Top 5%.
 - Easier existing contracts.
 - Quicker level progression.
@@ -1592,36 +1621,50 @@ Two new vehicles were added:
 - Replay #1 @ 10am PST / 1pm EST
 - Replay #2 @ 5pm PST / 8pm EST
 
-# May 6th 2022 / MORE TO EXPLORE!
+# May 6th 2022 / FAST TRAVEL JETS UPDATE
 
-- FAST TRAVEL JETS! Book a private flight to quickly travel around the map!
-- New Bank and new Bank Vault: Upper Management!
-- New Crater City stores: 1M Store, Garage & Gun Store!
-- Damage direction indicators!
+- Added the Private Jet: a feature to travel between airports.
+- Redesigned the Rising City Bank.
+- - New Bank floor: Upper Management.
+- Moved the 1M Dealership to Crater City with a new look.
+- Added Crater City Gun Shop in Crater City.
+- Added Crater City Garage in Crater City.
+- Added Damage Directional indicators.
+- Added 2 new Stallion spawns.
+- Buffed Stallion launch speed.
+- Fixed Jet innocent message bug.
 - Plus many other changes and improvements!
+- ATMs moved to E-prompts.
 - Use code "PrivateJet" for 10,000 cash!
 
-# June 4th 2022 / SEASON 10 UPDATE!
+# June 4th 2022 / SEASON 10 UPDATE
 
+- Added a new season: Season 10: Rich & Famous.
 - 10 New prizes!
 - New Nuke prize!
 - New Level-4 Criminal Base!
 - All new Beach Town!
-- The 1M Store has returned to the nearby town!
+- Added a countdown near Ship in Beach Town.
+- The 1M Store has returned to the Mountainside Town.
+- New Radiant color: Radiant Green.
+- Ramp changes.
+- Moved the Tow Truck spawn to Beach Town.
+- Code "Season10" for 10,000$
 - Coming June 10th @ 5PM PST: The Trade Island Expansion!
 
-# June 10th 2022 / TRADE ISLAND UPDATE!
+# June 10th 2022 / TRADE ISLAND EXPANSION UPDATE
 
+- Added the Trading Island.
 - TRADE with players! Obtain rare vehicles!
 - - Cash is not available to trade.
 - - Previously banned players cannot trade.
 - - You cannot trade items for nothing in return. Your trade will be declined by the system.
 - - You CAN trade non-limited items.
 - Explore an all new expansion: The Trade Island!
-- This weekend only: Find the sail spoiler on the island and keep forever!
+- This weekend only: Find the Sail Wing spoiler on the island and keep forever!
 - Visit the TRADE PORT on your minimap to begin your journey!
 
-# July 1st 2022 / HYPERCHROME UPDATE!
+# July 2nd 2022 / HYPERCHROME UPDATE!
 
 - A major graphics update, all while also improving performance.
 - Added "New Monster Truck", a free upgrade with existing owners with updated performance, off roading, tires, and styling.
@@ -1632,8 +1675,9 @@ Two new vehicles were added:
 - - HyperChromes! The rarest. Your first HyperChrome will be Level 1. Reach Level 5 through future rolls for even more shine!
 - - You also have a chance at earning bonus robbery cash or rocket fuel!
 - Added Trading VIP GamePass with animated trade tags, Trade Hub and Jailbreak menu buttons, custom chat text, and more.
-- Added "Snake" Vehicle for a limited time, with working air brake on the wing by @oof_ed1
+- Added the Snake for a limited time, with working air brake on the wing by @oof_ed1
 - Added new Police Siren with cleaner looks and greatly reduced part count. This could have helpful performance implications for full servers.
+- Added a code "HyperChrome" for 10,000$
 
 # Weapon balance, weapon fixes and new features!
 ## Weapons:
@@ -1774,7 +1818,7 @@ Two new vehicles were added:
 -   Mobile/Console sensitivity sliders now function.
 -   Sensitivity for sniper and other weapons have been reduced for all platforms.
 
-# August 13th 2022 / TOYS AND COLLECTIBLES!
+# August 13th 2022 / TOYS AND COLLECTIBLES
 
 - Season 11: Toys & Collectibles! All new free prizes and 2 vehicles to win!
 - New SAFES! Your old safes have been converted to equal value!
@@ -1792,27 +1836,33 @@ Two new vehicles were added:
 - Increased cash rewards for Safe duplicates!
 - To those of you who have already opened safes, we've given you a free Legendary Spoiler in your inventory!
 
-# September 10th 2022 / THE NPC UPDATE!
+# September 10th 2022 / NPC UPDATE
 
 - Battle bandits with the new AIRDROP system and earn bigger rewards!
 - NEW Cargo Train Boxcars! Four types!
 - 9 NEW Safe Prizes to win!
 - Improved Performance, and new "Level of Detail" setting! Your performance improvement may vary depending on your machine.
-- Use code NPC for 9,999 cash! This weekend only!
+- Use code "NPC" for 9,999 cash! This weekend only!
+- Improved vehicle stability.
 
-# October 8th 2022 / FALL 2022 UPDATE!
+# October 8th 2022 / FALL 2022 / SEASON 12 UPDATE
 
 - The 2022 Fall Map! It's our biggest Fall yet and possibly our most beautiful! Enjoy this limited time map through October and November.
+- Added Season 12: Bring in the Military.
 - Airdrops now have additional polish!
 - - No longer spawn near player spawns or player concentrated areas.
 - - Patches for Forcefield/Ambulance metas.
-- - New drop plane by @_ShadowSamurai]
+- - New drop plane by @_ShadowSamurai
 - - Guards are now minimap displayed.
 - - Decreased difficulty in busy servers.
-- Fly our new jets with heat seeking missiles!
+- Revamped Jet with heat seeking missiles, A/D steering, and more.
 - Earn XP towards our Military themed Season 12!
-- Check out the all new Blackhawk helicopter!
+- Check out the all new Black Hawk helicopter!
 - "6 Billion Celebration Wing" in our Garages to celebrate 6 Billion Visits!
+- Retuned 50+ vehicles.
+- Added "Military Green" as a new color customization option for 5,000$
+- Updated team attire.
+- Revamped Taser and Handcuffs with new targeting effects and models.
 
 # October 19th 2022 / PATCH UPDATE
 
@@ -1915,15 +1965,19 @@ Two new vehicles were added:
 - New Nitro Particles with better looking animated fire.
 - Removed floating gate bar at Military Base entrance.
 
-# December 17th 2022 / THE '22 WINTER UPDATE!
+# December 16th 2022 / 2022 WINTER UPDATE
 
 - Battle THE CEO in our first ever Boss Battle! You'll need an invite from an airdrop raid first! Major shoutout to @supernob12three for creating and animating The CEO.
-- NEW Lvl 4 Police Base.
-- Season 13, Radiant Purple, and much much more!
-- TWO vehicles: THE CROWN & FINAL PHASE both made by @JBDelorean 
-- "Winter22" for 12,000 cash :)
+- Added Mansion location in Coastline Forest.
+- NEW Lvl 4 Police Base underneath the Military Base.
+- Added Season 13: Super Villainous.
+- Added Bandit vehicle.
+- Added Radiant Purple color.
+- TWO vehicles: CROWN & ESCAPE BOT both made by @JBDelorean 
+- New ATM code: "Winter22" for 12,000$
+- Robbery Bonus Roll now displays hyperchrome percentage.
 
-# December 23rd 2022 / RB BATTLES UPDATE!
+# December 23rd 2022 / RB BATTLES UPDATE
 
 - Race through Jailbreak, find @RobloxBattles Headquarters, and race through the floors to reach the rooftop for the badge!
 
