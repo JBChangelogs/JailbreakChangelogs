@@ -2574,12 +2574,7 @@ Two new vehicles were added:
 - Fixed PlasmaPistol newly introduced damage issues.
 - Fixed an arrest avoidance bug with vehicles.
 
-# February 02, 2024 / Version 1271 / Season 20
-
-## Community Note
-
-> This marks the **first update of 2024!** This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# February 02, 2024 / Version 1271 / SEASON 20 UPDATE
 ## Season 20: Apocalypse
 
 - Added Season 20 and Season 20 Hype Zones
@@ -2642,11 +2637,7 @@ Two new vehicles were added:
 - Fixed Plasma Pistol not registering player heads.
 - Cargo Ship now “closes” the robbery round just before leaving the map.
 
-# March 08, 2024 / Version 1295 / Apocalypse Part 2
-
-## Community Note
-> Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code ***~~hammerhead~~*** for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# March 08, 2024 / Version 1295 / APOCALYPSE PART 2 UPDATE
 ## Tier 3 Police Safe, V2
 
 - New Vehicle: Hammerhead. With custom physics. 
@@ -2728,14 +2719,9 @@ Two new vehicles were added:
 - Fixed Radio playlists from not saving. 
 - Fixed a bug related to crosshair placement.
 - Fixed the Ray9 License Plate.
+- Use code "hammerhead" for 12k cash!
 
-# April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
-
-## Community Note
-
-> Hey friends! Nice to see you again. We finally got the long-awaited LIVE EVENT! If you missed it, remember replays happen later today and tomorrow morning. Also, redeem code 7years for 14k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted.The most recent Changelogs will always be pinned, so make sure to check back on the next update!  
-  
-
+# April 20, 2024 / Version 1327 / 2024 LIVE EVENT
 ## Live Event  
 
 - New Plasma Shotgun weapon, found from nearby alien encounters.  
@@ -2751,7 +2737,7 @@ Two new vehicles were added:
 ## OG Jailbreak   
 
 - OG Jailbreak has returned for a limited time! This required a ton of "surgery" as we modified purposely scrambled code and brought this game back to working order.   
-- New "Save The World" "Event" taking place now.   
+- New "Save The World Event" taking place now.   
 - - Cross server syncing of total cash earn.  
 - - Live progress board, find it in front of the prison.  
 - - New: OG Matador with original tune. Reward to everybody who participates. Keep forever and drive it in the modern game.  
@@ -2834,6 +2820,7 @@ Two new vehicles were added:
 - New purple "OG" meteor.
 - New surface on PowerPlant Exterior.
 - OG Skybox and lighting.
+- Redeem code "7years" for 14k cash!
 
 ## Misc
 - New Soccerball reward: The Laser Wing
