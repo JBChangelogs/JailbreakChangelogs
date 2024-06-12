@@ -1995,7 +1995,6 @@ Two new vehicles were added:
 - Enjoy a greener world w/Spring!
 - Added Proto-08 vehicle.
 - Added ATM code"spring23" for 12,500$
-# February 17th 2023 / PARISIAN EXP-1
 
 # February 17th 2023 / PARISIAN EXP-1 UPDATE
 
