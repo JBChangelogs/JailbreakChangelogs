@@ -881,46 +881,88 @@
 - Patched the Donut spamming bug that allowed players to restore all health.
 - The ragdoll time was decreased from 4 seconds to 2 seconds.
 
-# January 5th 2020 / HAPPY 2020!!!
+# January 5th 2020 / CYBERTRUCK UPDATE
 
-- Cybertruck! Cracked glass not included! Bring your own steel ball.
+- Reverted most winter-themed map decorations.
+- - Icebergs melted and became smaller, but were not completely removed.
+- New Vehicle: Cybertruck! Cracked glass not included! Bring your own steel ball.
 - Tire spike traps! Watch out criminals! Thanks for requesting this one <3
 - Epic Grass from the epic Roblox team. It's bootiful.
-- Added a couple jetpack no fly zones
-- We're giving police a bigger paycheck
-- Made that pesky blue bank floor less spawny
+- Added a couple jetpack no-fly zones to the to the Museum and Prison.
+- Police now receive double the amount of cash for arrests and paychecks.
+- Made increases to certain ways that criminals get bounties.
+- Made that pesky blue bank floor less spawny.
+- The top of the crater of the Volcano has been blown off.
+- Players can now press 'v' to toggle weapon aiming to point and click. This is only available for PC users.
+- Players can no longer escape the Cargo Plane by clipping out of the rear door without a keycard.
 
-# February 1st 2020 /  BEAUTIFUL WORLD...
+# February 1st 2020 /  HD/JETSKI RACING UPDATE
 
+- Added new lighting with Future Is Bright: Phase 2.
+- Improved rain weather by adding new three-dimensional clouds and more realistic raindrop effects.
+- Changed the body material of vehicles to metal to make them more reflective.
 - NEW Bank floor! Intense hallway action with "Corridor"!
-- NEW Bank + Jewelry buildings! More glass cases to punch too!
+- Revamped the Rising City Bank and Jewelry Store buildings. More glass cases to punch too!
 - NEW Jetski Racing gamemode! We also fixed other gamemodes!
-- NEW Lighting with new rain, clouds, nights, reflections and more!
+- Fixed spectator mode glitches in the Battle Royale gamemode.
+- Restricted every vehicle except for the Camaro in the Alien Invasion gamemode.
+- New Robbery Location Icons to help new players find robberies.
+- New license plate design.
+- The Roadster's roof is now collidable.
 - Use the twitter code "feb2020" for 10,000 cash. Valid 24 hours only
 
-# March 8th 2020 / ITEMS & SKINS
+# March 8th 2020 / GUN SKINS UPDATE
 
-- SNIPER RIFLE (Free! Hiding in a robbery)
-- PLASMA PISTOL (Shoots lightning!!)
-- REVOLVER (Free! Hiding in a robbery)
-- CHIRON w/Interior! First person driving!
-- WEAPON SKINS! Press B while holding!
+- Three new weapons:
+- - SNIPER RIFLE (Free! Hiding in a robbery)
+- - PLASMA PISTOL (Shoots lightning!!)
+- - REVOLVER (Free! Hiding in a robbery)
+- New Vehicle: CHIRON w/Interior! First person driving!
+- Added WEAPON SKINS! Press B while holding!
+- The Brulee, the Mighty, and the Steed vehicles have been retired; owners of these vehicles have received exclusive pinstripe decals for them.
+- Owners of the (retired) Bugatti have received 200,000$
+- Toggling gun camera now saves.
+- Changed the layout of some of the floors in the Jewelry Store.
+- Changed the layout of some of the floors in the Rising City Bank.
+- Removed the crosshair on the Taser.
+- Made windmills and some robbery lasers physics-based instead of moved by scripts. This makes them less likely to lag or glitch.
 
-# March 21st 2020 / BONUS UPDATE
+# March 21st 2020 / FLINTLOCK BONUS UPDATE
 
-- Flintlocks!
-- Donut weapon skins
-- Faster Chiron
+- New weapon: Flintlock.
+- Added the Donut Weapon Skin.
+- Buffed the Eclaire.
+- Patched the invisible glitch.
+- Added back the cross hair on the taser.
 - A bunch of small background improvements.
+- New code: "healthy" for 7,500$
 
-# April 4th 2020 / OCEANS LIVE EVENT + UPDATE
+# April 4th 2020 / OCEANS/SHIPS LIVE UPDATE
 
-- OCEANS, BEACHES, MOUNTAINS. Totally refreshed map!
+- Brand new map with oceans, beaches, mountains and more. Totally refreshed map!
 - NEW MAP LOCATIONS! Get exploring!
-- A NEW 3D CITY rises!
-- PIRATE SHIP. (1M$)
-- CRUISER BOAT. Seats TWO. (35K$)
+- Completely revamped the City, making buildings detailed and 3D.
+- New Vehicles added:
+- - Sloop (1M$)
+- - Cruiser (35K$)
+- Moved the spawn points of four vehicles:
+- - Ferrari
+- - Megalodon
+- - Ambulance
+- - Cybertruck
+- Revamped three apartment buildings, and removed the rest.
+- Moved the Water Tower to the top of a hill near the Mountainside Town.
+- Added several new tunnels.
+- Changed the way the menu screen pans over the City.
+- Changed the Town waterfall into a 2D moving texture, effectively patching the Jet Ski on land glitch.
+- Reduced lag by lowering the part count.
+- Players who have witnessed the 3 year live update has received the Live 2020 rims.
+- New soccer challenge reward: ShipWheel rims.
+- Added back the pinstripe decals to the Brulee, Mighty and Steed.
+- Majorly buffed the Eclaire, making it one of the best vehicles to purchase now.
+- The Camaro no longer spawns at the Criminal Lair, Replaced by a La Matador.
 - FUNCTIONING DRAWBRIDGE!
+- Removed An Easter Egg "Badimo's Photo Spot".
 - Use code "onehour" for 25,000 CASH!!
 
 # April 21st 2020 / JAILBREAK TURNS THREE!
@@ -929,22 +971,46 @@
 - Plus use code "threeyears" within the next 24 hours for 10,000 Cash.
 - We've also added back the April Fools character scaling for the day.
 
-# May 3rd 2020 / NUKES!
+# May 3rd 2020 / NUKES UPDATE
 
-- Nukes!
-- New island +more
+- Nukes have been added. Can be launched in the Military Base if players are level 50 on either team or bought for 20,000 robux
+- A new Bounty Island that has replaced the Military Base high security prison.
+- Two secrets have been added to the game.
+- - The first secret involves Piggy, a murderous anthropomorphic pig that spawns in the Sewers at 9:30 PM in game time. Getting killed by it awards the players the Piggy Rims.
+- - The second secret requires users to sail a Sloop or a Cruiser into the shipwreck in the new Island Prison while it's raining, which will transform the boat into a green, moldy, seaweed coated form.
+- The overall game GUI is heavily modified or completely revamped.
+- Seasons have been removed and levels are uncapped.
+- Missions have been removed.
+- There are now double-stacked containers on the Cargo Train.
+- Removed the snow on the Passenger Train, as well as new smoke effects, lights, and material.
+- Players ragdoll instead of going into pieces upon death.
+- Some areas now disable spawning vehicles.
+- Cargo Plane improvements.
+- Players can no longer reset to escape the Island Prison, unless they die in the lasers.
+- Players can no longer use the Jetpack inside the Jewelry Store, the Bank, and the Power Plant. As of June, this was added back.
+- The interior of the Eclaire can now be customized.
+- All vehicles (including aerial and watercraft) now has a reflection effect on the body (with the exception of Patrol, Dirtbike, and Dune Buggy)
+- Fall Chrome body color now reflects.
+- Mobile users now have access to the Minimap.
+- The Starter Pack has been removed.
 
 # May 17th 2020 / MINI-UPDATE
 
 - New "Atmosphere" from Roblox
 - Refreshed our thunderstorms with solid clouds and improved lightning.
 
-# June 6th 2020 / CARGO SHIP!
+# June 7th 2020 / CARGO SHIP UPDATE
 
-- Our newest robbery is HERE
-- CARGOSHIP. Grab containers using your helicopter and drop off at the criminal depot!
-- Grab empty vehicles with your helicopter rope!
-- Drop deadly crates on your friends!
+- A new robbery: the Cargo Ship! Grab containers using your helicopter and drop off at the criminal depot!
+- A new warehouse place to put the crates from the Cargo Ship for money.
+- A brand new vehicle: the Little Bird.
+- Tow empty vehicles using your helicopter rope!
+- The Helicopter Rope will be pulled up if the driver leaves the helicopter.
+- Removed 2020 live event replay option in the Control Tower.
+- First month of resetting levels.
+- Players can now use the Jetpack in the Rising City Bank again.
+- The Cargo Ship crates can ragdoll/kill players.
+- New code: "cargo" for 7,500 for 48 hours.
 
 # June 30th 2020 / 5 DAYS OF VEHICLES / DAY 1
 
@@ -965,63 +1031,127 @@
 # July 4th 2020 / 5 DAYS OF VEHICLES / DAY 5
 - Added the new and highly requested...Challenger!!! This muscle car is an american classic and recognized everywhere as the ultimate muscle coupe! Find it at the small town gun shop for 59,000 cash! ATM Code: 5Days
 
-# July 11th 2020 / MIDSUMMER UPDATE
+# July 12th 2020 / REVAMPED POWER PLANT UPDATE
 
 - Our revamped POWER PLANT is HERE! Deep underground, watch out for those pistons and that electrical beam!
+- Moved the Challenger spawn from the Town Gun Shop to the Power Plant, replacing the Camaro spawn at that location.
 - RETIRED the SUV and McLaren. Existing owners will be able to spawn them at any Garage or with their Garage Gamepass.
+- Nerfed the Jetpack so players cannot use the Jetpack whilst being tased and the taser will bring them down if they are in the sky.
+- Levels have been reset.
 - FIVE new vehicles!
+- Owners Of the retired SUV received 100,000$ to help buy the Surus.
 
-# August 2nd 2020 / NEW UPDATE
+# August 2nd 2020 / BLADE UPDATE
 
-- RADIO STATIONS!
+- The Radio is revamped, allowing the use of stations and the ability to create custom ones.
 - Listen to your music anywhere!
-- HELI LIGHT UPGRADES! Added Heli Spotlights.
-- NEW 1M BLADE Air Vehicle!
-- WINDOW TINT
+- Helicopter spotlights are added, slowing criminals down if caught in one.
+- A new 1M vehicle Blade was added.
+- Confetti inside the 1M Dealership to celebrate the Blade.
+- Removed an ATM in the Gas Station
+- Removed the glow of the Radiant Yellow color..
+- The lighting was improved which caused some minor changes in buildings.
+- Tinted window vehicle customization is added.
+- Removed one of the exits in the Sewers.
 
-# September 5th 2020 / BALANCE UPDATE
+# September 6th 2020 / BALANCE UPDATE
 
-- A toooooon of this update was based on your feedback.
+- A toooooon of this update was based on your feedback!
 - Cheaper vehicles for everybody to own
-- A huge list of balancing changes to keep gameplay between teams fair
 - Better Police pay.
-- NEW Ray car!
-- NEW Deja car!
+Two new vehicles were added: 
+- - Deja
+- - Ray
+- Many new balances, such as Jetpack nerfs, team balancing, and more.
+- New code "Balance", rewarding 6,000$
+- Added in a new special spaceship vehicle Lia for @L_iiaa for reaching 1B cash in Jailbreak.
+- New 4B rims.
+- Changed some of the UI such as the cash GUI for some robberies and the parachute/skydiving UI.
+- Increased the price of SWAT game pass from 300 R$ to 350 R$
+- Pistol and shotgun shoot full-auto for mobile players.
+- Fixed some bugs and glitches.
+- Levels are reset.
 
-# October 4th 2020 / FROM THE ASHES
+# September 29th 2020 / VOLCANO ERUPTION UPDATE / PART 1
 
-- ALL NEW TOWN! With a new layout and a few homes with interiors!
+- The Volcano Criminal Base erupted, causing the town to become full of lava.
+- The Volcano Criminal Base became made out of lava rock. The center of the Volcano also filled up with lava.
+- The town was destroyed. Added rivers of lava, and almost all of the the grassy areas are gone. Part of the Mountainside Town Gas Station are collapsed, but you could can still purchase rocket fuel from that location.
+
+# October 4th 2020 / VOLCANO ERUPTION UPDATE / PART 2
+
+- An all new Mountainside Town, featuring a new layout and a few homes with interiors.
+- A new garage beside the Donut Shop.
+- Some houses received an interior.
+- New tunnel that leads to nowhere but will likely be part of a future map expansion.
+- New roads added.
+- New bridge and river.
+- Revamped the Volcano Criminal Base.
+- Added the smoke on the Volcano Criminal Base.	
 - NEW MOLTEN M12 VEHICLE. LIMITED.
 - UPGRADED VOLCANO BASE!
 - POLICE GARAGE at the Prison! Plus Prison improvements!
-- BIGGER SERVERS! + important bug fixes!
+- Removed the Visitors Building.
+- Increased maximum players up to 32 players.
+- New code: "Molten" rewarding 10,000$. Lasts for 36 hours.
+- Several car spawn points added/moved.
+- Minor detail changes.
+- Changes of the minimap, Power Plant, Mountainside Town, and the Volcano Criminal Base.
+- Last month of resetting levels.
+- Some geography changes.
+- Revamped Prison such as adding footprints and arrows to show where Prisoners can escape prison.
+- Patched some of the Prison Escape Glitches, such as non-collideable umbrellas and an invisible wall behind the electric gate escape.
+- Added a new map decoration: Pine Trees.
+- Replaced the exploding wall’s white 'X' marker with a Red 'X' in the Prison.
+- Removed a door that was originally next to the most wanted board in the Prison.
+- Added a Gamepasses Tab in the Store GUI.
 
 # October 23rd 2020 / FALL MAP
 
 - Our 2020 Fall Map is LIVE
 
-# November 8th 2020 / FALL UPDATE
+# November 8th 2020 / FALL  2020 UPDATE
 
-- NEW 1M Drone
-- NEW Boxer Convertible
-- A ton of great UI changes in your Duffel Bag, Gun Shops, and Mobile Garage.
-- Don't own Premium Garage? Try clicking that Garage button! Free players gain access to spawn the Camaro and Jeep (but saves/customization on the go remain locked)
+- Added two new vehicles:
+- - Drone
+- - Boxer
+- Retired the Posh.
+- New Gun Shop Menus.
+- Added Duffel Tiers, from tier 2 to 4.
+- Changes in the Minimap.
+- Don't own Premium Garage? Try clicking that Garage button! Free players gain access to spawn the Camaro, Pickup and Jeep (but saves/customization on the go remain locked)
+- Re-ordered the spawn vehicles in the Mobile Garage, with the cheapest vehicle at the beginning of the slot.
+- Minor change to the spawn vehicles.
+- Sniper Rifle can now be found at Gun Shops the and Military Base War Room, costing 50,000$, and locked at level 10. The Sniper Rifle no longer spawns in the Bank.
+- Revolver can now be found at Gun Shops the and Military Base War Room, costing 10,000$. The Revolver no longer spawns in the Museum.
+- The Sword, Flintlock, Forcefield Gun, and Plasma Pistol are also available at the Gun Shops and the Military Base War Room. Their previous spawn points have been removed.
+- Added a tutorial on how to escape the prison.
+- Uzi damage per shot nerfed to 6 damage.
+- Unobtainable vehicles do not appear in the garage unless they are owned by the player.
 
-# December 20th 2020 / WINTER UPDATE 2020!!
+# December 20th 2020 / WINTER 2020 UPDATE
 
-
-- CASH TRUCK ROBBERY! A thrilling race between criminals and police.
+- Added a new fresh winter map.
+- Added two new vehicles: 
+- - Delorean
+- - Beam Hybrid
+- Moved the Challenger spawn from the Power Plant to the Mountainside Town Gun Shop.
+- BANK TRUCK ROBBERY! A thrilling race between criminals and police.
 - SEASONS + MISSIONS RETURN! Complete contracts to earn xp to level up and earn items!
 - C4 EXPLOSIVES! Blow up LITERALLY ANYTHING. Ragdoll players, send cars flying, etc. AND MUCH MORE!
+- Changes in the Minimap.
+- Removed the RB Battles Studio and anything related to the RB Battles Event.
+- Removed all of the Hot Air Balloons.
+- Added the Bank Heist Bag.
 
 # December 24th 2020 / PATCH UPDATE
 
 - New robbery was 6k by accident. Upping to 11k if alone.
-- Collect more by re-entering Truck.
-- Police alerts when truck is ready.
-- Boss alerts when truck is leaving.
+- Collect more by re-entering Bank Truck.
+- Police alerts when Bank Truck is ready.
+- Boss alerts when Bank Truck is leaving.
 - Better season discovery.
-- Better truck markers/visualizers.
+- Better Bank Truck markers/visualizers.
 - More odds and ends!
 
 # February 6th 2021 / ADOPT A DOG!
