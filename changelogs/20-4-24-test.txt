@@ -881,46 +881,88 @@
 - Patched the Donut spamming bug that allowed players to restore all health.
 - The ragdoll time was decreased from 4 seconds to 2 seconds.
 
-# January 5th 2020 / HAPPY 2020!!!
+# January 5th 2020 / CYBERTRUCK UPDATE
 
-- Cybertruck! Cracked glass not included! Bring your own steel ball.
+- Reverted most winter-themed map decorations.
+- - Icebergs melted and became smaller, but were not completely removed.
+- New Vehicle: Cybertruck! Cracked glass not included! Bring your own steel ball.
 - Tire spike traps! Watch out criminals! Thanks for requesting this one <3
 - Epic Grass from the epic Roblox team. It's bootiful.
-- Added a couple jetpack no fly zones
-- We're giving police a bigger paycheck
-- Made that pesky blue bank floor less spawny
+- Added a couple jetpack no-fly zones to the to the Museum and Prison.
+- Police now receive double the amount of cash for arrests and paychecks.
+- Made increases to certain ways that criminals get bounties.
+- Made that pesky blue bank floor less spawny.
+- The top of the crater of the Volcano has been blown off.
+- Players can now press 'v' to toggle weapon aiming to point and click. This is only available for PC users.
+- Players can no longer escape the Cargo Plane by clipping out of the rear door without a keycard.
 
-# February 1st 2020 /  BEAUTIFUL WORLD...
+# February 1st 2020 /  HD/JETSKI RACING UPDATE
 
+- Added new lighting with Future Is Bright: Phase 2.
+- Improved rain weather by adding new three-dimensional clouds and more realistic raindrop effects.
+- Changed the body material of vehicles to metal to make them more reflective.
 - NEW Bank floor! Intense hallway action with "Corridor"!
-- NEW Bank + Jewelry buildings! More glass cases to punch too!
+- Revamped the Rising City Bank and Jewelry Store buildings. More glass cases to punch too!
 - NEW Jetski Racing gamemode! We also fixed other gamemodes!
-- NEW Lighting with new rain, clouds, nights, reflections and more!
+- Fixed spectator mode glitches in the Battle Royale gamemode.
+- Restricted every vehicle except for the Camaro in the Alien Invasion gamemode.
+- New Robbery Location Icons to help new players find robberies.
+- New license plate design.
+- The Roadster's roof is now collidable.
 - Use the twitter code "feb2020" for 10,000 cash. Valid 24 hours only
 
-# March 8th 2020 / ITEMS & SKINS
+# March 8th 2020 / GUN SKINS UPDATE
 
-- SNIPER RIFLE (Free! Hiding in a robbery)
-- PLASMA PISTOL (Shoots lightning!!)
-- REVOLVER (Free! Hiding in a robbery)
-- CHIRON w/Interior! First person driving!
-- WEAPON SKINS! Press B while holding!
+- Three new weapons:
+- - SNIPER RIFLE (Free! Hiding in a robbery)
+- - PLASMA PISTOL (Shoots lightning!!)
+- - REVOLVER (Free! Hiding in a robbery)
+- New Vehicle: CHIRON w/Interior! First person driving!
+- Added WEAPON SKINS! Press B while holding!
+- The Brulee, the Mighty, and the Steed vehicles have been retired; owners of these vehicles have received exclusive pinstripe decals for them.
+- Owners of the (retired) Bugatti have received 200,000$
+- Toggling gun camera now saves.
+- Changed the layout of some of the floors in the Jewelry Store.
+- Changed the layout of some of the floors in the Rising City Bank.
+- Removed the crosshair on the Taser.
+- Made windmills and some robbery lasers physics-based instead of moved by scripts. This makes them less likely to lag or glitch.
 
-# March 21st 2020 / BONUS UPDATE
+# March 21st 2020 / FLINTLOCK BONUS UPDATE
 
-- Flintlocks!
-- Donut weapon skins
-- Faster Chiron
+- New weapon: Flintlock.
+- Added the Donut Weapon Skin.
+- Buffed the Eclaire.
+- Patched the invisible glitch.
+- Added back the cross hair on the taser.
 - A bunch of small background improvements.
+- New code: "healthy" for 7,500$
 
-# April 4th 2020 / OCEANS LIVE EVENT + UPDATE
+# April 4th 2020 / OCEANS/SHIPS LIVE UPDATE
 
-- OCEANS, BEACHES, MOUNTAINS. Totally refreshed map!
+- Brand new map with oceans, beaches, mountains and more. Totally refreshed map!
 - NEW MAP LOCATIONS! Get exploring!
-- A NEW 3D CITY rises!
-- PIRATE SHIP. (1M$)
-- CRUISER BOAT. Seats TWO. (35K$)
+- Completely revamped the City, making buildings detailed and 3D.
+- New Vehicles added:
+- - Sloop (1M$)
+- - Cruiser (35K$)
+- Moved the spawn points of four vehicles:
+- - Ferrari
+- - Megalodon
+- - Ambulance
+- - Cybertruck
+- Revamped three apartment buildings, and removed the rest.
+- Moved the Water Tower to the top of a hill near the Mountainside Town.
+- Added several new tunnels.
+- Changed the way the menu screen pans over the City.
+- Changed the Town waterfall into a 2D moving texture, effectively patching the Jet Ski on land glitch.
+- Reduced lag by lowering the part count.
+- Players who have witnessed the 3 year live update has received the Live 2020 rims.
+- New soccer challenge reward: ShipWheel rims.
+- Added back the pinstripe decals to the Brulee, Mighty and Steed.
+- Majorly buffed the Eclaire, making it one of the best vehicles to purchase now.
+- The Camaro no longer spawns at the Criminal Lair, Replaced by a La Matador.
 - FUNCTIONING DRAWBRIDGE!
+- Removed An Easter Egg "Badimo's Photo Spot".
 - Use code "onehour" for 25,000 CASH!!
 
 # April 21st 2020 / JAILBREAK TURNS THREE!
@@ -929,22 +971,46 @@
 - Plus use code "threeyears" within the next 24 hours for 10,000 Cash.
 - We've also added back the April Fools character scaling for the day.
 
-# May 3rd 2020 / NUKES!
+# May 3rd 2020 / NUKES UPDATE
 
-- Nukes!
-- New island +more
+- Nukes have been added. Can be launched in the Military Base if players are level 50 on either team or bought for 20,000 robux
+- A new Bounty Island that has replaced the Military Base high security prison.
+- Two secrets have been added to the game.
+- - The first secret involves Piggy, a murderous anthropomorphic pig that spawns in the Sewers at 9:30 PM in game time. Getting killed by it awards the players the Piggy Rims.
+- - The second secret requires users to sail a Sloop or a Cruiser into the shipwreck in the new Island Prison while it's raining, which will transform the boat into a green, moldy, seaweed coated form.
+- The overall game GUI is heavily modified or completely revamped.
+- Seasons have been removed and levels are uncapped.
+- Missions have been removed.
+- There are now double-stacked containers on the Cargo Train.
+- Removed the snow on the Passenger Train, as well as new smoke effects, lights, and material.
+- Players ragdoll instead of going into pieces upon death.
+- Some areas now disable spawning vehicles.
+- Cargo Plane improvements.
+- Players can no longer reset to escape the Island Prison, unless they die in the lasers.
+- Players can no longer use the Jetpack inside the Jewelry Store, the Bank, and the Power Plant. As of June, this was added back.
+- The interior of the Eclaire can now be customized.
+- All vehicles (including aerial and watercraft) now has a reflection effect on the body (with the exception of Patrol, Dirtbike, and Dune Buggy)
+- Fall Chrome body color now reflects.
+- Mobile users now have access to the Minimap.
+- The Starter Pack has been removed.
 
 # May 17th 2020 / MINI-UPDATE
 
 - New "Atmosphere" from Roblox
 - Refreshed our thunderstorms with solid clouds and improved lightning.
 
-# June 6th 2020 / CARGO SHIP!
+# June 7th 2020 / CARGO SHIP UPDATE
 
-- Our newest robbery is HERE
-- CARGOSHIP. Grab containers using your helicopter and drop off at the criminal depot!
-- Grab empty vehicles with your helicopter rope!
-- Drop deadly crates on your friends!
+- A new robbery: the Cargo Ship! Grab containers using your helicopter and drop off at the criminal depot!
+- A new warehouse place to put the crates from the Cargo Ship for money.
+- A brand new vehicle: the Little Bird.
+- Tow empty vehicles using your helicopter rope!
+- The Helicopter Rope will be pulled up if the driver leaves the helicopter.
+- Removed 2020 live event replay option in the Control Tower.
+- First month of resetting levels.
+- Players can now use the Jetpack in the Rising City Bank again.
+- The Cargo Ship crates can ragdoll/kill players.
+- New code: "cargo" for 7,500 for 48 hours.
 
 # June 30th 2020 / 5 DAYS OF VEHICLES / DAY 1
 
@@ -965,97 +1031,188 @@
 # July 4th 2020 / 5 DAYS OF VEHICLES / DAY 5
 - Added the new and highly requested...Challenger!!! This muscle car is an american classic and recognized everywhere as the ultimate muscle coupe! Find it at the small town gun shop for 59,000 cash! ATM Code: 5Days
 
-# July 11th 2020 / MIDSUMMER UPDATE
+# July 12th 2020 / REVAMPED POWER PLANT UPDATE
 
 - Our revamped POWER PLANT is HERE! Deep underground, watch out for those pistons and that electrical beam!
+- Moved the Challenger spawn from the Town Gun Shop to the Power Plant, replacing the Camaro spawn at that location.
 - RETIRED the SUV and McLaren. Existing owners will be able to spawn them at any Garage or with their Garage Gamepass.
+- Nerfed the Jetpack so players cannot use the Jetpack whilst being tased and the taser will bring them down if they are in the sky.
+- Levels have been reset.
 - FIVE new vehicles!
+- Owners Of the retired SUV received 100,000$ to help buy the Surus.
 
-# August 2nd 2020 / NEW UPDATE
+# August 2nd 2020 / BLADE UPDATE
 
-- RADIO STATIONS!
+- The Radio is revamped, allowing the use of stations and the ability to create custom ones.
 - Listen to your music anywhere!
-- HELI LIGHT UPGRADES! Added Heli Spotlights.
-- NEW 1M BLADE Air Vehicle!
-- WINDOW TINT
+- Helicopter spotlights are added, slowing criminals down if caught in one.
+- A new 1M vehicle Blade was added.
+- Confetti inside the 1M Dealership to celebrate the Blade.
+- Removed an ATM in the Gas Station
+- Removed the glow of the Radiant Yellow color..
+- The lighting was improved which caused some minor changes in buildings.
+- Tinted window vehicle customization is added.
+- Removed one of the exits in the Sewers.
 
-# September 5th 2020 / BALANCE UPDATE
+# September 6th 2020 / BALANCE UPDATE
 
-- A toooooon of this update was based on your feedback.
+- A toooooon of this update was based on your feedback!
 - Cheaper vehicles for everybody to own
-- A huge list of balancing changes to keep gameplay between teams fair
 - Better Police pay.
-- NEW Ray car!
-- NEW Deja car!
+Two new vehicles were added: 
+- - Deja
+- - Ray
+- Many new balances, such as Jetpack nerfs, team balancing, and more.
+- New code "Balance", rewarding 6,000$
+- Added in a new special spaceship vehicle Lia for @L_iiaa for reaching 1B cash in Jailbreak.
+- New 4B rims.
+- Changed some of the UI such as the cash GUI for some robberies and the parachute/skydiving UI.
+- Increased the price of SWAT game pass from 300 R$ to 350 R$
+- Pistol and shotgun shoot full-auto for mobile players.
+- Fixed some bugs and glitches.
+- Levels are reset.
 
-# October 4th 2020 / FROM THE ASHES
+# September 29th 2020 / VOLCANO ERUPTION UPDATE / PART 1
 
-- ALL NEW TOWN! With a new layout and a few homes with interiors!
+- The Volcano Criminal Base erupted, causing the town to become full of lava.
+- The Volcano Criminal Base became made out of lava rock. The center of the Volcano also filled up with lava.
+- The town was destroyed. Added rivers of lava, and almost all of the the grassy areas are gone. Part of the Mountainside Town Gas Station are collapsed, but you could can still purchase rocket fuel from that location.
+
+# October 4th 2020 / VOLCANO ERUPTION UPDATE / PART 2
+
+- An all new Mountainside Town, featuring a new layout and a few homes with interiors.
+- A new garage beside the Donut Shop.
+- Some houses received an interior.
+- New tunnel that leads to nowhere but will likely be part of a future map expansion.
+- New roads added.
+- New bridge and river.
+- Revamped the Volcano Criminal Base.
+- Added the smoke on the Volcano Criminal Base.	
 - NEW MOLTEN M12 VEHICLE. LIMITED.
 - UPGRADED VOLCANO BASE!
 - POLICE GARAGE at the Prison! Plus Prison improvements!
-- BIGGER SERVERS! + important bug fixes!
+- Removed the Visitors Building.
+- Increased maximum players up to 32 players.
+- New code: "Molten" rewarding 10,000$. Lasts for 36 hours.
+- Several car spawn points added/moved.
+- Minor detail changes.
+- Changes of the minimap, Power Plant, Mountainside Town, and the Volcano Criminal Base.
+- Last month of resetting levels.
+- Some geography changes.
+- Revamped Prison such as adding footprints and arrows to show where Prisoners can escape prison.
+- Patched some of the Prison Escape Glitches, such as non-collideable umbrellas and an invisible wall behind the electric gate escape.
+- Added a new map decoration: Pine Trees.
+- Replaced the exploding wall’s white 'X' marker with a Red 'X' in the Prison.
+- Removed a door that was originally next to the most wanted board in the Prison.
+- Added a Gamepasses Tab in the Store GUI.
 
 # October 23rd 2020 / FALL MAP
 
 - Our 2020 Fall Map is LIVE
 
-# November 8th 2020 / FALL UPDATE
+# November 8th 2020 / FALL  2020 UPDATE
 
-- NEW 1M Drone
-- NEW Boxer Convertible
-- A ton of great UI changes in your Duffel Bag, Gun Shops, and Mobile Garage.
-- Don't own Premium Garage? Try clicking that Garage button! Free players gain access to spawn the Camaro and Jeep (but saves/customization on the go remain locked)
+- Added two new vehicles:
+- - Drone
+- - Boxer
+- Retired the Posh.
+- New Gun Shop Menus.
+- Added Duffel Tiers, from tier 2 to 4.
+- Changes in the Minimap.
+- Don't own Premium Garage? Try clicking that Garage button! Free players gain access to spawn the Camaro, Pickup and Jeep (but saves/customization on the go remain locked)
+- Re-ordered the spawn vehicles in the Mobile Garage, with the cheapest vehicle at the beginning of the slot.
+- Minor change to the spawn vehicles.
+- Sniper Rifle can now be found at Gun Shops the and Military Base War Room, costing 50,000$, and locked at level 10. The Sniper Rifle no longer spawns in the Bank.
+- Revolver can now be found at Gun Shops the and Military Base War Room, costing 10,000$. The Revolver no longer spawns in the Museum.
+- The Sword, Flintlock, Forcefield Gun, and Plasma Pistol are also available at the Gun Shops and the Military Base War Room. Their previous spawn points have been removed.
+- Added a tutorial on how to escape the prison.
+- Uzi damage per shot nerfed to 6 damage.
+- Unobtainable vehicles do not appear in the garage unless they are owned by the player.
 
-# December 20th 2020 / WINTER UPDATE 2020!!
+# December 20th 2020 / WINTER 2020 UPDATE
 
-
-- CASH TRUCK ROBBERY! A thrilling race between criminals and police.
+- Added a new fresh winter map.
+- Added two new vehicles: 
+- - Delorean
+- - Beam Hybrid
+- Moved the Challenger spawn from the Power Plant to the Mountainside Town Gun Shop.
+- BANK TRUCK ROBBERY! A thrilling race between criminals and police.
 - SEASONS + MISSIONS RETURN! Complete contracts to earn xp to level up and earn items!
 - C4 EXPLOSIVES! Blow up LITERALLY ANYTHING. Ragdoll players, send cars flying, etc. AND MUCH MORE!
+- Changes in the Minimap.
+- Removed the RB Battles Studio and anything related to the RB Battles Event.
+- Removed all of the Hot Air Balloons.
+- Added the Bank Heist Bag.
 
 # December 24th 2020 / PATCH UPDATE
 
 - New robbery was 6k by accident. Upping to 11k if alone.
-- Collect more by re-entering Truck.
-- Police alerts when truck is ready.
-- Boss alerts when truck is leaving.
+- Collect more by re-entering Bank Truck.
+- Police alerts when Bank Truck is ready.
+- Boss alerts when Bank Truck is leaving.
 - Better season discovery.
-- Better truck markers/visualizers.
+- Better Bank Truck markers/visualizers.
 - More odds and ends!
 
-# February 6th 2021 / ADOPT A DOG!
+# February 6th 2021 / DOGS/SEASON 2 UPDATE
 
 - Added TWO DOGS! Made by the wonderful @supernob12three
-- - POLICE DOG! Best when paired with a cop!
-- - BULLDOG! Best when paired with a criminal!
+- - German Shepherd! Best when paired with a cop!
+- - Bulldog! Best when paired with a criminal!
+- Added a new building: the Pet Shop.
+- Added the Spring Map.
 - SEASON 2! Out of this world! Added all new space themed prizes and new contracts!
-- Added SPRING MAP, and more!
+- 6 more Contracts (erroneously stated to be 7) as well as more Season improvements.
+-  Added a new vehicle: the Crew Capsule.
+- Changes in the Minimap.
+- Removed the Piggy Crossover.
+- Added retired pinstripe decals to the SUV, the Megalodon and the Posh.
+- Gave the Roadster and Cybertruck an interior.
+- The color of Train Station 1 was changed from blue to red.
+- Patched several glitches and bugs.
+- The Beam Hybrid is no longer buyable.
 - Use code "DOGGO" for 7,500 cash!
 
-# March 6th 2021 / MID-SEASON UPDATE!
+# March 6th 2021 / MID-SEASON UPDATE
 
-- All new LAMBO! FREE upgrade for all existing owners!
-- SMOKE GRENADES!
-- AIRTAIL! Quick 3 seater supercar at the airport! 
-- Upgraded robbery markers! Boss Gamepass owners will find out about open locations up to a minute before other players!
+- The La Matador has been remodeled and given an interior. FREE upgrade for all existing owners!
+- Added new vehicle: AIRTAIL! Quick 3 seater supercar at the airport!
+- Added new item: SMOKE GRENADES!
+- Updated the robbery markers:
+- - Robbery icons will now be colored green and red if they are open or closed respectively.
+- - Non-owners of the BOSS gamepass will know about opened robberies a minute late.
+- - There is now a notification for the small stores.
+- - Robbery icons now show when a building is being robbed, repeatedly turning from green to white.
 - SWAT Pistol returns! Operate in silence with this pass exclusive item!
 - Weapons will no longer reload in the background, and have a slight delay on equipping, to combat gun spam!
 - Added anti-combat logging. Criminals who leave the game or switch teams will have their bounty go to the nearest police officer if they're within a close enough distance!
-- Shadow options in settings!
+- Added enabling/disabling shadows in settings.
+- Steering wheel now steers in first-person driving.
+- Players can now drop maximum 20,000$ cash at a time, an increase from 10,000$
+- Buffed the Crew Capsule in terms of speed and height.
+- The police paycheck now appears on the side of the screen, rather than the middle of the screen.
+- Some notable changes to the design of the Power Plant.
+- Slightly changed the Corridor Detonation area.
+- The screen no longer changes to black and white when players die.
+- Police now acquire 20 arrests for the Bank Truck robbery to open.
+- Added new code: "march2021", gives 5,000$
 
-# April 1st 2021 / MOONBREAK!
+# April 1st 2021 / MOONBREAK
 
 - Helmets for everybody!
 - Lower gravity for all! Including vehicles...
 - Planet themed sky!
 
-# April 3rd 2021 / LOOKING BACK!
+# April 3rd 2021 / SEASON 3 UPDATE
 
 - SEASON 3! "LOOKING BACK" with VOLT 4x4 Grand Prize!
-- HOMES & APARTMENTS! ALL new!
-- CREWS! Play with friends and earn extra!
+- Revamped Houses & Apartments, along with new furniture.
+- New crew feature: Crew members earn extra money from robbing. Play with friends and earn extra!
 - RAIDS. Police can break into apartments and access your Vault!
+- The Mighty returns as a Level 6 prize.
+- Old map, with orange skybox and old desert floor.
+- Sky Rings were removed.
+- The Crew Capsule is no longer buyable.
 
 # April 4th 2021 / IMPORTANT PATCHES
 
@@ -1081,21 +1238,40 @@
 - Slightly reduce E hold time on Raids.
 - Add a wait between Raids.
 
-# May 1st 2021 / MID-SEASON UPDATE!
+# May 1st 2021 / MID-SEASON UPDATE
 
-- THE AGENT! A spy car that shoots rockets! 7 Days only!!
+- A new vehicle: The Interrogator.
+- A new vehicle: THE AGENT! A spy car that shoots rockets! 7 Days only!!
 - INTERROGATOR! Affordable Police SUV!
-- PIT MANEUVERS! Watch out criminals!
-- New Soccer Ball reward: Bonded Wheels!
+- A new vehicle disabling feature is added: PIT maneuver.
+- New Soccer Ball reward: Bonded Wheels, which already come complimentary with the Agent.
 - 5B Visits Garage Spoiler! TY for getting us here!!
+- The colour of the skybox has been changed into a blue hue.
+- All vehicles in the Police Stations (excluding the Patrol) need to be hijacked in order to drive as a prisoner/criminal.
 
-# June 4th 2021 / THE GREAT TOMB UPDATE!
+# June 4th 2021 / THE GREAT TOMB/SEASON 4 UPDATE
 
 - NEW TOMB ROBBERY!
+- Players who successfully robbed the Tomb for the first time will receive a special spoiler.
 - SEASON 4! EPIC ADVENTURES!
+- New Level 10 vehicle: The Rattler.
 - The MILITARY BASE has MOVED with all new features!
-- An all new building! POLICE HQ
-- All new destructive physics!
+- New Nuke skin: Radiant Orange.
+- Rising City Bank and Jewelry Store layouts slightly nerfed.
+- Slightly new lighting.
+- Retired the Dune Buggy.
+- The Volt 4X4 is no longer purchasable.
+- Countdown timer removed.
+- Made the gems in the Jewelry Store Neon colored as well as the boxes that you punch.
+- Changed a strip from orange to red on one of the Jewelry stores top floors.
+- Changed the Season Hypezone so it is patterned with tiles.
+- Removed one of the collector locations at the Volcano Criminal Base.
+- Made some aspects of the volcano base neon colored.
+- The color of the Train Station was changed from red to orange.
+- Removed part of the Fire Station.
+- Moved the Delorean's license plate up from the bumper to in between the taillights.
+- Removed some lasers in Bank floors such as Corridor and Floor: Deductions.
+- Moved one of the Museum spotlights higher.
 
 # June 25th 2021 / PATCH UPDATE
 - Fixed train physics.
@@ -1104,27 +1280,58 @@
 
 # July 2nd 2021 / SENTINEL UPDATE
 
-- Added all new VOLT by TommyIsDaBoss!
+- Added all new VOLT by @TommyIsDaBoss! With its glitches being removed.
+- Buffed the Volt in acceleration and top speed.
+- An all new building! POLICE HQ
 - Added the SENTINEL. Made by community member @Ickleon37!
-- FIFTEEN! new contracts!
+- Added 13 new contracts.
 - Police Markers! Find your teammates!
 - We've reworked (and upped!) Robbery Bounties!
 - "Quiet Alarm" setting!
 - Army Heli missiles have been nerfed!
 - Cargo ships will now appear half as often, but reward TWICE as much!
-- Dune Buggy is FIXED, and now appears at the water tower tomb exit!
+- The Dune Buggy was re-added, with its infamous bug fixed. Now appears at the water tower tomb exit!
+- The Cargo Ship will now spawn half as often, but will reward twice as much.
+- The Black Hawk missiles were nerfed.
+- Bounties were upped.
+- Mini Police Station was removed.
+- Police no longer spawn at cells during Cell time.
+- The Helicopter spawn at the City Police Station was removed.
+- The Little Bird no longer spawns on top of the Rising City Bank.
+- Revert Season Pass price to 399 R$
+- Players can now destroy most of the decorations in the game, such as trees, road signs, etc.
 - Contract bug squashing + more!
 
 # July 12th 2021 / NERF GUNS!
 - We now have ROBLOX JAILBREAK NERF GUNS!
 - You get 2 per pack and redeeming the code gives you both weapons to wear on your character! Plus, you also get both weapons in with unique bullet trails!
 
-# August 7th 2021 / MEME SEASON!
-- NEW Season 5! MEME SEASON!
-- Home saving is HERE!
-- ENERGY DRINKS!
+# August 7th 2021 / MEME SEASON
+
+- Added Season 5: Let The Memes Begin.
+- Added the Banana Car and other seasonal rewards.
+- Revamped the Gas Station.
+- Updated the Season Hypezone.
+- Added many furniture items to the Houses & Apartments:
+- - Re-added the Confetti Gun and the VIP radio.
+- - Added home saving for Houses & Apartments.
+- - Added crews marker. Locate where your Crews are. (Toggle it on/off in the in-game Settings)
+- Added ENERGY DRINKS!
+- Added a new mascot for the Donut Shop.
+- Added interiors to the:
+- - Camaro
+- - Pickup
+- - Helicopter
+- - SWAT Van
+- - Celestial
+- The starting cash is 3,000$ when playing Jailbreak for the first time.
 - Working vending machines and Gun racks!
-- Additional garage save slots! and much much more!
+- The Garage menu now has five save slots, and ten for owners of the VIP Game pass.
+- Slightly nerfed the Flintlock and Uzi.
+- Nights are now darker than before.
+- Added a new code "memes" that gives 5,000$
+- The Rattler is no longer buyable.
+- Added Clouds phase 1.
 
 # August  31st 2021 / 5 DAYS OF VEHICLES / DAY 1
 
@@ -1227,23 +1434,41 @@
 - Fix: Recent season prizes are missing their "RARE" item plaque
 - Fix: Replaced retired vehicle stripes with a "CLASSIC" plaque
 
-# October 1st 2021 / FALL UPDATE!
+# October 1st 2021 / FALL UPDATE
 
-- Season 6 with additional prizes and easier contracts!
-- Global XP Leaderboards!
+- Season 6 with additional prizes and easier contracts! (this season only!)
+- Added Beignet vehicle and other seasonal rewards. (
+- Added seasonal global leaderboards.
+- Updated the Season Hypezone.
+- Adapted contract system.
+- Removed majority of the contracts and added three new contracts.
+- Levels are now uncapped. (this season only!)
+- Fall map added along with hot air balloons as well as new lighting.
 - Admin Commands in VIP Servers!
-- Item Dropping!! Finally!
+- Added item dropping feature.
 - 2021 Fall Map with improved lighting!
-- Additional prizes and uncapped levels this season only!
-- Use code "fall2021" for some cash in game
+- Slightly revamped the Prison cells area.
+- The Banana Car's spawn point is now removed and retired.
+- The Radiant Yellow color's glow has been added back.
+- Made the Water Tower neon orange to match the Fall theme.
+- Altered the Pet Shop building color to match the Fall theme as well as some other buildings.
+- Use code "fall2021" that gives 5,000$
 
-# November 5th 2021 / THE NASCAR UPDATE!
+# November 5th 2021 / THE NASCAR/MID-SEASON UPDATE
 
-- FREE NASCAR Vehicle in the City! (Limited Time)
+- The official Jailbreak X NASCAR Event.
+- Added two new vehicles:
+- -  NASCAR (Limited Time)
+- - NASCAR Free (Limited Time)
+- Revamped UI on PC and mobile.
+- Mobile UI buttons are now thumb-based and in a radial menu.
 - RACETRACK with lap counter and timer! (Limited Time)
-- 100k NASCAR with more power! (Limited Time)
-- New Bank Floor: The Basement!
-- Fresh NEW mobile controls!
+- The Museum Bag, Tomb gems and Cargo Plane crates are now considered items.
+- - The above items can now be dropped.
+- Vehicle Physics changed, most notably for helicopters.
+- Vehicle Camera now uses the latest Roblox vehicle camera.
+- Added a new Rising City Bank floor, The Basement.
+- Power Plant puzzle can now be only solved at the computer itself.
 
 # November 5th 2021 / PATCH UPDATE
 
@@ -1272,20 +1497,27 @@
 - Fix for cameras not following your vehicle.
 - Fix for Xbox aiming.
 
-# December 18th 2021 / 2021 WINTER UPDATE!
+# December 18th 2021 / WINTER 2021 UPDATE
 
-- TANKS!
-- SPEEDOMETERS! With mileage tracking per car!
+- Added Tank that spawns at Military Base.
+- Levels and leaderboards refreshed.
+- Revamped Rocket Fuel bar and license plate UI.
+- The Beignet's spawnpoint Is removed and retired.
+- Patched some glitches.
+- All vehicles (except planes and boats) now show SPEEDOMETER UI when you drive them.
 - SECURITY CAMERAS! With player tracking!
-- NEW Jewelry Store!
-- NEW Season 7!
+- The Jewelry Store received a major with 6 new randomized layouts.
+- Season 7: Ice cold started.
+- Added Icebreaker obtainable at level 10.
 - Better than ever winter themed map
+- Added security cameras.
+- - Police can track a criminal robbing something in any of the Police Stations.
 - Use code "WinterUpdate2021" for 5K cash! +much more
 
-# January 7th 2022 / THE MUSEUM UPDATE!
+# January 7th 2022 / THE MUSEUM REVAMP UPDATE
 
 - All new Museum with random puzzles!
-- T-Rex Rims! $50,000 Cash. 4-weeks only!
+- Added limited-time T-Rex rims.
 - Radiant Ice! The new Nuke server reward!
 - Dino-Bone Spoiler! A new soccer reward!
 - New admin-commands for VIP Servers
@@ -1297,59 +1529,88 @@
 - - Toggle Pit Maneuvers
 - - Disable Arresting (Hi Youtubers!)
 - Retired the Classic and the AirTail
-- All new game settings!
+- Revamped settings UI, with multiple new settings.
 - - All new design with room for infinite controls!
 - - Vehicle camera-type setting!
 - - Sliders for sound and music!
 - - Mobile server-command support!
+- The Boxer now has another spawn, located on left side of the Museum.
+- Added SWAT Phone, which is used to view Security Cameras anywhere.
+- The Bonded rims, the NASCAR tire, and the Radiant Orange color are now unobtainable.
+- The Camaro no longer spawns at the Secret Agent Base. (replaced by La Matador)
+- Added code "Museum" redeemable for 5,000$, which lasts for one week.
+- Increased the price of the SWAT Gamepass from 350 R$ to 400 R$
 
 # January 8th 2022 / DATA ROLLBACK
 
 - Removed the Time command due to a serious money glitch that was being abused.
 - Players part of this paycheck glitch will have their saves rolled back. 
 
-# February 4th 2022 / SPRING UPDATE!
+# February 4th 2022 / SEASON 8 UPDATE
 
+- New spring themed map.
 - New Season 8 has begun! Welcome to the FUTURE.
-- New GARAGE! With Favs, Sorts + more!
+- Added the Celsior that can be obtained at level 10.
+- Levels and leaderboards refreshed.
+- The Icebreaker is now unobtainable and its spawn has been removed.
+- Revamped the Garage UI, with favorites, sorts and more.
+- Changed the Water Tower to a light green color to match the spring map.
 - New: The Badger! Find @ The Museum for 40k!
-- And our 2022 Spring Map with more color than ever!
+- Reduced spawn range by 20% from the opposing team.
+- Brighter map.
 
-# February 11th 2022 / NEW MCLAREN F1 EVENT!
+# February 11th 2022 / MCLAREN F1 UPDATE
 
+- The McLaren F1 Event has started.
 - Drive the new MCL36 for free for a limited time, or buy it to keep it forever!
-- Race on our new limited time racetrack in the desert!
-- Visit the McLaren Skyscraper to begin!
+- Added two new locations:
+- -  The McLaren F1 Racetrack
+- - The McLaren Skyscraper. (Both locations will be removed after the event.)
+- Fixed a bug preventing non-Premium garage gamepass owners from changing their vehicle license plate.
+- Changing vehicle license plate is now free.
 
 # EXPERIMENTAL FEATURE ALERT!
 
 ## Dev Note
 - We believe in giving players one chance to redeem themselves but if this *experimental feature* is abused, it will be removed. We may restrict future features from them as well. And if they're caught again: Banned forever. 1500 Robux gone.
 
-# March 5th 2022 / THE TOW TRUCK UPDATE!
+# March 5th 2022 / TOW TRUCK UPDATE
 
-- Tow trucks,
-- Waypoints,
-- Fullscreen Maps,
-- One-time unbans
+- Added the Tow Truck.
+- The Minimap can now be expanded.
+- - Waypoints can be added on the Minimap.
+- - Enlarged the player blips on the Minimap.
+- Added a one-time unban pass for 1500 R$
 - - Their items + vehicles will be reset, except season prizes.
 - - Their cash will be reset to $100,000.
 - - Cash drop disabled.
 - - Safes reset. No gifting.
 - - Cost: 1500 Robux.
-- and Custom Horns!
+- Horns can now be customized in the Garage.
+- Added code "TOW", redeemable for 10,000$
+- Added a small detail in the night, every now and then, you can see bullets flying through the sky, or meteors.
 
-# April 2nd 2022 / LIVE EVENT / A NEW JOURNEY!
+# April 2nd 2022 / 5 YEAR ANNIVERSARY LIVE UPDATE
 
-- 50% MORE MAP!
+- Map expanded by 50%, including Crater City, Crater City Airport, Racetrack and Casino and Night club.
 - ALL NEW ROADS to discover!
-- CASINO AND NIGHTCLUB!
-- CASINO ROBBERY!
-- REVAMPED LOCATIONS!
+- New Casino heist location.
+- Relocated the Power Plant.
+- Removed the Fire Station and Mountainside Town Garage (original).
+- Players that were part of 5 Year Anniversary Live Event received Live Glider Spoiler.
+- @badcc and @asimo3089 NPCs return to Donut Shop and Gas Station.
+- Revamped numerous existing Locations.
+- Completely revamped Volcano Criminal Base.
+- Moved Firetruck, Delorean and Ray 9 spawns.
+- The Rising City Bank's exterior is somewhat destroyed.
+- Renamed the International Airport to Bounty Bay Airport, and completely revamped it.
 
 # April 9th 2022 /  SEASON 9 + FEEDBACK UPDATE!
 
-- NEW Season 9!
+- Season 9: A New Journey has began.
+- Added the Jackrabbit that can be obtained at level 8.
+- Levels and leaderboards refreshed.
+- Redesigned the Season Hypezone.
 - Top 2% prize raised to Top 5%.
 - Easier existing contracts.
 - Quicker level progression.
@@ -1360,36 +1621,50 @@
 - Replay #1 @ 10am PST / 1pm EST
 - Replay #2 @ 5pm PST / 8pm EST
 
-# May 6th 2022 / MORE TO EXPLORE!
+# May 6th 2022 / FAST TRAVEL JETS UPDATE
 
-- FAST TRAVEL JETS! Book a private flight to quickly travel around the map!
-- New Bank and new Bank Vault: Upper Management!
-- New Crater City stores: 1M Store, Garage & Gun Store!
-- Damage direction indicators!
+- Added the Private Jet: a feature to travel between airports.
+- Redesigned the Rising City Bank.
+- - New Bank floor: Upper Management.
+- Moved the 1M Dealership to Crater City with a new look.
+- Added Crater City Gun Shop in Crater City.
+- Added Crater City Garage in Crater City.
+- Added Damage Directional indicators.
+- Added 2 new Stallion spawns.
+- Buffed Stallion launch speed.
+- Fixed Jet innocent message bug.
 - Plus many other changes and improvements!
+- ATMs moved to E-prompts.
 - Use code "PrivateJet" for 10,000 cash!
 
-# June 4th 2022 / SEASON 10 UPDATE!
+# June 4th 2022 / SEASON 10 UPDATE
 
+- Added a new season: Season 10: Rich & Famous.
 - 10 New prizes!
 - New Nuke prize!
 - New Level-4 Criminal Base!
 - All new Beach Town!
-- The 1M Store has returned to the nearby town!
+- Added a countdown near Ship in Beach Town.
+- The 1M Store has returned to the Mountainside Town.
+- New Radiant color: Radiant Green.
+- Ramp changes.
+- Moved the Tow Truck spawn to Beach Town.
+- Code "Season10" for 10,000$
 - Coming June 10th @ 5PM PST: The Trade Island Expansion!
 
-# June 10th 2022 / TRADE ISLAND UPDATE!
+# June 10th 2022 / TRADE ISLAND EXPANSION UPDATE
 
+- Added the Trading Island.
 - TRADE with players! Obtain rare vehicles!
 - - Cash is not available to trade.
 - - Previously banned players cannot trade.
 - - You cannot trade items for nothing in return. Your trade will be declined by the system.
 - - You CAN trade non-limited items.
 - Explore an all new expansion: The Trade Island!
-- This weekend only: Find the sail spoiler on the island and keep forever!
+- This weekend only: Find the Sail Wing spoiler on the island and keep forever!
 - Visit the TRADE PORT on your minimap to begin your journey!
 
-# July 1st 2022 / HYPERCHROME UPDATE!
+# July 2nd 2022 / HYPERCHROME UPDATE!
 
 - A major graphics update, all while also improving performance.
 - Added "New Monster Truck", a free upgrade with existing owners with updated performance, off roading, tires, and styling.
@@ -1400,8 +1675,9 @@
 - - HyperChromes! The rarest. Your first HyperChrome will be Level 1. Reach Level 5 through future rolls for even more shine!
 - - You also have a chance at earning bonus robbery cash or rocket fuel!
 - Added Trading VIP GamePass with animated trade tags, Trade Hub and Jailbreak menu buttons, custom chat text, and more.
-- Added "Snake" Vehicle for a limited time, with working air brake on the wing by @oof_ed1
+- Added the Snake for a limited time, with working air brake on the wing by @oof_ed1
 - Added new Police Siren with cleaner looks and greatly reduced part count. This could have helpful performance implications for full servers.
+- Added a code "HyperChrome" for 10,000$
 
 # Weapon balance, weapon fixes and new features!
 ## Weapons:
@@ -1542,7 +1818,7 @@
 -   Mobile/Console sensitivity sliders now function.
 -   Sensitivity for sniper and other weapons have been reduced for all platforms.
 
-# August 13th 2022 / TOYS AND COLLECTIBLES!
+# August 13th 2022 / TOYS AND COLLECTIBLES
 
 - Season 11: Toys & Collectibles! All new free prizes and 2 vehicles to win!
 - New SAFES! Your old safes have been converted to equal value!
@@ -1560,27 +1836,33 @@
 - Increased cash rewards for Safe duplicates!
 - To those of you who have already opened safes, we've given you a free Legendary Spoiler in your inventory!
 
-# September 10th 2022 / THE NPC UPDATE!
+# September 10th 2022 / NPC UPDATE
 
 - Battle bandits with the new AIRDROP system and earn bigger rewards!
 - NEW Cargo Train Boxcars! Four types!
 - 9 NEW Safe Prizes to win!
 - Improved Performance, and new "Level of Detail" setting! Your performance improvement may vary depending on your machine.
-- Use code NPC for 9,999 cash! This weekend only!
+- Use code "NPC" for 9,999 cash! This weekend only!
+- Improved vehicle stability.
 
-# October 8th 2022 / FALL 2022 UPDATE!
+# October 8th 2022 / FALL 2022 / SEASON 12 UPDATE
 
 - The 2022 Fall Map! It's our biggest Fall yet and possibly our most beautiful! Enjoy this limited time map through October and November.
+- Added Season 12: Bring in the Military.
 - Airdrops now have additional polish!
 - - No longer spawn near player spawns or player concentrated areas.
 - - Patches for Forcefield/Ambulance metas.
-- - New drop plane by @_ShadowSamurai]
+- - New drop plane by @_ShadowSamurai
 - - Guards are now minimap displayed.
 - - Decreased difficulty in busy servers.
-- Fly our new jets with heat seeking missiles!
+- Revamped Jet with heat seeking missiles, A/D steering, and more.
 - Earn XP towards our Military themed Season 12!
-- Check out the all new Blackhawk helicopter!
+- Check out the all new Black Hawk helicopter!
 - "6 Billion Celebration Wing" in our Garages to celebrate 6 Billion Visits!
+- Retuned 50+ vehicles.
+- Added "Military Green" as a new color customization option for 5,000$
+- Updated team attire.
+- Revamped Taser and Handcuffs with new targeting effects and models.
 
 # October 19th 2022 / PATCH UPDATE
 
@@ -1683,60 +1965,83 @@
 - New Nitro Particles with better looking animated fire.
 - Removed floating gate bar at Military Base entrance.
 
-# December 17th 2022 / THE '22 WINTER UPDATE!
+# December 16th 2022 / 2022 WINTER UPDATE
 
 - Battle THE CEO in our first ever Boss Battle! You'll need an invite from an airdrop raid first! Major shoutout to @supernob12three for creating and animating The CEO.
-- NEW Lvl 4 Police Base.
-- Season 13, Radiant Purple, and much much more!
-- TWO vehicles: THE CROWN & FINAL PHASE both made by @JBDelorean 
-- "Winter22" for 12,000 cash :)
+- Added Mansion location in Coastline Forest.
+- NEW Lvl 4 Police Base underneath the Military Base.
+- Added Season 13: Super Villainous.
+- Added Bandit vehicle.
+- Added Radiant Purple color.
+- TWO vehicles: CROWN & ESCAPE BOT both made by @JBDelorean 
+- New ATM code: "Winter22" for 12,000$
+- Robbery Bonus Roll now displays hyperchrome percentage.
 
-# December 23rd 2022 / RB BATTLES UPDATE!
+# December 23rd 2022 / RB BATTLES UPDATE
 
 - Race through Jailbreak, find @RobloxBattles Headquarters, and race through the floors to reach the rooftop for the badge!
 
-# January 6th 2023 / MINI UPDATE!
+# January 7th 2023 / MINI UPDATE
 
-- All new garage paints - darkest paints.
-- Added the ability for the police to fight the all new boss battle!
-- Added a new meteor magnet prize!
+- Added 5 new dark paints.
+- Police officers can now battle the CEO in the Mansion.
+- Added new CEO prize. (Meteor Magnet spoiler)
 - You now keep your mansion robbery invite until you BEAT the boss! So if you die early, you can re-try again when it opens instead of battling air drop guards again.
+- Removed RB Battles integration.
 
-
-# February 11th 2023 / SEASON 14!
+# February 11th 2023 / SEASON 14 UPDATE
 
 - Season 14: For the Champions! Compete for sports themed prizes!
 - Enjoy a greener world w/Spring!
-
+- Added Proto-08 vehicle.
+- Added ATM code"spring23" for 12,500$
 # February 17th 2023 / PARISIAN EXP-1
 
-- The very exciting (and limited!) Parisian Exp-1 by @Zewo_Tsu is OUT!
+# February 17th 2023 / PARISIAN EXP-1 UPDATE
 
-# March 4th 2023 / CREW BATTLES
+- Added limited Parisian vehicle @Zewo_Tsu
+- Repaired minor bugs.
 
+# March 4th 2023 / CREW BATTLES UPDATE
+
+- Revamped Crews.
 - New Crews & CREW BATTLES with competitive ranking and matchmaking! Be sure to click Enter Matchmaking!
 - TAKEOVERS! The top Crew will takeover the city! Buildings will shine their crew color with their flag.
-- New garage suspension items, new horns, and a new soccer bonus reward along with gameplay balancing!
+- Added 10 new horns.
+- Added "Monster" & "Slammed" suspension heights.
+- New Soccer Ball Challenge reward: EXP-1 Rims.
+- Removed lasers from Cargo Train.
+- Revamped Power Plant & Jewelry Store exits.
+- Added highway signage around the map to help players get around.
 - Use code “twittercrews” for a free invite code! First 1,000 only!
 
-# March 10th 2023 / NASCAR EVENT!
+# March 10th 2023 / NASCAR UPDATE EVENT
 
-- @NASCAR returns to Jailbreak on @Roblox to celebrate 75 years!
+- NASCAR returns to Jailbreak on @Roblox to celebrate 75 years!
 - New Limited #75 Racecar w/engine startup & wide-body!
 - NEW portal to the new NASCAR Speed Hub on @Roblox
-- Next-level track & New items!
-- New SEMI by @Ickleon37 w/Limited NASCAR wrap!
+- Added NASCAR Racetrack.
+- Added NASCAR Skyscraper.
+- New SEMI by @Ickleon37
+- Added NASCAR avatar items and cosmetics.
+- Added Daytona Rims
+- Added Limited NASCAR texture for the Semi and quest required to obtain it.
+- Added Crews Beta v1.1 changes
 
-# April 7th 2023 / SEASON 15!
+# April 7th 2023 / SEASON 15 UPDATE
 
+- Added Season 15: Drift To Japan.
 - 10 Japanese themed season prizes! Earn them today!
-- Crew-Battles-2.0! Open now to all players with prizes and new features! Enter matchmaking today!
+- Added Shogun Vehicle.
+- Added Crew Battles v2.0 changes. Open now to all players with prizes and new features! Enter matchmaking today!
 - - A "Blue Fire" Drift to all who touch #1 on the leaderboard!
 - - A "Gradient Pixel" to those in Top 50 when leaderboards reset next month!
 - New and exclusive DRIFTS in Garages! Show off in speed and style.
 - StreamingEnabled! Enabling better performance for weaker devices with automatic LOD & more!
 - New SHORES! Drive out of the water onto land smoothly!
-- New paint option & more!
+- Added spawn for Semi Vehicle.
+- New paint option
+- Implemented miscellaneous map changes.
 
 ## Crew Battles v2.0:
 - Removed invite requirement
@@ -1765,46 +2070,76 @@
 - Fixed a bug that allowed players to rob the same robberies again.
 - Fixed a bug that incorrectly stated who was offline. This also prevented some matchmaking from happening.
 
-# April 29th 2023 /  DREAM HOMES!
+# April 29th 2023 /  DREAM HOMES UPDATE
 
 - NEW Dream Homes! With new UI, furniture regen, & better crew support.
 - NEW Home Customization! Choose flooring, paint, and more!
 - - NEW Rising City Penthouse!
-- - Desert Hideout Home!
-- - The Beach House!
 - - Crater City Penthouse!
-- - The RETURN of Vehicle Displays!!
+- - Desert Hideout Home by Military Base
+- - Modern Town Home in Mountainside Town
+- - The Beach House in Beach Town
+-  The RETURN of Vehicle Displays!!
 - NEW Vaults! Earn more & protect your home vault from raids!
 - NEW Crew Tower with upgrades for crews! Plus a leaderboard reset!
 - NEW Vehicle Skins in Garages, made by @Ickleon!
 - - Patchy Jeans
 - - Desert Camo
 - - Deep Purple Flame
+- Revamped Crew tower and added an interior.
+- Added billboards showing what crews have people currently in the server in them near the bounty board in the Prison and in the Crew Tower.
+- Renting is replaced with buying.
+- Removed Confetti Gun.
+- Removed all previous houses and apartments.	
+- Moved the Desert Crawler spawn point.
+- Removed one Deja spawn point.
 - Use code "DreamHome" for 10k cash!
 
-# June 2nd 2023 / PRISON UPDATE!
+# May 29th 2023 / JAILBREAK ATTACKED UPDATE
+
+- The Prison sustained major damages.
+- The Police HQ was destroyed.
+- Infrastructure nearby was affected.
+- Between May 29, 2023 and June 2, 2023 the rubble of the Police HQ crumbled noticeably more.
+
+# June 2nd 2023 / PRISON UPDATE
 
 - NEW PRISON with new locations, new escapes, and new features!
-- NEW Roll Action (Beta)! Try it out!
+- NEW Rolling (BETA) feature.
+- Removed Police HQ.
+- Re-added the Visitors Building.
 - 3 New Vehicle Skins made by @Ickleon!
-- 30+ New Furniture items made by the community! Plus, bigger furniture placement limits!
-- Use code "Summer23" for a free $10,000 cash!
+- 30+ New Furniture items made by Community Creators.
+- Increased furniture placement limit from 64 to 192.
+- Added Rusty NPCs.
+- Added wind animations to grass.
+- Free mobile garage now allows spawning of vehicles up to 100,000$ (previously16,000$)
+- Patched Helicopter, Little Bird, Black Hawk, UFO and Escape Bot rope no-clip glitch.
+- Moved Surus spawn from Prison Garage to Modern Town Home.
+- Relocated one Little Bird spawn from Police HQ to Prison.
+- Removed Little Bird hijack prompt on top of the Rising City Bank.
+- Moved the Camaro spawn from outside of the prison gates to inside the parking lot.
+- Re-added Helicopter spawn on top of the Rising City Police Station.
+- Use code "Summer23" for a free 10,000 cash!
 
-# June 9th 2023 / SEASON 16!
+# June 9th 2023 / SEASON 16 UPDATE
 
-- Season 16 is here on with Summer themed prizes
+- Added Season 16: Summer Beach Party
+- Added Poseidon vehicle.
 - New Nuke Reward: Radiant Red!
 
-# July 7th 2023 / Version-1186 / THE PRISON B
-- New Rocket Launchers support aerial vehicle locking with guided rockets.
+# July 7th 2023 / Version-1186 / PRISON BUS UPDATE
+
+- Added Prison Bus vehicle for 150,000$
+- New Rocket Launchers support aerial vehicle locking with guided rockets to shoot down aerial vehicles.
 - Added 6 new ambient sounds around the world including Beach, Port, City, Cave, Office, and Desert.
 - Added 5 free save slots and 5 VIP save slots to Garages.
 - Added confirmation to delete a save slot.
 - Added purchasing of vehicles to the Garage UI. Purchasing a vehicle greater than $100,000 prompts the Pro Garage Gamepass. 
 - Garages no longer close when purchasing items.
-- Added 6 new items by Zewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
+- Added 6 new items by @cZewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
 - Added 5 new items by D4EAMER. [VFX Rim, RX-1 Rim, SPACE-R Rim, Catch Me! Wing, Trouble! Wing]
-- Added new Confetti-Cannon furniture by Poogah.
+- Added new Confetti-Cannon furniture by @Poogah.
 - Added “Like the Game” UI for players who earn 100k+ cash.
 - Added magnitude check on normal sized doors to combat door exploits.
 - Added cooldown to breakouts.
@@ -1832,7 +2167,7 @@
 - Fixed an issue with double space sending jetpacks infinitely upwards. 
 - Fixed an error related to DefaultActions.
 
-# August 4, 2023 / Version-1205:
+# August 4th 2023 / Version-1205 / SEASON 17 UPDATE
 
 - New Season System with universally shared contracts and timers. 
 - - Refreshed portions of the Season UI for a fresh but familiar user experience.
@@ -1869,7 +2204,7 @@
 - Fixed Conch Shell Wing particles.
 - Updated Minimap.
 
-# September 1, 2023 / Version-1225:
+# September 1st 2023 / Version-1225 / RETURN OF BATTLE ROYALE UPDATE
 
 - Added Battle Royale with new storm, new weapon variety, vehicle ban support, weapon shop bans, vending machine and donut bans, a new holding lobby, and chat based round updates. 
 - Updated Tier 1 Safe contents.
@@ -1919,11 +2254,7 @@
 - Fixed an audio error within the Tomb.
 - Added "Barrier" around the PowerPlant to prevent terrain noclip tricks.
 
-# October 6, 2023 / Version-1237
-
-## Community Note
-
-> Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+# October 6th 2023 / Version-1237 / FALL 2023 UPDATE
 
 - New Season 18 with Wild West themed zone & prizes.
 - - Added: Native Wing, Windmill Wing, Wanted Backdrop, Bull Wing, Gunfire Rim, Tumbleweed Rim, Bandit Bandana Skin, Wagon Wheel, Wagon Furniture, and Longhorn Vehicle.
@@ -1979,12 +2310,9 @@
 - Fixed a problem where free vehicles might end up in a Garage Sale.
 - Fixed spoilers from incorrectly removing speed.
 
-# November 2, 2023 / Version-1241 / 5 Days - Day 1
+# November 2nd 2023 / Version-1241 / 5 DAYS OF VEHICLES / DAY 1
 
-## Community Note
-
-> Welcome! 5 Days of Vehicles 2023 has begun! Use code ~~***5days23***~~ for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Stunt Plane revamp with Machine Gun support.
 - Changed Stunt price from 200,000 to 300,000.
 - Replaced jet spawn at casino airport with Stunt.
@@ -2016,12 +2344,9 @@
 - Updated messaging for “Switch to Police” chat alert.
 - Raised Max Bounty to 20k.
 
-# November 3, 2023 / Version-1242 / 5 Days - Day 2
+# November 3rd 2023 / Version-1242 / 5 DAYS OF VEHICLES / DAY 2
 
-## Community Note
-
-> Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Laviolette Lowrider with Lowriding effects and sounds.
 - Added Mystic and Landmine Rims.
 - Added Nitro and Wingo Spoilers.
@@ -2048,12 +2373,9 @@
 - Filled a terrain gap under the tracks near the gas station.
 - Filled missing railings at Trade Hub Dragway.
 
-# November 6, 2023 / Version 1243 / 5 Days - Day 3
+# November 6th 2023 / Version 1243 / 5 DAYS OF VEHICLES / DAY 3
 
-## Community Note
-
-> After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code ***~~5days23~~*** for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Successor vehicle with startup sound and animated wing.
 - Added off-road path behind Bounty Bay Airport.
 - Added further reinforcing to the Museum entry to keep cars out.
@@ -2077,12 +2399,9 @@
 - Fixed an issue where banned players might not be teleported to the ban world.
 - Crew member markers are now hidden if the crew member is on the opposite team.
 
-# November 7, 2023 / Version 1245 / 5 Days - Day 4
+# November 7th 2023 / Version 1245 / 5 DAYS OF VEHICLES / DAY 4
 
-## Community Note
-
-> 5 Days of Vehicles 2023 - day 4 is here! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Eclaire revamp with functional doors and engine start.
 - Increased Eclaire price to 600,000.
 - Updated Successor tune with more high-end.
@@ -2111,12 +2430,9 @@
 - Jetpacks are now removed on Battle Royale start.
 - Dropped items in the map are now removed on Battle Royale start.
 
-# November 8, 2023 / Version 1246 / 5 Days - Day 5!
+# November 8th 2023 / Version 1246 / 5 DAYS OF VEHICLES / DAY 5
 
-## Community Note
-
-> Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added new Falcon S Sport Bike and Falcon Spawns.
 - New “Sport Bike” engine sound (Thank you Migue!)
 - - Revamped our Bike Chassis
@@ -2163,14 +2479,10 @@
 - Updated Streaming models to be made up of many small models instead of large building sized models. This should remove some FPS hiccups and possibly improve performance for slower machines. This could also reduce the possibility of entire buildings not loading in.
 - Updated 1,171 MeshParts to use Automatic LevelOfDetail instead of Precise. 627 came from Vehicle meshes, 28 Rims, 32 Spoilers, and 484 from the map. This may improve performance as these meshes are no longer rendered at highest quality when far away.
 
-# December 15, 2023 / Version 1253 / The Winter Update
-
-## Community Note
-
-> The winter update is finally here! Use code ***~~WINTER23~~*** for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# December 15th 2023 / Version 1253 / THE WINTER UPDATE
 ## New Robbery
 
+- Use code "5days23" for 10k cash!
 - Added Oil Rig Robbery.
 - New "Explosive Barrels" world item.
 - New support to pickup Barrels with Helicopters. 
@@ -2235,12 +2547,7 @@
 - Removed unused mansion code.
 - Updated Minimap.
 
-# December 22, 2023 / Version 1257 / One More Thing!
-
-## Community Note
-
-> This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have **5 Days** to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# December 22nd 2023 / Version 1257 / ONE MORE THING
 ## New Car
 
 - Added "Carbonara" limited vehicle. On sale for 5 days only! Offsale Dec 27th.
@@ -2267,12 +2574,7 @@
 - Fixed PlasmaPistol newly introduced damage issues.
 - Fixed an arrest avoidance bug with vehicles.
 
-# February 02, 2024 / Version 1271 / Season 20
-
-## Community Note
-
-> This marks the **first update of 2024!** This update brings in a brand new Season, the first Nissan GT-R in the game and more! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# February 2nd 2024 / Version 1271 / SEASON 20 UPDATE
 ## Season 20: Apocalypse
 
 - Added Season 20 and Season 20 Hype Zones
@@ -2335,11 +2637,7 @@
 - Fixed Plasma Pistol not registering player heads.
 - Cargo Ship now “closes” the robbery round just before leaving the map.
 
-# March 08, 2024 / Version 1295 / Apocalypse Part 2
-
-## Community Note
-> Hello one and all! Another Jailbreak update is upon us and there's a ton of changes that have been added! Remember to use code ***~~hammerhead~~*** for 12k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# March 8th 2024 / Version 1295 / APOCALYPSE PART 2 UPDATE
 ## Tier 3 Police Safe, V2
 
 - New Vehicle: Hammerhead. With custom physics. 
@@ -2421,14 +2719,9 @@
 - Fixed Radio playlists from not saving. 
 - Fixed a bug related to crosshair placement.
 - Fixed the Ray9 License Plate.
+- Use code "hammerhead" for 12k cash!
 
-# April 20, 2024 / Version 1327 / 2024 LIVE EVENT!
-
-## Community Note
-
-> Hey friends! Nice to see you again. We finally got the long-awaited LIVE EVENT! If you missed it, remember replays happen later today and tomorrow morning. Also, redeem code 7years for 14k cash! (valid this weekend only!) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted.The most recent Changelogs will always be pinned, so make sure to check back on the next update!  
-  
-
+# April 20th 2024 / Version 1327 / JAILBREAK REWIND
 ## Live Event  
 
 - New Plasma Shotgun weapon, found from nearby alien encounters.  
@@ -2444,7 +2737,7 @@
 ## OG Jailbreak   
 
 - OG Jailbreak has returned for a limited time! This required a ton of "surgery" as we modified purposely scrambled code and brought this game back to working order.   
-- New "Save The World" "Event" taking place now.   
+- New "Save The World Event" taking place now.   
 - - Cross server syncing of total cash earn.  
 - - Live progress board, find it in front of the prison.  
 - - New: OG Matador with original tune. Reward to everybody who participates. Keep forever and drive it in the modern game.  
@@ -2527,6 +2820,7 @@
 - New purple "OG" meteor.
 - New surface on PowerPlant Exterior.
 - OG Skybox and lighting.
+- Redeem code "7years" for 14k cash!
 
 ## Misc
 - New Soccerball reward: The Laser Wing
