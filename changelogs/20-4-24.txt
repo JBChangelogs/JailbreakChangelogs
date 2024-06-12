@@ -1981,48 +1981,67 @@ Two new vehicles were added:
 
 - Race through Jailbreak, find @RobloxBattles Headquarters, and race through the floors to reach the rooftop for the badge!
 
-# January 6th 2023 / MINI UPDATE!
+# January 7th 2023 / MINI UPDATE
 
-- All new garage paints - darkest paints.
-- Added the ability for the police to fight the all new boss battle!
-- Added a new meteor magnet prize!
+- Added 5 new dark paints.
+- Police officers can now battle the CEO in the Mansion.
+- Added new CEO prize. (Meteor Magnet spoiler)
 - You now keep your mansion robbery invite until you BEAT the boss! So if you die early, you can re-try again when it opens instead of battling air drop guards again.
+- Removed RB Battles integration.
 
-
-# February 11th 2023 / SEASON 14!
+# February 11th 2023 / SEASON 14 UPDATE
 
 - Season 14: For the Champions! Compete for sports themed prizes!
 - Enjoy a greener world w/Spring!
-
+- Added Proto-08 vehicle.
+- Added ATM code"spring23" for 12,500$
 # February 17th 2023 / PARISIAN EXP-1
 
-- The very exciting (and limited!) Parisian Exp-1 by @Zewo_Tsu is OUT!
+# February 17th 2023 / PARISIAN EXP-1 UPDATE
 
-# March 4th 2023 / CREW BATTLES
+- Added limited Parisian vehicle @Zewo_Tsu
+- Repaired minor bugs.
 
+# March 4th 2023 / CREW BATTLES UPDATE
+
+- Revamped Crews.
 - New Crews & CREW BATTLES with competitive ranking and matchmaking! Be sure to click Enter Matchmaking!
 - TAKEOVERS! The top Crew will takeover the city! Buildings will shine their crew color with their flag.
-- New garage suspension items, new horns, and a new soccer bonus reward along with gameplay balancing!
+- Added 10 new horns.
+- Added "Monster" & "Slammed" suspension heights.
+- New Soccer Ball Challenge reward: EXP-1 Rims.
+- Removed lasers from Cargo Train.
+- Revamped Power Plant & Jewelry Store exits.
+- Added highway signage around the map to help players get around.
 - Use code “twittercrews” for a free invite code! First 1,000 only!
 
-# March 10th 2023 / NASCAR EVENT!
+# March 10th 2023 / NASCAR UPDATE EVENT
 
-- @NASCAR returns to Jailbreak on @Roblox to celebrate 75 years!
+- NASCAR returns to Jailbreak on @Roblox to celebrate 75 years!
 - New Limited #75 Racecar w/engine startup & wide-body!
 - NEW portal to the new NASCAR Speed Hub on @Roblox
-- Next-level track & New items!
-- New SEMI by @Ickleon37 w/Limited NASCAR wrap!
+- Added NASCAR Racetrack.
+- Added NASCAR Skyscraper.
+- New SEMI by @Ickleon37
+- Added NASCAR avatar items and cosmetics.
+- Added Daytona Rims
+- Added Limited NASCAR texture for the Semi and quest required to obtain it.
+- Added Crews Beta v1.1 changes
 
-# April 7th 2023 / SEASON 15!
+# April 7th 2023 / SEASON 15 UPDATE
 
+- Added Season 15: Drift To Japan.
 - 10 Japanese themed season prizes! Earn them today!
-- Crew-Battles-2.0! Open now to all players with prizes and new features! Enter matchmaking today!
+- Added Shogun Vehicle.
+- Added Crew Battles v2.0 changes. Open now to all players with prizes and new features! Enter matchmaking today!
 - - A "Blue Fire" Drift to all who touch #1 on the leaderboard!
 - - A "Gradient Pixel" to those in Top 50 when leaderboards reset next month!
 - New and exclusive DRIFTS in Garages! Show off in speed and style.
 - StreamingEnabled! Enabling better performance for weaker devices with automatic LOD & more!
 - New SHORES! Drive out of the water onto land smoothly!
-- New paint option & more!
+- Added spawn for Semi Vehicle.
+- New paint option
+- Implemented miscellaneous map changes.
 
 ## Crew Battles v2.0:
 - Removed invite requirement
@@ -2051,46 +2070,76 @@ Two new vehicles were added:
 - Fixed a bug that allowed players to rob the same robberies again.
 - Fixed a bug that incorrectly stated who was offline. This also prevented some matchmaking from happening.
 
-# April 29th 2023 /  DREAM HOMES!
+# April 29th 2023 /  DREAM HOMES UPDATE
 
 - NEW Dream Homes! With new UI, furniture regen, & better crew support.
 - NEW Home Customization! Choose flooring, paint, and more!
 - - NEW Rising City Penthouse!
-- - Desert Hideout Home!
-- - The Beach House!
 - - Crater City Penthouse!
-- - The RETURN of Vehicle Displays!!
+- - Desert Hideout Home by Military Base
+- - Modern Town Home in Mountainside Town
+- - The Beach House in Beach Town
+-  The RETURN of Vehicle Displays!!
 - NEW Vaults! Earn more & protect your home vault from raids!
 - NEW Crew Tower with upgrades for crews! Plus a leaderboard reset!
 - NEW Vehicle Skins in Garages, made by @Ickleon!
 - - Patchy Jeans
 - - Desert Camo
 - - Deep Purple Flame
+- Revamped Crew tower and added an interior.
+- Added billboards showing what crews have people currently in the server in them near the bounty board in the Prison and in the Crew Tower.
+- Renting is replaced with buying.
+- Removed Confetti Gun.
+- Removed all previous houses and apartments.	
+- Moved the Desert Crawler spawn point.
+- Removed one Deja spawn point.
 - Use code "DreamHome" for 10k cash!
 
-# June 2nd 2023 / PRISON UPDATE!
+# May 29th 2023 / JAILBREAK ATTACKED UPDATE
+
+- The Prison sustained major damages.
+- The Police HQ was destroyed.
+- Infrastructure nearby was affected.
+- Between May 29, 2023 and June 2, 2023 the rubble of the Police HQ crumbled noticeably more.
+
+# June 2nd 2023 / PRISON UPDATE
 
 - NEW PRISON with new locations, new escapes, and new features!
-- NEW Roll Action (Beta)! Try it out!
+- NEW Rolling (BETA) feature.
+- Removed Police HQ.
+- Re-added the Visitors Building.
 - 3 New Vehicle Skins made by @Ickleon!
-- 30+ New Furniture items made by the community! Plus, bigger furniture placement limits!
-- Use code "Summer23" for a free $10,000 cash!
+- 30+ New Furniture items made by Community Creators.
+- Increased furniture placement limit from 64 to 192.
+- Added Rusty NPCs.
+- Added wind animations to grass.
+- Free mobile garage now allows spawning of vehicles up to 100,000$ (previously16,000$)
+- Patched Helicopter, Little Bird, Black Hawk, UFO and Escape Bot rope no-clip glitch.
+- Moved Surus spawn from Prison Garage to Modern Town Home.
+- Relocated one Little Bird spawn from Police HQ to Prison.
+- Removed Little Bird hijack prompt on top of the Rising City Bank.
+- Moved the Camaro spawn from outside of the prison gates to inside the parking lot.
+- Re-added Helicopter spawn on top of the Rising City Police Station.
+- Use code "Summer23" for a free 10,000 cash!
 
-# June 9th 2023 / SEASON 16!
+# June 9th 2023 / SEASON 16 UPDATE
 
-- Season 16 is here on with Summer themed prizes
+- Added Season 16: Summer Beach Party
+- Added Poseidon vehicle.
 - New Nuke Reward: Radiant Red!
 
-# July 7th 2023 / Version-1186 / THE PRISON B
-- New Rocket Launchers support aerial vehicle locking with guided rockets.
+# July 7th 2023 / Version-1186 / PRISON BUS UPDATE
+
+- Added Prison Bus vehicle for 150,000$
+- New Rocket Launchers support aerial vehicle locking with guided rockets to shoot down aerial vehicles.
 - Added 6 new ambient sounds around the world including Beach, Port, City, Cave, Office, and Desert.
 - Added 5 free save slots and 5 VIP save slots to Garages.
 - Added confirmation to delete a save slot.
 - Added purchasing of vehicles to the Garage UI. Purchasing a vehicle greater than $100,000 prompts the Pro Garage Gamepass. 
 - Garages no longer close when purchasing items.
-- Added 6 new items by Zewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
+- Added 6 new items by @cZewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
 - Added 5 new items by D4EAMER. [VFX Rim, RX-1 Rim, SPACE-R Rim, Catch Me! Wing, Trouble! Wing]
-- Added new Confetti-Cannon furniture by Poogah.
+- Added new Confetti-Cannon furniture by @Poogah.
 - Added “Like the Game” UI for players who earn 100k+ cash.
 - Added magnitude check on normal sized doors to combat door exploits.
 - Added cooldown to breakouts.
@@ -2118,7 +2167,7 @@ Two new vehicles were added:
 - Fixed an issue with double space sending jetpacks infinitely upwards. 
 - Fixed an error related to DefaultActions.
 
-# August 4, 2023 / Version-1205:
+# August 4th 2023 / Version-1205 / SEASON 17 UPDATE
 
 - New Season System with universally shared contracts and timers. 
 - - Refreshed portions of the Season UI for a fresh but familiar user experience.
@@ -2155,7 +2204,7 @@ Two new vehicles were added:
 - Fixed Conch Shell Wing particles.
 - Updated Minimap.
 
-# September 1, 2023 / Version-1225:
+# September 1st 2023 / Version-1225 / RETURN OF BATTLE ROYALE UPDATE
 
 - Added Battle Royale with new storm, new weapon variety, vehicle ban support, weapon shop bans, vending machine and donut bans, a new holding lobby, and chat based round updates. 
 - Updated Tier 1 Safe contents.
@@ -2205,11 +2254,7 @@ Two new vehicles were added:
 - Fixed an audio error within the Tomb.
 - Added "Barrier" around the PowerPlant to prevent terrain noclip tricks.
 
-# October 6, 2023 / Version-1237
-
-## Community Note
-
-> Hello everybody! We're introducing an important update to the sub. Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),  where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
+# October 6th 2023 / Version-1237 / FALL 2023 UPDATE
 
 - New Season 18 with Wild West themed zone & prizes.
 - - Added: Native Wing, Windmill Wing, Wanted Backdrop, Bull Wing, Gunfire Rim, Tumbleweed Rim, Bandit Bandana Skin, Wagon Wheel, Wagon Furniture, and Longhorn Vehicle.
@@ -2265,12 +2310,9 @@ Two new vehicles were added:
 - Fixed a problem where free vehicles might end up in a Garage Sale.
 - Fixed spoilers from incorrectly removing speed.
 
-# November 2, 2023 / Version-1241 / 5 Days - Day 1
+# November 2nd 2023 / Version-1241 / 5 DAYS OF VEHICLES / DAY 1
 
-## Community Note
-
-> Welcome! 5 Days of Vehicles 2023 has begun! Use code ~~***5days23***~~ for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Stunt Plane revamp with Machine Gun support.
 - Changed Stunt price from 200,000 to 300,000.
 - Replaced jet spawn at casino airport with Stunt.
@@ -2302,12 +2344,9 @@ Two new vehicles were added:
 - Updated messaging for “Switch to Police” chat alert.
 - Raised Max Bounty to 20k.
 
-# November 3, 2023 / Version-1242 / 5 Days - Day 2
+# November 3rd 2023 / Version-1242 / 5 DAYS OF VEHICLES / DAY 2
 
-## Community Note
-
-> Hello! 5 Days of Vehicles 2023 - day 2 is here! Use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Laviolette Lowrider with Lowriding effects and sounds.
 - Added Mystic and Landmine Rims.
 - Added Nitro and Wingo Spoilers.
@@ -2334,12 +2373,9 @@ Two new vehicles were added:
 - Filled a terrain gap under the tracks near the gas station.
 - Filled missing railings at Trade Hub Dragway.
 
-# November 6, 2023 / Version 1243 / 5 Days - Day 3
+# November 6th 2023 / Version 1243 / 5 DAYS OF VEHICLES / DAY 3
 
-## Community Note
-
-> After the long weekend, 5 Days of Vehicles 2023 - day 3 is here! Remember to use code ***~~5days23~~*** for 10k cash if you haven't already! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak),, where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Successor vehicle with startup sound and animated wing.
 - Added off-road path behind Bounty Bay Airport.
 - Added further reinforcing to the Museum entry to keep cars out.
@@ -2363,12 +2399,9 @@ Two new vehicles were added:
 - Fixed an issue where banned players might not be teleported to the ban world.
 - Crew member markers are now hidden if the crew member is on the opposite team.
 
-# November 7, 2023 / Version 1245 / 5 Days - Day 4
+# November 7th 2023 / Version 1245 / 5 DAYS OF VEHICLES / DAY 4
 
-## Community Note
-
-> 5 Days of Vehicles 2023 - day 4 is here! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added Eclaire revamp with functional doors and engine start.
 - Increased Eclaire price to 600,000.
 - Updated Successor tune with more high-end.
@@ -2397,12 +2430,9 @@ Two new vehicles were added:
 - Jetpacks are now removed on Battle Royale start.
 - Dropped items in the map are now removed on Battle Royale start.
 
-# November 8, 2023 / Version 1246 / 5 Days - Day 5!
+# November 8th 2023 / Version 1246 / 5 DAYS OF VEHICLES / DAY 5
 
-## Community Note
-
-> Today's update wraps up the 5 Days of Vehicles 2023 event! Remember to use code ***~~5days23~~*** for 10k cash! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+- Use code "5days23" for 10k cash!
 - Added new Falcon S Sport Bike and Falcon Spawns.
 - New “Sport Bike” engine sound (Thank you Migue!)
 - - Revamped our Bike Chassis
@@ -2449,14 +2479,10 @@ Two new vehicles were added:
 - Updated Streaming models to be made up of many small models instead of large building sized models. This should remove some FPS hiccups and possibly improve performance for slower machines. This could also reduce the possibility of entire buildings not loading in.
 - Updated 1,171 MeshParts to use Automatic LevelOfDetail instead of Precise. 627 came from Vehicle meshes, 28 Rims, 32 Spoilers, and 484 from the map. This may improve performance as these meshes are no longer rendered at highest quality when far away.
 
-# December 15, 2023 / Version 1253 / The Winter Update
-
-## Community Note
-
-> The winter update is finally here! Use code ***~~WINTER23~~*** for 12k cash! (valid this weekend only) Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# December 15th 2023 / Version 1253 / THE WINTER UPDATE
 ## New Robbery
 
+- Use code "5days23" for 10k cash!
 - Added Oil Rig Robbery.
 - New "Explosive Barrels" world item.
 - New support to pickup Barrels with Helicopters. 
@@ -2521,12 +2547,7 @@ Two new vehicles were added:
 - Removed unused mansion code.
 - Updated Minimap.
 
-# December 22, 2023 / Version 1257 / One More Thing!
-
-## Community Note
-
-> This update wraps it up for the year of 2023! The [LIMITED] Carbonara is available NOW and costs $800,000! You have **5 Days** to grab your own! Have you ever wished to stay informed about the specific details of each new update as they're released? Well, now you can! While the length of the logs may vary depending on the update, we'll share them as soon as they become available. This is especially helpful for those who may not actively follow the [official discord](https://discord.gg/jailbreak), where these updates are also posted. The most recent Changelogs will always be pinned so make sure to check back next update!
-
+# December 22nd 2023 / Version 1257 / ONE MORE THING
 ## New Car
 
 - Added "Carbonara" limited vehicle. On sale for 5 days only! Offsale Dec 27th.
