@@ -2574,7 +2574,7 @@ Two new vehicles were added:
 - Fixed PlasmaPistol newly introduced damage issues.
 - Fixed an arrest avoidance bug with vehicles.
 
-# February 02, 2024 / Version 1271 / SEASON 20 UPDATE
+# February 2nd 2024 / Version 1271 / SEASON 20 UPDATE
 ## Season 20: Apocalypse
 
 - Added Season 20 and Season 20 Hype Zones
@@ -2637,7 +2637,7 @@ Two new vehicles were added:
 - Fixed Plasma Pistol not registering player heads.
 - Cargo Ship now “closes” the robbery round just before leaving the map.
 
-# March 08, 2024 / Version 1295 / APOCALYPSE PART 2 UPDATE
+# March 8th 2024 / Version 1295 / APOCALYPSE PART 2 UPDATE
 ## Tier 3 Police Safe, V2
 
 - New Vehicle: Hammerhead. With custom physics. 
@@ -2721,7 +2721,7 @@ Two new vehicles were added:
 - Fixed the Ray9 License Plate.
 - Use code "hammerhead" for 12k cash!
 
-# April 20, 2024 / Version 1327 / 2024 LIVE EVENT
+# April 20th 2024 / Version 1327 / JAILBREAK REWIND
 ## Live Event  
 
 - New Plasma Shotgun weapon, found from nearby alien encounters.  
