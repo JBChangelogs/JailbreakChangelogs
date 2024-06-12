@@ -1154,38 +1154,65 @@ Two new vehicles were added:
 - Better Bank Truck markers/visualizers.
 - More odds and ends!
 
-# February 6th 2021 / ADOPT A DOG!
+# February 6th 2021 / DOGS/SEASON 2 UPDATE
 
 - Added TWO DOGS! Made by the wonderful @supernob12three
-- - POLICE DOG! Best when paired with a cop!
-- - BULLDOG! Best when paired with a criminal!
+- - German Shepherd! Best when paired with a cop!
+- - Bulldog! Best when paired with a criminal!
+- Added a new building: the Pet Shop.
+- Added the Spring Map.
 - SEASON 2! Out of this world! Added all new space themed prizes and new contracts!
-- Added SPRING MAP, and more!
+- 6 more Contracts (erroneously stated to be 7) as well as more Season improvements.
+-  Added a new vehicle: the Crew Capsule.
+- Changes in the Minimap.
+- Removed the Piggy Crossover.
+- Added retired pinstripe decals to the SUV, the Megalodon and the Posh.
+- Gave the Roadster and Cybertruck an interior.
+- The color of Train Station 1 was changed from blue to red.
+- Patched several glitches and bugs.
+- The Beam Hybrid is no longer buyable.
 - Use code "DOGGO" for 7,500 cash!
 
-# March 6th 2021 / MID-SEASON UPDATE!
+# March 6th 2021 / MID-SEASON UPDATE
 
-- All new LAMBO! FREE upgrade for all existing owners!
-- SMOKE GRENADES!
-- AIRTAIL! Quick 3 seater supercar at the airport! 
-- Upgraded robbery markers! Boss Gamepass owners will find out about open locations up to a minute before other players!
+- The La Matador has been remodeled and given an interior. FREE upgrade for all existing owners!
+- Added new vehicle: AIRTAIL! Quick 3 seater supercar at the airport!
+- Added new item: SMOKE GRENADES!
+- Updated the robbery markers:
+- - Robbery icons will now be colored green and red if they are open or closed respectively.
+- - Non-owners of the BOSS gamepass will know about opened robberies a minute late.
+- - There is now a notification for the small stores.
+- - Robbery icons now show when a building is being robbed, repeatedly turning from green to white.
 - SWAT Pistol returns! Operate in silence with this pass exclusive item!
 - Weapons will no longer reload in the background, and have a slight delay on equipping, to combat gun spam!
 - Added anti-combat logging. Criminals who leave the game or switch teams will have their bounty go to the nearest police officer if they're within a close enough distance!
-- Shadow options in settings!
+- Added enabling/disabling shadows in settings.
+- Steering wheel now steers in first-person driving.
+- Players can now drop maximum 20,000$ cash at a time, an increase from 10,000$
+- Buffed the Crew Capsule in terms of speed and height.
+- The police paycheck now appears on the side of the screen, rather than the middle of the screen.
+- Some notable changes to the design of the Power Plant.
+- Slightly changed the Corridor Detonation area.
+- The screen no longer changes to black and white when players die.
+- Police now acquire 20 arrests for the Bank Truck robbery to open.
+- Added new code: "march2021", gives 5,000$
 
-# April 1st 2021 / MOONBREAK!
+# April 1st 2021 / MOONBREAK
 
 - Helmets for everybody!
 - Lower gravity for all! Including vehicles...
 - Planet themed sky!
 
-# April 3rd 2021 / LOOKING BACK!
+# April 3rd 2021 / SEASON 3 UPDATE
 
 - SEASON 3! "LOOKING BACK" with VOLT 4x4 Grand Prize!
-- HOMES & APARTMENTS! ALL new!
-- CREWS! Play with friends and earn extra!
+- Revamped Houses & Apartments, along with new furniture.
+- New crew feature: Crew members earn extra money from robbing. Play with friends and earn extra!
 - RAIDS. Police can break into apartments and access your Vault!
+- The Mighty returns as a Level 6 prize.
+- Old map, with orange skybox and old desert floor.
+- Sky Rings were removed.
+- The Crew Capsule is no longer buyable.
 
 # April 4th 2021 / IMPORTANT PATCHES
 
@@ -1211,21 +1238,40 @@ Two new vehicles were added:
 - Slightly reduce E hold time on Raids.
 - Add a wait between Raids.
 
-# May 1st 2021 / MID-SEASON UPDATE!
+# May 1st 2021 / MID-SEASON UPDATE
 
-- THE AGENT! A spy car that shoots rockets! 7 Days only!!
+- A new vehicle: The Interrogator.
+- A new vehicle: THE AGENT! A spy car that shoots rockets! 7 Days only!!
 - INTERROGATOR! Affordable Police SUV!
-- PIT MANEUVERS! Watch out criminals!
-- New Soccer Ball reward: Bonded Wheels!
+- A new vehicle disabling feature is added: PIT maneuver.
+- New Soccer Ball reward: Bonded Wheels, which already come complimentary with the Agent.
 - 5B Visits Garage Spoiler! TY for getting us here!!
+- The colour of the skybox has been changed into a blue hue.
+- All vehicles in the Police Stations (excluding the Patrol) need to be hijacked in order to drive as a prisoner/criminal.
 
-# June 4th 2021 / THE GREAT TOMB UPDATE!
+# June 4th 2021 / THE GREAT TOMB/SEASON 4 UPDATE
 
 - NEW TOMB ROBBERY!
+- Players who successfully robbed the Tomb for the first time will receive a special spoiler.
 - SEASON 4! EPIC ADVENTURES!
+- New Level 10 vehicle: The Rattler.
 - The MILITARY BASE has MOVED with all new features!
-- An all new building! POLICE HQ
-- All new destructive physics!
+- New Nuke skin: Radiant Orange.
+- Rising City Bank and Jewelry Store layouts slightly nerfed.
+- Slightly new lighting.
+- Retired the Dune Buggy.
+- The Volt 4X4 is no longer purchasable.
+- Countdown timer removed.
+- Made the gems in the Jewelry Store Neon colored as well as the boxes that you punch.
+- Changed a strip from orange to red on one of the Jewelry stores top floors.
+- Changed the Season Hypezone so it is patterned with tiles.
+- Removed one of the collector locations at the Volcano Criminal Base.
+- Made some aspects of the volcano base neon colored.
+- The color of the Train Station was changed from red to orange.
+- Removed part of the Fire Station.
+- Moved the Delorean's license plate up from the bumper to in between the taillights.
+- Removed some lasers in Bank floors such as Corridor and Floor: Deductions.
+- Moved one of the Museum spotlights higher.
 
 # June 25th 2021 / PATCH UPDATE
 - Fixed train physics.
@@ -1234,27 +1280,58 @@ Two new vehicles were added:
 
 # July 2nd 2021 / SENTINEL UPDATE
 
-- Added all new VOLT by TommyIsDaBoss!
+- Added all new VOLT by @TommyIsDaBoss! With its glitches being removed.
+- Buffed the Volt in acceleration and top speed.
+- An all new building! POLICE HQ
 - Added the SENTINEL. Made by community member @Ickleon37!
-- FIFTEEN! new contracts!
+- Added 13 new contracts.
 - Police Markers! Find your teammates!
 - We've reworked (and upped!) Robbery Bounties!
 - "Quiet Alarm" setting!
 - Army Heli missiles have been nerfed!
 - Cargo ships will now appear half as often, but reward TWICE as much!
-- Dune Buggy is FIXED, and now appears at the water tower tomb exit!
+- The Dune Buggy was re-added, with its infamous bug fixed. Now appears at the water tower tomb exit!
+- The Cargo Ship will now spawn half as often, but will reward twice as much.
+- The Black Hawk missiles were nerfed.
+- Bounties were upped.
+- Mini Police Station was removed.
+- Police no longer spawn at cells during Cell time.
+- The Helicopter spawn at the City Police Station was removed.
+- The Little Bird no longer spawns on top of the Rising City Bank.
+- Revert Season Pass price to 399 R$
+- Players can now destroy most of the decorations in the game, such as trees, road signs, etc.
 - Contract bug squashing + more!
 
 # July 12th 2021 / NERF GUNS!
 - We now have ROBLOX JAILBREAK NERF GUNS!
 - You get 2 per pack and redeeming the code gives you both weapons to wear on your character! Plus, you also get both weapons in with unique bullet trails!
 
-# August 7th 2021 / MEME SEASON!
-- NEW Season 5! MEME SEASON!
-- Home saving is HERE!
-- ENERGY DRINKS!
+# August 7th 2021 / MEME SEASON
+
+- Added Season 5: Let The Memes Begin.
+- Added the Banana Car and other seasonal rewards.
+- Revamped the Gas Station.
+- Updated the Season Hypezone.
+- Added many furniture items to the Houses & Apartments:
+- - Re-added the Confetti Gun and the VIP radio.
+- - Added home saving for Houses & Apartments.
+- - Added crews marker. Locate where your Crews are. (Toggle it on/off in the in-game Settings)
+- Added ENERGY DRINKS!
+- Added a new mascot for the Donut Shop.
+- Added interiors to the:
+- - Camaro
+- - Pickup
+- - Helicopter
+- - SWAT Van
+- - Celestial
+- The starting cash is 3,000$ when playing Jailbreak for the first time.
 - Working vending machines and Gun racks!
-- Additional garage save slots! and much much more!
+- The Garage menu now has five save slots, and ten for owners of the VIP Game pass.
+- Slightly nerfed the Flintlock and Uzi.
+- Nights are now darker than before.
+- Added a new code "memes" that gives 5,000$
+- The Rattler is no longer buyable.
+- Added Clouds phase 1.
 
 # August  31st 2021 / 5 DAYS OF VEHICLES / DAY 1
 
@@ -1357,23 +1434,41 @@ Two new vehicles were added:
 - Fix: Recent season prizes are missing their "RARE" item plaque
 - Fix: Replaced retired vehicle stripes with a "CLASSIC" plaque
 
-# October 1st 2021 / FALL UPDATE!
+# October 1st 2021 / FALL UPDATE
 
-- Season 6 with additional prizes and easier contracts!
-- Global XP Leaderboards!
+- Season 6 with additional prizes and easier contracts! (this season only!)
+- Added Beignet vehicle and other seasonal rewards. (
+- Added seasonal global leaderboards.
+- Updated the Season Hypezone.
+- Adapted contract system.
+- Removed majority of the contracts and added three new contracts.
+- Levels are now uncapped. (this season only!)
+- Fall map added along with hot air balloons as well as new lighting.
 - Admin Commands in VIP Servers!
-- Item Dropping!! Finally!
+- Added item dropping feature.
 - 2021 Fall Map with improved lighting!
-- Additional prizes and uncapped levels this season only!
-- Use code "fall2021" for some cash in game
+- Slightly revamped the Prison cells area.
+- The Banana Car's spawn point is now removed and retired.
+- The Radiant Yellow color's glow has been added back.
+- Made the Water Tower neon orange to match the Fall theme.
+- Altered the Pet Shop building color to match the Fall theme as well as some other buildings.
+- Use code "fall2021" that gives 5,000$
 
-# November 5th 2021 / THE NASCAR UPDATE!
+# November 5th 2021 / THE NASCAR/MID-SEASON UPDATE
 
-- FREE NASCAR Vehicle in the City! (Limited Time)
+- The official Jailbreak X NASCAR Event.
+- Added two new vehicles:
+- -  NASCAR (Limited Time)
+- - NASCAR Free (Limited Time)
+- Revamped UI on PC and mobile.
+- Mobile UI buttons are now thumb-based and in a radial menu.
 - RACETRACK with lap counter and timer! (Limited Time)
-- 100k NASCAR with more power! (Limited Time)
-- New Bank Floor: The Basement!
-- Fresh NEW mobile controls!
+- The Museum Bag, Tomb gems and Cargo Plane crates are now considered items.
+- - The above items can now be dropped.
+- Vehicle Physics changed, most notably for helicopters.
+- Vehicle Camera now uses the latest Roblox vehicle camera.
+- Added a new Rising City Bank floor, The Basement.
+- Power Plant puzzle can now be only solved at the computer itself.
 
 # November 5th 2021 / PATCH UPDATE
 
@@ -1402,14 +1497,21 @@ Two new vehicles were added:
 - Fix for cameras not following your vehicle.
 - Fix for Xbox aiming.
 
-# December 18th 2021 / 2021 WINTER UPDATE!
+# December 18th 2021 / WINTER 2021 UPDATE
 
-- TANKS!
-- SPEEDOMETERS! With mileage tracking per car!
+- Added Tank that spawns at Military Base.
+- Levels and leaderboards refreshed.
+- Revamped Rocket Fuel bar and license plate UI.
+- The Beignet's spawnpoint Is removed and retired.
+- Patched some glitches.
+- All vehicles (except planes and boats) now show SPEEDOMETER UI when you drive them.
 - SECURITY CAMERAS! With player tracking!
-- NEW Jewelry Store!
-- NEW Season 7!
+- The Jewelry Store received a major with 6 new randomized layouts.
+- Season 7: Ice cold started.
+- Added Icebreaker obtainable at level 10.
 - Better than ever winter themed map
+- Added security cameras.
+- - Police can track a criminal robbing something in any of the Police Stations.
 - Use code "WinterUpdate2021" for 5K cash! +much more
 
 # January 7th 2022 / THE MUSEUM UPDATE!
