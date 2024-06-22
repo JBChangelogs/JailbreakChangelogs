@@ -2829,6 +2829,6 @@ Two new vehicles were added:
 - Crew Battle ratings no longer update if the battle was brief.
 - Removed Bank Truck bounty due to abuse.
 
-# June 23, 2024 / SEASON 22
+# June 23rd, 2024 / SEASON 22
 
 - CHANGELOGS COMING LATER TODAY/TOMORROW
