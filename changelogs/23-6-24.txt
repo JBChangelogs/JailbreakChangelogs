@@ -2833,7 +2833,7 @@ Two new vehicles were added:
 - Crew Battle ratings no longer update if the battle was brief.
 - Removed Bank Truck bounty due to abuse.
 
-# June 21st, 2024 / Version 1342 / SEASON 22
+# June 21st 2024 / Version 1342 / SEASON 22
 ## Season 22: Visiting America
 
 - Added Furniture: Fabulous Sign & Liberty
