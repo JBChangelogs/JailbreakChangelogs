@@ -2791,6 +2791,7 @@ Two new vehicles were added:
 - Portal back to Jailbreak 2024 in front of the prison.
 
 ## Season 21: REWIND
+
 - New Vehicle: OG Monster Truck! He has finally returned!
 - New Rims: Heli Blade and Handcuff Chain Rims
 - New Spoilers: OG Thrusters and OG Glider Shop Wing
@@ -2800,6 +2801,7 @@ Two new vehicles were added:
 - Season Pass, now 20% off.
 
 ## UI + Servers
+
 - New Main Menu design with nearly complete update history. We collected every version we had!
 - Support for alternate servers.
 - - Added OG Jailbreak Server with countdown.
@@ -2807,6 +2809,7 @@ Two new vehicles were added:
 - - Trade World Server button finally has a proper home.
 
 ## Main World
+
 - Added Season 21 hype zones.
 - Repainted and sculpted much of the world for an OG Desert feel.
 - Removed many low poly mesas from the southern map.
@@ -2822,6 +2825,7 @@ Two new vehicles were added:
 - Redeem code "7years" for 14k cash!
 
 ## Misc
+
 - New Soccerball reward: The Laser Wing
 - New "Eric's Starship" furniture item, for penthouses.
 - Mansion now opens at night instead of when it rains.
@@ -2829,6 +2833,47 @@ Two new vehicles were added:
 - Crew Battle ratings no longer update if the battle was brief.
 - Removed Bank Truck bounty due to abuse.
 
-# June 23rd, 2024 / SEASON 22
+# June 21st, 2024 / Version 1342 / SEASON 22
+## Season 22: Visiting America
 
-- CHANGELOGS COMING LATER TODAY/TOMORROW
+- Added Furniture: Fabulous Sign & Liberty
+- Added Rims: Sparkler & Quarter
+- Added Wings: Vintage w/Effects & Waving Flag
+- Added Skin: American Flag
+- Added Drift: Shooting Star
+- Added Vehicle: Maverick Sport Pickup
+- Experimenting with a longer season, players have ~80 days to complete. 
+
+## Tier 4 Safes: New Prizes
+
+- Retired: Japanese stickers, Dabloon Rims, and Cosmetic Safe furniture. 
+- Added: TrailTrek Tires, Venom vehicle, Jailbreak Hills and Campout spoilers, Roulette rims, and Patriotic stickers.
+- Added new "Venom" engine sound.
+- Increased odds of Legendary from 3% to 4%
+- Moved 2nd Legendary to Epic, giving the safe just one rarest item. This makes the venom easier to obtain through pity. 
+
+## Map changes
+
+- New summer lighting and map. Cleaned up 2024 event objects.
+- Darker terrain and part materials including greyer sidewalks. 
+- Removed and shortened a handful of buildings within Rising City for a more open feel.
+- Simplified a handful of building designs.
+
+## Misc
+
+- New Radiant: Radiant Sun
+- VoiceChat servers now properly check for VoiceChat.
+- Fixed typos and updated some outdated tooltips above the hotbar.
+- Removed new player onboarding allowing for driving any vehicle. We measured decreased session times from new players using this feature. 
+- Updated our wing and rim scaling code to improve support for particles with rotations.
+- Fixed a bug where PowerPlant would open routinely when it shouldn't be.
+- Removed Live2024 and Rings models.
+- Updated Minimap.
+
+## StreamingEnabled for low-RAM devices
+
+- Created and regrouped map models for additional StreamingEnabled support.
+- - Prison: VisitorCenter, Vent system, Police"HQ", Armory, MainBuilding, MaxSecurity, Cell Interiors, and Sewers.
+- - Robbery: Museum Decorative, Tomb entry, Tomb arrow room, Tomb CartA, Tomb CartB, Tomb treasure room, Tomb exits, Donut interior, Gas interior, Mansion entry, CEO rooms, Casino interior and Casino Vault, Oil Rig decoration, Powerplant interior, Train tracks, tunnels, and bridges.
+- - Other: Gun Shop 1 and Gun Shop 2, Trade ship, NPCs, Pirate Cave, Port objects, road tunnels and bridges, 1M interior, 2M interior, and the Volcano Base.
+- FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
