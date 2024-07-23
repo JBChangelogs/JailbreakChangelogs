@@ -2887,3 +2887,4 @@ Two new vehicles were added:
 - SWAT Van REVAMP! New updated model to match the toy. This redesign comes with the event and is here to stay!
 - Bonus Reward! Complete the SWAT Training Obby to obtain the Jailbreak SWAT Graffiti Skin, exclusive to the SWAT Van Vehicle and this event.
 - Brickset Tires by @DydyWasTaken
+- Slightly modified the turret design model. Credits to @MrYomelS
