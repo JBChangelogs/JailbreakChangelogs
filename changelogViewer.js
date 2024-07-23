@@ -2,10 +2,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
 
+  // Set the number of items per page and the current page number
   const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
   let changelogItems = [];
+
+  // Get a reference to the sidebar image element
+  const imageElement = document.querySelector(".sidebar-image");
+
+  // Fetch the image URLs from a JSON file
+  fetch("image_urls.json")
+    .then((response) => response.json())
+    .then((imageUrls) => {
+      // Function to update the sidebar image based on the page number
+      window.updateSidebarImage = (pageNumber) => {
+        const imageUrl =
+          imageUrls[pageNumber - 1] || "https://i.ibb.co/3dgp780/image.png";
+        imageElement.src = imageUrl;
+      };
+
+      updateSidebarImage(1); // Set the image for the initial page
+    })
+    .catch((error) => {
+      console.error(
+        "Error fetching the image URLs for the sidebar image:",
+        error
+      );
+    });
 
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/23-7-24.txt",
@@ -15,8 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
   )
     .then((response) => response.text())
     .then((data) => {
+      // Process the text data into changelog items
       const lines = data.split("\n");
-
       let currentItem = "";
       let currentDate = "";
 
@@ -53,6 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       changelogItems = changelogItems.reverse();
       totalPages = Math.ceil(changelogItems.length / itemsPerPage) || 1;
+
+      // Render initial content and pagination
       renderChangelogs();
       renderPagination();
       adjustSelectWidth();
@@ -63,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "<p>Error loading changelog. Please try again later.</p>";
     });
 
+  // Function to render changelog items based on current page
   function renderChangelogs() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -111,5 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChangelogs();
     renderPagination();
     adjustSelectWidth();
+    updateSidebarImage(currentPage);
   };
 });
