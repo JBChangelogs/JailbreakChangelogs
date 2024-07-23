@@ -1995,6 +1995,7 @@ Two new vehicles were added:
 - Enjoy a greener world w/Spring!
 - Added Proto-08 vehicle.
 - Added ATM code"spring23" for 12,500$
+# February 17th 2023 / PARISIAN EXP-1
 
 # February 17th 2023 / PARISIAN EXP-1 UPDATE
 
@@ -2825,7 +2826,6 @@ Two new vehicles were added:
 - Redeem code "7years" for 14k cash!
 
 ## Misc
-
 - New Soccerball reward: The Laser Wing
 - New "Eric's Starship" furniture item, for penthouses.
 - Mansion now opens at night instead of when it rains.
@@ -2877,3 +2877,11 @@ Two new vehicles were added:
 - - Robbery: Museum Decorative, Tomb entry, Tomb arrow room, Tomb CartA, Tomb CartB, Tomb treasure room, Tomb exits, Donut interior, Gas interior, Mansion entry, CEO rooms, Casino interior and Casino Vault, Oil Rig decoration, Powerplant interior, Train tracks, tunnels, and bridges.
 - - Other: Gun Shop 1 and Gun Shop 2, Trade ship, NPCs, Pirate Cave, Port objects, road tunnels and bridges, 1M interior, 2M interior, and the Volcano Base.
 - FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
+
+# July 23rd 2024 / TOY THEMED EVENT
+## Jazwares Toy themed event
+
+- NEW: Mini-Event (Check the prison to get started)
+- Limited Time skins
+- New SWAT Van
+- Brickset Tires
