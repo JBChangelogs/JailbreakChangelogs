@@ -2878,10 +2878,12 @@ Two new vehicles were added:
 - - Other: Gun Shop 1 and Gun Shop 2, Trade ship, NPCs, Pirate Cave, Port objects, road tunnels and bridges, 1M interior, 2M interior, and the Volcano Base.
 - FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
 
-# July 23rd 2024 / TOY THEMED EVENT
-## Jazwares Toy themed event
+# July 23rd 2024 / SWAT Toy Event
 
 - NEW: Mini-Event (Check the prison to get started)
+- - Criminals, paint the map with preset graffiti. Police, clean it up!
+- - Contribute from both teams and win the new, exclusive, Comic Convict Skin by @Ickleon37
 - Limited Time skins
-- New SWAT Van
-- Brickset Tires
+- SWAT Van REVAMP! New updated model to match the toy. This redesign comes with the event and is here to stay!
+- Bonus Reward! Complete the SWAT Training Obby to obtain the Jailbreak SWAT Graffiti Skin, exclusive to the SWAT Van Vehicle and this event.
+- Brickset Tires by @DydyWasTaken
