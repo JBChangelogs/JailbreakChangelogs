@@ -2,27 +2,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
 
-  // Set the number of items per page and the current page number
   const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
   let changelogItems = [];
 
-  // Get a reference to the sidebar image element
+  const logoImage = document.getElementById("logo");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        logoImage.src = logoImage.dataset.src;
+        logoImage.play();
+      } else {
+        // logo will pause if not in view
+        logoImage.pause();
+      }
+    },
+    { threshold: 1.0 }
+  );
+
+  observer.observe(logoImage);
+
   const imageElement = document.querySelector(".sidebar-image");
 
-  // Fetch the image URLs from a JSON file
   fetch("image_urls.json")
     .then((response) => response.json())
     .then((imageUrls) => {
-      // Function to update the sidebar image based on the page number
       window.updateSidebarImage = (pageNumber) => {
         const imageUrl =
           imageUrls[pageNumber - 1] || "https://i.ibb.co/3dgp780/image.png";
         imageElement.src = imageUrl;
       };
 
-      updateSidebarImage(1); // Set the image for the initial page
+      updateSidebarImage(1);
     })
     .catch((error) => {
       console.error(
@@ -32,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   fetch(
-    "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/23-7-24.txt",
+    "https://raw.githubusercontent.com/Jalenzzz/restful_logs_test/main/changelogs/23-7-24.txt",
     {
       mode: "cors",
     }
