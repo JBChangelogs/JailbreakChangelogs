@@ -26,7 +26,20 @@
   }
 }
 .dev-message {
-  font-size: x-large;
+  font-size: large;
+}
+.sidebar-image {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 480px;
+  height: auto;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 body {
   margin: 0;
@@ -47,32 +60,15 @@ body {
   max-width: 800px;
   padding: 20px;
   margin: auto;
-  height: 95vh;
+  height: 125vh;
   display: flex;
   flex-direction: column;
+  /* box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2), 0 -10px 10px rgba(0, 0, 0, 0.2); */
 }
 #content {
   flex: 1;
   overflow-y: auto;
-}
-.light-mode {
-  background-color: #f2f2f2;
-  color: #333;
-}
-.dark-mode {
-  background-color: #333;
-  color: #ddd;
-}
-#mode-toggle-btn i {
-  margin-right: 0.5rem;
-}
-
-#mode-toggle-btn.dark-mode i:first-child {
-  display: none;
-}
-
-#mode-toggle-btn.light-mode i:last-child {
-  display: none;
+  box-shadow: 0 6px 6px -6px rgba(0, 0, 0, 0.541);
 }
 header,
 section,
@@ -137,21 +133,32 @@ button {
   font-weight: bold;
   width: 200px;
 }
-
-@media (max-width: 600px) {
+/* phones in potrait */
+@media only screen and (max-width: 1024px) {
   body {
     flex-direction: column;
+  }
+  .sidebar-image {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    margin: 10px auto;
   }
 
   .container {
     padding: 10px;
     min-height: 165vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 95vw;
+    flex-direction: column;
   }
   header,
   section,
   footer {
-    margin-bottom: 10px;
+    margin-bottom: 4px;
   }
 
   header {
@@ -173,10 +180,6 @@ button {
     margin-bottom: 10px;
     margin-right: 10px;
   }
-  #content {
-    flex: 1;
-    overflow-y: auto;
-  }
   #pagination {
     flex-wrap: wrap;
     justify-content: center;
@@ -189,21 +192,19 @@ button {
   }
 
   .button-container {
-    display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin-top: 10px;
   }
 
   button {
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: 2px solid transparent;
     border-radius: 8px;
-    font-size: 1em;
+    font-size: 0.9em;
     cursor: pointer;
-    margin: 10px;
+    margin: 5px;
     background-color: transparent;
-    transition: all 0.3s ease;
   }
   .blue-button:hover {
     color: #000000;
@@ -253,4 +254,53 @@ h3 p {
 
 .pagination-select option {
   padding: 8px;
+}
+/* phones in landscape */
+@media only screen and (max-width: 926px) and (orientation: landscape) {
+  .container {
+    min-height: 350vh;
+    overflow-y: auto;
+  }
+  #content {
+    overflow-y: auto;
+  }
+  #logo {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    right: 90px;
+    top: 20px;
+  }
+  .sidebar-image {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 50%;
+    height: auto;
+    margin: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+  }
+}
+/* tablets in portrait and landscape */
+@media only screen and (min-device-width: 1080px) and (max-device-width: 1280px) and (orientation: landscape) {
+  .sidebar-image {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 60%;
+    margin: 10px auto;
+    width: 600px;
+    height: auto;
+    margin: 20px auto;
+  }
+  .container {
+    min-height: 175vh;
+    overflow-y: auto;
+  }
 }
