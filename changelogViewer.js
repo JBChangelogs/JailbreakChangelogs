@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
+  const imageElement = document.querySelector(".sidebar-image");
 
   const itemsPerPage = 1;
   let currentPage = 1;
@@ -23,7 +24,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   observer.observe(logoImage);
 
-  const imageElement = document.querySelector(".sidebar-image");
+  const imageObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          imageObserver.unobserve(img);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
 
   fetch("image_urls.json")
     .then((response) => response.json())
@@ -31,7 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
       window.updateSidebarImage = (pageNumber) => {
         const imageUrl =
           imageUrls[pageNumber - 1] || "https://i.ibb.co/3dgp780/image.png";
-        imageElement.src = imageUrl;
+        imageElement.dataset.src = imageUrl;
+        imageObserver.observe(imageElement);
       };
 
       updateSidebarImage(1);
