@@ -2888,3 +2888,4 @@ Two new vehicles were added:
 - Bonus Reward! Complete the SWAT Training Obby to obtain the Jailbreak SWAT Graffiti Skin, exclusive to the SWAT Van Vehicle and this event.
 - Brickset Tires by @DydyWasTaken
 - Slightly modified turret design model by @MrYomelS
+- Fixed a bug where high FPS players using the turret had extra recoil.
