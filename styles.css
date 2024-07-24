@@ -51,11 +51,11 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
-
+::selection {
+  background-color: #478ccf; /* Choose your preferred color */
+  color: #ffffff; /* Text color when selected */
+}
 .container {
   max-width: 800px;
   padding: 20px;
