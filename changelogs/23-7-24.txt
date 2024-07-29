@@ -2203,6 +2203,10 @@ Two new vehicles were added:
 - Fixed Conch Shell Wing particles.
 - Updated Minimap.
 
+# August 18th 2023 / CHANGE IN UNBANS
+
+- Changes to the Unban Pass: We now remove your entire inventory including any season items effective immediately.
+
 # September 1st 2023 / Version-1225 / RETURN OF BATTLE ROYALE UPDATE
 
 - Added Battle Royale with new storm, new weapon variety, vehicle ban support, weapon shop bans, vending machine and donut bans, a new holding lobby, and chat based round updates. 
@@ -2878,7 +2882,7 @@ Two new vehicles were added:
 - - Other: Gun Shop 1 and Gun Shop 2, Trade ship, NPCs, Pirate Cave, Port objects, road tunnels and bridges, 1M interior, 2M interior, and the Volcano Base.
 - FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
 
-# July 23rd 2024 / SWAT Toy Event
+# July 23rd 2024 / SWAT TOY EVENT
 
 - NEW: Mini-Event (Check the prison to get started)
 - - Criminals, paint the map with preset graffiti. Police, clean it up!
