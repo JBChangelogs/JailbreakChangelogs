@@ -2882,19 +2882,53 @@ Two new vehicles were added:
 - - Other: Gun Shop 1 and Gun Shop 2, Trade ship, NPCs, Pirate Cave, Port objects, road tunnels and bridges, 1M interior, 2M interior, and the Volcano Base.
 - FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
 
-# July 23rd 2024 / SWAT TOY EVENT
+# July 23rd 2024  / Version 1348 / SWAT Toy Event
 
-- NEW: Mini-Event (Check the prison to get started)
-- - Criminals, paint the map with preset graffiti. Police, clean it up!
-- - Contribute from both teams and win the new, exclusive, Comic Convict Skin by @Ickleon37
-- Limited Time skins
-- SWAT Van REVAMP! New updated model to match the toy. This redesign comes with the event and is here to stay!
-- Bonus Reward! Complete the SWAT Training Obby to obtain the Jailbreak SWAT Graffiti Skin, exclusive to the SWAT Van Vehicle and this event.
-- Brickset Tires by @DydyWasTaken
-- Slightly modified turret design model by @MrYomelS
-- Fixed a bug where high FPS players using the turret had extra recoil.
+- Summer Toy Event
+- Added event hype zone to the Prison Yard.
+- Realtime progress and saving for individual quests.
+- Graffiti to be found or cleaned up placed around the map. Eight styles to find.
+- Prize: The Comic Con-vict Skin by Ickleon!
+- SWAT Training Obby for those who complete the quest.
+- Rewards $10,000 cash and the custom Graffiti SWAT Skin!
+- $20,000 Cash secret inside.
 
-# August 2nd 2024 / SCORPION UPDATE
+## New SWAT Van
 
-- New Limited: THE SCORPION w/ROCKET ENGINES for $2,000,000. Our priciest and fastest car ever!
-- - Limited for 10 days only.
+- All new custom model made by Badimo, tailored to match the toy. Free upgrade.
+- UV Mapped Body with custom graffiti skin exclusive to this vehicle.
+- Features opening and closing doors through the action button.
+- Recently upgraded tune in preperation for the revamp.
+
+## Toys
+
+- New Graffiti SWAT Van, exclusively found at Comic Con San Diego 2024. 1 of 500 exist.
+- New SWAT Van Toy, without graffiti, coming to shelves soon! We'll let you know when it's here.
+- Redeem either toy for the new Brickset Tire by Dydywastaken!
+- Redeem the SDCC toy for both the new Brickset Tire and the Graffiti SWAT Skin in case you missed the event.
+
+## Misc.
+
+- We've run through the entire map and added Level of Detail support for dozens of locations. This should marginally help FPS at the cost of memory.
+- New Minigun design for all vehicles to the updated SWAT Design.
+- Fixed an issue with the Nukamo Fridge item not appearing.
+
+# August 2nd 2024 / Version 1354 / NEW LIMITED
+
+- NEW: The Scorpion by PlasmaZillah
+- Next level of Jailbreak speeds, hitting 500+ mph on the dragstrip with rocket fuel.
+- Features custom startup sound and rocket booster sounds, boost, and effects.
+- Spawns on a stage made by Phindr.
+- Tune by ShadowSamurai_720
+- Features third body color edited through Interior Detail.
+
+## Misc.
+
+- New: 1M Cash Bundle, a new tier above 250k.
+- Removed the 5k Cash Bundle.
+- Implemented equip times for melee, including for Swords, to prevent consecutive lunges.
+- Fixed a bug related to dropped museum items and item equipping.
+- Fixed a rogue character issue.
+- Fixed a problem related to UI button placement randomization.
+- Fixed a missing CEO texture issue.
+- Implemented additional Level of Detail for some meshes.

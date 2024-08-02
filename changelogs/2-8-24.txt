@@ -2883,6 +2883,7 @@ Two new vehicles were added:
 - FYI: StreamingEnabled improves device memory, helpful for low RAM devices. It does not affect FPS. We hope to chase FPS next! Thank you!
 
 # July 23rd 2024  / Version 1348 / SWAT Toy Event
+
 - Summer Toy Event
 - Added event hype zone to the Prison Yard.
 - Realtime progress and saving for individual quests.
