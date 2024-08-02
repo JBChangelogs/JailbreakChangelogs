@@ -2894,7 +2894,22 @@ Two new vehicles were added:
 - Slightly modified turret design model by @MrYomelS
 - Fixed a bug where high FPS players using the turret had extra recoil.
 
-# August 2nd 2024 / SCORPION UPDATE
+# August 2nd 2024 / Version 1354 / NEW LIMITED
 
-- New Limited: THE SCORPION w/ROCKET ENGINES for $2,000,000. Our priciest and fastest car ever!
-- - Limited for 10 days only.
+- NEW: The Scorpion by PlasmaZillah
+- Next level of Jailbreak speeds, hitting 500+ mph on the dragstrip with rocket fuel.
+- Features custom startup sound and rocket booster sounds, boost, and effects.
+- Spawns on a stage made by Phindr.
+- Tune by ShadowSamurai_720
+- Features third body color edited through Interior Detail.
+
+## Misc.
+
+- New: 1M Cash Bundle, a new tier above 250k.
+- Removed the 5k Cash Bundle.
+- Implemented equip times for melee, including for Swords, to prevent consecutive lunges.
+- Fixed a bug related to dropped museum items and item equipping.
+- Fixed a rogue character issue.
+- Fixed a problem related to UI button placement randomization.
+- Fixed a missing CEO texture issue.
+- Implemented additional Level of Detail for some meshes.
