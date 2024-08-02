@@ -2904,7 +2904,7 @@ Two new vehicles were added:
 
 - New Graffiti SWAT Van, exclusively found at Comic Con San Diego 2024. 1 of 500 exist.
 - New SWAT Van Toy, without graffiti, coming to shelves soon! We'll let you know when it's here.
-- Redeem either toy for the new Brickset Tire by Dydywastaken!
+- Redeem either toy for the new Brickset Tire by @Dydywastaken!
 - Redeem the SDCC toy for both the new Brickset Tire and the Graffiti SWAT Skin in case you missed the event.
 
 ## Misc.
@@ -2915,11 +2915,11 @@ Two new vehicles were added:
 
 # August 2nd 2024 / Version 1354 / NEW LIMITED
 
-- NEW: The Scorpion by PlasmaZillah
+- NEW: The Scorpion by @PlasmaZillah
 - Next level of Jailbreak speeds, hitting 500+ mph on the dragstrip with rocket fuel.
 - Features custom startup sound and rocket booster sounds, boost, and effects.
-- Spawns on a stage made by Phindr.
-- Tune by ShadowSamurai_720
+- Spawns on a stage made by @Phindr.
+- Tune by @ShadowSamurai_720
 - Features third body color edited through Interior Detail.
 
 ## Misc.
