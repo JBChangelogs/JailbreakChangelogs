@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   fetch(
-    "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/23-7-24.txt",
+    "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/2-8-24.txt",
     {
       mode: "cors",
     }
