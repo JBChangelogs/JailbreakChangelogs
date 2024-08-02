@@ -2893,3 +2893,8 @@ Two new vehicles were added:
 - Brickset Tires by @DydyWasTaken
 - Slightly modified turret design model by @MrYomelS
 - Fixed a bug where high FPS players using the turret had extra recoil.
+
+# August 2nd 2024 / SCORPION UPDATE
+
+- New Limited: THE SCORPION w/ROCKET ENGINES for $2,000,000. Our priciest and fastest car ever!
+- - Limited for 10 days only.
