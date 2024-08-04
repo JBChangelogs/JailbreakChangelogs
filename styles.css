@@ -45,7 +45,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: radial-gradient(rgb(130, 183, 218), rgb(223, 196, 156));
+  background: radial-gradient(rgb(60, 91, 111), rgb(148, 137, 121));
   color: #000000;
   display: flex;
   justify-content: center;
