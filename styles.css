@@ -405,9 +405,9 @@ h3 p {
   }
 }
 /* Very small devices */
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 390px) {
   .container {
-    min-height: 230vh;
+    min-height: 200vh;
     overflow-y: auto;
   }
 }
