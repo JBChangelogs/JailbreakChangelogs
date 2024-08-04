@@ -50,7 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((imageUrls) => {
       window.updateSidebarImage = (pageNumber) => {
         const imageUrl =
-          imageUrls[pageNumber - 1] || "https://i.ibb.co/3dgp780/image.png";
+          imageUrls[pageNumber - 1] ||
+          "https://res.cloudinary.com/dt6ym6zrw/image/upload/v1722811458/16ff8b3a-92de-43d6-ae92-094ad17f74a5.png";
         imageElement.dataset.src = imageUrl;
         imageObserver.observe(imageElement);
       };
