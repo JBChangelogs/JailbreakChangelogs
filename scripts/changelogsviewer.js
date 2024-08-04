@@ -1,12 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM fully loaded and parsed");
+
   const contentElement = document.getElementById("content");
   const paginationElement = document.getElementById("pagination");
   const imageElement = document.querySelector(".sidebar-image");
+  const body = document.body;
+  const themeToggle = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme") || "light";
 
   const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
   let changelogItems = [];
+
+  console.log("Variables initialized");
 
   const logoImage = document.getElementById("logo");
   const observer = new IntersectionObserver(
@@ -15,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
         logoImage.src = logoImage.dataset.src;
         logoImage.play();
       } else {
-        // logo will pause if not in view
         logoImage.pause();
       }
     },
@@ -37,6 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
     { threshold: 0.1 }
   );
 
+  console.log("Observers set up");
+
   fetch("data/image_urls.json")
     .then((response) => response.json())
     .then((imageUrls) => {
@@ -56,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
+  console.log("Fetching changelog data...");
   fetch(
     "https://raw.githubusercontent.com/JBChangelogs/JailbreakChangelogs/main/changelogs/2-8-24.txt",
     {
@@ -64,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   )
     .then((response) => response.text())
     .then((data) => {
-      // Process the text data into changelog items
+      console.log("Changelog data received, processing...");
       const lines = data.split("\n");
       let currentItem = "";
       let currentDate = "";
@@ -103,10 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
       changelogItems = changelogItems.reverse();
       totalPages = Math.ceil(changelogItems.length / itemsPerPage) || 1;
 
-      // Render initial content and pagination
+      console.log("Changelog processed, rendering...");
       renderChangelogs();
       renderPagination();
       adjustSelectWidth();
+      console.log("Initial render complete");
     })
     .catch((error) => {
       console.error("Error fetching the changelog:", error);
@@ -114,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "<p>Error loading changelog. Please try again later.</p>";
     });
 
-  // Function to render changelog items based on current page
   function renderChangelogs() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -165,4 +174,25 @@ document.addEventListener("DOMContentLoaded", () => {
     adjustSelectWidth();
     updateSidebarImage(currentPage);
   };
+  body.classList.toggle("dark-theme", currentTheme === "dark");
+
+  // Function to update theme icon
+  function updateThemeIcon() {
+    const isDark = body.classList.contains("dark-theme");
+    const iconName = isDark ? "sun" : "moon";
+    themeToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    lucide.createIcons();
+  }
+
+  // Initial icon update
+  updateThemeIcon();
+
+  themeToggle.addEventListener("click", () => {
+    body.classList.toggle("dark-theme");
+    const newTheme = body.classList.contains("dark-theme") ? "dark" : "light";
+    localStorage.setItem("theme", newTheme);
+    updateThemeIcon();
+  });
+
+  console.log("Script execution completed");
 });
