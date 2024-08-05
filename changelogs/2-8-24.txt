@@ -1359,7 +1359,7 @@ Two new vehicles were added:
 
 # September 1st 2021 / 5 DAYS OF VEHICLES / DAY 2
 
-- THE RAY NINE by "ItzTruminator"! You can find it at the small town gas station for 199,000 cash!
+- THE RAY NINE by @ItzTruminator! You can find it at the small town gas station for 199,000 cash!
 - New: Jailbreak MotorSport Tire Decals
 - New: Add reload time for ForceField Launcher
 - New: Cargo plane no longer requires Key card
@@ -1710,7 +1710,7 @@ Two new vehicles were added:
 -   Fixed an issue where tire tread was backwards on some models.
 -   Trailblazer now has new dual rear tires.
 -   Vehicles are now more stable at high speeds thanks to a discovery from ShadowSamurai720
--   Fixed an issue where vehicles could not reach their top speed due to poor gearing, thanks to gearing adjustments by ShadowSamurai720.
+-   Fixed an issue where vehicles could not reach their top speed due to poor gearing, thanks to gearing adjustments by @ShadowSamurai720.
 -   Rims, Spoilers and other parts no longer have Mass for better weight control (Thank you again, ShadowSamurai720!)
 -   Bank Truck is now a little bit faster.
 -   Headlights and Brakelights now default off when spawned.
@@ -1995,6 +1995,7 @@ Two new vehicles were added:
 - Enjoy a greener world w/Spring!
 - Added Proto-08 vehicle.
 - Added ATM code"spring23" for 12,500$
+# February 17th 2023 / PARISIAN EXP-1
 
 # February 17th 2023 / PARISIAN EXP-1 UPDATE
 
@@ -2829,7 +2830,6 @@ Two new vehicles were added:
 - Redeem code "7years" for 14k cash!
 
 ## Misc
-
 - New Soccerball reward: The Laser Wing
 - New "Eric's Starship" furniture item, for penthouses.
 - Mansion now opens at night instead of when it rains.
@@ -2888,7 +2888,7 @@ Two new vehicles were added:
 - Added event hype zone to the Prison Yard.
 - Realtime progress and saving for individual quests.
 - Graffiti to be found or cleaned up placed around the map. Eight styles to find.
-- Prize: The Comic Con-vict Skin by Ickleon!
+- Prize: The Comic Con-vict Skin by @Ickleon!
 - SWAT Training Obby for those who complete the quest.
 - Rewards $10,000 cash and the custom Graffiti SWAT Skin!
 - $20,000 Cash secret inside.
