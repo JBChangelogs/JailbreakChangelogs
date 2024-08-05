@@ -16,13 +16,34 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("Variables initialized");
 
   const logoImage = document.getElementById("logo");
+  let hasLoggedPlayError = false;
+  let hasLoggedPauseError = false;
+
   const observer = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting) {
         logoImage.src = logoImage.dataset.src;
-        logoImage.play();
+        try {
+          logoImage.play();
+        } catch (error) {
+          if (!hasLoggedPlayError) {
+            console.log(
+              "Note: logoImage.play is not available, but functionality should still work."
+            );
+            hasLoggedPlayError = true;
+          }
+        }
       } else {
-        logoImage.pause();
+        try {
+          logoImage.pause();
+        } catch (error) {
+          if (!hasLoggedPauseError) {
+            console.log(
+              "Note: logoImage.pause is not available, but functionality should still work."
+            );
+            hasLoggedPauseError = true;
+          }
+        }
       }
     },
     { threshold: 1.0 }
