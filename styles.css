@@ -52,6 +52,41 @@ body {
   align-items: center;
   min-height: 100vh;
 }
+#pagination {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.pagination-select {
+  font-size: 16px;
+  padding: 10px 35px 10px 15px;
+  border: 2px solid var(--text-color);
+  border-radius: 25px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-select:hover {
+  border-color: var(--button-bg);
+}
+
+.pagination-select:focus {
+  outline: none;
+  border-color: var(--button-bg);
+  box-shadow: 0 0 0 3px rgba(0, 89, 148, 0.2);
+}
 :root {
   --bg-color: #ffffff;
   --text-color: #333333;
@@ -76,7 +111,6 @@ body {
   --footer-link-color: #7cb9e8;
   --footer-link-hover-color: #a7d8ff;
 }
-
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -97,12 +131,11 @@ body {
   color: var(--button-text);
 }
 
-::selection {
-  background-color: var(--selection-bg);
-  color: var(--selection-text);
-}
-
-.theme-toggle {
+#theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
   background: none;
   border: none;
   cursor: pointer;
@@ -112,16 +145,12 @@ body {
   justify-content: center;
 }
 
-.theme-toggle svg {
+#theme-toggle svg {
   width: 24px;
   height: 24px;
   color: var(--text-color);
 }
 
-::selection {
-  background-color: #478ccf; /* Choose your preferred color */
-  color: #ffffff; /* Text color when selected */
-}
 .container {
   max-width: 800px;
   padding: 20px;
@@ -129,7 +158,6 @@ body {
   height: 125vh;
   display: flex;
   flex-direction: column;
-  /* box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2), 0 -10px 10px rgba(0, 0, 0, 0.2); */
 }
 #content {
   flex: 1;
@@ -199,17 +227,6 @@ button {
   font-weight: bold;
   width: 200px;
 }
-#footer-text {
-  color: var(--footer-text-color);
-  font-size: 0.9em;
-  line-height: 1.5;
-  margin-top: 20px;
-}
-
-#footer-text strong {
-  color: var(--footer-text-color);
-  font-weight: 700;
-}
 
 #footer-text a {
   color: var(--footer-link-color);
@@ -235,14 +252,34 @@ button {
     width: 100%;
     margin: 10px auto;
   }
-
+  #theme-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
   .container {
     padding: 10px;
-    min-height: 165vh;
+    padding-top: 50px;
+    min-height: 180vh;
     overflow-y: auto;
     overflow-x: hidden;
     max-width: 95vw;
     flex-direction: column;
+  }
+  .pagination-select {
+    font-size: 14px;
+    padding: 8px 30px 8px 12px;
+    width: 100%;
+    max-width: 300px;
+  }
+  #pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #pagination label {
+    text-align: center;
+    margin-bottom: 10px;
   }
   header,
   section,
@@ -269,17 +306,6 @@ button {
     margin-bottom: 10px;
     margin-right: 10px;
   }
-  #pagination {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  #pagination button {
-    padding: 6px 10px;
-    font-size: 0.8em;
-    margin: 5px;
-  }
-
   .button-container {
     flex-wrap: wrap;
     justify-content: center;
@@ -316,35 +342,6 @@ button {
 
 h3 p {
   margin: 0;
-}
-
-.pagination-select {
-  font-size: 16px;
-  padding: 8px;
-  padding-right: 30px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%27http://www.w3.org/2000/svg%27 width%3D%2716%27 height%3D%2716%27 fill%3D%27000%27 class%3D%27bi bi-chevron-down%27 viewBox%3D%270 0 16 16%27%3E%3Cpath fill-rule%3D%27evenodd%27 d%3D%27M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z%27/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 12px 12px;
-  min-width: 120px;
-  max-width: 100%;
-  width: auto;
-  margin-right: auto;
-}
-
-.pagination-select:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.pagination-select option {
-  padding: 8px;
 }
 
 /* phones in landscape */
@@ -392,6 +389,7 @@ h3 p {
     margin: 20px 0 20px 20px;
     align-self: flex-start;
   }
+
   #logo {
     position: absolute;
     width: 160px;
