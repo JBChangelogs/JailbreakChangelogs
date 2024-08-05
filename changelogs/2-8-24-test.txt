@@ -2137,8 +2137,8 @@ Two new vehicles were added:
 - Added confirmation to delete a save slot.
 - Added purchasing of vehicles to the Garage UI. Purchasing a vehicle greater than $100,000 prompts the Pro Garage Gamepass. 
 - Garages no longer close when purchasing items.
-- Added 6 new items by @cZewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
-- Added 5 new items by D4EAMER. [VFX Rim, RX-1 Rim, SPACE-R Rim, Catch Me! Wing, Trouble! Wing]
+- Added 6 new items by @Zewo_Tsu. [Tsutek Wing, Dragster Wing, Rally Blade Rim, Vecchio Rim, LeapYear Tire, Parisian Tire]
+- Added 5 new items by @D4EAMER. [VFX Rim, RX-1 Rim, SPACE-R Rim, Catch Me! Wing, Trouble! Wing]
 - Added new Confetti-Cannon furniture by @Poogah.
 - Added “Like the Game” UI for players who earn 100k+ cash.
 - Added magnitude check on normal sized doors to combat door exploits.
