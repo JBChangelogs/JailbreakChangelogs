@@ -45,7 +45,6 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  /* background: radial-gradient(rgb(60, 91, 111), rgb(148, 137, 121)); */
   color: #000000;
   display: flex;
   justify-content: center;
@@ -93,24 +92,27 @@ body {
   --button-bg: #005994;
   --button-text: #ffffff;
   --button-hover-bg: #003a61;
+  --button-hover-text: #ffffff;
   --selection-bg: #478ccf;
   --selection-text: #ffffff;
   --footer-text-color: #333333;
   --footer-link-color: #005994;
   --footer-link-hover-color: #003a61;
 }
+
 .dark-theme {
   --bg-color: #2c2c2c;
   --text-color: #ffffff;
   --button-bg: #003a61;
-  --button-text: #ffffff;
   --button-hover-bg: #002b4a;
+  --button-hover-text: #ffffff;
   --selection-bg: #2c5680;
   --selection-text: #ffffff;
   --footer-text-color: #e0e0e0;
   --footer-link-color: #7cb9e8;
   --footer-link-hover-color: #a7d8ff;
 }
+
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -130,7 +132,18 @@ body {
   transition: all 0.3s ease;
   color: var(--button-text);
 }
+.blue-button:hover,
+.orange-button:hover {
+  color: var(--button-hover-text);
+}
 
+.blue-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.orange-button:hover {
+  background-color: #ca4518;
+}
 #theme-toggle {
   position: fixed;
   top: 20px;
