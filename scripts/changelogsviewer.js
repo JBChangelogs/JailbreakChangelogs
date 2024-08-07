@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
   const themeToggle = document.getElementById("theme-toggle");
   const currentTheme = localStorage.getItem("theme") || "light";
+  const searchInput = document.getElementById("search-input");
+  const searchButton = document.getElementById("search-button");
+  const clearSearchButton = document.getElementById("clear-search");
+  const searchResultsContainer = document.getElementById("search-results");
 
   const itemsPerPage = 1;
   let currentPage = 1;
@@ -189,6 +193,54 @@ document.addEventListener("DOMContentLoaded", () => {
     selectElement.style.width = `${optionWidth + 20}px`;
   }
 
+  function performSearch() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredItems = changelogItems.filter(
+      (item) =>
+        item.content.toLowerCase().includes(searchTerm) ||
+        item.date.toLowerCase().includes(searchTerm)
+    );
+
+    if (filteredItems.length > 0) {
+      renderSearchResults(filteredItems);
+    } else {
+      searchResultsContainer.innerHTML = "<p>No results found.</p>";
+    }
+    searchResultsContainer.style.display = "block";
+  }
+
+  function renderSearchResults(results) {
+    let resultsHtml = "";
+    results.forEach((item, index) => {
+      resultsHtml += `
+        <div class="search-result-item" data-page="${
+          changelogItems.indexOf(item) + 1
+        }">
+          <strong>${item.date}</strong>
+          <p>${item.content.substring(0, 100)}...</p>
+        </div>
+      `;
+    });
+    searchResultsContainer.innerHTML = resultsHtml;
+
+    // Add click event listeners to search result items
+    const resultItems = searchResultsContainer.querySelectorAll(
+      ".search-result-item"
+    );
+    resultItems.forEach((item) => {
+      item.addEventListener("click", function () {
+        const pageNumber = parseInt(this.dataset.page);
+        goToPage(pageNumber);
+        clearSearch();
+      });
+    });
+  }
+
+  function clearSearch() {
+    searchInput.value = "";
+    searchResultsContainer.style.display = "none";
+  }
+
   window.goToPage = (pageNumber) => {
     currentPage = Number(pageNumber);
     renderChangelogs();
@@ -206,8 +258,20 @@ document.addEventListener("DOMContentLoaded", () => {
     lucide.createIcons();
   }
 
+  searchButton.addEventListener("click", performSearch);
+  searchInput.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      performSearch();
+    } else if (searchInput.value.length > 2) {
+      performSearch(); // Perform search as user types (after 3 characters)
+    } else if (searchInput.value.length === 0) {
+      clearSearch();
+    }
+  });
+
   // Initial icon update
   updateThemeIcon();
+  clearSearchButton.addEventListener("click", clearSearch);
 
   themeToggle.addEventListener("click", () => {
     body.classList.toggle("dark-theme");
