@@ -7,11 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
   const themeToggle = document.getElementById("theme-toggle");
   const currentTheme = localStorage.getItem("theme") || "light";
-  const searchInput = document.getElementById("search-input");
-  const searchButton = document.getElementById("search-button");
-  const clearSearchButton = document.getElementById("clear-search");
-  const searchResultsContainer = document.getElementById("search-results");
-
   const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
@@ -194,34 +189,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function performSearch() {
+    console.log("Performing search");
     const searchTerm = searchInput.value.toLowerCase();
+    console.log("Search term:", searchTerm);
+
+    if (searchTerm.length < 3) {
+      console.log("Search term too short");
+      searchResultsContainer.innerHTML =
+        "<div class='search-results-content'><p>Please enter at least 3 characters to search.</p></div>";
+      searchResultsContainer.style.display = "block";
+      return;
+    }
+
     const filteredItems = changelogItems.filter(
       (item) =>
         item.content.toLowerCase().includes(searchTerm) ||
         item.date.toLowerCase().includes(searchTerm)
     );
 
+    console.log("Filtered items:", filteredItems);
+
     if (filteredItems.length > 0) {
       renderSearchResults(filteredItems);
     } else {
-      searchResultsContainer.innerHTML = "<p>No results found.</p>";
+      searchResultsContainer.innerHTML =
+        "<div class='search-results-content'><p>No results found.</p></div>";
     }
     searchResultsContainer.style.display = "block";
   }
 
+  function clearSearch() {
+    searchInput.value = "";
+    searchResultsContainer.style.display = "none";
+  }
+
   function renderSearchResults(results) {
-    let resultsHtml = "";
-    results.forEach((item, index) => {
+    console.log("Rendering search results:", results);
+    let resultsHtml = "<div class='search-results-content'>";
+    results.forEach((item) => {
       resultsHtml += `
         <div class="search-result-item" data-page="${
           changelogItems.indexOf(item) + 1
         }">
           <strong>${item.date}</strong>
-          <p>${item.content.substring(0, 100)}...</p>
+          <p>${item.content.replace(/<[^>]*>/g, "").substring(0, 100)}...</p>
         </div>
       `;
     });
+    resultsHtml += "</div>";
     searchResultsContainer.innerHTML = resultsHtml;
+    searchResultsContainer.style.display = "block";
 
     // Add click event listeners to search result items
     const resultItems = searchResultsContainer.querySelectorAll(
@@ -238,6 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function clearSearch() {
     searchInput.value = "";
+    searchResultsContainer.innerHTML = "";
     searchResultsContainer.style.display = "none";
   }
 
@@ -258,20 +276,31 @@ document.addEventListener("DOMContentLoaded", () => {
     lucide.createIcons();
   }
 
-  searchButton.addEventListener("click", performSearch);
-  searchInput.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      performSearch();
-    } else if (searchInput.value.length > 2) {
-      performSearch(); // Perform search as user types (after 3 characters)
-    } else if (searchInput.value.length === 0) {
-      clearSearch();
-    }
+  const searchInput = document.getElementById("search-input");
+  const clearSearchButton = document.getElementById("clear-search");
+  const searchResultsContainer = document.getElementById("search-results");
+
+  let searchTimeout;
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (searchInput.value.length >= 3) {
+        performSearch();
+      } else if (searchInput.value.length === 0) {
+        clearSearch();
+      } else {
+        searchResultsContainer.innerHTML =
+          "<div class='search-results-content'><p>Please enter at least 3 characters to search.</p></div>";
+        searchResultsContainer.style.display = "block";
+      }
+    }, 300); // Wait for 300ms after the user stops typing
   });
+
+  clearSearchButton.addEventListener("click", clearSearch);
 
   // Initial icon update
   updateThemeIcon();
-  clearSearchButton.addEventListener("click", clearSearch);
 
   themeToggle.addEventListener("click", () => {
     body.classList.toggle("dark-theme");
