@@ -1437,7 +1437,7 @@ Two new vehicles were added:
 # October 1st 2021 / FALL UPDATE
 
 - Season 6 with additional prizes and easier contracts! (this season only!)
-- Added Beignet vehicle and other seasonal rewards. (
+- Added Beignet vehicle and other seasonal rewards.
 - Added seasonal global leaderboards.
 - Updated the Season Hypezone.
 - Adapted contract system.
