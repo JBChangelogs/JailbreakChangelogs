@@ -1795,7 +1795,7 @@ Two new vehicles were added:
 -   Added texture support to SecondBody on some vehicles.
 -   Fixed flickering screens and textures on the Sentinel.
 -   Fixed garage regions transparent where they were not.
--   Patched a glitch that allowed players to duplicate their cash drops. (Thank you Hazed_Mist & Mikee)
+-   Patched a glitch that allowed players to duplicate their cash drops. (Thank you @Hazed_Mist & @Mikee)
 
 ## Robberies
 
@@ -2466,7 +2466,7 @@ Two new vehicles were added:
 - Fixed Stunt Plane flaps from being the wrong color in garages.
 - Updated Patrol tune to support new physics.
 - Updated Dirtbike tune to support new physics.
-- Updated Dune Buggy tune to support new physics. (Thank you Shadow for all the tunes!)
+- Updated Dune Buggy tune to support new physics. (Thank you @ShadowSamurai for all the tunes!)
 - Updated Beignet tune to continue to match Eclaire.
 - Updated ShellMark5 tune.
 - Fixed an issue with ATV headlights not glowing.

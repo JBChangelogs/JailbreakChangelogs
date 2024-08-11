@@ -2466,7 +2466,7 @@ Two new vehicles were added:
 - Fixed Stunt Plane flaps from being the wrong color in garages.
 - Updated Patrol tune to support new physics.
 - Updated Dirtbike tune to support new physics.
-- Updated Dune Buggy tune to support new physics. (Thank you Shadow for all the tunes!)
+- Updated Dune Buggy tune to support new physics. (Thank you @ShadowSamurai for all the tunes!)
 - Updated Beignet tune to continue to match Eclaire.
 - Updated ShellMark5 tune.
 - Fixed an issue with ATV headlights not glowing.
@@ -2599,7 +2599,7 @@ Two new vehicles were added:
 - - Added dynamic “Duration” to vehicles that controls how long a specific vehicle is disabled.
 - - Vehicle health now gradually refills.
 - - Added Vehicle Health Bar underneath Rocket Fuel UI.
-- - (Major thank you to ShadowSamurai720 and the entire testing team for assisting!)
+- - (Major thank you to @ShadowSamurai720 and the entire testing team for assisting!)
 - Weapons now deal unique damage to Vehicles than Players.
 - - Sniper deals 40 vehicle damage.
 - - Shotgun deals 15 vehicle damage.
