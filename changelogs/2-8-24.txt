@@ -2437,7 +2437,7 @@ Two new vehicles were added:
 
 - Use code "5days23" for 10k cash!
 - Added new Falcon S Sport Bike and Falcon Spawns.
-- New “Sport Bike” engine sound (Thank you Migue!)
+- New “Sport Bike” engine sound (Thank you @Migue!)
 - - Revamped our Bike Chassis
 - - New physics with support for ramps, jumps, and Rocket Fuel.
 - - New gearing support with proper gear changing while driving.
@@ -2591,7 +2591,7 @@ Two new vehicles were added:
 ## Vehicles
 
 - Added the XRK right-hand-drive sports car.
-- Added XRK engine sounds and startup (Thank you Migue!)
+- Added XRK engine sounds and startup (Thank you @Migue!)
 - Updated “Traction” groups for select vehicles.
 - - Brulee* now slips and slides easier like it did in 2019.
 - - Deja and Shogun drift traction decreased for more fun.
