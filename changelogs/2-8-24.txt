@@ -1709,13 +1709,13 @@ Two new vehicles were added:
 -   New tire models for all vehicles with fewer polygons and realer material.
 -   Fixed an issue where tire tread was backwards on some models.
 -   Trailblazer now has new dual rear tires.
--   Vehicles are now more stable at high speeds thanks to a discovery from ShadowSamurai720
+-   Vehicles are now more stable at high speeds thanks to a discovery from @ShadowSamurai720
 -   Fixed an issue where vehicles could not reach their top speed due to poor gearing, thanks to gearing adjustments by @ShadowSamurai720.
--   Rims, Spoilers and other parts no longer have Mass for better weight control (Thank you again, ShadowSamurai720!)
+-   Rims, Spoilers and other parts no longer have Mass for better weight control (Thank you again, @ShadowSamurai720!)
 -   Bank Truck is now a little bit faster.
 -   Headlights and Brakelights now default off when spawned.
 -   Engine sounds have been reduced for improved Voicechat experiences.
--   Engine sounds now rolloff better when disappearing into the distance (Thanks Phindr!)
+-   Engine sounds now rolloff better when disappearing into the distance (Thanks @Phindr!)
 -   Updated headlights of the Ray9 and other vehicles to be reflective and properly black.
 -   Vehicles are now less likely to flip when cruising at high speeds, at least when riding alone.
 
@@ -1795,7 +1795,7 @@ Two new vehicles were added:
 -   Added texture support to SecondBody on some vehicles.
 -   Fixed flickering screens and textures on the Sentinel.
 -   Fixed garage regions transparent where they were not.
--   Patched a glitch that allowed players to duplicate their cash drops. (Thank you Hazed_Mist & Mikee)
+-   Patched a glitch that allowed players to duplicate their cash drops. (Thank you @Hazed_Mist & @Mikee)
 
 ## Robberies
 
@@ -1852,7 +1852,7 @@ Two new vehicles were added:
 - Airdrops now have additional polish!
 - - No longer spawn near player spawns or player concentrated areas.
 - - Patches for Forcefield/Ambulance metas.
-- - New drop plane by @_ShadowSamurai
+- - New drop plane by @ShadowSamurai
 - - Guards are now minimap displayed.
 - - Decreased difficulty in busy servers.
 - Revamped Jet with heat seeking missiles, A/D steering, and more.
