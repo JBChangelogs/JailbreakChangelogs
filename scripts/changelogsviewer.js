@@ -65,25 +65,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("Observers set up");
 
-  fetch("data/image_urls.json")
-    .then((response) => response.json())
-    .then((imageUrls) => {
-      window.updateSidebarImage = (pageNumber) => {
-        const imageUrl =
-          imageUrls[pageNumber - 1] ||
-          "https://res.cloudinary.com/dt6ym6zrw/image/upload/v1722811458/16ff8b3a-92de-43d6-ae92-094ad17f74a5.png";
-        imageElement.dataset.src = imageUrl;
-        imageObserver.observe(imageElement);
-      };
+  window.updateSidebarImage = (pageNumber) => {
+    console.log("Updating sidebar image for page:", pageNumber);
+    fetch("data/sidebar_images.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((imageData) => {
+        const image = imageData.find((img) => img.order_index === pageNumber);
+        const imageUrl = image
+          ? image.url
+          : "https://res.cloudinary.com/dt6ym6zrw/image/upload/v1722811458/16ff8b3a-92de-43d6-ae92-094ad17f74a5.png";
+        console.log("Selected image URL:", imageUrl);
 
-      updateSidebarImage(1);
-    })
-    .catch((error) => {
-      console.error(
-        "Error fetching the image URLs for the sidebar image:",
-        error
-      );
-    });
+        const imageElement = document.querySelector(".sidebar-image");
+        if (imageElement) {
+          imageElement.dataset.src = imageUrl;
+          imageObserver.observe(imageElement);
+        } else {
+          console.error("Sidebar image element not found");
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating sidebar image:", error);
+      });
+  };
+
+  // Initialize with the first image
+  updateSidebarImage(1);
 
   console.log("Fetching changelog data...");
   fetch(
@@ -251,12 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
         clearSearch();
       });
     });
-  }
-
-  function clearSearch() {
-    searchInput.value = "";
-    searchResultsContainer.innerHTML = "";
-    searchResultsContainer.style.display = "none";
   }
 
   window.goToPage = (pageNumber) => {
