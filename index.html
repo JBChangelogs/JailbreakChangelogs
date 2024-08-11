@@ -3,12 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      property="og:title"
+      content="Jailbreak Changelogs | Latest Updates & Patch Notes"
+    />
+    <meta
+      property="og:description"
+      content="Stay ahead of the game! Get updates on Jailbreak's latest features, bug fixes, and balance changes. Never miss a crucial update that could change the way you play the game."
+    />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/dt6ym6zrw/image/upload/v1723381289/Screen_Shot_2022-11-05_at_10.24.50_PM_wphqbc.png"
+    />
+    <meta property="og:image:width" content="2328" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:url" content="https://jailbreakchangelogs.xyz" />
+    <meta property="og:type" content="website" />
+    <meta
+      name="description"
+      content="Jailbreak Changelogs: Your go-to source for the latest updates, patch notes, and feature releases in Roblox Jailbreak. Stay informed about new vehicles, weapons, map changes, and more!"
+    />
+    <meta
+      name="keywords"
+      content="Jailbreak, Roblox, changelogs, updates, patch notes, game features, Jailbreak updates"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Jailbreak Changelogs | Latest Updates & Patch Notes"
+    />
+    <meta
+      name="twitter:description"
+      content="Get up-to-date information on Jailbreak's latest features, bug fixes, and balance changes. Stay ahead in the game!"
+    />
+    <meta
+      name="twitter:image"
+      content="https://res.cloudinary.com/dt6ym6zrw/image/upload/v1723380961/Screen_Shot_2022-11-07_at_10.25.04_PM_sznatb.png"
+    />
+
     <title>Jailbreak | Changelogs</title>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="container">
+    <div id="news-ticker">
+      <p>JAILBREAK HITS7 BILLION VISITS!! 🎉🎉🎉</p>
+    </div>
+
+    <div id="main-container" class="container">
       <div class="sidebar-image-wrapper">
         <img
           id="sidebarImage"
@@ -23,34 +69,58 @@
             src=""
             alt="Logo"
             id="logo"
+            class="header-logo"
             loading="lazy"
             data-src="./images/logo_animated.gif"
           />
         </a>
-        <h1 id="main-title">ChangeLogs</h1>
-        <div id="search-container">
-          <input type="text" id="search-input" placeholder="Search...">
-          <button id="clear-search">Clear</button>
-          <div id="search-results"></div>
 
-          
-        </div>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <h1 id="main-title">ChangeLogs</h1>
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          aria-label="Toggle theme"
+        >
+          <i data-lucide="sun" class="light-icon"></i>
+          <i data-lucide="moon" class="dark-icon"></i>
+        </button>
       </header>
-      <script src="scripts/changelogsviewer.js"></script>
-      <script src="https://unpkg.com/lucide@latest"></script>
-      <section id="pagination"></section>
+      <div id="navigation-container">
+        <div class="pagination-container">
+          <select id="pageSelect"></select>
+          <div id="pageInfoContainer">
+            <span id="pageInfo">1/X</span>
+          </div>
+        </div>
+        <form id="search-form">
+          <div id="search-container">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search changelogs..."
+              inputmode="search"
+              enterkeyhint="search"
+            />
+
+            <button type="submit" id="searchButton">Search</button>
+            <button type="button" id="clearSearch">Clear</button>
+          </div>
+        </form>
+      </div>
+      <div id="searchResults"></div>
+
       <section id="content"></section>
       <footer>
         <h3 class="dev-message">
-          <p>From the devs:</p>
+          <p>From badimo:</p>
           <p>
             To all of our players over all of these years, we love this game.
           </p>
           <p>Keep up the fight for Jailbreak forever! It'll never go away.</p>
           <p>Thank you for playing!</p>
         </h3>
-        <h4 style="font-weight: normal; font-size: 14px">
+
+        <h4 class="release-dates-info">
           <p>
             Release dates are recorded in the U.S. (EST/EDT) time zone. Some
             dates may be inaccurate due to differing time zones like (CST/CDT)
@@ -58,15 +128,17 @@
           </p>
         </h4>
 
-        <p id="footer-text">
-          This website is
-          <strong>NOT affiliated with Badimo.</strong> This is ran seperately by
-          <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
-          and
-          <a href="https://www.roblox.com/users/1910948809/profile"
-            >Jalenzz16</a
-          >
-        </p>
+        <div id="footer-text">
+          <p>This website is <strong>NOT affiliated with Badimo.</strong></p>
+          <p>
+            This is ran separately by
+            <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
+            and
+            <a href="https://www.roblox.com/users/1910948809/profile"
+              >Jalenzz16</a
+            >
+          </p>
+        </div>
 
         <div class="button-container">
           <a href="https://www.reddit.com/r/robloxjailbreak/" target="_blank">
@@ -84,15 +156,37 @@
               Official Jailbreak Discord Server
             </button>
           </a>
-
           <a
             href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
             target="_blank"
           >
             <button class="orange-button">Jailbreak Wiki Page</button>
           </a>
+          <a
+            href="https://github.com/JBChangelogs/JailbreakChangelogs"
+            target="_blank"
+          >
+            <button class="github-button">
+              <i data-lucide="github"></i> View on GitHub
+            </button>
+          </a>
+        </div>
+        <div id="github-info">
+          <p>
+            This website is open source. Feel free to
+            <a
+              href="https://github.com/JBChangelogs/JailbreakChangelogs/issues/new"
+              target="_blank"
+              >report any issues</a
+            >.
+          </p>
         </div>
       </footer>
     </div>
+    <script src="scripts/changelogsviewer.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
   </body>
 </html>
