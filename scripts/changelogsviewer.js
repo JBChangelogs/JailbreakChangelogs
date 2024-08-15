@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchResultsContainer.innerHTML =
           "<div class='search-results-content'><p>No results found.</p></div>";
       }
-      searchResultsContainer.style.display = "block";
+      searchResultsContainer.style.display = "flex";
 
       if (shouldScroll) {
         scrollToSearchResults();
