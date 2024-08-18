@@ -2917,7 +2917,7 @@ Two new vehicles were added:
 - NEW: The Scorpion by @PlasmaZillah
 - Next level of Jailbreak speeds, hitting 500+ mph on the dragstrip with rocket fuel.
 - Features custom startup sound and rocket booster sounds, boost, and effects.
-- Spawns on a stage made by @Phindr.
+- Spawns on a stage made by @Phindr
 - Tune by @ShadowSamurai_720
 - Features third body color edited through Interior Detail.
 
