@@ -213,17 +213,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function performSearch(shouldScroll = false) {
-    // console.log("Performing search");
-    const searchTerm = searchInput.value.toLowerCase();
-    // console.log("Search term:", searchTerm);
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    if (searchTerm.length === 0) {
+      clearSearch();
+      return;
+    }
+
     try {
       const filteredItems = changelogItems.filter(
         (item) =>
           item.content.toLowerCase().includes(searchTerm) ||
           item.date.toLowerCase().includes(searchTerm)
       );
-
-      // console.log("Filtered items:", filteredItems);
 
       if (filteredItems.length > 0) {
         renderSearchResults(filteredItems);
