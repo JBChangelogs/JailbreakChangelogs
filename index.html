@@ -50,9 +50,9 @@
     />
   </head>
   <body>
-    <div id="news-ticker">
+    <!-- <div id="news-ticker">
       <p>JAILBREAK HITS 7 BILLION VISITS!! 🎉🎉🎉</p>
-    </div>
+    </div> -->
 
     <div id="main-container" class="container">
       <div class="sidebar-image-wrapper">
@@ -94,17 +94,19 @@
         </div>
         <form id="search-form">
           <div id="search-container">
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search changelogs..."
-              inputmode="search"
-              enterkeyhint="search"
-            />
-
-            <button type="submit" id="searchButton">Search</button>
-            <button type="button" id="clearSearch">Clear</button>
+            <input type="text" id="searchInput" placeholder="Search..." />
+            <div
+              style="display: flex; justify-content: space-between; width: 100%"
+            >
+              <button id="searchButton" style="width: calc(50% - 5px)">
+                Search
+              </button>
+              <button id="clearSearch" style="width: calc(50% - 5px)">
+                Clear
+              </button>
+            </div>
           </div>
+
           <div id="searchResults"></div>
         </form>
       </div>

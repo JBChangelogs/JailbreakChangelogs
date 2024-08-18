@@ -109,7 +109,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  /* padding-top: 44px; Height of the news ticker */
 }
+
 #news-ticker {
   width: 100%;
   background-color: #ff5f29;
@@ -118,11 +121,11 @@ body {
   white-space: nowrap;
   box-sizing: border-box;
   padding: 10px 0;
-  position: sticky;
+  position: absolute; /* Change from fixed to absolute */
   top: 0;
   left: 0;
   z-index: 1001;
-  height: 44px; /* Set a fixed height */
+  height: 44px;
 }
 
 #news-ticker p {
@@ -132,7 +135,7 @@ body {
   line-height: 1;
   animation: scroll-left 15s linear infinite;
   margin: 0;
-  padding-left: 100%; /* Ensure the text starts from the right */
+  padding-left: 100%;
 }
 
 @keyframes scroll-left {
@@ -155,18 +158,20 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* position: sticky; */
-  top: 44px; /* Position right below the news ticker */
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  margin: 0;
-  width: calc(100vw - 40px);
   box-sizing: border-box;
 }
+
 .header-logo {
-  height: 60px; /* Adjust this value as needed */
+  height: 60px;
   width: auto;
   opacity: 0;
   animation: fadeIn 3s forwards;
+  margin-right: 20px;
 }
 @keyframes fadeIn {
   to {
@@ -196,12 +201,44 @@ header {
   z-index: -1;
   margin-left: 20px;
 }
+
 .sidebar-image {
   width: 100%;
   height: auto;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+
+#searchButton,
+#clearSearch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 8px 16px;
+  height: 40px; /* Set a fixed height */
+  font-size: 16px;
+  background-color: var(--blue-button-bg);
+  color: var(--blue-button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+#searchButton:hover,
+#clearSearch:hover {
+  background-color: var(--blue-button-hover-bg);
+  color: var(--blue-button-hover-text);
+}
+
+/* #search-container > div {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+} */
+
 #navigation-container {
   display: flex;
   width: calc(100vw - 40px);
@@ -226,8 +263,6 @@ header {
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: border-color 0.3s, box-shadow 0.3s;
-  /* height: 40px; /* Set a fixed height to match the select */
-  /* it is often noticed that it does not match the select */
 }
 #searchInput:hover,
 #searchInput:focus {
@@ -247,11 +282,11 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-top: 10px;
   z-index: 999999;
-  margin-right: 20px;
   position: absolute;
   max-height: 60vh; /* Limit the height of search results */
   overflow-y: auto; /* Enable vertical scrolling */
   padding: 10px 0; /* Add some padding at the top and bottom */
+  width: calc(100% - 440px); /* Adjust based on your layout */
 }
 .search-results-content {
   padding: 10px;
@@ -315,8 +350,6 @@ header {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  /*height: 40px; /* Set a fixed height to match the search input */
-  /* height does not work on other browsers... commenting it out*/
 }
 .pagination-container {
   /* instead set the height here */
@@ -508,7 +541,7 @@ footer {
 .orange-button:hover {
   background-color: var(--orange-button-hover-bg);
 }
-/* TODO: remplacer avec 1280px */ 
+/* TODO: remplacer avec 1280px */
 
 @media (max-width: 1280px) {
   .sidebar-image-wrapper {
@@ -554,11 +587,11 @@ footer {
     align-items: center;
     margin-top: 10px;
   }
-  #pageSelect {
+  /* #pageSelect {
     order: 3;
     width: 100%;
     margin-top: 10px;
-  }
+  } */
   .button-container {
     order: 4;
     display: grid;
@@ -587,44 +620,65 @@ footer {
   }
   #main-container {
     padding: 15px;
+    padding-top: 0;
+  }
+  .sidebar-image-wrapper {
+    position: static;
+    width: 100%;
+    max-width: 480px;
+    transform: none;
+    margin: 0 auto;
+    /* padding-top: 44px; /* Add padding equal to news ticker height */
+  }
+
+  .sidebar-image {
+    display: block;
+    margin: 0 auto;
   }
   #news-ticker {
-    height: 47px; /* Slightly smaller on mobile */
+    height: 34px; /* Slightly smaller on mobile */
   }
 
   #news-ticker p {
-    font-size: 27px; /* Smaller font size on mobile */
+    font-size: 18px; /* Smaller font size on mobile */
   }
   header {
     flex-direction: column;
     text-align: center;
-    padding: 10px;
+    position: sticky;
+    top: 0;
   }
   #navigation-container {
     flex-direction: column;
     align-items: stretch;
   }
   #search-container {
-    order: 2;
-    flex-grow: 1;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 20px;
+    gap: 10px;
+  }
+  #searchResults {
+    width: calc(100% - 30px); /* Adjust based on your layout */
+    left: 15px;
+    right: 15px;
   }
   #navigation-container {
     padding-left: 0;
     padding-right: 0;
   }
   #searchInput {
-    flex-grow: 1;
-    margin-right: 5px;
+    flex: 1 1 100%;
+    margin-right: 0;
   }
   #pageInfoContainer {
     order: 2;
-    text-align: right;
+    text-align: center;
     margin-bottom: 10px;
+    /* margin-left: 0;
+    transform: none; */
+    width: 50%;
   }
   #pageInfo {
     font-size: 15px;
@@ -645,7 +699,19 @@ footer {
   }
   #searchButton,
   #clearSearch {
-    width: auto;
+    flex: 0 1 calc(50% - 5px);
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: var(--blue-button-bg);
+    color: var(--blue-button-text);
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  #searchButton:hover,
+  #clearSearch:hover {
+    background-color: var(--blue-button-hover-bg);
+    color: var(--blue-button-hover-text);
   }
 }
 @media (max-width: 480px) {
