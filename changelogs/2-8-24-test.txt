@@ -1844,6 +1844,7 @@ Two new vehicles were added:
 - Improved Performance, and new "Level of Detail" setting! Your performance improvement may vary depending on your machine.
 - Use code "NPC" for 9,999 cash! This weekend only!
 - Improved vehicle stability.
+- Removed the Gravity command.
 
 # October 8th 2022 / FALL 2022 / SEASON 12 UPDATE
 
