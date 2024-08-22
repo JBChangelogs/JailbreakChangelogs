@@ -33,7 +33,7 @@ We welcome contributions, feedback, and suggestions to enhance the changelog exp
 A heartfelt thank you to our dedicated team:
 
 - **Owner:** [Jalenzz16](https://github.com/Jalenzzz)
-- **Collaborator:** [v3kmw](https://github.com/v3kmww/)
+- **Collaborator:** [v3kmw](https://github.com/v3kmmw/)
 
 ## Stay Connected
 
