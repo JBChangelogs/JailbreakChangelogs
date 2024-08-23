@@ -110,7 +110,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  /* padding-top: 44px; Height of the news ticker */
+  padding-top: 44px; /* Height of the news ticker */
 }
 
 #news-ticker {
