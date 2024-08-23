@@ -1,5 +1,5 @@
 > [!CAUTION]
-> The only official sources for information and updates about this repository are https://jailbreakchangelogs.xyz and the game's [official Discord server](https://discord.gg/jailbreak). Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
+> The only official sources for information and updates about the changelogs are https://jailbreakchangelogs.xyz and the game's [official Discord server](https://discord.gg/jailbreak). Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
 # Roblox Jailbreak Changelogs
 
