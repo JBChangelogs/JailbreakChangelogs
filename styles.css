@@ -628,7 +628,7 @@ footer {
     max-width: 480px;
     transform: none;
     margin: 0 auto;
-    /* padding-top: 44px; /* Add padding equal to news ticker height */
+    padding-top: 44px; /* Add padding equal to news ticker height */
   }
 
   .sidebar-image {
