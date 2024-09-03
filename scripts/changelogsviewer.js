@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const contentElement = document.getElementById("content");
   const pageSelectElement = document.getElementById("pageSelect");
-  const pageInfoElement = document.getElementById("pageInfo");
+  // const pageInfoElement = document.getElementById("pageInfo");
   const imageElement = document.querySelector(".sidebar-image");
   const themeToggle = document.getElementById("theme-toggle");
   const currentTheme = localStorage.getItem("theme") || "light";
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
       option.selected = i === currentPage;
       pageSelectElement.appendChild(option);
     }
-    pageInfoElement.textContent = `${currentPage} / ${totalPages}`;
+    // pageInfoElement.textContent = `${currentPage} / ${totalPages}`;
   }
 
   function adjustSelectWidth() {

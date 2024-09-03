@@ -1776,7 +1776,7 @@ Two new vehicles were added:
 -   Robbery open times for Museum, PowerPlant, Train, CargoShip, CargoPlane, Small Stores, Tomb, and Casino now match the Bank and Jewelry Store in VIP Servers.
 -   Updated prison region to (hopefully) be more accurate.
 -   Museum assists now round up to no longer give cents.
--   Moved Donut Store prompt away from Badcc and onto the Register.
+-   Moved Donut Store prompt away from @Badcc and onto the Register.
 -   Drone motor particles are now off when spawned.
 -   Fixed an issue where Classic's spare tire rim was inverted.
 -   Fixed vehicles with metal or glass windows, showing poor paint coloring.
@@ -2219,10 +2219,10 @@ Two new vehicles were added:
 - - Added new Server Select building in Trade World.
 - Added new Tire Style category and renamed Tires to Tire Sticker.
 - - Added HelloVG Tire Stickers
-- - Added NoobFreakT Tire Stickers
-- - Added PGHLFilms Tire Stickers
-- - Added DenisDaily Tire Stickers
-- - Added KraoESP Tire Stickers
+- - Added @NoobFreakT Tire Stickers
+- - Added @PGHLFilms Tire Stickers
+- - Added @DenisDaily Tire Stickers
+- - Added @KraoESP Tire Stickers
 - - Added Thin, Thick, Classic versions of Tires.
 - - Added Thin, Thick, Classic versions of new Realism Tires.
 - Changed vehicle Glows to be brighter and evenly lit.
