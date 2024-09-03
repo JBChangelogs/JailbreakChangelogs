@@ -13,7 +13,7 @@
   --footer-link-color: #005994;
   --footer-link-hover-color: #003a61;
   --header-bg: #003a61;
-  --header-text: #ffffff;
+  --header-text: #dbdbdb;
 }
 .dark-theme {
   --bg-color: #222222;
@@ -29,7 +29,7 @@
   --footer-text-color: #cccccc;
   --footer-link-color: #4db8ff;
   --footer-link-hover-color: #80ccff;
-  --header-bg: #2e2e2e;
+  --header-bg: #424242;
   --header-text: #ffffff;
 }
 body {
@@ -75,7 +75,7 @@ body {
 }
 .mention {
   display: inline-block;
-  background-color: #d3ecfd;
+  background-color: #cce7fb;
   border-radius: 4px;
   padding: 2px 4px;
   font-weight: bold;
@@ -88,7 +88,7 @@ body {
   color: #1da1f2;
 }
 .mention:hover {
-  background-color: #cce7fb;
+  background-color: #b1defc;
   cursor: pointer;
 }
 .dark-theme .mention {
