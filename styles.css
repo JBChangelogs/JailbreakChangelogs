@@ -104,7 +104,7 @@ body {
   background-color: #22303c;
 }
 #main-container {
-  max-width: 800px;
+  max-width: 100%;
   padding: 20px;
   min-height: 100vh;
   display: flex;
@@ -172,6 +172,7 @@ header {
   opacity: 0;
   animation: fadeIn 3s forwards;
   margin-right: 20px;
+  border-radius: 10px;
 }
 @keyframes fadeIn {
   to {
@@ -383,7 +384,7 @@ button {
 }
 #content {
   flex: 1;
-  width: 65vw;
+  width: 100vw;
 }
 .button-container a {
   text-decoration: none !important;
