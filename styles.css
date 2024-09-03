@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #ffffff;
+  --bg-color: #dbdbdb;
   --text-color: #333333;
   --blue-button-bg: #005994;
   --blue-button-text: #ffffff;
@@ -16,7 +16,7 @@
   --header-text: #ffffff;
 }
 .dark-theme {
-  --bg-color: #1a1a1a;
+  --bg-color: #222222;
   --text-color: #e0e0e0;
   --blue-button-bg: #005fa3;
   --blue-button-text: #ffffff;
@@ -41,42 +41,41 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 #content h1 {
-  font-size: 24px;
-  color: var(--blue-button-bg);
-  border-bottom: 2px solid var(--blue-button-bg);
+  font-size: 40px;
+  color: var(--footer-link-color);
+  border-bottom: 2px solid var(--footer-link-color);
   padding-bottom: 10px;
   margin-top: 30px;
   margin-bottom: 20px;
   font-family: "Bangers", Arial, Helvetica, sans-serif;
-  font-size: 30px;
 }
 #content h2 {
-  font-size: 20px;
+  font-size: 35px;
   color: var(--orange-button-bg);
   margin-top: 25px;
   margin-bottom: 15px;
   font-family: "Bangers", Arial, Helvetica, sans-serif;
-  font-size: 25px;
 }
 #content p {
   margin-bottom: 10px;
   padding-left: 20px;
   position: relative;
   line-height: 1.6;
+  font-size: 20px;
 }
 #content .bullet {
   position: absolute;
   left: 0;
-  color: var(--blue-button-bg);
+  color: var(--footer-link-color);
 }
 #content .sub-bullet {
   position: absolute;
   left: 10px;
-  color: var(--blue-button-bg);
+  color: var(--footer-link-color);
 }
 .mention {
   display: inline-block;
-  background-color: #e8f5fe;
+  background-color: #d3ecfd;
   border-radius: 4px;
   padding: 2px 4px;
   font-weight: bold;
@@ -90,6 +89,7 @@ body {
 }
 .mention:hover {
   background-color: #cce7fb;
+  cursor: pointer;
 }
 .dark-theme .mention {
   background-color: #192734;
@@ -104,7 +104,6 @@ body {
   background-color: #22303c;
 }
 #main-container {
-  max-width: 100%;
   max-width: 100%;
   padding: 20px;
   min-height: 100vh;
@@ -432,7 +431,7 @@ button {
 
 footer {
   margin-top: 20px;
-  text-align: center;
+  text-align: left;
 }
 #footer-text {
   margin: 20px 0;
@@ -440,11 +439,14 @@ footer {
   border-radius: 8px;
   font-size: 1.1em;
   line-height: 1.5;
-  background-color: rgba(0, 0, 0, 0.1); /* Slight background for light mode */
+  background-color: rgba(0, 0, 0, 0.1);
   color: var(--text-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  text-align: center;
+  max-width: 1220px;
 }
+
 .dark-theme #footer-text {
   background-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
@@ -473,8 +475,11 @@ footer {
   text-align: center;
   font-size: 16px;
   line-height: 1.6;
+  max-width: 1200px;
+  margin-left: 0; /* Add this line to align to the left */
 }
-.dev-message p {
+
+-message p {
   margin: 12px 0;
 }
 .dev-message p:first-child {
@@ -494,7 +499,11 @@ footer {
   margin-top: 20px;
   color: var(--text-color);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+  max-width: 1220px;
+  margin-left: 0;
 }
+
 .release-dates-info p {
   margin: 0;
   line-height: 1.5;
@@ -510,7 +519,7 @@ footer {
 .button-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 15px;
   margin-top: 30px;
 }
@@ -647,6 +656,10 @@ footer {
   .release-dates-info {
     padding: 15px;
     font-size: 14px;
+  }
+  footer {
+    margin-top: 20px;
+    text-align: center;
   }
 
   #footer-text {
