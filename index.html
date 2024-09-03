@@ -74,7 +74,6 @@
             data-src="./images/logo_animated.gif"
           />
         </a>
-
         <h1 id="main-title">ChangeLogs</h1>
         <button
           id="theme-toggle"
@@ -86,12 +85,6 @@
         </button>
       </header>
       <div id="navigation-container">
-        <div class="pagination-container">
-          <select id="pageSelect"></select>
-          <div id="pageInfoContainer">
-            <span id="pageInfo">1/X</span>
-          </div>
-        </div>
         <form id="search-form">
           <div id="search-container">
             <input type="text" id="searchInput" placeholder="Search..." />
@@ -106,11 +99,13 @@
               </button>
             </div>
           </div>
-
-          <div id="searchResults"></div>
         </form>
+        <select id="pageSelect"></select>
       </div>
-
+      <!-- <div id="pageInfoContainer">
+        <span id="pageInfo">1/X</span>
+      </div> -->
+      <div id="searchResults"></div>
       <section id="content"></section>
       <footer>
         <h3 class="dev-message">
