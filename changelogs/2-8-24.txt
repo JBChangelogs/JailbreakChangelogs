@@ -1721,7 +1721,7 @@ Two new vehicles were added:
 
 ## Vehicle performance:
 
--   ShadowSamurai720 has improved some existing vehicles for better driving or fairer performance. You can find these below.
+-   @ShadowSamurai720 has improved some existing vehicles for better driving or fairer performance. You can find these below.
 -   Camaro is now quicker from a stop for Level 1 and Level 5 engines. Top speed increased from 123 to 140.
 -   Pickup is now quicker from a stop.
 -   Fixed an issue where Deja would slowdown when reaching top speed. You can now reach 140.
@@ -1827,7 +1827,7 @@ Two new vehicles were added:
 - Extended railroad track that reaches Crater City!
 - New Phindr tires made by @coolgamr1638!
 - New DatBrian tires made by @Shadowg53632543!
-- Revamped tire decals thanks to @_ShadowSamurai!
+- Revamped tire decals thanks to @ShadowSamurai!
 - Season pass gifting
 - Plus a whole lot more!
 
@@ -2526,7 +2526,7 @@ Two new vehicles were added:
 - Fixed boat texture issues in garages.
 - Reduced uncontrollable shake on boats in reverse.
 - Reduced boat reverse speeds.
-- Added new boat tunes by Shadow.
+- Added new boat tunes by @ShadowSamurai720.
 
 ## World Map
 
