@@ -115,7 +115,7 @@ body {
 
 #news-ticker {
   width: 100%;
-  background-color: #ff5f29;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
   color: #ffffff;
   overflow: hidden;
   white-space: nowrap;
