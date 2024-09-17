@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentTheme = localStorage.getItem("theme") || "light";
   const searchForm = document.getElementById("search-form");
   const body = document.body;
+  const popupContainer = document.getElementById("popup-container");
+  const dismissButton = document.getElementById("dismiss-popup");
+
   const itemsPerPage = 1;
   let currentPage = 1;
   let totalPages;
@@ -52,6 +55,21 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   observer.observe(logoImage);
+
+  const popupContent = document.querySelector(".popup-content");
+  popupContainer.style.display = "block";
+  document.getElementById("main-container").classList.add("blur-background");
+
+  if (currentTheme === "dark") {
+    popupContent.classList.add("dark-theme");
+  }
+  dismissButton.addEventListener("click", function () {
+    popupContainer.style.display = "none";
+
+    document
+      .getElementById("main-container")
+      .classList.remove("blur-background");
+  });
 
   const imageObserver = new IntersectionObserver(
     (entries) => {
@@ -414,6 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
   themeToggle.addEventListener("click", () => {
     const newTheme = body.classList.contains("dark-theme") ? "light" : "dark";
     updateTheme(newTheme);
+    popupContainer.classList.toggle("dark-theme", newTheme === "dark");
   });
 
   const searchInput = document.getElementById("searchInput");

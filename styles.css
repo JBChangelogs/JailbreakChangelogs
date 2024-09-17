@@ -112,6 +112,56 @@ body {
   position: relative;
   padding-top: 44px; /* Height of the news ticker */
 }
+#main-container.blur-background {
+  filter: blur(10px);
+}
+.popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--text-color);
+  display: none;
+  z-index: 100000;
+}
+
+.popup-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--bg-color);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+.popup-content h2 {
+  color: var(--orange-button-bg);
+}
+.popup-content p {
+  color: var(--text-color);
+}
+.dismiss-popup {
+  background-color: var(--blue-button-bg);
+
+  color: var(--blue-button-text);
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.dismiss-popup:hover {
+  background-color: var(--blue-button-hover-bg);
+
+  color: var(--blue-button-hover-text);
+}
+
+/* Add this CSS rule to blur the background when the popup is visible */
+.blur-background {
+  filter: blur(5px);
+}
 
 #news-ticker {
   width: 100%;
