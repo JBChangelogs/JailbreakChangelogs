@@ -52,3 +52,4 @@ This is an unofficial, fan-made project and is not affiliated with or endorsed b
 ---
 
 We hope this project enhances your Jailbreak experience. Happy gaming!
+Leave a ⭐ if you like the project.
