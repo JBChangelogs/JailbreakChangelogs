@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invite Bot</title>
+    <link rel="stylesheet" href="styles/botinvite.css" />
+    <script>
+      // Initialize countdown value
+      let countdownValue = 3;
+
+      // Function to update the countdown display and redirect when it reaches zero
+      function startCountdown() {
+        const countdownElement = document.getElementById("countdown");
+        const countdownInterval = setInterval(() => {
+          // Update the countdown display
+          countdownElement.textContent = countdownValue;
+          countdownValue--;
+
+          // Redirect to the Discord authorization page once countdown reaches zero
+          if (countdownValue < 0) {
+            clearInterval(countdownInterval);
+            window.location.href = "";
+          }
+        }, 1000);
+      }
+
+      // Start the countdown once the document is fully loaded
+      document.addEventListener("DOMContentLoaded", startCountdown);
+    </script>
+  </head>
+  <body>
+    <p>
+      Redirecting you to the bot invite page in
+      <span id="countdown">3</span> seconds...
+    </p>
+  </body>
+</html>

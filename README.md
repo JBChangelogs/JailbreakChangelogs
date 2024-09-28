@@ -33,7 +33,7 @@ We welcome contributions, feedback, and suggestions to enhance the changelog exp
 A heartfelt thank you to our dedicated team:
 
 - **Owner:** [Jalenzz16](https://github.com/Jalenzzz)
-- **Collaborator:** [v3kmw](https://github.com/v3kmmw/)
+- **Owner:** [v3kmw](https://github.com/v3kmmw/)
 
 ## Stay Connected
 
@@ -43,7 +43,8 @@ A heartfelt thank you to our dedicated team:
   - [@badcc](https://x.com/badccvoid)
   - [@badimo](https://x.com/badimo) (Official Jailbreak account)
 
-- Join our [Discord community](https://discord.com/invite/tWbDg7MbUU) to discuss changes and connect with other players.
+- Join our [Discord community](https://discord.com/invite/tWbDg7MbUU) to discuss changes and connect with other players or make feature requests.
+- For support, reach out to [support@jailbreakchangelogs.xyz](mailto:support@jailbreakchangelogs.xyz)
 
 ## Disclaimer
 

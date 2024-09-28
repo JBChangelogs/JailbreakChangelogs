@@ -1,0 +1,97 @@
+body {
+  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358368/backgrounds/9.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: #e0e0e0;
+}
+.content-wrapper {
+  background-color: rgba(33, 37, 41, 0.9);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+.navbar {
+  background-color: #212a31 !important;
+}
+.accordion-item {
+  background-color: rgba(48, 52, 57, 0.8);
+  border-color: #444;
+}
+.accordion-button {
+  background-color: rgba(33, 37, 41, 0.9);
+  color: #e0e0e0;
+}
+.accordion-button:not(.collapsed) {
+  background-color: rgba(48, 52, 57, 0.9);
+  color: #ffffff;
+}
+.accordion-button::after {
+  filter: invert(1);
+}
+.btn-primary {
+  background-color: #124e66 !important;
+  border-color: #124e66 !important;
+}
+.btn-primary:hover {
+  background-color: #212a31 !important;
+  border-color: #212a31 !important;
+}
+.card {
+  background-color: rgba(33, 37, 41, 0.9);
+  border-color: #444;
+}
+.card-header {
+  background-color: rgba(48, 52, 57, 0.9);
+  border-color: #444;
+}
+a {
+  color: #6ea8fe;
+}
+a:hover {
+  color: #9ec5fe;
+}
+
+footer a {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #fff;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+footer a:hover {
+  color: #f0f0f0; /* Slightly lighter shade of white */
+}
+
+footer a:hover::after {
+  transform: scaleX(1);
+}
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}

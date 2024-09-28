@@ -1,0 +1,100 @@
+.hero {
+  padding: 80px 0;
+  text-align: center;
+  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358372/backgrounds/1.png");
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+  position: relative;
+  color: white;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+.feature-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+.feature-card {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 20px;
+  transition: transform 0.2s;
+}
+.btn-custom {
+  width: 200px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+footer a {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #fff;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+footer a:hover {
+  color: #f0f0f0; /* Slightly lighter shade of white */
+}
+
+footer a:hover::after {
+  transform: scaleX(1);
+}
+
+.btn-custom {
+  background-color: #032b44 !important; /* Light theme background color */
+  color: white; /* Light theme text color */
+  border: none; /* Remove default border if needed */
+  font-size: 1rem;
+}
+
+.btn-custom:hover {
+  background-color: #212a31 !important; /* Darker blue on hover for light mode */
+  color: #ffffff; /* Keep text color white */
+}
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+  .alert {
+    font-size: 0.9rem;
+  }
+  .bi-exclamation-triangle-fill {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}

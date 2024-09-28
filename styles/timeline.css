@@ -1,0 +1,734 @@
+/* Dark theme */
+[data-bs-theme="dark"] body {
+  --body-bg-color: #2e3944;
+  --timeline-entry-bg-color: #212a31;
+  --text-color: #d3d9d4;
+  --header-text: #d3d9d4;
+  --footer-link-color: #ff6347; /* Tomato */
+  --footer-link-hover-color: #ff7f50; /* Coral */
+  --button-primary-bg: #124e66; /* Orange Red */
+  --button-primary-text: #eeeeee;
+  --button-primary-hover-bg: #212a31; /* Tomato */
+  --selection-bg: #4682b4; /* Steel Blue */
+  --selection-text: #ffffff;
+  --glow-color: #748d92;
+  --hover-bg-color: #5a5a5a;
+
+  --reddit-color: #ff4500; /* Reddit Orange */
+  --discord-color: #7289da; /* Discord Blurple */
+  --wiki-color: #8ab4f8; /* Lighter Wiki Blue */
+  --github-color: #ffffff; /* GitHub White */
+
+  --gray-100: #333333;
+  --gray-200: #444444;
+  --gray-300: #555555;
+  --gray-400: #666666;
+  --gray-500: #777777;
+  --gray-600: #888888;
+  --gray-700: #999999;
+  --gray-800: #aaaaaa;
+  --gray-900: #bbbbbb;
+}
+/* Back to Top Button */
+#backToTop {
+  display: none; /* Initially hidden */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--button-primary-bg);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, display 0.3s;
+  z-index: 1000;
+}
+
+#backToTop.show {
+  display: block; /* Show when the 'show' class is added */
+}
+
+#backToTop:hover {
+  background-color: var(--button-primary-hover-bg);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#main-container {
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  transition: transform 0.3s ease-out;
+  background-color: var(--bg-color);
+  padding: 2rem 0;
+  color: var(--text-color);
+}
+
+footer.hide {
+  transform: translateY(100%);
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--body-bg-color);
+}
+
+.scrollMe {
+  animation: scroll 20s linear infinite; /* adjust duration and add infinite */
+}
+
+#timeline.scrollMe {
+  animation-name: scroll;
+
+  animation-duration: 20s;
+
+  animation-timing-function: linear;
+
+  animation-iteration-count: infinite;
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+.timeline-entry-container.right .timeline-entry h1,
+.timeline-entry-container.right .timeline-entry h2,
+.timeline-entry-container.right .timeline-entry h3,
+.timeline-entry-container.right .timeline-entry p,
+.timeline-entry-container.right .timeline-entry .accordion {
+  text-align: left; /* Ensure these elements are left-aligned */
+}
+.timeline-entry-container.right .entry-title {
+  text-align: right; /* Keep the title aligned to the right */
+}
+.timeline {
+  position: relative;
+  margin: 0 auto;
+  padding: 20px 0;
+  width: 80%;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--text-color); /* Use the same text color as the body */
+  transform: translateX(-50%);
+}
+
+[data-bs-theme="dark"] .timeline::before {
+  background-color: #748d92; /* Dark theme timeline line color */
+}
+
+.timeline-entry {
+  background-color: var(--timeline-entry-bg-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 0.3s ease; /* Add transition for smooth animation */
+}
+/* Hover effect for timeline entries */
+.timeline-entry:hover {
+  transform: scale(1.03); /* Slightly increase size on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+}
+/* Add a subtle glow effect on hover */
+.timeline-entry::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  box-shadow: 0 0 20px #2e3944; /* Adjust color as needed */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.timeline-entry:hover::after {
+  opacity: 1;
+}
+/* Ensure content stays above the glow effect */
+.timeline-entry > * {
+  position: relative;
+  z-index: 1;
+}
+.entry-title {
+  transition: transform 0.3s ease;
+}
+
+.timeline-entry:hover .entry-title {
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+.timeline-entry-container {
+  position: relative;
+  width: 50%;
+  padding: 10px 40px;
+  box-sizing: border-box;
+}
+
+.timeline-entry-container.left {
+  left: 0;
+}
+
+.timeline-entry-container.right {
+  left: 50%;
+}
+
+.timeline-entry-container.left .timeline-entry {
+  margin-left: auto;
+  text-align: left;
+}
+
+.timeline-entry-container.right .timeline-entry {
+  margin-right: auto;
+  text-align: right;
+}
+
+.btn-custom {
+  background-color: #124e66 !important  ; /* Light theme background color */
+  color: white; /* Light theme text color */
+  border: none; /* Remove default border if needed */
+}
+
+.btn-custom:hover {
+  background-color: #212a31 !important; /* Darker blue on hover for light mode */
+  color: white; /* Keep text color white */
+}
+/* Dark theme styles */
+[data-bs-theme="dark"] .btn-custom {
+  background-color: #0056b3; /* Dark theme background color */
+  color: #fff; /* Dark theme text color */
+}
+
+[data-bs-theme="dark"] .btn-custom:hover {
+  background-color: #004494; /* Darker color on hover for dark mode */
+  color: #fff; /* Keep text color visible */
+}
+
+/* Override Bootstrap's btn-primary class */
+.btn-primary {
+  background-color: var(
+    --button-primary-bg
+  ) !important; /* Use your custom variable */
+  border-color: var(--button-primary-bg) !important;
+  color: var(--button-primary-text) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(--button-primary-hover-bg) !important;
+  border-color: var(--button-primary-hover-bg) !important;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5);
+}
+
+.btn-close {
+  color: #ffffff;
+}
+
+.btn-close:hover {
+  color: #ff6347;
+}
+.gradient-bg {
+  background: linear-gradient(
+    to right,
+    var(--button-primary-bg),
+    var(--button-secondary-bg)
+  ) !important;
+}
+
+.svg-icon {
+  fill: var(--text-color) !important;
+  stroke: var(--button-primary-bg) !important;
+}
+
+.semi-transparent-bg {
+  background-color: rgba(var(--glow-color), 0.5) !important;
+}
+.custom-spinner {
+  border-top-color: #31b1ff; /* Blue */
+  border-right-color: #31b1ff; /* Blue */
+  border-bottom-color: #ff341c; /* Orange */
+  border-left-color: #ff341c; /* Orange */
+}
+
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  background-color: #ffffff;
+}
+
+#loading-overlay.show {
+  display: flex; /* Enable flexbox */
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  height: 100vh; /* Optional: full height for overlay */
+}
+
+#loading-overlay .loading-logo {
+  width: 300px; /* Adjust the width of your logo as needed */
+  height: auto; /* Maintain the aspect ratio */
+}
+
+#loading-overlay .loading-text {
+  font-size: 1.5rem; /* Font size for loading text */
+  font-weight: bold; /* Bold text */
+  margin-top: 10px; /* Space above loading text */
+}
+
+[data-bs-theme="dark"] #loading-overlay {
+  background-color: #2e3944; /* Dark background */
+}
+
+[data-bs-theme="dark"] #loading-overlay .loading-text {
+  color: #ffffff; /* White text in dark theme */
+}
+
+.responsive-text {
+  font-size: 1rem;
+}
+.timeline-logo {
+  height: 50px; /* Default height for larger screens */
+  width: auto; /* Maintain aspect ratio */
+  object-fit: contain;
+  max-width: 100%; /* Ensure it doesn't overflow its container */
+}
+#content-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#content {
+  flex: 1;
+  min-width: 0;
+}
+
+#content h1 {
+  color: var(--footer-link-color);
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
+  border-bottom: 2px solid var(--footer-link-color);
+}
+
+#content h2 {
+  color: var(--orange-button-bg);
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
+}
+
+#content h3 {
+  color: var(--text-color);
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
+}
+
+#content p {
+  color: var(--text-color);
+}
+
+#content .bullet {
+  color: var(--footer-link-color);
+}
+
+#content .sub-bullet {
+  color: var(--footer-link-color);
+}
+
+.mention {
+  color: var(--mention-color-light);
+  background-color: var(--mention-bg);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.mention .at {
+  color: var(--at-color-light);
+}
+
+.mention .username {
+  color: var(--username-color-light);
+}
+
+.mention:hover {
+  background-color: var(--mention-hover-bg);
+  cursor: pointer;
+}
+
+[data-bs-theme="dark"] .mention {
+  color: var(--mention-color-dark);
+  background-color: var(--mention-bg);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+[data-bs-theme="dark"] .mention .at {
+  color: var(--at-color-dark);
+}
+
+[data-bs-theme="dark"] .mention .username {
+  color: var(--username-color-dark);
+}
+
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+body,
+p,
+span {
+  color: var(--text-color);
+}
+
+#theme-toggle {
+  padding: 0.375rem 0.75rem;
+  font-size: 1.1rem;
+}
+.bi-moon-stars-fill {
+  color: #ffffffaf; /* or any other bright color */
+}
+.custom-navbar-color {
+  background-color: #4b4b4b;
+}
+[data-bs-theme="dark"] .custom-navbar-color {
+  background-color: #212a31; /* darker blue color for dark mode */
+  color: #ffffff; /* white text color */
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+#theme-toggle {
+  border: none;
+  cursor: pointer;
+  color: var(--header-text);
+  font-size: 30px;
+  margin-left: auto;
+}
+
+/* Remove outline for all elements */
+* {
+  outline: none;
+}
+
+/* Specific styles for buttons and interactive elements */
+button:focus,
+a:focus,
+input:focus,
+select:focus {
+  box-shadow: none;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Badimo Message Card */
+.badimo-message {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.badimo-message .card-header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  text-align: center;
+  font-weight: bold;
+}
+
+.badimo-message .card-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.badimo-message .lead {
+  font-size: 1.2rem;
+  color: var(--highlight-text);
+}
+
+.badimo-message .font-italic {
+  font-style: italic;
+  color: var(--text-color);
+}
+
+.badimo-message .font-weight-bold {
+  font-weight: bold;
+  color: var(--highlight-text);
+}
+/* Bigger View Details text */
+.view-details-btn {
+  font-size: 1.7rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.timeline-entry:hover .view-details-btn {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+/* Remove duplicate accordion styling */
+.accordion-button,
+.accordion-button:not(.collapsed) {
+  background-color: transparent;
+  color: inherit;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+/* Dark theme accordion */
+[data-bs-theme="dark"] .accordion-item {
+  background-color: #2c2c2c;
+}
+
+[data-bs-theme="dark"] .accordion-button {
+  background-color: #3a3a3a;
+  color: #ffffff;
+}
+
+[data-bs-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: #748d92;
+}
+
+/* Dark theme adjustments */
+[data-bs-theme="dark"] .timeline-entry:hover::after {
+  box-shadow: 0 0 20px #748d92; /* Stronger glow for dark theme */
+}
+
+[data-bs-theme="dark"] .timeline-entry:hover .view-details-btn {
+  background-color: #748d92;
+}
+
+/* Admin Links */
+.admin-link {
+  color: var(--footer-link-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.admin-link:hover {
+  color: var(--footer-link-hover-color);
+}
+
+/* Version Info Styling */
+.version-info {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.version-info p {
+  margin: 0;
+}
+
+/* General Link Styles */
+.btn-link {
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Dark Theme Adjustments */
+[data-bs-theme="dark"] .github-link:hover {
+  background-color: #444c56; /* Lighter gray for better visibility in dark mode */
+}
+
+@media (max-width: 768px) {
+  .timeline-logo {
+    height: 40px; /* Smaller height for mobile devices */
+  }
+  .timeline {
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-entry-container {
+    width: calc(100% - 40px);
+    margin-left: 40px;
+    padding: 0;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .timeline-entry-container.left,
+  .timeline-entry-container.right {
+    left: 0 !important;
+    transform: none !important;
+  }
+
+  .timeline-entry {
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    word-wrap: break-word;
+    font-size: 0.85rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Ensure all entries are left-aligned */
+  .timeline-entry-container.left .timeline-entry,
+  .timeline-entry-container.right .timeline-entry {
+    text-align: left;
+  }
+
+  .timeline-entry * {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Adjust font sizes for different elements inside timeline entries */
+  .timeline-entry h1 {
+    font-size: 1.2rem;
+  }
+  .timeline-entry h2 {
+    font-size: 1.1rem;
+  }
+  .timeline-entry h3 {
+    font-size: 1rem;
+  }
+  .timeline-entry p,
+  .timeline-entry li {
+    font-size: 0.9rem;
+  }
+
+  .timeline-line {
+    display: none;
+  }
+
+  .timeline-entry-container::before {
+    content: "";
+    position: absolute;
+    left: -30px;
+    top: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #3498db;
+    z-index: 1;
+  }
+
+  /* Ensure images and other media are responsive */
+  .timeline-entry img,
+  .timeline-entry video,
+  .timeline-entry iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Adjust entry title for mobile */
+  .entry-title {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  /* Adjust entry content for mobile */
+  .entry-content p {
+    margin-bottom: 10px;
+  }
+
+  /* Adjust view details button for mobile */
+  .view-details-btn {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+  }
+}

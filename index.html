@@ -1,32 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Welcome to Jailbreak Changelogs, your source for the latest updates!"
+    />
+    <!-- Open Graph metadata for social media sharing -->
     <meta
       property="og:title"
       content="Jailbreak Changelogs | Latest Updates & Patch Notes"
     />
     <meta
       property="og:description"
-      content="Stay ahead of the game! Get updates on Jailbreak's latest features, bug fixes, and balance changes. Never miss a crucial update that could change the way you play the game."
+      content="Get updates on Jailbreak's latest features, bug fixes, and balance changes."
     />
     <meta
       property="og:image"
-      content="https://res.cloudinary.com/dt6ym6zrw/image/upload/v1723381289/Screen_Shot_2022-11-05_at_10.24.50_PM_wphqbc.png"
+      content="https://res.cloudinary.com/dsvlphknq/image/upload/v1727536082/changelogs/changelog-image-344.png"
     />
     <meta property="og:image:width" content="2328" />
     <meta property="og:image:height" content="1054" />
     <meta property="og:url" content="https://jailbreakchangelogs.xyz" />
     <meta property="og:type" content="website" />
+
+    <!-- Additional metadata for SEO -->
     <meta
       name="description"
       content="Jailbreak Changelogs: Your go-to source for the latest updates, patch notes, and feature releases in Roblox Jailbreak. Stay informed about new vehicles, weapons, map changes, and more!"
     />
+    <meta name="robots" content="index, follow" />
     <meta
       name="keywords"
       content="Jailbreak, Roblox, changelogs, updates, patch notes, game features, Jailbreak updates"
     />
+
+    <!-- Twitter Card metadata -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
@@ -38,166 +48,274 @@
     />
     <meta
       name="twitter:image"
-      content="https://res.cloudinary.com/dt6ym6zrw/image/upload/v1723380961/Screen_Shot_2022-11-07_at_10.25.04_PM_sznatb.png"
+      content="https://res.cloudinary.com/dsvlphknq/image/upload/v1727536082/changelogs/changelog-image-344.png"
     />
-
-    <title>Jailbreak | Changelogs</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>Jailbreak Changelogs | Home</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="styles/homepage.css" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   </head>
+
   <body>
-    <div id="news-ticker">
-      <p>
-        <span>MAJOR WEBSITE UPDATE PUSHED TO NEXT WEEK! 👀</span>
+    <nav class="navbar navbar-expand-lg custom-navbar-color sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <img
+            class="navbar-logo"
+            src="https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs_homepage.png"
+            alt="Home Page Logo"
+          />
+        </a>
+
+        <!-- Container for navbar toggler and profile picture on mobile -->
+        <div class="d-flex d-lg-none align-items-center">
+          <!-- Navbar toggler -->
+          <button
+            id="navbarToggler"
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <!-- Profile picture icon (visible on mobile) -->
+          <div class="ms-2 d-lg-none">
+            <a href="login.html">
+              <img
+                src="https://jailbreakchangelogs.xyz/favicon.ico"
+                alt="Profile"
+                class="rounded-circle"
+                width="32"
+                height="32"
+              />
+            </a>
+          </div>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item">
+              <a class="nav-link" href="changelogs.html">Changelogs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="seasons.html">Seasons</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="timeline.html">Timeline</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bot.html">Our Discord Bot</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="faq.html">FAQ</a>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link btn"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#discordOffcanvas"
+                aria-controls="discordOffcanvas"
+              >
+                Join the Discord
+              </button>
+            </li>
+            <!-- Profile picture icon (visible on desktop) -->
+            <li class="nav-item d-none d-lg-block ms-2">
+              <a
+                href="login.html"
+                title="Go to login page"
+                class="profile-link"
+              >
+                <img
+                  src="https://jailbreakchangelogs.xyz/favicon.ico"
+                  alt="Profile"
+                  class="rounded-circle"
+                  width="32"
+                  height="32"
+                />
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Offcanvas -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="discordOffcanvas"
+      aria-labelledby="discordOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="discordOffcanvasLabel">
+          Join the Changelogs Discord
+        </h5>
+        <button
+          type="button"
+          class="btn-close white-close-button"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <iframe
+          src="https://discord.com/widget?id=1286064050135896064&theme=dark"
+          width="100%"
+          height="100%"
+          allowtransparency="true"
+          frameborder="0"
+          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        ></iframe>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-content">
+        <h1>Welcome to Jailbreak Changelogs</h1>
+        <p>
+          Your source for the latest updates and patch notes in Roblox
+          Jailbreak.
+        </p>
+        <p class="text-center">
+          Last updated: <span id="last-updated">September 28th, 2024</span>
+        </p>
+        <button class="btn btn-light d-lg-none" id="mobileViewUpdates">
+          View Latest Updates
+        </button>
+        <a
+          href="https://www.roblox.com/games/606849621/Jailbreak"
+          class="btn btn-primary"
+          >Play Jailbreak Now!</a
+        >
+      </div>
+    </div>
+    <div style="background-color: #2e3944; color: white; padding: 40px 0">
+      <div class="container">
+        <p class="text-center mb-5 small">
+          Note: This website is not affiliated with Badimo, the official
+          developers of Jailbreak.
+        </p>
+        <h2 class="text-center mb-4">Features</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h3>View Changelogs</h3>
+            <p>
+              Access the latest changelogs for the game Jailbreak on Roblox and
+              stay informed about all updates.
+            </p>
+          </div>
+          <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <h3>Seasonal Changes</h3>
+            <p>
+              Explore changes made during past and current in-game seasons,
+              including rewards and features.
+            </p>
+          </div>
+          <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-gear-fill"></i>
+            </div>
+            <h3>Fast Changelog Updates</h3>
+            <p>
+              Our data is sourced directly from our API, ensuring you receive
+              the latest changelogs faster than ever.
+            </p>
+          </div>
+          <div class="col-md-4 col-lg-3 text-center mb-4">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-chat-dots"></i>
+            </div>
+            <h3>Community Engagement</h3>
+            <p>
+              Engage with the community by commenting on changelogs and seasons
+              pages.
+              <a
+                href="https://discord.com/developers/docs/topics/oauth2"
+                target="_blank"
+                >Discord OAuth</a
+              >
+              ensures only verified members can participate.
+            </p>
+          </div>
+          <div class="col-md-4 col-lg-3 text-center mb-4">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-github"></i>
+            </div>
+            <h3>Open Source Contributions</h3>
+            <p>
+              Contributions can be made by anyone! Our project is fully open
+              source on
+              <a
+                href="https://github.com/JailbreakProject/JailbreakChangelogs"
+                target="_blank"
+              >
+                GitHub.
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <p class="cursive text-center mt-5">
+        Made with ❤️ by
+        <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
+        and
+        <a href="https://www.roblox.com/users/1910948809/profile">Jalenzz16</a>
       </p>
     </div>
 
-    <div id="popup-container" class="popup-container">
-      <div id="popup-content" class="popup-content">
-        <h2>Important Update!</h2>
-        <p>MAJOR WEBSITE UPDATE PUSHED TO SOMETIME NEXT WEEK!</p>
-        <blockquote class="imgur-embed-pub" lang="en" data-id="a/FSrKmE6">
-          <a href="//imgur.com/a/FSrKmE6"></a>
-        </blockquote>
-        <script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
-        <button id="dismiss-popup" class="dismiss-popup">Dismiss</button>
-      </div>
-    </div>
-
-    <div id="main-container" class="container">
-      <div class="sidebar-image-wrapper">
-        <img
-          id="sidebarImage"
-          class="sidebar-image"
-          data-src=""
-          alt="Sidebar Image"
-        />
-      </div>
-      <header>
-        <a href="https://www.roblox.com/games/606849621/Jailbreak">
-          <img
-            src=""
-            alt="Logo"
-            id="logo"
-            class="header-logo"
-            loading="lazy"
-            data-src="./images/logo_animated.gif"
-          />
-        </a>
-        <h1 id="main-title">ChangeLogs</h1>
-        <button
-          id="theme-toggle"
-          class="theme-toggle"
-          aria-label="Toggle theme"
+    <footer
+      style="background-color: #212a31; color: #d3d9d4"
+      class="text-center py-4"
+    >
+      <p>© 2024 Jailbreak Changelogs. All rights reserved.</p>
+      <div>
+        <a href="privacy.html" class="text-white me-2">Privacy Policy</a>
+        <a href="tos.html" class="text-white me-2">Terms of Service</a>
+        <a href="mailto:jailbreakchangelogs@gmail.com" class="text-white"
+          >Contact Us</a
         >
-          <i data-lucide="sun" class="light-icon"></i>
-          <i data-lucide="moon" class="dark-icon"></i>
-        </button>
-      </header>
-      <div id="navigation-container">
-        <form id="search-form">
-          <div id="search-container">
-            <input type="text" id="searchInput" placeholder="Search..." />
-            <div
-              style="display: flex; justify-content: space-between; width: 100%"
-            >
-              <button id="searchButton" style="width: calc(50% - 5px)">
-                Search
-              </button>
-              <button id="clearSearch" style="width: calc(50% - 5px)">
-                Clear
-              </button>
-            </div>
-          </div>
-        </form>
-        <select id="pageSelect"></select>
       </div>
-      <!-- <div id="pageInfoContainer">
-        <span id="pageInfo">1/X</span>
-      </div> -->
-      <div id="searchResults"></div>
-      <section id="content"></section>
-      <footer>
-        <h3 class="dev-message">
-          <p>From badimo:</p>
-          <p>
-            To all of our players over all of these years, we love this game.
-          </p>
-          <p>Keep up the fight for Jailbreak forever! It'll never go away.</p>
-          <p>Thank you for playing!</p>
-        </h3>
+    </footer>
 
-        <h4 class="release-dates-info">
-          <p>
-            Release dates are recorded in the U.S. (EST/EDT) time zone. Some
-            dates may be inaccurate due to differing time zones like (CST/CDT)
-            which is one hour behind eastern.
-          </p>
-        </h4>
-
-        <div id="footer-text">
-          <p>This website is <strong>NOT affiliated with Badimo.</strong></p>
-          <p>
-            This is ran separately by
-            <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
-            and
-            <a href="https://www.roblox.com/users/1910948809/profile"
-              >Jalenzz16</a
-            >
-          </p>
-        </div>
-
-        <div class="button-container">
-          <a href="https://www.reddit.com/r/robloxjailbreak/" target="_blank">
-            <button class="blue-button">r/RobloxJailbreak</button>
-          </a>
-
-          <a href="https://discord.com/invite/tWbDg7MbUU" target="_blank">
-            <button class="orange-button">
-              r/RobloxJailbreak Discord Server
-            </button>
-          </a>
-
-          <a href="https://discord.gg/jailbreak" target="_blank">
-            <button class="blue-button">
-              Official Jailbreak Discord Server
-            </button>
-          </a>
-          <a
-            href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
-            target="_blank"
-          >
-            <button class="orange-button">Jailbreak Wiki Page</button>
-          </a>
-          <a
-            href="https://github.com/JBChangelogs/JailbreakChangelogs"
-            target="_blank"
-          >
-            <button class="github-button">
-              <i data-lucide="github"></i> View on GitHub
-            </button>
-          </a>
-        </div>
-        <div id="github-info">
-          <p>
-            This website is open source. Feel free to
-            <a
-              href="https://github.com/JBChangelogs/JailbreakChangelogs/issues/new"
-              target="_blank"
-              >report any issues</a
-            >.
-          </p>
-        </div>
-      </footer>
-    </div>
-    <script src="scripts/changelogsviewer.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      lucide.createIcons();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
+  <script>
+    // Wait for the DOM to be fully loaded before running the script
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get references to the mobile "View Updates" button and the navbar toggler
+      var mobileViewUpdates = document.getElementById("mobileViewUpdates");
+      var navbarToggler = document.getElementById("navbarToggler");
+
+      // Check if both elements exist in the DOM
+      if (mobileViewUpdates && navbarToggler) {
+        // Add a click event listener to the mobile "View Updates" button
+        mobileViewUpdates.addEventListener("click", function (event) {
+          // Prevent the default action (navigation to changelogs.html)
+          event.preventDefault();
+          // Simulate a click on the navbar toggler to open the dropdown
+          navbarToggler.click();
+        });
+      }
+    });
+  </script>
 </html>

@@ -1,0 +1,161 @@
+.hero {
+  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358371/backgrounds/3.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 100px 0;
+  position: relative;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  color: white;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.hero div {
+  position: relative;
+  z-index: 2; /* Ensures text is on top of the overlay */
+}
+.feature-icon {
+  font-size: 3rem;
+}
+.btn-primary {
+  background-color: #032b44;
+  border-color: #032b44; /* Border color on hover */
+  color: #ffffff;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: #212a31 !important; /* Hover state for primary button */
+  border-color: #212a31 !important; /* Border color on hover */
+}
+body {
+  background-color: #f8f9fa;
+}
+.offcanvas-header {
+  display: flex; /* Keep the header visible */
+  justify-content: space-between; /* Align items properly */
+  background-color: #212a31; /* Semi-transparent background */
+  color: #ffffff;
+}
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+.offcanvas-body {
+  background-color: transparent;
+  padding: 0;
+}
+
+.offcanvas {
+  border: none;
+  box-shadow: none;
+}
+.white-close-button {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.cursive {
+  font-size: 0.8rem; /* make the text smaller */
+  font-style: italic; /* make the text cursive */
+}
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+/* Custom Navbar Color */
+.custom-navbar-color {
+  background-color: #212a31; /* This is the dark blue-gray color from your theme */
+  color: #ffffff; /* White text color */
+}
+/* Custom styles for navbar items */
+.custom-navbar-color .navbar-nav .nav-link {
+  color: #d3d9d4; /* Light gray color for nav links */
+  transition: color 0.3s ease;
+}
+
+.custom-navbar-color .navbar-nav .nav-link:hover,
+.custom-navbar-color .navbar-nav .nav-link:focus {
+  color: #ffffff; /* White color on hover/focus */
+}
+
+/* Custom style for the active nav item */
+.custom-navbar-color .navbar-nav .nav-item.active .nav-link {
+  color: #748d92; /* Highlight color for active link */
+}
+/* Custom style for the navbar toggler */
+.custom-navbar-color .navbar-toggler {
+  border-color: #748d92; /* Border color for the toggler */
+}
+
+.custom-navbar-color .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+/* Custom style for the "Join the Discord" button */
+.nav-link {
+  color: #d3d9d4; /* Light color for button text */
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-brand {
+  margin-right: 0;
+}
+
+footer a {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #fff;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+footer a:hover {
+  color: #f0f0f0; /* Slightly lighter shade of white */
+}
+
+footer a:hover::after {
+  transform: scaleX(1);
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 40px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 30px;
+  }
+}
