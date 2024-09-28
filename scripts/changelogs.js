@@ -67,6 +67,27 @@ $(document).ready(function () {
   // Initialize changelogs data and debounce timer
   let changelogsData = [];
   let debounceTimer;
+  let lastCommentTime = 0;
+  const SLOWMODE_DELAY = 30000; // 30 seconds in milliseconds
+
+  // Configure Toastr
+  toastr.options = {
+    closeButton: true,
+    debug: false,
+    newestOnTop: false,
+    progressBar: true,
+    positionClass: "toast-bottom-right",
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
 
   // Displays the most recent changelog entry.
   function displayLatestChangelog() {
@@ -1241,7 +1262,16 @@ $(document).ready(function () {
       }),
     })
       .then((response) => response.json())
+      .then(() => {
+        lastCommentTime = Date.now();
+        saveLastCommentTime();
+        toastr.success(
+          "Your comment has been posted successfully!",
+          "Comment Posted"
+        );
+      })
       .catch((error) => console.error("Error adding comment:", error));
+    toastr.error("Failed to post your comment. Please try again.", "Error");
   }
 
   function formatDate(unixTimestamp) {
@@ -1383,13 +1413,34 @@ $(document).ready(function () {
         console.error("Error fetching comments:", error); // Handle any errors
       });
   }
+  // Load lastCommentTime from localStorage
+  lastCommentTime = parseInt(localStorage.getItem("lastCommentTime")) || 0;
+
+  // Function to save lastCommentTime to localStorage
+  function saveLastCommentTime() {
+    localStorage.setItem("lastCommentTime", lastCommentTime.toString());
+  }
 
   CommentForm.addEventListener("submit", function (event) {
     event.preventDefault();
+
+    const currentTime = Date.now();
+    if (currentTime - lastCommentTime < SLOWMODE_DELAY) {
+      const remainingTime = Math.ceil(
+        (SLOWMODE_DELAY - (currentTime - lastCommentTime)) / 1000
+      );
+      toastr.warning(
+        `Please wait ${remainingTime} seconds before posting another comment.`
+      );
+      return;
+    }
+
     const comment = document.getElementById("commenter-text");
-    console.log(comment.value);
+    if (comment.value.trim() === "") return;
+
     addComment(comment);
     comment.value = ""; // Clear the comment input field
+    lastCommentTime = currentTime;
   });
 
   // Initialize Bootstrap dropdowns
