@@ -4,6 +4,34 @@ $(document).ready(function () {
   const $carouselInner = $("#carousel-inner");
   const $loadingOverlay = $("#loading-overlay");
   const $seasonList = $("#seasonList"); // Reference to the season dropdown
+  let lastCommentTime = 0;
+  const SLOWMODE_DELAY = 30000; // 30 seconds in milliseconds
+  // Configure Toastr
+  toastr.options = {
+    closeButton: true,
+    debug: false,
+    newestOnTop: false,
+    progressBar: true,
+    positionClass: "toast-bottom-right",
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
+
+  // Load lastCommentTime from localStorage
+  lastCommentTime = parseInt(localStorage.getItem("lastCommentTime")) || 0;
+
+  // Function to save lastCommentTime to localStorage
+  function saveLastCommentTime() {
+    localStorage.setItem("lastCommentTime", lastCommentTime.toString());
+  }
 
   // Function to fetch season descriptions from the API
   function fetchSeasonDescription() {
@@ -247,6 +275,18 @@ $(document).ready(function () {
   }
 
   function addComment(comment) {
+    const currentTime = Date.now();
+    if (currentTime - lastCommentTime < SLOWMODE_DELAY) {
+      const remainingTime = Math.ceil(
+        (SLOWMODE_DELAY - (currentTime - lastCommentTime)) / 1000
+      );
+      toastr.warning(
+        `Please wait ${remainingTime} seconds before posting another comment.`,
+        "Slowmode Active"
+      );
+      return;
+    }
+
     const listItem = document.createElement("li");
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
@@ -257,34 +297,30 @@ $(document).ready(function () {
     avatarElement.height = 32;
 
     const commentContainer = document.createElement("div");
-    commentContainer.classList.add("ms-2"); // Add margin to the left of the comment
+    commentContainer.classList.add("ms-2");
 
     const usernameElement = document.createElement("strong");
     usernameElement.textContent = userdata.global_name;
 
     const commentTextElement = document.createElement("p");
     commentTextElement.textContent = comment.value;
-    commentTextElement.classList.add("mb-0"); // Remove default margin from <p>
+    commentTextElement.classList.add("mb-0");
 
     const date = Math.floor(Date.now() / 1000);
-    const formattedDate = formatDate(date); // Assuming comment.date contains the date string
+    const formattedDate = formatDate(date);
     const dateElement = document.createElement("small");
-    dateElement.textContent = formattedDate; // Add the formatted date
-    dateElement.classList.add("text-muted"); // Optional: Add a class for styling
+    dateElement.textContent = formattedDate;
+    dateElement.classList.add("text-muted");
 
-    // Append elements to the comment container
     commentContainer.appendChild(usernameElement);
     commentContainer.appendChild(commentTextElement);
     commentContainer.appendChild(dateElement);
 
-    // Append avatar and comment container to the list item
     listItem.appendChild(avatarElement);
     listItem.appendChild(commentContainer);
 
-    // Prepend the new comment to the comments list
     commentsList.prepend(listItem);
 
-    // Post the comment to the server
     fetch("https://api.jailbreakchangelogs.xyz/add_comment", {
       method: "POST",
       headers: {
@@ -298,8 +334,18 @@ $(document).ready(function () {
       }),
     })
       .then((response) => response.json())
-      .then((data) => console.log("Comment added:", data))
-      .catch((error) => console.error("Error adding comment:", error));
+      .then((data) => {
+        lastCommentTime = currentTime;
+        saveLastCommentTime();
+        toastr.success(
+          "Your comment has been posted successfully!",
+          "Comment Posted"
+        );
+      })
+      .catch((error) => {
+        console.error("Error adding comment:", error);
+        toastr.error("Failed to post your comment. Please try again.", "Error");
+      });
   }
 
   function formatDate(unixTimestamp) {
@@ -441,7 +487,7 @@ $(document).ready(function () {
   CommentForm.addEventListener("submit", function (event) {
     event.preventDefault();
     const comment = document.getElementById("commenter-text");
-    console.log(comment.value);
+    if (comment.value.trim() === "") return;
     addComment(comment);
     comment.value = ""; // Clear the comment input field
   });
