@@ -1196,10 +1196,10 @@ $(document).ready(function () {
     console.log(avatarUrl);
     profilepicture.src = avatarUrl;
     commentinput.placeholder = "Comment as " + userdata.global_name;
-    commentbutton.disabled = false;
-    commentinput.disabled = false;
+    commentbutton.disabled = true;
+    commentinput.disabled = true;
   } else {
-    commentbutton.disabled = false;
+    commentbutton.disabled = true;
     commentbutton.textContent = "Log in";
     commentbutton.addEventListener("click", function (event) {
       localStorage.setItem(
