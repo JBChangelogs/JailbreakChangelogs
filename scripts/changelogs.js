@@ -424,7 +424,7 @@ $(document).ready(function () {
       const $elem = $(this);
       if ($elem.is("h2")) {
         // Add two newlines before each h2 to separate sections
-        processedContent.push("", $elem.text().trim(), "");
+        processedContent.push("", "## " + $elem.text().trim(), "");
       } else if ($elem.is("p.lead")) {
         processedContent.push($elem.text().trim()); // Add lead paragraph text
       } else if ($elem.hasClass("d-flex")) {
