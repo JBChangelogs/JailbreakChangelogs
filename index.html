@@ -97,6 +97,7 @@
                 src="https://jailbreakchangelogs.xyz/favicon.ico"
                 alt="Profile"
                 class="rounded-circle"
+                id="profile-picture-mobile"
                 width="32"
                 height="32"
               />
@@ -143,6 +144,7 @@
                   src="https://jailbreakchangelogs.xyz/favicon.ico"
                   alt="Profile"
                   class="rounded-circle"
+                  id="profile-picture"
                   width="32"
                   height="32"
                 />
@@ -191,7 +193,7 @@
           Jailbreak.
         </p>
         <p class="text-center">
-          Last updated: <span id="last-updated">September 30th, 2024</span>
+          Last updated: <span id="last-updated">September 28th, 2024</span>
         </p>
         <button class="btn btn-light d-lg-none" id="mobileViewUpdates">
           View Latest Updates
@@ -317,5 +319,15 @@
         });
       }
     });
+  </script>
+  <script>
+    const profilepicture = document.getElementById("profile-picture")
+    const mobileprofilepicture = document.getElementById("profile-picture-mobile")
+    const userid = sessionStorage.getItem("userid");
+    const avatarUrl = sessionStorage.getItem("avatar");
+    if (userid) {
+      profilepicture.src = avatarUrl;
+      mobileprofilepicture.src = avatarUrl;
+    }
   </script>
 </html>
