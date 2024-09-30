@@ -1,36 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles/api.css" />
     <title>API Key Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
-  />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  </head>
+  <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-dark custom-navbar-color sticky-top"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img
+            src="https://res.cloudinary.com/dsvlphknq/image/upload/v1727707364/logos/changelogs_api_keys.png"
+            alt="API Page Logo"
+            class="navbar-logo"
+          />
+        </a>
 
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg custom-navbar-color sticky-top">
-        <div class="container-fluid">
-          <a class="navbar-brand d-flex align-items-center" href="#">
-            <img
-              class="navbar-logo"
-              src="https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs_homepage.png"
-              alt="Home Page Logo"
-            />
-          </a>
-  
-          <!-- Container for navbar toggler and profile picture on mobile -->
-          <div class="d-flex d-lg-none align-items-center">
-            <!-- Navbar toggler -->
-            <button
+        <!-- Container for navbar toggler and profile picture on mobile -->
+        <div class="d-flex d-lg-none align-items-center">
+          <!-- Navbar toggler -->
+          <button
             class="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
@@ -41,140 +48,189 @@
           >
             <span class="navbar-toggler-icon"></span>
           </button>
-  
-            <!-- Profile picture icon (visible on mobile) -->
-            <div class="ms-2 d-lg-none">
-              <a href="login.html">
+
+          <!-- Profile picture icon (visible on mobile) -->
+          <div class="ms-2 d-lg-none">
+            <a href="login.html" title="Go to login page" class="profile-link">
+              <img
+                src="/favicon.ico"
+                alt="Profile"
+                id="profile-picture-mobile"
+                class="rounded-circle"
+                width="32"
+                height="32"
+              />
+            </a>
+          </div>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item">
+              <a class="nav-link" href="changelogs.html">Changelogs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="seasons.html">Seasons</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="timeline.html">Timeline</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bot.html">Our Discord Bot</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="faq.html">FAQ</a>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link btn"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#discordOffcanvas"
+                aria-controls="discordOffcanvas"
+              >
+                Join the Discord
+              </button>
+            </li>
+            <!-- Profile picture icon (visible on desktop) -->
+            <li class="nav-item d-none d-lg-block ms-2">
+              <a
+                href="login.html"
+                title="Go to login page"
+                class="profile-link"
+              >
                 <img
                   src="/favicon.ico"
                   alt="Profile"
                   class="rounded-circle"
+                  id="profile-picture"
                   width="32"
                   height="32"
                 />
               </a>
-            </div>
-          </div>
-  
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center">
-              <li class="nav-item">
-                <a class="nav-link" href="changelogs.html">Changelogs</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="seasons.html">Seasons</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="timeline.html">Timeline</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="bot.html">Our Discord Bot</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="faq.html">FAQ</a>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="nav-link btn"
-                  type="button"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#discordOffcanvas"
-                  aria-controls="discordOffcanvas"
-                >
-                  Join the Discord
-                </button>
-              </li>
-              <!-- Profile picture icon (visible on desktop) -->
-              <li class="nav-item d-none d-lg-block ms-2">
-                <a
-                  href="login.html"
-                  title="Go to login page"
-                  class="profile-link"
-                >
-                  <img
-                    src="/favicon.ico"
-                    alt="Profile"
-                    class="rounded-circle"
-                    width="32"
-                    height="32"
-                  />
-                </a>
-              </li>
-            </ul>
-          </div>
+            </li>
+          </ul>
         </div>
-      </nav>
+      </div>
+    </nav>
+
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="discordOffcanvas"
+      aria-labelledby="discordOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="discordOffcanvasLabel">
+          Join Our Discord
+        </h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <iframe
+          src="https://discord.com/widget?id=1286064050135896064&theme=dark"
+          width="100%"
+          height="100%"
+          allowtransparency="true"
+          frameborder="0"
+          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        >
+        </iframe>
+      </div>
+    </div>
 
     <div class="container content-wrapper mt-5">
-        <h1>API Key Management</h1>
-        <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#createKeyModal">Create API Key</button>
+      <h1>API Key Management</h1>
+      <button
+        class="btn btn-primary mb-3"
+        data-bs-toggle="modal"
+        data-bs-target="#createKeyModal"
+      >
+        Create API Key
+      </button>
 
-        <table class="table table-dark">
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Created At</th>
-                </tr>
-            </thead>
-            <tbody id="apiKeyList">
-                <!-- API Keys will be appended here -->
-            </tbody>
+      <div class="table-responsive">
+        <table
+          class="table table-dark table-bordered table-hover table-striped"
+        >
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody id="apiKeyList">
+            <!-- API Keys will be appended here -->
+          </tbody>
         </table>
+      </div>
     </div>
-
 
     <!-- Create API Key Modal -->
-    <div class="modal fade" id="createKeyModal" tabindex="-1" role="dialog" aria-labelledby="createKeyModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="background-color: rgba(33, 37, 41, 0.9);">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createKeyModalLabel">Create API Key</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="keyName">Name</label>
-                        <input type="text" class="form-control" id="keyName" placeholder="Enter key name">
-                    </div>
-                    <div class="form-group">
-                        <label for="keyDescription">Description</label>
-                        <input type="text" class="form-control" id="keyDescription" placeholder="Enter key description">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="createKeyButton">Create Key</button>
-                </div>
+    <div
+      class="modal fade"
+      id="createKeyModal"
+      tabindex="-1"
+      aria-labelledby="createKeyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div
+          class="modal-content"
+          style="background-color: rgba(33, 37, 41, 0.9)"
+        >
+          <div class="modal-header">
+            <h5 class="modal-title" id="createKeyModalLabel">Create API Key</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="keyName" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="keyName"
+                placeholder="Enter key name"
+              />
             </div>
+            <div class="mb-3">
+              <label for="keyDescription" class="form-label">Description</label>
+              <input
+                type="text"
+                class="form-control"
+                id="keyDescription"
+                placeholder="Enter key description"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="createKeyButton">
+              Create Key
+            </button>
+          </div>
         </div>
+      </div>
     </div>
-    <script>
-        // Wait for the DOM to be fully loaded before running the script
-        document.addEventListener("DOMContentLoaded", function () {
-          // Get references to the mobile "View Updates" button and the navbar toggler
-          var mobileViewUpdates = document.getElementById("mobileViewUpdates");
-          var navbarToggler = document.getElementById("navbarToggler");
-    
-          // Check if both elements exist in the DOM
-          if (mobileViewUpdates && navbarToggler) {
-            // Add a click event listener to the mobile "View Updates" button
-            mobileViewUpdates.addEventListener("click", function (event) {
-              // Prevent the default action (navigation to changelogs.html)
-              event.preventDefault();
-              // Simulate a click on the navbar toggler to open the dropdown
-              navbarToggler.click();
-            });
-          }
-        });
-      </script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="scripts/api.js"></script>
-
-</body>
+  </body>
 </html>
