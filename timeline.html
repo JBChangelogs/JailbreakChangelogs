@@ -57,12 +57,6 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css"
-    />
-
     <link rel="stylesheet" href="styles/timeline.css" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -72,11 +66,6 @@
       rel="stylesheet"
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/locomotive-scroll/dist/locomotive-scroll.min.css"
-    />
-    <script src="https://unpkg.com/locomotive-scroll/dist/locomotive-scroll.min.js"></script>
   </head>
 
   <body data-scroll-container>
@@ -213,6 +202,19 @@
 
     <div id="main-container" class="container-fluid">
       <div id="content-wrapper" class="row mt-3">
+        <div class="col-12 mb-3">
+          <div
+            class="info-button"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            data-bs-custom-class="custom-tooltip"
+            title="Looking for entries with images/videos/audio? Check out the Seasons page in the navigation bar!"
+          >
+            <i class="bi bi-info-circle"></i>
+            <span class="info-label">Info</span>
+          </div>
+        </div>
+
         <div class="col-12">
           <section id="content">
             <div id="timeline-container" class="container-fluid mt-5">
@@ -239,37 +241,14 @@
 
     <footer class="mt-5">
       <div class="container">
-        <!-- Badimo message -->
-        <div class="card badimo-message mb-3">
-          <div class="card-header bg-info text-white">
-            <h5 class="mb-0 text-center">From badimo</h5>
-          </div>
-          <div class="card-body text-center">
-            <p class="lead mb-2">
-              To all of our players over all of these years, we love this game.
-            </p>
-            <p class="font-italic mb-2">
-              Keep up the fight for Jailbreak forever! It'll never go away.
-            </p>
-            <p class="font-weight-bold mb-3">Thank you for playing!</p>
-            <!-- Play Here Button -->
-            <a
-              href="https://www.roblox.com/games/606849621/Jailbreak"
-              target="_blank"
-              class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
-            >
-              <strong>Play Here</strong>
-            </a>
-          </div>
-        </div>
-
         <!-- Accordion for additional information -->
-        <div class="accordion footer-accordion" id="footerAccordion">
-          <!-- Release Dates Info -->
+        <!-- This accordion contains expandable sections for Release Dates and Website Information -->
+        <div class="accordion" id="footerAccordion">
+          <!-- Release Dates Info Section -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="releaseDatesHeader">
               <button
-                class="accordion-button footer-accordion-button collapsed"
+                class="accordion-button collapsed"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#releaseDatesCollapse"
@@ -296,7 +275,7 @@
             </div>
           </div>
 
-          <!-- Website Info -->
+          <!-- Website Info Section -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="websiteInfoHeader">
               <button
@@ -317,6 +296,7 @@
               data-bs-parent="#footerAccordion"
             >
               <div class="accordion-body">
+                <!-- Disclaimer and admin information -->
                 <p class="text-center mb-2">
                   This website is <strong>NOT affiliated with Badimo.</strong>
                 </p>
@@ -324,16 +304,17 @@
                   This is ran separately by
                   <a
                     href="https://www.roblox.com/users/435983066/profile"
-                    class="admin-link"
+                    class="admin-link-v3"
                     >v3kmw</a
                   >
                   and
                   <a
                     href="https://www.roblox.com/users/1910948809/profile"
-                    class="admin-link"
+                    class="admin-link-jz"
                     >Jalenzz16</a
                   >
                 </p>
+                <!-- Website version, last updated, and build information -->
                 <div class="row text-center">
                   <div class="col-sm-4">
                     <p class="mb-0">
@@ -358,8 +339,8 @@
           </div>
         </div>
 
-        <!-- Quick Links -->
-        <!-- Quick Links -->
+        <!-- Quick Links Section -->
+        <!-- This card contains links to related resources -->
         <div class="card mt-3">
           <div class="card-header bg-secondary text-white">
             <h5 class="mb-0 text-center">
@@ -368,6 +349,7 @@
           </div>
           <div class="card-body">
             <div class="d-flex flex-wrap justify-content-center">
+              <!-- Reddit link -->
               <a
                 href="https://www.reddit.com/r/robloxjailbreak/"
                 target="_blank"
@@ -375,6 +357,7 @@
               >
                 <i class="bi bi-reddit"></i> r/RobloxJailbreak
               </a>
+              <!-- r/RobloxJailbreak Discord link -->
               <a
                 href="https://discord.com/invite/tWbDg7MbUU"
                 target="_blank"
@@ -382,6 +365,7 @@
               >
                 <i class="bi bi-discord"></i> r/RobloxJailbreak Discord
               </a>
+              <!-- Official Jailbreak Discord link -->
               <a
                 href="https://discord.gg/jailbreak"
                 target="_blank"
@@ -389,6 +373,7 @@
               >
                 <i class="bi bi-discord"></i> Official Jailbreak Discord
               </a>
+              <!-- Jailbreak Wiki link -->
               <a
                 href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
                 target="_blank"
@@ -396,6 +381,7 @@
               >
                 <i class="bi bi-book"></i> Jailbreak Wiki
               </a>
+              <!-- GitHub repository link -->
               <a
                 href="https://github.com/JBChangelogs/JailbreakChangelogs"
                 target="_blank"
@@ -407,7 +393,8 @@
           </div>
         </div>
 
-        <!-- Contribute -->
+        <!-- Contribute Section -->
+        <!-- This card encourages users to contribute to the project -->
         <div class="card mt-3">
           <div class="card-header bg-success text-white">
             <h5 class="mb-0 text-center">
@@ -418,6 +405,7 @@
             <p class="mb-3">
               This website is open source. We welcome your contributions!
             </p>
+            <!-- Link to report issues -->
             <a
               href="https://github.com/JBChangelogs/JailbreakChangelogs/issues/new"
               target="_blank"
@@ -425,6 +413,7 @@
             >
               <i class="bi bi-bug me-2"></i>Report an Issue
             </a>
+            <!-- Link to view the project on GitHub -->
             <a
               href="https://github.com/JBChangelogs/JailbreakChangelogs"
               target="_blank"
@@ -438,13 +427,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
     <script src="scripts/timeline.js"></script>
-    <script
-      src="https://widgets.sociablekit.com/twitter-feed/widget.js"
-      async
-      defer
-    ></script>
     <button
       id="backToTop"
       class="btn rounded-circle position-fixed bottom-0 end-0 m-3"
@@ -528,5 +511,15 @@
         </div>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+    </script>
   </body>
 </html>
