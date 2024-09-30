@@ -1178,7 +1178,7 @@ $(document).ready(function () {
     commentbutton.disabled = false;
     commentinput.disabled = false;
   } else {
-    commentbutton.disabled = true;
+    commentbutton.disabled = false;
     commentbutton.textContent = "Log in";
     commentbutton.addEventListener("click", function (event) {
       localStorage.setItem(
