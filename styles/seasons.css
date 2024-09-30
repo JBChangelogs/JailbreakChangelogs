@@ -111,6 +111,18 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   color: var(--text-color); /* Default text color */
 }
 
+#paginationControls {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 20px 0; /* Optional: Add some margin for spacing */
+}
+
+#paginationControls button,
+#paginationControls input {
+  margin: 0 5px; /* Add margin between controls */
+}
+
 /* Custom Changelog Dropdown Styling */
 .changelog-dropdown {
   min-width: 350px;

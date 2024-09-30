@@ -1,4 +1,13 @@
 $(document).ready(function () {
+  const profilepicture = document.getElementById("profile-picture")
+  const mobileprofilepicture = document.getElementById("profile-picture-mobile")
+  const userid = sessionStorage.getItem("userid");
+  const avatarUrl = sessionStorage.getItem("avatar");
+  if (userid) {
+    profilepicture.src = avatarUrl;
+    mobileprofilepicture.src = avatarUrl;
+  }
+ 
   // Get reference to the loading overlay element
   const loadingOverlay = document.getElementById("loading-overlay");
 
@@ -351,4 +360,5 @@ $(document).ready(function () {
     }
     lastScrollTop = st <= 0 ? 0 : st; // Update last scroll position
   });
+  
 });

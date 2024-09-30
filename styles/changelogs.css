@@ -698,31 +698,21 @@ span {
   color: rgba(255, 255, 255, 0.7); /* Color for input group text */
 }
 
-/* Header Styles */
-header {
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-}
-
-/* Fade In Animation */
-@keyframes fadeIn {
-  to {
-    opacity: 1; /* Final opacity */
-  }
-}
-
-/* Theme Toggle Button Styles */
-.theme-toggle {
-  border: none; /* No border */
-  cursor: pointer; /* Pointer cursor */
-  color: var(--header-text); /* Text color */
-  font-size: 1.2rem; /* Font size */
-  margin-left: auto; /* Align to the right */
-  padding: 0.375rem 0.75rem; /* Padding for button */
-}
 /* Input Group Styles */
 .input-group {
   position: relative; /* Relative positioning */
+}
+
+#paginationControls {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 20px 0; /* Optional: Add some margin for spacing */
+}
+
+#paginationControls button,
+#paginationControls input {
+  margin: 0 5px; /* Add margin between controls */
 }
 
 /* Skip Link Styles */

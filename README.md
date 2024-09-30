@@ -1,19 +1,13 @@
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
+
 > [!CAUTION]
 > The only official sources for information and updates about the changelogs are https://jailbreakchangelogs.xyz and the game's [official Discord server](https://discord.gg/jailbreak). Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
+![Logo](https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs.png)
+
 # Roblox Jailbreak Changelogs
 
-## Overview
-
 Welcome to the unofficial changelog repository for [Roblox Jailbreak](https://www.roblox.com/games/606849621/Jailbreak). This website is your go-to resource for comprehensive, up-to-date information on all changes, updates, and patches for the game.
-
-## Quick Access
-
-📌 **Website:** [jailbreakchangelogs.xyz](https://jailbreakchangelogs.xyz/)
-
-## About Jailbreak
-
-🏆 Jailbreak is a 12-time award-winning game where you can orchestrate a robbery or catch criminals! Team up with friends for even more fun and plan the ultimate police raid or criminal heist. What role will you play?
 
 ## Website Features
 
@@ -24,16 +18,139 @@ Our changelog website provides:
 - **Responsive Layout:** Enjoy seamless access across all devices - desktop, tablet, or mobile.
 - **Comprehensive Archives:** Explore the full history of Jailbreak updates and patches dating back to the game's release in 2017.
 
-## Community Contribution
+## Acknowledgements
 
-We welcome contributions, feedback, and suggestions to enhance the changelog experience for all Jailbreak enthusiasts.
+- [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
+- [Jakobiis](https://github.com/v3kmmw/) - Co-founder, Lead Back-end Developer & API Architect
 
-## Credits
+## API Reference
 
-A heartfelt thank you to our dedicated team:
+Base URL: `https://api.jailbreakchangelogs.xyz`
 
-- **Owner:** [Jalenzz16](https://github.com/Jalenzzz)
-- **Owner:** [v3kmw](https://github.com/v3kmmw/)
+### Seasons
+
+#### Get Season Details
+
+```http
+    GET /seasons/get
+
+```
+
+| Parameter | Type      | Description                 |
+| :-------- | :-------- | :-------------------------- |
+| `season`  | `integer` | **Required**. Season number |
+
+Returns the details of a specific season.
+
+#### List All Seasons
+
+```http
+  GET /seasons/list
+```
+
+Returns a list of all seasons.
+
+### Rewards
+
+#### Get Season Rewards
+
+```http
+  GET /rewards/get
+```
+
+| Parameter | Type      | Description                 |
+| :-------- | :-------- | :-------------------------- |
+| `season`  | `integer` | **Required**. Season number |
+
+Returns the rewards for a specific season.
+
+#### List All Rewards
+
+```http
+  GET /rewards/list
+```
+
+Returns a list of all rewards for all seasons.
+
+### Comments
+
+#### Get Comments
+
+```http
+  GET /comments/get
+```
+
+| Parameter | Type      | Description                                              |
+| :-------- | :-------- | :------------------------------------------------------- |
+| `type`    | `string`  | **Required**. Type of comments ('changelog' or 'season') |
+| `id`      | `integer` | **Required**. ID of the changelog, season, or comment    |
+
+Returns comments based on the provided parameters:
+
+1. With both `type` and `id`:
+
+- For `type=season`, `id` refers to the season number (e.g., id=1 is season 1)
+- For `type=changelog`, `id` refers to the changelog ID (e.g., id=1 is the first recorded changelog from April 21st, 2017)
+
+2. With only `id`:
+
+- Returns a specific comment
+
+3. Without parameters:
+
+- Returns all comments
+
+### Changelogs
+
+#### Get Specific Changelog
+
+```http
+  GET /changelogs/get
+```
+
+| Parameter | Type      | Description                |
+| :-------- | :-------- | :------------------------- |
+| `id`      | `integer` | **Required**. Changelog ID |
+
+Returns the changelog for the given ID.
+
+#### List All Changelogs
+
+```http
+  GET /changelogs/list
+```
+
+Returns a list of all changelogs.
+
+### Users
+
+#### Get User Data
+
+```http
+  GET /users/get
+```
+
+| Parameter | Type      | Description                   |
+| :-------- | :-------- | :---------------------------- |
+| `id`      | `integer` | **Required**. Discord User ID |
+
+Returns user data based on Discord User ID.
+
+To find your Discord User ID, follow the instructions here: [Where can I find my User/Server/Message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID)
+
+### Authentication
+
+To use any of these API endpoints outside the website, you need an API key. You can obtain an API key from https://jailbreakchangelogs.xyz/api.
+
+## Contributing
+
+Contributions are always welcome!
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to get started.
+
+## FAQ
+
+Visit https://jailbreakchangelogs.xyz/faq
 
 ## Stay Connected
 
@@ -52,6 +169,6 @@ This is an unofficial, fan-made project and is not affiliated with or endorsed b
 
 ---
 
-We hope this project enhances your Jailbreak experience. Happy gaming!
+We hope this project enhances your Jailbreak experience.
 
 Leave a ⭐ if you like the project.

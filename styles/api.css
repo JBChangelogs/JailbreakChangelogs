@@ -135,6 +135,9 @@ h1 {
 .table th,
 .table td {
   vertical-align: middle; /* Center table content */
+  padding: 10px; /* Padding for table cells */
+  border: none; /* Remove default borders */
+  border-bottom: 1px solid #000000; /* Light gray bottom border for separation */
 }
 
 .table-dark {
@@ -266,4 +269,13 @@ h1 {
   .navbar-logo {
     height: 30px;
   }
+}
+
+.small-button-cell {
+  width: 200px; /* Set a specific width for the cell */
+}
+
+.medium-button-cell {
+  width: 250px;
+  max-width: 0px; /* Set a specific width for the cell */
 }

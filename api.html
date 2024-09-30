@@ -160,6 +160,7 @@
         >
           <thead>
             <tr>
+              <th>Manage</th>
               <th>Key</th>
               <th>Name</th>
               <th>Description</th>
@@ -175,62 +176,90 @@
 
     <!-- Create API Key Modal -->
     <div
-      class="modal fade"
-      id="createKeyModal"
-      tabindex="-1"
-      aria-labelledby="createKeyModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div
-          class="modal-content"
-          style="background-color: rgba(33, 37, 41, 0.9)"
-        >
-          <div class="modal-header">
-            <h5 class="modal-title" id="createKeyModalLabel">Create API Key</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+    class="modal fade"
+    id="createKeyModal"
+    tabindex="-1"
+    aria-labelledby="createKeyModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div
+        class="modal-content"
+        style="background-color: rgba(33, 37, 41, 0.9)"
+      >
+        <div class="modal-header">
+          <h5 class="modal-title" id="createKeyModalLabel">Create API Key</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="keyName" class="form-label">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="keyName"
+              placeholder="Enter key name"
+            />
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="keyName" class="form-label">Name</label>
-              <input
-                type="text"
-                class="form-control"
-                id="keyName"
-                placeholder="Enter key name"
-              />
+          <div class="mb-3">
+            <label for="keyDescription" class="form-label">Description</label>
+            <input
+              type="text"
+              class="form-control"
+              id="keyDescription"
+              placeholder="Enter key description"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Permissions</label><br />
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="permChangelog" value="changelog">
+              <label class="form-check-label" for="permChangelog">Changelogs</label>
             </div>
-            <div class="mb-3">
-              <label for="keyDescription" class="form-label">Description</label>
-              <input
-                type="text"
-                class="form-control"
-                id="keyDescription"
-                placeholder="Enter key description"
-              />
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="permSeasons" value="seasons">
+              <label class="form-check-label" for="permUserManagement">Seasons</label>
             </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="permComments" value="comments">
+              <label class="form-check-label" for="permAdmin">Comments</label>
+            </div>
+            <!-- Add more checkboxes as needed -->
           </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="button" class="btn btn-primary" id="createKeyButton">
-              Create Key
-            </button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="button" class="btn btn-primary" id="createKeyButton">
+            Create Key
+          </button>
         </div>
       </div>
     </div>
+  </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="scripts/api.js"></script>
+    <script>
+      const profilepicture = document.getElementById("profile-picture");
+      const mobileprofilepicture = document.getElementById(
+        "profile-picture-mobile"
+      );
+      const userid = sessionStorage.getItem("userid");
+      const avatarUrl = sessionStorage.getItem("avatar");
+      if (userid) {
+        profilepicture.src = avatarUrl;
+        mobileprofilepicture.src = avatarUrl;
+      }
+    </script>
   </body>
 </html>
