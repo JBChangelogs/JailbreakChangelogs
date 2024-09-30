@@ -232,8 +232,8 @@ $(document).ready(function () {
     console.log(avatarUrl);
     profilepicture.src = avatarUrl;
     commentinput.placeholder = "Comment as " + userdata.global_name;
-    commentbutton.disabled = true;
-    commentinput.disabled = true;
+    commentbutton.disabled = false;
+    commentinput.disabled = false;
   } else {
     commentbutton.disabled = true;
     commentbutton.textContent = "Log in";
