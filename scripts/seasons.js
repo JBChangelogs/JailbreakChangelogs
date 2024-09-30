@@ -8,7 +8,7 @@ $(document).ready(function () {
   // Function to fetch season descriptions from the API
   function fetchSeasonDescription() {
     return $.ajax({
-      url: "https://api.jailbreakchangelogs.xyz/get_seasons",
+      url: "https://api.jailbreakchangelogs.xyz/seasons/list",
       method: "GET",
       dataType: "json",
       error: function (jqXHR, textStatus, errorThrown) {
@@ -21,7 +21,7 @@ $(document).ready(function () {
   // Function to fetch season rewards from the API
   function fetchSeasonRewards() {
     return $.ajax({
-      url: "https://api.jailbreakchangelogs.xyz/list_rewards",
+      url: "https://api.jailbreakchangelogs.xyz/rewards/list",
       method: "GET",
       dataType: "json",
       error: function (jqXHR, textStatus, errorThrown) {
