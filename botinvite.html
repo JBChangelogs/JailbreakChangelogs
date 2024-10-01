@@ -4,7 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Invite Bot</title>
-    <link rel="stylesheet" href="styles/botinvite.css" />
+    <style>
+      body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background-color: #2a2a2a;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        margin-bottom: 1rem;
+      }
+      p {
+        font-size: 1.2rem;
+      }
+      #countdown {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4caf50;
+      }
+    </style>
     <script>
       // Initialize countdown value
       let countdownValue = 3;
@@ -30,9 +59,12 @@
     </script>
   </head>
   <body>
-    <p>
-      Redirecting you to the bot invite page in
-      <span id="countdown">3</span> seconds...
-    </p>
+    <div class="container">
+      <h1>Invite Bot</h1>
+      <p>
+        Redirecting you to the bot invite page in
+        <span id="countdown">3</span> seconds...
+      </p>
+    </div>
   </body>
 </html>
