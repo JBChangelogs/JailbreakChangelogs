@@ -11,7 +11,27 @@ $(document).ready(function () {
   const mobileLatestChangelogBtn = document.getElementById(
     "mobileLatestChangelogBtn"
   );
-
+  const userid = sessionStorage.getItem("userid");
+  const token = getCookie("token");
+  if (token && !userid) {
+    fetch("https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token)
+     .then((response) => {
+        if (!response.ok) {
+          console.error("Unexpected response status:", response.status);
+          return null;
+        }
+        return response.json();
+      })
+     .then((userData) => {
+        if (!userData) return;
+        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+        sessionStorage.setItem("user", JSON.stringify(userData));
+        sessionStorage.setItem("avatar", avatarURL);
+        sessionStorage.setItem("userid", userData.id);      })
+     .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  } 
   // jQuery references for search results and navbar
   const $searchResultsContainer = $("#search-results");
   const $navbarCollapse = $("#navbarContent");
@@ -1162,7 +1182,7 @@ $(document).ready(function () {
     }
   });
 
-  const userid = sessionStorage.getItem("userid");
+  
   const CommentForm = document.getElementById("comment-form");
   const CommentHeader = document.getElementById("comment-header");
   const commentinput = document.getElementById("commenter-text");
@@ -1216,8 +1236,8 @@ $(document).ready(function () {
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
     const avatarElement = document.createElement("img");
-    avatarElement.src = avatarUrl;
-    avatarElement.classList.add("rounded-circle", "m-1");
+    const defaultAvatarUrl = '/favicon.ico';
+    avatarElement.src = avatarUrl.endsWith('null.png') ? defaultAvatarUrl : avatarUrl;    avatarElement.classList.add("rounded-circle", "m-1");
     avatarElement.width = 32;
     avatarElement.height = 32;
 
@@ -1361,7 +1381,9 @@ $(document).ready(function () {
         listItem.classList.add("list-group-item", "d-flex", "align-items-start");
   
         const avatarElement = document.createElement("img");
-        avatarElement.src = avatarUrl;
+        const defaultAvatarUrl = '/favicon.ico';
+
+        avatarElement.src = avatarUrl.endsWith('null.png') ? defaultAvatarUrl : avatarUrl;
         avatarElement.classList.add("rounded-circle", "m-1");
         avatarElement.width = 32;
         avatarElement.height = 32;
