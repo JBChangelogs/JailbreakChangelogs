@@ -1236,8 +1236,8 @@ $(document).ready(function () {
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
     const avatarElement = document.createElement("img");
-    avatarElement.src = avatarUrl;
-    avatarElement.classList.add("rounded-circle", "m-1");
+    const defaultAvatarUrl = '/favicon.ico';
+    avatarElement.src = avatarUrl.endsWith('null.png') ? defaultAvatarUrl : avatarUrl;    avatarElement.classList.add("rounded-circle", "m-1");
     avatarElement.width = 32;
     avatarElement.height = 32;
 
