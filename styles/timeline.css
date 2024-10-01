@@ -52,7 +52,25 @@
 #backToTop:hover {
   background-color: var(--button-primary-hover-bg);
 }
+.offcanvas-header {
+  display: flex; /* Keep the header visible */
+  justify-content: space-between; /* Align items properly */
+  background-color: #212a31; /* Semi-transparent background */
+  color: #ffffff;
+}
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+.offcanvas-body {
+  background-color: transparent;
+  padding: 0;
+}
 
+.offcanvas {
+  border: none;
+  box-shadow: none;
+}
 html,
 body {
   height: 100%;

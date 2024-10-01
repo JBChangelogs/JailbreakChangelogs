@@ -254,6 +254,25 @@ h1 {
   max-width: 100%;
   object-fit: contain;
 }
+.offcanvas-header {
+  display: flex; /* Keep the header visible */
+  justify-content: space-between; /* Align items properly */
+  background-color: #212a31; /* Semi-transparent background */
+  color: #ffffff;
+}
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+.offcanvas-body {
+  background-color: transparent;
+  padding: 0;
+}
+
+.offcanvas {
+  border: none;
+  box-shadow: none;
+}
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .quick-links .btn-link {
@@ -262,12 +281,12 @@ h1 {
 }
 @media (max-width: 576px) {
   .navbar-logo {
-    height: 35px;
+    height: 50px;
   }
 }
 @media (max-width: 400px) {
   .navbar-logo {
-    height: 30px;
+    height: 40px;
   }
 }
 
