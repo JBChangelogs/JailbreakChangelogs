@@ -23,7 +23,7 @@ $(document).ready(function () {
         sessionStorage.setItem("user", JSON.stringify(userData));
         sessionStorage.setItem("avatar", avatarURL);
         sessionStorage.setItem("userid", userData.id);      })
-        location.reload()
+        window.location.href = window.location.href
      .catch((error) => {
         console.error("Error fetching user data:", error);
       });
