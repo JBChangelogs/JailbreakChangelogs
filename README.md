@@ -163,6 +163,14 @@ Visit https://jailbreakchangelogs.xyz/faq
 - Join our [Discord community](https://discord.com/invite/tWbDg7MbUU) to discuss changes and connect with other players or make feature requests.
 - For support, reach out to [support@jailbreakchangelogs.xyz](mailto:support@jailbreakchangelogs.xyz)
 
+## License
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+
+This means you are free to use, modify, and distribute this software, provided that any derivative works are also distributed under the same license terms.
+
+For more details, see the [LICENSE](./LICENSE) file in this repository or visit the [GNU GPL v3.0 page](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
 ## Disclaimer
 
 This is an unofficial, fan-made project and is not affiliated with or endorsed by Badimo/Jailbreak development team.
