@@ -1,3 +1,25 @@
+const userid = sessionStorage.getItem("userid");
+const token = getCookie("token");
+if (token && !userid) {
+  fetch("https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token)
+   .then((response) => {
+      if (!response.ok) {
+        console.error("Unexpected response status:", response.status);
+        return null;
+      }
+      return response.json();
+    })
+   .then((userData) => {
+      if (!userData) return;
+      const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("avatar", avatarURL);
+      sessionStorage.setItem("userid", userData.id);      })
+   .catch((error) => {
+      console.error("Error fetching user data:", error);
+    });
+} 
+
 function keyCreated(message) {
     toastr.success(message, "API key created!", {
         positionClass: "toast-bottom-right", // Position at the bottom right
@@ -27,7 +49,6 @@ function getCookie(name) {
     return null;
 }
 
-const token = getCookie("token");
 
     if (!token) {
         localStorage.setItem(
