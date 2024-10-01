@@ -27,8 +27,9 @@ $(document).ready(function () {
         const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
         sessionStorage.setItem("user", JSON.stringify(userData));
         sessionStorage.setItem("avatar", avatarURL);
-        sessionStorage.setItem("userid", userData.id);      })
-        window.location.href = window.location.href
+        sessionStorage.setItem("userid", userData.id);      
+        window.location.reload()
+      })
      .catch((error) => {
         console.error("Error fetching user data:", error);
       });
