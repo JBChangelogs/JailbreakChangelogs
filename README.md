@@ -122,22 +122,6 @@ Returns the changelog for the given ID.
 
 Returns a list of all changelogs.
 
-### Users
-
-#### Get User Data
-
-```http
-  GET /users/get
-```
-
-| Parameter | Type      | Description                   |
-| :-------- | :-------- | :---------------------------- |
-| `id`      | `integer` | **Required**. Discord User ID |
-
-Returns user data based on Discord User ID.
-
-To find your Discord User ID, follow the instructions here: [Where can I find my User/Server/Message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID)
-
 ### Authentication
 
 To use any of these API endpoints outside the website, you need an API key. You can obtain an API key from https://jailbreakchangelogs.xyz/api.
