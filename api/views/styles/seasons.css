@@ -1,0 +1,705 @@
+/* Dark Theme Styles */
+[data-bs-theme="dark"] body {
+  /* Main Colors */
+  --common-bg-color: #2e3944; /* Background color: Dark Gray */
+  --text-color: #d3d9d4; /* Main text color: White */
+  --heading-color: #d3d9d4; /* Heading color: Bright Blue */
+  --subheading-color: #748d92; /* Subheading color: Bright Red */
+
+  /* Footer Colors */
+  --footer-link-color: #ff6347; /* Footer link color: Tomato */
+  --footer-link-hover-color: #ff7f50; /* Footer link hover color: Coral */
+
+  /* Button Colors */
+  --button-primary-bg: #124e66; /* Primary button background: Dark Blue */
+  --button-primary-text: #eeeeee; /* Primary button text: White */
+  --button-primary-hover-bg: #212a31; /* Primary button hover: Lighter Blue */
+
+  --border-color: #ff6347; /* Border color: Tomato */
+  --season-rewards-hover-text: #748d92; /* Season rewards hover text: Light Blue */
+
+  /* Social Media Colors */
+  --reddit-color: #ff4500; /* Reddit color: Reddit Orange */
+  --discord-color: #7289da; /* Discord color: Discord Blurple */
+  --wiki-color: #8ab4f8; /* Wiki color: Lighter Wiki Blue */
+  --github-color: #ffffff; /* GitHub color: White */
+
+  /* Interaction Effects */
+  --hover-bg-color: #5a5a5a; /* Hover background: Dim Gray */
+  --selection-bg: #4682b4; /* Selection background: Steel Blue */
+  --selection-text: #ffffff; /* Selection text: White */
+  --glow-color: 255, 165, 0; /* Glow effect color: Orange (RGB values) */
+  --username-color: #76abae; /* Soft cyan for Username */
+
+  /* Gray Scale */
+  --gray-100: #333333;
+  --gray-200: #444444;
+  --gray-300: #555555;
+  --gray-400: #666666;
+  --gray-500: #777777;
+  --gray-600: #888888;
+  --gray-700: #999999;
+  --gray-800: #aaaaaa;
+  --gray-900: #bbbbbb;
+}
+[data-bs-theme="dark"] body {
+  background-color: var(--common-bg-color);
+}
+html[data-bs-theme="dark"] .changelog-dropdown-item:nth-child(odd) {
+  background-color: #212a31; /* Dark Gray for Odd Items */
+}
+
+html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
+  background-color: #2e3944; /* Darker Background on Hover */
+  color: #d3d9d4;
+}
+
+/* Dark Theme Specific Styles */
+[data-bs-theme="dark"] {
+  /* Dropdown Menu Styles */
+  .dropdown-menu {
+    background-color: var(--gray-100);
+    border-color: var(--gray-600);
+  }
+
+  /* Dropdown Item Color Override */
+  .dropdown-menu .dropdown-item {
+    color: #ffffff;
+  }
+
+  /* Custom Navbar Color */
+  .custom-navbar-color {
+    background-color: #212a31; /* Darker blue color for dark mode */
+    color: #ffffff;
+  }
+}
+.nav-link {
+  color: #d3d9d4; /* Light color for button text */
+  border: none;
+  transition: background-color 0.3s ease;
+}
+/* Back to Top Button Styles */
+#backToTop {
+  display: none; /* Initially hidden */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--button-primary-bg);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, display 0.3s;
+  z-index: 1000;
+}
+
+#backToTop.show {
+  display: block; /* Show when the 'show' class is added */
+}
+
+#backToTop:hover {
+  background-color: var(--button-primary-hover-bg);
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+  margin-top: 0; /* Remove margin to align with the button */
+  border: 1px solid; /* Define border once, specific colors in theme rules */
+}
+
+.dropdown-menu .dropdown-item {
+  color: var(--text-color); /* Default text color */
+}
+
+#paginationControls {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 20px 0; /* Optional: Add some margin for spacing */
+}
+
+#paginationControls button,
+#paginationControls input {
+  margin: 0 5px; /* Add margin between controls */
+}
+
+/* Custom Changelog Dropdown Styling */
+.changelog-dropdown {
+  min-width: 350px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-group .btn {
+  margin: 0 5px; /* Add spacing between buttons */
+}
+
+/* Custom Dropdown Button Styles */
+.custom-dropdown-btn {
+  padding: 8px 46px;
+  display: inline-block;
+  min-width: 150px;
+}
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body,
+p,
+span {
+  color: var(--text-color);
+}
+
+/* Main Container Layout */
+#main-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Scroll Animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.btn-primary {
+  background-color: var(
+    --button-primary-bg
+  ) !important; /* Primary button background */
+  border-color: var(--button-primary-bg) !important; /* Primary button border */
+  color: var(--button-primary-text) !important; /* Primary button text color */
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Hover state for primary button */
+  border-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Border color on hover */
+}
+/* Custom Spinner */
+.custom-spinner {
+  border-top-color: #31b1ff; /* Blue */
+  border-right-color: #31b1ff; /* Blue */
+  border-bottom-color: #ff341c; /* Orange */
+  border-left-color: #ff341c; /* Orange */
+}
+
+/* Offcanvas Styling */
+.offcanvas {
+  color: var(--text-color); /* Text color */
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Smooth transitions */
+}
+
+.offcanvas-header {
+  background-color: #212a31;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+}
+
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+
+.offcanvas-body {
+  padding: 0.2rem; /* Padding for body */
+  color: var(--text-color); /* Body text color */
+  font-size: 1rem; /* Body font size */
+  line-height: 1.5; /* Line height for readability */
+  overflow-y: auto; /* Vertical scrolling */
+}
+
+/* Close Button Styles */
+.btn-close {
+  color: #ffffff; /* Close button text color */
+}
+/* Loading Overlay */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 9999;
+  background-color: #2e3944;
+}
+
+#loading-overlay.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#loading-overlay .loading-logo {
+  width: 300px;
+  height: auto;
+}
+
+#loading-overlay .loading-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+/* Responsive Heading Styles */
+.responsive-heading {
+  font-size: 2.5rem; /* Large font size for headings */
+}
+
+/* Responsive Text Styles */
+.responsive-text {
+  font-size: 1rem; /* Standard font size for text */
+}
+/* Ensure long words in comments don't overflow their container */
+.list-group-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+/* Style the main container for the comment section */
+.container {
+  border-radius: 15px; /* Rounded corners for the container */
+  padding: 30px; /* Add space inside the container */
+  box-shadow: 0 0 20px #000000c7; /* Subtle shadow for depth */
+}
+
+/* Header styling */
+#comment-header {
+  font-family: "Luckiest Guy", Arial, sans-serif;
+  letter-spacing: 1px;
+  color: #d3d9d4;
+  text-align: center;
+  border-bottom: 2px solid #748d92;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Comment form styling */
+#comment-form {
+  margin-bottom: 30px;
+}
+
+#comment-form .input-group {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+#comment-form input,
+#comment-form button {
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+}
+
+#comment-form button {
+  transition: background-color 0.3s ease;
+}
+
+/* Comments list styling */
+#comments-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Individual comment styling */
+#comments-list .list-group-item {
+  background-color: #212a31;
+  border: 1px solid #748d92;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+#comments-list .list-group-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Commenter name styling */
+#comments-list .list-group-item strong {
+  color: var(--content-h3);
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Comment timestamp styling */
+#comments-list .list-group-item .text-muted {
+  font-size: 0.85em;
+  color: var(--gray-600) !important;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Comment text styling */
+#comments-list .list-group-item p {
+  color: var(--text-color);
+  line-height: 1.6;
+  margin-bottom: 0;
+  word-break: break-word;
+  hyphens: auto;
+}
+/* Carousel Styles */
+.carousel-item img {
+  border-radius: 10px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+}
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%; /* Adjust the clickable area of the buttons */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  width: 15px; /* Adjust this value to make the arrows smaller */
+  height: 15px; /* Adjust this value to make the arrows smaller */
+}
+
+.carousel-control-prev-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+}
+
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Season Rewards Styles */
+.season-rewards li {
+  padding: 10px;
+}
+
+.season-rewards .badge {
+  margin-left: 8px;
+}
+
+.season-rewards li:hover .badge {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+.season-rewards .list-group-item {
+  background-color: #212a31;
+  color: #d3d9d4;
+}
+.season-rewards .list-group-item:hover {
+  background-color: #2e3944;
+  color: var(--text-color);
+  cursor: pointer;
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 1.1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease, padding 0.3s ease;
+}
+
+.season-rewards .list-group-item:hover * {
+  text-decoration: none;
+  color: var(--season-rewards-hover-text);
+  font-weight: bold;
+}
+
+.season-rewards .list-group-item:hover .badge {
+  background-color: var(--header-bg);
+  color: #fff;
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Title Styles */
+.season-title {
+  border-bottom: 2px solid var(--heading-color);
+  color: var(--heading-color);
+  font-family: "Luckiest Guy", "Bangers", Arial, Helvetica, sans-serif;
+}
+
+.custom-prizes-title {
+  border-bottom: 4px solid var(--subheading-color);
+  font-size: 2.5rem;
+  color: var(--subheading-color);
+  font-family: "Luckiest Guy", "Bangers", Arial, Helvetica, sans-serif;
+}
+
+.season-description-container {
+  background-color: #1a2228;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 3rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.season-description-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #124e66, #748d92);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 3px;
+  border-radius: 0.75rem;
+  pointer-events: none;
+}
+
+.season-description-body {
+  padding: 2.5rem;
+}
+
+.season-description-paragraph {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #e0e5e3;
+  letter-spacing: 0.015em;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-indent: 1.5em;
+}
+
+/* Add a subtle animation to the description container */
+.season-description-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Add a subtle transition effect for smoother hover interactions */
+.season-description-container,
+.season-description-paragraph {
+  transition: all 0.3s ease;
+}
+
+/* Enhance link styling within paragraphs */
+.season-description-paragraph a {
+  color: #8ecae6;
+  text-decoration: none;
+  border-bottom: 1px dotted #8ecae6;
+  transition: all 0.2s ease;
+}
+
+.season-description-paragraph a:hover {
+  color: #e0fbfc;
+  border-bottom: 1px solid #e0fbfc;
+}
+
+/* Bonus Badge */
+.bonus-badge {
+  margin-right: 0.5rem;
+}
+/* Dark Theme Adjustments */
+[data-bs-theme="dark"] footer {
+  background-color: var(--common-bg-color);
+}
+
+footer.hide {
+  transform: translateY(100%);
+}
+
+/* Back to Top Button */
+#backToTop {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--button-primary-bg);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, display 0.3s;
+  z-index: 1000;
+}
+
+#backToTop.show {
+  display: block;
+}
+
+#backToTop:hover {
+  background-color: var(--button-primary-hover-bg);
+}
+.list-group-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+/* Admin Links */
+.admin-link-v3 {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.admin-link-jz {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
+}
+/* Quick Links card body */
+.card-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+.seasons-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+/* Responsive Styles */
+@media (max-width: 576px) {
+  #comment-form .input-group {
+    flex-wrap: nowrap;
+  }
+
+  #comment-form input {
+    flex: 1;
+  }
+
+  #comment-form button {
+    width: auto;
+  }
+
+  /* Ensure comments fit within the container on small screens */
+  #comments-list {
+    padding-right: 0;
+  }
+
+  #comments-list .list-group-item {
+    padding: 10px;
+  }
+
+  #comments-list .list-group-item p {
+    font-size: 14px;
+  }
+  .season-rewards .badge {
+    margin: 0 0.25rem;
+  }
+
+  .season-rewards .d-flex {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  .seasons-logo {
+    height: 40px;
+  }
+}
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 40px;
+  }
+  .container {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

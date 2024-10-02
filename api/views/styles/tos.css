@@ -1,0 +1,79 @@
+body {
+  font-family: "Poppins", sans-serif;
+  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/6.png");
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  color: #e0e0e0;
+}
+.tos-container {
+  background-color: rgba(33, 37, 41, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+h1,
+h2 {
+  color: #ffffff;
+}
+h1 {
+  border-bottom: 2px solid #124e66;
+  padding-bottom: 10px;
+}
+h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  padding-left: 10px;
+  border-left: 4px solid #124e66;
+}
+.lead {
+  color: #cccccc;
+}
+.text-muted {
+  color: #7f8c8d !important;
+}
+a {
+  color: #d3d9d4;
+}
+a:hover {
+  color: #748d92;
+}
+.last-updated {
+  color: #748d92;
+  font-weight: 600;
+}
+.section {
+  margin-bottom: 2rem;
+}
+.section:hover {
+  transform: translateY(-5px);
+}
+.home-button {
+  background-color: #124e66 !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.home-button:hover {
+  background-color: #212a31 !important;
+}
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}

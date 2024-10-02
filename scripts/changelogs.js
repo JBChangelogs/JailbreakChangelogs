@@ -11,29 +11,6 @@ $(document).ready(function () {
   const mobileLatestChangelogBtn = document.getElementById(
     "mobileLatestChangelogBtn"
   );
-  const userid = sessionStorage.getItem("userid");
-  const token = getCookie("token");
-  if (token && !userid) {
-    fetch("https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token)
-     .then((response) => {
-        if (!response.ok) {
-          console.error("Unexpected response status:", response.status);
-          return null;
-        }
-        return response.json();
-      })
-     .then((userData) => {
-        if (!userData) return;
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-        sessionStorage.setItem("user", JSON.stringify(userData));
-        sessionStorage.setItem("avatar", avatarURL);
-        sessionStorage.setItem("userid", userData.id);      
-        window.location.reload()
-      })
-     .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
-  } 
   // jQuery references for search results and navbar
   const $searchResultsContainer = $("#search-results");
   const $navbarCollapse = $("#navbarContent");
@@ -1189,17 +1166,11 @@ $(document).ready(function () {
   const CommentHeader = document.getElementById("comment-header");
   const commentinput = document.getElementById("commenter-text");
   const commentbutton = document.getElementById("submit-comment");
-  const profilepicture = document.getElementById("profile-picture");
-  const mobileprofilepicture = document.getElementById(
-    "profile-picture-mobile"
-  );
   const avatarUrl = sessionStorage.getItem("avatar");
   const userdata = JSON.parse(sessionStorage.getItem("user"));
   const commentsList = document.getElementById("comments-list");
-  profilepicture.src = null;
+  const userid = sessionStorage.getItem("userid");
   if (userid) {
-    profilepicture.src = avatarUrl;
-    mobileprofilepicture.src = avatarUrl;
     commentinput.placeholder = "Comment as " + userdata.global_name;
     commentbutton.disabled = false;
     commentinput.disabled = false;

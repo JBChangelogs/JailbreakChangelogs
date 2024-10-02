@@ -1,0 +1,931 @@
+/* Dark Theme Colors */
+[data-bs-theme="dark"] body {
+  --common-bg-color: #2e3944; /* Dark background */
+  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
+  --content-h2: #748d92; /* Softer Red for Dark Mode */
+  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
+  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
+  --content-bullet: #748d92; /* Lighter Blue for Bullets */
+  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
+  --text-color: #ffffff; /* White Text */
+
+  --header-text: #ffffff; /* White for Header Text */
+  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
+  --button-primary-text: #eeeeee; /* White for Primary Button Text */
+  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
+  /* Mention Colors */
+  --mention-color: #748d92; /* Teal color for Mentions */
+  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
+  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
+  --username-color: #76abae; /* Soft cyan for Username */
+  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
+
+  --highlight-bg: rgba(
+    255,
+    165,
+    0,
+    0.4
+  ); /* Semi-transparent Orange for Highlights */
+  --highlight-text: #ffffff; /* White for Highlighted Text */
+  --selection-bg: #4682b4; /* Steel Blue for Selection Background */
+  --selection-text: #ffffff; /* White for Selection Text */
+  --glow-color: #4b4b4b; /* Dark Gray for Glow Effects */
+
+  /* Social Media Colors */
+  --reddit-color: #ff4500; /* Reddit Orange */
+  --discord-color: #7289da; /* Discord Blurple */
+  --wiki-color: #8ab4f8; /* Lighter Wiki Blue */
+  --github-color: #ffffff; /* GitHub White */
+
+  /* Gray Scale */
+  --gray-100: #333333; /* Very Dark Gray */
+  --gray-200: #444444; /* Darker Gray */
+  --gray-300: #555555; /* Dark Gray */
+  --gray-400: #666666; /* Gray */
+  --gray-500: #777777; /* Medium Gray */
+  --gray-600: #888888; /* Slate Gray */
+  --gray-700: #999999; /* Light Slate Gray */
+  --gray-800: #aaaaaa; /* Light Gray */
+  --gray-900: #bbbbbb; /* Very Light Gray */
+}
+
+html[data-bs-theme="dark"] .changelog-dropdown-item:nth-child(odd) {
+  background-color: #212a31; /* Dark Gray for Odd Items */
+}
+
+html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
+  background-color: #2e3944; /* Darker Background on Hover */
+  color: #2e3944; /* Gold Text Color on Hover */
+}
+
+[data-bs-theme="dark"] #loading-overlay {
+  background-color: #2e3944; /* Dark Background for Loading Overlay */
+}
+[data-bs-theme="dark"] body {
+  background-color: var(--common-bg-color);
+}
+/* Dark Mode Mentions */
+[data-bs-theme="dark"] .mention {
+  color: var(--mention-color); /* Bright Orange for Mentions */
+  background-color: var(
+    --mention-bg
+  ); /* Dark Slate Blue for Mention Background */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+[data-bs-theme="dark"] .mention .at {
+  color: var(--at-color); /* Bright Yellow for '@' Symbol */
+}
+
+[data-bs-theme="dark"] .mention .username {
+  color: var(--username-color); /* Bright Orange Red for Username */
+}
+
+[data-bs-theme="dark"] .mention:hover {
+  background-color: var(--mention-hover-bg); /* Custom Hover Background */
+  cursor: pointer; /* Change Cursor to Pointer on Hover */
+}
+
+[data-bs-theme="dark"] .custom-navbar-color {
+  background-color: #212a31; /* Darker Blue for Navbar */
+  color: #ffffff; /* White Text Color */
+}
+
+/* Dark Theme Styles for Example Queries */
+[data-bs-theme="dark"] .example-queries {
+  background-color: #333333; /* Dark gray background */
+  border: 1px solid #4a4a4a; /* Dark gray border */
+  padding: 15px; /* Add some padding for better readability */
+  border-radius: 10px; /* Add a subtle border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+[data-bs-theme="dark"] .example-queries p {
+  color: #ffffff; /* White text color */
+  font-size: 1rem; /* Use a standard font size */
+  margin-bottom: 10px; /* Add some margin for better spacing */
+}
+
+[data-bs-theme="dark"] .example-query {
+  color: #ff6347; /* Tomato color for links */
+  text-decoration: none; /* Remove the default underline */
+  transition: color 0.3s; /* Add a smooth transition for hover effects */
+}
+
+[data-bs-theme="dark"] .example-query:hover {
+  color: #ff7f50; /* Coral color on hover */
+  background-color: #3a3a3a; /* Dark gray background on hover */
+}
+/* Dark Theme Adjustments */
+[data-bs-theme="dark"] footer {
+  background-color: var(--common-bg-color);
+}
+
+/* Dark mode hover styles for custom search item */
+[data-bs-theme="dark"] .custom-search-item:hover {
+  background-color: #5c6269; /* Deep blue-gray background for dark mode hover */
+  color: #ffdd57; /* Vibrant yellow-orange text color for dark mode hover */
+}
+[data-bs-theme="dark"] #main-container {
+  background-color: var(--common-bg-color);
+}
+[data-bs-theme="dark"] .audio-badge {
+  background-color: #3498db; /* Dark blue for audio tags */
+}
+
+[data-bs-theme="dark"] .video-badge {
+  background-color: #2ecc71; /* Dark green for video tags */
+}
+
+[data-bs-theme="dark"] .image-badge {
+  background-color: #ff9900; /* Dark orange for image tags */
+}
+[data-bs-theme="dark"] .badge {
+  color: var(--text-color); /* White text for dark theme */
+}
+/* Dark theme adjustments */
+[data-bs-theme="dark"] .custom-search-input {
+  background-color: #4a4a4a; /* Darker background for dark theme */
+  color: #f0f0f0; /* Lighter text for dark theme */
+  border-color: #555;
+}
+
+[data-bs-theme="dark"] .custom-search-input::placeholder {
+  color: #aaa; /* Lighter placeholder text for dark theme */
+}
+
+[data-bs-theme="dark"] #search-results {
+  background-color: #4a4a4a;
+  border-color: #555;
+}
+
+[data-bs-theme="dark"] #search-results .dropdown-item {
+  color: #f0f0f0;
+}
+
+[data-bs-theme="dark"] #search-results .dropdown-item:hover,
+[data-bs-theme="dark"] #search-results .dropdown-item:focus {
+  background-color: #555;
+}
+.search-container {
+  position: relative;
+  width: 100%;
+}
+.nav-link {
+  color: #d3d9d4; /* Light color for button text */
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.custom-search-input {
+  background-color: #f0f0f0; /* Light gray background */
+  color: #333; /* Dark text color */
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Rounded corners */
+  padding-left: 40px; /* Space for the search icon */
+}
+.custom-search-input::placeholder {
+  color: #777; /* Placeholder text color */
+}
+.search-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  color: #777; /* Icon color */
+}
+#clear-search-button {
+  background: none;
+  border: none;
+  color: #6c757d; /* Bootstrap's secondary color */
+  line-height: 1;
+  z-index: 5;
+}
+
+#clear-search-button:hover {
+  color: #495057; /* Darken on hover */
+}
+/* Optionally, if you want a subtle indication of focus without size change */
+.custom-search-input:focus {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Slight highlight when focused */
+}
+
+.navbar-toggler.btn-light {
+  padding: 0.375rem 0.75rem;
+  background-color: #f8f9fa;
+  border-color: #e2e6ea;
+  transition: all 0.15s ease-in-out;
+}
+
+.navbar-toggler.btn-light:active,
+.navbar-toggler.btn-light[aria-expanded="true"] {
+  background-color: #dae0e5;
+  border-color: #d3d9df;
+  transform: translateY(1px);
+}
+
+.navbar-toggler.btn-light:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.navbar-toggler.btn-light .bi-menu-button-wide {
+  color: #212529;
+  font-size: 1.25rem;
+}
+
+/* Custom Header Styles */
+.text-custom-header {
+  color: var(--custom-header-color); /* Custom color for headers */
+}
+
+.border-custom-header {
+  border-color: var(
+    --custom-header-color
+  ); /* Custom border color for headers */
+}
+
+/* Custom Subheader Styles */
+.text-custom-subheader {
+  color: var(--custom-subheader-color); /* Custom color for subheaders */
+}
+
+/* Custom Icon Color */
+.text-custom-icon {
+  color: var(--custom-icon-color); /* Custom color for icons */
+}
+
+.btn-primary {
+  background-color: var(
+    --button-primary-bg
+  ) !important; /* Primary button background */
+  border-color: var(--button-primary-bg) !important; /* Primary button border */
+  color: var(--button-primary-text) !important; /* Primary button text color */
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Hover state for primary button */
+  border-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Border color on hover */
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5); /* Glow effect on focus */
+}
+
+.changelog-dropdown .dropdown-menu {
+  width: auto;
+  min-width: 400px; /* Adjusted to be less than or equal to max-width */
+  max-width: 450px; /* Increased to match your intended width */
+  max-height: 400px; /* Maximum height for dropdown */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.changelog-dropdown .dropdown-item {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Dropdown Item Styles */
+.dropdown-item {
+  padding: 10px 15px; /* Padding for dropdown items */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effects */
+}
+
+.dropdown-item:hover {
+  background-color: #2e3944; /* Light background on hover */
+
+  font-weight: bold; /* Bold text on hover */
+}
+
+/* Ensure Full Width for Each Dropdown Item */
+.changelog-dropdown-item {
+  width: 100%; /* Full width for dropdown items */
+}
+#mobileChangelogList {
+  height: auto;
+  max-height: 300px; /* Adjust this value as needed */
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+/* Sidebar Image Wrapper Styles */
+#sidebar-image-wrapper .card {
+  position: relative; /* Positioning for hover effects */
+  overflow: hidden; /* Hide overflow */
+  transition: all 0.5s ease; /* Smooth transition for all properties */
+  transform-style: preserve-3d; /* Preserve 3D transformations */
+}
+
+#sidebar-image-wrapper .card::before {
+  content: ""; /* Create a pseudo-element for gradient overlay */
+  position: absolute; /* Positioning for overlay */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 100%
+  ); /* Gradient overlay */
+  transform: translateY(-100%); /* Initial position above the card */
+  transition: transform 0.5s ease; /* Smooth transition for the overlay */
+}
+
+#sidebar-image-wrapper .card:hover {
+  transform: scale(1.05) rotateY(5deg); /* Scale and rotate on hover */
+}
+
+#sidebar-image-wrapper .card:hover::before {
+  transform: translateY(0); /* Move overlay into view on hover */
+}
+
+#sidebar-image-wrapper .card img {
+  transition: all 0.5s ease; /* Smooth transition for image properties */
+}
+
+#sidebar-image-wrapper .card:hover img {
+  filter: brightness(1.2) contrast(1.1); /* Adjust brightness and contrast on hover */
+}
+/* Highlight Styles */
+.highlight {
+  background-color: var(
+    --highlight-bg
+  ) !important; /* Background color for highlights */
+  color: var(--highlight-text) !important; /* Text color for highlights */
+  font-weight: bold; /* Bold text */
+  padding: 2px 4px; /* Padding around highlighted text */
+  border-radius: 3px; /* Rounded corners */
+}
+
+.highlight.mention {
+  background-color: #e6f3ff; /* Light blue background for mention highlights */
+  color: #0366d6; /* Dark blue text for mentions */
+  border-radius: 3px; /* Rounded corners */
+  padding: 0 2px; /* Padding for mention highlights */
+}
+
+/* Search results dropdown */
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 0 0 20px 20px;
+  border-top: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+/* Custom Search Item Styles */
+.custom-search-item {
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.2s; /* Smooth background color transition */
+}
+
+/* Copy Changelog Button Styles */
+#copyChangelog {
+  width: 50px; /* Fixed width */
+  height: 50px; /* Fixed height */
+  display: flex; /* Flexbox for centering */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+}
+
+#copyChangelog i {
+  font-size: 1.25rem; /* Icon size */
+}
+
+/* Text Selection Styles */
+::selection {
+  background-color: var(
+    --selection-bg
+  ) !important; /* Background color for selected text */
+  color: var(--selection-text) !important; /* Text color for selected text */
+}
+
+/* Glow Effect Styles */
+.glow-effect {
+  box-shadow: 0 0 10px rgba(var(--glow-color), 0.5) !important; /* Glow effect */
+}
+
+/* Offcanvas Styling */
+.offcanvas {
+  color: var(--text-color); /* Text color */
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Smooth transitions */
+}
+
+.offcanvas-header {
+  background-color: #212a31;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+}
+
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+
+.offcanvas-body {
+  padding: 0.2rem; /* Padding for body */
+  color: var(--text-color); /* Body text color */
+  font-size: 1rem; /* Body font size */
+  line-height: 1.5; /* Line height for readability */
+  overflow-y: auto; /* Vertical scrolling */
+}
+
+/* Close Button Styles */
+.btn-close {
+  color: #ffffff; /* Close button text color */
+}
+
+/* SVG Icon Styles */
+.svg-icon {
+  fill: var(--text-color) !important; /* Fill color for SVG icons */
+  stroke: var(--button-primary-bg) !important; /* Stroke color for SVG icons */
+}
+
+/* Semi-Transparent Background */
+.semi-transparent-bg {
+  background-color: rgba(
+    var(--glow-color),
+    0.5
+  ) !important; /* Semi-transparent background */
+}
+
+/* Custom Spinner Styles */
+.custom-spinner {
+  border-top-color: #31b1ff; /* Blue color for top border */
+  border-right-color: #31b1ff; /* Blue color for right border */
+  border-bottom-color: #ff341c; /* Orange color for bottom border */
+  border-left-color: #ff341c; /* Orange color for left border */
+}
+
+/* Loading Overlay Styles */
+#loading-overlay {
+  position: fixed; /* Fixed positioning */
+  top: 0; /* Align to top */
+  left: 0; /* Align to left */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  display: none; /* Hidden by default */
+  justify-content: center; /* Center items horizontally */
+  align-items: center; /* Center items vertically */
+  z-index: 9999; /* High stacking context */
+  background-color: #ffffff; /* White background */
+}
+
+#loading-overlay.show {
+  display: flex; /* Enable flexbox when shown */
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  height: 100vh; /* Full height for overlay */
+}
+
+/* Loading Logo Styles */
+#loading-overlay .loading-logo {
+  width: 300px; /* Adjust width for logo */
+  height: auto; /* Maintain aspect ratio */
+}
+
+/* Responsive Heading Styles */
+.responsive-heading {
+  font-size: 2.5rem; /* Large font size for headings */
+}
+
+/* Responsive Text Styles */
+.responsive-text {
+  font-size: 1rem; /* Standard font size for text */
+}
+/* Ensure long words in comments don't overflow their container */
+.list-group-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Style the main container for the comment section */
+.container {
+  border-radius: 15px; /* Rounded corners for the container */
+  padding: 30px; /* Add space inside the container */
+  box-shadow: 0 0 20px #000000c7; /* Subtle shadow for depth */
+}
+/* Header styling */
+#comment-header {
+  font-family: "Luckiest Guy", Arial, sans-serif;
+  letter-spacing: 1px;
+  color: var(--content-h1);
+  text-align: center;
+  border-bottom: 2px solid var(--content-h2);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Comment form styling */
+#comment-form {
+  margin-bottom: 30px;
+}
+
+#comment-form .input-group {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+#comment-form input,
+#comment-form button {
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+}
+
+#comment-form button {
+  transition: background-color 0.3s ease;
+}
+
+/* Comments list styling */
+#comments-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Individual comment styling */
+#comments-list .list-group-item {
+  background-color: #212a31;
+  border: 1px solid #748d92;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+#comments-list .list-group-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Commenter name styling */
+#comments-list .list-group-item strong {
+  color: var(--content-h3);
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Comment timestamp styling */
+#comments-list .list-group-item .text-muted {
+  font-size: 0.85em;
+  color: var(--gray-600) !important;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Comment text styling */
+#comments-list .list-group-item p {
+  color: var(--text-color);
+  line-height: 1.6;
+  margin-bottom: 0;
+  word-break: break-word;
+  hyphens: auto;
+}
+/* Content Wrapper Styles */
+#content-wrapper {
+  display: flex; /* Flexbox layout */
+  flex-wrap: wrap; /* Allow wrapping of items */
+}
+
+/* Content Area Styles */
+#content {
+  flex: 1; /* Flexible item */
+  min-width: 0; /* Prevent overflow */
+}
+
+/* Heading Styles within Content */
+#content h1 {
+  color: var(--content-h1); /* Color for h1 headings */
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h1 */
+  border-bottom: 2px solid var(--content-h1); /* Bottom border for h1 */
+}
+
+#content h2 {
+  color: var(--content-h2); /* Color for h2 headings */
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h2 */
+}
+
+#content h3 {
+  color: var(--content-h3); /* Color for h3 headings */
+  font-family: Arial, Helvetica, sans-serif; /* Font family for h3 */
+}
+
+/* Paragraph Styles within Content */
+#content p {
+  color: var(--content-paragraph); /* Color for paragraph text */
+}
+
+/* Icon Colors */
+.bi-arrow-return-right {
+  color: var(--content-sub-bullet); /* Color for return arrow icon */
+}
+
+.bi-arrow-right {
+  color: var(--content-bullet); /* Color for right arrow icon */
+}
+/* Row Styles */
+.row {
+  margin-left: 0; /* Reset left margin */
+  margin-right: 0; /* Reset right margin */
+}
+
+/* Media Tag Styles */
+.media-tag {
+  display: inline-block; /* Inline block display */
+  padding: 2px 6px; /* Padding around tag */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 0.75em; /* Font size */
+  margin-left: 8px; /* Left margin */
+  color: white; /* Text color */
+  font-weight: bold; /* Bold text */
+  text-transform: uppercase; /* Uppercase text */
+  letter-spacing: 0.5px; /* Spacing between letters */
+  vertical-align: middle; /* Align vertically */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Body Text Styles */
+body,
+p,
+span {
+  color: var(--text-color); /* Default text color */
+}
+
+/* Navbar Padding */
+.navbar {
+  padding-top: 0.5rem; /* Top padding */
+  padding-bottom: 0.5rem; /* Bottom padding */
+}
+
+/* Navbar Form Control Styles */
+.navbar .form-control {
+  background-color: rgba(255, 255, 255, 0.1); /* Background color */
+  border-color: rgba(255, 255, 255, 0.1); /* Border color */
+  color: #fff; /* Text color */
+}
+
+.navbar .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+}
+
+.navbar .input-group-text {
+  color: rgba(255, 255, 255, 0.7); /* Color for input group text */
+}
+
+/* Input Group Styles */
+.input-group {
+  position: relative; /* Relative positioning */
+}
+
+#paginationControls {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 20px 0; /* Optional: Add some margin for spacing */
+}
+
+#paginationControls button,
+#paginationControls input {
+  margin: 0 5px; /* Add margin between controls */
+}
+
+/* Skip Link Styles */
+.skip-link {
+  position: absolute; /* Absolute positioning */
+  top: -40px; /* Position above */
+  left: 0; /* Align to left */
+  background: var(--blue-button-bg); /* Background color */
+  color: var(--blue-button-text); /* Text color */
+  padding: 8px; /* Padding */
+  z-index: 100; /* High stacking context */
+}
+
+/* Remove Outline for All Elements */
+* {
+  outline: none; /* Remove default outline */
+}
+
+/* Focus Styles for Interactive Elements */
+button:focus,
+a:focus,
+input:focus,
+select:focus {
+  box-shadow: none; /* Remove box shadow on focus */
+}
+
+/* Page Info Container Styles */
+#pageInfoContainer {
+  flex: 0 0 auto; /* Fixed flex basis */
+  margin-left: 10px; /* Left margin */
+}
+
+/* Button Styles */
+button {
+  padding: 8px 16px; /* Padding for buttons */
+  border: none; /* No border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+}
+
+/* Back to Top Button Styles */
+#backToTop {
+  display: none; /* Initially hidden */
+  position: fixed; /* Fixed positioning */
+  bottom: 20px; /* Position from bottom */
+  right: 20px; /* Position from right */
+  background-color: var(--button-primary-bg); /* Background color */
+  color: #ffffff; /* Text color */
+  padding: 10px 15px; /* Padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+  transition: background-color 0.3s, display 0.3s; /* Smooth transitions */
+  z-index: 1000; /* High stacking context */
+}
+
+#backToTop.show {
+  display: block; /* Show when 'show' class is added */
+}
+
+#backToTop:hover {
+  background-color: var(--button-primary-hover-bg); /* Hover background color */
+}
+footer {
+  color: var(--text-color);
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-color);
+  transition: transform 0.3s ease-out;
+}
+footer.hide {
+  transform: translateY(100%);
+}
+/* Admin Links */
+.admin-link-v3 {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.admin-link-jz {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Quick Links background */
+.card-header.bg-secondary {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff; /* White text */
+}
+
+/* Quick Links card body */
+.card-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
+}
+
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .custom-search-item {
+    padding: 8px; /* Adjust padding for mobile */
+  }
+  .quick-links .btn-link {
+    font-size: 0.9rem; /* Font size for quick links */
+  }
+
+  /* Changelog Dropdown Styles */
+  .changelog-dropdown {
+    min-width: 300px; /* Minimum width for mobile */
+    max-height: 300px; /* Maximum height for dropdown */
+  }
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+  #comment-form .input-group {
+    flex-wrap: nowrap;
+  }
+
+  #comment-form input {
+    flex: 1;
+  }
+
+  #comment-form button {
+    width: auto;
+  }
+
+  /* Ensure comments fit within the container on small screens */
+  #comments-list {
+    padding-right: 0;
+  }
+
+  #comments-list .list-group-item {
+    padding: 10px;
+  }
+
+  #comments-list .list-group-item p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 40px;
+  }
+  .container {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

@@ -1,0 +1,174 @@
+/* Body styles */
+body {
+  /* Set background image and ensure it covers the entire viewport */
+  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/4.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  /* Set default font and remove default margins/padding */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+
+  /* Ensure the body takes up at least the full viewport height */
+  min-height: 100vh;
+
+  /* Center content vertically and horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Overlay to darken the background image */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(44, 62, 80, 0.7);
+  z-index: 1;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+/* Container for the login form */
+.container {
+  position: relative;
+  z-index: 2; /* Ensure it's above the background overlay */
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+/* Flex container for centering the login form */
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Login form container */
+.login-container {
+  width: 100%;
+  max-width: 400px; /* Limit the maximum width for larger screens */
+}
+
+/* Card styles for the login form */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background-color: rgba(52, 73, 94, 0.9);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px); /* Apply blur effect to the background */
+}
+
+/* Hover effect for the card */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+/* Card header styles */
+.card-header {
+  background-color: rgba(52, 73, 94, 0.9); /* Darker, less blue background */
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gradient overlay for the card header */
+.card-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(52, 73, 94, 0.8),
+    rgba(44, 62, 80, 0.8)
+  );
+  transform: rotate(45deg);
+  z-index: 0;
+}
+
+/* Styles for the "Login" text in the header */
+.card-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1; /* Ensure it's above the gradient overlay */
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
+  letter-spacing: 1px;
+}
+
+/* Card body styles */
+.card-body {
+  padding: 2rem;
+}
+
+/* Primary button styles (e.g., Submit button) */
+.btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+/* Hover and focus styles for primary button */
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+/* Secondary button styles (e.g., Cancel button) */
+.btn-secondary {
+  background-color: rgba(149, 165, 166, 0.8);
+  border-color: rgba(149, 165, 166, 0.8);
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+/* Hover and focus styles for secondary button */
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: rgba(127, 140, 141, 0.9);
+  border-color: rgba(127, 140, 141, 0.9);
+  box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 576px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.6rem 1rem;
+  }
+}

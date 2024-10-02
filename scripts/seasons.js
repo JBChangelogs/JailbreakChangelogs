@@ -4,29 +4,7 @@ $(document).ready(function () {
   const $carouselInner = $("#carousel-inner");
   const $loadingOverlay = $("#loading-overlay");
   const $seasonList = $("#seasonList"); // Reference to the season dropdown
-  const userid = sessionStorage.getItem("userid");
-  const token = getCookie("token");
-  if (token && !userid) {
-    fetch("https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token)
-     .then((response) => {
-        if (!response.ok) {
-          console.error("Unexpected response status:", response.status);
-          return null;
-        }
-        return response.json();
-      })
-     .then((userData) => {
-        if (!userData) return;
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-        sessionStorage.setItem("user", JSON.stringify(userData));
-        sessionStorage.setItem("avatar", avatarURL);
-        sessionStorage.setItem("userid", userData.id);      
-        window.location.reload()
-      })
-     .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
-  } 
+
 
   // Function to fetch season descriptions from the API
   function fetchSeasonDescription() {
@@ -199,13 +177,11 @@ $(document).ready(function () {
         (reward) => reward.season_number === season
       );
       updateCarousel(rewardsForSeason);
+      $loadingOverlay.hide();
     } catch (error) {
       console.error(`Failed to load season ${season} details:`, error);
     }
   }
-
-  // Show loading overlay
-  $loadingOverlay.show();
 
   // Fetch both season descriptions and rewards
   $.when(fetchSeasonDescription(), fetchSeasonRewards())
@@ -246,17 +222,11 @@ $(document).ready(function () {
   const CommentHeader = document.getElementById("comment-header");
   const commentinput = document.getElementById("commenter-text");
   const commentbutton = document.getElementById("submit-comment");
-  const profilepicture = document.getElementById("profile-picture");
-  const mobileprofilepicture = document.getElementById(
-    "profile-picture-mobile"
-  );
   const avatarUrl = sessionStorage.getItem("avatar");
   const userdata = JSON.parse(sessionStorage.getItem("user"));
   const commentsList = document.getElementById("comments-list");
+  const userid = sessionStorage.getItem("userid");
   if (userid) {
-    console.log(avatarUrl);
-    profilepicture.src = avatarUrl;
-    mobileprofilepicture.src = avatarUrl;
     commentinput.placeholder = "Comment as " + userdata.global_name;
     commentbutton.disabled = false;
     commentinput.disabled = false;

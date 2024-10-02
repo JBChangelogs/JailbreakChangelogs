@@ -1,0 +1,691 @@
+/* Dark theme */
+[data-bs-theme="dark"] body {
+  --body-bg-color: #2e3944;
+  --timeline-entry-bg-color: #212a31;
+  --text-color: #d3d9d4;
+  --header-text: #d3d9d4;
+  --footer-link-color: #ff6347; /* Tomato */
+  --footer-link-hover-color: #ff7f50; /* Coral */
+  --button-primary-bg: #124e66; /* Orange Red */
+  --button-primary-text: #eeeeee;
+  --button-primary-hover-bg: #212a31; /* Tomato */
+  --selection-bg: #4682b4; /* Steel Blue */
+  --selection-text: #ffffff;
+  --glow-color: #748d92;
+  --hover-bg-color: #5a5a5a;
+  --username-color: #76abae; /* Soft cyan for Username */
+
+  --reddit-color: #ff4500; /* Reddit Orange */
+  --discord-color: #7289da; /* Discord Blurple */
+  --wiki-color: #8ab4f8; /* Lighter Wiki Blue */
+  --github-color: #ffffff; /* GitHub White */
+
+  --gray-100: #333333;
+  --gray-200: #444444;
+  --gray-300: #555555;
+  --gray-400: #666666;
+  --gray-500: #777777;
+  --gray-600: #888888;
+  --gray-700: #999999;
+  --gray-800: #aaaaaa;
+  --gray-900: #bbbbbb;
+}
+/* Back to Top Button */
+#backToTop {
+  display: none; /* Initially hidden */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--button-primary-bg);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, display 0.3s;
+  z-index: 1000;
+}
+
+#backToTop.show {
+  display: block; /* Show when the 'show' class is added */
+}
+
+#backToTop:hover {
+  background-color: var(--button-primary-hover-bg);
+}
+.offcanvas-header {
+  display: flex; /* Keep the header visible */
+  justify-content: space-between; /* Align items properly */
+  background-color: #212a31; /* Semi-transparent background */
+  color: #ffffff;
+}
+.offcanvas-title {
+  font-weight: bold; /* Bold title */
+  font-size: 1.25rem; /* Title font size */
+}
+.offcanvas-body {
+  background-color: transparent;
+  padding: 0;
+}
+
+.offcanvas {
+  border: none;
+  box-shadow: none;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#main-container {
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  transition: transform 0.3s ease-out;
+  background-color: var(--bg-color);
+  padding: 2rem 0;
+  color: var(--text-color);
+}
+
+footer.hide {
+  transform: translateY(100%);
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--body-bg-color);
+}
+
+.scrollMe {
+  animation: scroll 20s linear infinite; /* adjust duration and add infinite */
+}
+
+#timeline.scrollMe {
+  animation-name: scroll;
+
+  animation-duration: 20s;
+
+  animation-timing-function: linear;
+
+  animation-iteration-count: infinite;
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+.timeline-entry-container.right .timeline-entry h1,
+.timeline-entry-container.right .timeline-entry h2,
+.timeline-entry-container.right .timeline-entry h3,
+.timeline-entry-container.right .timeline-entry p,
+.timeline-entry-container.right .timeline-entry .accordion {
+  text-align: left; /* Ensure these elements are left-aligned */
+}
+.timeline-entry-container.right .entry-title {
+  text-align: right; /* Keep the title aligned to the right */
+}
+.timeline {
+  position: relative;
+  margin: 0 auto;
+  padding: 20px 0;
+  width: 80%;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--text-color); /* Use the same text color as the body */
+  transform: translateX(-50%);
+}
+
+[data-bs-theme="dark"] .timeline::before {
+  background-color: #748d92; /* Dark theme timeline line color */
+}
+
+.timeline-entry {
+  background-color: var(--timeline-entry-bg-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 0.3s ease; /* Add transition for smooth animation */
+}
+/* Hover effect for timeline entries */
+.timeline-entry:hover {
+  transform: scale(1.03); /* Slightly increase size on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+}
+/* Add a subtle glow effect on hover */
+.timeline-entry::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  box-shadow: 0 0 20px #2e3944; /* Adjust color as needed */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.timeline-entry:hover::after {
+  opacity: 1;
+}
+/* Ensure content stays above the glow effect */
+.timeline-entry > * {
+  position: relative;
+  z-index: 1;
+}
+.entry-title {
+  transition: transform 0.3s ease;
+}
+
+.timeline-entry:hover .entry-title {
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+.timeline-entry-container {
+  position: relative;
+  width: 50%;
+  padding: 10px 40px;
+  box-sizing: border-box;
+}
+
+.timeline-entry-container.left {
+  left: 0;
+}
+
+.timeline-entry-container.right {
+  left: 50%;
+}
+
+.timeline-entry-container.left .timeline-entry {
+  margin-left: auto;
+  text-align: left;
+}
+
+.timeline-entry-container.right .timeline-entry {
+  margin-right: auto;
+  text-align: right;
+}
+
+/* Override Bootstrap's btn-primary class */
+.btn-primary {
+  background-color: var(
+    --button-primary-bg
+  ) !important; /* Use your custom variable */
+  border-color: var(--button-primary-bg) !important;
+  color: var(--button-primary-text) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(--button-primary-hover-bg) !important;
+  border-color: var(--button-primary-hover-bg) !important;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5);
+}
+
+.btn-close {
+  color: #ffffff;
+}
+
+.btn-close:hover {
+  color: #ff6347;
+}
+.gradient-bg {
+  background: linear-gradient(
+    to right,
+    var(--button-primary-bg),
+    var(--button-secondary-bg)
+  ) !important;
+}
+
+.svg-icon {
+  fill: var(--text-color) !important;
+  stroke: var(--button-primary-bg) !important;
+}
+
+.semi-transparent-bg {
+  background-color: rgba(var(--glow-color), 0.5) !important;
+}
+.custom-spinner {
+  border-top-color: #31b1ff; /* Blue */
+  border-right-color: #31b1ff; /* Blue */
+  border-bottom-color: #ff341c; /* Orange */
+  border-left-color: #ff341c; /* Orange */
+}
+
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  background-color: #ffffff;
+}
+
+#loading-overlay.show {
+  display: flex; /* Enable flexbox */
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  height: 100vh; /* Optional: full height for overlay */
+}
+
+#loading-overlay .loading-logo {
+  width: 300px; /* Adjust the width of your logo as needed */
+  height: auto; /* Maintain the aspect ratio */
+}
+
+#loading-overlay .loading-text {
+  font-size: 1.5rem; /* Font size for loading text */
+  font-weight: bold; /* Bold text */
+  margin-top: 10px; /* Space above loading text */
+}
+
+[data-bs-theme="dark"] #loading-overlay {
+  background-color: #2e3944; /* Dark background */
+}
+
+[data-bs-theme="dark"] #loading-overlay .loading-text {
+  color: #ffffff; /* White text in dark theme */
+}
+
+.responsive-text {
+  font-size: 1rem;
+}
+.timeline-logo {
+  height: 50px; /* Default height for larger screens */
+  width: auto; /* Maintain aspect ratio */
+  object-fit: contain;
+  max-width: 100%; /* Ensure it doesn't overflow its container */
+}
+#content-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#content {
+  flex: 1;
+  min-width: 0;
+}
+#content h1,
+#content h2,
+#content h3 {
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
+}
+
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+body,
+p,
+span {
+  color: var(--text-color);
+}
+
+.custom-navbar-color {
+  background-color: #4b4b4b;
+}
+[data-bs-theme="dark"] .custom-navbar-color {
+  background-color: #212a31; /* darker blue color for dark mode */
+  color: #ffffff; /* white text color */
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Remove outline for all elements */
+* {
+  outline: none;
+}
+
+/* Specific styles for buttons and interactive elements */
+button:focus,
+a:focus,
+input:focus,
+select:focus {
+  box-shadow: none;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Style the main container for the comment section */
+.container {
+  border-radius: 15px; /* Rounded corners for the container */
+  padding: 30px; /* Add space inside the container */
+  box-shadow: 0 0 20px #000000c7; /* Subtle shadow for depth */
+}
+/* Bigger View Details text */
+.view-details-btn {
+  font-size: 1.7rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.timeline-entry:hover .view-details-btn {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+/* Dark theme adjustments */
+[data-bs-theme="dark"] .timeline-entry:hover::after {
+  box-shadow: 0 0 20px #748d92; /* Stronger glow for dark theme */
+}
+
+[data-bs-theme="dark"] .timeline-entry:hover .view-details-btn {
+  background-color: #748d92 !important;
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
+}
+
+/* Info button styling */
+.info-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #124e66;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.info-button:hover {
+  background-color: #212a31;
+  box-shadow: 0 0 10px rgba(19, 132, 150, 0.5);
+}
+
+.info-button i {
+  font-size: 1.2em;
+  margin-right: 5px;
+}
+
+.info-label {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+.custom-tooltip {
+  --bs-tooltip-bg: #2e3944; /* Dark background */
+  --bs-tooltip-color: #ffc107; /* Yellow text */
+  --bs-tooltip-max-width: 300px; /* Adjust max-width as needed */
+  font-size: 0.9rem; /* Adjust font size as needed */
+}
+
+.custom-tooltip .tooltip-inner {
+  border: 1px solid #ffc107; /* Yellow border */
+  padding: 10px; /* More padding for better readability */
+}
+
+.custom-tooltip .tooltip-arrow::before {
+  border-right-color: #343a40; /* Match the tooltip background color */
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.info-button {
+  animation: pulse 2s infinite;
+}
+
+/* Admin Links */
+.admin-link-v3 {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.admin-link-jz {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+
+/* Quick Links background */
+.card-header.bg-secondary {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff; /* White text */
+}
+
+/* Quick Links card body */
+.card-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
+}
+@media (max-width: 768px) {
+  .timeline {
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-entry-container {
+    width: calc(100% - 40px);
+    margin-left: 40px;
+    padding: 0;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .timeline-entry-container.left,
+  .timeline-entry-container.right {
+    left: 0 !important;
+    transform: none !important;
+  }
+
+  .timeline-entry {
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    word-wrap: break-word;
+    font-size: 0.85rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Ensure all entries are left-aligned */
+  .timeline-entry-container.left .timeline-entry,
+  .timeline-entry-container.right .timeline-entry {
+    text-align: left;
+  }
+
+  .timeline-entry * {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Adjust font sizes for different elements inside timeline entries */
+  .timeline-entry h1 {
+    font-size: 1.2rem;
+  }
+  .timeline-entry h2 {
+    font-size: 1.1rem;
+  }
+  .timeline-entry h3 {
+    font-size: 1rem;
+  }
+  .timeline-entry p,
+  .timeline-entry li {
+    font-size: 0.9rem;
+  }
+
+  .timeline-line {
+    display: none;
+  }
+
+  .timeline-entry-container::before {
+    content: "";
+    position: absolute;
+    left: -30px;
+    top: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #3498db;
+    z-index: 1;
+  }
+
+  /* Ensure images and other media are responsive */
+  .timeline-entry img,
+  .timeline-entry video,
+  .timeline-entry iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Adjust entry title for mobile */
+  .entry-title {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  /* Adjust entry content for mobile */
+  .entry-content p {
+    margin-bottom: 10px;
+  }
+
+  /* Adjust view details button for mobile */
+  .view-details-btn {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+  }
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 40px;
+  }
+}

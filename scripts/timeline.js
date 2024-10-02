@@ -1,34 +1,4 @@
 $(document).ready(function () {
-  const profilepicture = document.getElementById("profile-picture")
-  const mobileprofilepicture = document.getElementById("profile-picture-mobile")
-  const userid = sessionStorage.getItem("userid");
-  const avatarUrl = sessionStorage.getItem("avatar");
-  if (userid) {
-    profilepicture.src = avatarUrl;
-    mobileprofilepicture.src = avatarUrl;
-  }
-  const token = getCookie("token");
-  if (token && !userid) {
-    fetch("https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token)
-     .then((response) => {
-        if (!response.ok) {
-          console.error("Unexpected response status:", response.status);
-          return null;
-        }
-        return response.json();
-      })
-     .then((userData) => {
-        if (!userData) return;
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-        sessionStorage.setItem("user", JSON.stringify(userData));
-        sessionStorage.setItem("avatar", avatarURL);
-        sessionStorage.setItem("userid", userData.id);      
-        window.location.reload()
-      })
-     .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
-  } 
   // Get reference to the loading overlay element
   const loadingOverlay = document.getElementById("loading-overlay");
 

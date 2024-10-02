@@ -1,0 +1,374 @@
+/* Dark Theme Colors */
+[data-bs-theme="dark"] body {
+  --common-bg-color: #2e3944; /* Dark background */
+  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
+  --content-h2: #748d92; /* Softer Red for Dark Mode */
+  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
+  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
+  --content-bullet: #748d92; /* Lighter Blue for Bullets */
+  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
+  --text-color: #ffffff; /* White Text */
+
+  --header-text: #ffffff; /* White for Header Text */
+  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
+  --button-primary-text: #eeeeee; /* White for Primary Button Text */
+  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
+  /* Mention Colors */
+  --mention-color: #748d92; /* Teal color for Mentions */
+  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
+  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
+  --username-color: #76abae; /* Soft cyan for Username */
+  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
+
+  --highlight-bg: rgba(
+    255,
+    165,
+    0,
+    0.4
+  ); /* Semi-transparent Orange for Highlights */
+  --highlight-text: #ffffff; /* White for Highlighted Text */
+  --selection-bg: #4682b4; /* Steel Blue for Selection Background */
+  --selection-text: #ffffff; /* White for Selection Text */
+  --glow-color: #4b4b4b; /* Dark Gray for Glow Effects */
+
+  /* Social Media Colors */
+  --reddit-color: #ff4500; /* Reddit Orange */
+  --discord-color: #7289da; /* Discord Blurple */
+  --wiki-color: #8ab4f8; /* Lighter Wiki Blue */
+  --github-color: #ffffff; /* GitHub White */
+
+  /* Gray Scale */
+  --gray-100: #333333; /* Very Dark Gray */
+  --gray-200: #444444; /* Darker Gray */
+  --gray-300: #555555; /* Dark Gray */
+  --gray-400: #666666; /* Gray */
+  --gray-500: #777777; /* Medium Gray */
+  --gray-600: #888888; /* Slate Gray */
+  --gray-700: #999999; /* Light Slate Gray */
+  --gray-800: #aaaaaa; /* Light Gray */
+  --gray-900: #bbbbbb; /* Very Light Gray */
+}
+
+[data-bs-theme="dark"] #loading-overlay {
+  background-color: #2e3944; /* Dark Background for Loading Overlay */
+}
+[data-bs-theme="dark"] body {
+  background-color: var(--common-bg-color);
+}
+
+[data-bs-theme="dark"] .custom-navbar-color {
+  background-color: #212a31; /* Darker Blue for Navbar */
+  color: #ffffff; /* White Text Color */
+}
+
+/* Dark Theme Adjustments */
+[data-bs-theme="dark"] footer {
+  background-color: var(--common-bg-color);
+}
+
+[data-bs-theme="dark"] #main-container {
+  background-color: var(--common-bg-color);
+}
+
+[data-bs-theme="dark"] .badge {
+  color: var(--text-color); /* White text for dark theme */
+}
+
+[data-bs-theme="dark"] .custom-search-input::placeholder {
+  color: #aaa; /* Lighter placeholder text for dark theme */
+}
+
+/* Custom Subheader Styles */
+.text-custom-subheader {
+  color: var(--custom-subheader-color); /* Custom color for subheaders */
+}
+
+/* Custom Icon Color */
+.text-custom-icon {
+  color: var(--custom-icon-color); /* Custom color for icons */
+}
+
+.btn-primary {
+  background-color: var(
+    --button-primary-bg
+  ) !important; /* Primary button background */
+  border-color: var(--button-primary-bg) !important; /* Primary button border */
+  color: var(--button-primary-text) !important; /* Primary button text color */
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Hover state for primary button */
+  border-color: var(
+    --button-primary-hover-bg
+  ) !important; /* Border color on hover */
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5); /* Glow effect on focus */
+}
+
+/* Text Selection Styles */
+::selection {
+  background-color: var(
+    --selection-bg
+  ) !important; /* Background color for selected text */
+  color: var(--selection-text) !important; /* Text color for selected text */
+}
+
+/* SVG Icon Styles */
+.svg-icon {
+  fill: var(--text-color) !important; /* Fill color for SVG icons */
+  stroke: var(--button-primary-bg) !important; /* Stroke color for SVG icons */
+}
+
+/* Semi-Transparent Background */
+.semi-transparent-bg {
+  background-color: rgba(
+    var(--glow-color),
+    0.5
+  ) !important; /* Semi-transparent background */
+}
+
+/* Custom Spinner Styles */
+.custom-spinner {
+  border-top-color: #31b1ff; /* Blue color for top border */
+  border-right-color: #31b1ff; /* Blue color for right border */
+  border-bottom-color: #ff341c; /* Orange color for bottom border */
+  border-left-color: #ff341c; /* Orange color for left border */
+}
+
+/* Loading Overlay Styles */
+#loading-overlay {
+  position: fixed; /* Fixed positioning */
+  top: 0; /* Align to top */
+  left: 0; /* Align to left */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  display: none; /* Hidden by default */
+  justify-content: center; /* Center items horizontally */
+  align-items: center; /* Center items vertically */
+  z-index: 9999; /* High stacking context */
+  background-color: #ffffff; /* White background */
+}
+
+#loading-overlay.show {
+  display: flex; /* Enable flexbox when shown */
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  height: 100vh; /* Full height for overlay */
+}
+
+/* Loading Logo Styles */
+#loading-overlay .loading-logo {
+  width: 300px; /* Adjust width for logo */
+  height: auto; /* Maintain aspect ratio */
+}
+
+/* Responsive Heading Styles */
+.responsive-heading {
+  font-size: 2.5rem; /* Large font size for headings */
+}
+
+/* Responsive Text Styles */
+.responsive-text {
+  font-size: 1rem; /* Standard font size for text */
+}
+/* Ensure long words in comments don't overflow their container */
+.list-group-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Style the main container for the comment section */
+.container {
+  border-radius: 15px; /* Rounded corners for the container */
+  padding: 30px; /* Add space inside the container */
+  box-shadow: 0 0 20px #000000c7; /* Subtle shadow for depth */
+}
+
+/* Content Area Styles */
+#content {
+  flex: 1; /* Flexible item */
+  min-width: 0; /* Prevent overflow */
+}
+/* Row Styles */
+.row {
+  margin-left: 0; /* Reset left margin */
+  margin-right: 0; /* Reset right margin */
+}
+
+/* Body Text Styles */
+body,
+p,
+span {
+  color: var(--text-color); /* Default text color */
+}
+
+/* Navbar Padding */
+.navbar {
+  padding-top: 0.5rem; /* Top padding */
+  padding-bottom: 0.5rem; /* Bottom padding */
+}
+
+/* Navbar Form Control Styles */
+.navbar .form-control {
+  background-color: rgba(255, 255, 255, 0.1); /* Background color */
+  border-color: rgba(255, 255, 255, 0.1); /* Border color */
+  color: #fff; /* Text color */
+}
+
+.navbar .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+}
+
+.navbar .input-group-text {
+  color: rgba(255, 255, 255, 0.7); /* Color for input group text */
+}
+
+/* Input Group Styles */
+.input-group {
+  position: relative; /* Relative positioning */
+}
+
+/* Remove Outline for All Elements */
+* {
+  outline: none; /* Remove default outline */
+}
+
+/* Focus Styles for Interactive Elements */
+button:focus,
+a:focus,
+input:focus,
+select:focus {
+  box-shadow: none; /* Remove box shadow on focus */
+}
+
+/* Page Info Container Styles */
+#pageInfoContainer {
+  flex: 0 0 auto; /* Fixed flex basis */
+  margin-left: 10px; /* Left margin */
+}
+footer {
+  color: var(--text-color);
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-color);
+  transition: transform 0.3s ease-out;
+}
+
+/* Admin Links */
+.admin-link-v3 {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.admin-link-jz {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Quick Links background */
+.card-header.bg-secondary {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff; /* White text */
+}
+
+/* Quick Links card body */
+.card-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
+}
+
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .quick-links .btn-link {
+    font-size: 0.9rem; /* Font size for quick links */
+  }
+}
+@media (max-width: 576px) {
+  .navbar-logo {
+    height: 50px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-logo {
+    height: 40px;
+  }
+  .container {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
