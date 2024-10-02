@@ -87,11 +87,6 @@
 .text-custom-icon {
   color: var(--custom-icon-color); /* Custom color for icons */
 }
-.nav-link {
-  color: #d3d9d4; /* Light color for button text */
-  border: none;
-  transition: background-color 0.3s ease;
-}
 
 .btn-primary {
   background-color: var(

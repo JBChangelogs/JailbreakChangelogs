@@ -145,40 +145,50 @@ app.get("/seasons", async (req, res) => {
 });
 
 app.get("/bot", (req, res) => {
-  res.sendFile(path.join(__dirname, "../bot.html"));
+  res.render('bot')
 });
 
-app.get("/botinvite", (req, res) => {
-  res.sendFile(path.join(__dirname, "../botinvite.html"));
-});
-
-app.get("/keys", (req, res) => {
-  res.sendFile(path.join(__dirname, "../keys.html"));
-});
-
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../login.html"));
+app.get("/faq", (req, res) => {
+  res.render('faq')
 });
 
 app.get("/privacy", (req, res) => {
-  res.sendFile(path.join(__dirname, "../privacy.html"));
-});
-
-app.get("/timeline", (req, res) => {
-  res.sendFile(path.join(__dirname, "../timeline.html"));
+  res.render('privacy')
 });
 
 app.get("/tos", (req, res) => {
-  res.sendFile(path.join(__dirname, "../tos.html"));
+  console.log("Serving FAQ page");
+  res.render('tos')
 });
 
+app.get("/botinvite", (req, res) => {
+  res.render('botinvite')
+});
+
+app.get("/keys", (req, res) => {
+  res.render('keys')
+});
+
+app.get("/login", (req, res) => {
+  res.render('login')
+});
+
+app.get("/timeline", (req, res) => {
+  res.render('timeline')
+});
+
+
 app.get("/tradetracker", (req, res) => {
-  res.sendFile(path.join(__dirname, "../tradetracker.html"));
+  res.render('tradetracker')
+});
+
+app.get("/", (req, res) => {
+  res.render('index')
 });
 
 // Handle unknown routes by serving index.html
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
+  res.render("index");
 });
 
 // Start the server
