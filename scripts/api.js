@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                         <span>${formattedKey}</span> <!-- Display the formatted key -->
                     </td>                    <td>${key.name}</td>
                     <td>${key.description}</td>
+                    <td>${key.permissions}</td>
                     <td>${formattedDate}</td> <!-- Use created_at instead of createdAt -->
                 </tr>
             `;
@@ -98,10 +99,10 @@ document.addEventListener('DOMContentLoaded', async function(event) {
             permissions.push('changelog');
         }
         if (document.getElementById('permSeasons').checked) {
-            permissions.push('seasons');
+            permissions.push('season');
         }
         if (document.getElementById('permComments').checked) {
-            permissions.push('comments');
+            permissions.push('comment');
         }
         if (permissions.length === 0) {
             throw_error('Please select at least one permission.');
@@ -192,6 +193,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                         <td>${formattedKey}</td>
                         <td>${apiKey.name}</td>
                         <td>${apiKey.description}</td>
+                        <td>${apiKey.permissions}</td>
                         <td>${formattedDate}</td> <!-- Use created_at -->
                     </tr>
                 `;
