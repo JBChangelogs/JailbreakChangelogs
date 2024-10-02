@@ -144,24 +144,16 @@ app.get("/seasons", async (req, res) => {
   }
 });
 
-app.get("/timeline", (req, res) => {
-  res.sendFile(path.join(__dirname, "../timeline.html"));
-});
-
 app.get("/bot", (req, res) => {
   res.sendFile(path.join(__dirname, "../bot.html"));
 });
 
-app.get("/keys", (req, res) => {
-  res.sendFile(path.join(__dirname, "../keys.html"));
-});
-
-app.get("/tradetracker", (req, res) => {
-  res.sendFile(path.join(__dirname, "../tradetracker.html"));
-});
-
 app.get("/botinvite", (req, res) => {
   res.sendFile(path.join(__dirname, "../botinvite.html"));
+});
+
+app.get("/keys", (req, res) => {
+  res.sendFile(path.join(__dirname, "../keys.html"));
 });
 
 app.get("/login", (req, res) => {
@@ -172,8 +164,16 @@ app.get("/privacy", (req, res) => {
   res.sendFile(path.join(__dirname, "../privacy.html"));
 });
 
+app.get("/timeline", (req, res) => {
+  res.sendFile(path.join(__dirname, "../timeline.html"));
+});
+
 app.get("/tos", (req, res) => {
   res.sendFile(path.join(__dirname, "../tos.html"));
+});
+
+app.get("/tradetracker", (req, res) => {
+  res.sendFile(path.join(__dirname, "../tradetracker.html"));
 });
 
 // Handle unknown routes by serving index.html
