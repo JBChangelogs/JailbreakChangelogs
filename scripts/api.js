@@ -53,6 +53,13 @@ function formatKey(key) {
     return key.length > 8 ? key.slice(0, 8) + '...' : key; // Show first 8 characters and add '...' if longer
 }
 
+function formatPermissions(permissions) {
+    return permissions
+      .split(',')
+      .map(permission => permission.charAt(0).toUpperCase() + permission.slice(1))
+      .join(' | ');
+  }
+
 document.addEventListener('DOMContentLoaded', async function(event) {
     const apiKeys = []; // Store API keys
     const token = getCookie("token");
@@ -66,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
             const createdAtDate = new Date(key.created_at * 1000); // Convert Unix timestamp to Date object
             const formattedDate = formatDate(createdAtDate); // Format the date
             const formattedKey = formatKey(key.key); // Format the API key
+            const formattedPermissions = formatPermissions(key.permissions); // Format the permissions
             const row = `
                 <tr>
                     <td class="small-button-cell">
@@ -76,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                         <span>${formattedKey}</span> <!-- Display the formatted key -->
                     </td>                    <td>${key.name}</td>
                     <td>${key.description}</td>
-                    <td>${key.permissions}</td>
+                    <td>${formattedPermissions}</td>
                     <td>${formattedDate}</td> <!-- Use created_at instead of createdAt -->
                 </tr>
             `;
@@ -184,6 +192,8 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                 const createdAtDate = new Date(apiKey.created_at * 1000); // Convert Unix timestamp to Date object
                 const formattedDate = formatDate(createdAtDate); // Format the date
                 const formattedKey = formatKey(apiKey.key); // Format the API key
+                const formattedPermissions = formatPermissions(key.permissions); // Format the permissions
+
                 const row = `
                     <tr>
                                         <td class="small-button-cell">
@@ -193,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                         <td>${formattedKey}</td>
                         <td>${apiKey.name}</td>
                         <td>${apiKey.description}</td>
-                        <td>${apiKey.permissions}</td>
+                        <td>${formattedPermissions}</td>
                         <td>${formattedDate}</td> <!-- Use created_at -->
                     </tr>
                 `;
