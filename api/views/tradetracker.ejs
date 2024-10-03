@@ -170,62 +170,67 @@
       </div>
     </div>
       
-      <div id="main-container" class="container-fluid py-4">
-        <div class="row justify-content-center">
-          <div class="col-12 col-lg-10">
-            <div class="card shadow">
-              <div class="card-body">
-                <div class="row mb-3">
-                  <div class="col-12 col-md-6 mb-3 mb-md-0">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Type">
-                  </div>
-                  <div class="col-12 col-md-3 mb-3 mb-md-0">
-                    <select id="filterType" class="form-select">
-                      <option value="">All Types</option>
-                    </select>
-                  </div>
-                  <div class="col-12 col-md-3">
-                    <select id="sortBy" class="form-select">
-                      <option value="TimesTraded_desc">Times Traded (High to Low)</option>
-                      <option value="TimesTraded_asc">Times Traded (Low to High)</option>
-                      <option value="UniqueCirculation_desc">Unique Circulation (High to Low)</option>
-                      <option value="UniqueCirculation_asc">Unique Circulation (Low to High)</option>
-                      <option value="DemandMultiple_desc">Demand Multiple (High to Low)</option>
-                      <option value="DemandMultiple_asc">Demand Multiple (Low to High)</option>
-                    </select>
-                  </div>
-                  <div class="col-12 col-md-3 mt-3">
-                    <button id="clearFilters" class="btn btn-secondary w-100">Clear Filters</button>
-                  </div>
+    <div class="container-fluid py-4">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <div class="alert alert-info mb-4" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>Data Update Schedule:</strong> The dataset refreshes every 24 hours at Midnight <a href="https://time.is/UTC" target="_blank" class="alert-link">UTC time</a>.
+          </div>
+          
+          <div class="card shadow">
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Type">
                 </div>
-                <div class="table-responsive">
-                  <table id="tradeDataTable" class="table table-dark table-bordered table-striped">
-                    <thead>
-                      <tr>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>Times Traded</th>
-                        <th>Unique Circulation</th>
-                        <th>Demand Multiple</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- Data will be inserted here by JavaScript -->
-                    </tbody>
-                  </table>
+                <div class="col-12 col-md-3 mb-3 mb-md-0">
+                  <select id="filterType" class="form-select">
+                    <option value="">All Types</option>
+                  </select>
                 </div>
-                
-                <div class="d-flex justify-content-center align-items-center mt-3">
-                  <button id="prevPage" class="btn btn-outline-primary me-2">Previous</button>
-                  <span id="currentPage" class="mx-2">Page 1</span>
-                  <button id="nextPage" class="btn btn-outline-primary ms-2">Next</button>
+                <div class="col-12 col-md-3">
+                  <select id="sortBy" class="form-select">
+                    <option value="TimesTraded_desc">Times Traded (High to Low)</option>
+                    <option value="TimesTraded_asc">Times Traded (Low to High)</option>
+                    <option value="UniqueCirculation_desc">Unique Circulation (High to Low)</option>
+                    <option value="UniqueCirculation_asc">Unique Circulation (Low to High)</option>
+                    <option value="DemandMultiple_desc">Demand Multiple (High to Low)</option>
+                    <option value="DemandMultiple_asc">Demand Multiple (Low to High)</option>
+                  </select>
                 </div>
-                
+                <div class="col-12 col-md-3 mt-3">
+                  <button id="clearFilters" class="btn btn-secondary w-100">Clear Filters</button>
+                </div>
               </div>
+              <div class="table-responsive">
+                <table id="tradeDataTable" class="table table-dark table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Name</th>
+                      <th>Times Traded</th>
+                      <th>Unique Circulation</th>
+                      <th>Demand Multiple</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Data will be inserted here by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="d-flex justify-content-center align-items-center mt-3">
+                <button id="prevPage" class="btn btn-outline-primary me-2">Previous</button>
+                <span id="currentPage" class="mx-2">Page 1</span>
+                <button id="nextPage" class="btn btn-outline-primary ms-2">Next</button>
+              </div>
+              
             </div>
           </div>
         </div>
       </div>
+    </div>
       
 
 <footer class="mt-5">
