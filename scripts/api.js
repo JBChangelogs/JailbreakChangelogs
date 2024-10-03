@@ -35,9 +35,9 @@ const token = getCookie("token");
     if (!token) {
         localStorage.setItem(
             "redirectAfterLogin",
-            "/api.html"
+            "/api"
           ); // Store the redirect URL in local storage
-          window.location.href = "/login.html"; // Redirect to login page
+          window.location.href = "/login"; // Redirect to login page
     }
 
 function formatDate(date) {

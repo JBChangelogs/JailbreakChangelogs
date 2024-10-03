@@ -1180,9 +1180,9 @@ $(document).ready(function () {
     commentbutton.addEventListener("click", function (event) {
       localStorage.setItem(
         "redirectAfterLogin",
-        "/changelogs.html?id=" + localStorage.getItem("selectedChangelogId")
+        "/changelogs?id=" + localStorage.getItem("selectedChangelogId")
       ); // Store the redirect URL in local storage
-      window.location.href = "/login.html"; // Redirect to login page
+      window.location.href = "/login"; // Redirect to login page
     });
   }
 
