@@ -56,10 +56,9 @@ function formatKey(key) {
 function formatPermissions(permissions) {
     return permissions
       .split(',')
-      .map(permission => permission.charAt(0).toUpperCase() + permission.slice(1))
+      .map(permission => permission.charAt(0).toUpperCase() + permission.slice(1) + 's')
       .join(' | ');
   }
-
 document.addEventListener('DOMContentLoaded', async function(event) {
     const apiKeys = []; // Store API keys
     const token = getCookie("token");
