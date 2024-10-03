@@ -52,6 +52,9 @@
   background-color: #212a31; /* Darker Blue for Navbar */
   color: #ffffff; /* White Text Color */
 }
+[data-bs-theme="dark"] footer {
+  background-color: var(--common-bg-color);
+}
 /* Remove Outline for All Elements */
 * {
   outline: none; /* Remove default outline */
@@ -272,6 +275,94 @@ h1 {
 .offcanvas {
   border: none;
   box-shadow: none;
+}
+footer {
+  color: var(--text-color);
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-color);
+  transition: transform 0.3s ease-out;
+}
+/* Admin Links */
+.admin-link-v3 {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.admin-link-jz {
+  color: var(--username-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+/* Reddit Link Styles */
+.reddit-link {
+  color: var(--reddit-color);
+  text-decoration: none;
+}
+
+.reddit-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--reddit-color); /* Reddit Orange background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Discord Link Styles */
+.discord-link {
+  color: var(--discord-color);
+  text-decoration: none;
+}
+
+.discord-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--discord-color); /* Discord Blurple background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Wiki Link Styles */
+.wiki-link {
+  color: var(--wiki-color);
+  text-decoration: none;
+}
+
+.wiki-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: var(--wiki-color); /* Wiki Blue background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* GitHub Link Styles */
+.github-link {
+  color: var(--github-color);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #000000; /* True black background */
+  transform: scale(1.05); /* Slightly larger */
+}
+/* Quick Links background */
+.card-header.bg-secondary {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff; /* White text */
+}
+
+/* Quick Links card body */
+.card-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+/* Accordion headers */
+.accordion-button {
+  background-color: #212a31 !important; /* Dark blue-gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Accordion bodies */
+.accordion-body {
+  background-color: #2e3944; /* Darker background for the body */
+  color: #d3d9d4; /* Light gray text */
+}
+
+/* Accordion item borders */
+.accordion-item {
+  border-color: #4a4a4a; /* Darker border color */
 }
 /* Responsive Adjustments */
 @media (max-width: 768px) {

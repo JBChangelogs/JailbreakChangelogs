@@ -476,24 +476,21 @@
             </p>
             <!-- Website version, last updated, and build information -->
             <div class="row text-center">
-              <div class="col-sm-4">
+              <div class="col-sm-6">
                 <p class="mb-0">
                   <strong>Version:</strong>
-                  <span id="version-number">adbb7fc</span>
+                  <span id="version-number">Loading...</span>
                 </p>
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-6">
                 <p class="mb-0">
                   <strong>Last Updated:</strong>
-                  <span id="last-updated">September 30th 2024</span>
-                </p>
-              </div>
-              <div class="col-sm-4">
-                <p class="mb-0">
-                  <strong>Build:</strong> <span id="build-number">#2</span>
+                  <span id="last-updated">Loading...</span>
                 </p>
               </div>
             </div>
+            
+            
           </div>
         </div>
       </div>
@@ -586,12 +583,6 @@
   </div>
 </footer>
 
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
-<script src="scripts/changelogs.js"></script>
-<script src="scripts/main.js"></script>
-
 <!-- Back to Top Button -->
 <button
   id="backToTop"
@@ -660,5 +651,17 @@
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script src="scripts/changelogs.js"></script>
+<script src="scripts/main.js"></script>
+<script>
+  fetch('https://api.jailbreakchangelogs.xyz/version/website')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('version-number').textContent = data.version;
+      document.getElementById('last-updated').textContent = data.date;
+    });
+</script>
 </body>
 </html>

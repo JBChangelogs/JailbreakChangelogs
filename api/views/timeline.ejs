@@ -322,21 +322,16 @@
                 </p>
                 <!-- Website version, last updated, and build information -->
                 <div class="row text-center">
-                  <div class="col-sm-4">
+                  <div class="col-sm-6">
                     <p class="mb-0">
                       <strong>Version:</strong>
-                      <span id="version-number">adbb7fc</span>
+                      <span id="version-number">Loading...</span>
                     </p>
                   </div>
-                  <div class="col-sm-4">
+                  <div class="col-sm-6">
                     <p class="mb-0">
                       <strong>Last Updated:</strong>
-                      <span id="last-updated">October 1st 2024</span>
-                    </p>
-                  </div>
-                  <div class="col-sm-4">
-                    <p class="mb-0">
-                      <strong>Build:</strong> <span id="build-number">#2</span>
+                      <span id="last-updated">Loading...</span>
                     </p>
                   </div>
                 </div>
@@ -527,6 +522,14 @@
           return new bootstrap.Tooltip(tooltipTriggerEl);
         });
       });
+    </script>
+     <script>
+      fetch('https://api.jailbreakchangelogs.xyz/version/website')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('version-number').textContent = data.version;
+          document.getElementById('last-updated').textContent = data.date;
+        });
     </script>
   </body>
 </html>
