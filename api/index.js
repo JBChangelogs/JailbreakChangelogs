@@ -186,9 +186,14 @@ app.get("/", (req, res) => {
   res.render('index')
 });
 
+app.get("/api", (req, res) => {
+  res.redirect("/");
+});
+
+
 // Handle unknown routes by serving index.html
 app.get("*", (req, res) => {
-  res.render("index");
+  res.redirect("/");
 });
 
 // Start the server
