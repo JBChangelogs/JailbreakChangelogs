@@ -202,6 +202,40 @@
   margin-left: 0; /* Reset left margin */
   margin-right: 0; /* Reset right margin */
 }
+thead {
+  background-color: #e0e0e0; /* Dark background */
+  color: #ffffff; /* White text */
+}
+
+thead th {
+  padding: 15px; /* Padding for header cells */
+  text-align: left; /* Align text to the left */
+  border: none; /* Remove default borders */
+  border-bottom: 2px solid #ffffff; /* White bottom border for separation */
+  font-family: "Luckiest Guy", Arial, sans-serif; /* Custom font */
+  font-size: 18px; /* Font size for headers */
+}
+
+thead th:hover {
+  background-color: #495057; /* Change background on hover */
+}
+/* Table styles */
+
+.table th,
+.table td {
+  vertical-align: middle; /* Center table content */
+  padding: 10px; /* Padding for table cells */
+  border: none; /* Remove default borders */
+  border-bottom: 1px solid #000000; /* Light gray bottom border for separation */
+}
+
+.table-dark {
+  background-color: #343a40; /* Darker table background */
+}
+
+.table-dark th {
+  background-color: #495057; /* Dark header */
+}
 
 /* Body Text Styles */
 body,
