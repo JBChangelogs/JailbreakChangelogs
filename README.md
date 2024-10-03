@@ -3,8 +3,8 @@
 > [!CAUTION]
 > The only official sources for information and updates about the changelogs are https://jailbreakchangelogs.xyz and the game's [official Discord server](https://discord.gg/jailbreak). Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
-> [!INFO]
-> This is a fan-made project and is not affiliated with or endorsed by Badimo/Jailbreak development team.
+> [!NOTE]
+> This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
 ![Logo](https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs.png)
 
