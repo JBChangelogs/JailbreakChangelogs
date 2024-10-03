@@ -191,7 +191,11 @@ app.get("/api", (req, res) => {
 });
 
 app.get("/faq.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "../faq.png"));
+  res.sendFile(path.join(__dirname, "../FAQ.png"));
+});
+
+app.get("/api.png", (req, res) => {
+  res.sendFile(path.join(__dirname, "../API.png"));
 });
 
 
