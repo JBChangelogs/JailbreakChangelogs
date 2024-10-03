@@ -364,6 +364,11 @@ $(document).ready(function () {
     e.preventDefault();
     const selectedSeason = $(this).attr("href").split("=")[1];
 
+    // Update the URL with the selected season
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set("season", selectedSeason);
+    window.history.pushState({}, "", newUrl);
+
     // Only show loading overlay if we're fetching fresh data
     toggleLoadingOverlay(true);
 
