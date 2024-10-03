@@ -481,13 +481,5 @@
     </div>
   </div>
 </div>
-<script>
-  fetch('https://api.jailbreakchangelogs.xyz/version/website')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('version-number').textContent = data.version;
-      document.getElementById('last-updated').textContent = data.date;
-    });
-</script>
 </body>
 </html>

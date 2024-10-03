@@ -668,13 +668,5 @@
 <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 <script src="scripts/changelogs.js"></script>
 <script src="scripts/main.js"></script>
-<script>
-  fetch('https://api.jailbreakchangelogs.xyz/version/website')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('version-number').textContent = data.version;
-      document.getElementById('last-updated').textContent = data.date;
-    });
-</script>
 </body>
 </html>

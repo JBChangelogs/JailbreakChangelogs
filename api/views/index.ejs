@@ -199,7 +199,7 @@
           Last Updated: <span id="last-updated">Loading...</span> 
         </p>
         <p class="text-center">
-          Version: <span id="version">Loading...</span>
+          Version: <span id="version-number">Loading...</span>
         </p>
         
         <button class="btn btn-light d-lg-none" id="mobileViewUpdates">
@@ -343,15 +343,5 @@
         console.error("Error fetching user data:", error);
       });
   } 
-  </script>
-   <script>
-   fetch('https://api.jailbreakchangelogs.xyz/version/website')
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('last-updated').textContent = data.date;
-    document.getElementById('version').textContent = data.version;
-  });
-
-
   </script>
 </html>
