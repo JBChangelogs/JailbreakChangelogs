@@ -3,11 +3,14 @@
 > [!CAUTION]
 > The only official sources for information and updates about the changelogs are https://jailbreakchangelogs.xyz and the game's [official Discord server](https://discord.gg/jailbreak). Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
+> [!INFO]
+> This is a fan-made project and is not affiliated with or endorsed by Badimo/Jailbreak development team.
+
 ![Logo](https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs.png)
 
 # Roblox Jailbreak Changelogs
 
-Welcome to the unofficial changelog repository for [Roblox Jailbreak](https://www.roblox.com/games/606849621/Jailbreak). This website is your go-to resource for comprehensive, up-to-date information on all changes, updates, and patches for the game.
+Welcome to the Roblox Jailbreak Changelogs repository. Discover the latest updates, changes, and patches for the game in one convenient place.
 
 ## Website Features
 
@@ -55,10 +58,6 @@ This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
 This means you are free to use, modify, and distribute this software, provided that any derivative works are also distributed under the same license terms.
 
 For more details, see the [LICENSE](./LICENSE) file in this repository or visit the [GNU GPL v3.0 page](https://www.gnu.org/licenses/gpl-3.0.en.html).
-
-## Disclaimer
-
-This is an unofficial, fan-made project and is not affiliated with or endorsed by Badimo/Jailbreak development team.
 
 ---
 
