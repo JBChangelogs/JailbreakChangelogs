@@ -1,10 +1,13 @@
 body {
-  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358368/backgrounds/9.png");
   background-size: cover;
-  background-position: center;
   background-attachment: fixed;
-  background-repeat: no-repeat;
-  color: #e0e0e0;
+  background-position: center;
+  font-family: Arial, sans-serif;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #ffffff;
 }
 .content-wrapper {
   background-color: rgba(33, 37, 41, 0.9);
@@ -15,21 +18,7 @@ body {
 .navbar {
   background-color: #212a31 !important;
 }
-.accordion-item {
-  background-color: rgba(48, 52, 57, 0.8);
-  border-color: #444;
-}
-.accordion-button {
-  background-color: rgba(33, 37, 41, 0.9);
-  color: #e0e0e0;
-}
-.accordion-button:not(.collapsed) {
-  background-color: rgba(48, 52, 57, 0.9);
-  color: #ffffff;
-}
-.accordion-button::after {
-  filter: invert(1);
-}
+
 .btn-primary {
   background-color: #124e66 !important;
   border-color: #124e66 !important;
@@ -45,6 +34,39 @@ body {
 .card-header {
   background-color: rgba(48, 52, 57, 0.9);
   border-color: #444;
+}
+.faq-item {
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+.faq-question,
+.faq-answer {
+  display: flex;
+  align-items: flex-start;
+}
+.faq-symbol {
+  font-family: "Bangers", cursive;
+  font-size: 2.5em;
+  margin-right: 10px;
+  line-height: 1;
+}
+.q-symbol {
+  color: #ff341c;
+}
+.a-symbol {
+  color: #31b1ff;
+}
+.question-text {
+  font-size: 1.2em;
+  margin-top: 5px;
+  color: #ffffff;
+  font-weight: bold;
+}
+.answer-text {
+  font-size: 1em;
+  margin-top: 5px;
+  color: #e0e0e0;
 }
 a {
   color: #6ea8fe;
