@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
                 const createdAtDate = new Date(apiKey.created_at * 1000); // Convert Unix timestamp to Date object
                 const formattedDate = formatDate(createdAtDate); // Format the date
                 const formattedKey = formatKey(apiKey.key); // Format the API key
-                const formattedPermissions = formatPermissions(key.permissions); // Format the permissions
+                const formattedPermissions = formatPermissions(apiKey.permissions); // Format the permissions
 
                 const row = `
                     <tr>
