@@ -85,7 +85,7 @@ app.get("/changelogs", async (req, res) => {
 });
 
 app.get("/seasons", async (req, res) => {
-  let seasonId = req.query.id || 1; // Default to season 1 if no ID is provided
+  let seasonId = req.query.season || 1; // Default to season 1 if no ID is provided
   const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const rewardsUrl = `https://api.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
 
