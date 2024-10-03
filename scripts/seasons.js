@@ -422,6 +422,10 @@ $(document).ready(function () {
         )
       ) {
         seasonNumber = latestSeason.toString();
+        // Update URL with the latest season if no valid season was provided
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set("season", seasonNumber);
+        window.history.replaceState({}, "", newUrl);
       }
 
       // Fetch rewards for the specific season and then load details
