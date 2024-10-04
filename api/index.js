@@ -50,7 +50,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Set the directory for your EJS files
 
 app.get("/changelogs", async (req, res) => {
-  let changelogId = req.query.id || 1;
+  let changelogId = req.query.changelog || 1;
   console.log(`Fetching changelog with ID: ${changelogId}`);
   const apiUrl = `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`;
 
