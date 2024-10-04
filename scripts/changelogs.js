@@ -5,12 +5,18 @@ $(document).ready(function () {
   const imageElement = document.getElementById("sidebarImage");
   const sectionsElement = document.getElementById("content");
   const titleElement = document.getElementById("changelogTitle");
+  const CommentHeader = document.getElementById("comment-header");
+  // Caching variables
+  const CACHE_KEY = "changelogsCache";
+  const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
+
   const desktopLatestChangelogBtn = document.getElementById(
     "desktopLatestChangelogBtn"
   );
   const mobileLatestChangelogBtn = document.getElementById(
     "mobileLatestChangelogBtn"
   );
+
   // jQuery references for search results and navbar
   const $searchResultsContainer = $("#search-results");
   const $navbarCollapse = $("#navbarContent");
@@ -66,6 +72,26 @@ $(document).ready(function () {
   // Initialize changelogs data and debounce timer
   let changelogsData = [];
   let debounceTimer;
+
+  // Function to get cache from localStorage
+  function getCache() {
+    const cache = localStorage.getItem(CACHE_KEY);
+    return cache ? JSON.parse(cache) : null;
+  }
+
+  // Function to set cache in localStorage
+  function setCache(data) {
+    const cacheData = {
+      data: data,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+  }
+
+  // Function to check if cache is expired
+  function isCacheExpired(cacheTimestamp) {
+    return Date.now() - cacheTimestamp > CACHE_EXPIRY;
+  }
 
   // Displays the most recent changelog entry.
   function displayLatestChangelog() {
@@ -820,66 +846,49 @@ $(document).ready(function () {
       '<span class="mention fw-bold"><span class="at">@</span><span class="username">$1</span></span>' // Highlight mentions
     );
   };
-
-  // Fetch changelog data from the API
-  $.getJSON(apiUrl)
-    .done((data) => {
-      // Store the fetched data globally for later use
-      changelogsData = data;
-
-      // Check if we received valid data
-      if (Array.isArray(data) && data.length > 0) {
-        // Populate the changelog dropdown with the fetched data
-        populateChangelogDropdown(data);
-
-        // Get the 'id' parameter from the URL, if present
-        const urlParams = new URLSearchParams(window.location.search);
-        const changelogId = urlParams.get("id");
-
-        let selectedChangelog;
-
-        // If an ID is provided in the URL, find the corresponding changelog
-        if (changelogId) {
-          selectedChangelog = changelogsData.find((cl) => cl.id == changelogId);
-        }
-
-        // If no changelog was found with the provided ID, or no ID was provided,
-        // default to the latest changelog (first in the array)
-        if (!selectedChangelog) {
-          selectedChangelog = data[0];
-        }
-
-        // Display the selected or latest changelog
-        displayChangelog(selectedChangelog);
-
-        // Make the "Latest Changelog" buttons visible by default
-        // This ensures they're shown when viewing older changelogs
-        desktopLatestChangelogBtn.style.display = "block";
-        mobileLatestChangelogBtn.style.display = "block";
-
-        // If the displayed changelog is the latest one, hide the "Latest Changelog" buttons
-        // as they're not needed when already viewing the latest changelog
-        if (selectedChangelog.id === data[0].id) {
-          desktopLatestChangelogBtn.style.display = "none";
-          mobileLatestChangelogBtn.style.display = "none";
-        }
+  function processChangelogData(data) {
+    changelogsData = data;
+    if (Array.isArray(data) && data.length > 0) {
+      populateChangelogDropdown(data);
+      const urlParams = new URLSearchParams(window.location.search);
+      const changelogId = urlParams.get("changelog");
+      let selectedChangelog = changelogId
+        ? changelogsData.find((cl) => cl.id == changelogId)
+        : data[0];
+      if (!selectedChangelog) {
+        selectedChangelog = data[0];
       }
+      displayChangelog(selectedChangelog);
+      desktopLatestChangelogBtn.style.display =
+        selectedChangelog.id === data[0].id ? "none" : "block";
+      mobileLatestChangelogBtn.style.display =
+        selectedChangelog.id === data[0].id ? "none" : "block";
+    }
+    hideLoadingOverlay();
+  }
 
-      // Hide the loading overlay once everything is loaded and displayed
-      hideLoadingOverlay();
-    })
-    .fail((jqXHR, textStatus, errorThrown) => {
-      // Log the error for debugging purposes
-      console.error("Error fetching changelogs:", errorThrown);
+  function fetchDataFromAPI() {
+    return $.getJSON(apiUrl)
+      .done((data) => {
+        setCache(data);
+        processChangelogData(data);
+      })
+      .fail((jqXHR, textStatus, errorThrown) => {
+        console.error("Error fetching changelogs:", errorThrown);
+        $("#content").html(
+          "<p>Error loading changelogs. Please try again later.</p>"
+        );
+        hideLoadingOverlay();
+      });
+  }
 
-      // Display a user-friendly error message
-      $("#content").html(
-        "<p>Error loading changelogs. Please try again later.</p>"
-      );
-
-      // Hide the loading overlay even if there's an error
-      hideLoadingOverlay();
-    });
+  // Check cache before fetching
+  const cachedData = getCache();
+  if (cachedData && !isCacheExpired(cachedData.timestamp)) {
+    processChangelogData(cachedData.data);
+  } else {
+    fetchDataFromAPI();
+  }
 
   // Function to perform a search based on user input
   function performSearch() {
@@ -1104,7 +1113,7 @@ $(document).ready(function () {
 
     // Update the URL with the ID parameter
     const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set("id", changelog.id);
+    urlParams.set("changelog", changelog.id);
     window.history.pushState(
       {},
       "",
@@ -1161,9 +1170,7 @@ $(document).ready(function () {
     }
   });
 
-  
   const CommentForm = document.getElementById("comment-form");
-  const CommentHeader = document.getElementById("comment-header");
   const commentinput = document.getElementById("commenter-text");
   const commentbutton = document.getElementById("submit-comment");
   const avatarUrl = sessionStorage.getItem("avatar");
@@ -1180,7 +1187,7 @@ $(document).ready(function () {
     commentbutton.addEventListener("click", function (event) {
       localStorage.setItem(
         "redirectAfterLogin",
-        "/changelogs?id=" + localStorage.getItem("selectedChangelogId")
+        "/changelogs?changelog=" + localStorage.getItem("selectedChangelogId")
       ); // Store the redirect URL in local storage
       window.location.href = "/login"; // Redirect to login page
     });
@@ -1209,8 +1216,11 @@ $(document).ready(function () {
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
     const avatarElement = document.createElement("img");
-    const defaultAvatarUrl = '/favicon.ico';
-    avatarElement.src = avatarUrl.endsWith('null.png') ? defaultAvatarUrl : avatarUrl;    avatarElement.classList.add("rounded-circle", "m-1");
+    const defaultAvatarUrl = "/favicon.ico";
+    avatarElement.src = avatarUrl.endsWith("null.png")
+      ? defaultAvatarUrl
+      : avatarUrl;
+    avatarElement.classList.add("rounded-circle", "m-1");
     avatarElement.width = 32;
     avatarElement.height = 32;
 
@@ -1319,23 +1329,25 @@ $(document).ready(function () {
   let currentPage = 1; // Track the current page
   const commentsPerPage = 5; // Number of comments per page
   let comments = []; // Declare the comments array globally
-  
+
   // Function to load comments
   function loadComments(commentsData) {
     comments = commentsData; // Assign the fetched comments to the global variable
     commentsList.innerHTML = ""; // Clear existing comments
     comments.sort((a, b) => b.date - a.date);
-  
+
     // Calculate the total number of pages
     const totalPages = Math.ceil(comments.length / commentsPerPage);
-  
+
     // Get the comments for the current page
     const startIndex = (currentPage - 1) * commentsPerPage;
     const endIndex = startIndex + commentsPerPage;
     const commentsToDisplay = comments.slice(startIndex, endIndex);
-  
+
     const userDataPromises = commentsToDisplay.map((comment) => {
-      return fetch("https://api.jailbreakchangelogs.xyz/users/get?id=" + comment.user_id)
+      return fetch(
+        "https://api.jailbreakchangelogs.xyz/users/get?id=" + comment.user_id
+      )
         .then((response) => response.json())
         .then((userData) => ({ comment, userData }))
         .catch((error) => {
@@ -1343,39 +1355,45 @@ $(document).ready(function () {
           return null;
         });
     });
-  
+
     Promise.all(userDataPromises).then((results) => {
       const validResults = results.filter((result) => result !== null);
-  
+
       validResults.forEach(({ comment, userData }) => {
         const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-  
-        const listItem = document.createElement("li");
-        listItem.classList.add("list-group-item", "d-flex", "align-items-start");
-  
-        const avatarElement = document.createElement("img");
-        const defaultAvatarUrl = '/favicon.ico';
 
-        avatarElement.src = avatarUrl.endsWith('null.png') ? defaultAvatarUrl : avatarUrl;
+        const listItem = document.createElement("li");
+        listItem.classList.add(
+          "list-group-item",
+          "d-flex",
+          "align-items-start"
+        );
+
+        const avatarElement = document.createElement("img");
+        const defaultAvatarUrl = "/favicon.ico";
+
+        avatarElement.src = avatarUrl.endsWith("null.png")
+          ? defaultAvatarUrl
+          : avatarUrl;
         avatarElement.classList.add("rounded-circle", "m-1");
         avatarElement.width = 32;
         avatarElement.height = 32;
-  
+
         const commentContainer = document.createElement("div");
         commentContainer.classList.add("ms-2");
-  
+
         const usernameElement = document.createElement("strong");
         usernameElement.textContent = userData.global_name;
-  
+
         const commentTextElement = document.createElement("p");
         commentTextElement.textContent = comment.content;
         commentTextElement.classList.add("mb-0");
-  
+
         const formattedDate = formatDate(comment.date);
         const dateElement = document.createElement("small");
         dateElement.textContent = formattedDate;
         dateElement.classList.add("text-muted");
-  
+
         commentContainer.appendChild(usernameElement);
         commentContainer.appendChild(commentTextElement);
         commentContainer.appendChild(dateElement);
@@ -1383,17 +1401,17 @@ $(document).ready(function () {
         listItem.appendChild(commentContainer);
         commentsList.appendChild(listItem);
       });
-  
+
       // Render pagination controls
       renderPaginationControls(totalPages);
     });
   }
-  
+
   // Function to render pagination controls with arrows and input
   function renderPaginationControls(totalPages) {
     const paginationContainer = document.getElementById("paginationControls");
     paginationContainer.innerHTML = ""; // Clear existing controls
-  
+
     // Create left arrow button
     const leftArrow = document.createElement("button");
     leftArrow.textContent = "<";
@@ -1406,7 +1424,7 @@ $(document).ready(function () {
       }
     });
     paginationContainer.appendChild(leftArrow);
-  
+
     // Page number input
     const pageInput = document.createElement("input");
     pageInput.type = "number";
@@ -1425,7 +1443,7 @@ $(document).ready(function () {
       }
     });
     paginationContainer.appendChild(pageInput);
-  
+
     // Create right arrow button
     const rightArrow = document.createElement("button");
     rightArrow.textContent = ">";
@@ -1439,7 +1457,6 @@ $(document).ready(function () {
     });
     paginationContainer.appendChild(rightArrow);
   }
-  
 
   function reloadcomments() {
     CommentHeader.textContent =

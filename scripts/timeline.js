@@ -351,5 +351,4 @@ $(document).ready(function () {
     }
     lastScrollTop = st <= 0 ? 0 : st; // Update last scroll position
   });
-  
 });
