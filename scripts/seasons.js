@@ -4,25 +4,7 @@ $(document).ready(function () {
   const $carouselInner = $("#carousel-inner");
   const $loadingOverlay = $("#loading-overlay");
   const $seasonList = $("#seasonList"); // Reference to the season dropdown
-  const API_BASE_URL =
-    "https://api.jailbreakchangelogs.xyz/seasons/get?season=";
 
-  async function fetchSpecificSeason(seasonId) {
-    try {
-      const response = await fetch(`${API_BASE_URL}${seasonId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error("Failed to fetch season details:", error);
-      return {
-        title: `Season ${seasonId}`,
-        description:
-          "Season details are currently unavailable. Please try again later.",
-      };
-    }
-  }
   function toggleLoadingOverlay(show) {
     if (show) {
       $loadingOverlay.show();
@@ -31,69 +13,47 @@ $(document).ready(function () {
     }
   }
 
-  function cacheRewardImages(seasonNumber, rewards) {
-    const cacheKey = `rewardImages_${seasonNumber}`;
-    localStorage.setItem(cacheKey, JSON.stringify(rewards));
-    localStorage.setItem(`${cacheKey}_time`, new Date().getTime());
-    console.log(`Cached reward images for season ${seasonNumber}`);
+  function fetchAndCacheAllSeasons() {
+    return fetch("https://api.jailbreakchangelogs.xyz/seasons/list")
+      .then((response) => response.json())
+      .then((data) => {
+        localStorage.setItem("allSeasons", JSON.stringify(data));
+        localStorage.setItem("allSeasons_time", new Date().getTime());
+        return data;
+      });
   }
 
-  function fetchSeasonRewards(seasonNumber) {
-    const cacheKey = `rewardImages_${seasonNumber}`;
-    const cachedData = localStorage.getItem(cacheKey);
-    const cacheTime = localStorage.getItem(`${cacheKey}_time`);
+  function fetchAndCacheAllRewards() {
+    return fetch("https://api.jailbreakchangelogs.xyz/rewards/list")
+      .then((response) => response.json())
+      .then((data) => {
+        localStorage.setItem("allRewards", JSON.stringify(data));
+        localStorage.setItem("allRewards_time", new Date().getTime());
+        return data;
+      });
+  }
+  function getCachedData(key, expirationTime = 3600000) {
+    const data = localStorage.getItem(key);
+    const time = localStorage.getItem(`${key}_time`);
     const currentTime = new Date().getTime();
 
-    if (cachedData && cacheTime && currentTime - cacheTime < 3600000) {
-      console.log(`Using cached rewards data for season ${seasonNumber}`);
-      return Promise.resolve(JSON.parse(cachedData));
+    if (data && time && currentTime - time < expirationTime) {
+      return JSON.parse(data);
     }
-
-    console.log(`Fetching fresh rewards data for season ${seasonNumber}`);
-    return new Promise((resolve, reject) => {
-      $.ajax({
-        url: `https://api.jailbreakchangelogs.xyz/rewards/get?season=${seasonNumber}`,
-        method: "GET",
-        dataType: "json",
-        success: function (data) {
-          console.log(`Received fresh rewards data for season ${seasonNumber}`);
-          cacheRewardImages(seasonNumber, data);
-          resolve(data);
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          console.error(
-            `Failed to fetch rewards for season ${seasonNumber}:`,
-            errorThrown
-          );
-          reject(
-            new Error(`Failed to fetch rewards for season ${seasonNumber}`)
-          );
-        },
-      });
-    });
+    return null;
   }
+  function loadAllData() {
+    const cachedSeasons = getCachedData("allSeasons");
+    const cachedRewards = getCachedData("allRewards");
 
-  // Function to fetch season descriptions from the API
-  function fetchSeasonDescription() {
-    return $.ajax({
-      url: "https://api.jailbreakchangelogs.xyz/seasons/list",
-      method: "GET",
-      dataType: "json",
-      timeout: 10000, // Add a timeout to prevent long waits
-    })
-      .then(function (response) {
-        if (Array.isArray(response)) {
-          return response;
-        } else if (response && Array.isArray(response.seasons)) {
-          return response.seasons;
-        } else {
-          throw new Error("Unexpected response format");
-        }
-      })
-      .catch(function (error) {
-        console.error("Failed to fetch season descriptions:", error);
-        throw error; // Re-throw the error to be caught by the main error handler
-      });
+    const seasonsPromise = cachedSeasons
+      ? Promise.resolve(cachedSeasons)
+      : fetchAndCacheAllSeasons();
+    const rewardsPromise = cachedRewards
+      ? Promise.resolve(cachedRewards)
+      : fetchAndCacheAllRewards();
+
+    return Promise.all([seasonsPromise, rewardsPromise]);
   }
 
   // Function to populate the season dropdown menu
@@ -285,80 +245,23 @@ $(document).ready(function () {
     e.preventDefault();
     $("html, body").animate({ scrollTop: 0 }, 100);
   });
+  // Modify the loadSeasonDetails function
+  // Modify the loadSeasonDetails function
+  function loadSeasonDetails(season) {
+    const allSeasons = getCachedData("allSeasons");
+    const allRewards = getCachedData("allRewards");
 
-  async function loadSeasonDetails(season, seasonRewards) {
-    try {
-      const seasonCacheKey = `seasonDetails_${season}`;
-      const rewardsCacheKey = `rewardImages_${season}`;
-      const cachedSeasonData = localStorage.getItem(seasonCacheKey);
-      const cachedRewardsData = localStorage.getItem(rewardsCacheKey);
-      const seasonCacheTime = localStorage.getItem(`${seasonCacheKey}_time`);
-      const rewardsCacheTime = localStorage.getItem(`${rewardsCacheKey}_time`);
-      const currentTime = new Date().getTime();
+    const seasonData = allSeasons.find((s) => s.season === parseInt(season));
+    const seasonRewards = allRewards.filter(
+      (r) => r.season_number === parseInt(season)
+    );
+    displaySeasonDetails(season, seasonData, seasonRewards);
+    updateCarousel(seasonRewards);
 
-      let seasonData;
-      let rewardsData;
-      let needsFreshData = false;
-
-      // Check if we have cached data and it's less than 1 hour old
-      if (
-        cachedSeasonData &&
-        seasonCacheTime &&
-        currentTime - seasonCacheTime < 3600000
-      ) {
-        seasonData = JSON.parse(cachedSeasonData);
-      } else {
-        needsFreshData = true;
-
-        seasonData = await fetchSpecificSeason(season);
-
-        // Cache the new data
-        localStorage.setItem(seasonCacheKey, JSON.stringify(seasonData));
-        localStorage.setItem(`${seasonCacheKey}_time`, currentTime);
-      }
-
-      if (
-        cachedRewardsData &&
-        rewardsCacheTime &&
-        currentTime - rewardsCacheTime < 3600000
-      ) {
-        rewardsData = JSON.parse(cachedRewardsData);
-      } else {
-        needsFreshData = true;
-
-        rewardsData = seasonRewards;
-
-        // Cache the new rewards data
-        cacheRewardImages(season, rewardsData);
-      }
-
-      // Display season details
-      displaySeasonDetails(season, seasonData, rewardsData);
-
-      // Always update carousel, it will handle cases with no rewards
-      updateCarousel(rewardsData);
-
-      return needsFreshData;
-    } catch (error) {
-      console.error(`Failed to load season ${season} details:`, error);
-      $seasonDetailsContainer.html(`
-        <div class="alert alert-warning" role="alert">
-          <h4 class="alert-heading">Season ${season} Details Partially Available</h4>
-          <p>We couldn't retrieve all the details for this season. Some information might be temporarily unavailable.</p>
-        </div>
-      `);
-      // Still try to display rewards and carousel if available
-      if (seasonRewards && seasonRewards.length > 0) {
-        displaySeasonDetails(
-          season,
-          { title: `Season ${season}`, description: "Description unavailable" },
-          seasonRewards
-        );
-        updateCarousel(seasonRewards);
-      }
-      return true; // Indicate that there was an error, so we should hide the loading overlay
-    }
+    // Return true if data was from cache, false otherwise
+    return allSeasons !== null && allRewards !== null;
   }
+
   // Add event listener for season selection
   $seasonList.on("click", ".changelog-dropdown-item", function (e) {
     e.preventDefault();
@@ -372,23 +275,22 @@ $(document).ready(function () {
     // Only show loading overlay if we're fetching fresh data
     toggleLoadingOverlay(true);
 
-    fetchSeasonRewards(selectedSeason)
-      .then((seasonRewards) => {
-        return loadSeasonDetails(parseInt(selectedSeason), seasonRewards);
-      })
-      .then((needsFreshData) => {
-        if (!needsFreshData) {
-          toggleLoadingOverlay(false);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          `Failed to fetch rewards for season ${selectedSeason}:`,
-          error
+    const dataFromCache = loadSeasonDetails(parseInt(selectedSeason));
+
+    if (dataFromCache) {
+      // If data was from cache, hide the overlay immediately
+      toggleLoadingOverlay(false);
+      try {
+        reloadcomments();
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+        $("#comments-list").html(
+          '<p class="text-muted">Unable to load comments at this time.</p>'
         );
-        return loadSeasonDetails(parseInt(selectedSeason), []);
-      })
-      .finally(() => {
+      }
+    } else {
+      // If data was not from cache, wait for potential async operations to complete
+      Promise.resolve().then(() => {
         toggleLoadingOverlay(false);
         try {
           reloadcomments();
@@ -399,18 +301,17 @@ $(document).ready(function () {
           );
         }
       });
+    }
   });
 
-  $.when(fetchSeasonDescription())
-    .done((seasonDescriptions) => {
-      // Populate the dropdown with season items
+  // Modify the initial data loading
+  loadAllData()
+    .then(([seasonDescriptions, allRewards]) => {
       populateSeasonDropdown(seasonDescriptions);
 
-      // Get season number from URL
       const urlParams = new URLSearchParams(window.location.search);
       let seasonNumber = urlParams.get("season");
 
-      // Find the latest season
       const latestSeason = Math.max(
         ...seasonDescriptions.map((desc) => desc.season)
       );
@@ -422,61 +323,50 @@ $(document).ready(function () {
         )
       ) {
         seasonNumber = latestSeason.toString();
-        // Update URL with the latest season if no valid season was provided
         const newUrl = new URL(window.location);
         newUrl.searchParams.set("season", seasonNumber);
         window.history.replaceState({}, "", newUrl);
       }
 
-      // Fetch rewards for the specific season and then load details
-      fetchSeasonRewards(seasonNumber)
-        .then((seasonRewards) => {
-          // Load details for the specified season
-          return loadSeasonDetails(parseInt(seasonNumber), seasonRewards);
-        })
-        .catch((error) => {
-          console.error(
-            `Failed to fetch rewards for season ${seasonNumber}:`,
-            error
+      const dataFromCache = loadSeasonDetails(parseInt(seasonNumber));
+
+      if (dataFromCache) {
+        toggleLoadingOverlay(false);
+        try {
+          reloadcomments();
+        } catch (error) {
+          console.error("Failed to load comments:", error);
+          $("#comments-list").html(
+            '<p class="text-muted">Unable to load comments at this time.</p>'
           );
-          // Still load season details with an empty rewards array
-          return loadSeasonDetails(parseInt(seasonNumber), []);
-        })
-        .finally(() => {
-          // Ensure the loading overlay is hidden
-          toggleLoadingOverlay(false);
-
-          // Attempt to load comments
-          try {
-            reloadcomments();
-          } catch (error) {
-            console.error("Failed to load comments:", error);
-            $("#comments-list").html(
-              '<p class="text-muted">Unable to load comments at this time.</p>'
-            );
-          }
-        });
+        }
+      } else {
+        return Promise.resolve();
+      }
     })
-    .fail((error) => {
-      console.error("Failed to fetch season descriptions:", error);
-
-      // Display an error message to the user
+    .then(() => {
+      toggleLoadingOverlay(false);
+      try {
+        reloadcomments();
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+        $("#comments-list").html(
+          '<p class="text-muted">Unable to load comments at this time.</p>'
+        );
+      }
+    })
+    .catch((error) => {
+      console.error("Failed to fetch data:", error);
       $seasonDetailsContainer.html(`
-      <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Unable to Load Season Data</h4>
-        <p>We're having trouble fetching the season information. Please try refreshing the page or check back later.</p>
-      </div>
-    `);
-
-      // Clear the season dropdown
+        <div class="alert alert-danger" role="alert">
+          <h4 class="alert-heading">Unable to Load Season Data</h4>
+          <p>We're having trouble fetching the season information. Please try refreshing the page or check back later.</p>
+        </div>
+      `);
       $seasonList.html(
         '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>'
       );
-
-      // Hide the loading overlay
       $loadingOverlay.hide();
-
-      // Disable comments section
       $("#comments-list").html(
         '<p class="text-muted">Comments are unavailable due to an error loading season data.</p>'
       );
