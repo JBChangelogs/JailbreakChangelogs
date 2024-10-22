@@ -1,17 +1,59 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Inject the Speed Insights code on every page load
-  const path = window.location.pathname;
-  fetch("https://api.jailbreakchangelogs.xyz/version/website")
-    .then((response) => response.json())
-    .then((data) => {
-      document.getElementById("last-updated").textContent = data.date;
-      document.getElementById("version-number").textContent = data.version;
-    });
 
-  if (path.endsWith(".html")) {
-    const cleanUrl = path.replace(".html", "");
-    window.history.pushState({}, "", cleanUrl);
+// Function to determine if we should fetch new version data
+function shouldFetchVersionData() {
+  // Get the timestamp of the last fetch from local storage
+  const lastFetch = localStorage.getItem('lastVersionFetch');
+  // Get the current timestamp
+  const currentTime = new Date().getTime();
+  
+  // If we've never fetched or it's been more than 1 hour since last fetch
+  if (!lastFetch || (currentTime - parseInt(lastFetch)) > 60 * 60 * 1000) {
+    // We should fetch new data
+    return true;
   }
+
+  // We should use cached data
+  return false;
+}
+
+// Function to update the version information on the page
+function updateVersionInfo() {
+  // Retrieve cached version data from local storage
+  const cachedData = localStorage.getItem('versionData');
+  // Retrieve the timestamp of the last fetch
+  const lastFetch = localStorage.getItem('lastVersionFetch');
+
+  // If we have cached data and shouldn't fetch new data
+  if (cachedData && !shouldFetchVersionData()) {
+    // Parse the cached data
+    const data = JSON.parse(cachedData);
+    // Update the DOM with cached data
+    document.getElementById("last-updated").textContent = data.date;
+    document.getElementById("version-number").textContent = data.version;
+  } else {
+    // We need to fetch new data
+    fetch("https://api.jailbreakchangelogs.xyz/version/website")
+      .then((response) => response.json())
+      .then((data) => {
+        // Update the DOM with new data
+        document.getElementById("last-updated").textContent = data.date;
+        document.getElementById("version-number").textContent = data.version;
+      
+        // Cache the new data
+        localStorage.setItem('versionData', JSON.stringify(data));
+        // Update the last fetch timestamp
+        localStorage.setItem('lastVersionFetch', new Date().getTime().toString());
+      })
+      .catch((error) => {
+        // Log any errors that occur during the fetch
+        console.error('Error fetching version data:', error);
+      });
+  }
+}
+
+  updateVersionInfo();
+
   const avatarUrl = sessionStorage.getItem("avatar");
 
   function getCookie(name) {
