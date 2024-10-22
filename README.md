@@ -1,5 +1,5 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/pizzaboxer/bloxstrap/ci.yml?branch=main&label=builds)](https://github.com/JBChangelogs/JailbreakChangelogs/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/JBChangelogs/JailbreakChangelogs/npm-publish-github-packages.yml?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/kAuxDntHG9)
 
 > [!CAUTION]
