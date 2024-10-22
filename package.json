@@ -2,7 +2,8 @@
     "name": "jailbreak-changelogs",
     "version": "1.0.0",
     "scripts": {
-        "start": "node api/index.js"
+        "start": "node api/index.js",
+        "test": "echo \"No test specified\" && exit 0"
     },
     "dependencies": {
         "@vercel/speed-insights": "^1.0.12",
