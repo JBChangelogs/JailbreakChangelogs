@@ -3,7 +3,9 @@
     "version": "1.0.0",
     "scripts": {
         "start": "node api/index.js",
-        "test": "echo \"No test specified\" && exit 0"
+        "dev": "nodemon api/index.js",
+        "test": "echo \"No test specified\" && exit 0",
+        "bump-version": "npm version patch && git push && git push --tags"
     },
     "dependencies": {
         "@vercel/speed-insights": "^1.0.12",
@@ -19,6 +21,7 @@
         "@babel/core": "^7.25.2",
         "@babel/preset-env": "^7.25.4",
         "babel-loader": "^9.2.1",
+        "nodemon": "^3.0.1",
         "webpack": "^5.95.0",
         "webpack-cli": "^5.1.4"
     }
