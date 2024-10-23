@@ -550,6 +550,7 @@ function updateDropdownButton(text) {
 
     // Get the sidebar image URL
     const sidebarImageUrl = $("#sidebarImage").attr("src");
+    // Attempt to use optimised image url for embed
     const optimizedSidebarImageUrl = addCloudinaryOptimization(sidebarImageUrl);
 
     // Process the content into an array
