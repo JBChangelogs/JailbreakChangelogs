@@ -550,8 +550,6 @@ function updateDropdownButton(text) {
 
     // Get the sidebar image URL
     const sidebarImageUrl = $("#sidebarImage").attr("src");
-    // Attempt to use optimised image url for embed
-    const optimizedSidebarImageUrl = addCloudinaryOptimization(sidebarImageUrl);
 
     // Process the content into an array
     let processedContent = [];
@@ -587,7 +585,7 @@ function updateDropdownButton(text) {
     processedContent.push(
       "",
       "",
-      `This changelog was copied from ${currentPageUrl}`,
+      `<This changelog was copied from ${currentPageUrl}>`,
     );
 
     // Join the processed content with newlines

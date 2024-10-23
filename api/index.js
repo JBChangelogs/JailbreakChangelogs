@@ -116,9 +116,12 @@ app.get("/changelogs/:changelog", async (req, res) => {
     const data = await response.json();
     const { title, image_url } = data;
 
+    // Apply optimization to the image_url
+    const optimizedImageUrl = addCloudinaryOptimization(image_url);
+
     res.render("changelogs", { 
       title, 
-      image_url,
+      image_url: optimizedImageUrl,
       logoUrl: 'assets/logos/changelogs.png',
       logoAlt: 'Changelogs Page Logo'
     });
