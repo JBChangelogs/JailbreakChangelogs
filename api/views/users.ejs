@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <!-- Character encoding -->
+    <meta charset="UTF-8" />
+
+    <!-- Responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Referrer policy -->
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- Open Graph metadata for social media sharing -->
+    <meta property="og:title" content="<%= userData.global_name %> / Jailbreak Changelogs" />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/dsvlphknq/image/upload/v1728008939/logos/users.png"
+    /> 
+    
+    <meta property="og:image:width" content="2328" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:type" content="profile" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="https://res.cloudinary.com/dsvlphknq/image/upload/v1728008939/logos/users.png"
+    />
+    <!-- Additional metadata for SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta
+      name="keywords"
+      content="user profile, gaming community, achievements, friends, customization"
+    />
+
+    <!-- Page title -->
+    <title><%= userData.global_name%> (@<%= userData.username %>) / Changelogs</title>
+
+    <!-- CSS Links -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+  />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- Custom stylesheet -->
+    <base href="/">
+    <link rel="stylesheet" href="styles/users.css" />
+
+    <!-- Favicon -->
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      const settings = `<%- JSON.stringify(settings) %>`; // Correctly embedded
+      const userData = `<%- JSON.stringify(userData) %>`; // Correctly embedded
+
+    </script>
+  </head>
+
+<body>
+  <%- include('partials/nav') %>
+  
+  <div class="container mt-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/users">Users</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@<%= userData.username %></li>
+      </ol>
+    </nav>
+    
+    <div class="container-fluid px-0">
+      <div class="user-header-wrapper position-relative mb-5">
+        <!-- Banner Image -->
+        <div class="banner-container">
+          <img id="banner" src="" class="w-100 banner-image" alt="">
+        </div>
+        
+        <!-- User Info Overlay -->
+        <div class="user-info-overlay position-absolute bottom-0 start-0 w-100 p-3">
+          <div class="container">
+            <div class="row align-items-end">
+              <!-- Avatar -->
+              <div class="col-auto">
+                <img src="<%= avatar %>" id="user-avatar" class="user-avatar rounded-circle" alt="User Avatar">
+              </div>
+              
+              <!-- User Details -->
+              <div class="col">
+                <h2 class="mb-0 text-white d-flex align-items-center">
+                  <%= userData.global_name %>
+                  <span id="crown" class="ms-2" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="crown-icon">
+                      <path fill="#ffd700" d="m12 6l4 6l5-4l-2 10H5L3 8l5 4z" />
+                    </svg>
+                  </span>
+                </h2>
+                <a class="text-light text-decoration-none" href="https://discord.com/users/<%= userData.id %>">@<%= userData.username %></a>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="col-auto">
+                <button class="btn btn-light me-2" id="message-button">
+                  <i class="bi bi-envelope-fill me-1"></i> Message
+                </button>
+                <button class="btn btn-primary" id="follow-button">
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  <span id="button-text">Loading</span>
+                </button>
+                <button id="settings-button" class="btn btn-link ms-2" style="display: none;">
+                  <i class="bi bi-gear-fill"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User Stats -->
+      <div class="container user-stats-container mb-4">
+        <div class="row user-stats-row">
+          <div class="col-md-8">
+            <div class="user-stats d-flex">
+              <div class="stat-box me-3">
+                <h3 class="h5 mb-0" id="followers">
+                  <span class="loading-icon" id="followers-loading" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  </span>
+                </h3>
+              </div>
+              <div class="stat-box">
+                <h3 class="h5 mb-0" id="following">
+                  <span class="loading-icon" id="following-loading" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  </span>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+     <!-- User Content Tabs -->
+     <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="about-button" aria-selected="true">About</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button 
+          class="nav-link recent-comments-button" 
+          id="recent-comments-button" 
+          aria-selected="false" 
+          <%= settings.show_recent_comments ? 'disabled' : '' %>
+        >
+          Recent Comments
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <div class="card card-pagination" id="card-pagination" style="display: none; align-items: center; max-width: fit-content; margin-bottom: 0;">
+          <div id="paginationControls" class="pagination d-flex align-items-center hidden"></div>
+        </div>
+      </li>
+    </ul>
+      
+      <div class="tab-content" id="userTabContent">
+        <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="about-tab">
+          <div class="row">
+            <div class="col-md-12 mb-4">
+              <div class="card bg-dark text-light" id="description-tab">
+                <div class="card-body position-relative" id="description-box">
+                  <div class="d-flex justify-content-between align-items-start mb-0">
+                    <h5 class="card-title">About Me</h5>
+                    <div>
+                      <button class="btn btn-outline-light btn-sm hidden" id="canceledit">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                      <button class="btn btn-outline-light btn-sm hidden" id="edit-bio-button">
+                        <i class="bi bi-pencil-fill"></i>
+                      </button>
+                      <button class="btn btn-outline-light btn-sm hidden" id="save-bio-button">
+                        <i class="bi bi-save"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="card-text mb-4" id="userBio">dear readers, I feel as though I am in a dream</p>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <small class="text-muted" id="description-updated-date"></small>
+                    <small class="text-muted" id="character-count"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container hidden mt-1" id="recent-comments-tab">
+          <div class="card bg-dark text-light">
+            <div class="card-body">
+              <div id="comments-list">
+                <span id="loading-spinner" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <!-- Add more comments as needed -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Profile Settings</h2>
+          <button type="button" class="btn-close" id="close-settings" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="settingsForm">
+            <div class="container-fluid">
+              <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                  <strong>Profile Public</strong>
+                </div>
+                <div class="col-3 text-end">
+                  <button id="profile-public-button" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                  <label for="showComments">Show Recent Comments</label>
+                </div>
+                <div class="col-3 text-end">
+                  <button id="show-comments-button" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                  <label for="hideFollowing">Hide Following</label>
+                </div>
+                <div class="col-3 text-end">
+                  <button id="hide-following-button" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                  <label for="hideFollowers">Hide Followers</label>
+                </div>
+                <div class="col-3 text-end">
+                  <button id="hide-followers-button" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                  <label for="usediscordBanner">Discord Banner</label>
+                </div>
+                <div class="col-3 text-end">
+                  <button id="usediscordBanner" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row mb-3" id="input-for-banner" style="display: none;">
+                <div class="col-12">
+                  <label for="bannerInput" class="form-label">Banner</label>
+                  <input type="text" id="bannerInput" class="form-control" placeholder="Banner URL here" name="Banner input">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button id="settings-loading" type="submit" style="display: none;" class="btn btn-secondary disabled">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          </button>
+          <button id="settings-submit" type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/scripts/main.js"></script>
+  <script src="/scripts/users.js"></script>
+  <%- include('partials/footer') %>
+</body>
+<div id="chat-popup" class="chat-popup">
+  <div class="chat-header">
+      <span>Chat</span>
+      <button id="close-chat-popup">×</button>
+  </div>
+  <div class="chat-content">
+      <!-- Chat Body on the Left -->
+      <div id="chat-body" class="chat-body">
+          <div id="chat-messages">
+              <!-- Chat messages will be dynamically added here -->
+          </div>
+      </div>
+      <!-- Table on the Right -->
+      <div id="chat-sidebar" class="chat-sidebar">
+          <table>
+              <thead>
+
+              </thead>
+              <tbody>
+                  <tr>
+                      <td>User 1</td>
+                  </tr>
+                  <tr>
+                      <td>User 2</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+  <div class="chat-footer">
+    <div clas="input-group">
+      <input type="text" id="chat-input" placeholder="Type a message...">
+      <button id="send-chat-message" class="btn btn-primary">Send</button>
+  </div>
+</div>
+<button id="open-chat-button" class="open-chat-button btn btn-primary">Chat</button>
+</html>

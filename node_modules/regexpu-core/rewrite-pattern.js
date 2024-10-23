@@ -1,6 +1,6 @@
 'use strict';
 
-const generate = require('@babel/regjsgen').generate;
+const generate = require('regjsgen').generate;
 const parse = require('regjsparser').parse;
 const regenerate = require('regenerate');
 const unicodeMatchProperty = require('unicode-match-property-ecmascript');
@@ -19,6 +19,11 @@ function flatMap(array, callback) {
 		}
 	});
 	return result;
+}
+
+function regenerateContainsAstral(regenerateData) {
+	const data = regenerateData.data;
+	return data.length >= 1 && data[data.length - 1] >= 0x10000;
 }
 
 const SPECIAL_CHARS = /([\\^$.*+?()[\]{}|])/g;
@@ -330,7 +335,7 @@ const buildHandler = (action) => {
 		}
 		// The `default` clause is only here as a safeguard; it should never be
 		// reached. Code coverage tools should ignore it.
-		/* istanbul ignore next */
+		/* node:coverage ignore next */
 		default:
 			throw new Error(`Unknown set action: ${ characterClassItem.kind }`);
 	}
@@ -414,7 +419,7 @@ const computeCharacterClass = (characterClassItem, regenerateOptions) => {
 			break;
 		// The `default` clause is only here as a safeguard; it should never be
 		// reached. Code coverage tools should ignore it.
-		/* istanbul ignore next */
+		/* node:coverage ignore next */
 		default:
 			throw new Error(`Unknown character class kind: ${ characterClassItem.kind }`);
 	}
@@ -441,7 +446,7 @@ const computeCharacterClass = (characterClassItem, regenerateOptions) => {
 			case 'characterClassEscape':
 				handlePositive.regSet(data, getCharacterClassEscapeSet(
 					item.value,
-					config.flags.unicode,
+					config.flags.unicode || config.flags.unicodeSets,
 					config.flags.ignoreCase
 				));
 				break;
@@ -451,7 +456,7 @@ const computeCharacterClass = (characterClassItem, regenerateOptions) => {
 				data.transformed =
 					data.transformed ||
 					config.transform.unicodePropertyEscapes ||
-					(config.transform.unicodeSetsFlag && nestedData.maybeIncludesStrings);
+					(config.transform.unicodeSetsFlag && (nestedData.maybeIncludesStrings || characterClassItem.kind !== "union"));
 				break;
 			case 'characterClass':
 				const handler = item.negative ? handleNegative : handlePositive;
@@ -465,7 +470,7 @@ const computeCharacterClass = (characterClassItem, regenerateOptions) => {
 				break;
 			// The `default` clause is only here as a safeguard; it should never be
 			// reached. Code coverage tools should ignore it.
-			/* istanbul ignore next */
+			/* node:coverage ignore next */
 			default:
 				throw new Error(`Unknown term type: ${ item.type }`);
 		}
@@ -488,13 +493,15 @@ const processCharacterClass = (
 	const negative = characterClassItem.negative;
 	const { singleChars, transformed, longStrings } = computed;
 	if (transformed) {
-		const setStr = singleChars.toString(regenerateOptions);
+		// If single chars already contains some astral character, regenerate (bmpOnly: true) will create valid regex strings
+		const bmpOnly = regenerateContainsAstral(singleChars);
+		const setStr = singleChars.toString(Object.assign({}, regenerateOptions, { bmpOnly: bmpOnly }));
 
 		if (negative) {
 			if (config.useUnicodeFlag) {
 				update(characterClassItem, `[^${setStr[0] === '[' ? setStr.slice(1, -1) : setStr}]`)
 			} else {
-				if (config.flags.unicode) {
+				if (config.flags.unicode || config.flags.unicodeSets) {
 					if (config.flags.ignoreCase) {
 						const astralCharsSet = singleChars.clone().intersection(ASTRAL_SET);
 						// Assumption: singleChars do not contain lone surrogates.
@@ -514,17 +521,15 @@ const processCharacterClass = (
 						// The transform here does not support lone surrogates.
 						update(
 							characterClassItem,
-							`(?!${surrogateOrBMPSetStr})[\\s\\S]|${astralNegativeSetStr}`
+							`(?!${surrogateOrBMPSetStr})[^]|${astralNegativeSetStr}`
 						);
 					} else {
 						// Generate negative set directly when case folding is not involved.
-						update(
-							characterClassItem,
-							UNICODE_SET.clone().remove(singleChars).toString(regenerateOptions)
-						);
+						const negativeSet = UNICODE_SET.clone().remove(singleChars);
+						update(characterClassItem, negativeSet.toString(regenerateOptions));
 					}
 				} else {
-					update(characterClassItem, `(?!${setStr})[\\s\\S]`);
+					update(characterClassItem, `(?!${setStr})[^]`);
 				}
 			}
 		} else {
@@ -583,7 +588,7 @@ const processTerm = (item, regenerateOptions, groups) => {
 				);
 			} else if (config.transform.dotAllFlag || config.modifiersData.s) {
 				// TODO: consider changing this at the regenerate level.
-				update(item, '[\\s\\S]');
+				update(item, '[^]');
 			}
 			break;
 		case 'characterClass':
@@ -679,6 +684,10 @@ const processTerm = (item, regenerateOptions, groups) => {
 			const codePoint = item.codePoint;
 			const set = regenerate(codePoint);
 			const folded = maybeFold(codePoint);
+			if (folded.length === 1 && item.kind === "symbol" && folded[0] >= 0x20 && folded[0] <= 0x7E) {
+				// skip regenerate when it is a printable ASCII symbol
+				break;
+			}
 			set.add(folded);
 			update(item, set.toString(regenerateOptions));
 			break;
@@ -731,7 +740,7 @@ const processTerm = (item, regenerateOptions, groups) => {
 			break;
 		// The `default` clause is only here as a safeguard; it should never be
 		// reached. Code coverage tools should ignore it.
-		/* istanbul ignore next */
+		/* node:coverage ignore next */
 		default:
 			throw new Error(`Unknown term type: ${ item.type }`);
 	}
@@ -773,13 +782,13 @@ const validateOptions = (options) => {
 			case 'dotAllFlag':
 			case 'unicodeFlag':
 			case 'unicodePropertyEscapes':
+			case 'unicodeSetsFlag':
 			case 'namedGroups':
 				if (value != null && value !== false && value !== 'transform') {
 					throw new Error(`.${key} must be false (default) or 'transform'.`);
 				}
 				break;
 			case 'modifiers':
-			case 'unicodeSetsFlag':
 				if (value != null && value !== false && value !== 'parse' && value !== 'transform') {
 					throw new Error(`.${key} must be false (default), 'parse' or 'transform'.`);
 				}
@@ -813,7 +822,7 @@ const rewritePattern = (pattern, flags, options) => {
 	config.transform.unicodeSetsFlag = config.flags.unicodeSets && transform(options, 'unicodeSetsFlag');
 
 	// unicodeFlag: 'transform' implies unicodePropertyEscapes: 'transform'
-	config.transform.unicodePropertyEscapes = config.flags.unicode && (
+	config.transform.unicodePropertyEscapes = (config.flags.unicode || config.flags.unicodeSets) && (
 		transform(options, 'unicodeFlag') || transform(options, 'unicodePropertyEscapes')
 	);
 	config.transform.namedGroups = transform(options, 'namedGroups');
@@ -824,18 +833,18 @@ const rewritePattern = (pattern, flags, options) => {
 	config.modifiersData.m = undefined;
 
 	const regjsparserFeatures = {
-		'unicodeSet': Boolean(options && options.unicodeSetsFlag),
 		'modifiers': Boolean(options && options.modifiers),
 
 		// Enable every stable RegExp feature by default
 		'unicodePropertyEscape': true,
+		'unicodeSet': true,
 		'namedGroups': true,
 		'lookbehind': true,
 	};
 
 	const regenerateOptions = {
 		'hasUnicodeFlag': config.useUnicodeFlag,
-		'bmpOnly': !config.flags.unicode
+		'bmpOnly': !config.flags.unicode && !config.flags.unicodeSets
 	};
 
 	const groups = {

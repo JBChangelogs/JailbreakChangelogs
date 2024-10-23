@@ -1,5 +1,5 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JBChangelogs/JailbreakChangelogs/npm-publish-github-packages.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JBChangelogs/JailbreakChangelogs/npm-publish-github-packages.yml)](https://github.com/JBChangelogs/JailbreakChangelogs/actions)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/kAuxDntHG9)
 
 > [!CAUTION]
@@ -8,7 +8,7 @@
 > [!NOTE]
 > This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
-![Logo](https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs.png)
+![Logo](/assets/logos/changelogs.png)
 
 # Roblox Jailbreak Changelogs
 

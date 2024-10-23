@@ -1,26 +1,17 @@
-/* Body styles */
-body {
-  /* Set background image and ensure it covers the entire viewport */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
+  background-color: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/4.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-
-  /* Set default font and remove default margins/padding */
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-
-  /* Ensure the body takes up at least the full viewport height */
-  min-height: 100vh;
-
-  /* Center content vertically and horizontally */
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
-/* Overlay to darken the background image */
 body::before {
   content: "";
   position: fixed;
@@ -28,147 +19,76 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(44, 62, 80, 0.7);
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 1;
 }
-html,
-body {
-  height: 100%;
-  overflow: hidden;
-}
-/* Container for the login form */
-.container {
-  position: relative;
-  z-index: 2; /* Ensure it's above the background overlay */
-  height: 100%;
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-}
-
-/* Flex container for centering the login form */
-.row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-/* Login form container */
 .login-container {
+  background: rgba(30, 30, 30, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
   width: 100%;
-  max-width: 400px; /* Limit the maximum width for larger screens */
+  max-width: 400px;
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(10px);
 }
-
-/* Card styles for the login form */
-.card {
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  background-color: rgba(52, 73, 94, 0.9);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(10px); /* Apply blur effect to the background */
-}
-
-/* Hover effect for the card */
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-}
-
-/* Card header styles */
-.card-header {
-  background-color: rgba(52, 73, 94, 0.9); /* Darker, less blue background */
-  color: white;
+.login-header {
   text-align: center;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 2rem;
 }
-
-/* Gradient overlay for the card header */
-.card-header::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    rgba(52, 73, 94, 0.8),
-    rgba(44, 62, 80, 0.8)
-  );
-  transform: rotate(45deg);
-  z-index: 0;
-}
-
-/* Styles for the "Login" text in the header */
-.card-header h1 {
-  margin: 0;
+.login-header h1 {
+  color: #64b5f6;
   font-size: 2rem;
-  font-weight: 700;
-  position: relative;
-  z-index: 1; /* Ensure it's above the gradient overlay */
-  color: #ffffff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
-  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
 }
-
-/* Card body styles */
-.card-body {
-  padding: 2rem;
+.login-header p {
+  color: #e0e0e0;
+  font-size: 1rem;
 }
-
-/* Primary button styles (e.g., Submit button) */
-.btn-primary {
-  background-color: #3498db;
-  border-color: #3498db;
-  color: #ffffff;
+.login-button {
+  background-color: #64b5f6;
+  color: #121212;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 1rem;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
 }
-
-/* Hover and focus styles for primary button */
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: #2980b9;
-  border-color: #2980b9;
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+.login-button:hover {
+  background-color: #42a5f5;
 }
-
-/* Secondary button styles (e.g., Cancel button) */
-.btn-secondary {
-  background-color: rgba(149, 165, 166, 0.8);
-  border-color: rgba(149, 165, 166, 0.8);
-  color: #ffffff;
-  font-weight: 500;
-  padding: 0.6rem 1.2rem;
-  border-radius: 50px;
-  transition: all 0.3s ease;
+.features {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: rgba(100, 181, 246, 0.1);
+  border-radius: 8px;
 }
-
-/* Hover and focus styles for secondary button */
-.btn-secondary:hover,
-.btn-secondary:focus {
-  background-color: rgba(127, 140, 141, 0.9);
-  border-color: rgba(127, 140, 141, 0.9);
-  box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+.features h2 {
+  color: #64b5f6;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
 }
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 576px) {
-  .card-body {
-    padding: 1.5rem;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    padding: 0.6rem 1rem;
-  }
+.features ul {
+  color: #e0e0e0;
+  padding-left: 1.5rem;
+}
+.footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+.footer a {
+  color: #64b5f6;
+  text-decoration: none;
+  margin: 0 10px;
+  font-size: 0.9rem;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+.footer a:hover {
+  color: #42a5f5;
+  text-decoration: underline;
 }

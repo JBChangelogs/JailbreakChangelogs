@@ -48,7 +48,7 @@
       name="twitter:image"
       content="https://res.cloudinary.com/dsvlphknq/image/upload/v1727536082/changelogs/changelog-image-344.png"
     />
-    <title>Jailbreak Changelogs | FAQ</title>
+    <title><%= title %></title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -60,73 +60,9 @@
     <link rel="stylesheet" href="styles/faq.css" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   </head>
-
   <body>
-    <nav class="navbar navbar-expand-lg custom-navbar-color sticky-top">
-      <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="/">
-          <img
-            class="navbar-logo"
-            src="https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs_faq.png"
-            alt="Nav Page Logo"
-          />
-        </a>
+    <%- include('partials/nav') %>
 
-        <!-- Container for navbar toggler and profile picture on mobile -->
-        <div class="d-flex d-lg-none align-items-center">
-          <!-- Navbar toggler -->
-          <button
-            id="navbarToggler"
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
-        </div>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto align-items-center">
-            <li class="nav-item">
-              <a class="nav-link" href="changelogs">Changelogs</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="seasons">Seasons</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="timeline">Timeline</a>
-            </li>
-            <li class="nav-item"></li>
-              <a class="nav-link" href="tradetracker">Trade Tracker</a>
-            </li>
-            <li class="nav-item"></li>
-              <a class="nav-link" href="keys">Api</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="bot">Our Discord Bot</a>
-            </li>
-            <li class="nav-item">
-              <button
-                class="nav-link btn"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#discordOffcanvas"
-                aria-controls="discordOffcanvas"
-              >
-                Join the Discord
-              </button>
-            </li>   
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Offcanvas -->
     <div
       class="offcanvas offcanvas-end"
       tabindex="-1"
@@ -139,7 +75,7 @@
         </h5>
         <button
           type="button"
-          class="btn-close white-close-button"
+          class="btn-close text-reset"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
         ></button>
@@ -152,59 +88,76 @@
           allowtransparency="true"
           frameborder="0"
           sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-        ></iframe>
+        >
+        </iframe>
       </div>
     </div>
-     <h1>Frequently Asked Questions</h1>
-     <div id="faq-container" class="faq-container">
-       <!-- FAQ items will be dynamically inserted here -->
-     </div>
-  </head>
-    <footer
-      style="background-color: #212a31; color: white"
-      class="text-center py-4"
-    >
-      <p>© 2024 Jailbreak Changelogs. All rights reserved.</p>
-      <div>
-        <a href="privacy" class="text-white me-2">Privacy Policy</a>
-        <a href="tos" class="text-white me-2">Terms of Service</a>
-        <a href="mailto:jailbreakchangelogs@gmail.com" class="text-white"
-          >Contact Us</a
-        >
+
+    <div class="container content-wrapper">
+      <h1 class="text-center mb-4">Frequently Asked Questions</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">FAQ</li>
+        </ol>
+      </nav>
+      <div id="faq-accordion" class="accordion">
+        <!-- FAQ items will be dynamically inserted here -->
       </div>
-    </footer>
+      <div id="faq-error" class="alert alert-danger" style="display: none;"></div>
+    </div>
+
+    <%- include('partials/footer') %>
+
     <script src="scripts/main.js"></script>
     <script>
-      // Function to load and display FAQ items
       function loadFAQ() {
+        const faqAccordion = document.getElementById('faq-accordion');
+        const errorDiv = document.getElementById('faq-error');
+
         fetch('faq.json')
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
           .then(data => {
-            const faqContainer = document.getElementById('faq-container');
-            data.forEach(item => {
-              const faqItem = document.createElement('div');
-              faqItem.className = 'faq-item';
-              faqItem.innerHTML = `
-                <div class="faq-question">
-                  <span class="faq-symbol q-symbol">Q:</span>
-                  <p class="question-text">${item.question}</p>
-                </div>
-                <div class="faq-answer">
-                  <span class="faq-symbol a-symbol">A:</span>
-                  <p class="answer-text">${item.answer}</p>
+            if (!Array.isArray(data) || data.length === 0) {
+              throw new Error('FAQ data is empty or not in the expected format');
+            }
+
+            data.forEach((item, index) => {
+              const accordionItem = document.createElement('div');
+              accordionItem.className = 'accordion-item';
+              accordionItem.innerHTML = `
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
+                    ${item.question}
+                  </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#faq-accordion">
+                  <div class="accordion-body">
+                    ${item.answer}
+                  </div>
                 </div>
               `;
-              faqContainer.appendChild(faqItem);
+              faqAccordion.appendChild(accordionItem);
             });
+
+            console.log('FAQ loaded successfully');
           })
-          .catch(error => console.error('Error loading FAQ:', error));
+          .catch(error => {
+            console.error('Error loading FAQ:', error);
+            errorDiv.textContent = `Failed to load FAQ: ${error.message}`;
+            errorDiv.style.display = 'block';
+          });
       }
 
-      // Call the function when the page loads
       window.addEventListener('load', loadFAQ);
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
-     crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+    crossorigin="anonymous"></script>
   </body>
 </html>

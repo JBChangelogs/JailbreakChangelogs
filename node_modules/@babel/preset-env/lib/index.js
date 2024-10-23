@@ -179,7 +179,7 @@ const getCoreJSOptions = ({
     exports.getPolyfillPlugins = getPolyfillPlugins;
   }
 }
-function getLocalTargets(optionsTargets, ignoreBrowserslistConfig, configPath, browserslistEnv) {
+function getLocalTargets(optionsTargets, ignoreBrowserslistConfig, configPath, browserslistEnv, api) {
   if (optionsTargets != null && optionsTargets.esmodules && optionsTargets.browsers) {
     console.warn(`
 @babel/preset-env: esmodules and browsers targets have been specified together.
@@ -189,7 +189,10 @@ function getLocalTargets(optionsTargets, ignoreBrowserslistConfig, configPath, b
   return (0, _helperCompilationTargets.default)(optionsTargets, {
     ignoreBrowserslistConfig,
     configPath,
-    browserslistEnv
+    browserslistEnv,
+    onBrowserslistConfigFound(config) {
+      api.addExternalDependency(config);
+    }
   });
 }
 function supportsStaticESM(caller) {
@@ -242,7 +245,7 @@ option \`forceAllTransforms: true\` instead.
 `);
       }
     }
-    targets = getLocalTargets(optionsTargets, ignoreBrowserslistConfig, configPath, browserslistEnv);
+    targets = getLocalTargets(optionsTargets, ignoreBrowserslistConfig, configPath, browserslistEnv, api);
   }
   const transformTargets = forceAllTransforms || hasUglifyTarget ? {} : targets;
   const include = transformIncludesAndExcludes(optionsInclude);

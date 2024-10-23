@@ -1,0 +1,140 @@
+<nav class="navbar navbar-expand-lg custom-navbar-color sticky-top">
+  <div class="container-fluid">
+    <!-- Navbar brand with logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img class="navbar-logo" src="<%= logoUrl %>" alt="<%= logoAlt %>" />
+    </a>
+
+    <!-- Mobile navigation controls -->
+    <div class="d-flex d-lg-none align-items-center">
+      <!-- Custom hamburger menu icon for mobile -->
+      <button id="navbarToggler" class="navbar-toggler burger-menu-icon" type="button" aria-controls="fullscreenMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <svg width="34" height="34" viewBox="0 0 100 100">
+          <path class="line line1" d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"></path>
+          <path class="line line2" d="M 20,50 H 80"></path>
+          <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"></path>
+        </svg>
+      </button>
+
+      <!-- Mobile profile picture with dropdown -->
+      <div class="ms-2 d-lg-none dropdown">
+        <a href="#" class="dropdown-toggle" id="mobileNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="assets/icon-512.png" alt="Profile" class="rounded-circle" id="profile-picture-mobile" width="32" height="32" />
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="mobileNavbarDropdown" id="mobileUserDropdown">
+          <!-- Dropdown items will be populated by JavaScript -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Full-screen overlay menu for mobile -->
+    <div id="sideMenu" class="side-menu d-lg-none">
+      <div class="side-menu-content">
+        <nav class="navbar-nav">
+          <div class="nav-item"><a class="nav-link" href="/changelogs">Changelogs</a></div>
+          <div class="nav-item"><a class="nav-link" href="/seasons">Seasons</a></div>
+          <div class="nav-item"><a class="nav-link" href="/timeline">Timeline</a></div>
+          <div class="nav-item"><a class="nav-link" href="/users">Users</a></div>
+          <div class="nav-item"><a class="nav-link" href="/tradetracker">Trade Tracker</a></div>
+          <div class="nav-item"><a class="nav-link" href="/keys">Api</a></div>
+          <div class="nav-item"><a class="nav-link" href="/bot">Our Discord Bot</a></div>
+          <div class="nav-item"><a class="nav-link" href="/faq">FAQ</a></div>
+          <div class="nav-item">
+            <a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#discordOffcanvas" aria-controls="discordOffcanvas">
+              Join the Discord
+            </a>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Desktop menu (hidden on mobile) -->
+    <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link" href="/changelogs">Changelogs</a></li>
+        <li class="nav-item"><a class="nav-link" href="/seasons">Seasons</a></li>
+        <li class="nav-item"><a class="nav-link" href="/timeline">Timeline</a></li>
+        <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="/tradetracker">Trade Tracker</a></li>
+        <li class="nav-item"><a class="nav-link" href="/keys">Api</a></li>
+        <li class="nav-item"><a class="nav-link" href="/bot">Our Discord Bot</a></li>
+        <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
+        <li class="nav-item">
+          <button class="nav-link btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#discordOffcanvas" aria-controls="discordOffcanvas">
+            Join the Discord
+          </button>
+        </li>
+        <!-- Profile picture icon with dynamic dark dropdown (visible on desktop) -->
+        <li class="nav-item dropdown d-none d-lg-block ms-2">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="assets/icon-512.png" alt="Profile" class="rounded-circle" id="profile-picture" width="32" height="32" />
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdown" id="userDropdown">
+            <!-- Dropdown items will be populated by JavaScript -->
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .dropdown-menu-dark {
+    background-color: #343a40;
+  }
+  .dropdown-menu-dark .dropdown-item {
+    color: #f8f9fa;
+  }
+  .dropdown-menu-dark .dropdown-item:hover, .dropdown-menu-dark .dropdown-item:focus {
+    background-color: #495057;
+  }
+  .dropdown-menu-dark .dropdown-divider {
+    border-color: #495057;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const userDropdown = document.getElementById('userDropdown');
+    const mobileUserDropdown = document.getElementById('mobileUserDropdown');
+    const profilePicture = document.getElementById('profile-picture');
+    const mobileProfilePicture = document.getElementById('profile-picture-mobile');
+    const userId = sessionStorage.getItem('userid');
+    const avatarUrl = sessionStorage.getItem('avatar');
+
+    function updateProfilePicture(imgElement, src) {
+      if (imgElement) {
+        imgElement.src = src || 'assets/icon-512.png';
+      }
+    }
+
+    function updateDropdownContent() {
+      const dropdownContent = userId
+        ? `
+          <li><a class="dropdown-item" href="/users/${userId}">Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#" onclick="logout()">Log out</a></li>
+        `
+        : `
+          <li><a class="dropdown-item" href="/login">Log in</a></li>
+        `;
+
+      if (userDropdown) userDropdown.innerHTML = dropdownContent;
+      if (mobileUserDropdown) mobileUserDropdown.innerHTML = dropdownContent;
+
+      updateProfilePicture(profilePicture, avatarUrl);
+      updateProfilePicture(mobileProfilePicture, avatarUrl);
+    }
+
+    updateDropdownContent();
+
+    window.logout = function() {
+      sessionStorage.removeItem('userid');
+      sessionStorage.removeItem('avatar');
+      sessionStorage.removeItem('user');
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      updateDropdownContent();
+      window.location.href = '/logout';
+    };
+  });
+</script>

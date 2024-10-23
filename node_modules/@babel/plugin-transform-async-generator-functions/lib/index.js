@@ -64,6 +64,7 @@ var _default = exports.default = (0, _helperPluginUtils.declare)(api => {
       path.traverse(forAwaitVisitor, state);
       if (!path.node.generator) return;
       path.traverse(yieldStarVisitor, state);
+      path.setData("@babel/plugin-transform-async-generator-functions/async_generator_function", true);
       (0, _helperRemapAsyncToGenerator.default)(path, {
         wrapAsync: state.addHelper("wrapAsyncGenerator"),
         wrapAwait: state.addHelper("awaitAsyncGenerator")
@@ -72,7 +73,7 @@ var _default = exports.default = (0, _helperPluginUtils.declare)(api => {
   };
   return {
     name: "transform-async-generator-functions",
-    inherits: api.version[0] === "8" ? undefined : require("@babel/plugin-syntax-async-generators").default,
+    manipulateOptions: (_, parser) => parser.plugins.push("asyncGenerators"),
     visitor: {
       Program(path, state) {
         path.traverse(visitor, state);

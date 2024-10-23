@@ -15,6 +15,35 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
 }
+.breadcrumb {
+  background-color: #212529; /* Light background color */
+  border-radius: 0.25rem; /* Slightly rounded corners */
+  padding: 10px 15px; /* Padding around the breadcrumb */
+  list-style: none; /* Remove default list styling */
+  display: flex; /* Use flexbox for alignment */
+  flex-wrap: wrap; /* Allow wrapping */
+  max-width: fit-content;
+}
+
+.breadcrumb-item {
+  margin-right: 10px; /* Space between items */
+  font-size: 16px; /* Font size */
+}
+
+.breadcrumb-item a {
+  text-decoration: none; /* Remove underline */
+  color: #007bff; /* Bootstrap primary color */
+  transition: color 0.3s; /* Smooth color transition */
+}
+
+.breadcrumb-item a:hover {
+  color: #0056b3; /* Darker blue on hover */
+}
+
+.breadcrumb-item.active {
+  color: #6c757d; /* Bootstrap secondary color for active item */
+  font-weight: bold; /* Bold text for active item */
+}
 .hero-content {
   position: relative;
   z-index: 1;
@@ -48,9 +77,7 @@
   background-color: #212a31 !important; /* Hover state for primary button */
   border-color: #212a31 !important; /* Border color on hover */
 }
-body {
-  background-color: #f8f9fa;
-}
+
 .offcanvas-header {
   display: flex; /* Keep the header visible */
   justify-content: space-between; /* Align items properly */
@@ -97,65 +124,179 @@ body {
 
 .custom-navbar-color .navbar-nav .nav-link:hover,
 .custom-navbar-color .navbar-nav .nav-link:focus {
-  color: #ffffff; /* White color on hover/focus */
+  background-color: rgba(211, 217, 212, 0.1); /* Slightly lighter background on hover */
+  color: #ffffff; /* Brighter text color on hover */
+  border-radius: 5px;
 }
 
 /* Custom style for the active nav item */
 .custom-navbar-color .navbar-nav .nav-item.active .nav-link {
   color: #748d92; /* Highlight color for active link */
 }
-/* Custom style for the navbar toggler */
-.custom-navbar-color .navbar-toggler {
-  border-color: #748d92; /* Border color for the toggler */
-}
 
-.custom-navbar-color .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-}
 /* Custom style for the "Join the Discord" button */
 .nav-link {
   color: #d3d9d4; /* Light color for button text */
   border: none;
   transition: background-color 0.3s ease;
 }
+/* Burger Menu Icon Styles */
+.burger-menu-icon {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001; /* Ensure it's above the fullscreen menu */
+}
+
+/* Burger Menu Line Styles */
+.burger-menu-icon .line {
+  fill: none;
+  stroke: #ffffff; /* Color of the burger menu lines */
+  stroke-width: 6;
+  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specific styles for each line of the burger menu */
+.burger-menu-icon .line1 {
+  stroke-dasharray: 60 207;
+  stroke-width: 6;
+}
+
+.burger-menu-icon .line2 {
+  stroke-dasharray: 60 60;
+  stroke-width: 6;
+}
+
+.burger-menu-icon .line3 {
+  stroke-dasharray: 60 207;
+  stroke-width: 6;
+}
+
+/* Styles for opened burger menu icon */
+.burger-menu-icon.opened .line1 {
+  stroke-dasharray: 90 207;
+  stroke-dashoffset: -134;
+  stroke-width: 6;
+}
+
+.burger-menu-icon.opened .line2 {
+  stroke-dasharray: 1 60;
+  stroke-dashoffset: -30;
+  stroke-width: 6;
+}
+
+.burger-menu-icon.opened .line3 {
+  stroke-dasharray: 90 207;
+  stroke-dashoffset: -134;
+  stroke-width: 6;
+}
+
+/* Navbar toggler styles */
+.navbar-toggler {
+  padding: 0;
+  border: none;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+/* Off-screen Side Menu Styles */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -405px; /* Start off-screen */
+  width: 400px;
+  max-width: 90vw;
+  height: 100%;
+  background-color: #212a31;
+  z-index: 1000;
+  overflow-x: hidden;
+  transition: right 0.3s ease-in-out;
+  padding-top: 83px; /* Account for the logo area */
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Show the side menu */
+.side-menu.show {
+  right: 0;
+}
+
+/* Side menu content styles */
+.side-menu-content {
+  padding: 0 1.5rem;
+  text-align: left;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation styles within the side menu */
+.side-menu .navbar-nav {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 1rem;
+}
+
+.side-menu .nav-item {
+  margin: 0.25rem 0;
+  width: 100%;
+}
+
+.side-menu .nav-link {
+  font-size: 1.25rem;
+  color: white;
+  padding: 0.25rem 0;
+  display: block;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  transition: color 0.3s;
+}
+
+/* Animation for menu items */
+.side-menu .nav-item {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.side-menu.show .nav-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Stagger the animation of menu items */
+.side-menu.show .nav-item:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.side-menu.show .nav-item:nth-child(2) {
+  transition-delay: 0.2s;
+}
+body {
+  background-color: #2e3944;
+}
+
+/* Adjust the body when menu is opened */
+body.menu-open {
+  overflow: hidden;
+}
 
 .navbar-brand {
   margin-right: 0;
 }
 
-footer a {
-  position: relative;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-footer a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  bottom: 0;
-  left: 0;
-  background-color: #fff;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-footer a:hover {
-  color: #f0f0f0; /* Slightly lighter shade of white */
-}
-
-footer a:hover::after {
-  transform: scaleX(1);
-}
 @media (max-width: 576px) {
   .navbar-logo {
-    height: 40px;
+    height: 44px;
   }
 }
 
 @media (max-width: 400px) {
   .navbar-logo {
-    height: 30px;
+    height: 36px;
   }
 }

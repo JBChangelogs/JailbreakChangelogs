@@ -48,11 +48,15 @@
       name="twitter:image"
       content="https://res.cloudinary.com/dsvlphknq/image/upload/v1727536082/changelogs/changelog-image-344.png"
     />
-    <title>Privacy Policy - Jailbreak Changelogs</title>
+    <title><%= title %></title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
     <link rel="stylesheet" href="styles/privacy.css" />
     <!-- Google Fonts -->
@@ -63,22 +67,36 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   </head>
   <body class="bg-dark text-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-custom sticky-top">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/">
-          <img
-            class="navbar-logo"
-            src="https://res.cloudinary.com/dsvlphknq/image/upload/v1727392622/logos/changelogs_privacy_policy.png"
-            alt="Privacy Policy Page Logo"
-          />
-        </a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"></li>
-          </ul>
-        </div>
+    <%- include('partials/nav') %>
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="discordOffcanvas"
+      aria-labelledby="discordOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="discordOffcanvasLabel">
+          Join the Changelogs Discord
+        </h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
       </div>
-    </nav>
+      <div class="offcanvas-body">
+        <iframe
+          src="https://discord.com/widget?id=1286064050135896064&theme=dark"
+          width="100%"
+          height="100%"
+          allowtransparency="true"
+          frameborder="0"
+          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        >
+        </iframe>
+      </div>
+    </div>
 
     <div class="container my-5">
       <div class="row justify-content-center">
@@ -173,5 +191,6 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
       crossorigin="anonymous"
     ></script>
+    <%- include('partials/footer') %>
   </body>
 </html>

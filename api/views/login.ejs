@@ -69,76 +69,50 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="stylesheet" href="styles/login.css" />
   </head>
-  <body>
-    <div class="container">
-      <main class="row w-100">
-        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
-          <div class="card login-container">
-            <div class="card-header">
-              <h1 class="h3 mb-0">Login</h1>
-            </div>
-            <div class="card-body p-4 p-sm-5">
-              <div class="alert alert-info mb-4" role="alert">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Unlock More Features!</strong> By logging in, you can:
-                <ul class="mt-2 mb-0">
-                  <li>Add comments to changelog entries</li>
-                  <li>Add comments to season entries</li>
-                  <li>Access our API page and generate API keys</li>
-                </ul>
-                <p class="mt-2 mb-0">
-                  <small>Sign in now to enhance your experience!</small>
-                </p>
-              </div>
-              <div class="d-grid">
-                <button
-                  class="btn btn-primary btn-primary fw-bold"
-                  id="login-button"
-                  aria-label="Sign in with Discord"
-                >
-                  <i class="bi bi-discord me-2" aria-hidden="true"></i>
-                  Sign in with Discord
-                </button>
-              </div>
-              <hr class="my-4" aria-hidden="true" />
-              <div class="d-grid mb-2">
-                <a href="privacy" class="btn btn-secondary" role="button">
-                  View our privacy policy
-                </a>
-              </div>
-              <div class="d-grid">
-                <a href="tos" class="btn btn-secondary" role="button">
-                  View our terms of service
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>Login Page</h1>
     </div>
-    <script src="scripts/main.js"></script>
+    <button class="login-button" id="login-button">
+      Sign in with Discord
+    </button>
+    <div class="features">
+      <h2>Why Sign In?</h2>
+      <ul>
+        <li>Manage your User Profile</li>
+        <li>Engage in discussions about updates</li>
+        <li>Access our API page to generate API keys</li>
+      </ul>
+    </div>
+    <div class="footer">
+      <a href="privacy">Privacy Policy</a>
+      <a href="tos">Terms of Service</a>
+    </div>
+  </div>
 
-    <!-- Scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
-    <script src="scripts/login.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
-      integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
-      crossorigin="anonymous"
-    ></script>
-  </body>
+ <!-- Scripts -->
+ <script src="scripts/main.js"></script>
+ <script
+ src="https://code.jquery.com/jquery-3.7.1.min.js"
+ integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+ crossorigin="anonymous"
+></script>
+<script src="scripts/login.js"></script>
+<script
+ src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+ integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+ crossorigin="anonymous"
+></script>
+<script
+ src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+ integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
+ crossorigin="anonymous"
+></script>
+<script
+ async
+ src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+ crossorigin="anonymous"
+></script>
+</body>
 </html>

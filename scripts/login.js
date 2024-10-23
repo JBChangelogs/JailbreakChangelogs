@@ -8,7 +8,7 @@ $(document).ready(function () {
 
   // Function to get a cookie value
   const OauthRedirect =
-    "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Fjailbreakchangelogs.xyz%2Flogin&scope=identify";
+    "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Ftesting.jailbreakchangelogs.xyz%2Flogin&scope=identify";
   const DiscordLoginButton = document.getElementById("login-button");
   DiscordLoginButton.addEventListener("click", () => {
     console.log("Redirecting to Discord OAuth...");
