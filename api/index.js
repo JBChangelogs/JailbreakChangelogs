@@ -5,6 +5,27 @@ const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
+
+function addCloudinaryOptimization(url) {
+  if (url.includes('res.cloudinary.com')) {
+    const parts = url.split('/upload/');
+    if (parts.length === 2) {
+      const fileExtension = parts[1].split('.').pop().toLowerCase();
+      
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+        // Image optimization
+        return `${parts[0]}/upload/w_500,f_auto,q_auto/${parts[1]}`;
+      } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
+        // Video optimization
+        return `${parts[0]}/upload/q_auto,f_auto,c_limit,w_1280/${parts[1]}`;
+      } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
+        // Audio optimization
+        return `${parts[0]}/upload/q_auto/${parts[1]}`;
+      }
+    }
+  }
+  return url;
+}
 // Serve your static HTML, CSS, and JS files
 const DATA_SOURCE_URL =
   "https://badimo.nyc3.digitaloceanspaces.com/trade/frequency/snapshot/month/latest.json";
@@ -82,7 +103,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       res.render("changelogs", {
         title: "Changelog not found",
         image_url:
-          "https://res.cloudinary.com/dsvlphknq/image/upload/v1727054787/changelogs/changelog-image-287.png",
+          "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
         logoUrl: 'assets/logos/changelogs.png',
         logoAlt: 'Changelogs Page Logo'
       });
@@ -130,7 +151,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/v1727054787/changelogs/changelog-image-287.png",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo"
       });
@@ -146,7 +167,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/v1727054787/changelogs/changelog-image-287.png",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo"
       });
@@ -161,9 +182,9 @@ app.get("/seasons/:season", async (req, res) => {
     );
 
     // Ensure we got the reward before accessing properties
-    let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/v1727054787/changelogs/changelog-image-287.png";
+    let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png";
     if (level_10_reward) {
-      image_url = level_10_reward.link;
+      image_url = addCloudinaryOptimization(level_10_reward.link);
     }
 
     const { season, title } = data; // Adjust the destructured properties based on the API response structure
