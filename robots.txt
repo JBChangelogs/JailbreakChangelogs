@@ -1,14 +1,4 @@
 User-agent: *
 Allow: /
-Allow: /changelogs
-Allow: /seasons
-Allow: /timeline
-Allow: /tradetracker
-Allow: /keys
-Allow: /bot
-Allow: /faq
-Allow: /privacy
-Allow: /tos
-Disallow: /users/
 
-# Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml
+Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml
