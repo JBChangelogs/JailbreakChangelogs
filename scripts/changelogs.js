@@ -585,7 +585,7 @@ function updateDropdownButton(text) {
     processedContent.push(
       "",
       "",
-      `<This changelog was copied from ${currentPageUrl}>`,
+      `This changelog was copied from ${currentPageUrl}`,
     );
 
     // Join the processed content with newlines
