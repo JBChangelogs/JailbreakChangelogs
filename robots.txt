@@ -7,6 +7,7 @@ Allow: /*.css
 Allow: /*.png
 Allow: /*.jpg
 Allow: /*.gif
+Allow: /*.ejs
 
 # Location of the XML sitemap
 Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml
