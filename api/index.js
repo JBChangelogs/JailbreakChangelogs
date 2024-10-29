@@ -105,7 +105,8 @@ app.get("/changelogs/:changelog", async (req, res) => {
         image_url:
           "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
         logoUrl: 'assets/logos/changelogs.png',
-        logoAlt: 'Changelogs Page Logo'
+        logoAlt: 'Changelogs Page Logo',
+        changelogId
       });
     }
 
@@ -123,7 +124,8 @@ app.get("/changelogs/:changelog", async (req, res) => {
       title, 
       image_url: optimizedImageUrl,
       logoUrl: 'assets/logos/changelogs.png',
-      logoAlt: 'Changelogs Page Logo'
+      logoAlt: 'Changelogs Page Logo',
+      changelogId
     });
   } catch (error) {
     console.error("Error fetching changelog data:", error);
