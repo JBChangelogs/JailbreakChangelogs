@@ -222,7 +222,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 
 
 .breadcrumb {
-  background-color: #212529;
   border-radius: 0.25rem;
   padding: 12px 20px;
   list-style: none;
@@ -230,7 +229,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   flex-wrap: wrap;
   max-width: fit-content;
   margin: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .breadcrumb-item {
@@ -839,6 +837,12 @@ body.menu-open {
 #content {
   flex: 1; /* Flexible item */
   min-width: 0; /* Prevent overflow */
+}
+h1 {
+  color: var(--content-h1); /* Color for h1 headings */
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h1 */
+  border-bottom: 2px solid var(--content-h1); /* Bottom border for h1 */
+  font-size: 0.25rem;
 }
 
 /* Heading Styles within Content */
