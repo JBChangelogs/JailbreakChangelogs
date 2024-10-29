@@ -69,7 +69,21 @@
 #clearFilters:disabled {
   cursor: not-allowed;
 }
+#content-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
 
+#content {
+  flex: 1;
+  min-width: 0;
+}
+#content h1,
+#content h2,
+#content h3 {
+  font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
+  color: #d3d9d4;
+}
 /* Custom Subheader Styles */
 .text-custom-subheader {
   color: var(--custom-subheader-color); /* Custom color for subheaders */
