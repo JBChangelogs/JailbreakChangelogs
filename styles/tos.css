@@ -1,5 +1,5 @@
 body {
-  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/6.png");
+  background-image: url('/assets/backgrounds/background6.png');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;

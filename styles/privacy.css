@@ -2,7 +2,7 @@
   background-color: #212a31;
 }
 body {
-  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/8.png");
+  background-image: url('/assets/backgrounds/background8.png');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;

@@ -62,24 +62,7 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   .dropdown-menu .dropdown-item {
     color: #ffffff;
   }
-
-  /* Custom Navbar Color */
-  .custom-navbar-color {
-    background-color: #212a31; /* Darker blue color for dark mode */
-    color: #ffffff;
-  }
 }
-.nav-link {
-  color: #d3d9d4; /* Light color for button text */
-  border: none;
-  transition: background-color 0.3s ease;
-}
-.nav-link:hover {
-  background-color: rgba(211, 217, 212, 0.1); /* Slightly lighter background on hover */
-  color: #ffffff; /* Brighter text color on hover */
-  border-radius: 5px;
-}
-
 /* Back to Top Button Styles */
 #backToTop {
   display: none; /* Initially hidden */
@@ -206,6 +189,8 @@ span {
 }
 /* Custom Spinner */
 .custom-spinner {
+  width: 50px;
+  height: 50px;
   border-top-color: #31b1ff; /* Blue */
   border-right-color: #31b1ff; /* Blue */
   border-bottom-color: #ff341c; /* Orange */
@@ -497,13 +482,6 @@ span {
   font-weight: 600;
   opacity: 1;
 }
-#mobileNavbarDropdown {
-  text-decoration: none; /* removes that weird hyphen next to dropdown */
-  color: #d3d9d4;
-}
-#navbarToggler .line {
-  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
-}
 .custom-prizes-title {
   border-bottom: 4px solid var(--subheading-color);
   font-size: 2.5rem;
@@ -611,150 +589,6 @@ span {
   overflow-wrap: break-word;
 }
 
-.navbar-logo {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-}
-/* Burger Menu Icon Styles */
-.burger-menu-icon {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 1001; /* Ensure it's above the fullscreen menu */
-}
-
-/* Burger Menu Line Styles */
-.burger-menu-icon .line {
-  fill: none;
-  stroke: #ffffff; /* Color of the burger menu lines */
-  stroke-width: 6;
-  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Specific styles for each line of the burger menu */
-.burger-menu-icon .line1 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line2 {
-  stroke-dasharray: 60 60;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line3 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-/* Styles for opened burger menu icon */
-.burger-menu-icon.opened .line1 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line2 {
-  stroke-dasharray: 1 60;
-  stroke-dashoffset: -30;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line3 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-/* Navbar toggler styles */
-.navbar-toggler {
-  padding: 0;
-  border: none;
-}
-
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-/* Off-screen Side Menu Styles */
-.side-menu {
-  position: fixed;
-  top: 0;
-  right: -405px; /* Start off-screen */
-  width: 400px;
-  max-width: 90vw;
-  height: 100%;
-  background-color: #212a31;
-  z-index: 1000;
-  overflow-x: hidden;
-  transition: right 0.3s ease-in-out;
-  padding-top: 83px; /* Account for the logo area */
-  padding-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Show the side menu */
-.side-menu.show {
-  right: 0;
-}
-
-/* Side menu content styles */
-.side-menu-content {
-  padding: 0 1.5rem;
-  text-align: left;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Navigation styles within the side menu */
-.side-menu .navbar-nav {
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 1rem;
-}
-
-.side-menu .nav-item {
-  margin: 0.25rem 0;
-  width: 100%;
-}
-
-.side-menu .nav-link {
-  font-size: 1.25rem;
-  color: white;
-  padding: 0.25rem 0;
-  display: block;
-  text-align: left;
-  background-color: transparent;
-  border: none;
-  transition: color 0.3s;
-}
-
-/* Animation for menu items */
-.side-menu .nav-item {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.side-menu.show .nav-item {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Stagger the animation of menu items */
-.side-menu.show .nav-item:nth-child(1) {
-  transition-delay: 0.1s;
-}
-.side-menu.show .nav-item:nth-child(2) {
-  transition-delay: 0.2s;
-}
-
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
@@ -794,9 +628,7 @@ body.menu-open {
     flex-direction: row;
     flex-wrap: nowrap;
   }
-  .navbar-logo {
-    height: 38px;
-  } .breadcrumb {
+  .breadcrumb {
     padding: 10px 15px;
   }
   .breadcrumb-item {
@@ -806,11 +638,15 @@ body.menu-open {
   .breadcrumb-item:not(:last-child)::after {
     margin-left: 10px;
   }
+  #loading-overlay .loading-logo {
+    width: 200px;
+  }
+  .custom-spinner {
+    width: 30px;
+    height: 30px;
+  }
 }
 @media (max-width: 400px) {
-  .navbar-logo {
-    height: 31px;
-  }
   .container {
     padding-left: 5px;
     padding-right: 5px;

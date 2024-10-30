@@ -1,29 +1,4 @@
-#mobileNavbarDropdown {
-  text-decoration: none; /* removes that weird hyphen next to dropdown */
-  color: #d3d9d4;
-}
-#navbarToggler .line {
-  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
-}
-/* Burger Menu Icon Styles */
-.burger-menu-icon {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 1001; /* Ensure it's above the fullscreen menu */
-}
-
-/* Burger Menu Line Styles */
-.burger-menu-icon .line {
-  fill: none;
-  stroke: #ffffff; /* Color of the burger menu lines */
-  stroke-width: 6;
-  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-}
 .breadcrumb {
-
   border-radius: 0.25rem;
   padding: 12px 20px;
   list-style: none;
@@ -62,160 +37,12 @@
   font-weight: 600;
   opacity: 1;
 }
-/* Specific styles for each line of the burger menu */
-.burger-menu-icon .line1 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line2 {
-  stroke-dasharray: 60 60;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line3 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-/* Styles for opened burger menu icon */
-.burger-menu-icon.opened .line1 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line2 {
-  stroke-dasharray: 1 60;
-  stroke-dashoffset: -30;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line3 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-/* Navbar toggler styles */
-.navbar-toggler {
-  padding: 0;
-  border: none;
-}
-
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-/* Off-screen Side Menu Styles */
-.side-menu {
-  position: fixed;
-  top: 0;
-  right: -405px; /* Start off-screen */
-  width: 400px;
-  max-width: 90vw;
-  height: 100%;
-  background-color: #212a31;
-  z-index: 1000;
-  overflow-x: hidden;
-  transition: right 0.3s ease-in-out;
-  padding-top: 83px; /* Account for the logo area */
-  padding-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Show the side menu */
-.side-menu.show {
-  right: 0;
-}
-
-/* Side menu content styles */
-.side-menu-content {
-  padding: 0 1.5rem;
-  text-align: left;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Navigation styles within the side menu */
-.side-menu .navbar-nav {
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 1rem;
-}
-
-.side-menu .nav-item {
-  margin: 0.25rem 0;
-  width: 100%;
-}
-
-.side-menu .nav-link {
-  font-size: 1.25rem;
-  color: white;
-  padding: 0.25rem 0;
-  display: block;
-  text-align: left;
-  background-color: transparent;
-  border: none;
-  transition: color 0.3s;
-}
-
-/* Animation for menu items */
-.side-menu .nav-item {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.side-menu.show .nav-item {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Stagger the animation of menu items */
-.side-menu.show .nav-item:nth-child(1) {
-  transition-delay: 0.1s;
-}
-.side-menu.show .nav-item:nth-child(2) {
-  transition-delay: 0.2s;
-}
-.offcanvas-header {
-  display: flex; /* Keep the header visible */
-  justify-content: space-between; /* Align items properly */
-  background-color: #212a31; /* Semi-transparent background */
-  color: #ffffff;
-}
-.offcanvas-title {
-  font-weight: bold; /* Bold title */
-  font-size: 1.25rem; /* Title font size */
-}
-.offcanvas-body {
-  background-color: transparent;
-  padding: 0;
-}
-
-.offcanvas {
-  border: none;
-  box-shadow: none;
-}
-.white-close-button {
-  filter: invert(1) grayscale(100%) brightness(200%);
-}
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
 }
-.nav-link {
-  color: #d3d9d4; /* Light color for button text */
-  border: none;
-  transition: background-color 0.3s ease;
-}
-.nav-link:hover {
-  background-color: rgba(211, 217, 212, 0.1); /* Slightly lighter background on hover */
-  color: #ffffff; /* Brighter text color on hover */
-}
 body {
-  background-image: url('https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/5.png');
+  background-image: url('/assets/backgrounds/background5.png');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
@@ -255,9 +82,6 @@ h1 {
   border-radius: 15px;
   padding: 30px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-.navbar {
-  background-color: #212a31 !important;
 }
 
 .btn-primary {
@@ -333,16 +157,7 @@ a {
 a:hover {
   color: #9ec5fe;
 }
-.navbar-logo {
-  height: 50px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-}
 @media (max-width: 576px) {
-  .navbar-logo {
-    height: 44px;
-  }
   .breadcrumb {
     padding: 10px 15px;
   }
@@ -352,11 +167,5 @@ a:hover {
   }
   .breadcrumb-item:not(:last-child)::after {
     margin-left: 10px;
-  }
-}
-
-@media (max-width: 400px) {
-  .navbar-logo {
-    height: 36px;
   }
 }

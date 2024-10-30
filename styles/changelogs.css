@@ -80,11 +80,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   cursor: pointer; /* Change Cursor to Pointer on Hover */
 }
 
-[data-bs-theme="dark"] .custom-navbar-color {
-  background-color: #212a31; /* Darker Blue for Navbar */
-  color: #ffffff; /* White Text Color */
-}
-
 /* Dark Theme Styles for Example Queries */
 [data-bs-theme="dark"] .example-queries {
   background-color: #333333; /* Dark gray background */
@@ -261,183 +256,29 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   opacity: 1;
 }
 
-
-/* Burger Menu Line Styles */
-.burger-menu-icon .line {
-  fill: none;
-  stroke: #ffffff; /* Color of the burger menu lines */
-  stroke-width: 6;
-  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Specific styles for each line of the burger menu */
-.burger-menu-icon .line1 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line2 {
-  stroke-dasharray: 60 60;
-  stroke-width: 6;
-}
-
-.burger-menu-icon .line3 {
-  stroke-dasharray: 60 207;
-  stroke-width: 6;
-}
-
-/* Styles for opened burger menu icon */
-.burger-menu-icon.opened .line1 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line2 {
-  stroke-dasharray: 1 60;
-  stroke-dashoffset: -30;
-  stroke-width: 6;
-}
-
-.burger-menu-icon.opened .line3 {
-  stroke-dasharray: 90 207;
-  stroke-dashoffset: -134;
-  stroke-width: 6;
-}
-#mobileNavbarDropdown {
-  text-decoration: none; /* removes that weird hyphen next to dropdown */
-  color: #d3d9d4;
-}
-#navbarToggler .line {
-  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
-}
-/* Navbar toggler styles */
-.navbar-toggler {
-  padding: 0;
-  border: none;
-}
-
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-/* Off-screen Side Menu Styles */
-.side-menu {
-  position: fixed;
-  top: 0;
-  right: -405px; /* Start off-screen */
-  width: 400px;
-  max-width: 90vw;
-  height: 100%;
-  background-color: #212a31;
-  z-index: 1000;
-  overflow-x: hidden;
-  transition: right 0.3s ease-in-out;
-  padding-top: 83px; /* Account for the logo area */
-  padding-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Show the side menu */
-.side-menu.show {
-  right: 0;
-}
-
-/* Side menu content styles */
-.side-menu-content {
-  padding: 0 1.5rem;
-  text-align: left;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Navigation styles within the side menu */
-.side-menu .navbar-nav {
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 1rem;
-}
-
-.side-menu .nav-item {
-  margin: 0.25rem 0;
-  width: 100%;
-}
-
-.side-menu .nav-link {
-  font-size: 1.25rem;
-  color: white;
-  padding: 0.25rem 0;
-  display: block;
-  text-align: left;
-  background-color: transparent;
-  border: none;
-  transition: color 0.3s;
-}
-
-/* Animation for menu items */
-.side-menu .nav-item {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.side-menu.show .nav-item {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Stagger the animation of menu items */
-.side-menu.show .nav-item:nth-child(1) {
-  transition-delay: 0.1s;
-}
-.side-menu.show .nav-item:nth-child(2) {
-  transition-delay: 0.2s;
-}
-
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
 }
 
-/* second navbar toggler  */
-.navbar-toggler.btn-light {
+/* Second navbar toggler - Dark theme */
+.navbar-toggler.btn-dark {
   padding: 0.375rem 0.75rem;
-  background-color: #f8f9fa;
-  border-color: #e2e6ea;
+  background-color: #343a40; /* Dark background */
+  border-color: #495057; /* Dark border */
   transition: all 0.15s ease-in-out;
 }
-.navbar-toggler.btn-light:active,
-.navbar-toggler.btn-light[aria-expanded="true"] {
-  background-color: #dae0e5;
-  border-color: #d3d9df;
+
+.navbar-toggler.btn-dark:active,
+.navbar-toggler.btn-dark[aria-expanded="true"] {
+  background-color: #495057; /* Slightly lighter for active state */
+  border-color: #6c757d; /* Adjusted border for active state */
   transform: translateY(1px);
 }
-.navbar-toggler.btn-light .bi-menu-button-wide {
-  color: #212529;
+
+.navbar-toggler.btn-dark .bi-menu-button-wide {
+  color: #f8f9fa; /* Light icon color */
   font-size: 1.25rem;
-}
-
-/* Custom Header Styles */
-.text-custom-header {
-  color: var(--custom-header-color); /* Custom color for headers */
-}
-
-.border-custom-header {
-  border-color: var(
-    --custom-header-color
-  ); /* Custom border color for headers */
-}
-
-/* Custom Subheader Styles */
-.text-custom-subheader {
-  color: var(--custom-subheader-color); /* Custom color for subheaders */
-}
-
-/* Custom Icon Color */
-.text-custom-icon {
-  color: var(--custom-icon-color); /* Custom color for icons */
 }
 
 .btn-primary {
@@ -645,36 +486,6 @@ body.menu-open {
   box-shadow: 0 0 10px rgba(var(--glow-color), 0.5) !important; /* Glow effect */
 }
 
-/* Offcanvas Styling */
-.offcanvas {
-  color: var(--text-color); /* Text color */
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Smooth transitions */
-}
-
-.offcanvas-header {
-  background-color: #212a31;
-  color: var(--text-color);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-}
-
-.offcanvas-title {
-  font-weight: bold; /* Bold title */
-  font-size: 1.25rem; /* Title font size */
-}
-
-.offcanvas-body {
-  padding: 0.2rem; /* Padding for body */
-  color: var(--text-color); /* Body text color */
-  font-size: 1rem; /* Body font size */
-  line-height: 1.5; /* Line height for readability */
-  overflow-y: auto; /* Vertical scrolling */
-}
-
-/* Close Button Styles */
-.btn-close {
-  color: #ffffff; /* Close button text color */
-}
-
 /* SVG Icon Styles */
 .svg-icon {
   fill: var(--text-color) !important; /* Fill color for SVG icons */
@@ -691,6 +502,8 @@ body.menu-open {
 
 /* Custom Spinner Styles */
 .custom-spinner {
+  width: 50px;
+  height: 50px;
   border-top-color: #31b1ff; /* Blue color for top border */
   border-right-color: #31b1ff; /* Blue color for right border */
   border-bottom-color: #ff341c; /* Orange color for bottom border */
@@ -910,26 +723,6 @@ span {
   color: var(--text-color); /* Default text color */
 }
 
-/* Navbar Padding */
-.navbar {
-  padding-top: 0.5rem; /* Top padding */
-  padding-bottom: 0.5rem; /* Bottom padding */
-}
-
-/* Navbar Form Control Styles */
-.navbar .form-control {
-  background-color: rgba(255, 255, 255, 0.1); /* Background color */
-  border-color: rgba(255, 255, 255, 0.1); /* Border color */
-  color: #fff; /* Text color */
-}
-
-.navbar .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Placeholder color */
-}
-
-.navbar .input-group-text {
-  color: rgba(255, 255, 255, 0.7); /* Color for input group text */
-}
 
 /* Input Group Styles */
 .input-group {
@@ -946,17 +739,6 @@ span {
 #paginationControls button,
 #paginationControls input {
   margin: 0 5px; /* Add margin between controls */
-}
-
-/* Skip Link Styles */
-.skip-link {
-  position: absolute; /* Absolute positioning */
-  top: -40px; /* Position above */
-  left: 0; /* Align to left */
-  background: var(--blue-button-bg); /* Background color */
-  color: var(--blue-button-text); /* Text color */
-  padding: 8px; /* Padding */
-  z-index: 100; /* High stacking context */
 }
 
 /* Remove Outline for All Elements */
@@ -1010,13 +792,6 @@ button {
   background-color: var(--button-primary-hover-bg); /* Hover background color */
 }
 
-.navbar-logo {
-  height: 50px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .custom-search-item {
@@ -1031,11 +806,15 @@ button {
     min-width: 300px; /* Minimum width for mobile */
     max-height: 300px; /* Maximum height for dropdown */
   }
+  #loading-overlay .loading-logo {
+    width: 200px;
+  }
+  .custom-spinner {
+    width: 30px;
+    height: 30px;
+  }
 }
 @media (max-width: 576px) {
-  .navbar-logo {
-    height: 52px;
-  }
   #comment-form .input-group {
     flex-wrap: nowrap;
   }
@@ -1073,9 +852,6 @@ button {
 }
 
 @media (max-width: 400px) {
-  .navbar-logo {
-    height: 42px;
-  }
   .container {
     padding-left: 5px;
     padding-right: 5px;
