@@ -497,7 +497,13 @@ span {
   font-weight: 600;
   opacity: 1;
 }
-
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 .custom-prizes-title {
   border-bottom: 4px solid var(--subheading-color);
   font-size: 2.5rem;

@@ -175,6 +175,13 @@
   width: 300px; /* Adjust width for logo */
   height: auto; /* Maintain aspect ratio */
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 /* Burger Menu Icon Styles */
 .burger-menu-icon {
   background-color: transparent;

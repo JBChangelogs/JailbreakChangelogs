@@ -46,6 +46,13 @@
 #backToTop.show {
   display: block; /* Show when the 'show' class is added */
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 .breadcrumb {
   border-radius: 0.25rem;
   padding: 12px 20px;

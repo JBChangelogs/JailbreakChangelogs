@@ -707,6 +707,13 @@ input {
   background-color: #ffffff;
   color: #000000;
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 .loading-spinner {
   position: absolute; /* Position absolutely within the container */
   top: 50%; /* Center vertically */

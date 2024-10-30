@@ -305,6 +305,13 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   stroke-dashoffset: -134;
   stroke-width: 6;
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 /* Navbar toggler styles */
 .navbar-toggler {
   padding: 0;

@@ -36,6 +36,13 @@
 .feature-icon {
   font-size: 3rem;
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 .btn-primary {
   background-color: #032b44;
   border-color: #032b44; /* Border color on hover */

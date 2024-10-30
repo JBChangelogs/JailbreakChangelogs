@@ -38,6 +38,13 @@
   align-items: center;
   justify-content: center;
 }
+#mobileNavbarDropdown {
+  text-decoration: none; /* removes that weird hyphen next to dropdown */
+  color: #d3d9d4;
+}
+#navbarToggler .line {
+  stroke: #d3d9d4; /* Changes the line color of mobile nav toggler */
+}
 footer a {
   position: relative;
   text-decoration: none;
