@@ -769,29 +769,6 @@ button {
   transition: background-color 0.3s, color 0.3s; /* Smooth transition */
 }
 
-/* Back to Top Button Styles */
-#backToTop {
-  display: none; /* Initially hidden */
-  position: fixed; /* Fixed positioning */
-  bottom: 20px; /* Position from bottom */
-  right: 20px; /* Position from right */
-  background-color: var(--button-primary-bg); /* Background color */
-  color: #ffffff; /* Text color */
-  padding: 10px 15px; /* Padding */
-  border-radius: 5px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor */
-  transition: background-color 0.3s, display 0.3s; /* Smooth transitions */
-  z-index: 1000; /* High stacking context */
-}
-
-#backToTop.show {
-  display: block; /* Show when 'show' class is added */
-}
-
-#backToTop:hover {
-  background-color: var(--button-primary-hover-bg); /* Hover background color */
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .custom-search-item {

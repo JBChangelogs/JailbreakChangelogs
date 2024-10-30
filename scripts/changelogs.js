@@ -243,7 +243,7 @@ clearFilterBtn.addEventListener('click', function() {
   updateButtonText('startDateBtn', null);
   updateButtonText('endDateBtn', null);
   currentFilterState = null; // Clear the filter state
-  populateChangelogDropdown(changelogsData, 'View Changelogs');
+  populateChangelogDropdown(changelogsData, 'Select a Changelog');
   clearedFilterToast('The date filter has been cleared successfully!');
 });
 
@@ -298,23 +298,6 @@ function populateChangelogDropdown(changelogs, buttonText) {
       $desktopDropdownButton.html(`${iconHtml}${buttonText}`);
     }
   }
-}
-
-// Update the dropdown button text based on the provided text
-function updateDropdownButton(text) {
-  const $mobileDropdownButton = $("#mobileChangelogDropdown");
-  const $desktopDropdownButton = $("#desktopChangelogDropdown");
-
-  let buttonText = '<i class="bi bi-calendar-event me-2"></i>';
-
-  if (text === "default") {
-    buttonText += "View Changelogs";
-  } else {
-    buttonText += text;
-  }
-
-  $mobileDropdownButton.html(buttonText);
-  $desktopDropdownButton.html(buttonText);
 }
 
   // Function to preprocess Markdown text
@@ -514,7 +497,7 @@ function updateDropdownButton(text) {
 
   // Set the button text based on the input
   if (text === "default") {
-    buttonText += "View Changelogs";
+    buttonText += "Select a Changelog";
   } else {
     buttonText += text;
   }
@@ -1094,24 +1077,6 @@ function updateDropdownButton(text) {
     }
   }
   
-
-  // Back to Top button functionality
-  const backToTopButton = $("#backToTop");
-
-  // Show or hide the back to top button based on scroll position
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 100) {
-      backToTopButton.addClass("show"); // Show button if scrolled down
-    } else {
-      backToTopButton.removeClass("show"); // Hide button if at the top
-    }
-  });
-
-  // Click event for back to top button
-  backToTopButton.on("click", function (e) {
-    e.preventDefault(); // Prevent default action
-    $("html, body").animate({ scrollTop: 0 }, 100); // Smooth scroll to top
-  });
   // Click event for changelog dropdown items
   $(document).on("click", ".changelog-dropdown-item", function (e) {
     e.preventDefault(); // Prevent default action

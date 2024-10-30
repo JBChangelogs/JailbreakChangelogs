@@ -562,28 +562,6 @@ span {
   margin-right: 0.5rem;
 }
 
-/* Back to Top Button */
-#backToTop {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: var(--button-primary-bg);
-  color: #ffffff;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, display 0.3s;
-  z-index: 1000;
-}
-
-#backToTop.show {
-  display: block;
-}
-
-#backToTop:hover {
-  background-color: var(--button-primary-hover-bg);
-}
 .list-group-item {
   word-wrap: break-word;
   overflow-wrap: break-word;

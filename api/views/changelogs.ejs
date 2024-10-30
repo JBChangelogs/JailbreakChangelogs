@@ -46,6 +46,7 @@
     <!-- Custom stylesheet -->
     <link rel="stylesheet" href="styles/changelogs.css" />
     <link rel="stylesheet" href="styles/navbar.css" />
+    <link rel="stylesheet" href="styles/footer.css" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -150,7 +151,7 @@
           <div class="col-auto d-none d-lg-block me-2">
             <div class="dropdown changelog-dropdown">
               <button class="btn btn-primary dropdown-toggle" type="button" id="desktopChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-calendar-event me-2"></i> View Changelogs
+                <i class="bi bi-calendar-event me-2"></i>
               </button>
               <ul class="dropdown-menu" aria-labelledby="desktopChangelogDropdown" id="desktopChangelogList">
                 <!-- Dropdown items will be populated dynamically -->
@@ -224,7 +225,7 @@
             </div>
             <div class="dropdown">
               <button class="btn btn-primary dropdown-toggle w-100" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-calendar-event me-2"></i> View Changelogs
+                <i class="bi bi-calendar-event me-2"></i>
               </button>
               <ul class="dropdown-menu w-100" aria-labelledby="mobileChangelogDropdown" id="mobileChangelogList">
                 <!-- Dropdown items will be populated dynamically -->
@@ -298,14 +299,6 @@
   </div>
 </div>
 <%- include('partials/footer') %>
-
-<!-- Back to Top Button -->
-<button
-  id="backToTop"
-  class="btn rounded-circle position-fixed bottom-0 end-0 m-3"
->
-  <i class="bi bi-arrow-up-circle-fill"></i>
-</button>
 
 <!-- Date Filter Modal -->
 <div

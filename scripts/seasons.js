@@ -249,25 +249,7 @@ $(document).ready(function () {
       $carouselInner.append(carouselItem);
     });
   }
-  
 
-  // Back to Top button functionality
-  const backToTopButton = $("#backToTop");
-
-  // Show/hide the Back to Top button based on scroll position
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 100) {
-      backToTopButton.addClass("show");
-    } else {
-      backToTopButton.removeClass("show");
-    }
-  });
-
-  // Smooth scroll to top when the Back to Top button is clicked
-  backToTopButton.on("click", function (e) {
-    e.preventDefault();
-    $("html, body").animate({ scrollTop: 0 }, 100);
-  });
   // Modify the loadSeasonDetails function
   // Modify the loadSeasonDetails function
   function loadSeasonDetails(season) {

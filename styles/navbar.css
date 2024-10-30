@@ -1,6 +1,6 @@
 /* Logo Styling */
 .navbar-logo {
-  height: 50px;
+  height: 40px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -244,12 +244,12 @@
 /* Responsive Logo Height */
 @media (max-width: 576px) {
   .navbar-logo {
-    height: 38px; /* Adjusted height for small screens */
+    height: 34px; /* Adjusted height for small screens */
   }
 }
 
 @media (max-width: 400px) {
   .navbar-logo {
-    height: 31px; /* Adjusted height for extra small screens */
+    height: 30px; /* Adjusted height for extra small screens */
   }
 }
