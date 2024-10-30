@@ -7,7 +7,7 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("https://res.cloudinary.com/dsvlphknq/image/upload/v1727358369/backgrounds/4.png");
+  background-image: url('/assets/backgrounds/background4.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
