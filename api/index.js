@@ -116,16 +116,18 @@ app.get("/changelogs/:changelog", async (req, res) => {
   }
 });
 
-app.get("/seasons", (req, res) => {
-  // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 23; // Set your default changelog ID here
-  res.redirect(`/seasons/${defaultChangelogId}`);
-});
+
 
 app.get("/seasons/:season", async (req, res) => {
   let seasonId = req.params.season || 1; // Default to season 1 if no ID is provided
   const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const rewardsUrl = `https://api.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
+  const defaultSeasonlogId = 23; // Default season ID here
+
+  // Check if the seasonId is invalid (not a number, less than 1, or greater than default)
+  if (isNaN(seasonId) || seasonId < 1 || seasonId > defaultSeasonlogId) {
+    return res.redirect(`/seasons/${defaultSeasonlogId}`);
+  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -136,14 +138,8 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
     if (!response.ok) {
-      return res.render("seasons", {
-        season: "???",
-        title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
-        logoUrl: "assets/logos/seasons_logo.png",
-        logoAlt: "Jailbreak Seasons Logo",
-        seasonId
-      });
+      // If the response is not ok, redirect to the default season ID
+      return res.redirect(`/seasons/${defaultSeasonlogId}`);
     }
     const rewardsResponse = await fetch(rewardsUrl, {
       method: "GET",
@@ -153,14 +149,7 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
     if (!rewardsResponse.ok) {
-      return res.render("seasons", {
-        season: "???",
-        title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
-        logoUrl: "assets/logos/seasons_logo.png",
-        logoAlt: "Jailbreak Seasons Logo",
-        seasonId
-      });
+      return res.redirect(`/seasons/${defaultSeasonlogId}`);
     }
 
     const data = await response.json();
