@@ -735,19 +735,16 @@ function updateDropdownButton(text) {
                       </div>`; // Convert to another styled list item
         } else if (line.startsWith("(audio)")) {
           const audioUrl = line.substring(7).trim(); // Extract audio URL
-          const optimizedAudioUrl = addCloudinaryOptimization(audioUrl);
           const audioType = audioUrl.endsWith(".wav")
             ? "audio/wav"
             : "audio/mpeg"; // Determine audio type
-          return `<audio class="w-100 mt-2 mb-2" controls><source src="${optimizedAudioUrl}" type="audio/mpeg"></audio>`; // Create audio element
+          return `<audio class="w-100 mt-2 mb-2" controls><source src="${audioUrl}" type="audio/mpeg"></audio>`; // Create audio element
         } else if (line.startsWith("(image)")) {
           const imageUrl = line.substring(7).trim(); // Extract image URL
-          const optimizedImageUrl = addCloudinaryOptimization(imageUrl);
-          return `<img src="${optimizedImageUrl}" alt="Image" class="img-fluid mt-2 mb-2 rounded" style="max-height: 270px;">`; // Create image element
+          return `<img src="${imageUrl}" alt="Image" class="img-fluid mt-2 mb-2 rounded" style="max-height: 270px;">`; // Create image element
         } else if (line.startsWith("(video)")) {
           const videoUrl = line.substring(7).trim(); // Extract video URL
-          const optimizedVideoUrl = addCloudinaryOptimization(videoUrl);
-          return `<video class="w-80 mt-2 mb-2 rounded" style="max-height: 500px;" controls><source src="${optimizedVideoUrl}" type="video/mp4"></video>`; // Create video element
+          return `<video class="w-80 mt-2 mb-2 rounded" style="max-height: 500px;" controls><source src="${videoUrl}" type="video/mp4"></video>`; // Create video element
         } else {
           return `<p class="lead mb-2">${wrapMentions(line)}</p>`; // Default to paragraph
         }
@@ -993,27 +990,6 @@ function updateDropdownButton(text) {
       .replace(/\s+/g, " ") // Collapse whitespace
       .trim(); // Trim leading and trailing whitespace
   }
-  function addCloudinaryOptimization(url) {
-    if (url.includes('res.cloudinary.com')) {
-      const parts = url.split('/upload/');
-      if (parts.length === 2) {
-        const fileExtension = parts[1].split('.').pop().toLowerCase();
-        
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
-          // Image optimization
-          return `${parts[0]}/upload/w_500,f_auto,q_auto/${parts[1]}`;
-        } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
-          // Video optimization
-          return `${parts[0]}/upload/q_auto,f_auto,c_limit,w_1280/${parts[1]}`;
-        } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
-          // Audio optimization
-          return `${parts[0]}/upload/q_auto/${parts[1]}`;
-        }
-      }
-    }
-    return url;
-  }
-
   
   // Function to display the selected changelog
   function displayChangelog(changelog) {
@@ -1028,18 +1004,15 @@ function updateDropdownButton(text) {
   
     // Update image element if available
     if (changelog.image_url) {
-      // Add Cloudinary optimization parameters to the URL
-      const optimizedImageUrl = addCloudinaryOptimization(changelog.image_url);
-      imageElement.src = optimizedImageUrl;
+      imageElement.src = changelog.image_url;
       imageElement.alt = `Image for ${changelog.title}`;
-      imageElement.style.display = "block";
+      imageElement.style.display = "block"; // Show image
     } else {
-      imageElement.src = "";
-      imageElement.alt = "";
-      imageElement.style.display = "none";
+      imageElement.src = ""; // Clear the source
+      imageElement.alt = ""; // Clear alt text when no image is present
+      imageElement.style.display = "none"; // Hide image
     }
-    
-  
+
     let contentHtml = `<h1 class="display-4 mb-4">${changelog.title}</h1>`;
   
     if (changelog.sections) {
