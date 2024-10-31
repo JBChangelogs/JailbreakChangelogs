@@ -23,8 +23,7 @@
   .apidoc-hover:hover { color: #8bc34a; }
   .faq-hover:hover { color: #ffcc00; } /* Gold color for FAQ */
   .bot-hover:hover { color: #00ccff; } /* Light blue for Our Discord Bot */
-  .github-hover:hover { color: #f0db4f; } /* Light yellow for GitHub */
-  
+
   .owner-link:hover {
     color: #fff !important;
     text-decoration: underline;
