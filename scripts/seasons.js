@@ -176,28 +176,7 @@ $(document).ready(function () {
   function formatDescription(description) {
     return `<p class="season-description-paragraph">${description}</p>`;
   }
-  function addCloudinaryOptimization(url) {
-    if (url.includes('res.cloudinary.com')) {
-      const parts = url.split('/upload/');
-      if (parts.length === 2) {
-        const fileExtension = parts[1].split('.').pop().toLowerCase();
-        
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
-          // Image optimization
-          return `${parts[0]}/upload/w_500,f_auto,q_auto/${parts[1]}`;
-        } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
-          // Video optimization
-          return `${parts[0]}/upload/q_auto,f_auto,c_limit,w_1280/${parts[1]}`;
-        } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
-          // Audio optimization
-          return `${parts[0]}/upload/q_auto/${parts[1]}`;
-        }
-      }
-    }
-    return url;
-  }
   
-
   // Function to update the carousel with reward images
   function updateCarousel(rewards) {
     // Clear any existing carousel items
@@ -240,10 +219,9 @@ $(document).ready(function () {
     // Iterate through each filtered reward
     filteredRewards.forEach((reward, index) => {
       const isActive = index === 0 ? "active" : "";
-      const optimizedImageUrl = addCloudinaryOptimization(reward.link);
       const carouselItem = $(`
         <div class="carousel-item ${isActive} rounded"> 
-          <img src="${optimizedImageUrl}" class="d-block w-100 img-fluid" alt="${reward.item}">
+          <img src="${reward.link}" class="d-block w-100 img-fluid" alt="${reward.item}">
         </div>
       `);
       $carouselInner.append(carouselItem);

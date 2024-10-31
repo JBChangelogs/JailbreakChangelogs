@@ -33,7 +33,7 @@
     <meta name="twitter:image" content="<%= image_url %>" />
     
     <!-- Page title -->
-    <title>Changelog for <%= title %></title>
+    <title><%= title %></title>
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://jailbreakchangelogs.xyz/changelogs/<%= changelogId %>" />
@@ -92,41 +92,31 @@
         <div class="row">
           <!-- Options Dropdown (hidden on mobile) -->
           <div class="col-auto d-none d-lg-block me-2">
-            <div class="dropdown me-2">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="desktopButtonsToggler" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-gear-fill me-2"></i> Options
+            <div class="d-flex gap-2 me-2">
+              <button class="btn btn-primary" type="button" id="desktopOpenDateFilterModal" aria-label="Select date range" data-bs-toggle="tooltip" title="Select Date Range">
+                <i class="bi bi-calendar-range" aria-hidden="true"></i> <!-- Changed to calendar-range -->
               </button>
-              <ul class="dropdown-menu" aria-labelledby="desktopButtonsToggler">
-      
-                <li>
-                  <button class="dropdown-item" type="button" id="desktopOpenDateFilterModal">
-                    <i class="bi bi-calendar-event me-2"></i> Select Date Range
-                  </button>
-                </li>
-                <li>
-                  <button class="dropdown-item" type="button" id="desktopCopyChangelog">
-                    <i class="bi bi-clipboard me-2"></i> Copy Changelog
-                  </button>
-                </li>
-                <li>
-                  <button class="dropdown-item" type="button" id="desktopLatestChangelogBtn">
-                    <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <!-- View Changelogs Dropdown (hidden on mobile) -->
-          <div class="col-auto d-none d-lg-block me-2">
-            <div class="dropdown changelog-dropdown">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="desktopChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-calendar-event me-2"></i>
+              
+              <button class="btn btn-primary" type="button" id="desktopCopyChangelog" aria-label="Copy the changelog" data-bs-toggle="tooltip" title="Copy Changelog">
+                <i class="bi bi-clipboard" aria-hidden="true"></i> <!-- Changed to file-earmark-text -->
               </button>
-              <ul class="dropdown-menu" aria-labelledby="desktopChangelogDropdown" id="desktopChangelogList">
-                <!-- Dropdown items will be populated dynamically -->
-              </ul>
+              
+              <button class="btn btn-primary" type="button" id="desktopLatestChangelogBtn" aria-label="Jump to the latest changelog" data-bs-toggle="tooltip" title="Jump to Latest">
+                <i class="bi bi-rocket-takeoff" aria-hidden="true"></i>
+              </button>
+              
+              <div class="col-auto d-none d-lg-block">
+                <div class="dropdown changelog-dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="desktopChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" title="View Other Changelogs">
+                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="desktopChangelogDropdown" id="desktopChangelogList">
+                    <!-- Dropdown items will be populated dynamically -->
+                  </ul>
+                </div>
+              </div>
             </div>
+            
           </div>
           
           <!-- Search Bar and Menu Toggler -->
@@ -164,13 +154,13 @@
                     </div>
                   </div>
                 </form>
-                <div id="exampleQueries" class="mt-2 d-none">
-                  <small class="text-muted">Example queries:</small>
+                <div id="exampleQueries" class="mt-2 d-none" aria-hidden="true">
+                  <h6 class="text-muted">Example queries:</h6>
                   <div class="d-flex flex-wrap gap-2 mt-1">
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none">has:audio</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none">has:video</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none">has:image</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none">has:mention</a>
+                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for audio content" aria-label="Search for audio content">has:audio</a>
+                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for video content" aria-label="Search for video content">has:video</a>
+                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for image content" aria-label="Search for image content">has:image</a>
+                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for mentions" aria-label="Search for mentions">has:mention</a>
                   </div>
                 </div>
                 <div id="search-results" class="dropdown-menu w-100">
@@ -184,15 +174,14 @@
         <!-- Mobile Menu Items (Collapsible) -->
         <div class="collapse mt-3 d-lg-none" id="mobileMenuItems">
           <div class="d-grid gap-2">
-            
-            <button id="mobileLatestChangelogBtn" class="btn btn-info">
-              <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
-            </button>
             <div class="btn-group" role="group" aria-label="Date Filter Options">
               <button class="btn btn-secondary" id="mobileOpenDateFilterModal">
                 <i class="bi bi-calendar-event me-2"></i> Select Date
               </button>
             </div>
+            <button id="mobileLatestChangelogBtn" class="btn btn-primary">
+              <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
+            </button>
             <div class="dropdown">
               <button class="btn btn-primary dropdown-toggle w-100" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-calendar-event me-2"></i>

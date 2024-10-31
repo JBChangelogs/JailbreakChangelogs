@@ -6,6 +6,26 @@ const app = express();
 const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
 
+function addCloudinaryOptimization(url) {
+  if (url.includes('res.cloudinary.com')) {
+    const parts = url.split('/upload/');
+    if (parts.length === 2) {
+      const fileExtension = parts[1].split('.').pop().toLowerCase();
+      
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+        // Image optimization
+        return `${parts[0]}/upload/w_500,f_auto,q_auto/${parts[1]}`;
+      } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
+        // Video optimization
+        return `${parts[0]}/upload/q_auto,f_auto,c_limit,w_1280/${parts[1]}`;
+      } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
+        // Audio optimization
+        return `${parts[0]}/upload/q_auto/${parts[1]}`;
+      }
+    }
+  }
+  return url;
+}
 // Serve your static HTML, CSS, and JS files
 const DATA_SOURCE_URL =
   "https://badimo.nyc3.digitaloceanspaces.com/trade/frequency/snapshot/month/latest.json";
@@ -70,12 +90,6 @@ app.get("/changelogs/:changelog", async (req, res) => {
   let changelogId = req.params.changelog || 1;
   console.log(`Fetching changelog with ID: ${changelogId}`);
   const apiUrl = `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`;
-  const defaultChangelogId = 346; // Set your default changelog ID here
-
-  // Check if changelogId is invalid (not a number, less than 1, or greater than default)
-  if (isNaN(changelogId) || changelogId < 1 || changelogId > defaultChangelogId) {
-    return res.redirect(`/changelogs/${defaultChangelogId}`);
-  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -103,9 +117,12 @@ app.get("/changelogs/:changelog", async (req, res) => {
     const data = await response.json();
     const { title, image_url } = data;
 
+    // Apply optimization to the image_url
+    const optimizedImageUrl = addCloudinaryOptimization(image_url);
+
     res.render("changelogs", { 
       title, 
-      image_url,
+      image_url: optimizedImageUrl,
       logoUrl: 'assets/logos/changelogs.png',
       logoAlt: 'Changelogs Page Logo',
       changelogId
@@ -116,18 +133,16 @@ app.get("/changelogs/:changelog", async (req, res) => {
   }
 });
 
-
+app.get("/seasons", (req, res) => {
+  // Redirect to a default changelog if no ID is provided in the URL
+  const defaultChangelogId = 23; // Set your default changelog ID here
+  res.redirect(`/seasons/${defaultChangelogId}`);
+});
 
 app.get("/seasons/:season", async (req, res) => {
   let seasonId = req.params.season || 1; // Default to season 1 if no ID is provided
   const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const rewardsUrl = `https://api.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
-  const defaultSeasonlogId = 23; // Default season ID here
-
-  // Check if the seasonId is invalid (not a number, less than 1, or greater than default)
-  if (isNaN(seasonId) || seasonId < 1 || seasonId > defaultSeasonlogId) {
-    return res.redirect(`/seasons/${defaultSeasonlogId}`);
-  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -138,8 +153,14 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
     if (!response.ok) {
-      // If the response is not ok, redirect to the default season ID
-      return res.redirect(`/seasons/${defaultSeasonlogId}`);
+      return res.render("seasons", {
+        season: "???",
+        title: "Season not found",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
+        logoUrl: "assets/logos/seasons_logo.png",
+        logoAlt: "Jailbreak Seasons Logo",
+        seasonId
+      });
     }
     const rewardsResponse = await fetch(rewardsUrl, {
       method: "GET",
@@ -149,7 +170,14 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
     if (!rewardsResponse.ok) {
-      return res.redirect(`/seasons/${defaultSeasonlogId}`);
+      return res.render("seasons", {
+        season: "???",
+        title: "Season not found",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
+        logoUrl: "assets/logos/seasons_logo.png",
+        logoAlt: "Jailbreak Seasons Logo",
+        seasonId
+      });
     }
 
     const data = await response.json();
@@ -163,7 +191,7 @@ app.get("/seasons/:season", async (req, res) => {
     // Ensure we got the reward before accessing properties
     let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png";
     if (level_10_reward) {
-      image_url = level_10_reward.link;
+      image_url = addCloudinaryOptimization(level_10_reward.link);
     }
 
     const { season, title } = data; // Adjust the destructured properties based on the API response structure
@@ -530,7 +558,7 @@ app.get('/tradetracker', (req, res) => {
 
 app.get('/', (req, res) => {
   res.render('index', {
-    title: 'Roblox Jailbreak Changelogs | Latest Updates & Patch Notes',
+    title: 'Home / Changelogs',
     logoUrl: 'assets/logos/home_page.png',
     logoAlt: 'Home Page Logo'
   });

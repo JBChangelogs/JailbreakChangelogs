@@ -19,7 +19,7 @@
       <!-- Mobile profile picture with dropdown -->
       <div class="ms-2 d-lg-none dropdown">
         <a href="#" class="dropdown-toggle" id="mobileNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="assets/icon-512.png" alt="Profile" class="rounded-circle" id="profile-picture-mobile" width="32" height="32" />
+          <img src="assets/profile-pic-placeholder.png" alt="Profile" class="rounded-circle" id="profile-picture-mobile" width="32" height="32" />
         </a>
         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="mobileNavbarDropdown" id="mobileUserDropdown">
           <!-- Dropdown items will be populated by JavaScript -->
@@ -58,7 +58,7 @@
         <!-- Profile picture icon with dynamic dark dropdown (visible on desktop) -->
         <li class="nav-item dropdown d-none d-lg-block ms-2">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="assets/icon-512.png" alt="Profile" class="rounded-circle" id="profile-picture" width="32" height="32" />
+            <img src="assets/profile-pic-placeholder.png" alt="Profile" class="rounded-circle" id="profile-picture" width="32" height="32" />
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdown" id="userDropdown">
             <!-- Dropdown items will be populated by JavaScript -->
@@ -95,7 +95,7 @@
 
     function updateProfilePicture(imgElement, src) {
       if (imgElement) {
-        imgElement.src = src || 'assets/icon-512.png';
+        imgElement.src = src || 'assets/profile-pic-placeholder.png';
       }
     }
 
