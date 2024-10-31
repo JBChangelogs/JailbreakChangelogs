@@ -12,6 +12,7 @@
     text-decoration: none;
     transition: all 0.3s ease;
     display: inline-block;
+    transition: color 0.3s ease;
   }
   .footer-link:hover {
     transform: translateX(5px);
@@ -19,16 +20,21 @@
   .reddit-hover:hover { color: #FF4500; }
   .discord-hover:hover { color: #5865F2; }
   .wiki-hover:hover { color: #007bff; }
-  .apidoc-hover:hover  { color: #8bc34a; }
+  .apidoc-hover:hover { color: #8bc34a; }
+  .faq-hover:hover { color: #ffcc00; } /* Gold color for FAQ */
+  .bot-hover:hover { color: #00ccff; } /* Light blue for Our Discord Bot */
+  .github-hover:hover { color: #f0db4f; } /* Light yellow for GitHub */
+  
+  .owner-link:hover {
+    color: #fff !important;
+    text-decoration: underline;
+  }
+  
   .owner-link {
     color: #30aefb;
     font-weight: bold;
     text-decoration: none;
     transition: all 0.3s ease;
-  }
-  .owner-link:hover {
-    color: #fff !important;
-    text-decoration: underline;
   }
   .contribute-btn {
     transition: all 0.3s ease;

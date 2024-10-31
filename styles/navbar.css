@@ -185,15 +185,6 @@
   padding: 0;
 }
 
-/* Close button styling */
-.white-close-button {
-  filter: invert(1) grayscale(100%) brightness(200%);
-  background: transparent; /* Make it clear */
-  border: none; /* No border */
-  cursor: pointer; /* Pointer cursor */
-}
-
-
 /* Mobile Navbar Dropdown */
 #mobileNavbarDropdown {
   text-decoration: none; /* Remove underline */
@@ -229,11 +220,6 @@
 .offcanvas {
   border: none;
   box-shadow: none;
-}
-
-/* Close Button */
-.white-close-button {
-  filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 /* Navbar Brand */
