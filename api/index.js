@@ -6,26 +6,6 @@ const app = express();
 const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
 
-function addCloudinaryOptimization(url) {
-  if (url.includes('res.cloudinary.com')) {
-    const parts = url.split('/upload/');
-    if (parts.length === 2) {
-      const fileExtension = parts[1].split('.').pop().toLowerCase();
-      
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
-        // Image optimization
-        return `${parts[0]}/upload/w_500,f_auto,q_auto/${parts[1]}`;
-      } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
-        // Video optimization
-        return `${parts[0]}/upload/q_auto,f_auto,c_limit,w_1280/${parts[1]}`;
-      } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
-        // Audio optimization
-        return `${parts[0]}/upload/q_auto/${parts[1]}`;
-      }
-    }
-  }
-  return url;
-}
 // Serve your static HTML, CSS, and JS files
 const DATA_SOURCE_URL =
   "https://badimo.nyc3.digitaloceanspaces.com/trade/frequency/snapshot/month/latest.json";
@@ -72,7 +52,7 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 
 app.get("/changelogs", (req, res) => {
   // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 344; // Set your default changelog ID here
+  const defaultChangelogId = 346; // Set your default changelog ID here
   res.redirect(`/changelogs/${defaultChangelogId}`);
 });
 
@@ -90,6 +70,12 @@ app.get("/changelogs/:changelog", async (req, res) => {
   let changelogId = req.params.changelog || 1;
   console.log(`Fetching changelog with ID: ${changelogId}`);
   const apiUrl = `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`;
+  const defaultChangelogId = 346; // Set your default changelog ID here
+
+  // Check if changelogId is invalid (not a number, less than 1, or greater than default)
+  if (isNaN(changelogId) || changelogId < 1 || changelogId > defaultChangelogId) {
+    return res.redirect(`/changelogs/${defaultChangelogId}`);
+  }
 
   try {
     const response = await fetch(apiUrl, {
@@ -117,12 +103,9 @@ app.get("/changelogs/:changelog", async (req, res) => {
     const data = await response.json();
     const { title, image_url } = data;
 
-    // Apply optimization to the image_url
-    const optimizedImageUrl = addCloudinaryOptimization(image_url);
-
     res.render("changelogs", { 
       title, 
-      image_url: optimizedImageUrl,
+      image_url,
       logoUrl: 'assets/logos/changelogs.png',
       logoAlt: 'Changelogs Page Logo',
       changelogId
@@ -191,7 +174,7 @@ app.get("/seasons/:season", async (req, res) => {
     // Ensure we got the reward before accessing properties
     let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png";
     if (level_10_reward) {
-      image_url = addCloudinaryOptimization(level_10_reward.link);
+      image_url = level_10_reward.link;
     }
 
     const { season, title } = data; // Adjust the destructured properties based on the API response structure
@@ -558,7 +541,7 @@ app.get('/tradetracker', (req, res) => {
 
 app.get('/', (req, res) => {
   res.render('index', {
-    title: 'Home / Changelogs',
+    title: 'Roblox Jailbreak Changelogs | Latest Updates & Patch Notes',
     logoUrl: 'assets/logos/home_page.png',
     logoAlt: 'Home Page Logo'
   });
