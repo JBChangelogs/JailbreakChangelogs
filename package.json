@@ -1,6 +1,6 @@
 {
     "name": "@jbchangelogs/jailbreak-changelogs",
-    "version": "2.6.12",
+    "version": "2.6.13",
     "scripts": {
         "start": "node api/index.js",
         "dev": "nodemon api/index.js",
