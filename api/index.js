@@ -103,7 +103,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       res.render("changelogs", {
         title: "Changelog not found",
         image_url:
-          "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
+          "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
         logoUrl: 'assets/logos/changelogs.png',
         logoAlt: 'Changelogs Page Logo',
         changelogId
@@ -156,7 +156,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo",
         seasonId
@@ -173,7 +173,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png",
+        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo",
         seasonId
@@ -189,7 +189,7 @@ app.get("/seasons/:season", async (req, res) => {
     );
 
     // Ensure we got the reward before accessing properties
-    let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/w_500,f_auto,q_auto/v1729712882/changelogs/changelog-image-345.png";
+    let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0";
     if (level_10_reward) {
       image_url = addCloudinaryOptimization(level_10_reward.link);
     }
