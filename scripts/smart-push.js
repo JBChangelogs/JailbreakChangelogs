@@ -19,14 +19,23 @@ const gitAdd = () => {
   executeCommand('git add .');
 };
 
+const checkForChanges = () => {
+  const status = execSync('git status --porcelain').toString();
+  return status.length > 0; // Returns true if there are changes
+};
+
 readline.question('Enter your commit message: ', (commitMessage) => {
   readline.question('What kind of version bump? (patch/minor/major) ', (bump) => {
     if (['patch', 'minor', 'major'].includes(bump)) {
-      gitAdd();
-      executeCommand(`git commit -m "${commitMessage}"`);
+      if (checkForChanges()) {
+        gitAdd();
+        executeCommand(`git commit -m "${commitMessage}"`);
+      } else {
+        console.log('No changes to commit.');
+      }
       executeCommand(`npm version ${bump} -m "Bump version to %s"`);
       executeCommand('git push && git push --tags');
-      console.log('Changes committed, version bumped, and pushed successfully!');
+      console.log('Version bumped and pushed successfully!');
     } else {
       console.log('Invalid bump type. Please use patch, minor, or major.');
     }
