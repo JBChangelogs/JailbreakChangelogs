@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const userCard = document.createElement("div");
       let avatar = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
       if (avatar.endsWith("null.png")) {
-        avatar = "/icon-512.png";
+        avatar = "assets/profile-pic-placeholder.png";
       }
       userCard.className = "user-card";
       userCard.innerHTML = `
