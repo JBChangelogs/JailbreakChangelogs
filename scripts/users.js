@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!response.ok) {
                 if (response.status === 404) {
-                    userBio.textContent = "User does not have a description.";
+                    userBio.textContent = "";
                 } else {
                     userBio.textContent = "Error fetching description.";
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -651,6 +651,14 @@ document.addEventListener('DOMContentLoaded', function() {
           progressBar: true, // Show a progress bar
         });
       }
+      function NotFollowingToast(message) {
+        toastr.error(message, "Error", {
+          positionClass: "toast-bottom-right", // Position at the bottom right
+          timeOut: 3000, // Toast will disappear after 3 seconds
+          closeButton: true, // Add a close button
+          progressBar: true, // Show a progress bar
+        });
+      }
     async function addFollow(userId) {
         try {
             const user = getCookie('token');
@@ -691,6 +699,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     follow_button.addEventListener('click', function() {
+        const user = getCookie('token');
+    
+        if (!user) {
+            // User is not logged in
+            NotFollowingToast("You are not logged in to perform this action.");
+            return;
+        }
         if (follow_button.textContent === 'Follow') {
             addFollow(userId);
             FollowToast("User followed successfully.");
