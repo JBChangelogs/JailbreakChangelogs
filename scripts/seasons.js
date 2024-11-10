@@ -13,6 +13,21 @@ $(document).ready(function () {
     }
   }
 
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedReloadComments = debounce(reloadcomments, 300);
+
+
   function fetchAndCacheAllSeasons() {
     return fetch("https://api.jailbreakchangelogs.xyz/seasons/list")
       .then((response) => response.json())
@@ -145,7 +160,7 @@ $(document).ready(function () {
         );
 
         // Enable comments
-        reloadcomments();
+        debouncedReloadComments();
       } else {
         // If no rewards for this season, display a message and disable comments
         $seasonDetailsContainer.append(
@@ -267,7 +282,7 @@ $(document).ready(function () {
       // If data was from cache, hide the overlay immediately
       toggleLoadingOverlay(false);
       try {
-        reloadcomments();
+        debouncedReloadComments();
       } catch (error) {
         console.error("Failed to load comments:", error);
         $("#comments-list").html(
@@ -279,7 +294,7 @@ $(document).ready(function () {
       Promise.resolve().then(() => {
         toggleLoadingOverlay(false);
         try {
-          reloadcomments();
+          debouncedReloadComments();
         } catch (error) {
           console.error("Failed to load comments:", error);
           $("#comments-list").html(
@@ -319,7 +334,7 @@ $(document).ready(function () {
       if (dataFromCache) {
         toggleLoadingOverlay(false);
         try {
-          reloadcomments();
+          debouncedReloadComments();
         } catch (error) {
           console.error("Failed to load comments:", error);
           $("#comments-list").html(
@@ -333,7 +348,7 @@ $(document).ready(function () {
     .then(() => {
       toggleLoadingOverlay(false);
       try {
-        reloadcomments();
+        debouncedReloadComments();
       } catch (error) {
         console.error("Failed to load comments:", error);
         $("#comments-list").html(
