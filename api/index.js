@@ -197,7 +197,7 @@ app.get("/seasons/:season", async (req, res) => {
     const { season, title } = data; // Adjust the destructured properties based on the API response structure
     res.render("seasons", { 
       season, 
-      title: "Seasons / Changelogs", 
+      title,
       image_url,
       logoUrl: "assets/logos/seasons_logo.png",
       logoAlt: "Jailbreak Seasons Logo",

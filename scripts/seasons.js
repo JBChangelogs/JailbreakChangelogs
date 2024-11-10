@@ -260,6 +260,9 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     );
     displaySeasonDetails(season, seasonData, seasonRewards);
     updateCarousel(seasonRewards);
+    
+    // Add this line to update the document title
+    document.title = `Season ${season} - ${seasonData.title}`;
 
     // Return true if data was from cache, false otherwise
     return allSeasons !== null && allRewards !== null;
