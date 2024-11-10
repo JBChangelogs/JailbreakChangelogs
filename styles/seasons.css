@@ -394,47 +394,62 @@ span {
 .carousel-control-next-icon:hover {
   background-color: rgba(0, 0, 0, 0.8);
 }
-
-/* Season Rewards Styles */
-.season-rewards li {
-  padding: 10px;
+.rewards-container {
+  background: linear-gradient(to bottom, #124E66, #2E3944, #212A31);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-.season-rewards .badge {
-  margin-left: 8px;
-}
-
-.season-rewards li:hover .badge {
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
-}
-.season-rewards .list-group-item {
-  background-color: #212a31;
-  color: #d3d9d4;
-}
-.season-rewards .list-group-item:hover {
-  background-color: #2e3944;
-  color: var(--text-color);
-  cursor: pointer;
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  padding: 1.1rem;
-  transition: background-color 0.3s ease, transform 0.3s ease,
-    box-shadow 0.3s ease, padding 0.3s ease;
-}
-
-.season-rewards .list-group-item:hover * {
-  text-decoration: none;
-  color: var(--season-rewards-hover-text);
+.rewards-title {
+  text-align: center;
+  font-family: "Luckiest Guy", Arial, sans-serif;
+  margin-bottom: 20px;
+  color: var(--heading-color);
   font-weight: bold;
 }
-
-.season-rewards .list-group-item:hover .badge {
-  background-color: var(--header-bg);
-  color: #fff;
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
+.rewards-list {
+  list-style-type: none;
+  padding: 0;
 }
+.reward-item {
+  background-color: #212A31;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: calc(var(--animation-order) * 0.1s);
+}
+.reward-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.reward-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
+.reward-title {
+  margin: 0;
+  font-size: 1rem;
+  color: #d3d9d4;
+}
+.reward-badges {
+  display: flex;
+  gap: 5px;
+}
+.badge {
+  font-size: 0.8rem;
+}
+.bonus-reward {
+  background-color: #212A31;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
 /* Title Styles */
 .season-title {

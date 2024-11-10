@@ -123,7 +123,6 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
           }</p>
         </div>
       </div>
-      <h3 class="prizes-title display-5 custom-prizes-title mb-4">Season Rewards</h3>
     `);
 
     // Check if rewardsData is available and not empty
@@ -136,27 +135,33 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
       if (rewards.length > 0) {
         // Generate HTML for season rewards
         const rewardsHTML = rewards
-          .map((reward) => {
-            const isBonus = reward.bonus === "True";
-            const bonusBadge = isBonus
-              ? `<span class="badge bg-warning text-dark rounded-pill fs-6 fs-md-5">Bonus</span>`
-              : "";
-            const requirementBadge = `<span class="badge bg-primary rounded-pill fs-6 fs-md-5">${reward.requirement}</span>`;
-
-            return `
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <h6 class="fw-bold fs-6 fs-md-5">${reward.item}</h6>
-            <div class="d-flex align-items-center">
-              ${bonusBadge}
-              ${requirementBadge}
-            </div>
-          </li>`;
-          })
-          .join("");
+        .map((reward, index) => {
+          const isBonus = reward.bonus === "True";
+          const bonusBadge = isBonus
+            ? `<span class="badge bg-warning text-dark rounded-pill fs-6 fs-md-5">Bonus</span>`
+            : "";
+          const requirementBadge = `<span class="badge bg-primary rounded-pill fs-6 fs-md-5">${reward.requirement}</span>`;
+  
+          return `
+          <div class="reward-item ${isBonus ? 'bonus-reward' : ''}" style="--animation-order: ${index}">
+      <div class="reward-content">
+        <h6 class="reward-title">${reward.item}</h6>
+        <div class="reward-badges">
+          ${bonusBadge}
+          ${requirementBadge}
+        </div>
+      </div>
+    </div>`;
+  })
+  .join("");
 
         // Append the rewards list to the season details container
         $seasonDetailsContainer.append(
-          `<ul class="list-group season-rewards">${rewardsHTML}</ul>`
+          `
+          <div class="rewards-container">
+    <h3 class="rewards-title">Season Rewards</h3>
+    <div class="rewards-list">${rewardsHTML}</div>
+  </div>`
         );
 
         // Enable comments
