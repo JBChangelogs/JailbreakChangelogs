@@ -420,7 +420,7 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
     const avatarElement = document.createElement("img");
-    const defaultAvatarUrl = "/favicon.ico";
+    const defaultAvatarUrl = "assets/profile-pic-placeholder.png";
 
     avatarElement.src = avatarUrl.endsWith("null.png")
       ? defaultAvatarUrl
@@ -586,7 +586,7 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
         );
 
         const avatarElement = document.createElement("img");
-        const defaultAvatarUrl = "/favicon.ico";
+        const defaultAvatarUrl = "assets/profile-pic-placeholder.png";
         avatarElement.src = avatarUrl.endsWith("null.png")
           ? defaultAvatarUrl
           : avatarUrl;

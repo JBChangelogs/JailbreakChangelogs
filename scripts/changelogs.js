@@ -1277,7 +1277,7 @@ function updateDropdownButton(text) {
         );
 
         const avatarElement = document.createElement("img");
-        const defaultAvatarUrl = "/favicon.ico";
+        const defaultAvatarUrl = "assets/profile-pic-placeholder.png";
 
         avatarElement.src = avatarUrl.endsWith("null.png")
           ? defaultAvatarUrl
