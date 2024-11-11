@@ -4,8 +4,8 @@
     ["@semantic-release/commit-analyzer", {
       "preset": "conventionalcommits",
       "releaseRules": [
-        { "type": "major change", "release": "major" },
-        { "type": "feat", "release": "minor" },
+        { "type": "major", "release": "major" },
+        { "type": "minor", "release": "minor" },
         { "type": "fix", "release": "patch" }
       ]
     }],
