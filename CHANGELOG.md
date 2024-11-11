@@ -1,3 +1,10 @@
+## [2.7.19](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.18...v2.7.19) (2024-11-11)
+
+
+### Bug Fixes
+
+* updated version number ([487d2eb](https://github.com/JBChangelogs/JailbreakChangelogs/commit/487d2eb48fddd79c368335346feae0c7d0a3cc8a))
+
 ## [2.7.18](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.17...v2.7.18) (2024-11-11)
 
 
