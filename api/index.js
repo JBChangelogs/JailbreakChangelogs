@@ -190,7 +190,8 @@ app.get('/bot', (req, res) => {
   res.render('bot', {
     title: 'Discord Bot / Changelogs',
     logoUrl: 'assets/logos/changelogs_discord_bot.png',
-    logoAlt: 'Timeline Page Logo'
+    logoAlt: 'Timeline Page Logo',
+    images
   });
 });
 
@@ -532,12 +533,26 @@ app.get('/tradetracker', (req, res) => {
     logoAlt: 'Trade Tracker Page Logo'
   });
 });
+// Array of background images
+const images = [
+  "assets/backgrounds/background1.png",
+  "assets/backgrounds/background2.png",
+  "assets/backgrounds/background3.png",
+  "assets/backgrounds/background4.png",
+  "assets/backgrounds/background5.png",
+  "assets/backgrounds/background6.png",
+  "assets/backgrounds/background7.png",
+  "assets/backgrounds/background8.png",
+  "assets/backgrounds/background9.png",
+  "assets/backgrounds/background10.png"
+];
 
 app.get('/', (req, res) => {
   res.render('index', {
     title: 'Home / Changelogs',
     logoUrl: 'assets/logos/home_page.png',
-    logoAlt: 'Home Page Logo'
+    logoAlt: 'Home Page Logo',
+    images
   });
 });
 
