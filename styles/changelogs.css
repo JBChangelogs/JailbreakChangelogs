@@ -770,6 +770,10 @@ button {
   .quick-links .btn-link {
     font-size: 0.9rem; /* Font size for quick links */
   }
+  video {
+    width: 100%;
+    height: auto;
+}
 
   /* Changelog Dropdown Styles */
   .changelog-dropdown {
