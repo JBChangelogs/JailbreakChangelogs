@@ -1,3 +1,10 @@
+## [2.7.22](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.21...v2.7.22) (2024-11-11)
+
+
+### Bug Fixes
+
+* preload images for hero content homepage and bot page ([7acfc7e](https://github.com/JBChangelogs/JailbreakChangelogs/commit/7acfc7e477faf00ba302886038bc83085f12855b))
+
 ## [2.7.21](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.20...v2.7.21) (2024-11-11)
 
 
