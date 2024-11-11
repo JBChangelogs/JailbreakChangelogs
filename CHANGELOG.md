@@ -1,3 +1,10 @@
+## [2.7.21](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.20...v2.7.21) (2024-11-11)
+
+
+### Bug Fixes
+
+* removed underline for version no. ([b09234c](https://github.com/JBChangelogs/JailbreakChangelogs/commit/b09234c999a091d637f516a25900582b45daa7e9))
+
 ## [2.7.20](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.19...v2.7.20) (2024-11-11)
 
 
