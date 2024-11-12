@@ -141,73 +141,56 @@
               <button class="btn btn-primary" type="button" id="desktopLatestChangelogBtn" aria-label="Jump to the latest changelog" data-bs-toggle="tooltip" title="Jump to Latest">
                 <i class="bi bi-rocket-takeoff" aria-hidden="true"></i>
               </button>
-              
+
               <div class="col-auto d-none d-lg-block">
-                <div class="dropdown changelog-dropdown">
-                  <button class="btn btn-primary dropdown-toggle" type="button" id="desktopChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" title="View Other Changelogs">
-                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="desktopChangelogDropdown" id="desktopChangelogList">
+                <div class="dropdown-changelog-dropdown">
+                  <button class="btn btn-primary dropdown-toggle changelog-btn" type="button" id="desktopChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="dropdown" title="View Other Changelogs"> <i class="bi bi-calendar-event" aria-hidden="true"></i>Changelog Versions</button>
+                  <ul class="dropdown-menu changelog-menu" aria-labelledby="desktopChangelogDropdown" id="desktopChangelogList">
                     <!-- Dropdown items will be populated dynamically -->
                   </ul>
                 </div>
               </div>
             </div>
-            
           </div>
           
-          <!-- Search Bar and Menu Toggler -->
-          <div class="col-12 col-lg">
-            <div class="d-flex align-items-center">
-              <!-- Menu Toggler (visible only on mobile) -->
-              <button class="btn btn-light navbar-toggler d-lg-none me-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenuItems" aria-controls="mobileMenuItems" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-menu-button-wide"></i>
-              </button>
-        
-              <!-- Search Bar -->
-              <div class="search-container flex-grow-1">
-                <form class="d-flex position-relative" role="search" id="searchForm">
-                  <div class="input-group w-100">
-                    <span class="input-group-text bg-transparent border-0 search-icon">
-                      <i class="bi bi-search"></i>
-                    </span>
-                    <div class="position-relative w-100">
-                      <input
-                        id="search-input"
-                        class="form-control custom-search-input pe-5"
-                        type="text"
-                        placeholder="Search changelogs..."
-                        aria-label="Search changelogs"
-                        autocomplete="off"
-                      />
-                      <button
-                        id="clear-search-button"
-                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y"
-                        type="button"
-                        aria-label="Clear search"
-                      >
-                        <i class="bi bi-x-circle-fill"></i>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-                <div id="exampleQueries" class="mt-2 d-none" aria-hidden="true">
-                  <h6 class="text-muted">Example queries:</h6>
-                  <div class="d-flex flex-wrap gap-2 mt-1">
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for audio content" aria-label="Search for audio content">has:audio</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for video content" aria-label="Search for video content">has:video</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for image content" aria-label="Search for image content">has:image</a>
-                    <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for mentions" aria-label="Search for mentions">has:mention</a>
-                  </div>
-                </div>
-                <div id="search-results" class="dropdown-menu w-100">
-                  <!-- Search results will be populated here -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
+         <!-- Search Bar -->
+<div class="search-container flex-grow-1">
+  <form class="d-flex position-relative" role="search" id="searchForm">
+    <div class="position-relative w-100">
+      <i class="bi bi-search search-icon"></i> <!-- Move icon here -->
+      <input
+        id="search-input"
+        class="form-control custom-search-input pe-5"
+        type="text"
+        placeholder="Search changelogs..."
+        aria-label="Search changelogs"
+        autocomplete="off"
+      />
+      <button
+        id="clear-search-button"
+        class="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+        type="button"
+        aria-label="Clear search"
+      >
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+  </form>
+  <!-- Example queries and search results remain the same -->
+  <div id="exampleQueries" class="mt-2 d-none" aria-hidden="true">
+    <h6 class="example-queries-title">Example queries:</h6>
+    <div class="d-flex flex-wrap gap-2 mt-1">
+      <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for audio content" aria-label="Search for audio content">has:audio</a>
+      <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for video content" aria-label="Search for video content">has:video</a>
+      <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for image content" aria-label="Search for image content">has:image</a>
+      <a href="#" class="example-query badge bg-secondary text-decoration-none" title="Search for mentions" aria-label="Search for mentions">has:mention</a>
+    </div>
+  </div>
+  <div id="search-results" class="dropdown-menu w-100">
+    <!-- Search results will be populated here -->
+  </div>
+</div>
+
         <!-- Mobile Menu Items (Collapsible) -->
         <div class="collapse mt-3 d-lg-none" id="mobileMenuItems">
           <div class="d-grid gap-2">
@@ -220,13 +203,15 @@
               <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
             </button>
             <div class="dropdown">
-              <button class="btn btn-primary dropdown-toggle w-100" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn changelog-btn w-100 dropdown-toggle" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-calendar-event me-2"></i>
+                Changelog Versions
               </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="mobileChangelogDropdown" id="mobileChangelogList">
+              <ul class="dropdown-menu changelog-menu w-100" aria-labelledby="mobileChangelogDropdown" id="mobileChangelogList">
                 <!-- Dropdown items will be populated dynamically -->
               </ul>
             </div>
+            
             <button id="mobileCopyChangelog" class="btn btn-primary">
               <i class="bi bi-clipboard me-2"></i> Copy Changelog
             </button>

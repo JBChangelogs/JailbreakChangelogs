@@ -80,37 +80,112 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   cursor: pointer; /* Change Cursor to Pointer on Hover */
 }
 
-/* Dark Theme Styles for Example Queries */
-[data-bs-theme="dark"] .example-queries {
-  background-color: #333333; /* Dark gray background */
-  border: 1px solid #4a4a4a; /* Dark gray border */
-  padding: 15px; /* Add some padding for better readability */
-  border-radius: 10px; /* Add a subtle border radius */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+/* Search Container */
+.search-container {
+  position: relative;
+  margin-top: 10px;
 }
 
-[data-bs-theme="dark"] .example-queries p {
-  color: #ffffff; /* White text color */
-  font-size: 1rem; /* Use a standard font size */
-  margin-bottom: 10px; /* Add some margin for better spacing */
+/* Search Input Styling */
+.custom-search-input {
+  background-color: #212A31;
+  color: #D3D9D4;
+  border: none;
+  border-radius: 8px;
+  padding-left: 2.5rem; /* Space for search icon */
+  padding-right: 2rem; /* Space for clear button */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s;
 }
 
-[data-bs-theme="dark"] .example-query {
-  text-decoration: none; /* Remove the default underline */
-  transition: color 0.3s; /* Add a smooth transition for hover effects */
+.custom-search-input::placeholder {
+  color: #748D92;
 }
 
-[data-bs-theme="dark"] .example-query:hover {
-  color: #f0ff50; /* Coral color on hover */
-  background-color: #3a3a3a; /* Dark gray background on hover */
+.custom-search-input:focus {
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  /* background-color: #212A31; */
 }
 
-
-/* Dark mode hover styles for custom search item */
-[data-bs-theme="dark"] .custom-search-item:hover {
-  background-color: #5c6269; /* Deep blue-gray background for dark mode hover */
-  color: #ffdd57; /* Vibrant yellow-orange text color for dark mode hover */
+/* Search Icon Styling */
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: #748D92;
+  font-size: 1.2rem;
+  pointer-events: none;
 }
+
+/* Clear Button Styling */
+#clear-search-button {
+  color: #D3D9D4;
+}
+
+#clear-search-button:hover {
+  color: #ffffff;
+}
+
+/* Example Queries Styling */
+#exampleQueries h6 {
+  font-size: 0.9rem;
+  color: #748D92;
+  font-weight: 600;
+}
+
+.example-query {
+  background-color: #124E66;
+  color: #D3D9D4;
+  border-radius: 12px;
+  padding: 0.25rem 0.5rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.example-query:hover {
+  background-color: #2E3944;
+  color: #ffffff;
+}
+
+/* Search Results Dropdown */
+#search-results {
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #2E3944;
+  color: #D3D9D4;
+  padding: 10px;
+}
+/* Search Result Items */
+#search-results .dropdown-item {
+  background-color: #212529;
+  color: #D3D9D4;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+
+#search-results .dropdown-item:hover {
+  background-color: #124E66;
+  color: #ffffff;
+}
+
+/* Scrollbar Styling */
+#search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+#search-results::-webkit-scrollbar-thumb {
+  background-color: #748D92;
+  border-radius: 10px;
+}
+
+#search-results::-webkit-scrollbar-thumb:hover {
+  background-color: #2E3944;
+}
+
 [data-bs-theme="dark"] #main-container {
   background-color: var(--common-bg-color);
 }
@@ -128,38 +203,7 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 [data-bs-theme="dark"] .badge {
   color: var(--text-color); /* White text for dark theme */
 }
-/* Dark theme adjustments */
-[data-bs-theme="dark"] .custom-search-input {
-  background-color: #4a4a4a; /* Darker background for dark theme */
-  color: #f0f0f0; /* Lighter text for dark theme */
-  border-color: #555;
-  border: 1px solid #ccc;
-  border-radius: 20px; /* Rounded corners */
-  padding-left: 40px; /* Space for the search icon */
-}
 
-[data-bs-theme="dark"] .custom-search-input::placeholder {
-  color: #d3d9d4; /* Lighter placeholder text for dark theme */
-}
-
-[data-bs-theme="dark"] #search-results {
-  background-color: #4a4a4a;
-  border-color: #555;
-}
-
-[data-bs-theme="dark"] #search-results .dropdown-item {
-  color: #f0f0f0;
-}
-
-[data-bs-theme="dark"] #search-results .dropdown-item:hover,
-[data-bs-theme="dark"] #search-results .dropdown-item:focus {
-  background-color: #555;
-}
-/* for search results */
-.search-container {
-  position: relative;
-  width: 100%;
-}
 .nav-link {
   color: #d3d9d4; /* Light color for button text */
   border: none;
@@ -171,34 +215,7 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   border-radius: 5px;
 }
 
-.search-icon {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  color: #777; /* Icon color */
-}
-#clear-search-button {
-  background: none;
-  border: none;
-  color: #6c757d; /* Bootstrap's secondary color */
-  line-height: 1;
-  z-index: 5;
-}
 
-#clear-search-button:hover {
-  color: #495057; /* Darken on hover */
-}
-/* Optionally, if you want a subtle indication of focus without size change */
-.custom-search-input:focus {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.1
-  ); /* Slight highlight when focused */
-}
 /* Burger Menu Icon Styles */
 .burger-menu-icon {
   background-color: transparent;
@@ -207,7 +224,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   padding: 0;
   z-index: 1001; /* Ensure it's above the fullscreen menu */
 }
-
 
 .breadcrumb {
   border-radius: 0.25rem;
@@ -252,6 +268,76 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
+}
+/* Button styling */
+.changelog-btn {
+  background: linear-gradient(45deg, #2E3944, #124E66);
+  justify-content: center;
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 5px;
+}
+
+.changelog-btn:hover, .changelog-btn:focus {
+  background: linear-gradient(45deg, #124E66, #2E3944);
+  color: #e9ecef;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Dropdown menu styling */
+.changelog-menu {
+  max-height: 400px; /* Constrain height for scrolling */
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  width: 450px; /* Increased width for longer titles */
+}
+
+/* Dropdown items styling */
+.changelog-menu .dropdown-item {
+  padding: 8px 15px;
+  color: #212529;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  white-space: normal; /* Allows text wrapping for long titles */
+  line-height: 1.4;
+  border-bottom: 1px solid #D3D9D4; /* Divider line between items */
+}
+
+.changelog-menu .dropdown-item:last-child {
+  border-bottom: none; /* Remove border for the last item */
+}
+
+.changelog-menu .dropdown-item:hover {
+  background-color: #007bff;
+  color: #ffffff;
+  border-radius: 5px;
+}
+
+/* Scrollbar styling for webkit browsers */
+.changelog-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.changelog-menu::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 10px;
+}
+
+.changelog-menu::-webkit-scrollbar-thumb:hover {
+  background-color: #0056b3;
+}
+
+.example-queries-title {
+  color: #D3D9D4 !important;
 }
 
 /* Second navbar toggler - Dark theme */
@@ -298,35 +384,6 @@ body.menu-open {
   box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5); /* Glow effect on focus */
 }
 
-.changelog-dropdown .dropdown-menu {
-  width: auto;
-  min-width: 400px; /* Adjusted to be less than or equal to max-width */
-  max-width: 450px; /* Increased to match your intended width */
-  max-height: 400px; /* Maximum height for dropdown */
-  overflow-y: auto; /* Enable vertical scrolling */
-}
-
-.changelog-dropdown .dropdown-item {
-  white-space: normal;
-  word-wrap: break-word;
-}
-
-/* Dropdown Item Styles */
-.dropdown-item {
-  padding: 10px 15px; /* Padding for dropdown items */
-  transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effects */
-}
-
-.dropdown-item:hover {
-  background-color: #2e3944; /* Light background on hover */
-
-  font-weight: bold; /* Bold text on hover */
-}
-
-/* Ensure Full Width for Each Dropdown Item */
-.changelog-dropdown-item {
-  width: 100%; /* Full width for dropdown items */
-}
 #mobileChangelogList {
   height: auto;
   max-height: 300px; /* Adjust this value as needed */
@@ -775,11 +832,6 @@ button {
     height: auto;
 }
 
-  /* Changelog Dropdown Styles */
-  .changelog-dropdown {
-    min-width: 300px; /* Minimum width for mobile */
-    max-height: 300px; /* Maximum height for dropdown */
-  }
   #loading-overlay .loading-logo {
     width: 200px;
   }
