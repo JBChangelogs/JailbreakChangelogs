@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.0...v2.9.1) (2024-11-13)
+
+
+### Bug Fixes
+
+* increased z-index of changelog dropdown items ([6259c67](https://github.com/JBChangelogs/JailbreakChangelogs/commit/6259c6730d98a2039a7754e31f207e84bd8212dc))
+
 # [2.9.0](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.8.0...v2.9.0) (2024-11-13)
 
 # [2.8.0](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.7.22...v2.8.0) (2024-11-11)
