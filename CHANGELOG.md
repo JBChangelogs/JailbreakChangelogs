@@ -1,3 +1,10 @@
+## [2.9.2](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.1...v2.9.2) (2024-11-14)
+
+
+### Bug Fixes
+
+* updated mobile menu ([536f12a](https://github.com/JBChangelogs/JailbreakChangelogs/commit/536f12a4959d6edf62a195279460f673c1e7076d))
+
 ## [2.9.1](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.0...v2.9.1) (2024-11-13)
 
 
