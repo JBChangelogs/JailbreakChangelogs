@@ -191,32 +191,37 @@
   </div>
 </div>
 
-        <!-- Mobile Menu Items (Collapsible) -->
-        <div class="collapse mt-3 d-lg-none" id="mobileMenuItems">
-          <div class="d-grid gap-2">
-            <div class="btn-group" role="group" aria-label="Date Filter Options">
-              <button class="btn btn-secondary" id="mobileOpenDateFilterModal">
-                <i class="bi bi-calendar-event me-2"></i> Select Date
-              </button>
-            </div>
-            <button id="mobileLatestChangelogBtn" class="btn btn-primary">
-              <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
-            </button>
-            <div class="dropdown">
-              <button class="btn changelog-btn w-100 dropdown-toggle" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-calendar-event me-2"></i>
-                Changelog Versions
-              </button>
-              <ul class="dropdown-menu changelog-menu w-100" aria-labelledby="mobileChangelogDropdown" id="mobileChangelogList">
-                <!-- Dropdown items will be populated dynamically -->
-              </ul>
-            </div>
-            
-            <button id="mobileCopyChangelog" class="btn btn-primary">
-              <i class="bi bi-clipboard me-2"></i> Copy Changelog
-            </button>
-          </div>
-        </div>
+        <!-- Mobile Menu Toggle Button -->
+<button id="mobileMenuToggle" class="btn btn-primary d-lg-none mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenuItems" aria-expanded="false" aria-controls="mobileMenuItems">
+  <i class="bi bi-list me-2"></i> More Options
+</button>
+
+<!-- Mobile Menu Items (Collapsible) with Custom Background -->
+<div class="collapse mt-3 d-lg-none" id="mobileMenuItems">
+  <div class="d-grid gap-2" style="background-color: #212A31; padding: 15px; border-radius: 8px; width: calc(100% + 30px); margin-left: -15px; margin-right: -15px;">
+    <div class="btn-group" role="group" aria-label="Date Filter Options">
+      <button class="btn" style="background-color: #124E66; color: #D3D9D4;" id="mobileOpenDateFilterModal">
+        <i class="bi bi-calendar-event me-2"></i> Select Date
+      </button>
+    </div>
+    <button id="mobileLatestChangelogBtn" class="btn" style="background-color: #124E66; color: #D3D9D4;">
+      <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
+    </button>
+    <div class="dropdown">
+      <button class="btn changelog-btn w-100 dropdown-toggle" id="mobileChangelogDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #124E66; color: #D3D9D4;">
+        <i class="bi bi-calendar-event me-2"></i> Changelog Versions
+      </button>
+      <ul class="dropdown-menu changelog-menu w-100" aria-labelledby="mobileChangelogDropdown" id="mobileChangelogList">
+        <!-- Dropdown items will be populated dynamically -->
+      </ul>
+    </div>
+    
+    <button id="mobileCopyChangelog" class="btn" style="background-color: #124E66; color: #D3D9D4;">
+      <i class="bi bi-clipboard me-2"></i> Copy Changelog
+    </button>
+  </div>
+</div>
+
       </div>
     </div>
   </div>
