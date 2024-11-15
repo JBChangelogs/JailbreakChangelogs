@@ -18,10 +18,11 @@ Welcome to the Roblox Jailbreak Changelogs repository. Discover the latest updat
 
 Our changelog website provides:
 
-- **Up-to-date changelogs:** Stay informed with the latest Jailbreak changes as they happen.
-- **User-Friendly Interface:** Navigate effortlessly through a clean, intuitive design.
-- **Responsive Layout:** Enjoy seamless access across all devices - desktop, tablet, or mobile.
-- **Comprehensive Archives:** Explore the full history of Jailbreak updates and patches dating back to the game's release in 2017.
+- **Up-to-date changelogs:** Stay informed with the latest Jailbreak changes.
+- **Intuitive Design:** Effortlessly navigate through a responsive layout optimized for desktop, tablet, and mobile.
+- **Complete Archives:** Access a full history of Jailbreak updates dating back to 2017.
+- **Interactive Features:** Comment on changelogs and season entries for an engaging experience.
+- **Seasons Page:** Track all season prizes since December 2020.
 
 ## Acknowledgements
 
