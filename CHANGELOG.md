@@ -1,3 +1,10 @@
+## [2.9.3](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.2...v2.9.3) (2024-11-20)
+
+
+### Bug Fixes
+
+* fixed the default pfp ([251d551](https://github.com/JBChangelogs/JailbreakChangelogs/commit/251d5516c2274c133dbccc8e6493ce7738f06974))
+
 ## [2.9.2](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.1...v2.9.2) (2024-11-14)
 
 
