@@ -502,7 +502,7 @@ app.get("/users/:user", (req, res) => {
 
       // Render the page only after both data sets are fetched
       const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-      const avatar = avatarUrl.endsWith('null.png') ? '/icon-512.png' : avatarUrl;
+      const avatar = avatarUrl.endsWith('null.png') ? '/assets/profile-pic-placeholder.png' : avatarUrl;
 
       res.render("users", { 
         userData, 
