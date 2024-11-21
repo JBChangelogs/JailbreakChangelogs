@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     userBio.textContent = "Error fetching description.";
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return; // Return early if an error occurred
             }
             await fetchUserBanner(userId);
             

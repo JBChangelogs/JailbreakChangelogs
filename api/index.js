@@ -450,7 +450,24 @@ app.get('/users', (req, res) => {
 });
 
 // Route to render a specific user profile
-app.get("/users/:user", (req, res) => {
+const getAvatar = async (url) => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' }); // Use HEAD to just check the existence of the resource
+    if (response.status === 404) {
+      // If 404, return placeholder
+      return '/assets/profile-pic-placeholder.png';
+    }
+    // If avatar exists, return the original avatar URL
+    return url;
+  } catch (error) {
+    // In case of error, return the placeholder
+    console.error('Error fetching avatar:', error);
+    return '/assets/profile-pic-placeholder.png';
+  }
+};
+
+// Route to render a specific user profile
+app.get("/users/:user", async (req, res) => {
   const user = req.params.user; // Get the user from the URL params
 
   if (!user) {
@@ -476,47 +493,52 @@ app.get("/users/:user", (req, res) => {
     },
   }).then((response) => response.json());
 
-  // Use Promise.all to wait for both fetch requests to resolve
-  Promise.all([settingsFetch, userFetch])
-    .then(([settings1, userData]) => {
-      const booleanSettings = {
-        ...settings1,
-        profile_public: Boolean(settings1.profile_public),
-        show_recent_comments: Boolean(settings1.show_recent_comments),
-        hide_following: Boolean(settings1.hide_following),
-        hide_followers: Boolean(settings1.hide_followers),
-        banner_discord: Boolean(settings1.banner_discord)
-      };
-      const settings = {
-        ...booleanSettings,
-        profile_public: !booleanSettings.profile_public,
-        show_recent_comments: !booleanSettings.show_recent_comments,
-        hide_following: !booleanSettings.hide_following,
-        hide_followers: !booleanSettings.hide_followers,
-        banner_discord:!booleanSettings.banner_discord
-      };
-      if (userData.error) {
-        const defaultUserID = "659865209741246514";
-        return res.redirect(`/users/${defaultUserID}`);
-      }
+  try {
+    // Use Promise.all to wait for both fetch requests to resolve
+    const [settings1, userData] = await Promise.all([settingsFetch, userFetch]);
 
-      // Render the page only after both data sets are fetched
-      const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-      const avatar = avatarUrl.endsWith('null.png') ? '/assets/profile-pic-placeholder.png' : avatarUrl;
+    const booleanSettings = {
+      ...settings1,
+      profile_public: Boolean(settings1.profile_public),
+      show_recent_comments: Boolean(settings1.show_recent_comments),
+      hide_following: Boolean(settings1.hide_following),
+      hide_followers: Boolean(settings1.hide_followers),
+      banner_discord: Boolean(settings1.banner_discord)
+    };
 
-      res.render("users", { 
-        userData, 
-        avatar, 
-        settings,
-        title: 'User Profile',
-        logoUrl: 'assets/logos/users.png',
-        logoAlt: 'User Profile Logo'
-      });
-    })
-    .catch((error) => {
-      console.error("Error fetching user data or settings:", error);
-      res.status(500).send("Error fetching user data");
+    const settings = {
+      ...booleanSettings,
+      profile_public: !booleanSettings.profile_public,
+      show_recent_comments: !booleanSettings.show_recent_comments,
+      hide_following: !booleanSettings.hide_following,
+      hide_followers: !booleanSettings.hide_followers,
+      banner_discord: !booleanSettings.banner_discord
+    };
+
+    if (userData.error) {
+      const defaultUserID = "659865209741246514";
+      return res.redirect(`/users/${defaultUserID}`);
+    }
+
+    // Assemble avatar URL
+    const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+
+    // Check if avatar exists and get the correct URL (or placeholder)
+    const avatar = await getAvatar(avatarUrl);
+
+    // Render the page only after both data sets are fetched
+    res.render("users", { 
+      userData, 
+      avatar, 
+      settings,
+      title: 'User Profile',
+      logoUrl: 'assets/logos/users.png',
+      logoAlt: 'User Profile Logo'
     });
+  } catch (error) {
+    console.error("Error fetching user data or settings:", error);
+    res.status(500).send("Error fetching user data");
+  }
 });
 
 app.get('/timeline', (req, res) => {
@@ -549,11 +571,13 @@ const images = [
 ];
 
 app.get('/', (req, res) => {
+  const randomNumber = Math.floor(Math.random() * 10) + 1;
+  const image = `assets/backgrounds/background${randomNumber}.png`;
   res.render('index', {
     title: 'Home / Changelogs',
     logoUrl: 'assets/logos/home_page.png',
     logoAlt: 'Home Page Logo',
-    images
+    image
   });
 });
 
