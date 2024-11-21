@@ -1,3 +1,10 @@
+## [2.9.5](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.4...v2.9.5) (2024-11-21)
+
+
+### Bug Fixes
+
+* better loading on images on bot page ([1c69b6c](https://github.com/JBChangelogs/JailbreakChangelogs/commit/1c69b6c085ac9f80c23426b63936e49206167bc3))
+
 ## [2.9.4](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.3...v2.9.4) (2024-11-21)
 
 
