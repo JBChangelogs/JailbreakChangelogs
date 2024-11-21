@@ -1,3 +1,10 @@
+## [2.9.4](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.3...v2.9.4) (2024-11-21)
+
+
+### Bug Fixes
+
+* user avatars not loading, not being able to edit description, and better loading on images on home page ([8d2346a](https://github.com/JBChangelogs/JailbreakChangelogs/commit/8d2346a21533aab5f1d2e873a600bf3172774d5d))
+
 ## [2.9.3](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.2...v2.9.3) (2024-11-20)
 
 
