@@ -4,37 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-8152532464536367" />
-    <title>Invite Bot</title>
-    <style>
-      body {
-        background-color: #1a1a1a;
-        color: #ffffff;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-      }
-      .container {
-        text-align: center;
-        padding: 2rem;
-        background-color: #2a2a2a;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-      h1 {
-        margin-bottom: 1rem;
-      }
-      p {
-        font-size: 1.2rem;
-      }
-      #countdown {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #4caf50;
-      }
-    </style>
+    <title>Bot Invite</title>
+
+    <link rel="stylesheet" href="styles/botinvite.css" 
     <script src="scripts/main.js"></script>
 
     <script>
@@ -49,10 +21,10 @@
           countdownElement.textContent = countdownValue;
           countdownValue--;
 
-          // Redirect to the Discord authorization page once countdown reaches zero
+          // Redirect to the Discord bot invite page once countdown reaches zero
           if (countdownValue < 0) {
             clearInterval(countdownInterval);
-            window.location.href = "";
+            window.location.href = "https://discord.com/application-directory/1281308669299920907";
           }
         }, 1000);
       }
@@ -63,10 +35,13 @@
   </head>
   <body>
     <div class="container">
-      <h1>Invite Bot</h1>
+      <h1>Invite Jailbreak Changelogs Bot</h1>
       <p>
-        Redirecting you to the bot invite page in
+        You will be redirected to the bot invite page on Discord in
         <span id="countdown">3</span> seconds...
+      </p>
+      <p>
+        <a href="https://discord.com/application-directory/1281308669299920907" target="_blank">Click here</a> if you are not redirected automatically.
       </p>
     </div>
     <script

@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/footer.css" />
 
+   
     <script>(function(){'use strict';function aa(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}var ba=typeof Object.defineProperties=="function"?Object.defineProperty:function(a,b,c){if(a==Array.prototype||a==Object.prototype)return a;a[b]=c.value;return a};
       function ca(a){a=["object"==typeof globalThis&&globalThis,a,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var b=0;b<a.length;++b){var c=a[b];if(c&&c.Math==Math)return c}throw Error("Cannot find global object");}var da=ca(this);function l(a,b){if(b)a:{var c=da;a=a.split(".");for(var d=0;d<a.length-1;d++){var e=a[d];if(!(e in c))break a;c=c[e]}a=a[a.length-1];d=c[a];b=b(d);b!=d&&b!=null&&ba(c,a,{configurable:!0,writable:!0,value:b})}}
       function ea(a){return a.raw=a}function n(a){var b=typeof Symbol!="undefined"&&Symbol.iterator&&a[Symbol.iterator];if(b)return b.call(a);if(typeof a.length=="number")return{next:aa(a)};throw Error(String(a)+" is not an iterable or ArrayLike");}function fa(a){for(var b,c=[];!(b=a.next()).done;)c.push(b.value);return c}var ha=typeof Object.create=="function"?Object.create:function(a){function b(){}b.prototype=a;return new b},p;
@@ -80,30 +81,6 @@
   <body>
     <%- include('partials/nav') %>
 
-    <div
-      class="alert alert-dark text-center p-2 p-sm-3"
-      role="alert"
-      style="
-        margin-bottom: 0;
-        background-color: #1a1a1a;
-        color: #f8f9fa;
-        border-color: #6c757d;
-        border-radius: 0px;
-      "
-    >
-      <div class="d-flex align-items-center justify-content-center flex-wrap">
-        <i
-          class="bi bi-exclamation-triangle-fill me-2"
-          style="color: #ffc107"
-        ></i>
-        <strong class="me-1">Beta Version:</strong>
-        <span class="d-inline-block">
-          Our Discord bot is currently under development and not yet online.
-        </span>
-        <span class="ms-1">Stay Tuned!</span>
-      </div>
-    </div>
-
     <div class="hero" style="background-image: url(<%= image %>);">
       <div class="hero-content">
         <h1>
@@ -114,11 +91,9 @@
           Your go-to resource for information and updates about our Discord bot!
         </p>
         <a
-          class="btn btn-primary btn-custom disabled"
-          href="#"
-          title="Invite to Your Server (Coming Soon)"
-          aria-disabled="true"
-          onclick="return false;"
+          class="btn btn-primary btn-custom"
+          href="/botinvite"
+          title="Invite to Your Server"
         >
           <i class="bi bi-person-plus-fill me-2"></i> Invite to Your Server
         </a>
@@ -134,7 +109,7 @@
               <i class="bi bi-people-fill"></i>
             </div>
             <h3>
-              Crew Tracking <small style="color: #adb5bd">(Coming Soon)</small>
+              Crew Tracking
             </h3>
             <p>
               View the stats of your jailbreak crew as well as other players'
