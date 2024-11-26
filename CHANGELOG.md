@@ -1,3 +1,5 @@
+# [2.10.0](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.5...v2.10.0) (2024-11-26)
+
 ## [2.9.5](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.4...v2.9.5) (2024-11-21)
 
 
