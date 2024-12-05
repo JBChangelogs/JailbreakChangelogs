@@ -1,3 +1,10 @@
+## [2.10.1](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.10.0...v2.10.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* fixed the markdown issue for inline items ([abdf085](https://github.com/JBChangelogs/JailbreakChangelogs/commit/abdf085122162c683a736021870b4994ec2646a8))
+
 # [2.10.0](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.5...v2.10.0) (2024-11-26)
 
 ## [2.9.5](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.4...v2.9.5) (2024-11-21)
