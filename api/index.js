@@ -365,87 +365,99 @@ app.get('/sitemap.xml', (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://jailbreakchangelogs.xyz/</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/timeline</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/bot</loc>
-    <lastmod>2024-11-26</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/tradetracker</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://status.jailbreakchangelogs.xyz/</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/tradetracker</loc>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/tos</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/faq</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/keys</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/privacy</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/users</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://docs.jailbreakchangelogs.xyz/</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/botinvite</loc>
-    <lastmod>2024-11-26</lastmod>
+    <loc>https://status.jailbreakchangelogs.xyz/incidents</loc>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/seasons/23</loc>
-    <lastmod>2024-11-26</lastmod>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/changelogs/346</loc>
-    <lastmod>2024-11-26</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/botinvite</loc>
+    <lastmod>2024-12-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/changelogs/347</loc>
+    <lastmod>2024-12-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://status.jailbreakchangelogs.xyz/incident/471508</loc>
+    <lastmod>2024-12-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>`;
 
