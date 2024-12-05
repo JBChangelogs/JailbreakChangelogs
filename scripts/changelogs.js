@@ -301,15 +301,17 @@ function populateChangelogDropdown(changelogs, buttonText) {
 }
 
   // Function to preprocess Markdown text
-  const preprocessMarkdown = (markdown) =>
-    markdown
-      .replace(/ - /g, "\n- ") // Format list items
-      .replace(/ - - /g, "\n- - ") // Format nested list items
-      .replace(/## /g, "\n## ") // Format second-level headers
-      .replace(/### /g, "\n### ") // Format third-level headers
-      .replace(/\(audio\) /g, "\n(audio) ") // Format audio references
-      .replace(/\(video\) /g, "\n(video) ") // Format video references
-      .replace(/\(image\) /g, "\n(image) "); // Format image references
+  const preprocessMarkdown = (markdown) => {
+    return markdown
+      .replace(/^ - /gm, '\n- ')   // Format top-level list items
+      .replace(/^ - - /gm, '\n  - ') // Format nested list items (indent with two spaces)
+      .replace(/^## /gm, '\n## ')  // Format second-level headers
+      .replace(/^### /gm, '\n### ') // Format third-level headers
+      .replace(/\(audio\) /g, '\n(audio) ') // Format audio references
+      .replace(/\(video\) /g, '\n(video) ') // Format video references
+      .replace(/\(image\) /g, '\n(image) '); // Format image references
+  };
+  
 
   // Function to dismiss the keyboard on mobile
   function dismissKeyboard() {
