@@ -52,7 +52,7 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 
 app.get("/changelogs", (req, res) => {
   // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 346; // Set your default changelog ID here
+  const defaultChangelogId = 347; // Set your default changelog ID here
   res.redirect(`/changelogs/${defaultChangelogId}`);
 });
 
