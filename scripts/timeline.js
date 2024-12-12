@@ -189,10 +189,10 @@ $(document).ready(function () {
     if (changelog.sections && typeof changelog.sections === "string") {
       // Process the markdown content
       const processedMarkdown = changelog.sections
-        .replace(/ - /g, "\n- ")
-        .replace(/ - - /g, "\n- - ")
-        .replace(/## /g, "\n## ")
-        .replace(/### /g, "\n### ");
+        .replace(/^ - /gm, '\n- ')   // Format top-level list items
+        .replace(/^ - - /gm, '\n  - ') // Format nested list items (indent with two spaces)
+        .replace(/^## /gm, '\n## ')  // Format second-level headers
+        .replace(/^### /gm, '\n### ') // Format third-level headers
 
       // Convert processed markdown to HTML
       sectionsHtml = convertMarkdownToHtml(processedMarkdown);
