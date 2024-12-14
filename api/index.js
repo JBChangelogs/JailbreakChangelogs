@@ -52,7 +52,7 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 
 app.get("/changelogs", (req, res) => {
   // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 346; // Set your default changelog ID here
+  const defaultChangelogId = 347; // Set your default changelog ID here
   res.redirect(`/changelogs/${defaultChangelogId}`);
 });
 
@@ -448,8 +448,8 @@ app.get('/sitemap.xml', (req, res) => {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/changelogs/346</loc>
-    <lastmod>2024-12-09</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/changelogs/347</loc>
+    <lastmod>2024-12-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
