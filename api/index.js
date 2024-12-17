@@ -58,11 +58,11 @@ app.get("/changelogs", (req, res) => {
 
 app.get("/owner/check/:user", (req, res) => {
   const user = req.params.user; // Get the user ID from the URL parameter
-  const owners = ['1019539798383398946', '659865209741246514']
+  const owners = ["1019539798383398946", "659865209741246514"];
   const isOwner = owners.includes(user);
   if (!isOwner) {
     res.status(403).json({ error: "Unauthorized" });
-  }  
+  }
   res.status(200).json({ isOwner });
 });
 
@@ -84,9 +84,9 @@ app.get("/changelogs/:changelog", async (req, res) => {
         title: "Changelog not found",
         image_url:
           "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
-        logoUrl: 'assets/logos/changelogs.png',
-        logoAlt: 'Changelogs Page Logo',
-        changelogId
+        logoUrl: "assets/logos/changelogs.png",
+        logoAlt: "Changelogs Page Logo",
+        changelogId,
       });
     }
 
@@ -97,12 +97,12 @@ app.get("/changelogs/:changelog", async (req, res) => {
     const data = await response.json();
     const { title, image_url } = data;
 
-    res.render("changelogs", { 
-      title, 
+    res.render("changelogs", {
+      title,
       image_url,
-      logoUrl: 'assets/logos/changelogs.png',
-      logoAlt: 'Changelogs Page Logo',
-      changelogId
+      logoUrl: "assets/logos/changelogs.png",
+      logoAlt: "Changelogs Page Logo",
+      changelogId,
     });
   } catch (error) {
     console.error("Error fetching changelog data:", error);
@@ -111,9 +111,9 @@ app.get("/changelogs/:changelog", async (req, res) => {
 });
 
 app.get("/seasons", (req, res) => {
-  // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 23; // Set your default changelog ID here
-  res.redirect(`/seasons/${defaultChangelogId}`);
+  // Redirect to a default season if no ID is provided in the URL
+  const defaultSeasonId = 24; // Set your default season ID here
+  res.redirect(`/seasons/${defaultSeasonId}`);
 });
 
 app.get("/seasons/:season", async (req, res) => {
@@ -133,10 +133,11 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
+        image_url:
+          "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo",
-        seasonId
+        seasonId,
       });
     }
     const rewardsResponse = await fetch(rewardsUrl, {
@@ -150,10 +151,11 @@ app.get("/seasons/:season", async (req, res) => {
       return res.render("seasons", {
         season: "???",
         title: "Season not found",
-        image_url: "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
+        image_url:
+          "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0",
         logoUrl: "assets/logos/seasons_logo.png",
         logoAlt: "Jailbreak Seasons Logo",
-        seasonId
+        seasonId,
       });
     }
 
@@ -166,19 +168,20 @@ app.get("/seasons/:season", async (req, res) => {
     );
 
     // Ensure we got the reward before accessing properties
-    let image_url = "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0";
+    let image_url =
+      "https://res.cloudinary.com/dsvlphknq/image/upload/f_auto,q_auto,w_500/v1/changelogs/changelog-image-345?_a=BAMCkGcc0";
     if (level_10_reward) {
       image_url = level_10_reward.link;
     }
 
     const { season, title } = data; // Adjust the destructured properties based on the API response structure
-    res.render("seasons", { 
-      season, 
+    res.render("seasons", {
+      season,
       title,
       image_url,
       logoUrl: "assets/logos/seasons_logo.png",
       logoAlt: "Jailbreak Seasons Logo",
-      seasonId
+      seasonId,
     }); // Render the seasons page with the retrieved data
   } catch (error) {
     console.error("Error fetching season data:", error);
@@ -186,38 +189,38 @@ app.get("/seasons/:season", async (req, res) => {
   }
 });
 
-app.get('/bot', (req, res) => {
+app.get("/bot", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 10) + 1;
   const image = `assets/backgrounds/background${randomNumber}.png`;
-  res.render('bot', {
-    title: 'Discord Bot / Changelogs',
-    logoUrl: 'assets/logos/changelogs_discord_bot.png',
-    logoAlt: 'Timeline Page Logo',
-    image
+  res.render("bot", {
+    title: "Discord Bot / Changelogs",
+    logoUrl: "assets/logos/changelogs_discord_bot.png",
+    logoAlt: "Timeline Page Logo",
+    image,
   });
 });
 
-app.get('/faq', (req, res) => {
-  res.render('faq', {
-    title: 'User FAQ',
-    logoUrl: 'assets/logos/changelogs_faq.png',
-    logoAlt: 'FAQ Page Logo'
+app.get("/faq", (req, res) => {
+  res.render("faq", {
+    title: "User FAQ",
+    logoUrl: "assets/logos/changelogs_faq.png",
+    logoAlt: "FAQ Page Logo",
   });
 });
 
-app.get('/privacy', (req, res) => {
-  res.render('privacy', {
-    title: 'Privacy Policy / Changelogs',
-    logoUrl: 'assets/logos/changelogs_privacy_policy.png',
-    logoAlt: 'Privacy Policy Page Logo'
+app.get("/privacy", (req, res) => {
+  res.render("privacy", {
+    title: "Privacy Policy / Changelogs",
+    logoUrl: "assets/logos/changelogs_privacy_policy.png",
+    logoAlt: "Privacy Policy Page Logo",
   });
 });
 
-app.get('/tos', (req, res) => {
-  res.render('tos', {
-    title: 'Terms Of Service / Changelogs',
-    logoUrl: 'assets/logos/changelogs_tos.png',
-    logoAlt: 'TOS Page Logo'
+app.get("/tos", (req, res) => {
+  res.render("tos", {
+    title: "Terms Of Service / Changelogs",
+    logoUrl: "assets/logos/changelogs_tos.png",
+    logoAlt: "TOS Page Logo",
   });
 });
 
@@ -225,11 +228,11 @@ app.get("/botinvite", (req, res) => {
   res.render("botinvite");
 });
 
-app.get('/keys', (req, res) => {
-  res.render('keys', {
-    title: 'API / Changelogs',
-    logoUrl: 'assets/logos/changelogs_api.png',
-    logoAlt: 'API Page Logo'
+app.get("/keys", (req, res) => {
+  res.render("keys", {
+    title: "API / Changelogs",
+    logoUrl: "assets/logos/changelogs_api.png",
+    logoAlt: "API Page Logo",
   });
 });
 
@@ -239,15 +242,18 @@ app.get("/login", (req, res) => {
 
 app.get("/users/:user/followers", async (req, res) => {
   const user = req.params.user; // Get the user from the URL params
-  const response = await fetch(`https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Origin: "https://jailbreakchangelogs.xyz",
+  const response = await fetch(
+    `https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
     }
-  });
+  );
 
   if (!response.ok) {
-    return res.status(response.status).send('Error fetching user settings');
+    return res.status(response.status).send("Error fetching user settings");
   }
   let showfollowers = true;
 
@@ -257,57 +263,59 @@ app.get("/users/:user/followers", async (req, res) => {
   } else {
     showfollowers = true;
   }
-    if (!user) {
+  if (!user) {
     return res.render("usersearch", {
-      title: 'User Search / Changelogs',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'Users Page Logo'
+      title: "User Search / Changelogs",
+      logoUrl: "assets/logos/users.png",
+      logoAlt: "Users Page Logo",
     });
   }
-  
+
   fetch(`https://api.jailbreakchangelogs.xyz/users/get?id=${user}`, {
     headers: {
       "Content-Type": "application/json",
       Origin: "https://jailbreakchangelogs.xyz", // Add your origin
     },
   })
-  .then((response) => response.json())
-  .then((userData) => {
-    if (userData.error) {
-      const defaultUserID = "659865209741246514"; // Set your default changelog ID here
-      return res.redirect(`/users/${defaultUserID}/followers`);
-    }
-    // Render the page only after the data is fetched
-    const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-    res.render("followers", { 
-      userData, 
-      avatar,
-      showfollowers,
-      title: 'Followers / Changelogs',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'Users Page Logo'
+    .then((response) => response.json())
+    .then((userData) => {
+      if (userData.error) {
+        const defaultUserID = "659865209741246514"; // Set your default changelog ID here
+        return res.redirect(`/users/${defaultUserID}/followers`);
+      }
+      // Render the page only after the data is fetched
+      const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+      res.render("followers", {
+        userData,
+        avatar,
+        showfollowers,
+        title: "Followers / Changelogs",
+        logoUrl: "assets/logos/users.png",
+        logoAlt: "Users Page Logo",
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
+
+      // Optionally render an error page or send a response with an error message
+      res.status(500).send("Error fetching user data");
     });
-  })
-  .catch((error) => {
-    console.error("Error fetching user data:", error);
-
-    // Optionally render an error page or send a response with an error message
-    res.status(500).send("Error fetching user data");
-  });
 });
-
 
 app.get("/users/:user/following", async (req, res) => {
   const user = req.params.user; // Get the user from the URL params
-  const response = await fetch(`https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Origin: "https://jailbreakchangelogs.xyz",
+  const response = await fetch(
+    `https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
     }
-  });
+  );
 
   if (!response.ok) {
-    return res.status(response.status).send('Error fetching user settings');
+    return res.status(response.status).send("Error fetching user settings");
   }
   let showfollowing = true;
 
@@ -319,46 +327,46 @@ app.get("/users/:user/following", async (req, res) => {
   }
   if (!user) {
     return res.render("usersearch", {
-      title: 'User Search / Changelogs',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'Users Page Logo'
+      title: "User Search / Changelogs",
+      logoUrl: "assets/logos/users.png",
+      logoAlt: "Users Page Logo",
     });
   }
-  
+
   fetch(`https://api.jailbreakchangelogs.xyz/users/get?id=${user}`, {
     headers: {
       "Content-Type": "application/json",
       Origin: "https://jailbreakchangelogs.xyz", // Add your origin
     },
   })
-  .then((response) => response.json())
-  .then((userData) => {
-    if (userData.error) {
-      const defaultUserID = "659865209741246514"; // Set your default changelog ID here
-      return res.redirect(`/users/${defaultUserID}/following`);
-    }
-    // Render the page only after the data is fetched
-    const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-    res.render("following", { 
-      userData, 
-      avatar,
-      showfollowing,
-      title: 'Users - Following',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'Users Page Logo'
-    });
-  })
-  .catch((error) => {
-    console.error("Error fetching user data:", error);
+    .then((response) => response.json())
+    .then((userData) => {
+      if (userData.error) {
+        const defaultUserID = "659865209741246514"; // Set your default changelog ID here
+        return res.redirect(`/users/${defaultUserID}/following`);
+      }
+      // Render the page only after the data is fetched
+      const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+      res.render("following", {
+        userData,
+        avatar,
+        showfollowing,
+        title: "Users - Following",
+        logoUrl: "assets/logos/users.png",
+        logoAlt: "Users Page Logo",
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
 
-    // Optionally render an error page or send a response with an error message
-    res.status(500).send("Error fetching user data");
-  });
+      // Optionally render an error page or send a response with an error message
+      res.status(500).send("Error fetching user data");
+    });
 });
 // Sitemap route
-app.get('/sitemap.xml', (req, res) => {
+app.get("/sitemap.xml", (req, res) => {
   // Set the Content-Type header to application/xml
-  res.header('Content-Type', 'application/xml');
+  res.header("Content-Type", "application/xml");
 
   const sitemap = `
   <?xml version="1.0" encoding="utf-8"?><!--Generated by Screaming Frog SEO Spider 21.1-->
@@ -489,30 +497,29 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(sitemap);
 });
 
-
 // Render search page
-app.get('/users', (req, res) => {
-  res.render('usersearch',  { 
-    title: 'Users',
-    logoUrl: 'assets/logos/users.png',
-    logoAlt: 'Users Page Logo'
+app.get("/users", (req, res) => {
+  res.render("usersearch", {
+    title: "Users",
+    logoUrl: "assets/logos/users.png",
+    logoAlt: "Users Page Logo",
   });
 });
 
 // Route to render a specific user profile
 const getAvatar = async (url) => {
   try {
-    const response = await fetch(url, { method: 'HEAD' }); // Use HEAD to just check the existence of the resource
+    const response = await fetch(url, { method: "HEAD" }); // Use HEAD to just check the existence of the resource
     if (response.status === 404) {
       // If 404, return placeholder
-      return '/assets/profile-pic-placeholder.png';
+      return "/assets/profile-pic-placeholder.png";
     }
     // If avatar exists, return the original avatar URL
     return url;
   } catch (error) {
     // In case of error, return the placeholder
-    console.error('Error fetching avatar:', error);
-    return '/assets/profile-pic-placeholder.png';
+    console.error("Error fetching avatar:", error);
+    return "/assets/profile-pic-placeholder.png";
   }
 };
 
@@ -522,26 +529,32 @@ app.get("/users/:user", async (req, res) => {
 
   if (!user) {
     return res.render("usersearch", {
-      title: 'Users',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'Users Page Logo'
+      title: "Users",
+      logoUrl: "assets/logos/users.png",
+      logoAlt: "Users Page Logo",
     });
   }
 
   // Fetch user settings and user data concurrently
-  const settingsFetch = fetch(`https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Origin: "https://jailbreakchangelogs.xyz",
-    },
-  }).then((response) => response.json());
+  const settingsFetch = fetch(
+    `https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
+    }
+  ).then((response) => response.json());
 
-  const userFetch = fetch(`https://api.jailbreakchangelogs.xyz/users/get?id=${user}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Origin: "https://jailbreakchangelogs.xyz",
-    },
-  }).then((response) => response.json());
+  const userFetch = fetch(
+    `https://api.jailbreakchangelogs.xyz/users/get?id=${user}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
+    }
+  ).then((response) => response.json());
 
   try {
     // Use Promise.all to wait for both fetch requests to resolve
@@ -553,7 +566,7 @@ app.get("/users/:user", async (req, res) => {
       show_recent_comments: Boolean(settings1.show_recent_comments),
       hide_following: Boolean(settings1.hide_following),
       hide_followers: Boolean(settings1.hide_followers),
-      banner_discord: Boolean(settings1.banner_discord)
+      banner_discord: Boolean(settings1.banner_discord),
     };
 
     const settings = {
@@ -562,7 +575,7 @@ app.get("/users/:user", async (req, res) => {
       show_recent_comments: !booleanSettings.show_recent_comments,
       hide_following: !booleanSettings.hide_following,
       hide_followers: !booleanSettings.hide_followers,
-      banner_discord: !booleanSettings.banner_discord
+      banner_discord: !booleanSettings.banner_discord,
     };
 
     if (userData.error) {
@@ -577,13 +590,13 @@ app.get("/users/:user", async (req, res) => {
     const avatar = await getAvatar(avatarUrl);
 
     // Render the page only after both data sets are fetched
-    res.render("users", { 
-      userData, 
-      avatar, 
+    res.render("users", {
+      userData,
+      avatar,
       settings,
-      title: 'User Profile',
-      logoUrl: 'assets/logos/users.png',
-      logoAlt: 'User Profile Logo'
+      title: "User Profile",
+      logoUrl: "assets/logos/users.png",
+      logoAlt: "User Profile Logo",
     });
   } catch (error) {
     console.error("Error fetching user data or settings:", error);
@@ -591,33 +604,32 @@ app.get("/users/:user", async (req, res) => {
   }
 });
 
-app.get('/timeline', (req, res) => {
-  res.render('timeline', {
-    title: 'Timeline / Changelogs',
-    logoUrl: 'assets/logos/timeline.png',
-    logoAlt: 'Timeline Page Logo'
+app.get("/timeline", (req, res) => {
+  res.render("timeline", {
+    title: "Timeline / Changelogs",
+    logoUrl: "assets/logos/timeline.png",
+    logoAlt: "Timeline Page Logo",
   });
 });
 
-app.get('/tradetracker', (req, res) => {
-  res.render('tradetracker', {
-    title: 'Trade Tracker',
-    logoUrl: 'assets/logos/trade_tracker.png',
-    logoAlt: 'Trade Tracker Page Logo'
+app.get("/tradetracker", (req, res) => {
+  res.render("tradetracker", {
+    title: "Trade Tracker",
+    logoUrl: "assets/logos/trade_tracker.png",
+    logoAlt: "Trade Tracker Page Logo",
   });
 });
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 10) + 1;
   const image = `assets/backgrounds/background${randomNumber}.png`;
-  res.render('index', {
-    title: 'Home / Changelogs',
-    logoUrl: 'assets/logos/home_page.png',
-    logoAlt: 'Home Page Logo',
-    image
+  res.render("index", {
+    title: "Home / Changelogs",
+    logoUrl: "assets/logos/home_page.png",
+    logoAlt: "Home Page Logo",
+    image,
   });
 });
-
 
 app.get("/api", (req, res) => {
   res.redirect("/");
