@@ -6,11 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchTerm = searchInput.value.trim();
     const usersGrid = document.getElementById("usersGrid");
     const loadingSpinner = document.getElementById("loading-spinner");
-  
+
     loadingSpinner.style.display = "none";
     usersGrid.style.display = "block";
     usersGrid.innerHTML = ""; // Clear previous results
-  
+
     if (users.length === 0) {
       // Display "No results found :(" message
       const noResultsMessage = document.createElement("div");
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
       usersGrid.appendChild(noResultsMessage);
       return;
     }
-  
+
     if (users.length === 1) {
       return (window.location.href = `/users/${users[0].id}`);
     }
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (exact_match.length > 0) {
       return (window.location.href = `/users/${exact_match[0].id}`);
     }
-  
+
     // Helper to check if a URL returns 404
     const isValidImage = async (url) => {
       try {
@@ -39,17 +39,18 @@ document.addEventListener("DOMContentLoaded", function () {
         return false; // Any fetch error will result in false
       }
     };
-  
+
     // Process each user
     for (const user of users) {
       const userCard = document.createElement("div");
       let avatar = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-  
+
       // Check if avatar is valid, otherwise use placeholder
       if (!(await isValidImage(avatar))) {
-        avatar = "assets/profile-pic-placeholder.png";
+        avatar =
+          "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
       }
-  
+
       userCard.className = "user-card";
       userCard.innerHTML = `
         <div class="card user-card mb-3 border-0 shadow-sm">
@@ -71,11 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
       `;
-  
+
       usersGrid.appendChild(userCard);
     }
   };
-  
 
   // Function to handle search requests
   const handleSearch = async () => {

@@ -1279,7 +1279,7 @@ function updateDropdownButton(text) {
         );
 
         const avatarElement = document.createElement("img");
-        const defaultAvatarUrl = "assets/profile-pic-placeholder.png";
+        const defaultAvatarUrl = "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
 
         avatarElement.src = avatarUrl.endsWith("null.png")
           ? defaultAvatarUrl
