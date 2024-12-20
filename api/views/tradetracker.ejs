@@ -15,7 +15,7 @@
     <!-- Open Graph metadata for social media sharing -->
     <meta property="og:title" content="Jailbreak Trading Tracker" />
     <meta property="og:description" content="Use our Trade Tracker to follow tradeable items in Roblox Jailbreak. Track trends and make informed trading decisions to stay on top!" />
-    <meta property="og:image" content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/349.webp" />
+    <meta property="og:image" content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/344.webp" />
     <meta property="og:url" content="https://jailbreaktrading.xyz/tradetracker" />
     <meta property="og:type" content="website" />
 
@@ -30,7 +30,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Jailbreak Trading Tracker" />
     <meta name="twitter:description" content="Use our Trade Tracker to follow tradeable items in Roblox Jailbreak. Track trends and make informed trading decisions to stay on top!" />
-    <meta name="twitter:image" content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/349.webp" />
+    <meta name="twitter:image" content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/344.webp" />
   
     <!-- Page title -->
     <title><%= title %> / Changelogs</title>
@@ -39,14 +39,13 @@
     <link rel="canonical" href="https://jailbreakchangelogs.xyz/tradetracker" />
 
     <!-- CSS Links (unchanged) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Custom stylesheet -->
     <link rel="stylesheet" href="styles/tradetracker.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
-    <link rel="stylesheet" href="styles/footer.css" />
+    <link rel="stylesheet" href="styles/main.css" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -98,18 +97,8 @@
       window.__h82AlnkH6D91__("WyJwdWItODE1MjUzMjQ2NDUzNjM2NyIsW251bGwsbnVsbCxudWxsLCJodHRwczovL2Z1bmRpbmdjaG9pY2VzbWVzc2FnZXMuZ29vZ2xlLmNvbS9iL3B1Yi04MTUyNTMyNDY0NTM2MzY3Il0sbnVsbCxudWxsLCJodHRwczovL2Z1bmRpbmdjaG9pY2VzbWVzc2FnZXMuZ29vZ2xlLmNvbS9lbC9BR1NLV3hWeXl2SHVkeDF6Z3BxYVJXdEtELVlPSF9lVGFoVG9tTElwSmd6MjJXV3FDanpXdkJtUlZYbzFSX1BabWRoUW96VmsyeUdRY0ozVEw5NEhBWWF6SFFTN3h3XHUwMDNkXHUwMDNkP3RlXHUwMDNkVE9LRU5fRVhQT1NFRCIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFZ1UXVSSU1ZbU1BWk9oM0hyVGZWeUFNSjJaV2dqMnNqRzRnNHlKRVVEUXlCZGhjOFBXNzQ4cW00aWNVUkhLdGpzaGxaSTk4ZWNXLVRSRUJ0MmdlSTdPZ0FcdTAwM2RcdTAwM2Q/YWJcdTAwM2QxXHUwMDI2c2JmXHUwMDNkMSIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFVHQUNNM0Y3b0xrN216T3FCZTg3eEF4eGVsajZmSWVmN3VpQndkY0NUWnNyUEZQMnZLUThFZ1UyVFVSR1B3b1Y0dFZYVVhJdmpWWVM0dXl1Qmw1dEVxWlFcdTAwM2RcdTAwM2Q/YWJcdTAwM2QyXHUwMDI2c2JmXHUwMDNkMSIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFh3UldsRWhwd0hpVWxUdXFNU01lbUJkVEdYQmtRQWdLUWx6Qmc3QXF1bVV3ZVg1eWJLUUN2NTlDZzZtaXZaOFhEMWV2VWlWT0tpZkRpU2J2NTNUR3pieXdcdTAwM2RcdTAwM2Q/c2JmXHUwMDNkMiIsImRpdi1ncHQtYWQiLDIwLDEwMCwiY0hWaUxUZ3hOVEkxTXpJME5qUTFNell6TmpjXHUwMDNkIixbbnVsbCxudWxsLG51bGwsImh0dHBzOi8vd3d3LmdzdGF0aWMuY29tLzBlbW4vZi9wL3B1Yi04MTUyNTMyNDY0NTM2MzY3LmpzP3VzcXBcdTAwM2RDQU0iXSwiaHR0cHM6Ly9mdW5kaW5nY2hvaWNlc21lc3NhZ2VzLmdvb2dsZS5jb20vZWwvQUdTS1d4WHRXMkFKLXczSW1WVG9EVkg3UGZVWTJYRmU2Z2lBVXVBamQ0RG5JbEFRT3NRSXdhR0JyU2Mwbk5kRVFnU3oxeDBmSnpsQmdBOEg3djlvVFZZYU94NE02Z1x1MDAzZFx1MDAzZCJd");</script>
   </head>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-700MM66K5G');
-</script>
-
-
 <body>
+  <!-- prettier-ignore -->
   <%- include('partials/nav') %>
   <!-- Loading Overlay -->
   <div id="loading-overlay" class="show">
@@ -126,181 +115,148 @@
       </div>
     </div>
   </div>
-  
-  <div
-      class="offcanvas offcanvas-end"
-      tabindex="-1"
-      id="discordOffcanvas"
-      aria-labelledby="discordOffcanvasLabel"
-    >
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="discordOffcanvasLabel">
-          Join the Changelogs Discord
-        </h5>
-        <button
-          type="button"
-          class="btn-close text-reset"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="offcanvas-body">
-        <iframe
-          src="https://discord.com/widget?id=1286064050135896064&theme=dark"
-          width="100%"
-          height="100%"
-          allowtransparency="true"
-          frameborder="0"
-          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-        >
-        </iframe>
-      </div>
-    </div>
       
     <div class="container-fluid py-4">
       <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
+          <!-- Breadcrumb -->
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="/">Home</a></li>
               <li class="breadcrumb-item active" aria-current="page">Trade Tracker</li>
             </ol>
           </nav>
+    
           <section id="content">
+            <!-- Page Title -->
             <h1>Trade Tracker</h1>
+    
+            <!-- Info Alert -->
             <div class="alert alert-info mb-2" role="alert">
               <i class="bi bi-info-circle-fill me-2"></i>
               <strong>Data Update Schedule:</strong> This dataset refreshes every 24 hours at midnight 
               <a href="https://time.is/UTC" target="_blank" class="alert-link">UTC time</a>.
             </div>
+    
+            <!-- Warning Alert -->
             <div class="alert alert-warning" role="alert">
               <i class="bi bi-exclamation-triangle-fill me-2"></i>
               Note: This dataset exclusively contains information about vehicles, including their customization items and the vehicles themselves.
             </div>
-            
-          
-          <div class="card shadow">
-            <div class="card-body">
-              <div class="row mb-3">
-                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                  <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Type">
+    
+            <!-- Main Card -->
+            <div class="card shadow">
+              <div class="card-body">
+                <!-- Filters Row -->
+                <div class="row g-3 mb-3">
+                  <!-- Search Input -->
+                  <div class="col-12 col-md-4">
+                    <form autocomplete="off">
+                        <div class="position-relative search-container">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                class="form-control pe-5" 
+                                placeholder="Search by Name or Type..."
+                                autocomplete="off"
+                                autocomplete="new-password"
+                                name="search_${Date.now()}"
+                            >
+                            <!-- Clear Search Button -->
+                            <button 
+                                id="clearSearch" 
+                                class="btn position-absolute top-50 end-0 translate-middle-y clear-search-btn d-none"
+                                type="button"
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="top" 
+                                title="Clear search"
+                                aria-label="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div>
+                    </form>
+                  </div>
+
+                  <!-- Type Filter -->
+                  <div class="col-12 col-md-3">
+                    <select id="filterType" class="form-select">
+                      <option value="">All Types</option>
+                    </select>
+                  </div>
+    
+                  <!-- Sort Dropdown -->
+                  <div class="col-12 col-md-3">
+                    <select id="sortBy" class="form-select">
+                      <option value="TimesTraded_desc">Times Traded (High to Low)</option>
+                      <option value="TimesTraded_asc">Times Traded (Low to High)</option>
+                      <option value="UniqueCirculation_desc">Unique Circulation (High to Low)</option>
+                      <option value="UniqueCirculation_asc">Unique Circulation (Low to High)</option>
+                      <option value="DemandMultiple_desc">Demand Multiple (High to Low)</option>
+                      <option value="DemandMultiple_asc">Demand Multiple (Low to High)</option>
+                    </select>
+                  </div>
+    
+                 <!-- Clear Filters Button -->
+                <div class="col-12 col-md-2">
+                  <button 
+                      id="clearFilters" 
+                      class="btn btn-secondary w-100"
+                      data-bs-toggle="tooltip" 
+                      data-bs-placement="top" 
+                      title="Clear all filters">
+                      <i class="bi bi-x-circle me-2"></i>Clear
+                  </button>
                 </div>
-                <div class="col-12 col-md-3 mb-3 mb-md-0">
-                  <select id="filterType" class="form-select">
-                    <option value="">All Types</option>
-                  </select>
+    
+                <!-- Table -->
+                <div class="table-responsive">
+                  <table id="tradeDataTable" class="table table-dark table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Times Traded</th>
+                        <th>Unique Circulation</th>
+                        <th>Demand Multiple</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                  </table>
                 </div>
-                <div class="col-12 col-md-3">
-                  <select id="sortBy" class="form-select">
-                    <option value="TimesTraded_desc">Times Traded (High to Low)</option>
-                    <option value="TimesTraded_asc">Times Traded (Low to High)</option>
-                    <option value="UniqueCirculation_desc">Unique Circulation (High to Low)</option>
-                    <option value="UniqueCirculation_asc">Unique Circulation (Low to High)</option>
-                    <option value="DemandMultiple_desc">Demand Multiple (High to Low)</option>
-                    <option value="DemandMultiple_asc">Demand Multiple (Low to High)</option>
-                  </select>
-                </div>
-                <div class="col-12 col-md-3 mt-3">
-                  <button id="clearFilters" class="btn btn-secondary w-100">Clear Filters</button>
-                </div>
+    
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center align-items-center mt-3">
+                  <button id="prevPage" class="btn btn-custom-outline me-2">Previous</button>
+                  <span id="currentPage" class="mx-2">Page 1</span>
+                  <button id="nextPage" class="btn btn-custom-outline ms-2">Next</button>
               </div>
-              <div class="table-responsive">
-                <table id="tradeDataTable" class="table table-dark table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th>Name</th>
-                      <th>Times Traded</th>
-                      <th>Unique Circulation</th>
-                      <th>Demand Multiple</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Data will be inserted here by JavaScript -->
-                  </tbody>
-                </table>
               </div>
-              
-              <div class="d-flex justify-content-center align-items-center mt-3">
-                <button id="prevPage" class="btn btn-outline-primary me-2">Previous</button>
-                <span id="currentPage" class="mx-2">Page 1</span>
-                <button id="nextPage" class="btn btn-outline-primary ms-2">Next</button>
-              </div>
-              
             </div>
-          </div>
+          </section>
         </div>
       </div>
-      </section>
     </div>
 
 <%- include('partials/footer') %>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+        crossorigin="anonymous"></script>
 
-<!-- Date Filter Modal -->
-<div
-  class="modal fade"
-  id="dateFilterModal"
-  tabindex="-1"
-  aria-labelledby="dateFilterModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="dateFilterModalLabel">Select Date Range</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <div id="dateRangeFilter" class="row g-2">
-          <div class="col-md-6">
-            <label for="startDateBtn" class="form-label">Start Date:</label>
-            <button
-              id="startDateBtn"
-              class="btn btn-outline-secondary w-100"
-            >
-              <i class="bi bi-calendar-event me-2"></i>
-              <span>Select Start Date</span>
-            </button>
-            <input type="hidden" id="startDate" />
-          </div>
-          <div class="col-md-6">
-            <label for="endDateBtn" class="form-label">End Date:</label>
-            <button
-              id="endDateBtn"
-              class="btn btn-outline-secondary w-100"
-            >
-              <i class="bi bi-calendar-event me-2"></i>
-              <span>Select End Date</span>
-            </button>
-            <input type="hidden" id="endDate" />
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-bs-dismiss="modal"
-        >
-          Close
-        </button>
-        <button type="button" class="btn btn-primary" id="applyDateFilter">
-          Apply Filter
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+        crossorigin="anonymous"></script>
+
+<!-- Toastr -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<!-- Custom Scripts -->
 <script src="scripts/tradetracker.js"></script>
 <script src="scripts/main.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
      crossorigin="anonymous"></script>
      <script async src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>

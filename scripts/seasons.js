@@ -16,17 +16,16 @@ $(document).ready(function () {
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+      const later = () => {
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
     };
-}
+  }
 
-const debouncedReloadComments = debounce(reloadcomments, 300);
-
+  const debouncedReloadComments = debounce(reloadcomments, 300);
 
   function fetchAndCacheAllSeasons() {
     return fetch("https://api.jailbreakchangelogs.xyz/seasons/list")
@@ -135,15 +134,17 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
       if (rewards.length > 0) {
         // Generate HTML for season rewards
         const rewardsHTML = rewards
-        .map((reward, index) => {
-          const isBonus = reward.bonus === "True";
-          const bonusBadge = isBonus
-            ? `<span class="badge bg-warning text-dark rounded-pill fs-6 fs-md-5">Bonus</span>`
-            : "";
-          const requirementBadge = `<span class="badge bg-primary rounded-pill fs-6 fs-md-5">${reward.requirement}</span>`;
-  
-          return `
-          <div class="reward-item ${isBonus ? 'bonus-reward' : ''}" style="--animation-order: ${index}">
+          .map((reward, index) => {
+            const isBonus = reward.bonus === "True";
+            const bonusBadge = isBonus
+              ? `<span class="badge bg-warning text-dark rounded-pill fs-6 fs-md-5">Bonus</span>`
+              : "";
+            const requirementBadge = `<span class="badge bg-primary rounded-pill fs-6 fs-md-5">${reward.requirement}</span>`;
+
+            return `
+          <div class="reward-item ${
+            isBonus ? "bonus-reward" : ""
+          }" style="--animation-order: ${index}">
       <div class="reward-content">
         <h6 class="reward-title">${reward.item}</h6>
         <div class="reward-badges">
@@ -152,8 +153,8 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
         </div>
       </div>
     </div>`;
-  })
-  .join("");
+          })
+          .join("");
 
         // Append the rewards list to the season details container
         $seasonDetailsContainer.append(
@@ -196,12 +197,12 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
   function formatDescription(description) {
     return `<p class="season-description-paragraph">${description}</p>`;
   }
-  
+
   // Function to update the carousel with reward images
   function updateCarousel(rewards) {
     // Clear any existing carousel items
     $carouselInner.empty();
-  
+
     if (!rewards || rewards.length === 0) {
       // No rewards data available, show a placeholder or message
       const placeholderItem = $(`
@@ -211,18 +212,18 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
           </div>
         </div>
       `);
-  
+
       $carouselInner.append(placeholderItem);
       return;
     }
-  
+
     // Filter rewards based on the criteria
     const filteredRewards = rewards.filter((reward) => {
       const isLevelRequirement = reward.requirement.startsWith("Level");
       const isBonus = reward.bonus === "True";
       return !(isLevelRequirement && isBonus);
     });
-  
+
     if (filteredRewards.length === 0) {
       // No rewards left after filtering, show a message
       const noRewardsItem = $(`
@@ -235,7 +236,7 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
       $carouselInner.append(noRewardsItem);
       return;
     }
-  
+
     // Iterate through each filtered reward
     filteredRewards.forEach((reward, index) => {
       const isActive = index === 0 ? "active" : "";
@@ -260,7 +261,7 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     );
     displaySeasonDetails(season, seasonData, seasonRewards);
     updateCarousel(seasonRewards);
-    
+
     // Add this line to update the document title
     document.title = `Season ${season} - ${seasonData.title}`;
 
@@ -278,7 +279,9 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     if (!isNaN(pathSegments[pathSegments.length - 1])) {
       pathSegments.pop();
     }
-    const newUrl = `${window.location.origin}${pathSegments.join("/")}/${selectedSeason}`;
+    const newUrl = `${window.location.origin}${pathSegments.join(
+      "/"
+    )}/${selectedSeason}`;
     window.history.pushState({}, "", newUrl);
 
     // Only show loading overlay if we're fetching fresh data
@@ -320,25 +323,33 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
       const pathSegments = window.location.pathname.split("/");
       let seasonNumber = pathSegments[pathSegments.length - 1];
 
-      const latestSeason = Math.max(
-        ...seasonDescriptions.map((desc) => desc.season)
-      );
-
+      // If season is invalid or missing, fetch latest from API
       if (
         !seasonNumber ||
         isNaN(seasonNumber) ||
-        !seasonDescriptions.some((desc) => desc.season === parseInt(seasonNumber))
+        !seasonDescriptions.some(
+          (desc) => desc.season === parseInt(seasonNumber)
+        )
       ) {
-        // If invalid, set seasonNumber to the latest season
-        seasonNumber = latestSeason.toString();
-    
-        // Update the URL to include the latest season in the path
-        const newUrl = `${window.location.origin}/seasons/${seasonNumber}`;
-        window.history.replaceState({}, "", newUrl);
+        return fetch("https://api.jailbreakchangelogs.xyz/seasons/latest", {
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            seasonNumber = data.season.toString();
+            // Update URL to latest season
+            const newUrl = `${window.location.origin}/seasons/${seasonNumber}`;
+            window.history.replaceState({}, "", newUrl);
+            return loadSeasonDetails(parseInt(seasonNumber));
+          });
       }
 
-      const dataFromCache = loadSeasonDetails(parseInt(seasonNumber));
-
+      return loadSeasonDetails(parseInt(seasonNumber));
+    })
+    .then((dataFromCache) => {
       if (dataFromCache) {
         toggleLoadingOverlay(false);
         try {
@@ -420,7 +431,8 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
     const avatarElement = document.createElement("img");
-    const defaultAvatarUrl = "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
+    const defaultAvatarUrl =
+      "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
 
     avatarElement.src = avatarUrl.endsWith("null.png")
       ? defaultAvatarUrl
@@ -435,11 +447,11 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
     const usernameElement = document.createElement("a");
     usernameElement.href = `/users/${userdata.id}`; // Set the href to redirect to the user's page
     usernameElement.textContent = userdata.global_name; // Set the text to the user's global name
-    usernameElement.classList.add('text-decoration-none'); 
+    usernameElement.classList.add("text-decoration-none");
     usernameElement.style.fontWeight = "bold"; // Make the text bold
     usernameElement.style.textDecoration = "none"; // Remove underline
     usernameElement.style.color = "#748d92"; // Use inherited color (usually the same as the surrounding text)
-    
+
     const commentTextElement = document.createElement("p");
     commentTextElement.textContent = comment.value;
     commentTextElement.classList.add("mb-0"); // Remove default margin from <p>
@@ -586,7 +598,8 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
         );
 
         const avatarElement = document.createElement("img");
-        const defaultAvatarUrl = "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
+        const defaultAvatarUrl =
+          "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
         avatarElement.src = avatarUrl.endsWith("null.png")
           ? defaultAvatarUrl
           : avatarUrl;
@@ -600,11 +613,10 @@ const debouncedReloadComments = debounce(reloadcomments, 300);
         const usernameElement = document.createElement("a");
         usernameElement.href = `/users/${userData.id}`; // Set the href to redirect to the user's page
         usernameElement.textContent = userData.global_name; // Set the text to the user's global name
-        usernameElement.classList.add('text-decoration-none'); 
+        usernameElement.classList.add("text-decoration-none");
         usernameElement.style.fontWeight = "bold"; // Make the text bold
         usernameElement.style.textDecoration = "none"; // Remove underline
         usernameElement.style.color = "#748d92"; // Use inherited color (usually the same as the surrounding text)
-        
 
         const commentTextElement = document.createElement("p");
         commentTextElement.textContent = comment.content;

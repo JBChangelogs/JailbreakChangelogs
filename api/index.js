@@ -141,18 +141,64 @@ app.get("/changelogs/:changelog", async (req, res) => {
   }
 });
 
-app.get("/seasons", (req, res) => {
-  // Redirect to a default season if no ID is provided in the URL
-  const defaultSeasonId = 24; // Set your default season ID here
-  res.redirect(`/seasons/${defaultSeasonId}`);
+app.get("/seasons", async (req, res) => {
+  try {
+    // Fetch the latest season ID from the new endpoint
+    const response = await fetch(
+      "https://api.jailbreakchangelogs.xyz/seasons/latest",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch latest season");
+    }
+
+    const data = await response.json();
+    res.redirect(`/seasons/${data.season}`);
+  } catch (error) {
+    console.error("Error fetching latest season:", error);
+    res.status(500).send("Error loading season");
+  }
 });
 
 app.get("/seasons/:season", async (req, res) => {
-  let seasonId = req.params.season || 1; // Default to season 1 if no ID is provided
+  let seasonId = req.params.season;
   const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const rewardsUrl = `https://api.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
 
   try {
+    // If invalid season ID, fetch the latest season
+    const seasonResponse = await fetch(apiUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
+    });
+
+    if (!seasonResponse.ok) {
+      const latestResponse = await fetch(
+        "https://api.jailbreakchangelogs.xyz/seasons/latest",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+        }
+      );
+
+      if (!latestResponse.ok) {
+        throw new Error("Failed to fetch latest season");
+      }
+
+      const latestData = await latestResponse.json();
+      return res.redirect(`/seasons/${latestData.season}`);
+    }
+
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {

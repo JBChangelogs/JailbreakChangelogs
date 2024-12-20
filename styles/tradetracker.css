@@ -89,28 +89,16 @@
   color: var(--custom-icon-color); /* Custom color for icons */
 }
 
-.btn-primary {
-  background-color: var(
-    --button-primary-bg
-  ) !important; /* Primary button background */
-  border-color: var(--button-primary-bg) !important; /* Primary button border */
-  color: var(--button-primary-text) !important; /* Primary button text color */
+.btn-custom-outline {
+  border: 1px solid #124e66;
+  color: #D3D9D4;
+  background-color: #124e66;
+  transition: all 0.3s ease;
 }
 
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active,
-.btn-primary.active {
-  background-color: var(
-    --button-primary-hover-bg
-  ) !important; /* Hover state for primary button */
-  border-color: var(
-    --button-primary-hover-bg
-  ) !important; /* Border color on hover */
-}
-
-.btn-primary:focus {
-  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5); /* Glow effect on focus */
+.btn-custom-outline:hover {
+  background-color: #124e66;
+  color: #D3D9D4;
 }
 
 /* Text Selection Styles */
@@ -172,50 +160,51 @@
   width: 300px; /* Adjust width for logo */
   height: auto; /* Maintain aspect ratio */
 }
-.breadcrumb {
-  border-radius: 0.25rem;
-  padding: 12px 20px;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  max-width: fit-content;
-  margin: 0;
-}
-
-.breadcrumb-item {
-  margin-right: 15px;
-  font-size: 16px;
+.search-container {
   position: relative;
 }
 
-.breadcrumb-item:not(:last-child)::after {
-  content: "›";
-  color: #6c757d;
-  margin-left: 15px;
+.clear-search-btn {
+  padding: 0.375rem 0.75rem;
+  color: #748D92 !important; /* Medium grayish-blue for default state */
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.breadcrumb-item a {
-  text-decoration: none;
-  color: #ffffff;
-  transition: color 0.3s, opacity 0.3s;
-  opacity: 0.8;
+.clear-search-btn:hover {
+  color: #D3D9D4 !important; /* Deep teal for hover state */
 }
 
-.breadcrumb-item a:hover {
-  color: #ffffff;
-  opacity: 1;
+.clear-search-btn i {
+  font-size: 1.1rem;
 }
 
-.breadcrumb-item.active {
-  color: #ffffff;
-  font-weight: 600;
-  opacity: 1;
+#searchInput {
+  background-color: #2E3944; /* Dark grayish-blue */
+  border-color: #748D92; /* Medium grayish-blue */
+  color: #D3D9D4; /* Very light grayish-green for text */
 }
 
-/* Adjust the body when menu is opened */
-body.menu-open {
-  overflow: hidden;
+#searchInput::placeholder {
+  color: #748D92; /* Medium grayish-blue for placeholder */
 }
+
+#searchInput:focus {
+  color: #D3D9D4;
+  box-shadow: 0 0 0 0.25rem rgba(18, 78, 102, 0.25); /* Deep teal with opacity */
+}
+
+#searchInput:focus + .clear-search-btn {
+  color: #124E66; /* Deep teal when input is focused */
+}
+
+#searchInput:focus + .clear-search-btn:hover {
+  color: #D3D9D4; /* Very light grayish-green for hover on focused state */
+}
+
 /* Responsive Heading Styles */
 .responsive-heading {
   font-size: 2.5rem; /* Large font size for headings */
@@ -289,6 +278,19 @@ p,
 span {
   color: var(--text-color); /* Default text color */
 }
+/* Remove default focus outline */
+.form-select:focus {
+  outline: none;
+  box-shadow: none; /* Removes Bootstrap's default blue box-shadow */
+  border-color: #dee2e6; /* Keeps the default border color even on focus */
+}
+
+/* Optional: If you want a custom focus state */
+.form-select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #ced4da; /* or any other color */
+}
 
 /* Navbar Form Control Styles */
 .navbar .form-control {
@@ -334,18 +336,6 @@ select:focus {
   .custom-spinner {
     width: 30px;
     height: 30px;
-  }
-}
-@media (max-width: 576px) {
-  .breadcrumb {
-    padding: 10px 15px;
-  }
-  .breadcrumb-item {
-    font-size: 14px;
-    margin-right: 10px;
-  }
-  .breadcrumb-item:not(:last-child)::after {
-    margin-left: 10px;
   }
 }
 
