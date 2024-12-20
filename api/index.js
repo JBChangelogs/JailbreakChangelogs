@@ -50,10 +50,29 @@ app.get("/trade-data", async (req, res) => {
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Set the directory for your EJS files
 
-app.get("/changelogs", (req, res) => {
-  // Redirect to a default changelog if no ID is provided in the URL
-  const defaultChangelogId = 348; // Set your default changelog ID here
-  res.redirect(`/changelogs/${defaultChangelogId}`);
+app.get("/changelogs", async (req, res) => {
+  try {
+    // Fetch the latest changelog ID from the new endpoint
+    const response = await fetch(
+      "https://api.jailbreakchangelogs.xyz/changelogs/latest",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch latest changelog");
+    }
+
+    const data = await response.json();
+    res.redirect(`/changelogs/${data.id}`);
+  } catch (error) {
+    console.error("Error fetching latest changelog:", error);
+    res.status(500).send("Error loading changelog");
+  }
 });
 
 app.get("/owner/check/:user", (req, res) => {
@@ -67,11 +86,12 @@ app.get("/owner/check/:user", (req, res) => {
 });
 
 app.get("/changelogs/:changelog", async (req, res) => {
-  let changelogId = req.params.changelog || 1;
+  let changelogId = req.params.changelog;
   console.log(`Fetching changelog with ID: ${changelogId}`);
-  const apiUrl = `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`;
 
   try {
+    // First try to fetch the requested changelog
+    const apiUrl = `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`;
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
@@ -79,16 +99,26 @@ app.get("/changelogs/:changelog", async (req, res) => {
         Origin: "https://jailbreakchangelogs.xyz",
       },
     });
+
+    // If not found, fetch the latest changelog
     if (response.status === 404) {
-      res.render("changelogs", {
-        title: "Changelog not found",
-        image_url:
-          "https://cdn.jailbreakchangelogs.xyz/images/changelogs/348.webp",
-        logoUrl:
-          "https://cdn.jailbreakchangelogs.xyz/logos/Changelogs_Logo.webp",
-        logoAlt: "Changelogs Page Logo",
-        changelogId,
-      });
+      const latestResponse = await fetch(
+        "https://api.jailbreakchangelogs.xyz/changelogs/latest",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+        }
+      );
+
+      if (!latestResponse.ok) {
+        throw new Error("Failed to fetch latest changelog");
+      }
+
+      const latestData = await latestResponse.json();
+      // Redirect to the latest changelog
+      return res.redirect(`/changelogs/${latestData.id}`);
     }
 
     if (!response.ok) {
