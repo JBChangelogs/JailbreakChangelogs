@@ -95,13 +95,46 @@ $(document).ready(function () {
     return Date.now() - cacheTimestamp > CACHE_EXPIRY;
   }
 
-  // Displays the most recent changelog entry.
-  function displayLatestChangelog() {
-    if (changelogsData.length > 0) {
-      const latestChangelog = changelogsData[0]; // Get the first (latest) changelog
-      displayChangelog(latestChangelog); // Display the changelog content
-      updateDropdownButton("default"); // Reset the dropdown button to its default state
-      changelogToast("Showing latest changelog"); // Show a toast notification
+  // Function to display the most recent changelog entry.
+  async function displayLatestChangelog() {
+    try {
+      const response = await fetch(
+        "https://api.jailbreakchangelogs.xyz/changelogs/latest",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch latest changelog");
+      }
+
+      const data = await response.json();
+      const latestChangelogId = data.id;
+
+      // Find the changelog with the matching ID
+      const latestChangelog = changelogsData.find(
+        (cl) => cl.id === latestChangelogId
+      );
+
+      if (latestChangelog) {
+        displayChangelog(latestChangelog);
+        updateDropdownButton("default");
+        changelogToast("Showing latest changelog");
+      } else {
+        console.error("Latest changelog not found in local data");
+      }
+    } catch (error) {
+      console.error("Error fetching latest changelog:", error);
+      // Fallback to first changelog in the array if API call fails
+      if (changelogsData.length > 0) {
+        displayChangelog(changelogsData[0]);
+        updateDropdownButton("default");
+        changelogToast("Showing latest changelog");
+      }
     }
   }
 
