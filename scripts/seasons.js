@@ -86,7 +86,7 @@ $(document).ready(function () {
       const listItem = $(`
         <li class="w-100">
           <a class="dropdown-item changelog-dropdown-item w-100" href="?season=${season.season}">
-            <span class="badge bg-primary me-2">Season ${season.season}</span> 
+            <span class="badge me-2" style="background-color: #124E66; color: #D3D9D4">Season ${season.season}</span>
             ${season.title}
           </a>
         </li>
@@ -137,10 +137,9 @@ $(document).ready(function () {
           .map((reward, index) => {
             const isBonus = reward.bonus === "True";
             const bonusBadge = isBonus
-              ? `<span class="badge bg-warning text-dark rounded-pill fs-6 fs-md-5">Bonus</span>`
+              ? `<span class="badge rounded-pill fs-6 fs-md-5" style="background-color: #748D92; color: #212A31">Bonus</span>`
               : "";
-            const requirementBadge = `<span class="badge bg-primary rounded-pill fs-6 fs-md-5">${reward.requirement}</span>`;
-
+            const requirementBadge = `<span class="badge rounded-pill fs-6 fs-md-5" style="background-color: #124E66; color: #D3D9D4">${reward.requirement}</span>`;
             return `
           <div class="reward-item ${
             isBonus ? "bonus-reward" : ""

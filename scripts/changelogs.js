@@ -40,6 +40,41 @@ $(document).ready(function () {
   let currentFilterState = null;
   let debounceTimer;
 
+  function escapeHtml(text) {
+    // First preserve any existing highlight spans by using temporary markers
+    text = text.replace(
+      /<span class="highlight">(.*?)<\/span>/g,
+      "§§H§§$1§§/H§§"
+    );
+    text = text.replace(
+      /<span class="highlight mention">(.*?)<\/span>/g,
+      "§§M§§$1§§/M§§"
+    );
+
+    // Escape HTML entities
+    const div = document.createElement("div");
+    div.textContent = text;
+    text = div.innerHTML;
+
+    // Decode any existing HTML entities to prevent double encoding
+    text = text
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+
+    // Restore highlight spans
+    text = text.replace(
+      /§§H§§(.*?)§§\/H§§/g,
+      '<span class="highlight">$1</span>'
+    );
+    text = text.replace(
+      /§§M§§(.*?)§§\/M§§/g,
+      '<span class="highlight mention">$1</span>'
+    );
+
+    return text;
+  }
+
   // Function to get cache from localStorage
   function getCache() {
     const cache = localStorage.getItem(CACHE_KEY);
@@ -715,31 +750,33 @@ $(document).ready(function () {
 
   // Function to highlight specific text in a string based on a query
   function highlightText(text, query) {
+    // First escape any HTML in the original text
+    let highlightedText = escapeHtml(text);
+
     const words = query
       .split(/\s+/)
       .map((word) => word.trim())
-      .filter((word) => word.length > 0); // Split query into words
+      .filter((word) => word.length > 0);
 
-    let highlightedText = text; // Initialize highlighted text
+    // Highlight other query words in the text first
+    words.forEach((word) => {
+      if (word !== "has:" && word !== "mention") {
+        // Modified regex to avoid matching within HTML tags
+        const regex = new RegExp(`(?![^<]*>)(${word})`, "gi");
+        highlightedText = highlightedText.replace(
+          regex,
+          '<span class="highlight">$1</span>'
+        );
+      }
+    });
 
-    // Highlight @mentions in the text
+    // Highlight @mentions in the text last
     highlightedText = highlightedText.replace(
       /@(\w+)/g,
       '<span class="highlight mention">@$1</span>'
     );
 
-    // Highlight other query words in the text
-    words.forEach((word) => {
-      if (word !== "has:" && word !== "mention") {
-        const regex = new RegExp(`(${word})`, "gi"); // Create a regex for the word
-        highlightedText = highlightedText.replace(
-          regex,
-          '<span class="highlight">$1</span>' // Highlight the word
-        );
-      }
-    });
-
-    return highlightedText; // Return the highlighted text
+    return highlightedText;
   }
 
   // Function to convert Markdown text to HTML
@@ -975,17 +1012,20 @@ $(document).ready(function () {
         const hasAudio = changelog.sections.includes("(audio)");
         const hasVideo = changelog.sections.includes("(video)");
         const hasImage = changelog.sections.includes("(image)");
+        const hasMention = /@\w+/.test(changelog.sections);
         const mediaLabels = [
           hasAudio ? '<span class="badge audio-badge me-1">Audio</span>' : "",
           hasVideo ? '<span class="badge video-badge me-1">Video</span>' : "",
           hasImage ? '<span class="badge image-badge me-1">Image</span>' : "",
+          hasMention
+            ? '<span class="badge mention-badge me-1">Mention</span>'
+            : "",
         ].join("");
 
         $listItem.html(`
-              <h5 class="mb-1">${highlightedTitle} ${mediaLabels}</h5>
-              <p class="mb-1 small">${highlightedPreview}</p>
-          `);
-
+          <h5 class="mb-1">${escapeHtml(highlightedTitle)} ${mediaLabels}</h5>
+          <p class="mb-1 small">${escapeHtml(highlightedPreview)}</p>
+      `);
         // Click event to display the selected changelog
         $listItem.on("click", () => {
           displayChangelog(changelog); // Display the selected changelog

@@ -142,17 +142,26 @@
 
 <style>
   .dropdown-menu-dark {
-    background-color: #343a40;
+    background-color: #212a31;
+    border: 1px solid #2e3944;
   }
+
   .dropdown-menu-dark .dropdown-item {
-    color: #f8f9fa;
+    color: #d3d9d4;
   }
+
   .dropdown-menu-dark .dropdown-item:hover,
   .dropdown-menu-dark .dropdown-item:focus {
-    background-color: #495057;
+    background-color: #124e66;
+    color: #d3d9d4;
   }
+
   .dropdown-menu-dark .dropdown-divider {
-    border-color: #495057;
+    border-color: #2e3944;
+  }
+
+  .dropdown-menu-dark .dropdown-header {
+    color: #748d92;
   }
 </style>
 
@@ -164,10 +173,10 @@
     const mobileProfilePicture = document.getElementById(
       "profile-picture-mobile"
     );
-    const userId = sessionStorage.getItem("userid");
+    const userId = sessionStorage.getItem("userid") || null;
     const avatarUrl = sessionStorage.getItem("avatar");
 
-    function updateProfilePicture(imgElement, src) {
+    function setProfilePictureSrc(imgElement, src) {
       if (imgElement) {
         imgElement.src =
           src ||
@@ -175,8 +184,8 @@
       }
     }
 
-    function updateDropdownContent() {
-      const dropdownContent = userId
+    function getDropdownContent(userId) {
+      return userId !== null
         ? `
           <li><a class="dropdown-item" href="/users/${userId}">Profile</a></li>
           <li><hr class="dropdown-divider"></li>
@@ -185,29 +194,37 @@
         : `
           <li><a class="dropdown-item" href="/login">Log in</a></li>
         `;
-
-      if (userDropdown) userDropdown.innerHTML = dropdownContent;
-      if (mobileUserDropdown) mobileUserDropdown.innerHTML = dropdownContent;
-
-      updateProfilePicture(profilePicture, avatarUrl);
-      updateProfilePicture(mobileProfilePicture, avatarUrl);
     }
 
-    updateDropdownContent();
+    function updateDropdownContent() {
+      const dropdownContent = getDropdownContent(userId);
+      if (userDropdown) userDropdown.innerHTML = dropdownContent;
+      if (mobileUserDropdown) mobileUserDropdown.innerHTML = dropdownContent;
+      setProfilePictureSrc(profilePicture, avatarUrl);
+      setProfilePictureSrc(mobileProfilePicture, avatarUrl);
+    }
 
     window.logout = function () {
-      sessionStorage.removeItem("userid");
-      sessionStorage.removeItem("avatar");
-      sessionStorage.removeItem("user");
-      document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      updateDropdownContent();
-      window.location.href = "/logout";
+      if (
+        sessionStorage.getItem("userid") ||
+        document.cookie.includes("token")
+      ) {
+        sessionStorage.removeItem("userid");
+        sessionStorage.removeItem("avatar");
+        sessionStorage.removeItem("user");
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        updateDropdownContent();
+        window.location.href = "/logout";
+      }
     };
+    // Initial update of dropdown content
+    updateDropdownContent();
   });
 </script>
 <script
-  src="https://uptime.betterstack.com/widgets/announcement.js"
+  async="async"
+  defer
   data-id="194811"
   async="async"
   type="text/javascript"

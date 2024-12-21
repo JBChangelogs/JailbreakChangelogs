@@ -14,12 +14,6 @@
   --border-color: #ff6347; /* Border color: Tomato */
   --season-rewards-hover-text: #748d92; /* Season rewards hover text: Light Blue */
 
-  /* Social Media Colors */
-  --reddit-color: #ff4500; /* Reddit color: Reddit Orange */
-  --discord-color: #7289da; /* Discord color: Discord Blurple */
-  --wiki-color: #8ab4f8; /* Wiki color: Lighter Wiki Blue */
-  --github-color: #ffffff; /* GitHub color: White */
-
   /* Interaction Effects */
   --hover-bg-color: #5a5a5a; /* Hover background: Dim Gray */
   --selection-bg: #4682b4; /* Selection background: Steel Blue */
@@ -63,27 +57,184 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
     color: #ffffff;
   }
 }
-/* Back to Top Button Styles */
-#backToTop {
-  display: none; /* Initially hidden */
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: var(--button-primary-bg);
-  color: #ffffff;
-  padding: 10px 15px;
-  border-radius: 5px;
+/* Overall Comment Section Styling */
+.comment-container {
+  background-color: #212a31; /* Dark grayish-blue background */
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #748d92; /* Medium grayish-blue border to distinguish it */
+}
+
+/* Comment Header */
+.comment-header {
+  color: #d3d9d4; /* Very light grayish-green */
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-family: "Luckiest Guy", Arial, sans-serif; /* Applying the desired font */
+  text-align: center;
+}
+
+/* Comment Input Field */
+#commenter-text {
+  background-color: #212a31; /* Very dark blue-gray background */
+  color: #d3d9d4; /* Very light grayish-green */
+  border: 1px solid #748d92; /* Medium grayish-blue border */
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 1rem;
+  width: 100%;
+  flex: 1;
+  width: 100%;
+}
+
+/* Disabled State for Commenter Text */
+#commenter-text:disabled {
+  background-color: #2e3944; /* Medium grayish-blue for the background */
+  color: #d3d9d4; /* Very light grayish-green for text */
+  cursor: not-allowed; /* Change cursor to indicate it's disabled */
+}
+
+/* Change icon to stop icon on hover (for the disabled state) */
+#commenter-text:disabled:hover {
+  background-color: #2e394483; /* Dark grayish-blue background on hover */
+  color: #d3d9d4; /* Keep the text color consistent */
+}
+
+/* To ensure the icon changes to a "stop" icon on hover, assuming it's an img element */
+#commenter-text:disabled:hover::before {
+  content: "\f04d"; /* Unicode for a stop icon (FontAwesome example) */
+}
+
+/* Comment Submit Button */
+#submit-comment {
+  background-color: #124e66; /* Deep teal */
+  color: #d3d9d4;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s, display 0.3s;
-  z-index: 1000;
+  flex-shrink: 0;
 }
 
-#backToTop.show {
-  display: block; /* Show when the 'show' class is added */
+/* Comment Submit Button */
+#submit-comment:hover {
+  background-color: #124e6676 !important; /* Deep teal */
 }
 
-#backToTop:hover {
-  background-color: var(--button-primary-hover-bg);
+/* Comment List */
+#comments-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 30px;
+  width: 100%;
+}
+
+/* Individual Comment Styling */
+.comment-item {
+  background-color: transparent; /* Very dark blue-gray */
+  color: #d3d9d4; /* Very light grayish-green */
+  margin-bottom: 0;
+
+  font-family: Arial, sans-serif; /* Default sans-serif font */
+  width: 100%;
+  word-wrap: break-word; /* Break words that are too long */
+  white-space: pre-wrap; /* Preserve spaces and line breaks */
+  position: relative;
+  padding-right: 40px !important; /* Add padding to prevent text from going under the dots */
+}
+
+.comment-item a {
+  text-decoration: none; /* Remove the default underline */
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+/* Comment Author Styling */
+.comment-author {
+  color: #124e66; /* Deep teal */
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Comment Text Styling */
+.comment-text {
+  color: #d3d9d4;
+  font-size: 1rem;
+  margin-top: 8px;
+  word-wrap: break-word; /* Ensures long words break and don't overflow */
+  overflow-wrap: break-word; /* Handle long words within text */
+  word-break: break-word; /* Breaks words when necessary to prevent overflow */
+  margin-bottom: 0; /* Ensure no extra margin for text */
+}
+
+/* General Pagination Styles */
+#paginationControls {
+  padding: 8px 15px;
+  background-color: #2e3944; /* Dark grayish-blue for the background */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  color: #d3d9d4; /* Very light grayish-green text */
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Button Styles */
+#paginationControls .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  font-size: 16px;
+  border: none;
+  background-color: #124e66; /* Deep teal for button background */
+  color: #d3d9d4; /* Very light grayish-green for button text */
+  border-radius: 50%; /* Circular button */
+  transition: background-color 0.3s ease;
+}
+
+#paginationControls .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#paginationControls .btn:hover:not(:disabled) {
+  background-color: #748d92; /* Medium grayish-blue on hover */
+  color: #212a31; /* Very dark blue-gray text on hover */
+}
+
+/* Input Group Styles */
+#paginationControls .input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+#paginationControls .form-control {
+  text-align: center;
+  font-size: 14px;
+  border: 1px solid #748d92; /* Medium grayish-blue border */
+  background-color: #212a31; /* Very dark blue-gray for the input */
+  color: #d3d9d4; /* Light grayish-green text for input */
+  border-radius: 4px;
+  width: 50px; /* Compact input width */
+}
+
+#paginationControls .form-control:focus {
+  outline: none;
+  border-color: #124e66; /* Deep teal on focus */
+  box-shadow: 0 0 4px rgba(18, 78, 102, 0.5); /* Focus glow */
+}
+
+/* Text and Spacing Adjustments */
+#paginationControls span {
+  font-size: 14px;
+  color: #748d92; /* Medium grayish-blue for text */
 }
 
 /* Dropdown Menu Styles */
@@ -269,95 +420,11 @@ span {
 .list-group-item {
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
-/* Style the main container for the comment section */
-.comment-container {
-  border-radius: 15px; /* Rounded corners for the container */
-  padding: 30px; /* Add space inside the container */
-  box-shadow: 0 0 20px #000000c7; /* Subtle shadow for depth */
-}
-
-/* Header styling */
-#comment-header {
-  font-family: "Luckiest Guy", Arial, sans-serif;
-  letter-spacing: 1px;
-  color: #d3d9d4;
-  text-align: center;
-  border-bottom: 2px solid #748d92;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-/* Comment form styling */
-#comment-form {
-  margin-bottom: 30px;
-}
-
-#comment-form .input-group {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 25px;
-  overflow: hidden;
-}
-
-#comment-form input,
-#comment-form button {
   border: none;
-  padding: 15px 20px;
-  font-size: 16px;
+  background-color: transparent;
+  border-radius: 0;
 }
 
-#comment-form button {
-  transition: background-color 0.3s ease;
-}
-
-/* Comments list styling */
-#comments-list {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-/* Individual comment styling */
-#comments-list .list-group-item {
-  background-color: #212a31;
-  border: 1px solid #748d92;
-  border-radius: 15px;
-  padding: 15px;
-  margin-bottom: 15px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
-}
-
-#comments-list .list-group-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Commenter name styling */
-#comments-list .list-group-item strong {
-  color: var(--content-h3);
-  display: block;
-  margin-bottom: 5px;
-}
-
-/* Comment timestamp styling */
-#comments-list .list-group-item .text-muted {
-  font-size: 0.85em;
-  color: var(--gray-600) !important;
-  display: block;
-  margin-bottom: 10px;
-}
-
-/* Comment text styling */
-#comments-list .list-group-item p {
-  color: var(--text-color);
-  line-height: 1.6;
-  margin-bottom: 0;
-  word-break: break-word;
-  hyphens: auto;
-}
 /* Carousel Styles */
 .carousel-item img {
   border-radius: 10px;
@@ -395,7 +462,7 @@ span {
   background-color: rgba(0, 0, 0, 0.8);
 }
 .rewards-container {
-  background: linear-gradient(to bottom, #124E66, #2E3944, #212A31);
+  background: linear-gradient(to bottom, #124e66, #2e3944, #212a31);
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -412,7 +479,7 @@ span {
   padding: 0;
 }
 .reward-item {
-  background-color: #212A31;
+  background-color: #212a31;
   border-radius: 8px;
   margin-bottom: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -443,59 +510,24 @@ span {
   font-size: 0.8rem;
 }
 .bonus-reward {
-  background-color: #212A31;
+  background-color: #212a31;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
 
 /* Title Styles */
 .season-title {
   border-bottom: 2px solid var(--heading-color);
   color: var(--heading-color);
   font-family: "Luckiest Guy", "Bangers", Arial, Helvetica, sans-serif;
-}
-.breadcrumb {
-  /* background-color: #212529; */
-  border-radius: 0.25rem;
-  padding: 12px 20px;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  max-width: fit-content;
-  margin: 0;
-}
-
-.breadcrumb-item {
-  margin-right: 15px;
-  font-size: 16px;
-  position: relative;
-}
-
-.breadcrumb-item:not(:last-child)::after {
-  content: "›";
-  color: #6c757d;
-  margin-left: 15px;
-}
-
-.breadcrumb-item a {
-  text-decoration: none;
-  color: #ffffff;
-  transition: color 0.3s, opacity 0.3s;
-  opacity: 0.8;
-}
-
-.breadcrumb-item a:hover {
-  color: #ffffff;
-  opacity: 1;
-}
-
-.breadcrumb-item.active {
-  color: #ffffff;
-  font-weight: 600;
-  opacity: 1;
 }
 .custom-prizes-title {
   border-bottom: 4px solid var(--subheading-color);
@@ -531,9 +563,6 @@ span {
 
 .season-description-body {
   padding: 2.5rem;
-}
-
-.season-description-paragraph {
   font-size: 1.125rem;
   line-height: 1.8;
   color: #e0e5e3;
@@ -543,8 +572,6 @@ span {
   hyphens: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  text-indent: 1.5em;
 }
 
 /* Add a subtle animation to the description container */
@@ -582,37 +609,44 @@ span {
   overflow-wrap: break-word;
 }
 
-/* Adjust the body when menu is opened */
-body.menu-open {
-  overflow: hidden;
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .comment-container {
+    padding: 20px; /* Slightly reduce padding for mobile */
+    width: 100%; /* Full width to prevent compression */
+    max-width: 700px; /* Limit maximum width to prevent over-expansion */
+    margin: 0 auto; /* Center the container */
+  }
+
+  .comment-header {
+    font-size: 1.5rem; /* Smaller header font size */
+  }
+
+  /* Comment input and button */
+  #commenter-text,
+  #submit-comment {
+    font-size: 0.9rem; /* Adjust font size for smaller devices */
+  }
+
+  /* Make the input field and submit button full-width */
+  .input-group {
+    flex-direction: column; /* Stack the input and button vertically */
+    gap: 10px;
+  }
+
+  #submit-comment {
+    width: 100%; /* Make submit button full-width */
+    margin-top: 10px; /* Add space between the input and the button */
+  }
+
+  /* Comment list margin */
+  #comments-list {
+    margin-top: 20px;
+  }
 }
 
 /* Responsive Styles */
 @media (max-width: 576px) {
-  #comment-form .input-group {
-    flex-wrap: nowrap;
-  }
-
-  #comment-form input {
-    flex: 1;
-  }
-
-  #comment-form button {
-    width: auto;
-  }
-
-  /* Ensure comments fit within the container on small screens */
-  #comments-list {
-    padding-right: 0;
-  }
-
-  #comments-list .list-group-item {
-    padding: 10px;
-  }
-
-  #comments-list .list-group-item p {
-    font-size: 14px;
-  }
   .season-rewards .badge {
     margin: 0 0.25rem;
   }
@@ -620,16 +654,6 @@ body.menu-open {
   .season-rewards .d-flex {
     flex-direction: row;
     flex-wrap: nowrap;
-  }
-  .breadcrumb {
-    padding: 10px 15px;
-  }
-  .breadcrumb-item {
-    font-size: 14px;
-    margin-right: 10px;
-  }
-  .breadcrumb-item:not(:last-child)::after {
-    margin-left: 10px;
   }
   #loading-overlay .loading-logo {
     width: 200px;
