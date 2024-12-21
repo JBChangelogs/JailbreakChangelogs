@@ -385,7 +385,7 @@ $(document).ready(function () {
   // jQuery references for search input and UI elements
   const $searchInput = $('input[aria-label="Search changelogs"]');
   const $exampleQueries = $("#exampleQueries");
-  const $clearButton = $("#clear-search-button");
+  const $clearButton = $("#clearSearch");
 
   // Event listener for input in the search field
   $searchInput.on("input", function () {
@@ -393,16 +393,29 @@ $(document).ready(function () {
     const query = $(this).val().trim(); // Get the trimmed query
     $exampleQueries.addClass("d-none"); // Hide example queries
 
-    debounceTimer = setTimeout(() => {
-      performSearch(); // Call performSearch after the delay
-      toggleClearButton(); // Toggle clear button visibility
-    }, 300); // 300 milliseconds delay
+    $clearButton.toggle(query.length > 0);
+
+    if (query.length > 0) {
+      // Only search if there's actual input
+      debounceTimer = setTimeout(() => {
+        performSearch(); // Call performSearch after the delay
+      }, 300); // 300 milliseconds delay
+    }
   });
 
   // Event listener for the clear button
   $clearButton.on("click", function () {
     $searchInput.val(""); // Clear the search input
-    clearSearch(); // Call clearSearch function
+    $clearButton.hide(); // Hide the clear button
+    $searchResultsContainer.empty(); // Clear the search results
+    $searchResultsContainer.hide();
+    $exampleQueries.removeClass("d-none");
+
+    // Trigger input event to update search results
+    // $searchInput.trigger("input");
+
+    // Focus back on the input
+    $searchInput.focus();
   });
 
   // Handle Enter key press or mobile 'Go' button
@@ -410,6 +423,8 @@ $(document).ready(function () {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent default form submission behavior
       focusOnSearchResults(); // Focus on the search results
+      $clearButton.hide(); // Hide the clear button
+      $searchInput.trigger("input"); // Trigger input event to update search
       dismissKeyboard(); // Dismiss the keyboard on mobile
     }
   });
@@ -818,8 +833,17 @@ $(document).ready(function () {
           const imageUrl = line.substring(7).trim(); // Extract image URL
           return `<img src="${imageUrl}" alt="Image" class="img-fluid mt-2 mb-2 rounded" style="max-height: 270px;">`; // Create image element
         } else if (line.startsWith("(video)")) {
-          const videoUrl = line.substring(7).trim(); // Extract video URL
-          return `<video class="w-80 mt-2 mb-2 rounded" style="max-height: 500px;" controls><source src="${videoUrl}" type="video/mp4"></video>`; // Create video element
+          const videoUrl = line.substring(7).trim();
+          return `
+            <video 
+                class="video-responsive" 
+                controls
+                preload="metadata"
+                playsinline
+            >
+                <source src="${videoUrl}" type="video/webm">
+                Your browser does not support the video tag.
+            </video>`;
         } else {
           return `<p class="lead mb-2">${wrapMentions(line)}</p>`; // Default to paragraph
         }
