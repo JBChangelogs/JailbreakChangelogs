@@ -24,7 +24,21 @@
   padding: var(--jb-footer-spacing-lg) 0;
   margin-top: var(--jb-footer-spacing-lg);
 }
+.jb-footer__social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
 
+.jb-footer__social-link {
+  color: #fff;
+  transition: color 0.2s ease;
+  padding: 0.5rem;
+}
+
+.jb-footer__social-link:hover {
+  color: #1da1f2;
+}
 /* Section styles */
 .jb-footer__section {
   padding: var(--jb-footer-spacing-md);
