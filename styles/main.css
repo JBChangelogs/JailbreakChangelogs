@@ -27,18 +27,22 @@
 .jb-footer__social-icons {
   display: flex;
   justify-content: center;
-  gap: 1.5rem;
 }
 
 .jb-footer__social-link {
   color: #fff;
   transition: color 0.2s ease;
-  padding: 0.5rem;
+  padding: 0.25rem; /* Reduced from 0.5rem */
 }
 
 .jb-footer__social-link:hover {
-  color: #1da1f2;
+  color: #1da1f2; /* Twitter blue */
 }
+
+.jb-footer__social-link[title*="Discord"]:hover {
+  color: #5865f2; /* Discord blurple */
+}
+
 /* Section styles */
 .jb-footer__section {
   padding: var(--jb-footer-spacing-md);
@@ -49,18 +53,6 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: var(--jb-footer-spacing-md);
-  position: relative;
-}
-
-.jb-footer__heading::after {
-  content: "";
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3rem;
-  height: 2px;
-  background-color: var(--jb-footer-accent);
 }
 
 /* List styles */
@@ -87,6 +79,20 @@
 .jb-footer__link:hover {
   color: var(--jb-footer-link-hover);
   transform: translateX(4px);
+}
+
+/* Platform-specific icon colors */
+.jb-footer__link:hover .bi-reddit {
+  color: #ff4500; /* Reddit orange */
+}
+
+.jb-footer__link:hover .bi-discord {
+  color: #5865f2; /* Discord blurple */
+}
+
+/* Keep other icons using default hover color */
+.jb-footer__link:hover .bi:not(.bi-reddit):not(.bi-discord) {
+  color: inherit;
 }
 
 /* Button styles */
