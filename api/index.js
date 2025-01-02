@@ -6,6 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
 
+app.use((req, res, next) => {
+  res.locals.hostname = req.hostname;
+  next();
+});
+
 // Serve your static HTML, CSS, and JS files
 const DATA_SOURCE_URL =
   "https://badimo.nyc3.digitaloceanspaces.com/trade/frequency/snapshot/month/latest.json";
