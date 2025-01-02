@@ -536,13 +536,6 @@ body.menu-open {
   margin-right: 0; /* No margin */
 }
 
-/* Testing Banner Responsive Styles */
-.jb-footer__testing-banner .container-fluid p {
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  padding: 0.75rem;
-}
-
 @media (max-width: 768px) {
   .breadcrumb {
     padding: 12px 20px;
@@ -591,16 +584,51 @@ body.menu-open {
     display: block;
     margin-top: 0.25rem;
   }
-  .jb-footer__testing-banner .container-fluid p {
-    flex-direction: column;
-    text-align: center;
-    padding: 1rem;
+  .jb-footer__testing-banner p {
+    text-align: left;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start;
   }
 
-  .jb-footer__testing-banner .btn-close {
-    position: absolute;
+  .jb-footer__testing-banner a {
+    margin: 0;
+  }
+
+  .jb-footer__testing-banner .bi-x-lg {
+    font-size: 1.25rem;
+  }
+
+  .jb-footer__testing-banner button {
+    margin-left: auto !important;
+    padding: 0.25rem !important;
+  }
+
+  .jb-footer__testing-banner strong {
+    margin: 0 !important;
+  }
+}
+
+/* Banner Close Button */
+.banner-close {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  z-index: 1;
+  font-size: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .banner-close {
     top: 0.5rem;
     right: 0.5rem;
+    transform: none;
+  }
+
+  .jb-footer__testing-banner p {
+    padding-top: 2rem !important;
+    padding-bottom: 1rem !important;
   }
 }
 
@@ -612,7 +640,7 @@ body.menu-open {
 
 @media (max-width: 400px) {
   .navbar-logo {
-    height: 30px; /* Adjusted height for extra small screens */
+    height: 27px; /* Adjusted height for extra small screens */
   }
   .jbcl-announcement-banner {
     padding: 0.625rem;
@@ -621,4 +649,9 @@ body.menu-open {
   .jbcl-announcement-text {
     font-size: 0.8125rem;
   }
+}
+
+/* Banner Styles */
+.jb-footer__testing-banner p {
+  text-align: center;
 }

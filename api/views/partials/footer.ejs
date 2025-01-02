@@ -1,47 +1,53 @@
 <footer class="jb-footer bg-gradient-dark text-light py-5 mt-5">
   <% if (hostname === 'testing.jailbreakchangelogs.xyz') { %>
-  <div class="jb-footer__testing-banner mb-4" id="testing-banner">
-    <div class="container-fluid">
-      <p class="mb-0 bg-dark text-light rounded position-relative">
-        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-        <span>
-          This is the
-          <strong class="text-warning">testing version</strong>
-          of Jailbreak Changelogs.
-        </span>
+  <div class="jb-footer__testing-banner mb-4 text-center" id="testing-banner">
+    <div class="container-fluid position-relative">
+      <button
+        type="button"
+        class="btn btn-link text-white p-0 border-0 banner-close"
+        aria-label="Close"
+        onclick="dismissBanner('testing')"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <p
+        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
+      >
+        <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+        This is the
+        <strong class="text-warning mx-1">testing version</strong> of Jailbreak
+        Changelogs.
         <a
           href="https://jailbreakchangelogs.xyz"
-          class="text-light text-decoration-underline"
+          class="text-light text-decoration-underline mx-2"
         >
           Go to production site
         </a>
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          aria-label="Close"
-          onclick="dismissBanner('testing')"
-        ></button>
       </p>
     </div>
   </div>
   <% } else if (hostname === 'jailbreakchangelogs.xyz') { %>
-  <div class="jb-footer__testing-banner mb-4" id="prod-banner">
-    <div class="container-fluid">
-      <p class="mb-0 bg-dark text-light rounded position-relative">
-        <i class="bi bi-code-square text-info"></i>
-        <span>Want to help us test new features before they release?</span>
+  <div class="jb-footer__testing-banner mb-4 text-center" id="prod-banner">
+    <div class="container-fluid position-relative">
+      <button
+        type="button"
+        class="btn btn-link text-white p-0 border-0 banner-close"
+        aria-label="Close"
+        onclick="dismissBanner('prod')"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <p
+        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
+      >
+        <i class="bi bi-code-square me-2 text-info"></i>
+        Want to help us test new features before they release?
         <a
           href="https://testing.jailbreakchangelogs.xyz"
-          class="text-info text-decoration-underline"
+          class="text-info text-decoration-underline mx-2"
         >
           Visit our testing site
         </a>
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          aria-label="Close"
-          onclick="dismissBanner('prod')"
-        ></button>
       </p>
     </div>
   </div>
@@ -153,8 +159,10 @@
             <i class="bi bi-github me-1"></i>View on GitHub
           </a>
           <a
-            href="https://github.com/JBChangelogs/JailbreakChangelogs/issues/new"
+            href="#"
             class="jb-footer__button btn btn-outline-light btn-sm mb-2"
+            data-bs-toggle="modal"
+            data-bs-target="#reportIssueModal"
           >
             <i class="bi bi-bug me-1"></i>Report Issue
           </a>
@@ -221,6 +229,62 @@
   </div>
 </footer>
 
+<!-- Report Issue Modal -->
+<div
+  class="modal fade"
+  id="reportIssueModal"
+  tabindex="-1"
+  aria-labelledby="reportIssueModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportIssueModalLabel">Report an Issue</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div id="successMessage" class="alert alert-success d-none">
+          Thank you for reporting this issue. We will look into it shortly.
+        </div>
+        <form id="reportIssueForm">
+          <div class="mb-3">
+            <label for="issueTitle" class="form-label">Title</label>
+            <input
+              type="text"
+              class="form-control bg-dark text-light"
+              id="issueTitle"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="issueDescription" class="form-label">Description</label>
+            <textarea
+              class="form-control bg-dark text-light"
+              id="issueDescription"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" id="submitIssue">
+          Submit Issue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   function dismissBanner(type) {
     const banner = document.getElementById(
@@ -253,5 +317,50 @@
         }
       }
     }
+
+    // Handle issue submission
+    document
+      .getElementById("submitIssue")
+      .addEventListener("click", async () => {
+        const title = document.getElementById("issueTitle").value;
+        const description = document.getElementById("issueDescription").value;
+
+        if (title && description) {
+          try {
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+
+            // Show success message
+            const successMessage = document.getElementById("successMessage");
+            successMessage.classList.remove("d-none");
+
+            // Disable form
+            document.getElementById("issueTitle").disabled = true;
+            document.getElementById("issueDescription").disabled = true;
+            document.getElementById("submitIssue").disabled = true;
+
+            // Close modal after 2 seconds
+            setTimeout(() => {
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("reportIssueModal")
+              );
+              modal.hide();
+
+              // Reset form and hide success message
+              setTimeout(() => {
+                document.getElementById("reportIssueForm").reset();
+                successMessage.classList.add("d-none");
+                document.getElementById("issueTitle").disabled = false;
+                document.getElementById("issueDescription").disabled = false;
+                document.getElementById("submitIssue").disabled = false;
+              }, 500);
+            }, 2000);
+          } catch (error) {
+            console.error("Error submitting issue:", error);
+            alert(
+              "There was an error submitting your issue. Please try again."
+            );
+          }
+        }
+      });
   });
 </script>
