@@ -3,20 +3,21 @@
   <div class="jb-footer__testing-banner mb-4 text-center" id="testing-banner">
     <div class="container-fluid">
       <p
-        class="mb-0 py-2 bg-warning text-dark rounded d-flex align-items-center justify-content-center"
+        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
       >
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        This is the <strong class="mx-1">testing version</strong> of Jailbreak
+        <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+        This is the
+        <strong class="mx-1 text-warning">testing version</strong> of Jailbreak
         Changelogs.
         <a
           href="https://jailbreakchangelogs.xyz"
-          class="text-dark text-decoration-underline mx-1"
+          class="text-light text-decoration-underline mx-1"
         >
           Go to production site
         </a>
         <button
           type="button"
-          class="btn-close btn-close-dark ms-3"
+          class="btn-close btn-close-white ms-3"
           aria-label="Close"
           onclick="dismissBanner('testing')"
         ></button>
@@ -27,13 +28,13 @@
   <div class="jb-footer__testing-banner mb-4 text-center" id="prod-banner">
     <div class="container-fluid">
       <p
-        class="mb-0 py-2 bg-secondary text-light rounded d-flex align-items-center justify-content-center"
+        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
       >
-        <i class="bi bi-code-square me-2"></i>
+        <i class="bi bi-code-square me-2 text-info"></i>
         Want to help us test new features before they release?
         <a
           href="https://testing.jailbreakchangelogs.xyz"
-          class="text-light text-decoration-underline mx-2"
+          class="text-info text-decoration-underline mx-2"
         >
           Visit our testing site
         </a>
@@ -228,21 +229,31 @@
       type === "testing" ? "testing-banner" : "prod-banner"
     );
     banner.style.display = "none";
-    localStorage.setItem(`${type}BannerDismissed`, "true");
+
+    // Store dismissal time
+    const dismissalTime = new Date().getTime();
+    localStorage.setItem(`${type}BannerDismissed`, dismissalTime.toString());
   }
 
-  // Check if banner was previously dismissed
+  // Check if banner should be shown based on time elapsed
   document.addEventListener("DOMContentLoaded", () => {
     const hostname = window.location.hostname;
     const bannerType =
       hostname === "testing.jailbreakchangelogs.xyz" ? "testing" : "prod";
     const banner = document.getElementById(`${bannerType}-banner`);
 
-    if (
-      banner &&
-      localStorage.getItem(`${bannerType}BannerDismissed`) === "true"
-    ) {
-      banner.style.display = "none";
+    if (banner) {
+      const dismissedTime = localStorage.getItem(
+        `${bannerType}BannerDismissed`
+      );
+      if (dismissedTime) {
+        const timeElapsed = new Date().getTime() - parseInt(dismissedTime);
+        const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+        if (timeElapsed < thirtyMinutes) {
+          banner.style.display = "none";
+        }
+      }
     }
   });
 </script>
