@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
 
 app.use((req, res, next) => {
-  res.locals.hostname = req.hostname;
+  res.locals.req = req;
   next();
 });
 
