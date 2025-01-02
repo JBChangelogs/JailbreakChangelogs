@@ -536,6 +536,13 @@ body.menu-open {
   margin-right: 0; /* No margin */
 }
 
+/* Testing Banner Responsive Styles */
+.jb-footer__testing-banner .container-fluid p {
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+}
+
 @media (max-width: 768px) {
   .breadcrumb {
     padding: 12px 20px;
@@ -583,6 +590,17 @@ body.menu-open {
   .jbcl-announcement-cta {
     display: block;
     margin-top: 0.25rem;
+  }
+  .jb-footer__testing-banner .container-fluid p {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .jb-footer__testing-banner .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
   }
 }
 

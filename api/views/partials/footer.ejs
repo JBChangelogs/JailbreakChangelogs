@@ -1,23 +1,23 @@
 <footer class="jb-footer bg-gradient-dark text-light py-5 mt-5">
   <% if (hostname === 'testing.jailbreakchangelogs.xyz') { %>
-  <div class="jb-footer__testing-banner mb-4 text-center" id="testing-banner">
+  <div class="jb-footer__testing-banner mb-4" id="testing-banner">
     <div class="container-fluid">
-      <p
-        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
-      >
-        <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
-        This is the
-        <strong class="mx-1 text-warning">testing version</strong> of Jailbreak
-        Changelogs.
+      <p class="mb-0 bg-dark text-light rounded position-relative">
+        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+        <span>
+          This is the
+          <strong class="text-warning">testing version</strong>
+          of Jailbreak Changelogs.
+        </span>
         <a
           href="https://jailbreakchangelogs.xyz"
-          class="text-light text-decoration-underline mx-1"
+          class="text-light text-decoration-underline"
         >
           Go to production site
         </a>
         <button
           type="button"
-          class="btn-close btn-close-white ms-3"
+          class="btn-close btn-close-white"
           aria-label="Close"
           onclick="dismissBanner('testing')"
         ></button>
@@ -25,22 +25,20 @@
     </div>
   </div>
   <% } else if (hostname === 'jailbreakchangelogs.xyz') { %>
-  <div class="jb-footer__testing-banner mb-4 text-center" id="prod-banner">
+  <div class="jb-footer__testing-banner mb-4" id="prod-banner">
     <div class="container-fluid">
-      <p
-        class="mb-0 py-2 bg-dark text-light rounded d-flex align-items-center justify-content-center"
-      >
-        <i class="bi bi-code-square me-2 text-info"></i>
-        Want to help us test new features before they release?
+      <p class="mb-0 bg-dark text-light rounded position-relative">
+        <i class="bi bi-code-square text-info"></i>
+        <span>Want to help us test new features before they release?</span>
         <a
           href="https://testing.jailbreakchangelogs.xyz"
-          class="text-info text-decoration-underline mx-2"
+          class="text-info text-decoration-underline"
         >
           Visit our testing site
         </a>
         <button
           type="button"
-          class="btn-close btn-close-white ms-3"
+          class="btn-close btn-close-white"
           aria-label="Close"
           onclick="dismissBanner('prod')"
         ></button>
