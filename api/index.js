@@ -310,14 +310,6 @@ app.get("/botinvite", (req, res) => {
   res.render("botinvite");
 });
 
-app.get("/keys", (req, res) => {
-  res.render("keys", {
-    title: "API / Changelogs",
-    logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Api_Logo.webp",
-    logoAlt: "API Page Logo",
-  });
-});
-
 app.get("/login", (req, res) => {
   res.render("login");
 });
@@ -587,10 +579,6 @@ app.get("/api", (req, res) => {
 
 app.get("/faq.png", (req, res) => {
   res.sendFile(path.join(__dirname, "../FAQ.png"));
-});
-
-app.get("/api.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "../API.png"));
 });
 
 app.get("/icon-512.png", (req, res) => {
