@@ -5,6 +5,8 @@ const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 5500; // Set the port
 const fs = require("fs");
+const MIN_TITLE_LENGTH = 10;
+const MIN_DESCRIPTION_LENGTH = 25;
 
 app.use((req, res, next) => {
   res.locals.req = req;
@@ -21,6 +23,7 @@ app.use(
     origin: "https://jailbreakchangelogs.xyz",
   })
 );
+
 // Serve the changelogs.html file
 app.get("/trade-data", async (req, res) => {
   try {
@@ -139,6 +142,8 @@ app.get("/changelogs/:changelog", async (req, res) => {
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Changelogs_Logo.webp",
       logoAlt: "Changelogs Page Logo",
       changelogId,
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     });
   } catch (error) {
     console.error("Error fetching changelog data:", error);
@@ -220,6 +225,8 @@ app.get("/seasons/:season", async (req, res) => {
         logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Seasons_Logo.webp",
         logoAlt: "Jailbreak Seasons Logo",
         seasonId,
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
       });
     }
     const rewardsResponse = await fetch(rewardsUrl, {
@@ -238,6 +245,8 @@ app.get("/seasons/:season", async (req, res) => {
         logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Seasons_Logo.webp",
         logoAlt: "Jailbreak Seasons Logo",
         seasonId,
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
       });
     }
 
@@ -264,6 +273,8 @@ app.get("/seasons/:season", async (req, res) => {
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Seasons_Logo.webp",
       logoAlt: "Jailbreak Seasons Logo",
       seasonId,
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     }); // Render the seasons page with the retrieved data
   } catch (error) {
     console.error("Error fetching season data:", error);
@@ -279,6 +290,8 @@ app.get("/bot", (req, res) => {
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Discord_Bot_Logo.webp ",
     logoAlt: "Discord Bot Page Logo",
     image,
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -287,6 +300,8 @@ app.get("/faq", (req, res) => {
     title: "User FAQ",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/FAQ_Logo.webp",
     logoAlt: "FAQ Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -295,6 +310,8 @@ app.get("/privacy", (req, res) => {
     title: "Privacy Policy / Changelogs",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Privacy_Logo.webp",
     logoAlt: "Privacy Policy Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -303,6 +320,8 @@ app.get("/tos", (req, res) => {
     title: "Terms Of Service / Changelogs",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Tos_Logo.webp",
     logoAlt: "TOS Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -342,6 +361,8 @@ app.get("/users/:user/followers", async (req, res) => {
       title: "User Search / Changelogs",
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
       logoAlt: "Users Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     });
   }
 
@@ -366,6 +387,8 @@ app.get("/users/:user/followers", async (req, res) => {
         title: "Followers / Changelogs",
         logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
         logoAlt: "Users Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
       });
     })
     .catch((error) => {
@@ -404,6 +427,8 @@ app.get("/users/:user/following", async (req, res) => {
       title: "User Search / Changelogs",
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
       logoAlt: "Users Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     });
   }
 
@@ -428,6 +453,8 @@ app.get("/users/:user/following", async (req, res) => {
         title: "Users - Following",
         logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
         logoAlt: "Users Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
       });
     })
     .catch((error) => {
@@ -444,6 +471,8 @@ app.get("/users", (req, res) => {
     title: "Users",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
     logoAlt: "Users Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -473,6 +502,8 @@ app.get("/users/:user", async (req, res) => {
       title: "Users",
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
       logoAlt: "Users Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     });
   }
 
@@ -538,6 +569,8 @@ app.get("/users/:user", async (req, res) => {
       title: "User Profile",
       logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp",
       logoAlt: "User Profile Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
     });
   } catch (error) {
     console.error("Error fetching user data or settings:", error);
@@ -550,6 +583,8 @@ app.get("/timeline", (req, res) => {
     title: "Timeline / Changelogs",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Timeline_Logo.webp",
     logoAlt: "Timeline Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -559,6 +594,8 @@ app.get("/tradetracker", (req, res) => {
     logoUrl:
       "https://cdn.jailbreakchangelogs.xyz/logos/Trade_Tracker_Logo.webp",
     logoAlt: "Trade Tracker Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 
@@ -570,6 +607,8 @@ app.get("/", (req, res) => {
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Homepage_Logo.webp",
     logoAlt: "Home Page Logo",
     image,
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
   });
 });
 

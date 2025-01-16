@@ -78,8 +78,7 @@
   </script>
 
   <body>
-    <%- include('partials/nav') %>
-    <%- include('partials/announcement') %>
+    <%- include('partials/nav') %> <%- include('partials/announcement') %>
 
     <div class="hero" style="background-image: url(<%= image %>)">
       <div class="hero-content">
@@ -102,11 +101,7 @@
     </div>
     <div style="background-color: #2e3944; color: white; padding: 40px 0">
       <div class="container">
-        <p class="text-center mb-5 small">
-          Note: This website is not affiliated with Badimo, the official
-          developers of Jailbreak.
-        </p>
-        <h2 class="text-center mb-4">Features</h2>
+        <h2 class="text-center">Features</h2>
 
         <div
           class="row row-cols-1 row-cols-md-2 row-cols-lg-3 justify-content-center"
@@ -204,12 +199,24 @@
           </div>
         </div>
       </div>
-      <p class="cursive text-center mt-5">
-        Made with ❤️ by
-        <a href="https://www.roblox.com/users/435983066/profile">Jakobiis</a>
-        and
-        <a href="https://www.roblox.com/users/1910948809/profile">Jalenzz16</a>
-      </p>
+      <div class="footer-credit text-center py-4 mt-5">
+        <p class="mb-0">
+          <span class="text-muted">Crafted with</span>
+          <i class="bi bi-heart-fill heart-icon mx-1"></i>
+          <span class="text-muted">by</span>
+          <a
+            href="https://www.roblox.com/users/435983066/profile"
+            class="text-decoration-none mx-1 creator-link"
+            >Jakobiis</a
+          >
+          <span class="text-muted">&</span>
+          <a
+            href="https://www.roblox.com/users/1910948809/profile"
+            class="text-decoration-none mx-1 creator-link"
+            >Jalenzz16</a
+          >
+        </p>
+      </div>
     </div>
 
     <script src="scripts/main.js"></script>

@@ -1,3 +1,21 @@
+.footer-credit {
+  font-family: "Inter", sans-serif;
+}
+
+.creator-link {
+  color: #748d92;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.creator-link:hover {
+  color: #1d7da3;
+}
+
+.heart-icon {
+  color: #1d7da3;
+  font-size: 0.9em;
+}
 .hero {
   background-size: cover;
   background-position: center;
