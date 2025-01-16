@@ -284,7 +284,7 @@ app.get("/seasons/:season", async (req, res) => {
 
 app.get("/bot", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 10) + 1;
-  const image = `https://cdn.jailbreakchangelogs.xyz/backgrounds/background${randomNumber}.webp`;
+  const image = `/assets/backgrounds/background${randomNumber}.webp`;
   res.render("bot", {
     title: "Discord Bot / Changelogs",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Discord_Bot_Logo.webp ",
@@ -601,7 +601,7 @@ app.get("/tradetracker", (req, res) => {
 
 app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 10) + 1;
-  const image = `https://cdn.jailbreakchangelogs.xyz/backgrounds/background${randomNumber}.webp`;
+  const image = `/assets/backgrounds/background${randomNumber}.webp`;
   res.render("index", {
     title: "Home / Changelogs",
     logoUrl: "https://cdn.jailbreakchangelogs.xyz/logos/Homepage_Logo.webp",
