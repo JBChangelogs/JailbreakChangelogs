@@ -1,13 +1,16 @@
 User-agent: *
 Allow: /
 
+# Specify main domain only
+Host: jailbreakchangelogs.xyz
+
 # Main Value Pages
 Allow: /values
 Allow: /values/calculator
 Allow: /item/*/
 Allow: /item/*/*
 
-// Important Trading Sections
+# Important Trading Sections
 Allow: /trading
 Allow: /values?sort=*
 Allow: /values/calculator
