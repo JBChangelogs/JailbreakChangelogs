@@ -361,14 +361,32 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (valueSortType !== "none") {
       const [valueType, direction] = valueSortType.split("-");
       filteredItems.sort((a, b) => {
+        const rawValueA = valueType === "cash" ? a.cash_value : a.duped_value;
+        const rawValueB = valueType === "cash" ? b.cash_value : b.duped_value;
+
+        // Check for N/A or empty values
+        const isInvalidA =
+          !rawValueA || rawValueA === "N/A" || rawValueA === "'N/A'";
+        const isInvalidB =
+          !rawValueB || rawValueB === "N/A" || rawValueB === "'N/A'";
+
+        // If both are invalid, sort alphabetically by name
+        if (isInvalidA && isInvalidB) {
+          return a.name.localeCompare(b.name);
+        }
+        // Invalid values go to the end
+        if (isInvalidA) return 1;
+        if (isInvalidB) return -1;
+
+        // For valid values, use numeric sorting
         const valueA =
           valueType === "cash"
-            ? formatValue(a.cash_value).numeric
-            : formatValue(a.duped_value).numeric;
+            ? formatValue(rawValueA).numeric
+            : formatValue(rawValueA).numeric;
         const valueB =
           valueType === "cash"
-            ? formatValue(b.cash_value).numeric
-            : formatValue(b.duped_value).numeric;
+            ? formatValue(rawValueB).numeric
+            : formatValue(rawValueB).numeric;
 
         return direction === "asc" ? valueA - valueB : valueB - valueA;
       });
@@ -820,13 +838,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatValue(value) {
     // Return default object if value is null, undefined, or empty string
     if (value === null || value === undefined || value === "") {
-      return {
-        display: "No Value", // Changed from "-" to "No Value"
-        numeric: 0,
-      };
-    }
-
-    if (isNaN(value)) {
       return {
         display: "No Value", // Changed from "-" to "No Value"
         numeric: 0,
