@@ -9,7 +9,7 @@
 > [!NOTE]
 > This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
-![Logo](https://cdn.jailbreakchangelogs.xyz/logos/Changelogs_Logo.webp)
+![Logo](/assets/logos/JB%20Changelogs%20Banner%20(PNG).webp)
 
 # Roblox Jailbreak Changelogs
 
@@ -17,13 +17,19 @@ Welcome to the Roblox Jailbreak Changelogs repository. Discover the latest updat
 
 ## Website Features
 
-Our changelog website provides:
+Our platform offers comprehensive Roblox Jailbreak related features:
 
-- **Up-to-date changelogs:** Stay informed with the latest Jailbreak changes.
-- **Intuitive Design:** Effortlessly navigate through a responsive layout optimized for desktop, tablet, and mobile.
-- **Complete Archives:** Access a full history of Jailbreak updates dating back to 2017.
-- **Interactive Features:** Comment on changelogs and season entries for an engaging experience.
-- **Seasons Page:** Track all season prizes since December 2020.
+- **Changelog Archive:** Access the complete history of Jailbreak updates, with detailed patch notes dating back to 2017.
+
+- **Season Tracking:** Stay updated on seasonal changes and rewards, with a comprehensive archive of all season prizes since December 2020.
+
+- **Community Engagement:** Join discussions by commenting on changelogs and season entries, with secure OAuth authentication ensuring quality interactions.
+
+- **Trading System:** Post trade advertisements, browse listings, and find the perfect deals for in-game items.
+
+- **Trade Analytics:** Access official trading statistics from Badimo, including circulation numbers and trade frequency for vehicles and customizations.
+
+- **Open Source:** Contribute to the project's development through our GitHub repository, making the platform better for everyone.
 
 ## Acknowledgements
 

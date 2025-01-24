@@ -1,25 +1,28 @@
+@import "colors.css";
+
 /* Dark Theme Styles */
 [data-bs-theme="dark"] body {
   /* Main Colors */
-  --common-bg-color: #2e3944; /* Background color: Dark Gray */
-  --text-color: #d3d9d4; /* Main text color: White */
-  --heading-color: #d3d9d4; /* Heading color: Bright Blue */
-  --subheading-color: #748d92; /* Subheading color: Bright Red */
+  --common-bg-color: var(--background-light);
+  --text-color: var(--text-body);
+  --heading-color: var(--text-body);
+  --subheading-color: var(--text-secondary);
 
   /* Button Colors */
-  --button-primary-bg: #124e66; /* Primary button background: Dark Blue */
-  --button-primary-text: #eeeeee; /* Primary button text: White */
-  --button-primary-hover-bg: #212a31; /* Primary button hover: Lighter Blue */
+  --button-primary-bg: var(--button-primary);
+  --button-primary-text: var(--text-body);
+  --button-primary-hover-bg: var(--background-dark);
 
-  --border-color: #ff6347; /* Border color: Tomato */
-  --season-rewards-hover-text: #748d92; /* Season rewards hover text: Light Blue */
+  /* Keep unique color variables */
+  --border-color: #ff6347;
+  --season-rewards-hover-text: var(--text-secondary);
 
   /* Interaction Effects */
-  --hover-bg-color: #5a5a5a; /* Hover background: Dim Gray */
-  --selection-bg: #4682b4; /* Selection background: Steel Blue */
-  --selection-text: #ffffff; /* Selection text: White */
+  --hover-bg-color: var(--hover-bg);
+  --selection-bg: var(--accent-color);
+  --selection-text: var(--text-body);
   --glow-color: 255, 165, 0; /* Glow effect color: Orange (RGB values) */
-  --username-color: #76abae; /* Soft cyan for Username */
+  --username-color: var(--text-secondary);
 
   /* Gray Scale */
   --gray-100: #333333;
@@ -35,14 +38,6 @@
 [data-bs-theme="dark"] body {
   background-color: var(--common-bg-color);
 }
-html[data-bs-theme="dark"] .changelog-dropdown-item:nth-child(odd) {
-  background-color: #212a31; /* Dark Gray for Odd Items */
-}
-
-html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
-  background-color: #2e3944; /* Darker Background on Hover */
-  color: #d3d9d4;
-}
 
 /* Dark Theme Specific Styles */
 [data-bs-theme="dark"] {
@@ -57,185 +52,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
     color: #ffffff;
   }
 }
-/* Overall Comment Section Styling */
-.comment-container {
-  background-color: #212a31; /* Dark grayish-blue background */
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 2px solid #748d92; /* Medium grayish-blue border to distinguish it */
-}
-
-/* Comment Header */
-.comment-header {
-  color: #d3d9d4; /* Very light grayish-green */
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-  font-family: "Luckiest Guy", Arial, sans-serif; /* Applying the desired font */
-  text-align: center;
-}
-
-/* Comment Input Field */
-#commenter-text {
-  background-color: #212a31; /* Very dark blue-gray background */
-  color: #d3d9d4; /* Very light grayish-green */
-  border: 1px solid #748d92; /* Medium grayish-blue border */
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 1rem;
-  width: 100%;
-  flex: 1;
-  width: 100%;
-}
-
-/* Disabled State for Commenter Text */
-#commenter-text:disabled {
-  background-color: #2e3944; /* Medium grayish-blue for the background */
-  color: #d3d9d4; /* Very light grayish-green for text */
-  cursor: not-allowed; /* Change cursor to indicate it's disabled */
-}
-
-/* Change icon to stop icon on hover (for the disabled state) */
-#commenter-text:disabled:hover {
-  background-color: #2e394483; /* Dark grayish-blue background on hover */
-  color: #d3d9d4; /* Keep the text color consistent */
-}
-
-/* To ensure the icon changes to a "stop" icon on hover, assuming it's an img element */
-#commenter-text:disabled:hover::before {
-  content: "\f04d"; /* Unicode for a stop icon (FontAwesome example) */
-}
-
-/* Comment Submit Button */
-#submit-comment {
-  background-color: #124e66; /* Deep teal */
-  color: #d3d9d4;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-/* Comment Submit Button */
-#submit-comment:hover {
-  background-color: #124e6676 !important; /* Deep teal */
-}
-
-/* Comment List */
-#comments-list {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 30px;
-  width: 100%;
-}
-
-/* Individual Comment Styling */
-.comment-item {
-  background-color: transparent; /* Very dark blue-gray */
-  color: #d3d9d4; /* Very light grayish-green */
-  margin-bottom: 0;
-
-  font-family: Arial, sans-serif; /* Default sans-serif font */
-  width: 100%;
-  word-wrap: break-word; /* Break words that are too long */
-  white-space: pre-wrap; /* Preserve spaces and line breaks */
-  position: relative;
-  padding-right: 40px !important; /* Add padding to prevent text from going under the dots */
-}
-
-.comment-item a {
-  text-decoration: none; /* Remove the default underline */
-  transition: all 0.3s ease; /* Smooth transition for hover effects */
-}
-
-/* Comment Author Styling */
-.comment-author {
-  color: #124e66; /* Deep teal */
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-/* Comment Text Styling */
-.comment-text {
-  color: #d3d9d4;
-  font-size: 1rem;
-  margin-top: 8px;
-  word-wrap: break-word; /* Ensures long words break and don't overflow */
-  overflow-wrap: break-word; /* Handle long words within text */
-  word-break: break-word; /* Breaks words when necessary to prevent overflow */
-  margin-bottom: 0; /* Ensure no extra margin for text */
-}
-
-/* General Pagination Styles */
-#paginationControls {
-  padding: 8px 15px;
-  background-color: #2e3944; /* Dark grayish-blue for the background */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-  color: #d3d9d4; /* Very light grayish-green text */
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-/* Button Styles */
-#paginationControls .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  font-size: 16px;
-  border: none;
-  background-color: #124e66; /* Deep teal for button background */
-  color: #d3d9d4; /* Very light grayish-green for button text */
-  border-radius: 50%; /* Circular button */
-  transition: background-color 0.3s ease;
-}
-
-#paginationControls .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#paginationControls .btn:hover:not(:disabled) {
-  background-color: #748d92; /* Medium grayish-blue on hover */
-  color: #212a31; /* Very dark blue-gray text on hover */
-}
-
-/* Input Group Styles */
-#paginationControls .input-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-#paginationControls .form-control {
-  text-align: center;
-  font-size: 14px;
-  border: 1px solid #748d92; /* Medium grayish-blue border */
-  background-color: #212a31; /* Very dark blue-gray for the input */
-  color: #d3d9d4; /* Light grayish-green text for input */
-  border-radius: 4px;
-  width: 50px; /* Compact input width */
-}
-
-#paginationControls .form-control:focus {
-  outline: none;
-  border-color: #124e66; /* Deep teal on focus */
-  box-shadow: 0 0 4px rgba(18, 78, 102, 0.5); /* Focus glow */
-}
-
-/* Text and Spacing Adjustments */
-#paginationControls span {
-  font-size: 14px;
-  color: #748d92; /* Medium grayish-blue for text */
-}
 
 /* Dropdown Menu Styles */
 .dropdown-menu {
@@ -245,28 +61,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 
 .dropdown-menu .dropdown-item {
   color: var(--text-color); /* Default text color */
-}
-
-#paginationControls {
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  margin: 20px 0; /* Optional: Add some margin for spacing */
-}
-
-#paginationControls button,
-#paginationControls input {
-  margin: 0 5px; /* Add margin between controls */
-}
-
-/* Custom Changelog Dropdown Styling */
-.changelog-dropdown {
-  min-width: 350px;
-  max-height: 400px;
-  overflow-y: auto;
-  border-radius: 8px;
-  padding: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Button Group Styles */
@@ -338,16 +132,6 @@ span {
     --button-primary-hover-bg
   ) !important; /* Border color on hover */
 }
-/* Custom Spinner */
-.custom-spinner {
-  width: 50px;
-  height: 50px;
-  border-top-color: #31b1ff; /* Blue */
-  border-right-color: #31b1ff; /* Blue */
-  border-bottom-color: #ff341c; /* Orange */
-  border-left-color: #ff341c; /* Orange */
-}
-
 /* Offcanvas Styling */
 .offcanvas {
   color: var(--text-color); /* Text color */
@@ -377,36 +161,7 @@ span {
 .btn-close {
   color: #ffffff; /* Close button text color */
 }
-/* Loading Overlay */
-#loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  z-index: 9999;
-  background-color: #2e3944;
-}
 
-#loading-overlay.show {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-#loading-overlay .loading-logo {
-  width: 300px;
-  height: auto;
-}
-
-#loading-overlay .loading-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-top: 10px;
-}
 /* Responsive Heading Styles */
 .responsive-heading {
   font-size: 2.5rem; /* Large font size for headings */
@@ -415,14 +170,6 @@ span {
 /* Responsive Text Styles */
 .responsive-text {
   font-size: 1rem; /* Standard font size for text */
-}
-/* Ensure long words in comments don't overflow their container */
-.list-group-item {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  border: none;
-  background-color: transparent;
-  border-radius: 0;
 }
 
 /* Carousel Styles */
@@ -462,7 +209,12 @@ span {
   background-color: rgba(0, 0, 0, 0.8);
 }
 .rewards-container {
-  background: linear-gradient(to bottom, #124e66, #2e3944, #212a31);
+  background: linear-gradient(
+    to bottom,
+    var(--button-primary),
+    var(--background-light),
+    var(--background-dark)
+  );
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -479,7 +231,7 @@ span {
   padding: 0;
 }
 .reward-item {
-  background-color: #212a31;
+  background-color: var(--background-dark);
   border-radius: 8px;
   margin-bottom: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -500,7 +252,7 @@ span {
 .reward-title {
   margin: 0;
   font-size: 1rem;
-  color: #d3d9d4;
+  color: var(--text-body);
 }
 .reward-badges {
   display: flex;
@@ -574,6 +326,57 @@ span {
   overflow-wrap: break-word;
 }
 
+/* Dropdown button padding */
+#seasonsDropdown {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Custom scrollbar styling for Webkit browsers (Chrome, Safari, etc.) */
+#seasonList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#seasonList::-webkit-scrollbar-track {
+  background: var(--gray-300);
+  border-radius: 4px;
+}
+
+#seasonList::-webkit-scrollbar-thumb {
+  background: var(--gray-600);
+  border-radius: 4px;
+}
+
+#seasonList::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-700);
+}
+
+/* Dropdown menu padding */
+#seasonList {
+  padding: 0.5rem 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  max-height: 400px; /* Set maximum height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  min-width: 400px; /* Increased from default */
+  max-width: 90vw; /* Ensures it doesn't overflow on mobile */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: var(--gray-600) var(--gray-300); /* For Firefox */
+}
+
+/* Dropdown items padding */
+#seasonList .dropdown-item {
+  padding: 0.75rem 1.25rem;
+  white-space: normal; /* Allows text to wrap */
+  word-wrap: break-word; /* Handles very long words */
+  line-height: 1.4; /* Improves readability of wrapped text */
+}
+
+/* Hover state for dropdown items */
+#seasonList .dropdown-item:hover {
+  background-color: var(--hover-bg-color);
+}
+
 /* Add a subtle animation to the description container */
 .season-description-container:hover {
   transform: translateY(-5px);
@@ -609,43 +412,6 @@ span {
   overflow-wrap: break-word;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .comment-container {
-    padding: 20px; /* Slightly reduce padding for mobile */
-    width: 100%; /* Full width to prevent compression */
-    max-width: 700px; /* Limit maximum width to prevent over-expansion */
-    margin: 0 auto; /* Center the container */
-  }
-
-  .comment-header {
-    font-size: 1.5rem; /* Smaller header font size */
-  }
-
-  /* Comment input and button */
-  #commenter-text,
-  #submit-comment {
-    font-size: 0.9rem; /* Adjust font size for smaller devices */
-  }
-
-  /* Make the input field and submit button full-width */
-  .input-group {
-    flex-direction: column; /* Stack the input and button vertically */
-    gap: 10px;
-  }
-
-  #submit-comment {
-    width: 100%; /* Make submit button full-width */
-    margin-top: 10px; /* Add space between the input and the button */
-  }
-
-  /* Comment list margin */
-  #comments-list {
-    margin-top: 20px;
-  }
-}
-
-/* Responsive Styles */
 @media (max-width: 576px) {
   .season-rewards .badge {
     margin: 0 0.25rem;
@@ -655,17 +421,300 @@ span {
     flex-direction: row;
     flex-wrap: nowrap;
   }
-  #loading-overlay .loading-logo {
-    width: 200px;
-  }
-  .custom-spinner {
-    width: 30px;
-    height: 30px;
+  #seasonList {
+    min-width: 300px;
+    max-height: 350px; /* Slightly smaller on mobile */
   }
 }
 @media (max-width: 400px) {
   .container {
     padding-left: 5px;
     padding-right: 5px;
+  }
+}
+
+/* Seasons Introduction Styles */
+.seasons-intro {
+  background: var(--bg-primary);
+  border-radius: 8px; /* Reduced from 12px */
+  padding: 1.5rem; /* Reduced from 2.5rem */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Smaller shadow */
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
+  border: 1px solid var(--accent-color);
+}
+
+.seasons-intro .display-4 {
+  color: var(--text-primary);
+  font-family: "Luckiest Guy", sans-serif;
+  margin-bottom: 1rem; /* Reduced from 1.5rem */
+  font-size: 2rem; /* Reduced from 2.5rem */
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--text-primary); /* Thinner border */
+}
+.seasons-intro .lead {
+  color: var(--text-primary);
+  font-size: 1rem; /* Reduced from 1.15rem */
+  line-height: 1.5; /* Reduced from 1.7 */
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
+  text-align: center;
+  max-width: 800px; /* Reduced from 900px */
+  margin-left: auto;
+  margin-right: auto;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  ); /* Reduced from 250px */
+  gap: 1rem; /* Reduced from 1.5rem */
+  margin-top: 1.5rem; /* Reduced from 2rem */
+}
+.feature-item {
+  background: var(--bg-secondary);
+  padding: 1.25rem; /* Reduced from 1.75rem */
+  border-radius: 8px; /* Reduced from 10px */
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+  border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.feature-grid .feature-item i {
+  color: var(--accent-color-light) !important;
+}
+
+.feature-item i {
+  font-size: 1.75rem; /* Reduced from 2.25rem */
+  margin-bottom: 1rem; /* Reduced from 1.25rem */
+  color: var(--accent-color-light) !important;
+}
+
+.feature-item h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
+  font-size: 1.1rem; /* Reduced from 1.25rem */
+  font-weight: 600;
+}
+
+.feature-item p {
+  color: var(--text-muted);
+  font-size: 0.9rem; /* Reduced from 0.95rem */
+  margin: 0;
+  line-height: 1.4; /* Reduced from 1.6 */
+}
+
+.seasons-intro .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.seasons-intro .feature-item {
+  background: var(--bg-secondary);
+  padding: 1.75rem;
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+  border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.seasons-intro .feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent-color);
+}
+
+.seasons-intro .feature-item i {
+  font-size: 2.25rem;
+  margin-bottom: 1.25rem;
+  color: var(--accent-color);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.seasons-intro .feature-item h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.seasons-intro .feature-item p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Season Countdown Styles */
+.season-countdown {
+  background: var(--bg-secondary);
+  padding: 1.25rem; /* Reduced from 1.5rem */
+  border-radius: 8px; /* Reduced from 12px */
+  border: 1px solid var(--accent-color);
+  margin: 1.5rem 0; /* Reduced from 2rem */
+}
+.countdown-title {
+  color: var(--text-primary);
+  font-family: "Luckiest Guy", sans-serif;
+  margin-bottom: 0.75rem; /* Reduced from 1rem */
+  font-size: 1.25rem; /* Reduced from 1.5rem */
+}
+
+.countdown-timer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* Reduced from 1.5rem */
+  margin-top: 0.75rem; /* Reduced from 1rem */
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px; /* Reduced from 80px */
+}
+
+.countdown-item span {
+  color: var(--text-primary);
+  font-size: 1.75rem; /* Reduced from 2rem */
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+}
+
+.countdown-item .countdown-label {
+  color: var(--text-muted);
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  margin-top: 0.2rem; /* Reduced from 0.25rem */
+}
+
+.season-ended {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ff6b6b;
+  text-align: center;
+  padding: 1rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.season-ended i {
+  font-size: 2rem;
+  margin-right: 0.5rem;
+}
+.season-dates {
+  background-color: rgba(18, 78, 102, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.season-dates p {
+  margin-bottom: 0.25rem;
+  color: var(--text-secondary);
+}
+
+.season-dates strong {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .seasons-intro {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .seasons-intro .display-4 {
+    font-size: 1.25rem; /* Further reduced for mobile */
+    margin-bottom: 0.75rem;
+  }
+
+  .seasons-intro .lead {
+    font-size: 0.875rem; /* Further reduced for mobile */
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem; /* Further reduced for mobile */
+    margin-top: 0.75rem;
+  }
+
+  .feature-item {
+    padding: 0.75rem; /* Further reduced for mobile */
+  }
+
+  .feature-item i {
+    font-size: 1.25rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .feature-item h5 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-item p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  .countdown-timer {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .countdown-item {
+    min-width: 55px;
+  }
+
+  .countdown-item span {
+    font-size: 1.25rem;
+  }
+
+  .countdown-item .countdown-label {
+    font-size: 0.7rem;
+    margin-top: 0.15rem;
+  }
+
+  .countdown-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .seasons-intro {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-item {
+    padding: 0.625rem;
+  }
+  .countdown-timer {
+    gap: 0.25rem;
+  }
+
+  .countdown-item {
+    min-width: 45px;
+  }
+
+  .countdown-item span {
+    font-size: 1.1rem;
+  }
+
+  .countdown-item .countdown-label {
+    font-size: 0.65rem;
+    margin-top: 0.1rem;
+  }
+
+  .countdown-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
   }
 }

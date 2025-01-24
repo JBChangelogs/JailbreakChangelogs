@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- Primary Meta Tags -->
+    <title>Jailbreak Item Values & Trading Guide | JailbreakChangelogs</title>
+    <meta
+      name="title"
+      content="Jailbreak Item Values & Trading Guide | JailbreakChangelogs"
+    />
+    <meta
+      name="description"
+      content="Get accurate values for Jailbreak items, vehicles, and limited items. Find current market prices, rarity information, and trading tips to make informed decisions."
+    />
+    <meta
+      name="keywords"
+      content="<% allItems?.forEach(item => { %>jailbreak <%= item.name %>, jailbreak wiki <%= item.name %>, <%= item.name %> value jailbreak, roblox jailbreak <%= item.name %>, jb wiki <%= item.name %>, <%= item.name %> price jailbreak, <% }); %>Jailbreak values, Jailbreak trading values, Jailbreak item prices, Jailbreak vehicle values, Jailbreak limited values, Jailbreak trading guide, Jailbreak market prices, Jailbreak item worth, Jailbreak trading prices, Roblox Jailbreak values"
+    />
+    <meta name="author" content="Jailbreak Changelogs" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/values"
+    />
+    <meta
+      property="og:title"
+      content="Jailbreak Item Values & Trading Guide | JailbreakChangelogs"
+    />
+    <meta
+      property="og:description"
+      content="Get accurate values for Jailbreak items, vehicles, and limited items. Find current market prices, rarity information, and trading tips to make informed decisions."
+    />
+    <meta property="og:image" content="<%= logoUrl %>" />
+    <meta property="og:image:width" content="4000" />
+    <meta property="og:image:height" content="900" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://jailbreakchangelogs.xyz/values"
+    />
+    <meta
+      property="twitter:title"
+      content="Jailbreak Item Values & Trading Guide | JailbreakChangelogs"
+    />
+    <meta
+      property="twitter:description"
+      content="Get accurate values for Jailbreak items, vehicles, and limited items. Find current market prices, rarity information, and trading tips to make informed decisions."
+    />
+    <meta property="twitter:image" content="<%= logoUrl %>" />
+
+    <!-- Additional SEO tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link
+      rel="canonical"
+      href="https://jailbreakchangelogs.xyz/values"
+    />
+
+    <!-- Locale and Language -->
+    <meta property="og:locale" content="en_US" />
+    <meta name="language" content="English" />
+
+    <base href="/" />
+
+    <!-- Stylesheets -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="styles/values.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Luckiest+Guy&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+  </head>
+
+  <body data-scroll-container>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
+    <%- include('partials/nav') %>
+    <%- include('partials/announcement') %>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="container-fluid mt-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" id="breadcrumb-nav">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item" id="values-breadcrumb">
+            <a href="/values">Values</a>
+          </li>
+          <li
+            class="breadcrumb-item category-name active"
+            aria-current="page"
+            style="display: none"
+          ></li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- New Intro Section -->
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="intro-container p-4 rounded shadow-sm">
+            <div class="row">
+              <div class="col-12 col-lg-8 mb-4 mb-lg-0">
+                <div class="intro-content">
+                  <h1 class="mb-3">Roblox Jailbreak Values Guide</h1>
+                  <p class="lead mb-3">
+                    Welcome to our Roblox Jailbreak trading values database. Get
+                    accurate, up-to-date values for all tradeable items in
+                    Roblox Jailbreak, from limited vehicles to rare cosmetics.
+                  </p>
+
+                  <div class="row g-3 mb-3">
+                    <div class="col-auto">
+                      <a
+                        href="/values/calculator"
+                        class="intro-button intro-button-calculator"
+                      >
+                        <i class="bi bi-calculator"></i>
+                        Value Calculator
+                      </a>
+                    </div>
+                    <div class="col-auto">
+                      <a
+                        href="/trading"
+                        class="intro-button intro-button-trading"
+                      >
+                        <i class="bi bi-arrow-left-right"></i>
+                        Trade Ad
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="values-text d-flex flex-column align-items-start">
+                    <strong class="mb-2"
+                      >Want to make a value suggestion?</strong
+                    >
+                    <button
+                      onclick="window.open('https://discord.gg/PmDXwK2b6n', '_blank', 'noopener,noreferrer')"
+                      class="discord-button"
+                    >
+                      Join Jailbreak Trading Core!
+                    </button>
+                  </div>
+                  <div class="categories-section">
+                    <h2 class="h6 mb-2">Categories:</h2>
+                    <div class="row g-2">
+                      <!-- Row 1: 3 most important items -->
+                      <div class="col-6 col-sm-4 col-lg-4">
+                        <div
+                          class="category-item p-2 rounded category-limited-items"
+                        >
+                          <i class="bi bi-star-fill me-2"></i>
+                          <span>Limited</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-4">
+                        <div
+                          class="category-item p-2 rounded category-vehicles"
+                        >
+                          <i class="bi bi-car-front-fill me-2"></i>
+                          <span>Vehicles</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-4">
+                        <div
+                          class="category-item p-2 rounded category-hyperchromes"
+                        >
+                          <i class="bi bi-stars me-2"></i>
+                          <span>HyperChromes</span>
+                        </div>
+                      </div>
+
+                      <!-- Row 2: 4 items -->
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div class="category-item p-2 rounded category-rims">
+                          <i class="bi bi-disc me-2"></i>
+                          <span>Rims</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-spoilers"
+                        >
+                          <i class="bi bi-triangle-fill me-2"></i>
+                          <span>Spoilers</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-body-colors"
+                        >
+                          <i class="bi bi-palette-fill me-2"></i>
+                          <span>Body Colors</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-textures"
+                        >
+                          <i class="bi bi-layers-fill me-2"></i>
+                          <span>Textures</span>
+                        </div>
+                      </div>
+
+                      <!-- Row 3: 4 items -->
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-tire-stickers"
+                        >
+                          <i class="bi bi-sticky me-2"></i>
+                          <span>Tire Stickers</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-tire-styles"
+                        >
+                          <i class="bi bi-disc-fill me-2"></i>
+                          <span>Tire Styles</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div class="category-item p-2 rounded category-drifts">
+                          <i class="bi bi-fire me-2"></i>
+                          <span>Drifts</span>
+                        </div>
+                      </div>
+                      <div class="col-6 col-sm-4 col-lg-3">
+                        <div
+                          class="category-item p-2 rounded category-furnitures"
+                        >
+                          <i class="bi bi-house-fill me-2"></i>
+                          <span>Furniture</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-4">
+                <div class="card h-100 contributor-card">
+                  <div class="card-body p-0">
+                    <div
+                      class="contributor-header"
+                      onclick="toggleContributors(this)"
+                    >
+                      <div class="d-flex align-items-center w-100">
+                        <i class="bi bi-people-fill me-2"></i>
+                        <h5 class="card-title m-0">Contributors</h5>
+                        <i
+                          class="bi bi-chevron-up ms-auto toggle-icon"
+                          style="color: #748d92"
+                        ></i>
+                      </div>
+                    </div>
+                    <div class="contributors-grid">
+                      <div class="contributor-item">
+                        <div class="contributor-avatar">
+                          <img
+                            src="/assets/images/avatars/PikachuWolverine.webp"
+                            alt="PikachuWolverine"
+                            class="avatar-img"
+                          />
+                        </div>
+                        <div class="contributor-info">
+                          <a
+                            href="https://www.roblox.com/users/147356807/profile"
+                            class="contributor-link"
+                            rel="noopener noreferrer"
+                            >@PikachuWolverine</a
+                          >
+                          <span class="contributor-role"
+                            >General Photography</span
+                          >
+                        </div>
+                      </div>
+
+                      <div class="contributor-item">
+                        <div class="contributor-avatar">
+                          <img
+                            src="/assets/images/avatars/EIesia.webp"
+                            alt="EIesia"
+                            class="avatar-img"
+                          />
+                        </div>
+                        <div class="contributor-info">
+                          <a
+                            href="https://www.roblox.com/users/582234297/profile"
+                            class="contributor-link"
+                            rel="noopener noreferrer"
+                            >@EIesia</a
+                          >
+                          <span class="contributor-role"
+                            >HyperChrome & HyperShift Photography</span
+                          >
+                        </div>
+                      </div>
+
+                      <div class="contributor-item">
+                        <div class="contributor-avatar">
+                          <img
+                            src="/assets/images/avatars/TradingCore.webp"
+                            alt="Trading Core"
+                            class="avatar-img"
+                          />
+                        </div>
+                        <div class="contributor-info">
+                          <a
+                            href="https://discord.gg/jailbreaktrading"
+                            class="contributor-link"
+                            rel="noopener noreferrer"
+                            >@Trading Core</a
+                          >
+                          <span class="contributor-role">Values</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/loading') %>
+
+    <div class="container-fluid mt-4">
+      <div class="row g-3">
+        <!-- Search and Filter Section -->
+        <div class="col-12">
+          <div class="filter-controls p-4 rounded shadow-sm">
+            <div class="row g-3 align-items-center">
+              <!-- Search Bar -->
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    id="search-bar"
+                    class="form-control"
+                    placeholder="Search items..."
+                    oninput="filterItems()"
+                  />
+                  <button
+                    class="btn btn-outline-secondary clear-button"
+                    type="button"
+                    id="clear-search"
+                    onclick="clearSearch()"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Clear search"
+                    style="display: none"
+                  >
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+                </div>
+                <div id="search-messages" class="mt-1">
+                  <!-- Feedback text will be inserted here dynamically -->
+                </div>
+              </div>
+
+              <!-- Sort Dropdown -->
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="bi bi-filter"></i>
+                  </span>
+                  <select
+                    id="sort-dropdown"
+                    class="form-select"
+                    onchange="window.sortItems()"
+                  >
+                    <option value="name-all-items">All Items</option>
+                    <option value="name-limited-items">Limited Items</option>
+                    <option value="name-vehicles">Vehicles</option>
+                    <option value="name-spoilers">Spoilers</option>
+                    <option value="name-rims">Rims</option>
+                    <option value="name-body-colors">Body Colors</option>
+                    <option value="name-hyperchromes">HyperChromes</option>
+                    <option value="name-textures">Body Textures</option>
+                    <option value="name-tire-stickers">Tire Stickers</option>
+                    <option value="name-tire-styles">Tire Styles</option>
+                    <option value="name-drifts">Drifts</option>
+                    <option value="name-furnitures">Furniture</option>
+                  </select>
+                  <select
+                    id="value-sort-dropdown"
+                    class="form-select"
+                    onchange="window.sortItems()"
+                  >
+                    <option value="random">Random</option>
+                    <option value="separator" disabled>
+                      ───── Alphabetically ─────
+                    </option>
+                    <option value="alpha-asc">Name (A to Z)</option>
+                    <option value="alpha-desc">Name (Z to A)</option>
+                    <option value="separator" disabled>
+                      ───── Values ─────
+                    </option>
+                    <option value="cash-asc">Cash Value (Low to High)</option>
+                    <option value="cash-desc">Cash Value (High to Low)</option>
+                    <option value="duped-asc">Duped Value (Low to High)</option>
+                    <option value="duped-desc">
+                      Duped Value (High to Low)
+                    </option>
+                    <option value="separator" disabled>
+                      ───── Demand ─────
+                    </option>
+                    <option value="demand-asc">Demand (Low to High)</option>
+                    <option value="demand-desc">Demand (High to Low)</option>
+                  </select>
+
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onclick="clearFilters()"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Clear all filters"
+                  >
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onclick="shareCurrentView()"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Share current view"
+                  >
+                    <i class="bi bi-share"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination Section -->
+        <div class="col-12">
+          <div class="total-items-section p-3 rounded shadow-sm">
+            <!-- Stack elements vertically on mobile -->
+            <div
+              class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+            >
+              <!-- Total items info -->
+              <div
+                class="total-items-info order-3 order-md-3 text-center text-md-end"
+              >
+                <i class="bi bi-collection"></i>
+                <span id="total-items-label"></span>
+                <span id="total-items"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Container -->
+        <div class="col-12">
+          <div id="items-container" class="container-fluid p-0">
+            <div class="row g-3" id="items-list">
+              <!-- Items will be dynamically populated here -->
+            </div>
+            <!-- Add loading spinner -->
+            <div class="loading-spinner">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to top button -->
+        <button
+          id="back-to-top"
+          class="back-to-top-btn"
+          aria-label="Back to top"
+          data-bs-toggle="tooltip"
+          data-bs-placement="left"
+          title="Back to top"
+        >
+          <i class="bi bi-chevron-double-up"></i>
+        </button>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <!-- Scripts -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+      integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/values.js" defer></script>
+    <script></script>
+  </body>
+</html>

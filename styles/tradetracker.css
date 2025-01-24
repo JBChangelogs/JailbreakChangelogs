@@ -1,69 +1,11 @@
-/* Dark Theme Colors */
+@import "colors.css";
+
+/* Theme and Base Styles */
 [data-bs-theme="dark"] body {
-  --common-bg-color: #2e3944; /* Dark background */
-  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
-  --content-h2: #748d92; /* Softer Red for Dark Mode */
-  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
-  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
-  --content-bullet: #748d92; /* Lighter Blue for Bullets */
-  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
-  --text-color: #ffffff; /* White Text */
-
-  --header-text: #ffffff; /* White for Header Text */
-  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
-  --button-primary-text: #eeeeee; /* White for Primary Button Text */
-  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
-  /* Mention Colors */
-  --mention-color: #748d92; /* Teal color for Mentions */
-  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
-  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
-  --username-color: #76abae; /* Soft cyan for Username */
-  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
-
-  --highlight-bg: rgba(
-    255,
-    165,
-    0,
-    0.4
-  ); /* Semi-transparent Orange for Highlights */
-  --highlight-text: #ffffff; /* White for Highlighted Text */
-  --selection-bg: #4682b4; /* Steel Blue for Selection Background */
-  --selection-text: #ffffff; /* White for Selection Text */
-  --glow-color: #4b4b4b; /* Dark Gray for Glow Effects */
-
-  /* Gray Scale */
-  --gray-100: #333333; /* Very Dark Gray */
-  --gray-200: #444444; /* Darker Gray */
-  --gray-300: #555555; /* Dark Gray */
-  --gray-400: #666666; /* Gray */
-  --gray-500: #777777; /* Medium Gray */
-  --gray-600: #888888; /* Slate Gray */
-  --gray-700: #999999; /* Light Slate Gray */
-  --gray-800: #aaaaaa; /* Light Gray */
-  --gray-900: #bbbbbb; /* Very Light Gray */
+  background-color: var(--bg-secondary);
 }
 
-[data-bs-theme="dark"] #loading-overlay {
-  background-color: #2e3944; /* Dark Background for Loading Overlay */
-}
-[data-bs-theme="dark"] body {
-  background-color: var(--common-bg-color);
-}
-
-[data-bs-theme="dark"] #main-container {
-  background-color: var(--common-bg-color);
-}
-
-[data-bs-theme="dark"] .badge {
-  color: var(--text-color); /* White text for dark theme */
-}
-
-[data-bs-theme="dark"] .custom-search-input::placeholder {
-  color: #aaa; /* Lighter placeholder text for dark theme */
-}
-#clearFilters:disabled {
-  cursor: not-allowed;
-}
+/* Content Layout */
 #content-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -73,275 +15,349 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Typography */
 #content h1,
 #content h2,
 #content h3 {
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
-  color: #d3d9d4;
-}
-/* Custom Subheader Styles */
-.text-custom-subheader {
-  color: var(--custom-subheader-color); /* Custom color for subheaders */
+  color: var(--text-primary);
 }
 
-/* Custom Icon Color */
-.text-custom-icon {
-  color: var(--custom-icon-color); /* Custom color for icons */
-}
-
-.btn-custom-outline {
-  border: 1px solid #124e66;
-  color: #D3D9D4;
-  background-color: #124e66;
-  transition: all 0.3s ease;
-}
-
-.btn-custom-outline:hover {
-  background-color: #124e66;
-  color: #D3D9D4;
-}
-
-/* Text Selection Styles */
-::selection {
-  background-color: var(
-    --selection-bg
-  ) !important; /* Background color for selected text */
-  color: var(--selection-text) !important; /* Text color for selected text */
-}
-
-/* SVG Icon Styles */
-.svg-icon {
-  fill: var(--text-color) !important; /* Fill color for SVG icons */
-  stroke: var(--button-primary-bg) !important; /* Stroke color for SVG icons */
-}
-
-/* Semi-Transparent Background */
-.semi-transparent-bg {
-  background-color: rgba(
-    var(--glow-color),
-    0.5
-  ) !important; /* Semi-transparent background */
-}
-
-/* Custom Spinner Styles */
-.custom-spinner {
-  width: 50px;
-  height: 50px;
-  border-top-color: #31b1ff; /* Blue color for top border */
-  border-right-color: #31b1ff; /* Blue color for right border */
-  border-bottom-color: #ff341c; /* Orange color for bottom border */
-  border-left-color: #ff341c; /* Orange color for left border */
-}
-
-/* Loading Overlay Styles */
-#loading-overlay {
-  position: fixed; /* Fixed positioning */
-  top: 0; /* Align to top */
-  left: 0; /* Align to left */
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  display: none; /* Hidden by default */
-  justify-content: center; /* Center items horizontally */
-  align-items: center; /* Center items vertically */
-  z-index: 9999; /* High stacking context */
-  background-color: #ffffff; /* White background */
-}
-
-#loading-overlay.show {
-  display: flex; /* Enable flexbox when shown */
-  flex-direction: column; /* Stack items vertically */
-  justify-content: center; /* Center items vertically */
-  align-items: center; /* Center items horizontally */
-  height: 100vh; /* Full height for overlay */
-}
-
-/* Loading Logo Styles */
-#loading-overlay .loading-logo {
-  width: 300px; /* Adjust width for logo */
-  height: auto; /* Maintain aspect ratio */
-}
+/* Search Input Styles */
 .search-container {
   position: relative;
 }
 
-.clear-search-btn {
-  padding: 0.375rem 0.75rem;
-  color: #748D92 !important; /* Medium grayish-blue for default state */
-  transition: all 0.2s ease;
-  background: transparent;
-  border: none;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.clear-search-btn:hover {
-  color: #D3D9D4 !important; /* Deep teal for hover state */
-}
-
-.clear-search-btn i {
-  font-size: 1.1rem;
-}
-
 #searchInput {
-  background-color: #2E3944; /* Dark grayish-blue */
-  border-color: #748D92; /* Medium grayish-blue */
-  color: #D3D9D4; /* Very light grayish-green for text */
+  background-color: var(--bg-primary);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
 }
 
 #searchInput::placeholder {
-  color: #748D92; /* Medium grayish-blue for placeholder */
+  color: var(--text-muted);
 }
 
 #searchInput:focus {
-  color: #D3D9D4;
-  box-shadow: 0 0 0 0.25rem rgba(18, 78, 102, 0.25); /* Deep teal with opacity */
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(18, 78, 102, 0.25);
 }
 
-#searchInput:focus + .clear-search-btn {
-  color: #124E66; /* Deep teal when input is focused */
-}
-
-#searchInput:focus + .clear-search-btn:hover {
-  color: #D3D9D4; /* Very light grayish-green for hover on focused state */
-}
-
-/* Responsive Heading Styles */
-.responsive-heading {
-  font-size: 2.5rem; /* Large font size for headings */
-}
-
-/* Responsive Text Styles */
-.responsive-text {
-  font-size: 1rem; /* Standard font size for text */
-}
-/* Ensure long words in comments don't overflow their container */
-.list-group-item {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Style the main container for the comment section */
-.container {
-  border-radius: 15px; /* Rounded corners for the container */
-  padding: 30px; /* Add space inside the container */
-}
-
-/* Content Area Styles */
-#content {
-  flex: 1; /* Flexible item */
-  min-width: 0; /* Prevent overflow */
-}
-/* Row Styles */
-.row {
-  margin-left: 0; /* Reset left margin */
-  margin-right: 0; /* Reset right margin */
-}
-thead {
-  background-color: #e0e0e0; /* Dark background */
-  color: #ffffff; /* White text */
-  letter-spacing: 1.5px;
-}
-
-thead th {
-  padding: 15px; /* Padding for header cells */
-  text-align: left; /* Align text to the left */
-  border: none; /* Remove default borders */
-  border-bottom: 2px solid #ffffff; /* White bottom border for separation */
-  font-family: "Luckiest Guy", Arial, sans-serif; /* Custom font */
-  font-size: 18px; /* Font size for headers */
-}
-
-thead th:hover {
-  background-color: #495057; /* Change background on hover */
-}
-/* Table styles */
-
-.table th,
-.table td {
-  vertical-align: middle; /* Center table content */
-  padding: 10px; /* Padding for table cells */
-  border: none; /* Remove default borders */
-  border-bottom: 1px solid #000000; /* Light gray bottom border for separation */
-}
-
-.table-dark {
-  background-color: #343a40; /* Darker table background */
-}
-
-.table-dark th {
-  background-color: #495057; /* Dark header */
-}
-
-/* Body Text Styles */
-body,
-p,
-span {
-  color: var(--text-color); /* Default text color */
-}
-/* Remove default focus outline */
-.form-select:focus {
-  outline: none;
-  box-shadow: none; /* Removes Bootstrap's default blue box-shadow */
-  border-color: #dee2e6; /* Keeps the default border color even on focus */
-}
-
-/* Optional: If you want a custom focus state */
-.form-select:focus {
+/* Clear Search Button */
+.clear-search-btn {
+  padding: 0.375rem 0.75rem;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
   outline: none;
   box-shadow: none;
-  border-color: #ced4da; /* or any other color */
 }
 
-/* Navbar Form Control Styles */
-.navbar .form-control {
-  background-color: rgba(255, 255, 255, 0.1); /* Background color */
-  border-color: rgba(255, 255, 255, 0.1); /* Border color */
-  color: #fff; /* Text color */
+.clear-search-btn:hover {
+  color: var(--text-primary);
 }
 
-.navbar .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+/* Enhanced Table Styles */
+.table {
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--bg-primary);
+  width: 100%;
+  min-width: 800px;
 }
 
-.navbar .input-group-text {
-  color: rgba(255, 255, 255, 0.7); /* Color for input group text */
+/* Table Header */
+.table thead th {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--accent-color);
+  padding: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+/* Minimum width for table columns on mobile */
+.table th,
+.table td {
+  min-width: 120px; /* Adjust this value based on your content */
 }
 
-/* Input Group Styles */
-.input-group {
-  position: relative; /* Relative positioning */
+/* Allow first column to be smaller */
+.table th:first-child,
+.table td:first-child {
+  min-width: 80px;
 }
 
-/* Remove Outline for All Elements */
-* {
-  outline: none; /* Remove default outline */
+/* Table Body */
+.table tbody tr {
+  transition: background-color 0.2s ease;
 }
 
-/* Focus Styles for Interactive Elements */
-button:focus,
-a:focus,
-input:focus,
-select:focus {
-  box-shadow: none; /* Remove box shadow on focus */
+.table tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-primary);
+}
+
+.table tbody tr:nth-of-type(even) {
+  background-color: var(--bg-secondary);
+}
+
+.table tbody tr:hover {
+  background-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(116, 141, 146, 0.1); /* semi-transparent --text-muted */
+  vertical-align: middle;
+}
+
+/* Table Responsive Container */
+.table-responsive {
+  border-radius: 8px;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Prevent vertical scrolling */
+  border: 1px solid var(--accent-color);
+  background-color: var(--bg-primary);
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+/* Remove Bootstrap's Default Striping */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-accent-bg: none;
+}
+
+/* Custom Scrollbar for Table Container */
+.table-responsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color-light);
+}
+
+/* Empty State Styling */
+.table tbody tr.no-results td {
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--bg-primary);
+}
+
+/* Specific Column Styles */
+.table td:nth-child(1) {
+  /* Type column */
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.table td:nth-child(2) {
+  /* Name column */
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.table td:nth-child(3), /* Times Traded */
+.table td:nth-child(4), /* Unique Circulation */
+.table td:nth-child(5) {
+  /* Demand Multiple */
+  text-align: right;
+  font-family: monospace;
+  color: var(--text-primary);
+}
+
+/* Button Styles */
+.btn-custom-outline {
+  border: 1px solid var(--accent-color);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-custom-outline:hover {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+/* Form Controls */
+.form-select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: none;
+}
+
+/* Clear Filters Button */
+#clearFilters:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* Trade Tracker Introduction Styles */
+.tradetracker-intro {
+  background: var(--bg-primary);
+  border-radius: 8px; /* Reduced from 12px */
+  padding: 1.5rem; /* Reduced from 2.5rem */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Smaller shadow */
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
+  border: 1px solid var(--accent-color);
+}
+
+.tradetracker-intro .display-4 {
+  color: var(--text-primary);
+  font-family: "Luckiest Guy", sans-serif;
+  margin-bottom: 1rem; /* Reduced from 1.5rem */
+  font-size: 2rem; /* Reduced from 2.5rem */
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--text-primary); /* Thinner border */
+}
+
+.tradetracker-intro .lead {
+  color: var(--text-primary);
+  font-size: 1rem; /* Reduced from 1.15rem */
+  line-height: 1.5; /* Reduced from 1.7 */
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
+  text-align: center;
+  max-width: 800px; /* Reduced from 900px */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  ); /* Reduced from 250px */
+  gap: 1rem; /* Reduced from 1.5rem */
+  margin-top: 1.5rem; /* Reduced from 3rem */
+}
+.feature-item {
+  background: var(--bg-secondary);
+  padding: 1.25rem; /* Reduced from 1.75rem */
+  border-radius: 8px; /* Reduced from 10px */
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+  border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent-color);
+}
+
+.feature-item i {
+  font-size: 1.75rem; /* Reduced from 2.25rem */
+  margin-bottom: 1rem; /* Reduced from 1.25rem */
+  color: var(--accent-color-light) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)); /* Reduced shadow */
+}
+
+.feature-item h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
+  font-size: 1.1rem; /* Reduced from 1.25rem */
+  font-weight: 600;
+}
+
+.feature-item p {
+  color: var(--text-muted);
+  font-size: 0.9rem; /* Reduced from 0.95rem */
+  margin: 0;
+  line-height: 1.4; /* Reduced from 1.6 */
+}
+
+/* Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .quick-links .btn-link {
-    font-size: 0.9rem; /* Font size for quick links */
+  .table thead th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
   }
-  #loading-overlay .loading-logo {
-    width: 200px;
+
+  .table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
+
   .custom-spinner {
     width: 30px;
     height: 30px;
   }
+  .tradetracker-intro {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tradetracker-intro .display-4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tradetracker-intro .lead {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .feature-item {
+    padding: 0.75rem;
+  }
+
+  .feature-item i {
+    font-size: 1.25rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .feature-item h5 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-item p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
 }
 
 @media (max-width: 400px) {
-  .container {
-    padding-left: 5px;
-    padding-right: 5px;
+  .tradetracker-intro {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-item {
+    padding: 0.625rem;
   }
 }

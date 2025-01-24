@@ -6,34 +6,6 @@
   {
     "question": "Who are the creators of Jailbreak?",
     "answer": "Jailbreak was created by Badimo, a development team consisting primarily of <a href=\"https://x.com/asimo3089\" target=\"_blank\">asimo3089</a> and <a href=\"https://x.com/badccvoid\" target=\"_blank\">badcc</a>. asimo3089 focuses on game design, while badcc handles the technical aspects of development. Together, they've turned Jailbreak into one of the most popular and enduring games on the Roblox platform, continuously updating and improving it since its release in 2017."
-  },  
-  {
-    "question": "Why was the Jailbreak Changelogs website created?",
-    "answer": "The website was created to provide a central hub for all Jailbreak Changelog updates, reward details, and season information. It's a convenient place to stay informed about the latest changes and explore the evolution of Jailbreak over time."
-  },
-  {
-    "question": "How can I stay updated with the latest Jailbreak changelogs?",
-    "answer": "You can stay updated by visiting the Jailbreak Changelogs homepage, where the latest season and updates are showcased. The timeline section provides a comprehensive history of all past and present changelogs."
-  },
-  {
-    "question": "What are seasons in Jailbreak?",
-    "answer": "Seasons in Jailbreak are limited-time events that introduce new content, challenges, and rewards. Each season typically has a unique theme and offers items that players can earn by completing contracts or purchasing a season pass to unlock more prizes."
-  },  
-  {
-    "question": "How can I interact with the Jailbreak community?",
-    "answer": "There are several ways to interact with the Jailbreak community:<br>1. Join the official Jailbreak Discord server at <a href=\"https://discord.gg/jailbreak\" target=\"_blank\">discord.gg/jailbreak</a> to chat with other players, share ideas, and get the latest news.<br>2. Follow Badimo on X (Twitter) at <a href=\"https://x.com/badimo\" target=\"_blank\">@badimo</a> for announcements and updates.<br>3. Participate in discussions on the Jailbreak subreddit at <a href=\"https://www.reddit.com/r/robloxjailbreak\" target=\"_blank\">r/robloxjailbreak</a>.<br>4. Join the Jailbreak subreddit's Discord server at <a href=\"https://discord.com/invite/tWbDg7MbUU\" target=\"_blank\">discord.com/invite/tWbDg7MbUU</a> for additional community interactions.<br>These community spaces allow you to share experiences, suggest ideas, and stay informed about the latest Jailbreak developments."
-  },  
-  {
-    "question": "How can I contribute to or provide feedback about the Jailbreak Changelogs website?",
-    "answer": "We welcome your contributions and feedback! Here's how you can get involved:<br>1. Learn how to contribute directly to the project by reading our <a href=\"https://github.com/JBChangelogs/JailbreakChangelogs/blob/main/CONTRIBUTING.md\" target=\"_blank\">Contribution Guidelines</a>.<br>2. <a href=\"https://github.com/JBChangelogs/JailbreakChangelogs/issues/new\" target=\"_blank\">Open a new GitHub issue</a> to report bugs, suggest improvements, or share ideas.<br>Your input helps us improve the Jailbreak Changelogs website for everyone!"
-  },  
-  {
-    "question": "Who can I contact if I have questions or need assistance?",
-    "answer": "If you need assistance with the website, you can reach out to these Discord users: <a href=\"https://discord.com/users/659865209741246514\">@jakobiis</a> or <a href=\"https://discord.com/users/1019539798383398946\">@jalenzz</a>. Please note that these are Discord usernames and links to their profiles."
-  },
-  {
-    "question": "Where are the changelogs sourced from among the other data?",
-    "answer": "Changelogs are sourced from the <a href=\"https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home\" target=\"_blank\">Jailbreak Wiki</a>, the official Discord changelogs channel, Twitter posts by <a href=\"https://x.com/badimo\" target=\"_blank\">Badimo</a>, <a href=\"https://x.com/asimo3089\" target=\"_blank\">asimo3089</a>, and <a href=\"https://x.com/badccvoid\" target=\"_blank\">badcc</a>, as well as community contributions."
   },
   {
     "question": "What platforms is Jailbreak available on?",
@@ -46,7 +18,11 @@
   {
     "question": "How often is Jailbreak updated?",
     "answer": "Jailbreak's update schedule has changed over time. Previously, the game received monthly updates. However, as of April 2024, Badimo announced that they would be discontinuing the monthly update cycle. The new update schedule is more flexible, allowing for both larger, less frequent updates and smaller, more frequent patches as needed. This change aims to provide higher quality content and address issues more efficiently."
-  },  
+  },
+  {
+    "question": "What are seasons in Jailbreak?",
+    "answer": "Seasons in Jailbreak are limited-time events that introduce new content, challenges, and rewards. Each season typically has a unique theme and offers items that players can earn by completing contracts or purchasing a season pass to unlock more prizes."
+  },
   {
     "question": "Is there a way to report bugs or issues in the game?",
     "answer": "Players can report bugs through the official Discord server or by using this form: <a href=\"https://forms.gle/FHSEsGGAknfqeSdB7\" target=\"_blank\">Report Form</a>."
@@ -54,5 +30,33 @@
   {
     "question": "Is there a way to follow Jailbreak news and updates?",
     "answer": "Players can follow <a href=\"https://x.com/badimo\" target=\"_blank\">Badimo</a>, <a href=\"https://x.com/asimo3089\" target=\"_blank\">asimo3089</a>, and <a href=\"https://x.com/badccvoid\" target=\"_blank\">badcc</a> on X, join the game's official Discord at <a href=\"https://discord.gg/jailbreak\" target=\"_blank\">discord.gg/jailbreak</a>, or participate in the Reddit community at <a href=\"https://www.reddit.com/r/robloxjailbreak\" target=\"_blank\">r/robloxjailbreak</a>."
+  },
+  {
+    "question": "Why was the Jailbreak Changelogs website created?",
+    "answer": "The website was created to provide a central hub for all Jailbreak Changelog updates, reward details, and season information. It's a convenient place to stay informed about the latest changes and explore the evolution of Jailbreak over time."
+  },
+  {
+    "question": "How can I stay updated with the latest Jailbreak changelogs?",
+    "answer": "You can stay updated by visiting the Jailbreak Changelogs homepage, where the latest season and updates are showcased. The timeline section provides a comprehensive history of all past and present changelogs."
+  },
+  {
+    "question": "Where are the changelogs sourced from among the other data?",
+    "answer": "Changelogs are sourced from the <a href=\"https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home\" target=\"_blank\">Jailbreak Wiki</a>, the official Discord changelogs channel, Twitter posts by <a href=\"https://x.com/badimo\" target=\"_blank\">Badimo</a>, <a href=\"https://x.com/asimo3089\" target=\"_blank\">asimo3089</a>, and <a href=\"https://x.com/badccvoid\" target=\"_blank\">badcc</a>, as well as community contributions."
+  },
+  {
+    "question": "What is the Users page for?",
+    "answer": "The Users page is a community feature that allows users to create and customize their profiles on Jailbreak Changelogs. Users can:<br>1. Sign in with Discord to create a profile<br>2. Customize their profile with a bio and banner image<br>3. Follow other users and be followed<br>4. View and manage their comments on changelogs and seasons<br>5. Control privacy settings for their profile<br>This feature helps build a community around Jailbreak and allows players to connect with others who share their interest in the game."
+  },
+  {
+    "question": "How can I interact with the Jailbreak community?",
+    "answer": "There are several ways to interact with the Jailbreak community:<br>1. Join the official Jailbreak Discord server at <a href=\"https://discord.gg/jailbreak\" target=\"_blank\">discord.gg/jailbreak</a> to chat with other players, share ideas, and get the latest news.<br>2. Follow Badimo on X (Twitter) at <a href=\"https://x.com/badimo\" target=\"_blank\">@badimo</a> for announcements and updates.<br>3. Participate in discussions on the Jailbreak subreddit at <a href=\"https://www.reddit.com/r/robloxjailbreak\" target=\"_blank\">r/robloxjailbreak</a>.<br>4. Join the Jailbreak subreddit's Discord server at <a href=\"https://discord.com/invite/tWbDg7MbUU\" target=\"_blank\">discord.com/invite/tWbDg7MbUU</a> for additional community interactions.<br>These community spaces allow you to share experiences, suggest ideas, and stay informed about the latest Jailbreak developments."
+  },
+  {
+    "question": "How can I contribute to or provide feedback about the Jailbreak Changelogs website?",
+    "answer": "We welcome your contributions and feedback! Here's how you can get involved:<br>1. Learn how to contribute directly to the project by reading our <a href=\"https://github.com/JBChangelogs/JailbreakChangelogs/blob/main/CONTRIBUTING.md\" target=\"_blank\">Contribution Guidelines</a>.<br>2. <a href=\"https://github.com/JBChangelogs/JailbreakChangelogs/issues/new\" target=\"_blank\">Open a new GitHub issue</a> to report bugs, suggest improvements, or share ideas.<br>Your input helps us improve the Jailbreak Changelogs website for everyone!"
+  },
+  {
+    "question": "Who can I contact if I have questions or need assistance?",
+    "answer": "If you need assistance with the website, you can reach out to these Discord users: <a href=\"https://discord.com/users/659865209741246514\">@jakobiis</a> or <a href=\"https://discord.com/users/1019539798383398946\">@jalenzz</a>. Please note that these are Discord usernames and links to their profiles."
   }
 ]

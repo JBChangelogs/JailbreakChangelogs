@@ -7,53 +7,71 @@
 
     <base href="/" />
 
-    <!-- Open Graph metadata for social media sharing -->
+    <!-- Primary Meta Tags -->
+    <meta
+      name="title"
+      content="Jailbreak Season <%= season %> | <%= title %>"
+    />
+    <meta name="author" content="Jailbreak Changelogs" />
+    <meta
+      name="description"
+      content="Explore Jailbreak Season <%= season %>: <%= title %>. Track seasonal rewards, exclusive vehicles, limited-time items, and progression milestones for Roblox Jailbreak Season <%= season %>."
+    />
+    <meta
+      name="keywords"
+      content="Jailbreak Season <%= season %>, <%= title %>, jb wiki seasons, jailbreak wiki seasons, Roblox Jailbreak, seasonal rewards, exclusive vehicles, limited items, game progression, seasonal content, Jailbreak updates, seasonal milestones, game events"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jailbreak Changelogs" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/seasons/<%= season %>"
+    />
     <meta
       property="og:title"
       content="Jailbreak Season <%= season %> | <%= title %>"
     />
     <meta
       property="og:description"
-      content="Explore Jailbreak Season <%= season %>: <%= title %>. Unlock exclusive rewards, rare items, and unique vehicles in this limited-time event!"
+      content="Explore Jailbreak Season <%= season %>: <%= title %>. Track seasonal rewards, unlock exclusive items, and discover all rewards in this limited-time event!"
     />
     <meta property="og:image" content="<%= image_url %>" />
-    <meta
-      property="og:url"
-      content="https://jailbreakchangelogs.xyz/seasons/<%= season %>"
-    />
-    <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
-    <!-- Additional metadata for SEO -->
-    <meta
-      name="description"
-      content="Explore Jailbreak Season <%= season %>: <%= title %>. Unlock exclusive rewards, rare items, and unique vehicles in this limited-time event!"
-    />
-    <meta name="robots" content="index, follow" />
-
-    <meta
-      name="keywords"
-      content="Jailbreak seasons, seasonal events, exclusive vehicles, limited-time items, gameplay rewards, season updates, Roblox Jailbreak events, game features, community engagement"
-    />
-
-    <!-- Twitter Card metadata -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
+      name="twitter:url"
+      content="https://jailbreakchangelogs.xyz/seasons/<%= season %>"
+    />
+    <meta
       name="twitter:title"
-      content="Jailbreak Season <%= season %> | Exclusive Rewards and Time-Limited Content"
+      content="Jailbreak Season <%= season %> | <%= title %>"
     />
     <meta
       name="twitter:description"
-      content="Explore Jailbreak Season <%= season %>: <%= title %>. Unlock exclusive rewards, rare items, and unique vehicles in this limited-time event!"
+      content="Explore Jailbreak Season <%= season %>: <%= title %>. Track seasonal rewards, unlock exclusive items, and discover all rewards in this limited-time event!"
     />
     <meta name="twitter:image" content="<%= image_url %>" />
 
-    <title><%= title %></title>
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#2e3944" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
     <!-- Canonical URL -->
     <link
       rel="canonical"
-      href="https://jailbreakchangelogs.xyz/seasons/<%= seasonId %>"
+      href="https://jailbreakchangelogs.xyz/seasons/<%= season %>"
     />
+
+    <title>Jailbreak Season <%= season %> | <%= title %></title>
 
     <!-- Stylesheets -->
     <link
@@ -64,15 +82,15 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
 
     <link rel="stylesheet" href="styles/seasons.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="/styles/comments.css" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -88,56 +106,153 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
 
-    <!-- Scripts -->
-    <script src="scripts/seasons.js" defer></script>
-    <script src="scripts/main.js"></script>
-   
+    <!-- Additional SEO Questions -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "When does Jailbreak Season <%= season %> end?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Jailbreak Season <%= season %> ends on February 25, 2025. Check our countdown timer above for the exact time remaining. New seasons typically start shortly after the previous season ends."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What rewards are available in Jailbreak Season <%= season %>?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Season <%= season %> features exclusive rewards including limited-time vehicles, items, and customizations. View the complete list of rewards and their level requirements on our season details page."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
-
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-
-    gtag("config", "G-700MM66K5G");
-  </script>
+  <!-- prettier-ignore -->
+  <%- include('partials/nav') %>
+  <%- include('partials/announcement') %>
+  <%- include('partials/loading') %>
 
   <body data-scroll-container>
-    <%- include('partials/nav') %>
-    <%- include('partials/announcement') %>
-    <!-- Loading Overlay -->
-    <!-- This overlay is shown while the page is loading -->
-    <div id="loading-overlay" class="show">
-      <div class="text-center">
-        <img
-          src="https://cdn.jailbreakchangelogs.xyz/logos/Jailbreak_Logo.webp"
-          alt="Loading logo"
-          class="loading-logo"
-        />
-      </div>
-      <div class="d-flex justify-content-center mt-3">
-        <div class="spinner-border custom-spinner" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- Seasons Button Container -->
     <div class="container-fluid mt-3">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Seasons</li>
+          <li class="breadcrumb-item"><a href="/seasons">Seasons</a></li>
+          <li
+            class="breadcrumb-item active season-breadcrumb"
+            aria-current="page"
+          ></li>
         </ol>
       </nav>
+
+      <!-- New Seasons Introduction Section -->
+      <div class="seasons-intro mb-4">
+        <h1 class="display-4 mb-3">Roblox Jailbreak Season Archives</h1>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="intro-text">
+              <p class="lead">
+                Explore every season of Roblox Jailbreak! Each season brings
+                exciting limited-time rewards, exclusive vehicles, and unique
+                customization items. Level up, earn XP, and unlock special
+                prizes during these time-limited events.
+              </p>
+              <!-- Add Season Countdown -->
+              <div class="season-countdown text-center my-4">
+                <h3 class="countdown-title">
+                  Season <span id="season-number"></span> /
+                  <span id="season-title"></span>
+                  <span id="countdown-mode"></span>
+                </h3>
+
+                <div class="countdown-timer">
+                  <div class="countdown-item">
+                    <span id="countdown-days">00</span>
+                    <span class="countdown-label">Days</span>
+                  </div>
+                  <div class="countdown-item">
+                    <span id="countdown-hours">00</span>
+                    <span class="countdown-label">Hours</span>
+                  </div>
+                  <div class="countdown-item">
+                    <span id="countdown-minutes">00</span>
+                    <span class="countdown-label">Minutes</span>
+                  </div>
+                  <div class="countdown-item">
+                    <span id="countdown-seconds">00</span>
+                    <span class="countdown-label">Seconds</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="feature-grid mt-4">
+                <div class="feature-item">
+                  <i class="bi bi-trophy text-primary"></i>
+                  <h5>Limited-Time Rewards</h5>
+                  <p>
+                    Browse exclusive vehicles, items, and customizations
+                    available only during specific seasons. Track current and
+                    past seasonal rewards all in one place.
+                  </p>
+                </div>
+
+                <div class="feature-item">
+                  <i class="bi bi-stars text-primary"></i>
+                  <h5>Season Progress</h5>
+                  <p>
+                    View level requirements, XP thresholds, and bonus rewards
+                    for each season. Plan your progress and track seasonal
+                    milestones.
+                  </p>
+                </div>
+
+                <div class="feature-item">
+                  <i class="bi bi-calendar-event text-primary"></i>
+                  <h5>Season History</h5>
+                  <p>
+                    Access complete information about past seasons, including
+                    theme details, special events, and exclusive content from
+                    previous updates.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-12 col-lg-8">
           <!-- This aligns with the content wrapper width -->
@@ -147,7 +262,7 @@
                 <a
                   class="nav-link dropdown-toggle btn btn-primary custom-dropdown-btn"
                   href="#"
-                  id="changelogDropdown"
+                  id="seasonsDropdown"
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
@@ -157,7 +272,7 @@
                 <ul
                   class="dropdown-menu changelog-dropdown w-100"
                   id="seasonList"
-                  aria-labelledby="changelogDropdown"
+                  aria-labelledby="seasonsDropdown"
                 >
                   <!-- Dropdown items will be populated dynamically by JavaScript -->
                 </ul>
@@ -179,7 +294,8 @@
         </section>
 
         <!-- Rewards Carousel Section -->
-        <div class="col-md-4" id="sidebar-image-wrapper">
+        <div class="col-12 col-sm-4 col-md-4" id="sidebar-image-wrapper">
+          <!-- Carousel Image -->
           <div
             id="rewardsCarousel"
             class="carousel slide"
@@ -214,64 +330,42 @@
               <span class="visually-hidden">Next</span>
             </button>
           </div>
-          <div class="comment-container my-5">
-            <h2 class="comment-header" id="comment-header">Comments</h2>
-            <div class="row justify-content-center">
-              <div class="col-md-12">
-                <!-- Comment submission form -->
-                <form id="comment-form" class="mb-4">
-                  <div class="input-group">
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="commenter-text"
-                      disabled
-                      placeholder="Login to comment"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      class="btn btn-primary"
-                      id="submit-comment"
-                      disabled
-                    >
-                      <i class="bi bi-send-fill me-1"></i> Submit
-                    </button>
-                  </div>
-                </form>
 
-                <!-- Comment List -->
-                <ul id="comments-list" class="list-group shadow-sm">
-                  <!-- Comments will be dynamically added here -->
-                </ul>
-                <div
-                  id="paginationControls"
-                  class="pagination d-flex align-items-center"
-                ></div>
-              </div>
-            </div>
-          </div>
+          <%- include('partials/comments', { type: 'season', itemId: seasonId })
+          %>
         </div>
       </div>
     </div>
 
     <%- include('partials/footer') %>
+    <!-- jQuery -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Bootstrap Bundle -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Toastr -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
       integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
+
+    <!-- Custom scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="/scripts/comments.js"></script>
+    <script src="scripts/seasons.js"></script>
+
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
@@ -300,5 +394,6 @@
         signalGooglefcPresent();
       })();
     </script>
+    <script></script>
   </body>
 </html>

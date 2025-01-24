@@ -13,10 +13,10 @@
       property="og:description"
       content="Your go-to source for the latest updates, patch notes, and feature releases in Roblox Jailbreak. Discover new vehicles, weapons, map changes, and more!"
     />
-    <meta
-      property="og:image"
-      content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/349.webp"
-    />
+    <meta property="og:image" content="<%= logoUrl %>" />
+    <meta property="og:image:width" content="4000" />
+    <meta property="og:image:height" content="900" />
+    <meta property="og:site_name" content="Jailbreak Changelogs HomePage" />
     <meta property="og:url" content="https://jailbreakchangelogs.xyz" />
     <meta property="og:type" content="website" />
 
@@ -37,10 +37,7 @@
       name="twitter:title"
       content="Roblox Jailbreak Changelogs | Latest Updates & Patch Notes"
     />
-    <meta
-      name="twitter:image"
-      content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/349.webp"
-    />
+    <meta property="twitter:image" content="<%= logoUrl %>" />
 
     <title>Roblox Jailbreak Changelogs | Latest Updates & Patch Notes</title>
 
@@ -53,32 +50,43 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
+
     <link rel="stylesheet" href="styles/homepage.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/main.css" />
 
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   </head>
 
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-
-    gtag("config", "G-700MM66K5G");
-  </script>
-
   <body>
-    <%- include('partials/nav') %> <%- include('partials/announcement') %>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
+    <%- include('partials/nav') %>
+    <%- include('partials/announcement') %>
 
     <div class="hero" style="background-image: url(<%= image %>)">
       <div class="hero-content">
@@ -99,132 +107,140 @@
         >
       </div>
     </div>
-    <div style="background-color: #2e3944; color: white; padding: 40px 0">
-      <div class="container">
-        <h2 class="text-center">Features</h2>
 
-        <div
-          class="row row-cols-1 row-cols-md-2 row-cols-lg-3 justify-content-center"
-        >
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-journal-text"></i>
-              </div>
-              <h3>View Changelogs</h3>
-              <p>
-                Access the entire history of changelogs for the game Jailbreak
-                on Roblox and stay informed about all updates, whether big or
-                small.
-              </p>
+    <div class="container">
+      <h2 class="text-center mb-4 mt-4">Features</h2>
+      <div
+        class="row row-cols-1 row-cols-md-2 row-cols-lg-3 justify-content-center"
+      >
+        <!-- 1. Core Feature: Changelogs -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-journal-text"></i>
             </div>
+            <h3>View Changelogs</h3>
+            <p>
+              Access the entire history of changelogs for the game Jailbreak on
+              Roblox and stay informed about all updates, whether big or small.
+            </p>
           </div>
+        </div>
 
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-hourglass-split"></i>
-              </div>
-              <h3>Seasonal Changes</h3>
-              <p>
-                Stay informed about the latest seasonal changes in Jailbreak,
-                such as rewards and other additions.
-              </p>
+        <!-- 2. Seasonal Updates -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-hourglass-split"></i>
             </div>
+            <h3>Seasonal Changes</h3>
+            <p>
+              Stay informed about the latest seasonal changes in Jailbreak, such
+              as the newest rewards and their requirements.
+            </p>
           </div>
+        </div>
 
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-gear-fill"></i>
-              </div>
-              <h3>Fast Changelog Updates</h3>
-              <p>
-                Our data is sourced directly from our API, ensuring you receive
-                the latest changelogs faster than ever.
-              </p>
+        <!-- 3. Community Features -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-chat-dots"></i>
             </div>
+            <h3>Community Engagement</h3>
+            <p>
+              Engage with the community by commenting on changelogs and seasons
+              pages.
+              <a
+                href="https://curity.io/resources/learn/oauth-overview/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >OAuth</a
+              >
+              ensures only verified members can participate.
+            </p>
           </div>
+        </div>
 
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-chat-dots"></i>
-              </div>
-              <h3>Community Engagement</h3>
-              <p>
-                Engage with the community by commenting on changelogs and
-                seasons pages.
-                <a
-                  href="https://curity.io/resources/learn/oauth-overview/"
-                  target="_blank"
-                  >OAuth</a
-                >
-                ensures only verified members can participate.
-              </p>
+        <!-- 4. Trading System -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-arrow-left-right"></i>
             </div>
+            <h3>Trading Hub</h3>
+            <p>
+              Create trade advertisements and check current item values. Post
+              your offers, request specific items, and browse through other
+              players' trade listings to find the perfect deal.
+            </p>
           </div>
+        </div>
 
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-github"></i>
-              </div>
-              <h3>Open Source Contributions</h3>
-              <p>
-                Contributions can be made by anyone! Our project is fully open
-                source on
-                <a
-                  href="https://github.com/JailbreakProject/JailbreakChangelogs"
-                  target="_blank"
-                >
-                  GitHub.
-                </a>
-              </p>
+        <!-- 5. Trade Analytics -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-graph-up"></i>
             </div>
+            <h3>Trade Statistics</h3>
+            <p>
+              Access Badimo's official dataset for vehicles and vehicle
+              customization items. Track how many times items have been traded
+              and view their unique circulation numbers in the trading system.
+            </p>
           </div>
+        </div>
 
-          <div class="col mb-4">
-            <div class="text-center">
-              <div class="feature-icon" style="color: #748d92">
-                <i class="bi bi-graph-up"></i>
-              </div>
-              <h3>Trade Statistics</h3>
-              <p>
-                Powered by one of Badimo's open-source datasets, view the vast
-                amount of times players trade with each other and their detailed
-                trade stats.
-              </p>
+        <!-- 6. Open Source -->
+        <div class="col mb-4">
+          <div class="text-center">
+            <div class="feature-icon" style="color: #748d92">
+              <i class="bi bi-github"></i>
             </div>
+            <h3>Open Source Contributions</h3>
+            <p>
+              Contributions can be made by anyone! Our project is fully open
+              source on
+              <a
+                href="https://github.com/JBChangelogs/JailbreakChangelogs"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub.
+              </a>
+            </p>
           </div>
         </div>
       </div>
-      <div class="footer-credit text-center py-4 mt-5">
-        <p class="mb-0">
-          <span class="text-muted">Crafted with</span>
-          <i class="bi bi-heart-fill heart-icon mx-1"></i>
-          <span class="text-muted">by</span>
-          <a
-            href="https://www.roblox.com/users/435983066/profile"
-            class="text-decoration-none mx-1 creator-link"
-            >Jakobiis</a
-          >
-          <span class="text-muted">&</span>
-          <a
-            href="https://www.roblox.com/users/1910948809/profile"
-            class="text-decoration-none mx-1 creator-link"
-            >Jalenzz16</a
-          >
-        </p>
-      </div>
+    </div>
+    <div class="footer-credit text-center py-4 mt-5">
+      <p class="mb-0">
+        <span class="text-muted">Crafted with</span>
+        <i class="bi bi-heart-fill heart-icon mx-1"></i>
+        <span class="text-muted">by</span>
+        <a
+          href="https://www.roblox.com/users/435983066/profile"
+          class="text-decoration-none mx-1 creator-link"
+          >Jakobiis</a
+        >
+        <span class="text-muted">&</span>
+        <a
+          href="https://www.roblox.com/users/1910948809/profile"
+          class="text-decoration-none mx-1 creator-link"
+          >Jalenzz16</a
+        >
+      </p>
     </div>
 
-    <script src="scripts/main.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+
     <script
       async
       src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"
@@ -248,45 +264,20 @@
         signalGooglefcPresent();
       })();
     </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const mobileViewUpdates = document.getElementById("mobileViewUpdates");
+        if (mobileViewUpdates) {
+          mobileViewUpdates.addEventListener("click", function () {
+            window.openSideMenu();
+          });
+        }
+      });
+    </script>
+
     <%- include('partials/footer') %>
   </body>
-  <script>
-    function getCookie(name) {
-      let cookieArr = document.cookie.split(";");
-      for (let i = 0; i < cookieArr.length; i++) {
-        let cookiePair = cookieArr[i].split("=");
-        if (name === cookiePair[0].trim()) {
-          return decodeURIComponent(cookiePair[1]);
-        }
-      }
-      return null;
-    }
-    const userid = sessionStorage.getItem("userid");
-    const token = getCookie("token");
-    if (token && !userid) {
-      fetch(
-        "https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token
-      )
-        .then((response) => {
-          if (!response.ok) {
-            console.error("Unexpected response status:", response.status);
-            return null;
-          }
-          return response.json();
-        })
-        .then((userData) => {
-          if (!userData) return;
-          const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          sessionStorage.setItem("user", JSON.stringify(userData));
-          sessionStorage.setItem("avatar", avatarURL);
-          sessionStorage.setItem("userid", userData.id);
-          window.location.reload();
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
-    }
-  </script>
+
   <script
     async
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"

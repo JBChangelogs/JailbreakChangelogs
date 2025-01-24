@@ -3,52 +3,99 @@
   <head>
     <!-- Character encoding -->
     <meta charset="UTF-8" />
-
-    <!-- Responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- Referrer policy -->
     <meta name="referrer" content="no-referrer" />
+    <base href="/" />
 
-    <!-- Open Graph metadata for social media sharing -->
-    <meta property="og:title" content="<%= userData.global_name %> / Jailbreak Changelogs" />
+    <!-- Primary Meta Tags -->
     <meta
-      property="og:image"
-      content="https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp"
-    /> 
-    
-    <meta property="og:image:width" content="2328" />
-    <meta property="og:image:height" content="1054" />
-    <meta property="og:type" content="profile" />
+      name="title"
+      content="<%= userData.global_name %> (@<%= userData.username %>) | Jailbreak Changelogs"
+    />
+    <meta name="author" content="Jailbreak Changelogs" />
+    <meta
+      name="description"
+      content="Check out <%= userData.global_name %>'s profile on Jailbreak Changelogs. View their contributions, comments, and stay connected with updates about Roblox Jailbreak."
+    />
+    <meta
+      name="keywords"
+      content="Roblox Jailbreak, player profile, game community, Jailbreak updates, user comments, game feedback"
+    />
 
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="profile" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/users/<%= userData.id %>"
+    />
+    <meta property="og:site_name" content="Jailbreak Changelogs Users" />
+    <meta
+      property="og:title"
+      content="<%= userData.global_name %> (@<%= userData.username %>) | Jailbreak Changelogs"
+    />
+    <meta
+      property="og:description"
+      content="Check out <%= userData.global_name %>'s profile on Jailbreak Changelogs. View their contributions and stay connected."
+    />
+    <meta property="og:image" content="<%= avatar %>" />
+    <meta property="profile:username" content="<%= userData.username %>" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
-      name="twitter:image"
-      content="https://cdn.jailbreakchangelogs.xyz/logos/Users_Logo.webp"
+      name="twitter:url"
+      content="https://jailbreakchangelogs.xyz/users/<%= userData.id %>"
     />
-    <!-- Additional metadata for SEO -->
-    <meta name="robots" content="index, follow" />
+    <meta
+      name="twitter:title"
+      content="<%= userData.global_name %> (@<%= userData.username %>) | Jailbreak Changelogs"
+    />
+    <meta
+      name="twitter:description"
+      content="Check out <%= userData.global_name %>'s profile on Jailbreak Changelogs. View their contributions and stay connected."
+    />
+    <meta name="twitter:image" content="<%= avatar %>" />
 
-    <!-- Page title -->
-    <title><%= userData.global_name%> (@<%= userData.username %>) / Changelogs</title>
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#2e3944" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="https://jailbreakchangelogs.xyz/users/<%= userData.id %>"
+    />
 
     <!-- CSS Links -->
     <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-    crossorigin="anonymous"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
     />
+
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
 
     <!-- Custom stylesheet -->
-    <base href="/">
+    <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/users.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/main.css" />
 
     <!-- Favicon -->
@@ -65,307 +112,440 @@
       const userData = `<%- JSON.stringify(userData) %>`; // Correctly embedded
     </script>
 
-
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
   </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
+    <%- include('partials/nav') %>
+    <%- include('partials/announcement') %>
+    <!-- Breadcrumb Navigation -->
+    <div class="container mt-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/users">Users</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            @<%= userData.global_name || userData.username %>
+          </li>
+        </ol>
+      </nav>
+    </div>    
 
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
+  <!-- Private Profile Alert -->
+  <% if (isPrivateProfile && !isProfileOwner) { %>
+    <div class="container mt-4">
+      <div class="alert alert-info text-center" role="alert">
+        <i class="bi bi-lock-fill me-2"></i>
+        This profile is private
+      </div>
+      <!-- Basic Profile Info -->
+      <div class="text-center mb-4">
+        <img src="<%= avatar %>" alt="User Avatar" class="rounded-circle mb-3" style="width: 128px; height: 128px;">
+        <h4><%= userData.username %></h4>
+      </div>
+    </div>
+    </div>
+    <% } else { %>
+    <div class="user-profile">
+      <!-- Banner Section - Full Width -->
+      <div class="banner-container">
+        <img id="banner" src="" class="banner-image" alt="" />
+        <div class="banner-overlay"></div>
+      </div>
 
-    gtag("config", "G-700MM66K5G");
-  </script>
+      <div class="container">
+        <!-- User Info Section -->
+        <div class="user-info-section">
+          <!-- Avatar -->
+          <div class="avatar-wrapper">
+            <img
+              src="<%= avatar %>"
+              id="user-avatar"
+              class="user-avatar"
+              alt="User Avatar"
+            />
+          </div>
 
+          <div class="user-name-container">
+            <!-- Wrapper div for name and both buttons -->
+            <div class="name-and-button">
+              <h2 class="user-display-name d-flex align-items-center">
+                <%= userData.global_name %>
+                <span
+                  id="crown"
+                  class="ms-2 crown-wrapper"
+                  style="display: none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    class="crown-icon"
+                  >
+                    <path fill="#ffd700" d="m12 6l4 6l5-4l-2 10H5L3 8l5 4z" />
+                  </svg>
+                </span>
+              </h2>
 
-<body>
-  <%- include('partials/nav') %>
-  <%- include('partials/announcement') %>
-  
-  <div class="container mt-4">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item"><a href="/users">Users</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@<%= userData.username %></li>
-      </ol>
-    </nav>
-    
-    <div class="container-fluid px-0">
-      <div class="user-header-wrapper position-relative mb-5">
-        <!-- Banner Image -->
-        <div class="banner-container">
-          <img id="banner" src="" class="w-100 banner-image" alt="">
-        </div>
-        
-        <!-- User Info Overlay -->
-        <div class="user-info-overlay position-absolute bottom-0 start-0 w-100 p-3">
-          <div class="container">
-            <div class="row align-items-end">
-              <!-- Avatar -->
-              <div class="col-auto">
-                <img src="<%= avatar %>" id="user-avatar" class="user-avatar rounded-circle" alt="User Avatar">
-              </div>
-              
-              <!-- User Details -->
-              <div class="col">
-                <h2 class="mb-0 text-white d-flex align-items-center">
-                  <%= userData.global_name %>
-                  <span id="crown" class="ms-2" style="display: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="crown-icon">
-                      <path fill="#ffd700" d="m12 6l4 6l5-4l-2 10H5L3 8l5 4z" />
-                    </svg>
-                  </span>
-                </h2>
-                <a class="text-light text-decoration-none" href="https://discord.com/users/<%= userData.id %>">@<%= userData.username %></a>
-              </div>
-              
-              <!-- Action Buttons -->
-              <div class="col-auto">
-                <button class="btn btn-light me-2" id="message-button">
-                  <i class="bi bi-envelope-fill me-1"></i> Message
-                </button>
-                <button class="btn btn-primary" id="follow-button">
-                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              <!-- Both buttons in a flex container -->
+              <div class="action-buttons">
+                <button
+                  class="btn btn-primary btn-hover action-button"
+                  id="follow-button"
+                >
+                  <span
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   <span id="button-text">Loading</span>
                 </button>
-                <button id="settings-button" class="btn btn-link ms-2" style="display: none;">
-                  <i class="bi bi-gear-fill"></i>
+                <button
+                  id="settings-button"
+                  class="btn btn-secondary action-button btn-sm ms-2 d-flex align-items-center gap-2 d-none"
+                >
+                  <i class="bi bi-gear"></i>
+                  Settings
                 </button>
               </div>
             </div>
+
+            <span class="username-link text-muted">
+              <%= userData.username %>
+            </span>
           </div>
         </div>
-      </div>
-      
-      <!-- User Stats -->
-      <div class="container user-stats-container mb-4">
-        <div class="row user-stats-row">
-          <div class="col-md-8">
-            <div class="user-stats d-flex">
-              <div class="stat-box me-3">
-                <h3 class="h5 mb-0" id="followers">
-                  <span class="loading-icon" id="followers-loading" style="display: none;">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  </span>
-                </h3>
-              </div>
-              <div class="stat-box">
-                <h3 class="h5 mb-0" id="following">
-                  <span class="loading-icon" id="following-loading" style="display: none;">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-     <!-- User Content Tabs -->
-     <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="about-button" aria-selected="true">About</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button 
-          class="nav-link recent-comments-button" 
-          id="recent-comments-button" 
-          aria-selected="false" 
-          <%= settings.show_recent_comments ? 'disabled' : '' %>
-        >
-          Recent Comments
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <div class="card card-pagination" id="card-pagination" style="display: none; align-items: center; max-width: fit-content; margin-bottom: 0;">
-          <div id="paginationControls" class="pagination d-flex align-items-center hidden"></div>
-        </div>
-      </li>
-    </ul>
-      
-      <div class="tab-content" id="userTabContent">
-        <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="about-tab">
+
+        <!-- User Content -->
+        <div class="user-content mt-4">
+          <!-- About Section -->
           <div class="row">
-            <div class="col-md-12 mb-4">
+            <!-- About Section -->
+            <div class="col-12 mb-3">
               <div class="card bg-dark text-light" id="description-tab">
                 <div class="card-body position-relative" id="description-box">
-                  <div class="d-flex justify-content-between align-items-start mb-0">
-                    <h5 class="card-title">About Me</h5>
-                    <div>
-                      <button class="btn btn-outline-light btn-sm hidden" id="canceledit">
+                  <!-- Header with Title and Buttons -->
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-2"
+                  >
+                    <h5 class="card-title fs-6 fs-md-5">About</h5>
+                    <div class="btn-group gap-2">
+                      <!-- Cancel Button -->
+                      <button
+                        class="btn btn-danger btn-sm py-1 px-2 d-none"
+                        id="cancel-bio-button"
+                      >
                         <i class="bi bi-x-lg"></i>
+                        <span class="d-none d-sm-inline ms-1">Cancel</span>
                       </button>
-                      <button class="btn btn-outline-light btn-sm hidden" id="edit-bio-button">
+
+                      <!-- Edit Button -->
+                      <button
+                        class="btn btn-outline-light btn-sm py-1 px-2 d-none"
+                        id="edit-bio-button"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Edit Bio"
+                      >
                         <i class="bi bi-pencil-fill"></i>
                       </button>
-                      <button class="btn btn-outline-light btn-sm hidden" id="save-bio-button">
+
+                      <!-- Save Button -->
+                      <button
+                        class="btn btn-success btn-sm py-1 px-2 d-none"
+                        id="save-bio-button"
+                      >
                         <i class="bi bi-save"></i>
+                        <span class="d-none d-sm-inline ms-1">Save</span>
                       </button>
                     </div>
                   </div>
-                  <p class="card-text mb-4" id="userBio"></p>
-                  <div class="d-flex justify-content-between align-items-center mt-1">
-                    <small class="text-muted" id="description-updated-date"></small>
-                    <small class="text-muted" id="character-count"></small>
+                  
+
+                  <!-- Bio Text -->
+                  <p class="card-text mb-3 fs-6" id="userBio"></p>
+
+                  <!-- Footer Info -->
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <small
+                      class="text-muted fs-7"
+                      id="description-updated-date"
+                    ></small>
+                    <small class="text-muted fs-7" id="character-count"></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+           
+          <!-- Connections Section -->
+          <div class="col-12 mb-3">
+            <div class="card bg-dark text-light">
+              <div class="card-body">
+                <h5 class="card-title fs-6 fs-md-5 mb-3">Connections</h5>
+                <div class="connections-list">
+                  <!-- Discord Connection -->
+                  <div class="connection-item" id="discord-connection">
+                    <i class="bi bi-discord me-2"></i>
+                    <span class="connection-text"></span>
+                    <i class="bi bi-box-arrow-up-right ms-2"></i>
+                  </div>
+                  
+                  <!-- Roblox Connection -->
+                  <div class="connection-item" id="roblox-connection">
+                    <svg class="me-1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 24 24">
+                      <path fill="#030000" d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"></path>
+                      </svg>
+                    <span class="connection-text"></span>
+                    <i class="bi bi-box-arrow-up-right ms-2"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+
+            <!-- Stats Section -->
+            <div class="col-12 mb-3">
+              <div class="card bg-dark text-light">
+                <div class="card-body">
+                  <div class="user-stats">
+                    <div class="stat-box">
+                      <h3 class="h5 mb-0" id="followers">
+                        <span class="stat-number">0</span>
+                        <span class="stat-text">Followers</span>
+                      </h3>
+                    </div>
+                    <div class="stat-box">
+                      <h3 class="h5 mb-0" id="following">
+                        <span class="stat-number">0</span>
+                        <span class="stat-text">Following</span>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <!-- Comments content... -->
+              <div
+                class="d-flex flex-wrap justify-content-between align-items-center mb-3"
+              >
+                <h5 class="mb-2 mb-sm-0">Recent Comments</h5>
+                <div
+                  class="card-pagination"
+                  id="card-pagination"
+                  style="display: none; align-items: center; margin-bottom: 0"
+                >
+                  <div
+                    id="paginationControls"
+                    class="pagination d-flex align-items-center hidden"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="card bg-dark text-light">
+                <div class="card-body p-0">
+                  <div id="comments-list" class="comments-container">
+                    <div class="comments-loading">
+                      <div class="spinner-wrapper">
+                        <span
+                          id="loading-spinner"
+                          class="spinner-border"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="container hidden mt-1" id="recent-comments-tab">
-          <div class="card bg-dark text-light">
-            <div class="card-body">
-              <div id="comments-list">
-                <span id="loading-spinner" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                <!-- Add more comments as needed -->
+      </div>
+    </div>
+    <% } %>
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">Profile Settings</h2>
+            <button
+              type="button"
+              class="btn-close"
+              id="close-settings"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="settingsForm">
+              <div class="container-fluid">
+                <div class="row mb-3 align-items-center">
+                  <div class="col-9">Profile Public</div>
+                  <div class="col-3 text-end">
+                    <button id="profile-public-button" class="btn btn-danger">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                  <div class="col-9">
+                    <label for="showComments">Show Recent Comments</label>
+                  </div>
+                  <div class="col-3 text-end">
+                    <button id="show-comments-button" class="btn btn-danger">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                  <div class="col-9">
+                    <label for="hideFollowing">Hide Following</label>
+                  </div>
+                  <div class="col-3 text-end">
+                    <button id="hide-following-button" class="btn btn-danger">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                  <div class="col-9">
+                    <label for="hideFollowers">Hide Followers</label>
+                  </div>
+                  <div class="col-3 text-end">
+                    <button id="hide-followers-button" class="btn btn-danger">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                  <div class="col-9">
+                    <label for="usediscordBanner">Discord Banner</label>
+                  </div>
+                  <div class="col-3 text-end">
+                    <button id="usediscordBanner" class="btn btn-danger">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="row mb-3"
+                  id="input-for-banner"
+                  style="display: none"
+                >
+                  <div class="col-12">
+                    <label for="bannerInput" class="form-label">Banner</label>
+                    <input
+                      type="text"
+                      id="bannerInput"
+                      class="form-control"
+                      placeholder="Banner URL here"
+                      name="Banner input"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              id="settings-loading"
+              type="submit"
+              style="display: none"
+              class="btn btn-secondary disabled"
+            >
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            </button>
+            <button id="settings-submit" type="submit" class="btn btn-primary">
+              Save Changes
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  
-  
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title">Profile Settings</h2>
-          <button type="button" class="btn-close" id="close-settings" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="settingsForm">
-            <div class="container-fluid">
-              <div class="row mb-3 align-items-center">
-                <div class="col-9">
-                  <strong>Profile Public</strong>
-                </div>
-                <div class="col-3 text-end">
-                  <button id="profile-public-button" class="btn btn-danger">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mb-3 align-items-center">
-                <div class="col-9">
-                  <label for="showComments">Show Recent Comments</label>
-                </div>
-                <div class="col-3 text-end">
-                  <button id="show-comments-button" class="btn btn-danger">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mb-3 align-items-center">
-                <div class="col-9">
-                  <label for="hideFollowing">Hide Following</label>
-                </div>
-                <div class="col-3 text-end">
-                  <button id="hide-following-button" class="btn btn-danger">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mb-3 align-items-center">
-                <div class="col-9">
-                  <label for="hideFollowers">Hide Followers</label>
-                </div>
-                <div class="col-3 text-end">
-                  <button id="hide-followers-button" class="btn btn-danger">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mb-3 align-items-center">
-                <div class="col-9">
-                  <label for="usediscordBanner">Discord Banner</label>
-                </div>
-                <div class="col-3 text-end">
-                  <button id="usediscordBanner" class="btn btn-danger">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mb-3" id="input-for-banner" style="display: none;">
-                <div class="col-12">
-                  <label for="bannerInput" class="form-label">Banner</label>
-                  <input type="text" id="bannerInput" class="form-control" placeholder="Banner URL here" name="Banner input">
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button id="settings-loading" type="submit" style="display: none;" class="btn btn-secondary disabled">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          </button>
-          <button id="settings-submit" type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- JavaScript -->
-  <script
+
+    <%- include('partials/footer') %>
+
+    <!-- JavaScript -->
+    <script
+      async
+      src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"
+    ></script>
+    <script>
+      (function () {
+        function signalGooglefcPresent() {
+          if (!window.frames["googlefcPresent"]) {
+            if (document.body) {
+              const iframe = document.createElement("iframe");
+              iframe.style =
+                "width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;";
+              iframe.style.display = "none";
+              iframe.name = "googlefcPresent";
+              document.body.appendChild(iframe);
+            } else {
+              setTimeout(signalGooglefcPresent, 0);
+            }
+          }
+        }
+        signalGooglefcPresent();
+      })();
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+      integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-  <script src="/scripts/main.js"></script>
-  <script src="/scripts/users.js"></script>
-  <script
-  src="https://code.jquery.com/jquery-3.7.1.min.js"
-  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-  crossorigin="anonymous"
-  ></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script async src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
-  <%- include('partials/footer') %>
-</body>
-<div id="chat-popup" class="chat-popup">
-  <div class="chat-header">
-      <span>Chat</span>
-      <button id="close-chat-popup">×</button>
-  </div>
-  <div class="chat-content">
-      <!-- Chat Body on the Left -->
-      <div id="chat-body" class="chat-body">
-          <div id="chat-messages">
-              <!-- Chat messages will be dynamically added here -->
-          </div>
-      </div>
-      <!-- Table on the Right -->
-      <div id="chat-sidebar" class="chat-sidebar">
-          <table>
-              <thead>
-
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>User 1</td>
-                  </tr>
-                  <tr>
-                      <td>User 2</td>
-                  </tr>
-              </tbody>
-          </table>
-      </div>
-  </div>
-  <div class="chat-footer">
-    <div clas="input-group">
-      <input type="text" id="chat-input" placeholder="Type a message...">
-      <button id="send-chat-message" class="btn btn-primary">Send</button>
-  </div>
-</div>
-<button id="open-chat-button" class="open-chat-button btn btn-primary">Chat</button>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/users.js"></script>
+  </body>
 </html>

@@ -1,0 +1,34 @@
+:root {
+  /* Main Theme Colors */
+  --bg-primary: #212a31; /* Very dark blue-gray */
+  --bg-secondary: #2e3944; /* Dark grayish-blue */
+  --accent-color: #124e66; /* Deep teal */
+  --accent-color-light: #1d7da3;
+  --text-muted: #748d92; /* Medium grayish-blue */
+  --text-primary: #d3d9d4; /* Very light grayish-green */
+
+  /* Semantic Colors */
+  --background-dark: var(--bg-primary);
+  --background-light: var(--bg-secondary);
+  --button-primary: var(--accent-color);
+  --button-hover: var(--bg-secondary);
+  --text-body: var(--text-primary);
+  --text-secondary: var(--text-muted);
+
+  /* Interactive States */
+  --hover-bg: rgba(116, 141, 146, 0.1); /* #748D92 with opacity */
+  --active-bg: rgba(18, 78, 102, 0.2); /* #124E66 with opacity */
+}
+
+.modal {
+  --bs-modal-bg: var(--bg-primary) !important;
+  --bs-modal-header-bg: var(--bg-secondary) !important;
+  --bs-modal-footer-bg: var(--bg-secondary) !important;
+}
+
+/* Dark Theme Overrides */
+[data-bs-theme="dark"] {
+  --background-dark: var(--bg-primary);
+  --background-light: var(--bg-secondary);
+  --text-body: var(--text-primary);
+}

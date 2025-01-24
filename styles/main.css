@@ -1,3 +1,135 @@
+/* Report Issue Modal Specific Styling */
+#reportIssueModal .modal-content {
+  background-color: var(--bg-primary) !important;
+  border: 1px solid var(--bg-secondary) !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+#reportIssueModal .modal-header {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--accent-color) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+#reportIssueModal .modal-footer {
+  background-color: var(--bg-secondary) !important;
+  border-top: 1px solid var(--accent-color) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+#reportIssueModal .modal-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Form Controls */
+#reportIssueModal .form-control {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--accent-color) !important;
+  color: var(--text-primary) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+#reportIssueModal .form-control:focus {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--accent-color-light) !important;
+  box-shadow: 0 0 0 0.25rem rgba(29, 125, 163, 0.25) !important;
+  color: var(--text-primary) !important;
+}
+
+#reportIssueModal .form-control::placeholder {
+  color: var(--text-muted) !important;
+}
+
+#reportIssueModal .form-label {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Buttons */
+#reportIssueModal .btn-primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+#reportIssueModal .btn-primary:hover,
+#reportIssueModal .btn-primary:focus {
+  background-color: var(--accent-color-light) !important;
+  border-color: var(--accent-color-light) !important;
+}
+
+#reportIssueModal .btn-secondary {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--text-muted) !important;
+  color: var(--text-primary) !important;
+}
+
+#reportIssueModal .btn-secondary:hover,
+#reportIssueModal .btn-secondary:focus {
+  background-color: var(--text-muted) !important;
+  border-color: var(--text-muted) !important;
+}
+
+/* Success Alert */
+#reportIssueModal .alert-success {
+  background-color: rgba(25, 135, 84, 0.2) !important;
+  border-color: rgba(25, 135, 84, 0.3) !important;
+  color: #75b798 !important;
+}
+
+/* Validation Feedback */
+#reportIssueModal .invalid-feedback {
+  color: #dc3545 !important;
+  font-size: 0.875rem !important;
+  margin-top: 0.25rem !important;
+}
+
+#reportIssueModal .form-control.is-invalid {
+  border-color: #dc3545 !important;
+  background-image: none !important;
+}
+
+/* Close Button */
+#reportIssueModal .btn-close-white {
+  filter: brightness(0) invert(1) !important;
+  opacity: 0.75 !important;
+}
+
+#reportIssueModal .btn-close-white:hover {
+  opacity: 1 !important;
+}
+
+/* Disabled State */
+#reportIssueModal .form-control:disabled {
+  background-color: var(--bg-primary) !important;
+  opacity: 0.75 !important;
+}
+
+/* Scrollbar Styling */
+#reportIssueModal textarea::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+#reportIssueModal textarea::-webkit-scrollbar-track {
+  background: var(--bg-primary) !important;
+}
+
+#reportIssueModal textarea::-webkit-scrollbar-thumb {
+  background: var(--accent-color) !important;
+  border-radius: 4px !important;
+}
+
+#reportIssueModal textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color-light) !important;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  background-color: rgba(33, 42, 49, 0.8) !important;
+}
+
 /* Custom properties for the footer namespace */
 .jb-footer {
   --jb-footer-bg-primary: #212a31;
@@ -156,99 +288,83 @@
   color: var(--jb-footer-text-primary);
 }
 .jbcl-announcement-banner {
-  background: linear-gradient(90deg, #212a31, #124e66);
-  padding: 0.75rem 0;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: height 0.3s ease-out;
+  background: linear-gradient(90deg, #212a31, #124e66) !important;
+  padding: 0.75rem 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: height 0.3s ease-out !important;
+  display: flex !important; /* Visible by default */
+}
+
+.jbcl-announcement-banner.hidden {
+  display: none !important;
 }
 
 .jbcl-announcement-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  gap: 1rem;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  gap: 1rem !important;
 }
 
 .jbcl-announcement-close {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1.25rem;
-  line-height: 1;
-  transition: color 0.2s ease;
-  display: flex;
-  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: pointer !important;
+  padding: 0.25rem !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  transition: color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .jbcl-announcement-close:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Update existing announcement styles */
 .jbcl-announcement-text {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #ffffff;
-  font-size: 0.95rem;
-  text-align: center;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  text-align: center !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
 }
 
 .jbcl-announcement-icon {
-  color: #ffd700;
-  display: inline-flex;
-  align-items: center;
-  animation: pulse 2s infinite;
+  color: #ffd700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  animation: pulse 2s infinite !important;
 }
 
 .jbcl-announcement-highlight {
-  font-weight: 600;
-  color: #ffd700;
+  font-weight: 600 !important;
+  color: #ffd700 !important;
 }
 
 .jbcl-announcement-message {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .jbcl-announcement-link {
-  color: #5ea2ff;
-  text-decoration: none;
-  position: relative;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  margin: 0 0.25rem;
+  color: #5ea2ff !important;
+  text-decoration: none !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  margin: 0 0.25rem !important;
 }
 
 .jbcl-announcement-link:hover {
-  color: #90c1ff;
-}
-
-.jbcl-announcement-link::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  bottom: -1px;
-  left: 0;
-  background-color: currentColor;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.jbcl-announcement-link:hover::after {
-  transform: scaleX(1);
-}
-
-.jbcl-announcement-cta {
-  color: rgba(255, 255, 255, 0.8);
+  color: #90c1ff !important;
 }
 
 @keyframes pulse {
@@ -312,40 +428,69 @@
   opacity: 1;
 }
 
-/* NAVBAR STYLING */
-/* Logo Styling */
+/* Base navbar structure */
+.custom-navbar-color {
+  background-color: #212a31;
+  height: 64px; /* Fixed height */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Container positioning */
+.custom-navbar-color .container-fluid {
+  max-width: 1920px; /* Maximum width */
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Logo positioning */
+.custom-navbar-color .navbar-brand {
+  margin-right: 48px; /* Space between logo and nav items */
+  padding: 0;
+}
+
 .navbar-logo {
-  height: 40px;
+  height: 70px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
+  margin: -10px 0; /* to prevent increasing navbar height */
 }
 
-/* Custom Navbar Color */
-.custom-navbar-color {
-  background-color: #212a31; /* Dark blue-gray */
-  color: #ffffff; /* White text color */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+/* Navigation items positioning */
+.custom-navbar-color .navbar-collapse {
+  flex: 1;
+  justify-content: flex-start; /* Align items to the left */
 }
 
-/* Navbar Items Styling */
-.custom-navbar-color .navbar-nav .nav-link {
-  color: #d3d9d4; /* Light gray for nav links */
-  transition: color 0.3s ease, background-color 0.3s ease;
+.custom-navbar-color .navbar-nav {
+  width: auto; /* Let nav items take natural width */
+  margin-left: 0; /* Remove any auto margins */
+  gap: 4px; /* Space between nav items */
 }
 
-/* Hover and Focus States for Nav Links */
-.custom-navbar-color .navbar-nav .nav-link:hover,
-.custom-navbar-color .navbar-nav .nav-link:focus {
-  background-color: rgba(211, 217, 212, 0.1); /* Lighter background on hover */
-  color: #ffffff; /* Bright text on hover */
-  border-radius: 8px; /* Increased border-radius for a softer look */
+/* Individual nav items */
+.custom-navbar-color .nav-item {
+  padding: 0;
 }
 
-/* Active Nav Item Styling */
-.custom-navbar-color .navbar-nav .nav-item.active .nav-link {
-  color: #748d92; /* Highlight color for active link */
-  font-weight: bold; /* Bold active link */
+.custom-navbar-color .nav-link {
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+/* Profile section (right side) */
+.custom-navbar-color .navbar-nav.ms-auto {
+  margin-left: auto !important; /* Force right alignment */
+  gap: 0;
+}
+
+/* Ensure dropdown stays aligned properly */
+.custom-navbar-color .nav-item.dropdown {
+  margin-left: 4px;
 }
 
 /* "Join the Discord" Button */
@@ -422,24 +567,26 @@ body.menu-open {
 .side-menu {
   position: fixed;
   top: 0;
-  right: -405px; /* Start off-screen */
+  right: -405px;
   width: 400px;
   max-width: 90vw;
   height: 100%;
-  background-color: #1c242a; /* Darker background for better contrast */
+  background-color: #1c242a;
   z-index: 1000;
   overflow-x: hidden;
-  transition: right 0.4s ease-in-out; /* Smoother transition */
-  padding-top: 20px; /* Reduced padding for a cleaner look */
+  transition: right 0.4s ease-in-out, visibility 0.4s ease-in-out; /* Add visibility to transition */
+  padding-top: 20px;
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+  visibility: hidden; /* Start hidden */
 }
 
 /* Show the side menu */
-.side-menu.show {
+.side-menu.active {
   right: 0;
+  visibility: visible;
 }
 
 /* Side menu content styles */
@@ -449,6 +596,20 @@ body.menu-open {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Show content when menu is active */
+.side-menu.active .side-menu-content {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.side-menu.show .nav-item {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* Navigation styles within the side menu */
@@ -482,8 +643,8 @@ body.menu-open {
 
 /* Animation for menu items */
 .side-menu .nav-item {
-  opacity: 0;
-  transform: translateX(20px);
+  opacity: 1;
+  transform: none;
 }
 
 /* Show nav items with animation */
@@ -556,6 +717,71 @@ body.menu-open {
   margin-right: 0; /* No margin */
 }
 
+/* Dropdown item styles */
+.dropdown-menu {
+  padding: 0.5rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+}
+
+.dropdown-item {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-divider {
+  margin: 0.5rem 0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style for the profile picture in dropdown toggle */
+.nav-link.dropdown-toggle {
+  padding: 0;
+}
+
+.nav-link.dropdown-toggle img {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: border-color 0.2s;
+}
+
+.nav-link.dropdown-toggle:hover img {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Danger item specific styling */
+.dropdown-item.text-danger {
+  color: #dc3545 !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Icons in dropdown items */
+.dropdown-item i,
+.dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+
+/* Mobile horizontal separator */
+.side-menu .nav-separator {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 12px 0;
+}
+
 @media (max-width: 768px) {
   .breadcrumb {
     padding: 12px 20px;
@@ -579,41 +805,53 @@ body.menu-open {
     gap: var(--jb-footer-spacing-sm);
   }
   .jbcl-announcement-banner {
-    padding: 0.75rem;
+    padding: 0.75rem !important;
   }
 
   .jbcl-announcement-content {
-    flex-direction: row;
-    padding: 0 1rem;
+    flex-direction: row !important;
+    padding: 0 1rem !important;
   }
 
   .jbcl-announcement-text {
-    font-size: 0.875rem;
-    gap: 0.35rem;
+    font-size: 0.875rem !important;
+    gap: 0.35rem !important;
   }
 
   .jbcl-announcement-close {
-    position: relative;
-    padding: 0.5rem;
-    margin-left: auto;
+    position: relative !important;
+    padding: 0.5rem !important;
+    margin-left: auto !important;
   }
 }
 
 @media (max-width: 576px) {
+  #reportIssueModal .modal-dialog {
+    margin: 0.5rem !important;
+  }
+
+  #reportIssueModal .modal-content {
+    border-radius: 0.5rem !important;
+  }
+
   .navbar-logo {
-    height: 34px; /* Adjusted height for small screens */
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: inline-block;
+    margin-left: -5px; /* Move logo slightly to the left on mobile */
+  }
+  .custom-navbar-color .container-fluid {
+    padding-left: 10px; /* Reduced left padding */
   }
 }
 
 @media (max-width: 400px) {
-  .navbar-logo {
-    height: 27px; /* Adjusted height for extra small screens */
-  }
   .jbcl-announcement-banner {
-    padding: 0.625rem;
+    padding: 0.625rem !important;
   }
 
   .jbcl-announcement-text {
-    font-size: 0.8125rem;
+    font-size: 0.8125rem !important;
   }
 }

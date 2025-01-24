@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Open Graph metadata for social media sharing -->
+    <meta property="og:title" content="<%= title %>" />
+    <meta
+      property="og:description"
+      content="Find Roblox Jailbreak private servers to connect with other traders and players. Join a server to trade, chat, and play with other Jailbreak fans!"
+    />
+    <meta property="og:image" content="<%= logoUrl %>" />
+    <meta property="og:image:width" content="4000" />
+    <meta property="og:image:height" content="900" />
+    <meta property="og:site_name" content="Jailbreak Changelogs Servers Page" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/servers"
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Additional metadata for SEO -->
+    <meta
+      name="description"
+      content="Find Roblox Jailbreak private servers to connect with other traders and players. Join a server to trade, chat, and play with other Jailbreak fans!"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta
+      name="keywords"
+      content="Roblox Jailbreak, private servers, trading servers, Jailbreak trading, Roblox trading, Jailbreak community, private game servers, Roblox Jailbreak trading hub, safe trading spaces, verified Roblox servers, Jailbreak player community, Roblox game servers"
+    />
+
+    <!-- Twitter Card metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="<%= title %>" />
+    <meta property="twitter:image" content="<%= logoUrl %>" />
+
+    <title><%= title %></title>
+
+    <link
+      rel="canonical"
+      href="https://jailbreakchangelogs.xyz/servers"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+
+    <link rel="stylesheet" href="styles/servers.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Luckiest+Guy&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  </head>
+
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
+    <%- include('partials/nav') %>
+    <%- include('partials/announcement') %>
+
+    <!-- After nav and announcement -->
+    <div class="server-intro mb-4">
+      <h1 class="display-4 mb-3">Roblox Jailbreak Private Servers</h1>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="intro-text">
+            <p class="lead">
+              Welcome to our Private Servers hub! Connect with fellow Jailbreak
+              players in dedicated trading and gaming spaces. Browse through
+              community-shared servers, or share your own to build the ultimate
+              Jailbreak trading community.
+            </p>
+            <div class="auth-notice">
+              <i class="bi bi-info-circle"></i>
+              To submit, edit, or delete servers, please log in to your JBC
+              account. This helps us maintain a reliable trading environment.
+            </div>
+
+            <div class="feature-grid mt-4">
+              <div class="feature-item">
+                <i class="bi bi-people-fill text-primary"></i>
+                <h5>Trading Spaces</h5>
+                <p>
+                  Join dedicated servers for safe and efficient trading with
+                  other Jailbreak players. Find the perfect environment for your
+                  trading needs.
+                </p>
+              </div>
+
+              <div class="feature-item">
+                <i class="bi bi-shield-check text-primary"></i>
+                <h5>Verified Servers</h5>
+                <p>
+                  We verify all submitted server links to ensure they are not
+                  malicious and are safe to use. Your security is our priority.
+                </p>
+              </div>
+
+              <div class="feature-item">
+                <i class="bi bi-clock text-primary"></i>
+                <h5>Auto-Managed Servers</h5>
+                <p>
+                  Our system automatically removes expired servers to ensure all
+                  listed servers are active and ready to use. You'll only see
+                  valid, working servers.
+                </p>
+              </div>
+
+              <div class="feature-item">
+                <i class="bi bi-plus-circle text-primary"></i>
+                <h5>Share Your Server</h5>
+                <p>
+                  Have a great private server? Share it with the community and
+                  help build our trading network.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Replace the current server list container with this -->
+    <div class="container my-4">
+      <div class="server-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="section-title mb-0">Available Servers</h2>
+          <button
+            class="btn btn-primary"
+            id="addServerBtn"
+            onclick="checkAuthAndShowModal()"
+          >
+            <i class="bi bi-plus-circle me-2"></i>Submit a Server
+          </button>
+        </div>
+
+        <div class="server-container">
+          <div id="serverList" class="row g-4">
+            <!-- Servers will be loaded here -->
+            <div class="text-center" id="loading">
+              <div class="custom-spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="addServerModal"
+      tabindex="-1"
+      aria-labelledby="addServerModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addServerModalLabel">
+              Add Private Server
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <form id="addServerForm" onsubmit="handleAddServer(event)">
+            <div class="modal-body">
+              <!-- Server Link -->
+              <div class="mb-3">
+                <label for="serverLink" class="form-label"
+                  >Server Link <span class="text-danger">*</span></label
+                >
+                <input
+                  type="url"
+                  class="form-control"
+                  id="serverLink"
+                  name="serverLink"
+                  pattern="https://www\.roblox\.com/share\?code=.*"
+                  title="Link must start with 'https://www.roblox.com/share?code='"
+                  placeholder="https://www.roblox.com/share?code=..."
+                  required
+                />
+                <div class="form-text">Enter the full private server link</div>
+              </div>
+
+              <!-- Server Rules -->
+              <div class="mb-3">
+                <label for="serverRules" class="form-label">Server Rules</label>
+                <textarea
+                  class="form-control"
+                  id="serverRules"
+                  name="serverRules"
+                  rows="3"
+                  placeholder="Enter server rules (optional)"
+                ></textarea>
+              </div>
+
+              <!-- Expiration Date -->
+              <div class="mb-3">
+                <label for="expiresAt" class="form-label"
+                  >Expires At <span class="text-danger">*</span></label
+                >
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  id="expiresAt"
+                  name="expiresAt"
+                  required
+                />
+                <div class="form-text">When will this server link expire?</div>
+              </div>
+              <div class="form-check mb-3">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="neverExpires"
+                />
+                <label class="form-check-label" for="neverExpires">
+                  Never expires
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Add Server
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+      integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/servers.js"></script>
+
+    <script
+      async
+      src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"
+    ></script>
+    <script>
+      (function () {
+        function signalGooglefcPresent() {
+          if (!window.frames["googlefcPresent"]) {
+            if (document.body) {
+              const iframe = document.createElement("iframe");
+              iframe.style =
+                "width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;";
+              iframe.style.display = "none";
+              iframe.name = "googlefcPresent";
+              document.body.appendChild(iframe);
+            } else {
+              setTimeout(signalGooglefcPresent, 0);
+            }
+          }
+        }
+        signalGooglefcPresent();
+      })();
+    </script>
+    <%- include('partials/footer') %>
+  </body>
+  <script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+    crossorigin="anonymous"
+  ></script>
+</html>

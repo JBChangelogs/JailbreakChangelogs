@@ -1,13 +1,28 @@
 User-agent: *
 Allow: /
 
-# Allow crawling of all content
-Allow: /*.js
-Allow: /*.css
-Allow: /*.png
-Allow: /*.jpg
-Allow: /*.gif
-Allow: /*.ejs
+# Main Value Pages
+Allow: /values
+Allow: /values/calculator
+Allow: /item/*/
+Allow: /item/*/*
 
-# Location of the XML sitemap
+// Important Trading Sections
+Allow: /trading
+Allow: /values?sort=*
+Allow: /values/calculator
+
+# Static Resources
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.webp$
+
+# Clean URLs
+Disallow: /*?page=
+Disallow: /*?filter=
+Disallow: /api/
+
+# Increased crawl rate for item pages
+Crawl-delay: 0.5
+
 Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml

@@ -1,33 +1,3 @@
-## [2.10.1](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.10.0...v2.10.1) (2024-12-05)
-
-
-### Bug Fixes
-
-* fixed the markdown issue for inline items ([abdf085](https://github.com/JBChangelogs/JailbreakChangelogs/commit/abdf085122162c683a736021870b4994ec2646a8))
-
-# [2.10.0](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.5...v2.10.0) (2024-11-26)
-
-## [2.9.5](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.4...v2.9.5) (2024-11-21)
-
-
-### Bug Fixes
-
-* better loading on images on bot page ([1c69b6c](https://github.com/JBChangelogs/JailbreakChangelogs/commit/1c69b6c085ac9f80c23426b63936e49206167bc3))
-
-## [2.9.4](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.3...v2.9.4) (2024-11-21)
-
-
-### Bug Fixes
-
-* user avatars not loading, not being able to edit description, and better loading on images on home page ([8d2346a](https://github.com/JBChangelogs/JailbreakChangelogs/commit/8d2346a21533aab5f1d2e873a600bf3172774d5d))
-
-## [2.9.3](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.2...v2.9.3) (2024-11-20)
-
-
-### Bug Fixes
-
-* fixed the default pfp ([251d551](https://github.com/JBChangelogs/JailbreakChangelogs/commit/251d5516c2274c133dbccc8e6493ce7738f06974))
-
 ## [2.9.2](https://github.com/JBChangelogs/JailbreakChangelogs/compare/v2.9.1...v2.9.2) (2024-11-14)
 
 

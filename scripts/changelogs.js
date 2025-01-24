@@ -1,11 +1,8 @@
 $(document).ready(function () {
-  // Get references to DOM elements
-  const loadingOverlay = document.getElementById("loading-overlay");
-  const apiUrl = "https://api.jailbreakchangelogs.xyz/changelogs/list";
+  const apiUrl = "https://api3.jailbreakchangelogs.xyz/changelogs/list";
   const imageElement = document.getElementById("sidebarImage");
   const sectionsElement = document.getElementById("content");
   const titleElement = document.getElementById("changelogTitle");
-  const CommentHeader = document.getElementById("comment-header");
   const startDateBtn = document.getElementById("startDateBtn");
   const endDateBtn = document.getElementById("endDateBtn");
   const startDateInput = document.getElementById("startDate");
@@ -20,20 +17,26 @@ $(document).ready(function () {
     document.getElementById("dateFilterModal")
   );
 
-  // Caching variables
-  const CACHE_KEY = "changelogsCache";
-  const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
-
-  const desktopLatestChangelogBtn = document.getElementById(
-    "desktopLatestChangelogBtn"
-  );
-  const mobileLatestChangelogBtn = document.getElementById(
-    "mobileLatestChangelogBtn"
-  );
-
   // jQuery references for search results and navbar
   const $searchResultsContainer = $("#search-results");
   const $navbarCollapse = $("#navbarContent");
+  const debounceLatestChangelog = (function () {
+    let timeoutId = null;
+    const delay = 4700; // Same as random changelog delay for consistency
+
+    return function (fn) {
+      if (timeoutId) {
+        return; // Exit if there's a pending action
+      }
+
+      fn(); // Execute the function
+
+      // Set the timeout and store its ID
+      timeoutId = setTimeout(() => {
+        timeoutId = null; // Reset the timeout ID after delay
+      }, delay);
+    };
+  })();
 
   // Initialize changelogs data and debounce timer
   let changelogsData = [];
@@ -41,120 +44,73 @@ $(document).ready(function () {
   let debounceTimer;
 
   function escapeHtml(text) {
-    // First preserve any existing highlight spans by using temporary markers
-    text = text.replace(
-      /<span class="highlight">(.*?)<\/span>/g,
-      "§§H§§$1§§/H§§"
-    );
-    text = text.replace(
-      /<span class="highlight mention">(.*?)<\/span>/g,
-      "§§M§§$1§§/M§§"
-    );
-
-    // Escape HTML entities
+    // Create a temporary div to handle HTML encoding
     const div = document.createElement("div");
     div.textContent = text;
-    text = div.innerHTML;
-
-    // Decode any existing HTML entities to prevent double encoding
-    text = text
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">");
-
-    // Restore highlight spans
-    text = text.replace(
-      /§§H§§(.*?)§§\/H§§/g,
-      '<span class="highlight">$1</span>'
-    );
-    text = text.replace(
-      /§§M§§(.*?)§§\/M§§/g,
-      '<span class="highlight mention">$1</span>'
-    );
-
-    return text;
+    return div.innerHTML;
   }
 
-  // Function to get cache from localStorage
-  function getCache() {
-    const cache = localStorage.getItem(CACHE_KEY);
-    return cache ? JSON.parse(cache) : null;
+  function updateChangelogBreadcrumb(changelogId) {
+    const breadcrumbHtml = `
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/changelogs">Changelogs</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Changelog ${changelogId}</li>
+        </ol>
+    `;
+    document.querySelector('nav[aria-label="breadcrumb"]').innerHTML =
+      breadcrumbHtml;
   }
 
-  // Function to set cache in localStorage
-  function setCache(data) {
-    const cacheData = {
-      data: data,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-  }
+  $("#latestChangelogBtn, #latestChangelogMobileBtn").on("click", function () {
+    const $btn = $(this);
 
-  // Function to check if cache is expired
-  function isCacheExpired(cacheTimestamp) {
-    return Date.now() - cacheTimestamp > CACHE_EXPIRY;
-  }
-
-  // Function to display the most recent changelog entry.
-  async function displayLatestChangelog() {
-    try {
-      const response = await fetch(
-        "https://api.jailbreakchangelogs.xyz/changelogs/latest",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch latest changelog");
-      }
-
-      const data = await response.json();
-      const latestChangelogId = data.id;
-
-      // Find the changelog with the matching ID
-      const latestChangelog = changelogsData.find(
-        (cl) => cl.id === latestChangelogId
-      );
-
-      if (latestChangelog) {
-        displayChangelog(latestChangelog);
-        updateDropdownButton("default");
-        changelogToast("Showing latest changelog");
-      } else {
-        console.error("Latest changelog not found in local data");
-      }
-    } catch (error) {
-      console.error("Error fetching latest changelog:", error);
-      // Fallback to first changelog in the array if API call fails
-      if (changelogsData.length > 0) {
-        displayChangelog(changelogsData[0]);
-        updateDropdownButton("default");
-        changelogToast("Showing latest changelog");
-      }
+    // Check if button is already disabled
+    if ($btn.prop("disabled")) {
+      return;
     }
-  }
 
-  // Event listener for the desktop version of the "Latest Changelog" button
-  desktopLatestChangelogBtn.addEventListener("click", displayLatestChangelog);
+    debounceLatestChangelog(() => {
+      if (changelogsData && changelogsData.length > 0) {
+        const latestChangelog = changelogsData[0];
+        const currentChangelogId = parseInt(
+          window.location.pathname.split("/").pop()
+        );
 
-  // Event listener for the mobile version of the "Latest Changelog" button
-  mobileLatestChangelogBtn.addEventListener("click", function (e) {
-    e.preventDefault(); // Prevent default action if the button is a link
-    displayLatestChangelog(); // Show the latest changelog
+        // Only proceed if we're not already on the latest changelog
+        if (currentChangelogId !== latestChangelog.id) {
+          const newUrl = `/changelogs/${latestChangelog.id}`;
+          history.pushState({}, "", newUrl);
+          displayChangelog(latestChangelog);
+          updateChangelogBreadcrumb(latestChangelog.id);
+
+          if (window.commentsManagerInstance) {
+            window.commentsManagerInstance.clearComments();
+            window.commentsManagerInstance.type = "changelog";
+            window.commentsManagerInstance.itemId = latestChangelog.id;
+            window.commentsManagerInstance.loadComments();
+          }
+
+          changelogToast("Showing latest changelog");
+        }
+      }
+    });
+    // Add visual feedback by disabling the button temporarily
+    $btn.prop("disabled", true).addClass("disabled");
+
+    // Re-enable the button after the delay
+    setTimeout(() => {
+      $btn.prop("disabled", false).removeClass("disabled");
+    }, 4700);
   });
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
-    loadingOverlay.classList.add("show");
+    $("#loading-overlay").addClass("show");
   }
 
-  // Function to hide the loading overlay
   function hideLoadingOverlay() {
-    loadingOverlay.classList.remove("show");
+    $("#loading-overlay").removeClass("show");
   }
 
   showLoadingOverlay();
@@ -213,7 +169,6 @@ $(document).ready(function () {
     openDatePicker("endDate", "endDateBtn");
   });
 
-  // Event listeners for the date inputs
   document.getElementById("startDate").addEventListener("change", function () {
     updateButtonText("startDateBtn", new Date(this.value));
     this.style.display = "none";
@@ -339,7 +294,7 @@ $(document).ready(function () {
     clearedFilterToast("The date filter has been cleared successfully!");
   });
 
-  // Function to populate the changelog dropdowns for mobile and desktop
+  /// Function to populate the changelog dropdowns for mobile and desktop
   function populateChangelogDropdown(changelogs, buttonText) {
     const $mobileDropdown = $("#mobileChangelogList");
     const $desktopDropdown = $("#desktopChangelogList");
@@ -372,7 +327,7 @@ $(document).ready(function () {
 
         $mobileDropdown.append(`
         <li class="w-100">
-            <a class="dropdown-item changelog-dropdown-item w-100" href="#" data-changelog-id="${changelog.id}" title="${fullTitle}">
+            <a class="dropdown-item changelog-dropdown-item w-100" href="?changelog=${changelog.id}" data-changelog-id="${changelog.id}" title="${fullTitle}">
                 <span class="changelog-title">${truncatedTitle}</span>
             </a>
         </li>
@@ -380,7 +335,7 @@ $(document).ready(function () {
 
         $desktopDropdown.append(`
         <li class="w-100">
-            <a class="dropdown-item changelog-dropdown-item w-100" href="#" data-changelog-id="${changelog.id}">
+            <a class="dropdown-item changelog-dropdown-item w-100" href="?changelog=${changelog.id}" data-changelog-id="${changelog.id}">
                 <span class="changelog-title">${fullTitle}</span>
             </a>
         </li>
@@ -393,6 +348,23 @@ $(document).ready(function () {
         $mobileDropdownButton.html(`${iconHtml}${buttonText}`);
         $desktopDropdownButton.html(`${iconHtml}${buttonText}`);
       }
+
+      // Add click event handlers for the dropdown items
+      $(".changelog-dropdown-item").on("click", function (e) {
+        e.preventDefault();
+        const changelogId = $(this).data("changelog-id");
+
+        // Update the URL without reloading the page
+        const newUrl = `/changelogs/${changelogId}`;
+        history.pushState({}, "", newUrl);
+
+        // Find the selected changelog
+        const selectedChangelog = changelogs.find((cl) => cl.id == changelogId);
+        if (selectedChangelog) {
+          displayChangelog(selectedChangelog);
+          updateChangelogBreadcrumb(changelogId);
+        }
+      });
     }
   }
 
@@ -415,7 +387,6 @@ $(document).ready(function () {
     }
   }
 
-  // jQuery references for search input and UI elements
   const $searchInput = $('input[aria-label="Search changelogs"]');
   const $exampleQueries = $("#exampleQueries");
   const $clearButton = $("#clearSearch");
@@ -433,32 +404,32 @@ $(document).ready(function () {
       debounceTimer = setTimeout(() => {
         performSearch(); // Call performSearch after the delay
       }, 300); // 300 milliseconds delay
+    } else {
+      // Clear search results when input is empty
+      clearSearch();
     }
   });
 
-  // Event listener for the clear button
-  $clearButton.on("click", function () {
-    $searchInput.val(""); // Clear the search input
-    $clearButton.hide(); // Hide the clear button
-    $searchResultsContainer.empty(); // Clear the search results
-    $searchResultsContainer.hide();
+  // Unified clear search function
+  function clearSearch() {
+    $searchInput.val("").blur(); // Add blur() to remove focus
+    $clearButton.hide();
+    $searchResultsContainer.empty().hide();
     $exampleQueries.removeClass("d-none");
+  }
 
-    // Trigger input event to update search results
-    // $searchInput.trigger("input");
+  // Update clear button click handler
+  $clearButton.on("click", clearSearch);
 
-    // Focus back on the input
-    $searchInput.focus();
-  });
-
-  // Handle Enter key press or mobile 'Go' button
+  // Update keyboard event handler
   $searchInput.on("keydown", function (e) {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent default form submission behavior
       focusOnSearchResults(); // Focus on the search results
-      $clearButton.hide(); // Hide the clear button
-      $searchInput.trigger("input"); // Trigger input event to update search
       dismissKeyboard(); // Dismiss the keyboard on mobile
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      clearSearch();
     }
   });
 
@@ -467,6 +438,7 @@ $(document).ready(function () {
     e.preventDefault(); // Prevent default action
     const query = $(this).text(); // Get the example query text
     $searchInput.val(query); // Set the search input to the example query
+    $clearButton.show();
     performSearch(); // Perform the search
     $exampleQueries.addClass("d-none"); // Hide example queries
   });
@@ -636,100 +608,6 @@ $(document).ready(function () {
     return new bootstrap.Dropdown(dropdownToggleEl); // Create Bootstrap dropdown instances
   });
 
-  // Define buttons for copying changelog
-  const mobileCopyChangelogBtn = $("#mobileCopyChangelog");
-  const desktopCopyChangelogBtn = $("#desktopCopyChangelog");
-
-  // Combined function to handle copying the changelog content
-  function copyChangelog() {
-    // Disable buttons to prevent spamming
-    mobileCopyChangelogBtn.prop("disabled", true);
-    desktopCopyChangelogBtn.prop("disabled", true);
-
-    // Get the content of the changelog
-    const changelogContent = $("#content").clone();
-
-    // Get the current page URL
-    const currentPageUrl = window.location.href;
-
-    // Process the content into an array
-    let processedContent = [];
-
-    // Add the title (h1) with '#' before it
-    const title = changelogContent.find("h1.display-4").first().text().trim();
-    processedContent.push("# " + title, "");
-
-    // Process other elements in the changelog
-    changelogContent.children().each(function () {
-      const $elem = $(this);
-      if ($elem.is("h2")) {
-        processedContent.push("", "## " + $elem.text().trim(), "");
-      } else if ($elem.is("p.lead")) {
-        // Handle italicized text in paragraphs
-        let text = $elem.html();
-        // Replace italic spans with underscore-wrapped text
-        text = text.replace(
-          /<span style="font-style: italic;[^"]*">([^<]+)<\/span>/g,
-          "_$1_"
-        );
-        // Remove any other HTML tags and trim
-        text = $("<div>").html(text).text().trim();
-        processedContent.push(text);
-      } else if ($elem.hasClass("d-flex")) {
-        const $leadElem = $elem.find(".lead");
-        // Handle italicized text in list items
-        let text = $leadElem.html();
-        // Replace italic spans with underscore-wrapped text
-        text = text.replace(
-          /<span style="font-style: italic;[^"]*">([^<]+)<\/span>/g,
-          "_$1_"
-        );
-        // Remove any other HTML tags and trim
-        text = $("<div>").html(text).text().trim();
-
-        if ($elem.find(".bi-arrow-return-right").length > 0) {
-          processedContent.push("  - " + text);
-        } else if ($elem.find(".bi-arrow-right").length > 0) {
-          processedContent.push("- " + text);
-        } else {
-          processedContent.push("- " + text);
-        }
-      }
-    });
-
-    // Add custom message at the end with the current page URL
-    processedContent.push(
-      "",
-      "",
-      `This changelog was copied from ${currentPageUrl}`
-    );
-
-    // Join the processed content with newlines
-    const cleanedContent = processedContent.join("\n");
-
-    // Copy the cleaned content to the clipboard
-    navigator.clipboard
-      .writeText(cleanedContent)
-      .then(() => {
-        // Show the toast notification
-        copiedChangelogToast("Changelog copied to clipboard!"); // Notify user of success
-      })
-      .catch((err) => {
-        console.error("Failed to copy text: ", err); // Log error if copy fails
-        alert("Failed to copy changelog. Please try again."); // Alert user of failure
-      })
-      .finally(() => {
-        // Re-enable buttons after a delay
-        setTimeout(() => {
-          mobileCopyChangelogBtn.prop("disabled", false);
-          desktopCopyChangelogBtn.prop("disabled", false); // Re-enable both buttons
-        }, 5000); // 5 seconds delay
-      });
-  }
-  // Attach the combined function to both copy changelog buttons
-  mobileCopyChangelogBtn.on("click", copyChangelog);
-  desktopCopyChangelogBtn.on("click", copyChangelog);
-
   // Function to open the changelog dropdown
   function openChangelogDropdown() {
     const $mobileDropdownEl = $("#mobileChangelogDropdown"); // Mobile dropdown reference
@@ -788,55 +666,38 @@ $(document).ready(function () {
     });
   }
 
-  // Function to toggle the visibility of the clear button based on input
-  function toggleClearButton() {
-    $clearButton.toggle($searchInput.val().length > 0); // Show/hide clear button based on input length
-  }
-
-  // Function to hide search results and focus on the input
-  function hideSearchResults() {
-    $("#search-results").hide(); // Hide search results
-    $searchInput.focus(); // Focus on the search input
-  }
-
-  // Function to clear the search input and reset UI elements
-  function clearSearch() {
-    $searchInput.val(""); // Clear the input value
-
-    toggleClearButton(); // Update clear button visibility
-    hideSearchResults(); // Hide search results
-    dismissKeyboard(); // Dismiss the keyboard
-  }
-
   // Function to highlight specific text in a string based on a query
   function highlightText(text, query) {
-    // First escape any HTML in the original text
-    let highlightedText = escapeHtml(text);
+    // First escape HTML special characters
+    let safeText = escapeHtml(text);
 
-    const words = query
-      .split(/\s+/)
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
+    // Check if this is a mention search
+    const isMentionSearch = query.trim() === "has:mention";
 
-    // Highlight other query words in the text first
-    words.forEach((word) => {
-      if (word !== "has:" && word !== "mention") {
-        // Modified regex to avoid matching within HTML tags
-        const regex = new RegExp(`(?![^<]*>)(${word})`, "gi");
-        highlightedText = highlightedText.replace(
-          regex,
-          '<span class="highlight">$1</span>'
-        );
-      }
-    });
+    if (isMentionSearch) {
+      // Only highlight mentions for has:mention searches
+      safeText = safeText.replace(
+        /@(\w+)/g,
+        '<span class="highlight mention">@$1</span>'
+      );
+    } else {
+      // For regular searches, highlight the search terms
+      const words = query
+        .split(/\s+/)
+        .filter((word) => word.length > 0)
+        .map((word) => escapeRegExp(word));
 
-    // Highlight @mentions in the text last
-    highlightedText = highlightedText.replace(
-      /@(\w+)/g,
-      '<span class="highlight mention">@$1</span>'
-    );
+      const pattern = words.join("|");
+      const regex = new RegExp(`(${pattern})`, "gi");
+      safeText = safeText.replace(regex, '<span class="highlight">$1</span>');
+    }
 
-    return highlightedText;
+    return safeText;
+  }
+
+  // Helper function to escape special characters in regex
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   // Function to convert Markdown text to HTML
@@ -846,11 +707,10 @@ $(document).ready(function () {
       /\b_([^_]+)_\b/g,
       '<span style="font-style: italic; color: var(--content-paragraph);">$1</span>'
     );
-
     return markdown
-      .split("\n")
+      .split("\n") // Split the markdown into lines
       .map((line) => {
-        line = line.trim();
+        line = line.trim(); // Trim whitespace from the line
         // Handle different Markdown syntaxes
         if (line.startsWith("# ")) {
           return `<h1 class="display-4 mb-4 text-custom-header border-bottom border-custom-header pb-2">${wrapMentions(
@@ -874,27 +734,30 @@ $(document).ready(function () {
                             line.substring(2)
                           )}</p>
                       </div>`; // Convert to another styled list item
-        } else if (line.startsWith("(audio)")) {
-          const audioUrl = line.substring(7).trim(); // Extract audio URL
-          const audioType = audioUrl.endsWith(".wav")
-            ? "audio/wav"
-            : "audio/mpeg"; // Determine audio type
-          return `<audio class="w-100 mt-2 mb-2" controls><source src="${audioUrl}" type="audio/mpeg"></audio>`; // Create audio element
-        } else if (line.startsWith("(image)")) {
-          const imageUrl = line.substring(7).trim(); // Extract image URL
-          return `<img src="${imageUrl}" alt="Image" class="img-fluid mt-2 mb-2 rounded" style="max-height: 270px;">`; // Create image element
-        } else if (line.startsWith("(video)")) {
-          const videoUrl = line.substring(7).trim();
-          return `
-            <video 
-                class="video-responsive" 
-                controls
-                preload="metadata"
-                playsinline
-            >
-                <source src="${videoUrl}" type="video/webm">
-                Your browser does not support the video tag.
+        } else if (
+          line.startsWith("(audio)") ||
+          line.startsWith("(video)") ||
+          line.startsWith("(image)")
+        ) {
+          // Add class for media element and margin if it follows another media element
+          const isMedia = true;
+          const mediaElementClass = "media-element-spacing";
+
+          if (line.startsWith("(video)")) {
+            const videoUrl = line.substring(7).trim();
+            return `<video class="${mediaElementClass}" controls preload="metadata" playsinline>
+              <source src="${videoUrl}" type="video/webm">
+              Your browser does not support the video tag.
             </video>`;
+          } else if (line.startsWith("(image)")) {
+            const imageUrl = line.substring(7).trim();
+            return `<img src="${imageUrl}" alt="Image" class="${mediaElementClass}">`;
+          } else if (line.startsWith("(audio)")) {
+            const audioUrl = line.substring(7).trim();
+            return `<audio class="${mediaElementClass}" controls>
+              <source src="${audioUrl}" type="audio/mpeg">
+            </audio>`;
+          }
         } else {
           return `<p class="lead mb-2">${wrapMentions(line)}</p>`; // Default to paragraph
         }
@@ -909,70 +772,121 @@ $(document).ready(function () {
       '<span class="mention fw-bold"><span class="at">@</span><span class="username">$1</span></span>' // Highlight mentions
     );
   };
+
+  // Replace this function in changelogs.js
   function processChangelogData(data) {
     changelogsData = data;
 
     if (Array.isArray(data) && data.length > 0) {
       populateChangelogDropdown(data);
 
-      // Get changelogId from the URL path, e.g., /changelogs/{changelog id}
+      // Get the changelog ID from URL
       const pathSegments = window.location.pathname.split("/");
       const changelogId = pathSegments[pathSegments.length - 1];
 
-      // Find the requested changelog in the data
-      let selectedChangelog = changelogId
-        ? changelogsData.find((cl) => cl.id == changelogId)
-        : null;
+      // Find the requested changelog in our data
+      const selectedChangelog = data.find((cl) => cl.id == changelogId);
 
-      // If no changelog is found, it will be handled by the server redirect
       if (selectedChangelog) {
+        // Update breadcrumb and display changelog
+        document.querySelector('nav[aria-label="breadcrumb"]').innerHTML = `
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/changelogs">Changelogs</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Changelog ${selectedChangelog.id}</li>
+        </ol>
+      `;
+
         displayChangelog(selectedChangelog);
 
-        // Toggle button visibility based on whether the selected changelog is the latest one
-        const isLatestChangelog = selectedChangelog.id === data[0].id;
-        desktopLatestChangelogBtn.style.display = isLatestChangelog
-          ? "none"
-          : "block";
-        mobileLatestChangelogBtn.style.display = isLatestChangelog
-          ? "none"
-          : "block";
+        // Initialize comments manager
+        if (!window.commentsManagerInstance) {
+          window.commentsManagerInstance = new CommentsManager(
+            "changelog",
+            changelogId
+          );
+          window.commentsManagerInstance.loadComments();
+        }
+      } else {
+        // If changelog not found, display latest
+        const latestChangelog = data[0];
+        history.replaceState({}, "", `/changelogs/${latestChangelog.id}`);
+        displayChangelog(latestChangelog);
+        updateChangelogBreadcrumb(latestChangelog.id);
       }
     }
-
     hideLoadingOverlay();
   }
 
-  function fetchDataFromAPI() {
+  // Make the function globally accessible
+  window.fetchDataFromAPI = function () {
     return $.getJSON(apiUrl)
       .done((data) => {
-        setCache(data);
         processChangelogData(data);
       })
       .fail((jqXHR, textStatus, errorThrown) => {
         console.error("Error fetching changelogs:", errorThrown);
-        $("#content").html(
-          "<p>Error loading changelogs. Please try again later.</p>"
-        );
+
+        const errorMessage = getErrorMessage(jqXHR.status);
+
+        // Update main content
+        $("#content").html(`
+          <div class="api-error-container">
+            <div class="api-error-icon">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 class="api-error-title">Unable to Load Data</h2>
+            <p class="api-error-message">
+              We're having trouble loading the changelog information. This might be due to a temporary connection issue or server maintenance.
+            </p>
+            <button class="api-retry-button" id="retryButton">Try Again</button>
+            <p class="api-error-details">
+              If the problem persists, please refresh the page or try again later.<br>
+              You can check our service status at <a href="https://status.jailbreakchangelogs.xyz/" target="_blank" class="status-link">status.jailbreakchangelogs.xyz</a>
+            </p>
+          </div>
+        `);
+
+        // Update sidebar image
+        $("#sidebarImage").html(`
+          <div class="api-error-container">
+            <div class="api-error-icon">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 class="api-error-title">Unable to Load Changelog Image</h2>
+          </div>
+        `);
+
+        // Add event listener after inserting the button
+        $("#retryButton").on("click", () => {
+          fetchDataFromAPI();
+        });
+
         hideLoadingOverlay();
       });
-  }
+  };
 
-  // Check cache before fetching
-  const cachedData = getCache();
-  if (cachedData && !isCacheExpired(cachedData.timestamp)) {
-    processChangelogData(cachedData.data);
-  } else {
-    fetchDataFromAPI();
+  // Initial data fetch
+  fetchDataFromAPI();
+
+  function getErrorMessage(statusCode) {
+    switch (statusCode) {
+      case 404:
+        return "The requested information could not be found. Please check back later.";
+      case 403:
+        return "You don't have permission to access this information. Please check your credentials.";
+      case 500:
+        return "We're experiencing server issues. Our team has been notified and is working on it.";
+      case 0:
+        return "Unable to connect to the server. Please check your internet connection.";
+      default:
+        return "We're having trouble loading the changelog information. This might be due to a temporary connection issue or server maintenance.";
+    }
   }
 
   // Function to perform a search based on user input
   function performSearch() {
     const query = $searchInput.val().trim().toLowerCase(); // Get and normalize the search query
-
-    if (query.length === 0) {
-      hideSearchResults(); // Hide search results if the input is empty
-      return; // Exit the function early
-    }
 
     let searchResults = []; // Initialize an array for search results
 
@@ -1007,13 +921,6 @@ $(document).ready(function () {
     }
 
     displaySearchResults(searchResults, query); // Display the search results
-    toggleClearButton(); // Update clear button visibility
-  }
-
-  // Function to hide the search results container and focus on the search input
-  function hideSearchResults() {
-    $searchResultsContainer.hide(); // Hide the search results container
-    $searchInput.focus(); // Focus on the search input
   }
 
   // Function to display search results based on the user's query
@@ -1098,14 +1005,35 @@ $(document).ready(function () {
         ].join("");
 
         $listItem.html(`
-          <h5 class="mb-1">${escapeHtml(highlightedTitle)} ${mediaLabels}</h5>
-          <p class="mb-1 small">${escapeHtml(highlightedPreview)}</p>
-      `);
+                <h5 class="mb-1">${highlightText(
+                  changelog.title,
+                  query
+                )} ${mediaLabels}</h5>
+                <p class="mb-1 small">${highlightText(previewText, query)}</p>
+            `);
+
         // Click event to display the selected changelog
         $listItem.on("click", () => {
-          displayChangelog(changelog); // Display the selected changelog
-          clearSearch(); // Clear the search input
-          dismissKeyboard(); // Dismiss the keyboard
+          // Update the URL without reloading the page
+          const newUrl = `/changelogs/${changelog.id}`;
+          history.pushState({}, "", newUrl);
+
+          // Clear search when clicking a result
+          clearSearch();
+
+          // Display the selected changelog
+          displayChangelog(changelog);
+          updateChangelogBreadcrumb(changelog.id);
+
+          // Update comments section
+          if (window.commentsManagerInstance) {
+            window.commentsManagerInstance.clearComments();
+            window.commentsManagerInstance.type = "changelog";
+            window.commentsManagerInstance.itemId = changelog.id;
+            window.commentsManagerInstance.loadComments();
+          }
+
+          dismissKeyboard();
         });
 
         $resultsList.append($listItem); // Append the list item to the results list
@@ -1123,10 +1051,61 @@ $(document).ready(function () {
   $searchResultsContainer.on("touchstart touchmove", function (event) {
     event.stopPropagation(); // Prevent body scrolling on touch devices
   });
+
   function truncateText(text, maxLength) {
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + "...";
   }
+
+  function displayRandomChangelog() {
+    if (changelogsData && changelogsData.length > 0) {
+      const randomIndex = Math.floor(Math.random() * changelogsData.length);
+      const randomChangelog = changelogsData[randomIndex];
+
+      // Update the URL without reloading the page
+      const newUrl = `/changelogs/${randomChangelog.id}`;
+      history.pushState({}, "", newUrl);
+
+      displayChangelog(randomChangelog);
+      updateChangelogBreadcrumb(randomChangelog.id); // Update the breadcrumb
+
+      if (window.commentsManagerInstance) {
+        window.commentsManagerInstance.clearComments();
+        window.commentsManagerInstance.type = "changelog";
+        window.commentsManagerInstance.itemId = randomChangelog.id;
+        window.commentsManagerInstance.loadComments();
+      }
+
+      changelogToast("Showing a random changelog");
+    } else {
+      console.warn("No changelog data available to display a random entry.");
+      changelogToast("No changelog data available.");
+    }
+  }
+
+  const slowModeDelay = 4700;
+  const buttons = ["#randomChangelogDesktopBtn", "#randomChangelogMobileBtn"]; // IDs of the buttons
+
+  buttons.forEach(function (buttonSelector) {
+    $(buttonSelector).on("click", function () {
+      const $btn = $(this); // Cache the button element
+
+      // Check if the button is disabled
+      if ($btn.prop("disabled")) {
+        return; // Exit if already in slow mode
+      }
+
+      displayRandomChangelog(); // Call the random changelog function
+
+      // Disable the button and add a disabled class for styling
+      $btn.prop("disabled", true).addClass("disabled");
+
+      // Re-enable the button after the delay
+      setTimeout(function () {
+        $btn.prop("disabled", false).removeClass("disabled");
+      }, slowModeDelay);
+    });
+  });
 
   // Function to clean content for search
   function cleanContentForSearch(content) {
@@ -1149,9 +1128,13 @@ $(document).ready(function () {
   // Function to display the selected changelog
   function displayChangelog(changelog) {
     localStorage.setItem("selectedChangelogId", changelog.id);
-
     document.title = changelog.title;
-    reloadcomments();
+
+    // Update comments header
+    const commentsHeader = document.querySelector(".comment-header");
+    if (commentsHeader) {
+      commentsHeader.textContent = `Comments for ${changelog.title}`;
+    }
 
     if (titleElement) {
       titleElement.textContent = changelog.title;
@@ -1174,6 +1157,7 @@ $(document).ready(function () {
       const processedMarkdown = preprocessMarkdown(changelog.sections);
       const processedSections = convertMarkdownToHtml(processedMarkdown);
       contentHtml += processedSections;
+      contentHtml += createNavigationLinks(changelog);
     } else {
       console.warn("No sections available for changelog.");
       contentHtml += '<p class="lead">No sections available.</p>';
@@ -1195,158 +1179,183 @@ $(document).ready(function () {
     window.history.pushState({}, "", newPath);
 
     const isLatestChangelog = changelog.id === changelogsData[0].id;
-
-    if (isLatestChangelog) {
-      desktopLatestChangelogBtn.style.display = "none";
-      mobileLatestChangelogBtn.style.display = "none";
-    } else {
-      desktopLatestChangelogBtn.style.display = "";
-      mobileLatestChangelogBtn.style.display = "";
-    }
   }
 
   // Click event for changelog dropdown items
+  // In changelogs.js - Update the dropdown click handler
   $(document).on("click", ".changelog-dropdown-item", function (e) {
-    e.preventDefault(); // Prevent default action
-    const changelogId = $(this).data("changelog-id"); // Get changelog ID from data attribute
-    const selectedChangelog = changelogsData.find((cl) => cl.id == changelogId); // Find selected changelog
+    e.preventDefault();
+    const changelogId = $(this).data("changelog-id");
+    const selectedChangelog = changelogsData.find((cl) => cl.id == changelogId);
 
     if (selectedChangelog) {
-      displayChangelog(selectedChangelog); // Display the selected changelog
+      // Update the URL without reloading the page
+      const newUrl = `/changelogs/${changelogId}`;
+      history.pushState({}, "", newUrl);
 
-      // Close the dropdown after selection
+      // Display the changelog
+      displayChangelog(selectedChangelog);
+      updateChangelogBreadcrumb(changelogId);
+
+      // Update comments section
+      if (window.commentsManagerInstance) {
+        window.commentsManagerInstance.clearComments();
+        window.commentsManagerInstance.type = "changelog";
+        window.commentsManagerInstance.itemId = changelogId;
+        window.commentsManagerInstance.loadComments();
+      }
+
+      // Close the dropdown
       const dropdown = bootstrap.Dropdown.getInstance(
         this.closest(".dropdown-menu").previousElementSibling
       );
       if (dropdown) {
         dropdown.hide();
       }
-    } else {
-      console.error("Selected changelog not found!");
     }
   });
 
-  const CommentForm = document.getElementById("comment-form");
-  const commentinput = document.getElementById("commenter-text");
-  const commentbutton = document.getElementById("submit-comment");
-  const avatarUrl = sessionStorage.getItem("avatar");
-  const userdata = JSON.parse(sessionStorage.getItem("user"));
-  const commentsList = document.getElementById("comments-list");
-  const userid = sessionStorage.getItem("userid");
-  if (userid) {
-    commentinput.placeholder = "Comment as " + userdata.global_name;
-    commentbutton.disabled = false;
-    commentinput.disabled = false;
-  } else {
-    commentbutton.disabled = false;
-    commentbutton.textContent = "Log in";
-    commentbutton.addEventListener("click", function (event) {
-      localStorage.setItem(
-        "redirectAfterLogin",
-        "/changelogs/" + localStorage.getItem("selectedChangelogId")
-      ); // Store the redirect URL in local storage
-      window.location.href = "/login"; // Redirect to login page
-    });
+  function createNavigationLinks(currentChangelog) {
+    const currentIndex = changelogsData.findIndex(
+      (cl) => cl.id === currentChangelog.id
+    );
+    const prevChangelog =
+      currentIndex < changelogsData.length - 1
+        ? changelogsData[currentIndex + 1]
+        : null;
+    const nextChangelog =
+      currentIndex > 0 ? changelogsData[currentIndex - 1] : null;
+
+    return `
+        <nav class="changelog-navigation mt-5 border-top pt-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                ${
+                  prevChangelog
+                    ? `
+                    <div class="nav-item">
+                        <a href="/changelogs/${prevChangelog.id}" 
+                           class="quick-nav-link" 
+                           data-changelog-id="${prevChangelog.id}"
+                           title="${prevChangelog.title}">
+                            <div class="d-flex flex-column">
+                                <small class="text-muted mb-1">Previous Changelog</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span>${extractDate(
+                                      prevChangelog.title
+                                    )}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `
+                    : ""
+                }
+                
+                ${
+                  nextChangelog
+                    ? `
+                    <div class="nav-item">
+                        <a href="/changelogs/${nextChangelog.id}" 
+                           class="quick-nav-link" 
+                           data-changelog-id="${nextChangelog.id}"
+                           title="${nextChangelog.title}">
+                            <div class="d-flex flex-column">
+                                <small class="text-muted mb-1">Next Changelog</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span>${extractDate(
+                                      nextChangelog.title
+                                    )}</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `
+                    : ""
+                }
+            </div>
+        </nav>
+    `;
   }
 
-  function getCookie(name) {
-    let cookieArr = document.cookie.split(";");
-    for (let i = 0; i < cookieArr.length; i++) {
-      let cookiePair = cookieArr[i].split("=");
-      if (name === cookiePair[0].trim()) {
-        return decodeURIComponent(cookiePair[1]);
+  $(document).on("click", ".quick-nav-link", function (e) {
+    e.preventDefault();
+    const changelogId = $(this).data("changelog-id");
+    if (changelogId) {
+      const changelog = changelogsData.find((cl) => cl.id === changelogId);
+      if (changelog) {
+        const newUrl = `/changelogs/${changelogId}`;
+        history.pushState({}, "", newUrl);
+
+        // First update the content
+        displayChangelog(changelog);
+        updateChangelogBreadcrumb(changelogId);
+
+        // Update comments if necessary
+        if (window.commentsManagerInstance) {
+          window.commentsManagerInstance.clearComments();
+          window.commentsManagerInstance.type = "changelog";
+          window.commentsManagerInstance.itemId = changelogId;
+          window.commentsManagerInstance.loadComments();
+        }
+
+        // Then scroll to content with offset
+        setTimeout(() => {
+          const contentElement = document.getElementById("content-wrapper");
+          if (contentElement) {
+            const offset = 80; // Adjust this value based on your header height
+            const elementPosition = contentElement.getBoundingClientRect().top;
+            const offsetPosition =
+              elementPosition + window.pageYOffset - offset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          }
+        }, 100);
       }
     }
-    return null;
+  });
+
+  function extractDate(title) {
+    // Extract date portion from titles like "March 16th 2018 / Miscellaneous Update 12"
+    const dateMatch = title.match(/^([A-Za-z]+ \d+(?:st|nd|rd|th) \d{4})/);
+    return dateMatch ? dateMatch[1] : title;
   }
-  function throw_error(message) {
-    toastr.error(message, "Error creating comment.", {
-      positionClass: "toast-bottom-right", // Position at the bottom right
-      timeOut: 3000, // Toast will disappear after 3 seconds
-      closeButton: true, // Add a close button
-      progressBar: true, // Show a progress bar
-    });
-  }
-  function addComment(comment) {
-    const listItem = document.createElement("li");
-    listItem.classList.add("list-group-item", "d-flex", "align-items-start");
 
-    const avatarElement = document.createElement("img");
-    const defaultAvatarUrl = "/favicon.ico";
-    avatarElement.src = avatarUrl.endsWith("null.png")
-      ? defaultAvatarUrl
-      : avatarUrl;
-    avatarElement.classList.add("rounded-circle", "m-1");
-    avatarElement.width = 32;
-    avatarElement.height = 32;
+  // Add handler for navigation clicks
+  function handleNavigationClick(event, changelogId) {
+    event.preventDefault();
+    const changelog = changelogsData.find((cl) => cl.id === changelogId);
+    if (changelog) {
+      const newUrl = `/changelogs/${changelogId}`;
+      history.pushState({}, "", newUrl);
 
-    const commentContainer = document.createElement("div");
-    commentContainer.classList.add("ms-2"); // Add margin to the left of the comment
+      // First update the content
+      displayChangelog(changelog);
+      updateChangelogBreadcrumb(changelogId);
 
-    const usernameElement = document.createElement("a");
-    usernameElement.href = `/users/${userdata.id}`; // Set the href to redirect to the user's page
-    usernameElement.textContent = userdata.global_name; // Set the text to the user's global name
-    usernameElement.classList.add("text-decoration-none");
-    usernameElement.style.fontWeight = "bold"; // Make the text bold
-    usernameElement.style.textDecoration = "none"; // Remove underline
-    usernameElement.style.color = "#748d92"; // Use inherited color (usually the same as the surrounding text)
+      // Update comments if necessary
+      if (window.commentsManagerInstance) {
+        window.commentsManagerInstance.clearComments();
+        window.commentsManagerInstance.type = "changelog";
+        window.commentsManagerInstance.itemId = changelogId;
+        window.commentsManagerInstance.loadComments();
+      }
 
-    const commentTextElement = document.createElement("p");
-    commentTextElement.textContent = comment.value;
-    commentTextElement.classList.add("mb-0"); // Remove default margin from <p>
-
-    const date = Math.floor(Date.now() / 1000);
-    const formattedDate = formatDate(date); // Assuming comment.date contains the date string
-    const dateElement = document.createElement("small");
-    dateElement.textContent = formattedDate; // Add the formatted date
-    dateElement.classList.add("text-muted"); // Optional: Add a class for styling
-
-    // Append elements to the comment container
-    commentContainer.appendChild(usernameElement);
-    commentContainer.appendChild(commentTextElement);
-    commentContainer.appendChild(dateElement);
-
-    // Append avatar and comment container to the list item
-    listItem.appendChild(avatarElement);
-    listItem.appendChild(commentContainer);
-
-    // Prepend the new comment to the comments list
-
-    const token = getCookie("token");
-
-    // Post the comment to the server
-    fetch("https://api.jailbreakchangelogs.xyz/comments/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        author: token,
-        content: comment.value,
-        item_id: localStorage.getItem("selectedChangelogId"),
-        item_type: "changelog",
-      }),
-    })
-      .then(async (response) => {
-        const data = await response.json(); // Parse JSON response
-
-        if (response.status === 429) {
-          const cooldown = data.remaining;
-          throw_error("Wait " + cooldown + " seconds before commenting again.");
-          return; // Stop further execution
+      // Then scroll to content with a slight delay to ensure content is rendered
+      setTimeout(() => {
+        const contentElement = document.getElementById("content");
+        if (contentElement) {
+          contentElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
         }
-
-        if (response.ok) {
-          commentsList.prepend(listItem);
-        } else {
-          // Handle other non-429 errors (e.g., validation)
-          throw_error(data.error || "An error occurred.");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        throw_error("An unexpected error occurred.");
-      });
+      }, 100);
+    }
   }
 
   function formatDate(unixTimestamp) {
@@ -1387,190 +1396,132 @@ $(document).ready(function () {
     }
   }
 
-  let currentPage = 1; // Track the current page
-  const commentsPerPage = 5; // Number of comments per page
-  let comments = []; // Declare the comments array globally
-
-  // Function to load comments
-  function loadComments(commentsData) {
-    comments = commentsData; // Assign the fetched comments to the global variable
-    commentsList.innerHTML = ""; // Clear existing comments
-    comments.sort((a, b) => b.date - a.date);
-
-    // Calculate the total number of pages
-    const totalPages = Math.ceil(comments.length / commentsPerPage);
-
-    // Get the comments for the current page
-    const startIndex = (currentPage - 1) * commentsPerPage;
-    const endIndex = startIndex + commentsPerPage;
-    const commentsToDisplay = comments.slice(startIndex, endIndex);
-
-    const userDataPromises = commentsToDisplay.map((comment) => {
-      return fetch(
-        "https://api.jailbreakchangelogs.xyz/users/get?id=" + comment.user_id
-      )
-        .then((response) => response.json())
-        .then((userData) => ({ comment, userData }))
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-          return null;
-        });
-    });
-
-    Promise.all(userDataPromises).then((results) => {
-      const validResults = results.filter((result) => result !== null);
-
-      validResults.forEach(({ comment, userData }) => {
-        const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-
-        const listItem = document.createElement("li");
-        listItem.classList.add(
-          "list-group-item",
-          "d-flex",
-          "align-items-start"
-        );
-
-        const avatarElement = document.createElement("img");
-        const defaultAvatarUrl =
-          "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
-
-        avatarElement.src = avatarUrl.endsWith("null.png")
-          ? defaultAvatarUrl
-          : avatarUrl;
-        avatarElement.classList.add("rounded-circle", "m-1");
-        avatarElement.width = 32;
-        avatarElement.height = 32;
-
-        const commentContainer = document.createElement("div");
-        commentContainer.classList.add("ms-2");
-
-        const usernameElement = document.createElement("a");
-        usernameElement.href = `/users/${userData.id}`; // Set the href to redirect to the user's page
-        usernameElement.textContent = userData.global_name; // Set the text to the user's global name
-        usernameElement.classList.add("text-decoration-none");
-        usernameElement.style.fontWeight = "bold"; // Make the text bold
-        usernameElement.style.textDecoration = "none"; // Remove underline
-        usernameElement.style.color = "#748d92"; // Use inherited color (usually the same as the surrounding text)
-
-        const commentTextElement = document.createElement("p");
-        commentTextElement.textContent = comment.content;
-        commentTextElement.classList.add("mb-0");
-
-        const formattedDate = formatDate(comment.date);
-        const dateElement = document.createElement("small");
-        dateElement.textContent = formattedDate;
-        dateElement.classList.add("text-muted");
-
-        commentContainer.appendChild(usernameElement);
-        commentContainer.appendChild(commentTextElement);
-        commentContainer.appendChild(dateElement);
-        listItem.appendChild(avatarElement);
-        listItem.appendChild(commentContainer);
-        commentsList.appendChild(listItem);
-      });
-
-      // Render pagination controls
-      renderPaginationControls(totalPages);
-    });
-  }
-
-  // Function to render pagination controls with arrows and input
-  function renderPaginationControls(totalPages) {
-    const paginationContainer = document.getElementById("paginationControls");
-    paginationContainer.innerHTML = ""; // Clear existing controls
-
-    // Create left arrow button
-    const leftArrow = document.createElement("button");
-    leftArrow.textContent = "<";
-    leftArrow.classList.add("btn", "btn-outline-primary", "m-1");
-    leftArrow.disabled = currentPage === 1; // Disable if on the first page
-    leftArrow.addEventListener("click", () => {
-      if (currentPage > 1) {
-        currentPage--;
-        loadComments(comments); // Reload comments for the current page
-      }
-    });
-    paginationContainer.appendChild(leftArrow);
-
-    // Page number input
-    const pageInput = document.createElement("input");
-    pageInput.type = "number";
-    pageInput.value = currentPage;
-    pageInput.min = 1;
-    pageInput.max = totalPages;
-    pageInput.classList.add("form-control", "mx-1");
-    pageInput.style.width = "60px"; // Set width for input
-    pageInput.addEventListener("change", () => {
-      const newPage = parseInt(pageInput.value);
-      if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
-        loadComments(comments); // Reload comments for the new page
-      } else {
-        pageInput.value = currentPage; // Reset input if invalid
-      }
-    });
-    paginationContainer.appendChild(pageInput);
-
-    // Create right arrow button
-    const rightArrow = document.createElement("button");
-    rightArrow.textContent = ">";
-    rightArrow.classList.add("btn", "btn-outline-primary", "m-1");
-    rightArrow.disabled = currentPage === totalPages; // Disable if on the last page
-    rightArrow.addEventListener("click", () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        loadComments(comments); // Reload comments for the current page
-      }
-    });
-    paginationContainer.appendChild(rightArrow);
-  }
-
-  function reloadcomments() {
-    CommentHeader.textContent =
-      "Comments For Changelog " + localStorage.getItem("selectedChangelogId");
-    fetch(
-      "https://api.jailbreakchangelogs.xyz/comments/get?type=changelog&id=" +
-        localStorage.getItem("selectedChangelogId")
-    )
-      .then((response) => {
-        if (!response.ok) {
-          console.error("Unexpected response status:", response.status);
-          return null; // Exit early if the response is not OK
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (!data) return; // Prevent further execution if the response was not OK
-
-        // Check if data contains a message like "No comments found"
-        if (data.message && data.message === "No comments found") {
-          console.log(data.message);
-          commentsList.innerHTML = "";
-          return;
-        }
-
-        // Check if data contains the comments as an array
-        if (Array.isArray(data)) {
-          loadComments(data); // Load the comments if data is an array
-        } else if (data.comments && Array.isArray(data.comments)) {
-          loadComments(data.comments); // Load nested comments if available
-        } else {
-          console.error("Unexpected response format:", data); // Handle unexpected format
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching comments:", error); // Handle any errors
-      });
-  }
-
-  CommentForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const comment = document.getElementById("commenter-text");
-    addComment(comment);
-    comment.value = ""; // Clear the comment input field
-  });
-
   // Initialize Bootstrap dropdowns
   bootstrap.Dropdown.getOrCreateInstance($("#mobileChangelogDropdown")[0]);
   bootstrap.Dropdown.getOrCreateInstance($("#desktopChangelogDropdown")[0]);
+
+  // State machine for error handling
+  const ErrorState = {
+    SUCCESS: "success",
+    NOT_FOUND: "not_found",
+    FORBIDDEN: "forbidden",
+    SERVER_ERROR: "server_error",
+    NETWORK_ERROR: "network_error",
+  };
+
+  function handleError(status) {
+    switch (status) {
+      case 404:
+        return {
+          state: ErrorState.NOT_FOUND,
+          message: "The requested information could not be found.",
+        };
+      case 403:
+        return {
+          state: ErrorState.FORBIDDEN,
+          message: "You don't have permission to access this information.",
+        };
+      case 500:
+        return {
+          state: ErrorState.SERVER_ERROR,
+          message: "We're experiencing server issues.",
+        };
+      case 0:
+        return {
+          state: ErrorState.NETWORK_ERROR,
+          message: "Unable to connect to the server.",
+        };
+      default:
+        return {
+          state: ErrorState.SERVER_ERROR,
+          message: "An unknown error occurred.",
+        };
+    }
+  }
+
+  // Switch statement for handling media types
+  function handleMediaType(type, changelog) {
+    switch (type) {
+      case "audio":
+        return changelog.sections.includes("(audio)");
+      case "video":
+        return changelog.sections.includes("(video)");
+      case "image":
+        return changelog.sections.includes("(image)");
+      case "mention":
+        return /@\w+/.test(changelog.sections);
+      default:
+        return false;
+    }
+  }
+
+  // Switch statement for markdown parsing
+  function parseMarkdownElement(line) {
+    switch (true) {
+      case line.startsWith("# "):
+        return createH1Element(line.substring(2));
+      case line.startsWith("## "):
+        return createH2Element(line.substring(3));
+      case line.startsWith("- - "):
+        return createNestedListItem(line.substring(4));
+      case line.startsWith("- "):
+        return createListItem(line.substring(2));
+      case line.startsWith("(audio)"):
+        return createAudioElement(line.substring(7));
+      case line.startsWith("(video)"):
+        return createVideoElement(line.substring(7));
+      case line.startsWith("(image)"):
+        return createImageElement(line.substring(7));
+      default:
+        return createParagraph(line);
+    }
+  }
+
+  // Function to update quick stats
+  function updateQuickStats(data) {
+    if (Array.isArray(data) && data.length > 0) {
+      // Sort data by date
+      const sortedData = [...data].sort((a, b) => {
+        const dateA = new Date(a.title.split(" ").slice(-3).join(" "));
+        const dateB = new Date(b.title.split(" ").slice(-3).join(" "));
+        return dateB - dateA;
+      });
+
+      // Update latest update date
+      const latestDate = new Date(
+        sortedData[0].title.split(" ").slice(-3).join(" ")
+      );
+      $("#latestUpdateDate").text(
+        latestDate.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      );
+
+      // Update total updates count
+      $("#totalUpdates").text(data.length);
+
+      // Count major features (sections starting with "Added" or "New")
+      let majorFeatureCount = 0;
+      data.forEach((changelog) => {
+        const sections = changelog.sections.split("\n");
+        sections.forEach((section) => {
+          if (section.includes("Added") || section.includes("New")) {
+            majorFeatureCount++;
+          }
+        });
+      });
+      $("#majorFeatures").text(majorFeatureCount);
+    }
+  }
 });
+function handleinvalidImage() {
+  setTimeout(() => {
+    const userId = this.id.replace("avatar-", "");
+    const username = this.closest("li").querySelector("a").textContent;
+    this.src = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
+      username
+    )}&bold=true&format=svg`;
+  }, 0);
+}

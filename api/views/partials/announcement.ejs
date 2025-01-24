@@ -1,8 +1,4 @@
-<div
-  class="jbcl-announcement-banner"
-  id="siteAnnouncement"
-  style="display: none"
->
+<div class="jbcl-announcement-banner" id="siteAnnouncement">
   <div class="container">
     <div class="jbcl-announcement-content">
       <div class="jbcl-announcement-text">
@@ -50,14 +46,14 @@
     const announcement = document.getElementById("siteAnnouncement");
     const isDismissed = sessionStorage.getItem("announcementDismissed");
 
-    if (!isDismissed) {
-      announcement.style.display = "block";
+    if (isDismissed) {
+      announcement.classList.add("hidden");
     }
   });
 
   function dismissAnnouncement() {
     const announcement = document.getElementById("siteAnnouncement");
-    announcement.style.display = "none";
+    announcement.classList.add("hidden");
     sessionStorage.setItem("announcementDismissed", "true");
   }
 </script>

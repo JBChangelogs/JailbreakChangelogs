@@ -11,45 +11,57 @@
     <meta name="referrer" content="no-referrer" />
     <base href="/" />
 
-    <!-- Open Graph metadata for social media sharing -->
-    <meta property="og:title" content="<%= title %>" />
-    <meta
-      property="og:description"
-      content="Check out what's new in this Jailbreak update! See all the latest changes and additions in the game."
-    />
-    <meta property="og:image" content="<%= image_url %>" />
-    <meta property="og:url" content="https://jailbreakchangelogs.xyz" />
-    <meta property="og:type" content="website" />
-
-    <!-- Additional metadata for SEO -->
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="<%= title %> | Jailbreak Changelogs" />
     <meta
       name="description"
-      content="Check out what's new in this Jailbreak update! See all the latest changes and additions in the game."
+      content="Stay updated with the latest Roblox Jailbreak changes! View detailed changelogs, patch notes, and updates. Track new features, vehicles, and game improvements."
     />
-    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Jailbreak Changelogs" />
+    <meta name="referrer" content="no-referrer" />
 
+    <!-- Keywords -->
     <meta
       name="keywords"
-      content="Roblox, Jailbreak, Roblox Jailbreak, updates, changelogs, changelog, patch notes, new features, vehicles, customization, game improvements, community, trading, seasons, Discord bot, API, user profiles, trade tracker, game mechanics, gameplay, tips, guides, events, player stats, user contributions, feedback, bug fixes, latest news"
+      content="Roblox Jailbreak, jb wiki changelogs, jailbreak wiki changelogs, jailbreak wiki updates, game updates, patch notes, changelogs, new features, vehicles, map changes, game balance, bug fixes, community updates, trading, seasons, gameplay changes"
     />
 
-    <!-- Twitter Card metadata -->
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/changelogs"
+    />
+    <meta property="og:title" content="<%= title %> | Jailbreak Changelogs" />
+    <meta
+      property="og:description"
+      content="Stay updated with the latest Roblox Jailbreak changes! View detailed changelogs, patch notes, and track new features."
+    />
+    <meta property="og:image" content="<%= image_url %>" />
+    <meta property="og:site_name" content="Jailbreak Changelogs" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="<%= title %>" />
+    <meta
+      name="twitter:url"
+      content="https://jailbreakchangelogs.xyz/changelogs"
+    />
+    <meta name="twitter:title" content="<%= title %> | Jailbreak Changelogs" />
     <meta
       name="twitter:description"
-      content="Check out what's new in this Jailbreak update! See all the latest changes and additions in the game."
+      content="Stay updated with the latest Roblox Jailbreak changes! View detailed changelogs, patch notes, and track new features."
     />
     <meta name="twitter:image" content="<%= image_url %>" />
 
-    <!-- Page title -->
-    <title><%= title %></title>
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#2e3944" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
     <!-- Canonical URL -->
-    <link
-      rel="canonical"
-      href="https://jailbreakchangelogs.xyz/changelogs/<%= changelogId %>"
-    />
+    <link rel="canonical" href="https://jailbreakchangelogs.xyz/changelogs" />
 
     <!-- CSS Links -->
     <link
@@ -67,16 +79,31 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
 
     <!-- Custom stylesheet -->
     <link rel="stylesheet" href="styles/changelogs.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="/styles/comments.css" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -85,41 +112,49 @@
       href="https://fonts.googleapis.com/css2?family=Bangers&family=Luckiest+Guy&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Additional SEO Questions -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "When does the current Jailbreak season end?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The current Jailbreak season ends on February 25, 2025. Check our seasons page for a detailed countdown timer and complete information about seasonal rewards."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Where can I find Jailbreak changelogs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can find all Roblox Jailbreak changelogs and updates on our website. We maintain a comprehensive archive of all game changes, updates, and patch notes."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
 
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-
-    gtag("config", "G-700MM66K5G");
-  </script>
-
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
     <%- include('partials/nav') %>
     <%- include('partials/announcement') %>
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="show">
-      <div class="text-center">
-        <img
-          src="https://cdn.jailbreakchangelogs.xyz/logos/Jailbreak_Logo.webp"
-          alt="Loading logo"
-          class="loading-logo"
-        />
-      </div>
-      <div class="d-flex justify-content-center mt-3">
-        <div class="spinner-border custom-spinner" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
+    <%- include('partials/loading') %>
 
     <div class="container-fluid mt-3">
       <nav aria-label="breadcrumb">
@@ -128,61 +163,174 @@
           <li class="breadcrumb-item active" aria-current="page">Changelogs</li>
         </ol>
       </nav>
+
+      <!-- New SEO-Optimized Introduction Section -->
+      <div class="changelog-intro mb-4">
+        <h1 class="display-4 mb-3">
+          Roblox Jailbreak Changelogs & Update History
+        </h1>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="intro-text">
+              <p class="lead">
+                Welcome to the our comprehensive collection of Roblox Jailbreak
+                changelogs! Track every update, feature release, and game
+                modification in Jailbreak's history. Whether you're looking for
+                the latest vehicle additions, seasonal updates, or gameplay
+                changes, our detailed changelog archive has everything you need
+                to stay informed. Some updates and features may be unaccounted
+                for, as they may not have been directly announced by Badimo.
+              </p>
+
+              <div class="feature-grid mt-4">
+                <div class="feature-item">
+                  <i class="bi bi-clock-history text-primary"></i>
+                  <h5>Complete Update History</h5>
+                  <p>
+                    Access every Jailbreak update since release, including
+                    seasonal events, new vehicles, map changes, and game
+                    mechanics updates.
+                  </p>
+                </div>
+
+                <div class="feature-item">
+                  <i class="bi bi-search text-primary"></i>
+                  <h5>Advanced Search Features</h5>
+                  <p>
+                    Find specific Jailbreak updates by searching keywords,
+                    dates, or content types - perfect for tracking down vehicle
+                    releases or major game changes.
+                  </p>
+                </div>
+
+                <div class="feature-item">
+                  <i class="bi bi-chat-dots text-primary"></i>
+                  <h5>Community Insights</h5>
+                  <p>
+                    Join discussions about Jailbreak updates, share strategies,
+                    and connect with other players in our community through the
+                    comments sections.
+                  </p>
+                </div>
+
+                <div class="feature-item">
+                  <i class="bi bi-calendar-check text-primary"></i>
+                  <h5>Date-Based Navigation</h5>
+                  <p>
+                    Browse Jailbreak updates by date range to track the game's
+                    evolution and find specific seasonal events or major
+                    releases.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-12 col-lg-8">
-          <!-- This aligns with the content wrapper width -->
           <div class="row">
-            <!-- Options Dropdown (hidden on mobile) -->
+            <!-- Desktop Options Dropdown -->
             <div class="col-auto d-none d-lg-block me-2">
               <div class="d-flex gap-2 me-2">
+                <!-- Date Range Button -->
                 <button
-                  class="btn btn-primary"
+                  class="btn btn-primary changelog-action-btn"
                   type="button"
                   id="desktopOpenDateFilterModal"
                   aria-label="Select date range"
                   data-bs-toggle="tooltip"
                   title="Select Date Range"
                 >
-                  <i class="bi bi-calendar-range" aria-hidden="true"></i>
-                  <!-- Changed to calendar-range -->
+                  <i class="bi bi-calendar-range"></i>
                 </button>
 
+                <!-- Share Button -->
+                <div class="dropdown">
+                  <button
+                    class="btn btn-primary changelog-action-btn"
+                    type="button"
+                    id="desktopShareChangelog"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Share Changelog"
+                  >
+                    <i class="bi bi-share"></i>
+                  </button>
+                  <ul class="dropdown-menu share-menu">
+                    <li>
+                      <button class="dropdown-item" onclick="shareOnDiscord()">
+                        <i class="bi bi-discord"></i> Discord
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item" onclick="shareOnTwitter()">
+                        <i class="bi bi-twitter-x"></i> X (Twitter)
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item" onclick="shareOnReddit()">
+                        <i class="bi bi-reddit"></i> Reddit
+                      </button>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <button class="dropdown-item" onclick="copyShareLink()">
+                        <i class="bi bi-link-45deg"></i> Copy Link
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Random Changelog Button -->
                 <button
-                  class="btn btn-primary"
+                  class="btn btn-primary changelog-action-btn"
                   type="button"
-                  id="desktopCopyChangelog"
-                  aria-label="Copy the changelog"
+                  id="randomChangelogDesktopBtn"
+                  aria-label="Get a random changelog"
                   data-bs-toggle="tooltip"
-                  title="Copy Changelog"
+                  title="Random changelog"
                 >
-                  <i class="bi bi-clipboard" aria-hidden="true"></i>
-                  <!-- Changed to file-earmark-text -->
+                  <i class="bi bi-dice-6"></i>
                 </button>
 
+                <!-- Latest Changelog Button -->
                 <button
-                  class="btn btn-primary"
-                  type="button"
-                  id="desktopLatestChangelogBtn"
-                  aria-label="Jump to the latest changelog"
-                  data-bs-toggle="tooltip"
-                  title="Jump to Latest"
+                  class="btn btn-primary changelog-action-btn"
+                  id="latestChangelogBtn"
+                  title="View Latest Changelog"
+                  aria-label="View latest changelog"
                 >
-                  <i class="bi bi-rocket-takeoff" aria-hidden="true"></i>
+                  <i class="bi bi-clock-history"></i>
+                  <span class="d-none d-lg-inline">Latest Update</span>
                 </button>
 
+                <!-- Timeline Button -->
+                <a
+                  href="/timeline"
+                  class="btn btn-primary changelog-action-btn"
+                  aria-label="View Timeline"
+                  data-bs-toggle="tooltip"
+                  title="View Timeline"
+                >
+                  <i class="bi bi-clock-history"></i>
+                  <span class="timeline-text d-none d-lg-inline">Timeline</span>
+                </a>
+
+                <!-- Changelog Versions Button -->
                 <div class="col-auto d-none d-lg-block">
                   <div class="dropdown-changelog-dropdown">
                     <button
-                      class="btn btn-primary dropdown-toggle changelog-btn"
+                      class="btn btn-primary changelog-action-btn"
                       type="button"
                       id="desktopChangelogDropdown"
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
-                      data-bs-toggle="dropdown"
                       title="View Other Changelogs"
                     >
-                      <i class="bi bi-calendar-event" aria-hidden="true"></i
-                      >Changelog Versions
+                      <i class="bi bi-calendar-event"></i>
+                      <span>Changelog Versions</span>
                     </button>
                     <ul
                       class="dropdown-menu changelog-menu"
@@ -205,7 +353,6 @@
               >
                 <div class="position-relative w-100">
                   <i class="bi bi-search search-icon"></i>
-                  <!-- Move icon here -->
                   <input
                     id="search-input"
                     class="form-control custom-search-input pe-5"
@@ -224,8 +371,9 @@
                   </button>
                 </div>
               </form>
-              <!-- Example queries and search results remain the same -->
-              <div id="exampleQueries" class="mt-2 d-none" aria-hidden="true">
+
+              <div id="exampleQueries" class="mt-2 d-none">
+                <!-- Example queries here -->
                 <h6 class="example-queries-title">Example queries:</h6>
                 <div class="d-flex flex-wrap gap-2 mt-1">
                   <a
@@ -258,83 +406,132 @@
                   >
                 </div>
               </div>
+
               <div id="search-results" class="dropdown-menu w-100">
-                <!-- Search results will be populated here -->
+                <!-- Search results here -->
               </div>
             </div>
 
-            <!-- Mobile Menu Toggle Button -->
-            <button
-              id="mobileMenuToggle"
-              class="btn btn-primary d-lg-none mt-3"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#mobileMenuItems"
-              aria-expanded="false"
-              aria-controls="mobileMenuItems"
-            >
-              <i class="bi bi-list me-2"></i> More Options
-            </button>
-
-            <!-- Mobile Menu Items (Collapsible) with Custom Background -->
-            <div class="collapse mt-3 d-lg-none" id="mobileMenuItems">
-              <div
-                class="d-grid gap-2"
-                style="
-                  background-color: #212a31;
-                  padding: 15px;
-                  border-radius: 8px;
-                  width: calc(100% + 30px);
-                  margin-left: -15px;
-                  margin-right: -15px;
-                "
+            <div class="col-12 d-lg-none">
+              <!-- Toggle Button -->
+              <button
+                id="mobileMenuToggle"
+                class="btn btn-sm btn-primary mt-3"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mobileMenuItems"
               >
-                <div
-                  class="btn-group"
-                  role="group"
-                  aria-label="Date Filter Options"
-                >
-                  <button
-                    class="btn"
-                    style="background-color: #124e66; color: #d3d9d4"
-                    id="mobileOpenDateFilterModal"
-                  >
-                    <i class="bi bi-calendar-event me-2"></i> Select Date
-                  </button>
-                </div>
-                <button
-                  id="mobileLatestChangelogBtn"
-                  class="btn"
-                  style="background-color: #124e66; color: #d3d9d4"
-                >
-                  <i class="bi bi-rocket-takeoff me-2"></i> Jump to Latest
-                </button>
-                <div class="dropdown">
-                  <button
-                    class="btn changelog-btn w-100 dropdown-toggle"
-                    id="mobileChangelogDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    style="background-color: #124e66; color: #d3d9d4"
-                  >
-                    <i class="bi bi-calendar-event me-2"></i> Changelog Versions
-                  </button>
-                  <ul
-                    class="dropdown-menu changelog-menu w-100"
-                    aria-labelledby="mobileChangelogDropdown"
-                    id="mobileChangelogList"
-                  >
-                    <!-- Dropdown items will be populated dynamically -->
-                  </ul>
-                </div>
+                <i class="bi bi-list me-2"></i> More Options
+              </button>
 
-                <button
-                  id="mobileCopyChangelog"
-                  class="btn"
-                  style="background-color: #124e66; color: #d3d9d4"
-                >
-                  <i class="bi bi-clipboard me-2"></i> Copy Changelog
-                </button>
+              <!-- Collapsible Menu -->
+              <!-- Collapsible Menu -->
+              <div class="collapse mt-3" id="mobileMenuItems">
+                <div class="mobile-menu-container">
+                  <!-- Date Filter -->
+                  <button
+                    class="btn mobile-menu-btn"
+                    id="mobileOpenDateFilterModal"
+                    style="background-color: #124e66; color: #d3d9d4"
+                  >
+                    <i class="bi bi-calendar-range me-2"></i> Select Date
+                  </button>
+
+                  <!-- Latest Changelog -->
+                  <button
+                    class="btn mobile-menu-btn"
+                    id="latestChangelogMobileBtn"
+                    style="background-color: #124e66; color: #d3d9d4"
+                  >
+                    <i class="bi bi-clock-history me-2"></i> Latest Update
+                  </button>
+
+                  <!-- Timeline Button -->
+                  <a
+                    href="/timeline"
+                    class="btn mobile-menu-btn"
+                    style="background-color: #124e66; color: #d3d9d4"
+                  >
+                    <i class="bi bi-clock-history me-2"></i> Timeline
+                  </a>
+
+                  <!-- Random Changelog -->
+                  <button
+                    class="btn mobile-menu-btn"
+                    id="randomChangelogMobileBtn"
+                    style="background-color: #124e66; color: #d3d9d4"
+                  >
+                    <i class="bi bi-dice-6 me-2"></i> Random Changelog
+                  </button>
+
+                  <!-- Changelog Versions Dropdown -->
+                  <div class="dropdown">
+                    <button
+                      class="btn mobile-menu-btn dropdown-toggle w-100"
+                      id="mobileChangelogDropdown"
+                      data-bs-toggle="dropdown"
+                      style="background-color: #124e66; color: #d3d9d4"
+                    >
+                      <i class="bi bi-calendar-event me-2"></i> Changelog
+                      Versions
+                    </button>
+                    <ul
+                      class="dropdown-menu w-100"
+                      id="mobileChangelogList"
+                    ></ul>
+                  </div>
+
+                  <!-- Share Button Dropdown -->
+                  <div class="dropdown">
+                    <button
+                      class="btn mobile-menu-btn dropdown-toggle w-100"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      style="background-color: #124e66; color: #d3d9d4"
+                    >
+                      <i class="bi bi-share me-2"></i> Share Changelog
+                    </button>
+                    <ul class="dropdown-menu w-100 share-menu">
+                      <li>
+                        <button
+                          class="dropdown-item"
+                          onclick="shareOnDiscord()"
+                        >
+                          <i class="bi bi-discord"></i> Share on Discord
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          class="dropdown-item"
+                          onclick="shareOnTwitter()"
+                        >
+                          <i class="bi bi-twitter-x"></i> Share on X (Twitter)
+                        </button>
+                      </li>
+                      <li>
+                        <button class="dropdown-item" onclick="shareOnReddit()">
+                          <i class="bi bi-reddit"></i> Share on Reddit
+                        </button>
+                      </li>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li>
+                        <button class="dropdown-item" onclick="copyShareLink()">
+                          <i class="bi bi-link-45deg"></i> Copy Link
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Copy Changelog -->
+                  <button
+                    class="btn mobile-menu-btn"
+                    id="mobileCopyChangelog"
+                    style="background-color: #124e66; color: #d3d9d4"
+                  >
+                    <i class="bi bi-clipboard me-2"></i> Copy Changelog
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -355,54 +552,18 @@
                   <img
                     id="sidebarImage"
                     class="card-img-top img-fluid"
-                    alt="Changelog Image"
-                    style="max-width: 100%; height: auto"
+                    alt=" "
                   />
                 </div>
               </div>
             </div>
-            <div class="comment-container my-5">
-              <h2 class="comment-header" id="comment-header">Comments</h2>
-              <div class="row justify-content-center">
-                <div class="col-md-12">
-                  <!-- Comment submission form -->
-                  <form id="comment-form" class="mb-4">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="commenter-text"
-                        disabled
-                        placeholder="Login to comment"
-                        required
-                      />
-                      <button
-                        type="submit"
-                        class="btn btn-primary"
-                        id="submit-comment"
-                        disabled
-                      >
-                        <i class="bi bi-send-fill me-1"></i> Submit
-                      </button>
-                    </div>
-                  </form>
 
-                  <!-- Comment List -->
-                  <ul id="comments-list" class="list-group shadow-sm">
-                    <!-- Comments will be dynamically added here -->
-                  </ul>
-                  <div
-                    id="paginationControls"
-                    class="pagination d-flex align-items-center"
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <%- include('partials/comments', { type: 'changelog', itemId:
+            changelogId }) %>
           </div>
         </div>
       </div>
     </div>
-    <%- include('partials/footer') %>
 
     <!-- Date Filter Modal -->
     <div
@@ -487,24 +648,35 @@
         </div>
       </div>
     </div>
+    <%- include('partials/footer') %>
+    <!-- Bootstrap Bundle -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+
+    <!-- jQuery -->
     <script
       src="https://code.jquery.com/jquery-3.7.1.min.js"
       integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
       crossorigin="anonymous"
     ></script>
+
+    <!-- Toastr (For Notifications) -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
       integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+
+    <!-- Custom Scripts -->
     <script src="scripts/changelogs.js"></script>
+    <script src="/scripts/comments.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="scripts/main.js"></script>
+
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
@@ -532,6 +704,78 @@
         }
         signalGooglefcPresent();
       })();
+    </script>
+    <script>
+      function shareOnDiscord() {
+        const changelogId = localStorage.getItem("selectedChangelogId");
+        const title = document.querySelector("#content h1").textContent;
+        const url = `${window.location.origin}/changelogs/${changelogId}`;
+
+        // Create a Discord-friendly formatted message
+        const discordMessage = `**${title}**\n${url}`;
+
+        // Copy to clipboard
+        navigator.clipboard
+          .writeText(discordMessage)
+          .then(() => {
+            toastr.success(
+              "Discord formatted message copied to clipboard! Now you can paste it in any Discord channel.",
+              "Share",
+              {
+                positionClass: "toast-bottom-right",
+                timeOut: 5000,
+                closeButton: true,
+                progressBar: true,
+                onclick: () => toastr.clear(), // Close on click
+              }
+            );
+          })
+          .catch(() => {
+            toastr.error("Failed to copy message. Please try again.", "Error", {
+              positionClass: "toast-bottom-right",
+              timeOut: 3000,
+              closeButton: true,
+              progressBar: true,
+            });
+          });
+      }
+
+      function shareOnTwitter() {
+        const changelogId = localStorage.getItem("selectedChangelogId");
+        const title = document.querySelector("#content h1").textContent;
+        const url = `${window.location.origin}/changelogs/${changelogId}`;
+        const text = `Check out this Roblox Jailbreak changelog: ${title}`;
+
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          text
+        )}&url=${encodeURIComponent(url)}`;
+        window.open(twitterUrl, "_blank");
+      }
+
+      function shareOnReddit() {
+        const changelogId = localStorage.getItem("selectedChangelogId");
+        const title = document.querySelector("#content h1").textContent;
+        const url = `${window.location.origin}/changelogs/${changelogId}`;
+
+        const redditUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(
+          url
+        )}&title=${encodeURIComponent(title)}`;
+        window.open(redditUrl, "_blank");
+      }
+
+      function copyShareLink() {
+        const changelogId = localStorage.getItem("selectedChangelogId");
+        const url = `${window.location.origin}/changelogs/${changelogId}`;
+
+        navigator.clipboard.writeText(url).then(() => {
+          toastr.success("Link copied to clipboard!", "Share", {
+            positionClass: "toast-bottom-right",
+            timeOut: 3000,
+            closeButton: true,
+            progressBar: true,
+          });
+        });
+      }
     </script>
   </body>
 </html>

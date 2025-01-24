@@ -2,6 +2,14 @@ let allData = [];
 let currentPage = 1;
 const itemsPerPage = 20;
 
+function showLoadingOverlay() {
+  $("#loading-overlay").addClass("show");
+}
+
+function hideLoadingOverlay() {
+  $("#loading-overlay").removeClass("show");
+}
+
 const searchInput = document.getElementById("searchInput");
 const clearSearchBtn = document.getElementById("clearSearch");
 
@@ -230,13 +238,6 @@ function updateTypeFilter(data) {
     option.textContent = type;
     filterType.appendChild(option);
   });
-}
-
-function hideLoadingOverlay() {
-  const loadingOverlay = document.getElementById("loading-overlay");
-  if (loadingOverlay) {
-    loadingOverlay.style.display = "none";
-  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

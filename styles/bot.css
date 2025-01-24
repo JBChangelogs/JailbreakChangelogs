@@ -1,3 +1,5 @@
+@import "colors.css";
+
 .hero {
   background-size: cover;
   background-position: center;
@@ -31,47 +33,19 @@
   transition: transform 0.2s;
 }
 .btn-custom {
-  width: 200px;
-  height: 50px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-footer a {
-  position: relative;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-footer a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  bottom: 0;
-  left: 0;
-  background-color: #fff;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-footer a:hover {
-  color: #f0f0f0; /* Slightly lighter shade of white */
-}
-
-.btn-custom {
-  background-color: #032b44 !important; /* Light theme background color */
-  color: white; /* Light theme text color */
-  border: none; /* Remove default border if needed */
+  background-color: var(--accent-color) !important;
+  color: var(--text-primary);
+  border: none;
   font-size: 1rem;
 }
 
 .btn-custom:hover {
-  background-color: #212a31 !important; /* Darker blue on hover for light mode */
-  color: #ffffff; /* Keep text color white */
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary);
 }
 
 body {
-  background-color: #2e3944;
+  background-color: var(--bg-secondary);
 }
 
 /* Adjust the body when menu is opened */
@@ -81,8 +55,8 @@ body.menu-open {
 .offcanvas-header {
   display: flex; /* Keep the header visible */
   justify-content: space-between; /* Align items properly */
-  background-color: #212a31; /* Semi-transparent background */
-  color: #ffffff;
+  background-color: var(--bg-primary); /* Semi-transparent background */
+  color: var(--text-primary);
 }
 .offcanvas-title {
   font-weight: bold; /* Bold title */
@@ -100,11 +74,58 @@ body.menu-open {
 .white-close-button {
   filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 50px 20px; /* Reduce padding on mobile */
+  }
+
+  .hero-content {
+    padding: 0 10px; /* Add some side padding */
+  }
+
+  .hero-content h1 {
+    font-size: 1.75rem; /* Smaller heading */
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-content .lead {
+    font-size: 1rem; /* Smaller lead text */
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-content .bi-discord {
+    font-size: 1.75rem !important; /* Adjust discord icon size */
+  }
+
+  .btn-custom {
+    width: 100%; /* Full width button */
+    max-width: 300px; /* Maximum width */
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 576px) {
   .alert {
     font-size: 0.9rem;
   }
   .bi-exclamation-triangle-fill {
     font-size: 1rem;
+  }
+  .hero {
+    padding: 40px 15px; /* Further reduce padding */
+  }
+
+  .hero-content h1 {
+    font-size: 1.5rem; /* Even smaller heading */
+  }
+
+  .hero-content .bi-discord {
+    font-size: 1.5rem !important; /* Smaller discord icon */
+  }
+
+  .hero-content .lead {
+    font-size: 0.95rem; /* Smaller lead text */
   }
 }

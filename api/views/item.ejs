@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- Primary Meta Tags -->
+    <title>
+      <%= item.name %> - Jailbreak <%= itemType %> Value & Details |
+      JailbreakChangelogs
+    </title>
+    <meta
+      name="title"
+      content="<%= item.name %> - Jailbreak <%= itemType %> Value & Details | JailbreakChangelogs"
+    />
+    <meta
+      name="description"
+      content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest value and details for ${item.name} in Roblox Jailbreak. View current price, trading history, rarity status, and market trends.` %>"
+    />
+    <meta
+      name="keywords"
+      content="<%= item.name.toLowerCase() %> jailbreak, jailbreak <%= item.name.toLowerCase() %> value, <%= itemType.toLowerCase() %> worth jailbreak, jailbreak trading values, roblox jailbreak <%= itemType %>, jailbreak <%= item.name.toLowerCase() %> price, <%= item.name.toLowerCase() %> trading value"
+    />
+    <meta name="author" content="Jailbreak Changelogs" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="product" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
+    />
+    <meta
+      property="og:title"
+      content="<%= item.name %> - Current Value & Details | Jailbreak <%= itemType %>"
+    />
+    <meta
+      property="og:description"
+      content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
+    />
+    <meta property="og:image" content="<%= item.image || logoUrl %>" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://jailbreakchangelogs.xyz/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
+    />
+    <meta
+      name="twitter:title"
+      content="<%= item.name %> - Jailbreak <%= itemType %> Value & Details"
+    />
+    <meta
+      name="twitter:description"
+      content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
+    />
+    <meta property="twitter:image" content="<%= logoUrl %>" />
+
+    <!-- Additional SEO tags -->
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <meta
+      property="article:modified_time"
+      content="<%= new Date().toISOString() %>"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="twitter:label1" content="Item Type" />
+    <meta name="twitter:data1" content="<%= itemType %>" />
+    <meta name="twitter:label2" content="Current Value" />
+    <meta name="twitter:data2" content="<%= item.cash_value %>" />
+
+    <!-- Alternative Title Tags for Better SEO -->
+    <title>
+      <%= item.name %> Value in Jailbreak - Current Price & Trading Guide
+    </title>
+    <meta
+      name="title"
+      content="<%= item.name %> Value in Jailbreak - Current Price & Trading Guide"
+    />
+
+    <!-- Enhanced Keywords -->
+    <meta
+      name="keywords"
+      content="<%= item.name.toLowerCase() %> jailbreak value, jailbreak <%= item.name.toLowerCase() %>, <%= item.name.toLowerCase() %> worth, jailbreak trading value <%= item.name.toLowerCase() %>, <%= item.name.toLowerCase() %> price jailbreak, roblox jailbreak <%= item.name.toLowerCase() %>, jailbreak <%= itemType.toLowerCase() %> values"
+    />
+
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link
+      rel="canonical"
+      href="https://jailbreakchangelogs.xyz/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
+    />
+
+    <!-- Schema.org structured data for Game Item -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Game Item",
+        "name": "<%= item.name %>",
+        "description": "<%- (item.description && item.description !== 'N/A') ? item.description : `${item.name} is a ${itemType.toLowerCase()} item in Roblox Jailbreak.` %>",
+        "image": "<%= item.image || logoUrl %>",
+        "additionalType": "VideoGameItem",
+        "additionalProperty": [
+          {
+            "@type": "PropertyValue",
+            "name": "Game",
+            "value": "Roblox Jailbreak"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "ItemType",
+            "value": "<%= itemType %>"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "InGameValue",
+            "value": "<%= item.cash_value %>"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Availability",
+            "value": "<%- item.is_limited ? 'Limited' : 'Regular' %>"
+          }
+        ]
+      }
+    </script>
+
+    <!-- Schema.org structured data for Breadcrumbs -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://jailbreakchangelogs.xyz"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Values",
+            "item": "https://jailbreakchangelogs.xyz/values"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "<%= itemType %>s",
+            "item": "https://jailbreakchangelogs/values?sort=<%= itemType.toLowerCase() %>s"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "<%= item.name %>",
+            "item": "https://jailbreakchangelogs/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
+          }
+        ]
+      }
+    </script>
+
+    <!-- Additional Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the value of <%= item.name %> in Jailbreak?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The current cash value of <%= item.name %> is <%= item.cash_value %>. <% if(item.is_limited) { %>This is a limited item, which means it is rare and potentially more valuable.<% } %>"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is <%= item.name %> a limited item in Jailbreak?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<% if(item.is_limited) { %>Yes, <%= item.name %> is a limited item in Jailbreak, making it more valuable and harder to obtain.<% } else { %>No, <%= item.name %> is not a limited item in Jailbreak.<% } %>"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <base href="/" />
+
+    <!-- Stylesheets -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+
+    <link rel="stylesheet" href="styles/item.css" />
+    <link rel="stylesheet" href="styles/comments.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+
+  <body data-scroll-container>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!-- prettier-ignore -->
+    <%- include('partials/nav') %>
+    <%- include('partials/announcement') %>
+    <%- include('partials/loading') %>
+
+    <div id="item-container">
+      <!-- Item will be loaded here dynamically -->
+    </div>
+
+    <!-- Add this section after the graph section -->
+    <div class="container-fluid mt-4">
+      <div class="similar-items-section">
+        <h3 class="mb-4" style="font-family: 'Luckiest Guy', cursive">
+          Similar Items
+        </h3>
+        <div class="row g-4" id="similar-items">
+          <!-- Similar items will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <%- include('partials/comments', { type: itemType.toLowerCase(), itemId:
+      item.id, itemName: item.name }) %>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <!-- Scripts -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+      integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="/scripts/comments.js"></script>
+    <script src="scripts/item.js" defer></script>
+  </body>
+</html>

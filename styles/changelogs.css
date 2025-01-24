@@ -1,24 +1,27 @@
+@import "colors.css";
+
 /* Dark Theme Colors */
 [data-bs-theme="dark"] body {
-  --common-bg-color: #2e3944; /* Dark background */
-  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
-  --content-h2: #748d92; /* Softer Red for Dark Mode */
-  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
-  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
-  --content-bullet: #748d92; /* Lighter Blue for Bullets */
-  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
-  --text-color: #ffffff; /* White Text */
+  --common-bg-color: var(--bg-secondary);
+  --content-h1: var(--text-primary);
+  --content-h2: var(--text-muted);
+  --content-h3: var(--text-muted);
+  --content-paragraph: var(--text-primary);
+  --content-bullet: var(--text-muted);
+  --content-sub-bullet: var(--text-muted);
+  --text-color: #ffffff;
 
-  --header-text: #ffffff; /* White for Header Text */
-  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
-  --button-primary-text: #eeeeee; /* White for Primary Button Text */
-  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
+  --header-text: #ffffff;
+  --button-primary-bg: var(--accent-color);
+  --button-primary-text: var(--text-primary);
+  --button-primary-hover-bg: var(--bg-primary);
+
   /* Mention Colors */
-  --mention-color: #748d92; /* Teal color for Mentions */
-  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
-  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
-  --username-color: #76abae; /* Soft cyan for Username */
-  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
+  --mention-color: var(--text-muted);
+  --mention-bg: var(--bg-primary);
+  --at-color: var(--text-primary);
+  --username-color: var(--text-muted);
+  --mention-hover-bg: var(--accent-color);
 
   --highlight-bg: rgba(
     255,
@@ -44,17 +47,14 @@
 }
 
 html[data-bs-theme="dark"] .changelog-dropdown-item:nth-child(odd) {
-  background-color: #212a31; /* Dark Gray for Odd Items */
+  background-color: var(--bg-primary);
 }
 
 html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
-  background-color: #2e3944; /* Darker Background on Hover */
-  color: #2e3944; /* Gold Text Color on Hover */
+  background-color: var(--bg-secondary);
+  color: var(--bg-secondary);
 }
 
-[data-bs-theme="dark"] #loading-overlay {
-  background-color: #2e3944; /* Dark Background for Loading Overlay */
-}
 [data-bs-theme="dark"] body {
   background-color: var(--common-bg-color);
 }
@@ -78,6 +78,46 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 [data-bs-theme="dark"] .mention:hover {
   background-color: var(--mention-hover-bg); /* Custom Hover Background */
   cursor: pointer; /* Change Cursor to Pointer on Hover */
+}
+
+.quick-nav-link {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid var(--bg-secondary);
+  min-width: 200px;
+}
+
+.quick-nav-link:hover {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.quick-nav-link.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.quick-nav-link small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.quick-nav-link i {
+  color: var(--text-muted);
+}
+
+.quick-nav-link:hover i,
+.quick-nav-link:hover small {
+  color: var(--text-primary);
 }
 .api-error-container {
   text-align: center;
@@ -167,8 +207,8 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 
 /* Search Input Styling */
 .custom-search-input {
-  background-color: #212a31;
-  color: #d3d9d4;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   border: none;
   border-radius: 8px;
   padding-left: 2.5rem; /* Space for search icon */
@@ -178,7 +218,7 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
 }
 
 .custom-search-input::placeholder {
-  color: #748d92;
+  color: var(--text-muted);
 }
 
 .custom-search-input:focus {
@@ -281,12 +321,39 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   background-color: #2e3944;
 }
 
-.video-responsive {
+/* Media Element Styles */
+.media-element {
   max-width: 90%;
+  max-height: 420px;
   height: auto;
   display: block;
-  margin-right: auto; /* Remove this if it exists */
-  margin-left: 0; /* Ensures left alignment */
+  margin-right: auto;
+  margin-left: 0;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+/* Add spacing between consecutive media elements */
+.media-element-spacing {
+  margin-bottom: 1.5rem;
+  max-width: 90%;
+  max-height: 420px;
+  height: auto;
+  display: block;
+  margin-right: auto;
+  margin-left: 0;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+/* Overwrite existing video-responsive class */
+.video-responsive {
+  max-width: 90%;
+  max-height: 420px;
+  height: auto;
+  display: block;
+  margin-right: auto;
+  margin-left: 0;
 }
 
 [data-bs-theme="dark"] #main-container {
@@ -531,44 +598,81 @@ body.menu-open {
   ) !important; /* Semi-transparent background */
 }
 
-/* Custom Spinner Styles */
-.custom-spinner {
-  width: 50px;
-  height: 50px;
-  border-top-color: #31b1ff; /* Blue color for top border */
-  border-right-color: #31b1ff; /* Blue color for right border */
-  border-bottom-color: #ff341c; /* Orange color for bottom border */
-  border-left-color: #ff341c; /* Orange color for left border */
+/* Action Buttons Styling */
+.changelog-action-btn {
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  gap: 8px;
 }
 
-/* Loading Overlay Styles */
-#loading-overlay {
-  position: fixed; /* Fixed positioning */
-  top: 0; /* Align to top */
-  left: 0; /* Align to left */
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  display: none; /* Hidden by default */
-  justify-content: center; /* Center items horizontally */
-  align-items: center; /* Center items vertically */
-  z-index: 9999; /* High stacking context */
-  background-color: #ffffff; /* White background */
+/* Icon sizing in buttons */
+.changelog-action-btn i {
+  font-size: 1.2rem;
 }
 
-#loading-overlay.show {
-  display: flex; /* Enable flexbox when shown */
-  flex-direction: column; /* Stack items vertically */
-  justify-content: center; /* Center items vertically */
-  align-items: center; /* Center items horizontally */
-  height: 100vh; /* Full height for overlay */
+/* Timeline button specific styling */
+.changelog-action-btn .timeline-text {
+  margin-left: 4px;
 }
 
-/* Loading Logo Styles */
-#loading-overlay .loading-logo {
-  width: 300px; /* Adjust width for logo */
-  height: auto; /* Maintain aspect ratio */
+/* Share button dropdown styling */
+.share-menu {
+  min-width: 200px;
+  border-radius: 6px;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* Hover effect for action buttons */
+.changelog-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(18, 78, 102, 0.2);
+}
+
+/* Active state for buttons */
+.changelog-action-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile Menu Toggle Button */
+#mobileMenuToggle {
+  width: 220px;
+}
+
+/* Mobile Menu Container */
+.mobile-menu-container {
+  background-color: #212a31;
+  padding: 10px;
+  border-radius: 8px;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Sidebar Image */
+#sidebarImage {
+  max-width: 100%;
+  height: auto;
+}
+
+/* IFrame Styles */
+.google-fc-present {
+  width: 0;
+  height: 0;
+  border: none;
+  z-index: -1000;
+  left: -1000px;
+  top: -1000px;
+  display: none;
+}
 /* Responsive Heading Styles */
 .responsive-heading {
   font-size: 2.5rem; /* Large font size for headings */
@@ -577,187 +681,6 @@ body.menu-open {
 /* Responsive Text Styles */
 .responsive-text {
   font-size: 1rem; /* Standard font size for text */
-}
-/* Ensure long words in comments don't overflow their container */
-.list-group-item {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  border: none;
-  background-color: transparent;
-  border-radius: 0;
-}
-/* Overall Comment Section Styling */
-.comment-container {
-  background-color: #212a31; /* Dark grayish-blue background */
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 2px solid #748d92; /* Medium grayish-blue border to distinguish it */
-}
-
-/* Comment Header */
-.comment-header {
-  color: #d3d9d4; /* Very light grayish-green */
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-  font-family: "Luckiest Guy", Arial, sans-serif; /* Applying the desired font */
-  text-align: center;
-}
-
-/* Comment Input Field */
-#commenter-text {
-  background-color: #212a31; /* Very dark blue-gray background */
-  color: #d3d9d4; /* Very light grayish-green */
-  border: 1px solid #748d92; /* Medium grayish-blue border */
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 1rem;
-  width: 100%;
-  flex: 1;
-  width: 100%;
-}
-
-/* Disabled State for Commenter Text */
-#commenter-text:disabled {
-  background-color: #2e3944; /* Medium grayish-blue for the background */
-  color: #d3d9d4; /* Very light grayish-green for text */
-  cursor: not-allowed; /* Change cursor to indicate it's disabled */
-}
-
-/* Change icon to stop icon on hover (for the disabled state) */
-#commenter-text:disabled:hover {
-  background-color: #2e394483; /* Dark grayish-blue background on hover */
-  color: #d3d9d4; /* Keep the text color consistent */
-}
-
-/* To ensure the icon changes to a "stop" icon on hover, assuming it's an img element */
-#commenter-text:disabled:hover::before {
-  content: "\f04d"; /* Unicode for a stop icon (FontAwesome example) */
-}
-
-/* Comment Submit Button */
-#submit-comment {
-  background-color: #124e66; /* Deep teal */
-  color: #d3d9d4;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-/* Comment Submit Button */
-#submit-comment:hover {
-  background-color: #124e6676 !important; /* Deep teal */
-}
-
-/* Comment List */
-#comments-list {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 30px;
-  width: 100%;
-}
-
-/* Individual Comment Styling */
-.comment-item {
-  background-color: transparent; /* Very dark blue-gray */
-  color: #d3d9d4; /* Very light grayish-green */
-  margin-bottom: 0;
-  font-family: Arial, sans-serif; /* Default sans-serif font */
-  width: 100%;
-  word-wrap: break-word; /* Break words that are too long */
-  white-space: pre-wrap; /* Preserve spaces and line breaks */
-  position: relative; /* Add relative positioning to the comment container */
-  padding-right: 40px !important; /* Add padding to prevent text from going under the dots */
-}
-
-/* Comment Author Styling */
-.comment-author {
-  color: #124e66; /* Deep teal */
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-/* Comment Text Styling */
-.comment-text {
-  color: #d3d9d4;
-  font-size: 1rem;
-  margin-top: 8px;
-  word-wrap: break-word; /* Ensures long words break and don't overflow */
-  overflow-wrap: break-word; /* Handle long words within text */
-  word-break: break-word; /* Breaks words when necessary to prevent overflow */
-  margin-bottom: 0; /* Ensure no extra margin for text */
-}
-
-/* General Pagination Styles */
-#paginationControls {
-  padding: 8px 15px;
-  background-color: #2e3944; /* Dark grayish-blue for the background */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-  color: #d3d9d4; /* Very light grayish-green text */
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-/* Button Styles */
-#paginationControls .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  font-size: 16px;
-  border: none;
-  background-color: #124e66; /* Deep teal for button background */
-  color: #d3d9d4; /* Very light grayish-green for button text */
-  border-radius: 50%; /* Circular button */
-  transition: background-color 0.3s ease;
-}
-
-#paginationControls .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#paginationControls .btn:hover:not(:disabled) {
-  background-color: #748d92; /* Medium grayish-blue on hover */
-  color: #212a31; /* Very dark blue-gray text on hover */
-}
-
-/* Input Group Styles */
-#paginationControls .input-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-#paginationControls .form-control {
-  text-align: center;
-  font-size: 14px;
-  border: 1px solid #748d92; /* Medium grayish-blue border */
-  background-color: #212a31; /* Very dark blue-gray for the input */
-  color: #d3d9d4; /* Light grayish-green text for input */
-  border-radius: 4px;
-  width: 50px; /* Compact input width */
-}
-
-#paginationControls .form-control:focus {
-  outline: none;
-  border-color: #124e66; /* Deep teal on focus */
-  box-shadow: 0 0 4px rgba(18, 78, 102, 0.5); /* Focus glow */
-}
-
-/* Text and Spacing Adjustments */
-#paginationControls span {
-  font-size: 14px;
-  color: #748d92; /* Medium grayish-blue for text */
 }
 
 /* Content Wrapper Styles */
@@ -774,6 +697,7 @@ body.menu-open {
 h1 {
   color: var(--content-h1); /* Color for h1 headings */
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h1 */
+  letter-spacing: 1px;
   border-bottom: 2px solid var(--content-h1); /* Bottom border for h1 */
   font-size: 0.25rem;
 }
@@ -782,12 +706,14 @@ h1 {
 #content h1 {
   color: var(--content-h1); /* Color for h1 headings */
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h1 */
+  letter-spacing: 1px;
   border-bottom: 2px solid var(--content-h1); /* Bottom border for h1 */
 }
 
 #content h2 {
   color: var(--content-h2); /* Color for h2 headings */
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h2 */
+  letter-spacing: 1px;
 }
 
 #content h3 {
@@ -867,83 +793,376 @@ button {
   transition: background-color 0.3s, color 0.3s; /* Smooth transition */
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .comment-container {
-    padding: 20px; /* Slightly reduce padding for mobile */
-    width: 100%; /* Full width to prevent compression */
-    max-width: 700px; /* Limit maximum width to prevent over-expansion */
-    margin: 0 auto; /* Center the container */
-  }
-
-  .comment-header {
-    font-size: 1.5rem; /* Smaller header font size */
-  }
-
-  /* Comment input and button */
-  #commenter-text,
-  #submit-comment {
-    font-size: 0.9rem; /* Adjust font size for smaller devices */
-  }
-
-  /* Make the input field and submit button full-width */
-  .input-group {
-    flex-direction: column; /* Stack the input and button vertically */
-    gap: 10px;
-  }
-
-  #submit-comment {
-    width: 100%; /* Make submit button full-width */
-    margin-top: 10px; /* Add space between the input and the button */
-  }
-
-  /* Comment list margin */
-  #comments-list {
-    margin-top: 20px;
-  }
-  .video-responsive {
-    max-height: 300px; /* Smaller height on mobile */
-    max-width: 100%;
-  }
+/* Changelog Dropdown Styling */
+.changelog-dropdown-item {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 4px 8px;
+  transition: all 0.2s ease-in-out;
+  border-left: 3px solid transparent;
+  font-size: 0.95rem;
 }
 
+.changelog-dropdown-item:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-left-color: var(--accent-color);
+  transform: translateX(4px);
+}
+
+.changelog-menu {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--bg-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.changelog-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.changelog-menu::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: 8px;
+}
+
+.changelog-menu::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.changelog-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.changelog-title {
+  color: var(--text-primary);
+  font-weight: 500;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.changelog-dropdown-item .changelog-date {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.changelog-btn {
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.changelog-btn:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(18, 78, 102, 0.2);
+}
+
+.changelog-btn .bi {
+  font-size: 1.1rem;
+}
+
+/* Changelog Introduction Styles */
+.changelog-intro {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.changelog-intro .display-4 {
+  color: var(--text-primary);
+  font-family: "Luckiest Guy", sans-serif;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.changelog-intro .lead {
+  color: var(--text-primary);
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.feature-grid .feature-item i {
+  color: var(--accent-color-light) !important;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.feature-item {
+  background: var(--bg-secondary);
+  padding: 1.75rem;
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-item i {
+  font-size: 2.25rem;
+  margin-bottom: 1.25rem;
+  color: var(--accent-color);
+}
+
+.feature-item h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.feature-item p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Changelog Introduction Styles */
+.changelog-intro {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.changelog-intro .display-4 {
+  color: var(--text-primary);
+  font-family: "Luckiest Guy", sans-serif;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+}
+
+.changelog-intro .lead {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.feature-item {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+}
+
+.feature-item i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+}
+
+.feature-item h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.feature-item p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.quick-stats {
+  background: var(--bg-secondary);
+  margin-top: 2rem;
+}
+
+.quick-stats h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.quick-stats ul li {
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.quick-stats i {
+  font-size: 0.5rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.quick-links.card {
+  background: var(--bg-secondary);
+  border: none;
+  margin-top: 1rem;
+}
+
+.quick-links .card-title {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.quick-links ul li {
+  margin-bottom: 0.75rem;
+}
+
+.quick-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-links a:hover {
+  color: var(--text-primary);
+}
+
+/* Share Menu Styles */
+.share-menu {
+  min-width: 200px;
+  padding: 0.5rem 0;
+}
+
+.share-menu .dropdown-item {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.share-menu .dropdown-item:hover {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.share-menu .dropdown-item i {
+  font-size: 1.1rem;
+}
+@media (max-width: 768px) {
+  /* Changelog intro adjustments */
+  .changelog-intro {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .changelog-intro .display-4 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .changelog-intro .lead {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  /* Feature grid adjustments */
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .feature-item {
+    padding: 1rem;
+    text-align: left;
+  }
+
+  .feature-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-item h5 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  /* Quick stats and links adjustments */
+  .quick-stats,
+  .quick-links {
+    margin-top: 1rem;
+  }
+
+  .quick-stats h5,
+  .quick-links .card-title {
+    font-size: 1rem;
+  }
+
+  .quick-stats ul li,
+  .quick-links ul li {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+}
 /* For even smaller screens (576px and below) */
 @media (max-width: 576px) {
-  #loading-overlay .loading-logo {
-    width: 200px;
-    height: auto;
+  .changelog-intro {
+    padding: 0.75rem;
+  }
+  .quick-nav-link {
+    padding: 0.5rem 0.75rem;
+    min-width: 150px;
   }
 
-  .custom-spinner {
-    width: 30px;
-    height: 30px;
+  .quick-nav-link small {
+    font-size: 0.7rem;
   }
 
-  .comment-container {
-    padding: 15px; /* Further reduce padding for smaller screens */
-    width: 100%; /* Full width to prevent any compression */
+  .changelog-intro .display-4 {
+    font-size: 1.25rem;
   }
 
-  .comment-header {
-    font-size: 1.4rem; /* Slightly smaller header font */
-  }
-
-  #commenter-text,
-  #submit-comment {
-    font-size: 0.85rem; /* Further reduce the font size */
-  }
-  #paginationControls {
-    gap: 8px; /* Reduce gap for small screens */
-  }
-
-  .pagination-btn {
-    font-size: 16px; /* Smaller buttons on mobile */
-    padding: 6px 10px; /* Smaller padding for the buttons */
-  }
-
-  .pagination-input {
-    font-size: 14px; /* Smaller input text */
-    max-width: 50px; /* Smaller input box on mobile */
+  .feature-item {
+    padding: 0.75rem;
   }
 }
 
@@ -952,20 +1171,5 @@ button {
   .container {
     padding-left: 5px;
     padding-right: 5px; /* Ensure no edge space on very small screens */
-  }
-
-  .comment-container {
-    width: auto;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .comment-header {
-    font-size: 1.2rem; /* Adjust header for small screens */
-  }
-
-  #commenter-text,
-  #submit-comment {
-    font-size: 0.8rem; /* Adjust font size for very small screens */
   }
 }

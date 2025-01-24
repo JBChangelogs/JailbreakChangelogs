@@ -1,15 +1,17 @@
+@import url("colors.css");
+
 .bg-custom {
-  background-color: #212a31;
+  background-color: var(--bg-primary);
 }
 body {
-  background-image: url("/assets/backgrounds/background8.webp");
+  background-image: url("https://cdn.jailbreakchangelogs.xyz/backgrounds/background8.webp");
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
-  color: #e0e0e0;
+  color: var(--text-body);
 }
 .privacy-container {
-  background-color: rgba(33, 37, 41, 0.9);
+  background-color: var(--bg-primary);
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
@@ -18,39 +20,37 @@ h2 {
   color: #ffffff;
 }
 h1 {
-  border-bottom: 2px solid #124e66;
+  border-bottom: 2px solid var(--accent-color);
   padding-bottom: 10px;
 }
 h2 {
   font-size: 1.5rem;
   margin-top: 2rem;
   padding-left: 10px;
-  border-left: 4px solid #124e66;
+  border-left: 4px solid var(--accent-color);
 }
 .lead {
-  color: #cccccc;
+  color: var(--text-body);
 }
 .text-muted {
-  color: #7f8c8d !important;
+  color: var(--text-muted) !important;
 }
 a {
-  color: #d3d9d4;
+  color: var(--text-body);
 }
 a:hover {
-  color: #748d92;
+  color: var(--text-muted);
 }
 .last-updated {
-  color: #748d92;
+  color: var(--text-muted);
   font-weight: 600;
 }
 .section {
   margin-bottom: 2rem;
 }
-.section:hover {
-  transform: translateY(-5px);
-}
+
 .home-button {
-  background-color: #124e66 !important;
+  background-color: var(--accent-color) !important;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -59,10 +59,5 @@ a:hover {
   transition: background-color 0.3s;
 }
 .home-button:hover {
-  background-color: #212a31 !important;
-}
-
-/* Adjust the body when menu is opened */
-body.menu-open {
-  overflow: hidden;
+  background-color: var(--bg-primary) !important;
 }

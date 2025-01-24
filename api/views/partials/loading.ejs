@@ -1,0 +1,80 @@
+<div id="loading-overlay" class="show">
+  <div class="text-center">
+    <img
+      src="/assets/logos/JB Changelogs Logo Square.webp"
+      alt="Loading logo"
+      class="loading-logo"
+    />
+  </div>
+  <div class="d-flex justify-content-center mt-3">
+    <div class="spinner-border custom-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<style>
+  [data-bs-theme="dark"] #loading-overlay {
+    background-color: var(--bg-secondary);
+  }
+
+  /* Loading Overlay Styles */
+  #loading-overlay {
+    position: fixed; /* Fixed positioning */
+    top: 0; /* Align to top */
+    left: 0; /* Align to left */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    display: none; /* Hidden by default */
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+    z-index: 9999; /* High stacking context */
+    background-color: #ffffff; /* White background */
+  }
+
+  #loading-overlay.show {
+    display: flex; /* Enable flexbox when shown */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    height: 100vh; /* Full height for overlay */
+  }
+
+  /* Loading Logo Styles */
+  #loading-overlay .loading-logo {
+    width: 300px; /* Adjust width for logo */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+  /* Custom Spinner Styles */
+  .custom-spinner {
+    width: 50px;
+    height: 50px;
+    border-top-color: #124e66;
+    border-right-color: #124e66;
+    border-bottom-color: #212a31;
+    border-left-color: #212a31;
+  }
+  @media (max-width: 576px) {
+    #loading-overlay .loading-logo {
+      width: 200px;
+      height: auto;
+    }
+
+    .custom-spinner {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  @media (max-width: 399px) {
+    #loading-overlay .loading-logo {
+      width: 150px; /* Reduced from 200px */
+      height: auto;
+    }
+
+    .custom-spinner {
+      width: 25px; /* Reduced from 30px */
+      height: 25px;
+    }
+  }
+</style>

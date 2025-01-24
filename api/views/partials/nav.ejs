@@ -5,82 +5,85 @@
       <img class="navbar-logo" src="<%= logoUrl %>" alt="<%= logoAlt %>" />
     </a>
 
-    <!-- Mobile navigation controls -->
     <div class="d-flex d-lg-none align-items-center">
-      <!-- Custom hamburger menu icon for mobile -->
       <button
-        id="navbarToggler"
-        class="navbar-toggler burger-menu-icon"
+        id="mobileAvatarToggle"
+        class="btn p-0"
         type="button"
-        aria-controls="fullscreenMenu"
+        aria-controls="sideMenu"
         aria-expanded="false"
         aria-label="Toggle navigation"
       >
-        <svg width="34" height="34" viewBox="0 0 100 100">
-          <path
-            class="line line1"
-            d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"
-          ></path>
-          <path class="line line2" d="M 20,50 H 80"></path>
-          <path
-            class="line line3"
-            d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"
-          ></path>
-        </svg>
+        <img
+          src=""
+          alt="Profile"
+          class="rounded-circle"
+          id="profile-picture-mobile"
+          width="34"
+          height="34"
+        />
       </button>
-
-      <!-- Mobile profile picture with dropdown -->
-      <div class="ms-2 d-lg-none dropdown">
-        <a
-          href="#"
-          class="dropdown-toggle"
-          id="mobileNavbarDropdown"
-          role="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <img
-            src="https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg"
-            alt="Profile"
-            class="rounded-circle"
-            id="profile-picture-mobile"
-            width="32"
-            height="32"
-          />
-        </a>
-        <ul
-          class="dropdown-menu dropdown-menu-dark dropdown-menu-end"
-          aria-labelledby="mobileNavbarDropdown"
-          id="mobileUserDropdown"
-        >
-          <!-- Dropdown items will be populated by JavaScript -->
-        </ul>
-      </div>
     </div>
 
     <!-- Full-screen overlay menu for mobile -->
     <div id="sideMenu" class="side-menu d-lg-none">
       <div class="side-menu-content">
+        <button
+          id="sideMenuClose"
+          class="btn position-absolute top-0 end-0 text-white"
+          type="button"
+          aria-label="Close menu"
+        >
+          <i class="bi bi-x-lg fs-4"></i>
+        </button>
+        <!-- Login/Profile Section (Added to side menu) -->
+        <div class="mobile-profile-section mb-3 mt-4" id="mobileProfileSection">
+          <!-- This section will be populated by JavaScript -->
+        </div>
+
+        <div class="nav-separator"></div>
+
         <nav class="navbar-nav">
+          <!-- Game Status & Updates -->
           <div class="nav-item">
             <a class="nav-link" href="/changelogs">Changelogs</a>
           </div>
           <div class="nav-item">
             <a class="nav-link" href="/seasons">Seasons</a>
           </div>
+
+          <div class="nav-separator"></div>
+
+          <!-- Core Trading Features -->
           <div class="nav-item">
-            <a class="nav-link" href="/timeline">Timeline</a>
+            <a class="nav-link" href="/trading">Trading</a>
           </div>
           <div class="nav-item">
-            <a class="nav-link" href="/users">Users</a>
+            <a class="nav-link" href="/values">Values</a>
           </div>
           <div class="nav-item">
             <a class="nav-link" href="/tradetracker">Trade Tracker</a>
           </div>
+
+          <div class="nav-separator"></div>
+
+          <!-- Community & Tools -->
+          <div class="nav-item">
+            <a class="nav-link" href="/users">Users</a>
+          </div>
+          <div class="nav-item">
+            <a class="nav-link" href="/servers">Servers</a>
+          </div>
           <div class="nav-item">
             <a class="nav-link" href="/bot">Our Discord Bot</a>
           </div>
-          <div class="nav-item"><a class="nav-link" href="/faq">FAQ</a></div>
+
+          <div class="nav-separator"></div>
+
+          <!-- Help -->
+          <div class="nav-item">
+            <a class="nav-link" href="/faq">FAQ</a>
+          </div>
         </nav>
       </div>
     </div>
@@ -88,28 +91,45 @@
     <!-- Desktop menu (hidden on mobile) -->
     <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Game Status & Updates -->
         <li class="nav-item">
           <a class="nav-link" href="/changelogs">Changelogs</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/seasons">Seasons</a>
         </li>
+
+        <!-- Core Trading Features -->
         <li class="nav-item">
-          <a class="nav-link" href="/timeline">Timeline</a>
+          <a class="nav-link" href="/trading">Trading</a>
         </li>
-        <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="/values">Values</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" href="/tradetracker">Trade Tracker</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/bot">Our Discord Bot</a>
-        </li>
-        <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
 
-        <!-- Profile picture icon with dynamic dark dropdown (visible on desktop) -->
+        <!-- Community & Tools -->
+        <li class="nav-item">
+          <a class="nav-link" href="/users">Users</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/servers">Servers</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/bot">Discord Bot</a>
+        </li>
+
+        <!-- Help -->
+        <li class="nav-item">
+          <a class="nav-link" href="/faq">FAQ</a>
+        </li>
+
+        <!-- Profile picture icon with dropdown (visible on desktop) -->
         <li class="nav-item dropdown d-none d-lg-block ms-2">
           <a
-            class="nav-link dropdown-toggle"
+            class="nav-link dropdown-toggle-no-caret"
             href="#"
             id="navbarDropdown"
             role="button"
@@ -117,7 +137,7 @@
             aria-expanded="false"
           >
             <img
-              src="https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg"
+              src=""
               alt="Profile"
               class="rounded-circle"
               id="profile-picture"
@@ -138,92 +158,232 @@
   </div>
 </nav>
 
-<style>
-  .dropdown-menu-dark {
-    background-color: #212a31;
-    border: 1px solid #2e3944;
-  }
-
-  .dropdown-menu-dark .dropdown-item {
-    color: #d3d9d4;
-  }
-
-  .dropdown-menu-dark .dropdown-item:hover,
-  .dropdown-menu-dark .dropdown-item:focus {
-    background-color: #124e66;
-    color: #d3d9d4;
-  }
-
-  .dropdown-menu-dark .dropdown-divider {
-    border-color: #2e3944;
-  }
-
-  .dropdown-menu-dark .dropdown-header {
-    color: #748d92;
-  }
-</style>
-
 <script>
+  window.openSideMenu = function () {
+    const sideMenu = document.getElementById("sideMenu");
+    const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
+    if (sideMenu && mobileAvatarToggle) {
+      sideMenu.classList.add("active");
+      mobileAvatarToggle.setAttribute("aria-expanded", "true");
+    }
+  };
+
+  window.closeSideMenu = function () {
+    const sideMenu = document.getElementById("sideMenu");
+    const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
+    if (sideMenu && mobileAvatarToggle) {
+      sideMenu.classList.remove("active");
+      mobileAvatarToggle.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  // Fix the sideMenuClose event listener
+  const sideMenuClose = document.getElementById("sideMenuClose");
+  if (sideMenuClose) {
+    sideMenuClose.addEventListener("click", function () {
+      window.closeSideMenu();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    const sideMenu = document.getElementById("sideMenu");
+    const sideMenuClose = document.getElementById("sideMenuClose");
     const userDropdown = document.getElementById("userDropdown");
-    const mobileUserDropdown = document.getElementById("mobileUserDropdown");
     const profilePicture = document.getElementById("profile-picture");
     const mobileProfilePicture = document.getElementById(
       "profile-picture-mobile"
     );
-    const userId = sessionStorage.getItem("userid") || null;
+
+    const mobileProfileSection = document.getElementById(
+      "mobileProfileSection"
+    );
+    const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
+
+    // Simply check if token cookie exists
+    const isLoggedIn = !!Cookies.get("token");
     const avatarUrl = sessionStorage.getItem("avatar");
 
-    function setProfilePictureSrc(imgElement, src) {
+    async function setProfilePictureSrc(imgElement, src) {
       if (imgElement) {
-        imgElement.src =
-          src ||
-          "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
+        try {
+          if (src) {
+            imgElement.src = src;
+          } else {
+            const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+            if (userData.id) {
+              const avatarUrl = await window.checkAndSetAvatar(userData);
+              imgElement.src = avatarUrl;
+            } else {
+              imgElement.src =
+                "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
+            }
+          }
+        } catch (error) {
+          console.error("Error setting profile picture:", error);
+          imgElement.src =
+            "https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=Jailbreak+Break&bold=true&format=svg";
+        }
       }
     }
 
-    function getDropdownContent(userId) {
-      return userId !== null
-        ? `
-          <li><a class="dropdown-item" href="/users/${userId}">Profile</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#" onclick="logout()">Log out</a></li>
-        `
-        : `
-          <li><a class="dropdown-item" href="/login">Log in</a></li>
+    function getProfileContent(isLoggedIn) {
+      if (isLoggedIn) {
+        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        const hasRoblox = userData.roblox_id != null;
+        const userId = userData.id;
+
+        return `
+          <div class="profile-actions">
+            <a class="nav-link" href="/users/${userId}">
+              <i class="bi bi-person me-1"></i> Profile
+            </a>
+            ${
+              !hasRoblox
+                ? `
+            <a class="nav-link" href="/roblox">
+              <svg class="me-1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 24 24">
+                <path fill="#030000" d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"></path>
+              </svg> Authenticate with Roblox
+            </a>
+            `
+                : ""
+            }
+            <a class="nav-link text-danger" href="" onclick="logout()">
+              <i class="bi bi-box-arrow-right me-1"></i> Log out
+            </a>
+          </div>
         `;
+      } else {
+        return `
+          <a class="nav-link" href="/login">
+            <i class="bi bi-discord me-1"></i> Authenticate with Discord
+          </a>
+        `;
+      }
     }
 
-    function updateDropdownContent() {
-      const dropdownContent = getDropdownContent(userId);
+    function getDropdownContent(isLoggedIn) {
+      if (isLoggedIn) {
+        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        const hasRoblox = userData.roblox_id != null;
+        const userId = userData.id;
+
+        return `
+          <li>
+            <a class="dropdown-item" href="/users/${userId}">
+              <i class="bi bi-person me-1"></i> Profile
+            </a>
+          </li>
+          ${
+            !hasRoblox
+              ? `
+          <li>
+            <a class="dropdown-item" href="/roblox">
+              <svg class="me-1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 24 24">
+                <path fill="#030000" d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"></path>
+              </svg> Authenticate with Roblox
+            </a>
+          </li>`
+              : ""
+          }
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item text-danger" href="" onclick="logout()">
+              <i class="bi bi-box-arrow-right me-1"></i> Log out
+            </a>
+          </li>
+        `;
+      } else {
+        return `
+          <li>
+            <a class="dropdown-item" href="/login">
+              <i class="bi bi-discord me-1"></i> Authenticate with Discord
+            </a>
+          </li>
+        `;
+      }
+    }
+
+    function updateContent() {
+      if (isLoggedIn) {
+        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        if (!userData.id) {
+          setTimeout(updateContent, 100);
+          return;
+        }
+      }
+
+      const dropdownContent = getDropdownContent(isLoggedIn);
+      const profileContent = getProfileContent(isLoggedIn);
+
       if (userDropdown) userDropdown.innerHTML = dropdownContent;
-      if (mobileUserDropdown) mobileUserDropdown.innerHTML = dropdownContent;
+      if (mobileProfileSection) mobileProfileSection.innerHTML = profileContent;
+
       setProfilePictureSrc(profilePicture, avatarUrl);
       setProfilePictureSrc(mobileProfilePicture, avatarUrl);
     }
 
+    // Toggle side menu with mobile avatar
+    mobileAvatarToggle.addEventListener("click", function () {
+      const isExpanded = this.getAttribute("aria-expanded") === "true";
+      this.setAttribute("aria-expanded", !isExpanded);
+      sideMenu.classList.toggle("active");
+    });
+
     window.logout = function () {
-      if (
-        sessionStorage.getItem("userid") ||
-        document.cookie.includes("token")
-      ) {
-        sessionStorage.removeItem("userid");
-        sessionStorage.removeItem("avatar");
-        sessionStorage.removeItem("user");
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        updateDropdownContent();
-        window.location.href = "/logout";
-      }
+      Cookies.remove("token");
+      updateContent();
+      window.location.reload();
     };
-    // Initial update of dropdown content
-    updateDropdownContent();
+
+    updateContent();
   });
+  if (sideMenuClose) {
+    sideMenuClose.addEventListener("click", function () {
+      sideMenu.classList.remove("active");
+      mobileAvatarToggle.setAttribute("aria-expanded", "false");
+    });
+  }
 </script>
-<script
-  async="async"
-  defer
-  data-id="194811"
-  async="async"
-  type="text/javascript"
-></script>
+
+<style>
+  /* Add these styles to your CSS */
+  .dropdown-toggle-no-caret::after {
+    display: none !important;
+  }
+
+  .mobile-profile-section {
+    padding: 0 1rem; /* Change padding to only left and right */
+    margin-top: 4rem; /* Space for close button */
+  }
+
+  #sideMenuClose {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1030;
+  }
+
+  .side-menu-content .nav-link {
+    padding: 0.5rem 0;
+    color: white;
+  }
+
+  .mobile-profile-section .nav-link {
+    color: white;
+    display: block;
+    padding: 0.5rem 0;
+  }
+
+  .profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .side-menu-content .nav-item {
+    padding: 0 1rem;
+  }
+  .nav-separator {
+    margin: 0.5rem 0;
+  }
+</style>

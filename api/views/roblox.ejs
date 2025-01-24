@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Roblox Auth page for Jailbreak Changelogs"
+    />
+    <!-- Open Graph metadata for social media sharing -->
+    <meta
+      property="og:title"
+      content="Jailbreak Changelogs | Roblox Authentication Page"
+    />
+    <meta
+      property="og:description"
+      content="JailbreakChangelogs connects with Roblox to build your user profile."
+    />
+    <meta property="og:image" content="/assets/logos/Roblox_Logo.webp" />
+    <meta property="og:image:width" content="2328" />
+    <meta property="og:image:height" content="1054" />
+    <meta
+      property="og:url"
+      content="https://jailbreakchangelogs.xyz/roblox"
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Additional metadata for SEO -->
+    <meta
+      name="description"
+      content="JailbreakChangelogs connects with Roblox to build your user profile."
+    />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Twitter Card metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Jailbreak Changelogs | Latest Updates & Patch Notes"
+    />
+    <meta
+      name="twitter:description"
+      content="JailbreakChangelogs connects with Roblox to build your user profile."
+    />
+    <meta name="twitter:image" content="/assets/logos/Roblox_Logo.webp" />
+    <title>Jailbreak Changelogs | Roblox Authentication Page</title>
+    <link
+      rel="canonical"
+      href="https://jailbreakchangelogs.xyz/login"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles/roblox.css" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+  </head>
+  <body>
+    <div class="site-logo">
+      <a href="/">
+        <img src="<%= logoUrl %>" alt="<%= logoAlt %>" class="navbar-logo" />
+      </a>
+    </div>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div class="login-container">
+      <div class="auth-toggle">
+        <button class="auth-toggle-btn active">Roblox</button>
+        <button class="auth-toggle-btn" onclick="window.location.href='/login'">
+          Discord
+        </button>
+      </div>
+      <div class="login-header">
+        <h1>Connect Roblox</h1>
+      </div>
+      <img
+        src="/assets/logos/Roblox_Logo.webp"
+        alt="Roblox Logo"
+        class="roblox-logo"
+      />
+      <p class="privacy-notice">
+        JailbreakChangelogs connects with Roblox to build your user profile. We
+        only collect your publicly available Roblox details to enhance your
+        trading experience. Your data security is important to us - there's no
+        need to provide a password.
+      </p>
+      <div class="consent-checkboxes">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="ageCheck" />
+          <label class="form-check-label" for="ageCheck">
+            I am 13 years of age or older
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="tosCheck" />
+          <label class="form-check-label" for="tosCheck">
+            I agree to the <a href="/tos">Terms of Service</a> and
+            <a href="/privacy">Privacy Policy</a>
+          </label>
+        </div>
+      </div>
+      <button class="login-button" id="button" disabled>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#ffffff"
+            d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"
+          ></path>
+        </svg>
+        Authenticate with Roblox
+      </button>
+    </div>
+
+    <!-- jQuery -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Toastr (For Notifications) -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+      integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- Bootstrap -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Custom Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/roblox.js"></script>
+
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

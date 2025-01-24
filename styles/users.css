@@ -1,707 +1,684 @@
-/* Dark Theme Colors */
+@import "colors.css";
+
 [data-bs-theme="dark"] body {
-  --common-bg-color: #2e3944; /* Dark background */
-  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
-  --content-h2: #748d92; /* Softer Red for Dark Mode */
-  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
-  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
-  --content-bullet: #748d92; /* Lighter Blue for Bullets */
-  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
-  --text-color: #ffffff; /* White Text */
-
-  --header-text: #ffffff; /* White for Header Text */
-  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
-  --button-primary-text: #eeeeee; /* White for Primary Button Text */
-  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
-  /* Mention Colors */
-  --mention-color: #748d92; /* Teal color for Mentions */
-  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
-  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
-  --username-color: #76abae; /* Soft cyan for Username */
-  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
-
-  --highlight-bg: rgba(
-    255,
-    165,
-    0,
-    0.4
-  ); /* Semi-transparent Orange for Highlights */
-  --highlight-text: #ffffff; /* White for Highlighted Text */
-  --selection-bg: #4682b4; /* Steel Blue for Selection Background */
-  --selection-text: #ffffff; /* White for Selection Text */
-  --glow-color: #4b4b4b; /* Dark Gray for Glow Effects */
-
-  /* Social Media Colors */
-  --reddit-color: #ff4500; /* Reddit Orange */
-  --discord-color: #7289da; /* Discord Blurple */
-  --wiki-color: #8ab4f8; /* Lighter Wiki Blue */
-  --github-color: #ffffff; /* GitHub White */
-
-  /* Gray Scale */
-  --gray-100: #333333; /* Very Dark Gray */
-  --gray-200: #444444; /* Darker Gray */
-  --gray-300: #555555; /* Dark Gray */
-  --gray-400: #666666; /* Gray */
-  --gray-500: #777777; /* Medium Gray */
-  --gray-600: #888888; /* Slate Gray */
-  --gray-700: #999999; /* Light Slate Gray */
-  --gray-800: #aaaaaa; /* Light Gray */
-  --gray-900: #bbbbbb; /* Very Light Gray */
+  /* Only keep functional colors that aren't in colors.css */
+  --border-color: rgba(116, 141, 146, 0.2);
+  --overlay-dark: rgba(33, 42, 49, 0.8);
+  --mention-bg: var(--background-dark);
+  --mention-color: var(--text-secondary);
+  --mention-hover: var(--button-primary);
+  --highlight-bg: rgba(18, 78, 102, 0.4);
+  --highlight-text: var(--text-body);
+  --selection-bg: var(--button-primary);
+  --selection-text: var(--text-body);
 }
-[data-bs-theme="dark"] body {
-  background-color: var(--common-bg-color);
-}
-
-.comment-card {
-  border: none;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: box-shadow 0.3s ease;
-}
-.comment-card:hover {
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-.card-body {
-  padding: 1rem;
-}
-.comment-container {
-  display: flex;
-  gap: 1rem;
-}
-.comment-image-container {
-  flex-shrink: 0;
-  width: 200px;
-  height: 112.5px; /* Maintains a 16:9 aspect ratio */
-  overflow: hidden;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.comment-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.comment-content-container {
-  flex-grow: 1;
+/* Connections Section */
+.connections-list {
   display: flex;
   flex-direction: column;
-}
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-.card-title {
-  font-size: 0.9rem;
-  margin-bottom: 0;
-}
-.card-subtitle {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-.comment-text {
-  font-size: 0.9rem;
-  margin-bottom: 0.75rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-.btn-sm {
-  align-self: flex-start;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-}
-.hidden {
-  display: none; /* Hides the button */
+  gap: 12px;
 }
 
-.btn-primary {
-  background-color: var(
-    --button-primary-bg
-  ) !important; /* Primary button background */
-  border-color: var(--button-primary-bg) !important; /* Primary button border */
-  color: var(--button-primary-text) !important; /* Primary button text color */
-}
-
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active,
-.btn-primary.active {
-  background-color: var(
-    --button-primary-hover-bg
-  ) !important; /* Hover state for primary button */
-  border-color: var(
-    --button-primary-hover-bg
-  ) !important; /* Border color on hover */
-}
-
-.btn-primary:focus {
-  box-shadow: 0 0 0 0.2rem rgba(var(--glow-color), 0.5); /* Glow effect on focus */
-}
-.large-avatar {
-  width: 128px;
-  height: 128pxpx;
-}
-
-.banner-container {
-  background-color: var(--common-bg-color)
-}
-
-.nav-tabs {
-  display: flex; /* Ensures that all items are displayed in a row */
-  align-items: center; /* Vertically aligns items */
-}
-
-/* Adjust the body when menu is opened */
-body.menu-open {
-  overflow: hidden;
-}
-
-#userTabs{
-  border-bottom: 2px solid #e0e0e0;
-  padding-top: 12px;
-
-}
-#card-pagination {
-  border: none;
-  background: none;
-}
-#paginationControls{
+.connection-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-#paginationControls button{
-  margin: 0 5px;
-  padding: 5px 10px;
-  border: none;
-  background-color: #f8f9fa;
-  color: #007bff;
-  border-radius: 5px;
+  padding: 8px 12px;
+  background-color: var(--background-light);
+  border-radius: 8px;
+  transition: all 0.2s ease;
   cursor: pointer;
-  transition: all 0.3 ease;
-}
-#paginationControls button:hover{
-  background-color: #007bff;
-  color: #ffffff;
-}
-#paginationControls input {
-  width: 50px;
-  text-align: center;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  padding: 5px;
-}
-#comments-list {
-  max-height: 500px; /* Set the maximum height for the scrollable area */
-  overflow-y: auto; /* Enable vertical scrolling */
-  padding-right: 10px; /* Right padding for the scrollbar */
-  display: flex; /* Enable flexbox */
-  flex-direction: column; /* Stack comments vertically */
-  align-items: center; /* Center items horizontally */
+  color: var(--text-body);
 }
 
-.card-pagination {
-  display: flex; /* Enable flexbox */
-  justify-content: center; /* Center items horizontally */
-  margin-left: 15px;
-  margin-bottom: 10px;
-  padding: 5px;
+.connection-item:hover {
+  background-color: var(--hover-bg);
+  transform: translateY(-1px);
 }
 
-.recent-comments-button {
-  max-height: 100%;
-}
-.banner-container {
-  height: 300px;
-  overflow: hidden;
-}
-.banner-image {
-  object-fit: cover;
-  height: 100%;
-}
-
-.user-header {
-  margin-top: -50px; /* Adjust to overlap with banner */
-}
-.crown-icon {
-  filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));
-}
-.user-avatar {
-  width: 120px;
-  height: 120px;
-  margin-bottom: -30px;
-}
-.user-info-overlay {
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-}
-.user-stats:hover {
-  cursor: pointer;
-}
-.user-header-wrapper {
-  background-color: #f8f9fa;
-}
-
-.user-stats-container {
-  margin-top: -20px;
-}
-.user-stats-row {
-  margin-top: -10px; 
-}
-.user-info {
-  padding-top: 60px; /* Make space for the avatar */
-}
-.open-chat-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  z-index: 1000;
-}
-
-/* Chat popup container */
-.chat-popup {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 600px;
-  height: 350px;
-  background-color: #2e3944;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  display: none;
-  flex-direction: column;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Chat header */
-.chat-header {
-  background-color: #212a31;
-  color: #d3d9d4;
-  padding: 10px;
-  font-weight: bold;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Close button */
-.chat-header button {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: white;
-  cursor: pointer;
-}
-
-/* Chat content layout: left for chat, right for table */
-.chat-content {
-  display: flex;
+.connection-text {
   flex: 1;
+  font-size: 14px;
 }
 
-tbody tr:nth-child(odd) {
-  background-color: #1e2b3b00;
-  border-radius: 10px;
-
+/* Make the pointing icon smaller and more subtle */
+.bi-box-arrow-up-right {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-tbody tr:nth-child(even) {
-  background-color: #2e394400;
-  border-radius: 10px;
-
+.fs-7 {
+  font-size: 0.75rem !important;
+}
+/* Custom toggle button states */
+.btn-success {
+  background-color: #124e66 !important; /* --accent-color */
+  border-color: #124e66 !important; /* --accent-color */
+  color: #d3d9d4 !important; /* --text-primary */
 }
 
-/* Hover effect on table rows */
-tbody tr:hover {
-  background-color: #007bff00;
-  border-radius: 10px;
-
+.btn-danger {
+  background-color: #212a31 !important; /* --bg-primary */
+  border-color: #748d92 !important; /* --text-muted */
+  color: #d3d9d4 !important; /* --text-primary */
 }
 
-/* Highlight and lift effect for <td> */
-td {
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease, transform 0.3s ease;
+/* Hover states */
+.btn-success:hover {
+  background-color: #1d7da3 !important; /* --accent-color-light */
+  border-color: #1d7da3 !important; /* --accent-color-light */
 }
 
-td:hover {
-  background-color: #535353; /* Change background color */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15); /* Add subtle lift effect */
-  border-radius: 10px;
-  transform: translateY(-2px); /* Lift up the cell slightly */
+.btn-danger:hover {
+  background-color: #2e3944 !important; /* --bg-secondary */
+  border-color: #748d92 !important; /* --text-muted */
 }
 
-/* Chat body */
-#chat-body {
-  flex: 2;
-  padding: 10px;
-  overflow-y: auto;
-  background-color: #212529;
+/* Banner Input Field */
+#bannerInput {
+  background-color: #212a31; /* --bg-primary */
+  color: #d3d9d4; /* --text-primary */
+  border: 1px solid #748d92; /* --text-muted */
+  transition: all 0.2s ease;
 }
 
-/* Chat sidebar (table) */
-.chat-sidebar {
-  flex: 1;
-  padding: 10px;
-  background-color: #2e3944;
-  border-left: 1px solid #ddd;
-  overflow-y: auto;
+#bannerInput:focus {
+  border-color: #1d7da3; /* --accent-color-light */
+  box-shadow: 0 0 0 0.2rem rgba(29, 125, 163, 0.25); /* --accent-color-light with opacity */
+  background-color: #2e3944; /* --bg-secondary */
+  outline: none;
 }
 
-/* Table styling */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #212529;
-  border-radius: 10px;
-  border-collapse: unset;
+#bannerInput:hover {
+  border-color: #1d7da3; /* --accent-color-light */
 }
 
-table, th, td {
-  border: 1px solid #212529;
+#bannerInput::placeholder {
+  color: #748d92; /* --text-muted */
 }
 
-th, td {
-  padding: 8px;
-  text-align: left;
+/* Form Label */
+.form-label {
+  color: #d3d9d4; /* --text-primary */
 }
 
-thead {
-  background-color: #007bff42;
+/* For disabled state */
+#bannerInput:disabled {
+  background-color: #2e3944; /* --bg-secondary */
+  color: #748d92; /* --text-muted */
+  border-color: #748d92; /* --text-muted */
 }
 
-tbody tr:nth-child(odd) {
-  background-color: #3a445000;
+/* Settings Modal Styles */
+#settingsModal {
+  background-color: rgba(33, 42, 49, 0.8); /* --bg-primary with opacity */
 }
 
-tbody tr:nth-child(even) {
-  background-color: #2e394400;
+#settingsModal .modal-content {
+  background-color: #212a31; /* --bg-primary */
+  border: 1px solid #748d92; /* --text-muted */
+  color: #d3d9d4; /* --text-primary */
 }
 
-/* Chat footer */
-.chat-footer {
-  display: block;
-  padding: 10px;
-  border-top: 1px solid #ddd;
+#settingsModal .modal-header {
+  border-bottom: 1px solid #2e3944; /* --bg-secondary */
 }
 
-/* Chat input field */
-#chat-input {
-  flex: 1;
-  padding: 5px;
-  border: 1px solid #ccc;
-  min-width: 80%;
-  border-radius: 5px;
-  margin-right: 10px;
-  background-color: #3a4450;
-  color: white;
+#settingsModal .modal-footer {
+  border-top: 1px solid #2e3944; /* --bg-secondary */
 }
 
-/* Send button */
-#send-chat-message {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
+#settingsModal .close {
+  color: #748d92; /* --text-muted */
 }
 
-/* Chat messages styling */
-#chat-messages {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+#settingsModal .close:hover {
+  color: #d3d9d4; /* --text-primary */
 }
 
-.chat-message {
-  padding: 8px;
-  background-color: #eee;
-  border-radius: 5px;
+/* Banner Input Styles */
+#input-for-banner {
+  background-color: #2e3944; /* --bg-secondary */
+  border: 1px solid #748d92; /* --text-muted */
+  color: #d3d9d4; /* --text-primary */
+  transition: all 0.2s ease;
 }
 
-.chat-message.self {
-  background-color: #d4edda;
-  align-self: flex-end;
+#input-for-banner:focus {
+  background-color: #2e3944; /* --bg-secondary */
+  border-color: #1d7da3; /* --accent-color-light */
+  box-shadow: 0 0 0 0.2rem rgba(29, 125, 163, 0.25); /* --accent-color-light with opacity */
+  color: #d3d9d4; /* --text-primary */
 }
 
-.chat-message.other {
-  background-color: #f8d7da;
-  align-self: flex-start;
+#input-for-banner::placeholder {
+  color: #748d92; /* --text-muted */
 }
 
-input {
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #748d92;
-  border-radius: 5px;
-  background-color: #212529;
-  color: #d3d9d4;
-  transition: all 0.3s ease;
+/* Settings Button Styles */
+#settings-submit {
+  background-color: #124e66; /* --accent-color */
+  border-color: #124e66; /* --accent-color */
+  color: #d3d9d4; /* --text-primary */
 }
 
-/* Individual comment styling */
-#comments-list .list-group-item {
-  background-color: #212a31; /* Dark background for comments */
-  border: 1px solid #748d92; /* Border around comments */
-  border-radius: 15px; /* Rounded corners */
-  padding: 15px 15px 1px; /* Reduced bottom padding */
-  margin-bottom: 15px; /* Space between comments */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Transition effects */
-  word-wrap: break-word; /* Break long words */
-  overflow-wrap: break-word; /* Handle overflow of long words */
-  max-width: 100%; /* Ensure comments do not exceed container width */
-  width: 100%; /* Set width to 100% */
+#settings-submit:hover {
+  background-color: #2e3944 !important; /* --accent-color-light */
+  border-color: #748d92 !important; /* --accent-color-light */
 }
 
-
-#comments-list .list-group-item:hover {
-  transform: translateY(-3px); /* Raise comment on hover */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+#settings-submit:focus {
+  box-shadow: 0 0 0 0.2rem rgba(29, 125, 163, 0.25); /* --accent-color-light with opacity */
 }
 
-/* Commenter name styling */
-#comments-list .list-group-item strong {
-  color: var(--content-h3); /* Color for commenter name */
-  display: block; /* Display name as block */
-  margin-bottom: 5px; /* Space below name */
-  text-align: left; /* Center the name */
+/* Settings Toggle Buttons */
+.settings-toggle-btn {
+  background-color: #2e3944; /* --bg-secondary */
+  border: 1px solid #748d92; /* --text-muted */
+  color: #d3d9d4; /* --text-primary */
 }
 
-/* Comment timestamp styling */
-#comments-list .list-group-item .text-muted {
-  font-size: 0.85em; /* Smaller font for timestamp */
-  color: var(--gray-600) !important; /* Color for timestamp */
-  display: block; /* Display timestamp as block */
-  margin-bottom: 10px; /* Space below timestamp */
-  text-align: left; /* Center the timestamp */
+.settings-toggle-btn.btn-success {
+  background-color: #124e66; /* --accent-color */
+  border-color: #124e66; /* --accent-color */
 }
 
-/* Comment text styling */
-#comments-list .list-group-item p {
-  color: var(--text-color); /* Color for comment text */
-  line-height: 1.6; /* Line height for readability */
-  margin-bottom: 0; /* Remove bottom margin */
-  word-break: break-word; /* Break long words */
-  hyphens: auto; /* Enable hyphenation */
-  text-align: left; /* Center the comment text */
+.settings-toggle-btn.btn-danger {
+  background-color: #212a31; /* --bg-primary */
+  border-color: #748d92; /* --text-muted */
 }
 
-.card {
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Loading Spinner */
+.spinner-border {
+  color: #d3d9d4; /* --text-primary */
 }
 
-#description-box {
-  min-height: 150px;
+.view-item-btn {
+  color: var(--text-body) !important;
+  border: 1px solid var(--button-primary) !important;
+  background-color: var(--background-light) !important;
+  transition: all 0.3s ease !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
 }
 
-#userBio {
-  font-size: 1.1rem;
-  line-height: 1.6;
+.view-item-btn:hover {
+  color: var(--background-dark) !important;
+  background-color: var(--text-secondary) !important;
+  border-color: var(--text-secondary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(33, 42, 49, 0.3);
 }
 
-#edit-bio-button, #save-bio-button {
-  transition: all 0.3s ease;
+.view-item-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+  background-color: #124e66 !important;
+  border-color: #124e66 !important;
+  color: #d3d9d4 !important;
 }
 
-#edit-bio-button:hover, #save-bio-button:hover {
-  background-color: #ffffff;
-  color: #000000;
+.view-item-btn:focus {
+  box-shadow: 0 0 0 2px #2e3944, 0 0 0 4px rgba(116, 141, 146, 0.4) !important;
+  outline: none;
 }
 
-.loading-spinner {
-  position: absolute; /* Position absolutely within the container */
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust for the spinner's dimensions */
-  display: none; /* Initially hide the spinner */
+/* Layout & Container */
+body {
+  background-color: var(--background-light);
+  color: var(--text-body);
 }
 
-.loading-icon {
-  vertical-align: middle; /* Align icon with text */
-  align-items: center;
+.container {
+  max-width: 1000px;
+  padding: 0 16px;
+  margin: 0 auto;
 }
 
-.breadcrumb {
-  border-radius: 0.25rem;
-  padding: 12px 20px;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  max-width: fit-content;
+.row {
   margin: 0;
 }
 
-.breadcrumb-item {
-  margin-right: 15px;
-  font-size: 16px;
+.col-md-3,
+.col-md-9 {
+  padding: 0;
+}
+
+/* Card Components */
+.card {
+  background-color: var(--background-dark) !important;
+  border: none !important;
+  border-radius: 16px;
+}
+
+.card-body {
+  padding: 16px !important;
+}
+
+/* Banner Section */
+.banner-container {
   position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background-color: var(--background-light);
+  max-width: 1000px; /* Match container max-width */
+  margin: 0 auto; /* Center the banner */
+  border-radius: 16px; /* Optional: add rounded corners */
 }
 
-.breadcrumb-item:not(:last-child)::after {
-  content: "›";
-  color: #6c757d;
-  margin-left: 15px;
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: 100%;
 }
 
-.breadcrumb-item a {
-  text-decoration: none;
-  color: #ffffff;
-  transition: color 0.3s, opacity 0.3s;
-  opacity: 0.8;
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, transparent, var(--overlay-dark));
 }
 
-.breadcrumb-item a:hover {
-  color: #ffffff;
-  opacity: 1;
+/* Avatar Styles */
+.avatar-wrapper {
+  position: relative;
+  margin: -75px 1rem 1rem;
+}
+/* Profile Layout */
+.user-profile {
+  position: relative;
+  width: 100%;
+  margin-bottom: 2rem;
+  padding-top: 1rem; /* Add some space at the top */
 }
 
-.breadcrumb-item.active {
-  color: #ffffff;
-  font-weight: 600;
-  opacity: 1;
-}
-#settings-button {
-  color: #ffffff; /* or any light color that fits your theme */
-  padding: 0.375rem 0.75rem; /* Optional: adjust padding as needed */
+.user-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid var(--avatar-border-color, #000);
+  background-color: var(--bg-primary);
 }
 
-#settings-button:hover,
-#settings-button:focus {
-  color: #cccccc; /* slightly darker on hover/focus */
-  text-decoration: none; /* removes underline on hover */
+/* User Info Layout */
+.user-info-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between; /* This helps push items to edges */
+  position: relative; /* For absolute positioning context */
 }
 
-#settings-button:focus {
-  box-shadow: none; /* removes focus outline */
+.user-header {
+  margin-top: -50px;
 }
+
+.user-info {
+  padding-top: 60px;
+}
+
+.user-name-container {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+
+/* Typography */
+.user-display-name {
+  margin: 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 1; /* Allow the name to shrink if needed */
+  min-width: 0; /* Prevent text overflow */
+}
+
+.username-link {
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+  color: var(--text-muted) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Buttons */
+.action-button {
+  min-width: 120px;
+  height: 38px;
+  padding: 0.375rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1000;
+}
+
+.btn-primary {
+  background-color: var(--button-primary) !important;
+  border-color: var(--button-primary) !important;
+  color: var(--text-body) !important;
+
+  &:hover {
+    background-color: var(--background-dark) !important;
+    border-color: var(--button-primary) !important;
+  }
+}
+
+.btn-outline-light {
+  border: none;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+
+  &:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-body);
+  }
+}
+
+/* Stats Section */
+.user-stats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
 .stat-box {
-  background-color: #2c3e50; /* Dark background color */
-  border-radius: 8px;
-  padding: 10px 15px;
-  transition: all 0.3s ease;
-}
-.stat-box:hover {
-  background-color: #34495e; /* Slightly lighter on hover */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-.modal {
-  display: none; /* Hidden by default */
-  background-color: rgba(0, 0, 0, 0.676);
-}
-
-/* Modal Content Box */
-.modal-content {
-  background-color: rgba(0, 0, 0, 0.858);
-}
-
-td {
-  background-color: #212529; /* Background color */
-  padding: 10px;             /* Padding */
-  text-align: left;          /* Text alignment */
-  display: grid;
-  border: 0px solid #b1b1b1;    /* Border */
-}
-
-
-
-/* Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   cursor: pointer;
+
+  .h5 {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .stat-number {
+    font-weight: 700;
+    color: var(--text-body);
+    font-size: 16px;
+  }
+
+  .stat-text {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-left: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
-/* Form Style */
-form label {
-  font-weight: bold;
+/* Comments Section */
+#comments-list {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+
+  .list-group-item {
+    background-color: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
+/* Modal */
+.modal {
+  background-color: var(--overlay-dark);
+
+  .modal-content {
+    background-color: var(--background-dark);
   }
 }
 
-#description-box {
-  min-height: 62px;
+/* Responsive Styles */
+@media (max-width: 991.98px) {
+  .container {
+    max-width: 100%;
+  }
+  .user-header {
+    margin-top: -30px;
+  }
 }
+@media (max-width: 767.98px) {
+  .user-info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 1rem;
+  }
 
-@media (max-width: 768px) {
-  #message-button,
-  #follow-button {
-    font-size: 0.8rem;
-    padding: 0.375rem 0.75rem;
-    margin-top: 30px;
+  .avatar-wrapper {
+    margin: -50px 0 1rem 0;
+    width: auto;
   }
-  .comment-container {
-      flex-direction: column;
-  }
-  .comment-header {
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  .card-title {
-      margin-bottom: 0.25rem;
-  }
-  .card-subtitle {
-      font-size: 1rem;
-  }
-  .comment-text {
-      font-size: 0.85rem;
-  }
+
   .user-avatar {
     width: 80px;
     height: 80px;
-    margin-bottom: -20px;
   }
-  .banner-container {
-    height: 150px;
+
+  .user-name-container {
+    width: 100%;
+  }
+
+  .name-and-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Changed from fixed gap */
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto; /* This pushes the buttons to the end */
+  }
+
+  .display-name {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Username now sits below the name-and-button container */
+  .username-link {
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  .action-button {
+    min-width: auto;
+    height: 32px;
+    padding: 0.25rem 1rem;
+  }
+  .connection-item {
+    padding: 6px 10px;
+  }
+
+  .connection-text {
+    font-size: 13px;
   }
 }
-@media (max-width: 576px) {
-  .breadcrumb {
-    padding: 10px 15px;
+
+@media (min-width: 768px) {
+  .user-info-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1rem;
   }
-  .breadcrumb-item {
-    font-size: 14px;
-    margin-right: 10px;
+
+  .avatar-wrapper {
+    flex-shrink: 0;
   }
-  .breadcrumb-item:not(:last-child)::after {
-    margin-left: 10px;
+
+  .user-name-container {
+    flex-grow: 1;
   }
-  .user-stats-container {
-    padding-left: 5px;
-    padding-right: 5px;
+
+  .name-and-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0.5rem; /* Add some bottom margin */
+    gap: 1rem; /* Add gap between name and buttons */
   }
-  .user-stats .stat-box {
-    font-size: 0.8rem;
-    padding: 5px 10px;
+
+  .user-display-name {
+    margin: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
   }
-  .user-stats .h5 {
+
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+  }
+
+  .action-button {
+    height: 36px;
+  }
+
+  /* Ensure buttons maintain reasonable width */
+  #follow-button {
+    min-width: 100px;
+  }
+
+  #settings-button {
+    min-width: auto;
+  }
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .banner-container {
+    height: 150px;
+    width: 100%;
+  }
+  .user-profile {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .user-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-wrapper {
+    margin-top: -50px;
+    margin-left: 0.5rem;
+  }
+
+  .user-stats {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .stat-box {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* Container for title and pagination */
+  .d-flex.flex-wrap.justify-content-between {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Pagination container */
+  .card-pagination {
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  /* Improve button spacing on mobile */
+  .btn-group .btn {
+    margin-left: 0.25rem;
+  }
+
+  /* Add some breathing room to the card */
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* Pagination controls */
+  #paginationControls {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card-pagination {
+    display: flex;
+    align-items: center;
+  }
+
+  #paginationControls.pagination {
+    margin-bottom: 0;
+    gap: 0.5rem; /* Adds some space between pagination items */
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .card-title {
     font-size: 1rem;
+  }
+  .card-text {
+    font-size: 0.875rem;
+  }
+  #comments-list {
+    padding-right: 0;
+  }
+  .container {
+    padding: 0 8px;
+  }
+  .action-button {
+    min-width: 50px;
+  }
+
+  /* Utility Classes */
+  .mobile-hidden {
+    display: none !important;
+  }
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  .mobile-mt-2 {
+    margin-top: 0.5rem !important;
+  }
+  .mobile-mb-2 {
+    margin-bottom: 0.5rem !important;
   }
 }

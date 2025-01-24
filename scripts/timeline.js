@@ -3,15 +3,29 @@ $(document).ready(function () {
   const loadingOverlay = document.getElementById("loading-overlay");
 
   // API endpoint for fetching changelogs
-  const apiUrl = "https://api.jailbreakchangelogs.xyz/changelogs/list";
+  const apiUrl = "https://api3.jailbreakchangelogs.xyz/changelogs/list";
 
   // jQuery selectors for important elements
   const $timeline = $("#timeline");
   const $footer = $("footer");
 
-  // Constants for local storage caching
-  const CACHE_KEY = "changelog_data";
-  const CACHE_EXPIRY = 60 * 60 * 1000; // Cache expiry set to 1 hour in milliseconds
+  const backToTopButton = document.getElementById("back-to-top");
+  // Show button when scrolling down 300px
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+      backToTopButton.style.display = "flex";
+    } else {
+      backToTopButton.style.display = "none";
+    }
+  });
+
+  // Scroll to top when button is clicked
+  backToTopButton.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  });
 
   // State variables
   let isLoading = false; // Tracks whether data is currently being loaded
@@ -22,27 +36,6 @@ $(document).ready(function () {
   if ($timeline.length === 0) {
     console.error("Timeline element not found");
     return;
-  }
-
-  // Retrieve cached data from local storage if available and not expired
-  function getCachedData() {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    if (cachedData) {
-      const { timestamp, data } = JSON.parse(cachedData);
-      if (Date.now() - timestamp < CACHE_EXPIRY) {
-        return data;
-      }
-    }
-    return null;
-  }
-
-  // Store data in local storage with current timestamp
-  function setCachedData(data) {
-    const cacheObject = {
-      timestamp: Date.now(),
-      data: data,
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObject));
   }
 
   // Toggle visibility of the loading overlay
@@ -58,6 +51,12 @@ $(document).ready(function () {
    * @returns {string} The resulting HTML string
    */
   const convertMarkdownToHtml = (markdown) => {
+    // Handle inline italic formatting
+    markdown = markdown.replace(
+      /\b_([^_]+)_\b/g,
+      '<span style="font-style: italic; color: var(--content-paragraph);">$1</span>'
+    );
+
     return markdown
       .split("\n")
       .map((line) => {
@@ -152,24 +151,6 @@ $(document).ready(function () {
     return formattedTitle;
   }
 
-  // Back to Top button functionality
-  const backToTopButton = $("#backToTop");
-
-  // Show/hide the Back to Top button based on scroll position
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 100) {
-      backToTopButton.addClass("show");
-    } else {
-      backToTopButton.removeClass("show");
-    }
-  });
-
-  // Smooth scroll to top when Back to Top button is clicked
-  backToTopButton.on("click", function (e) {
-    e.preventDefault();
-    $("html, body").animate({ scrollTop: 0 }, 100);
-  });
-
   // Handle click events on changelog dropdown items
   $(document).on("click", ".changelog-dropdown-item", function (e) {
     e.preventDefault();
@@ -180,48 +161,77 @@ $(document).ready(function () {
     }
   });
 
+  const imageObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const spinner = img.previousElementSibling;
+
+          // Show spinner immediately when intersecting
+          spinner.style.display = "block";
+
+          // Only proceed if we have a data-src and it's different from current src
+          if (img.dataset.src && img.src !== img.dataset.src) {
+            // Pre-load the image
+            const tempImage = new Image();
+
+            tempImage.onload = () => {
+              img.src = img.dataset.src;
+              img.style.opacity = "1";
+              img.classList.add("loaded");
+              spinner.style.display = "none";
+            };
+
+            tempImage.onerror = () => {
+              img.src = img.dataset.defaultSrc;
+              img.style.opacity = "1";
+              img.classList.add("loaded");
+              spinner.style.display = "none";
+            };
+
+            tempImage.src = img.dataset.src;
+            observer.unobserve(img);
+          }
+        }
+      });
+    },
+    {
+      rootMargin: "50px 0px",
+      threshold: 0.1,
+    }
+  );
+
   // Create a timeline entry for a changelog
   function createTimelineEntry(changelog, index) {
-    if (!changelog || !changelog.title) return ""; // Skip empty entries
+    if (!changelog || !changelog.title) return "";
     const sideClass = index % 2 === 0 ? "left" : "right";
-
-    let sectionsHtml = "";
-    if (changelog.sections && typeof changelog.sections === "string") {
-      // Process the markdown content
-      const processedMarkdown = changelog.sections
-        .replace(/^ - /gm, '\n- ')   // Format top-level list items
-        .replace(/^ - - /gm, '\n  - ') // Format nested list items (indent with two spaces)
-        .replace(/^## /gm, '\n## ')  // Format second-level headers
-        .replace(/^### /gm, '\n### ') // Format third-level headers
-
-      // Convert processed markdown to HTML
-      sectionsHtml = convertMarkdownToHtml(processedMarkdown);
-    }
-
     const formattedTitle = formatTitle(changelog.title);
+    const defaultImage =
+      "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp";
+    const imageUrl = changelog.image_url || defaultImage;
 
     return `
-    <div class="timeline-entry-container ${sideClass}" style="display: none;">
-      <div class="timeline-entry">
-        <h3 class="entry-title mb-3 text-custom-header">${formattedTitle}</h3>
-        <div class="accordion timeline-accordion" id="accordion-${index}">
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="heading-${index}">
-              <button class="accordion-button timeline-accordion-button view-details-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${index}" aria-expanded="false" aria-controls="collapse-${index}">
-                View Details
-              </button>
-            </h2>
-            <div id="collapse-${index}" class="accordion-collapse collapse" aria-labelledby="heading-${index}" data-bs-parent="#accordion-${index}">
-              <div class="accordion-body">
-                <div>${sectionsHtml}</div>
-              </div>
+      <div class="timeline-entry-container ${sideClass}" style="display: none;">
+        <div class="timeline-entry">
+          <h3 class="entry-title mb-3 text-custom-header">${formattedTitle}</h3>
+          <a href="/changelogs/${changelog.id}" class="changelog-link">
+            <div class="image-container">
+              <div class="image-spinner"></div>
+              <img 
+                src=""
+                data-src="${imageUrl}"
+                data-default-src="${defaultImage}"
+                class="changelog-image"
+                alt=""
+                width="1920"
+                height="1080"
+              >
             </div>
-          </div>
+          </a>
         </div>
       </div>
-      <div class="timeline-line"></div>
-    </div>
-  `;
+    `;
   }
 
   // Set up the text change for accordion buttons
@@ -276,17 +286,9 @@ $(document).ready(function () {
     toggleLoadingOverlay(true); // Show loading overlay
     $footer.addClass("hide"); // Hide the footer during loading
 
-    const cachedData = getCachedData();
-    if (cachedData) {
-      processData(cachedData, true); // Use cached data if available
-      finishLoading();
-      return;
-    }
-
     $.getJSON(apiUrl)
       .done((data) => {
-        setCachedData(data); // Cache the newly fetched data
-        processData(data, false); // Process the fresh data
+        processData(data); // Process the fresh data
       })
       .fail((jqXHR, textStatus, errorThrown) => {
         console.error("Error fetching changelogs:", errorThrown);
@@ -299,38 +301,64 @@ $(document).ready(function () {
       });
   }
 
+  // Add this helper function to parse dates correctly
+  function parseDateFromTitle(title) {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const match = title
+      .split("/")[0]
+      .trim()
+      .match(/^([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\s+(\d{4})/);
+    if (match) {
+      const month = monthNames.indexOf(match[1]);
+      const day = parseInt(match[2]);
+      const year = parseInt(match[3]);
+      return new Date(year, month, day);
+    }
+    return new Date(0); // fallback for invalid dates
+  }
+
   // Process the changelog data and render it
-  function processData(data, isCached) {
+  function processData(data) {
     if (Array.isArray(data) && data.length > 0) {
-      const validData = data.filter((entry) => entry && entry.title);
+      const validData = data
+        .filter((entry) => entry && entry.title)
+        .sort((a, b) => {
+          const dateA = parseDateFromTitle(a.title);
+          const dateB = parseDateFromTitle(b.title);
+          return dateB - dateA;
+        });
+
       if (validData.length > 0) {
         const entriesHtml = validData.map(createTimelineEntry).join("");
         $timeline.html(entriesHtml);
 
-        if (isCached) {
-          // If data is from cache, show all entries immediately
-          $timeline.find(".timeline-entry-container").show();
-        } else {
-          // If it's fresh data, use the fade-in effect
-          fadeInEntries(0, validData.length);
-        }
+        // Initialize lazy loading for images after HTML is added
+        // Increased timeout to ensure DOM is ready
+        setTimeout(() => {
+          const images = document.querySelectorAll(".changelog-image");
+          images.forEach((img) => {
+            imageObserver.observe(img);
+          });
+        }, 300);
 
-        setupAccordionButtonText();
-
-        // Open the first accordion item by default
-        $timeline
-          .find(".accordion-button")
-          .first()
-          .removeClass("collapsed")
-          .attr("aria-expanded", "true");
-        $timeline.find(".accordion-collapse").first().addClass("show");
+        fadeInEntries(0, validData.length);
       } else {
-        console.log("No valid entries found");
         $timeline.html("<p>No changelogs found.</p>");
       }
-    } else {
-      console.log("Invalid or empty data");
-      $timeline.html("<p>No changelogs found.</p>");
     }
   }
 

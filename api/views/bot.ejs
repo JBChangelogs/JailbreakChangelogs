@@ -4,52 +4,97 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Only one meta description tag -->
+    <!-- Primary Meta Tags -->
+    <title>Jailbreak Changelogs Discord Bot</title>
+    <meta
+      name="title"
+      content="Jailbreak Discord Bot - Game Updates & Crew Tracking | JailbreakChangelogs"
+    />
     <meta
       name="description"
-      content="Stay updated on Roblox Jailbreak with our Discord bot! Get updates, patch notes, and game features directly in your server."
+      content="Add our Discord bot to get instant Jailbreak game updates, track crew stats, and view season progress. Stay informed with automatic changelog notifications and game features directly in your Discord server."
     />
+    <meta
+      name="keywords"
+      content="Jailbreak Discord bot, Roblox Jailbreak bot, Jailbreak crew tracking, Jailbreak game updates, Discord game bot, Jailbreak season tracker, Jailbreak notifications, Discord server bot, Jailbreak changelog bot"
+    />
+    <meta name="author" content="JailbreakChangelogs" />
 
-    <!-- Open Graph metadata for social media sharing -->
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jailbreakchangelogs.xyz/bot" />
     <meta
       property="og:title"
-      content="Jailbreak Changelogs | Latest Updates & Patch Notes"
+      content="Jailbreak Discord Bot - Game Updates & Crew Tracking | JailbreakChangelogs"
     />
     <meta
       property="og:description"
-      content="Stay updated on Roblox Jailbreak with our Discord bot! Get updates, patch notes, and game features directly in your server."
+      content="Add our Discord bot to get instant Jailbreak game updates, track crew stats, and view season progress. Stay informed with automatic changelog notifications and game features directly in your Discord server."
     />
-    <meta
-      property="og:image"
-      content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/348.webp"
-    />
-    <meta property="og:url" content="https://jailbreakchangelogs.xyz" />
-    <meta property="og:type" content="website" />
+    <meta property="og:image" content="<%= logoUrl %>" />
+    <meta property="og:image:width" content="4000" />
+    <meta property="og:image:height" content="900" />
 
-    <meta name="robots" content="index, follow" />
+    <meta property="og:site_name" content="Jailbreak Changelogs Discord Bot" />
 
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
     <meta
-      name="keywords"
-      content="Jailbreak Discord bot, Roblox Jailbreak bot, bot commands, server integration, community tools, gameplay features, user engagement, bot setup, game updates"
-    />
-
-    <!-- Twitter Card metadata -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="Jailbreak Changelogs | Latest Updates & Patch Notes"
+      property="twitter:url"
+      content="https://jailbreakchangelogs.xyz/bot"
     />
     <meta
-      name="twitter:description"
-      content="Stay updated on Roblox Jailbreak with our Discord bot! Get updates, patch notes, and game features directly in your server."
+      property="twitter:title"
+      content="Jailbreak Discord Bot - Game Updates & Crew Tracking | JailbreakChangelogs"
     />
     <meta
-      name="twitter:image"
-      content="https://cdn.jailbreakchangelogs.xyz/images/changelogs/349.webp"
+      property="twitter:description"
+      content="Add our Discord bot to get instant Jailbreak game updates, track crew stats, and view season progress. Stay informed with automatic changelog notifications and game features directly in your Discord server."
     />
 
-    <title><%= title %></title>
+    <meta property="twitter:image" content="<%= logoUrl %>" />
+
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://jailbreakchangelogs.xyz/bot" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="language" content="English" />
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Schema.org markup for Google -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Jailbreak Discord Bot",
+        "applicationCategory": "Discord Bot",
+        "operatingSystem": "Discord",
+        "description": "Discord bot for Roblox Jailbreak game updates, crew tracking, and season progress monitoring.",
+        "image": "<%= logoUrl %>",
+        "url": "https://jailbreakchangelogs.xyz/bot",
+        "isAccessibleForFree": true,
+        "features": [
+          "Crew tracking",
+          "Season progress monitoring",
+          "Changelog notifications",
+          "Game updates"
+        ]
+      }
+    </script>
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -58,31 +103,25 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
     <link rel="stylesheet" href="styles/bot.css" />
-    <link rel="stylesheet" href="styles/navbar.css" />
     <link rel="stylesheet" href="styles/main.css" />
   </head>
 
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-700MM66K5G"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-
-    gtag("config", "G-700MM66K5G");
-  </script>
-
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <%- include('partials/nav') %> <%- include('partials/announcement') %>
 
     <div class="hero" style="background-image: url(<%= image %>)">
@@ -104,48 +143,47 @@
       </div>
     </div>
 
-    <div style="background-color: #2e3944; color: white; padding: 40px 0">
-      <div class="container">
-        <h2 class="text-center mb-4">Bot Features</h2>
-        <div class="row justify-content-center">
-          <div class="col-md-4 text-center mb-4">
-            <div class="feature-icon" style="color: #748d92">
-              <i class="bi bi-people-fill"></i>
-            </div>
-            <h3>Crew Tracking</h3>
-            <p>
-              View the stats of your jailbreak crew as well as other players'
-              crews directly from the bot, making it easy to keep track of
-              without any hassle.
-            </p>
+    <div class="container">
+      <h2 class="text-center mb-4 mt-4">Bot Features</h2>
+      <div class="row justify-content-center">
+        <div class="col-md-4 text-center mb-4">
+          <div class="feature-icon" style="color: #748d92">
+            <i class="bi bi-people-fill"></i>
           </div>
-          <div class="col-md-4 text-center mb-4">
-            <div class="feature-icon" style="color: #748d92">
-              <i class="bi bi-calendar-event-fill"></i>
-            </div>
-            <h3>Season Tracking</h3>
-            <p>
-              Remove the hassle of visiting the website! With season tracking,
-              you can view all the latest season content directly from the
-              Discord bot.
-            </p>
+          <h3>Crew Tracking</h3>
+          <p>
+            View the stats of your jailbreak crew as well as other players'
+            crews directly from the bot, making it easy to keep track of without
+            any hassle.
+          </p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+          <div class="feature-icon" style="color: #748d92">
+            <i class="bi bi-calendar-event-fill"></i>
           </div>
-          <div class="col-md-4 text-center mb-4">
-            <div class="feature-icon" style="color: #748d92">
-              <i class="bi bi-file-earmark-text-fill"></i>
-            </div>
-            <h3>Changelog Tracking</h3>
-            <p>
-              Stay informed about the latest updates and changes without the
-              hassle of visiting external sites. Get instant updates on
-              changelogs right from the bot.
-            </p>
+          <h3>Season Tracking</h3>
+          <p>
+            Remove the hassle of visiting the website! With season tracking, you
+            can view all the latest season content directly from the Discord
+            bot.
+          </p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+          <div class="feature-icon" style="color: #748d92">
+            <i class="bi bi-file-earmark-text-fill"></i>
           </div>
+          <h3>Changelog Tracking</h3>
+          <p>
+            Stay informed about the latest updates and changes without the
+            hassle of visiting external sites. Get instant updates on changelogs
+            right from the bot.
+          </p>
         </div>
       </div>
     </div>
 
     <%- include('partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="scripts/main.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

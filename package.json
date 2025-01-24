@@ -1,36 +1,38 @@
 {
-    "name": "@jbchangelogs/jailbreak-changelogs",
-    "version": "2.10.1",
-    "scripts": {
-        "start": "node api/index.js",
-        "dev": "nodemon api/index.js",
-        "test": "echo \"No test specified\" && exit 0",
-        "bump-version": "npm version patch && git push && git push --tags",
-        "smart-push": "node scripts/smart-push.js"
-    },
-    "dependencies": {
-        "@vercel/speed-insights": "^1.0.12",
-        "axios": "^1.7.7",
-        "cors": "^2.8.5",
-        "ejs": "^3.1.10",
-        "express": "^4.21.0"
-    },
-    "engines": {
-        "node": "20.x"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.25.2",
-        "@babel/preset-env": "^7.25.4",
-        "@semantic-release/changelog": "^6.0.3",
-        "@semantic-release/git": "^10.0.1",
-        "babel-loader": "^9.2.1",
-        "conventional-changelog-conventionalcommits": "^8.0.0",
-        "nodemon": "^3.1.7",
-        "semantic-release": "^24.2.0",
-        "webpack": "^5.95.0",
-        "webpack-cli": "^5.1.4"
-    },
-    "publishConfig": {
-        "access": "public"
-    }
+  "name": "@jbchangelogs/jailbreak-changelogs",
+  "version": "2.9.2",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js",
+    "test": "echo \"No test specified\" && exit 0",
+    "bump-version": "npm version patch && git push && git push --tags",
+    "smart-push": "node scripts/smart-push.js"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.12",
+    "axios": "^1.7.7",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "cross-spawn": "^7.0.6",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "babel-loader": "^9.2.1",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "nodemon": "^3.1.7",
+    "semantic-release": "^24.2.0",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

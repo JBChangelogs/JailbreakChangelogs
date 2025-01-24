@@ -1,28 +1,32 @@
+@import url("colors.css");
+
 .footer-credit {
   font-family: "Inter", sans-serif;
 }
 
 .creator-link {
-  color: #748d92;
+  color: var(--text-muted);
   transition: color 0.2s ease;
   font-weight: 500;
 }
 
 .creator-link:hover {
-  color: #1d7da3;
+  color: var(--accent-color-light);
 }
 
 .heart-icon {
-  color: #1d7da3;
+  color: var(--accent-color-light);
   font-size: 0.9em;
 }
+
 .hero {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 100px 0;
+  padding: 100px;
   position: relative;
 }
+
 .hero::before {
   content: "";
   position: absolute;
@@ -32,39 +36,44 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
 }
+
 .hero-content {
   position: relative;
   z-index: 1;
-  color: white;
+  color: var(--text-primary);
   text-align: center;
 }
+
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 2.5rem; /* Default size */
   margin-bottom: 1rem;
 }
+
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* Default size */
   margin-bottom: 1.5rem;
 }
+
 .hero div {
   position: relative;
   z-index: 2; /* Ensures text is on top of the overlay */
 }
+
 .feature-icon {
   font-size: 3rem;
 }
 
 .btn-primary {
-  background-color: #032b44;
-  border-color: #032b44; /* Border color on hover */
-  color: #ffffff;
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
 }
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary.active {
-  background-color: #212a31 !important; /* Hover state for primary button */
-  border-color: #212a31 !important; /* Border color on hover */
+  background-color: var(--bg-primary) !important;
+  border-color: var(--bg-primary) !important;
 }
 /* made by note */
 .cursive {
@@ -72,10 +81,33 @@
   font-style: italic; /* make the text cursive */
 }
 body {
-  background-color: #2e3944;
+  background-color: var(--bg-secondary);
 }
 
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
+}
+@media (max-width: 768px) {
+  .hero {
+    padding: 50px;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .btn:last-child {
+    margin-bottom: 0;
+  }
 }
