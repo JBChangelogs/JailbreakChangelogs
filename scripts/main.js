@@ -422,6 +422,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       sessionStorage.removeItem("campaign");
     } else {
+      toastr.options = {
+        closeButton: true,
+        debug: false,
+        newestOnTop: false,
+        progressBar: true,
+        positionClass: "toast-bottom-right",
+        preventDuplicates: true,
+        showDuration: "300",
+        hideDuration: "1000",
+        timeOut: "7000",
+        extendedTimeOut: "1000",
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+      };
+
+      toastr.info(
+        "We noticed you're visiting from a campaign. Please log in to count your visit!",
+        "Campaign Visit"
+      );
+
       sessionStorage.setItem("campaign", campaign);
     }
   }
