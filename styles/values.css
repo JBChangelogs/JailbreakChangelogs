@@ -915,6 +915,9 @@ body {
 }
 
 @media (max-width: 768px) {
+  .text-muted {
+    font-size: 0.7rem !important; /* Reduced from 0.8rem */
+  }
   /* Container adjustments */
   .container-fluid {
     padding-left: 6px !important;
@@ -1206,6 +1209,9 @@ body {
 }
 /* Add this new media query for extra small screens */
 @media (max-width: 400px) {
+  .text-muted {
+    font-size: 0.65rem !important; /* Even smaller for very small screens */
+  }
   .card-title {
     font-size: 0.875rem; /* Even smaller than before */
     margin: 6px 0;
