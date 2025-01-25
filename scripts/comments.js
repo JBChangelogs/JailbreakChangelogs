@@ -203,27 +203,27 @@ class CommentsManager {
       }
     }
 
-    try {
-      const itemResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
-          this.itemName
-        )}&type=${this.type}`
-      );
+    // Only verify item existence for item types, not changelogs
+    if (this.type !== "changelog" && this.itemName) {
+      try {
+        const itemResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+            this.itemName
+          )}&type=${this.type}`
+        );
 
-      if (!itemResponse.ok) {
-        // Fix: Use correct class selector with dot
-        const commentsSection = document.querySelector(".comment-container");
-        if (commentsSection) {
-          commentsSection.style.display = "none";
-          window.commentsManagerInstance = null;
-        } else {
-          console.log("Comments section not found");
+        if (!itemResponse.ok) {
+          const commentsSection = document.querySelector(".comment-container");
+          if (commentsSection) {
+            commentsSection.style.display = "none";
+            window.commentsManagerInstance = null;
+          }
+          return;
         }
+      } catch (error) {
+        console.error("[Debug] Error verifying item existence:", error);
         return;
       }
-    } catch (error) {
-      console.error("[Debug] Error verifying item existence:", error);
-      return;
     }
 
     this._isLoading = true;
