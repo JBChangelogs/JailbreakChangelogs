@@ -191,16 +191,8 @@ class CommentsManager {
 
   async loadComments() {
     if (this._isLoading) {
-      console.log("[Debug] Comments already loading, skipping");
       return;
     }
-
-    console.log("[Debug] Starting loadComments");
-    console.log("[Debug] Item details:", {
-      type: this.type,
-      itemId: this.itemId,
-      itemName: this.itemName,
-    });
 
     // Check if elements are initialized
     if (!this.commentsList || !this.paginationControls) {
@@ -212,7 +204,6 @@ class CommentsManager {
     }
 
     try {
-      console.log("[Debug] Verifying item existence");
       const itemResponse = await fetch(
         `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
           this.itemName
@@ -220,23 +211,16 @@ class CommentsManager {
       );
 
       if (!itemResponse.ok) {
-        console.log(
-          "[Debug] Item verification failed, status:",
-          itemResponse.status
-        );
         // Fix: Use correct class selector with dot
         const commentsSection = document.querySelector(".comment-container");
         if (commentsSection) {
-          console.log("[Debug] Hiding comments section");
           commentsSection.style.display = "none";
           window.commentsManagerInstance = null;
         } else {
-          console.log("[Debug] Comments section not found");
+          console.log("Comments section not found");
         }
         return;
       }
-
-      console.log("[Debug] Item verification successful");
     } catch (error) {
       console.error("[Debug] Error verifying item existence:", error);
       return;
@@ -339,7 +323,6 @@ class CommentsManager {
   `;
 
     this._renderTimeout = setTimeout(async () => {
-      console.log("Starting renderComments...");
       this.commentsList.innerHTML = "";
 
       if (this.comments.length === 0) {

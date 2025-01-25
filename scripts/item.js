@@ -1319,17 +1319,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       .trim()
       .replace(/\s+/g, " ");
 
-    console.log("[Debug] Showing error message for invalid item");
     const commentsSection = document.querySelector(".comment-container");
     if (commentsSection) {
-      console.log("[Debug] Found comments section, hiding it");
       commentsSection.style.display = "none";
     } else {
-      console.log("[Debug] Comments section not found");
+      console.log("Comments section not found");
     }
 
     if (window.commentsManagerInstance) {
-      console.log("[Debug] Clearing existing CommentsManager instance");
       window.commentsManagerInstance = null;
     }
 
@@ -1350,14 +1347,14 @@ document.addEventListener("DOMContentLoaded", async () => {
              onmouseout="this.style.backgroundColor='var(--accent-color)'; this.style.borderColor='var(--accent-color)';">
             <i class="bi bi-arrow-left me-2"></i>Back to All Items
           </a>
-          <a href="/values?sort=${itemType}&valueSort=cash-desc" 
+          <a href="/values?sort=${itemType}s&valueSort=cash-desc" 
              class="btn btn-outline-primary"
              style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
              onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
              onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
             <i class="bi bi-grid me-2"></i>Browse ${
               itemType.charAt(0).toUpperCase() + itemType.slice(1)
-            }
+            }s
           </a>
         </div>
       </div>
@@ -1397,22 +1394,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Update handleimage function to skip HyperShift
   window.handleimage = function (element) {
-    console.log("handleimage called for:", {
-      id: element.id,
-      alt: element.alt,
-      tagName: element.tagName,
-      src: element.src,
-      isHyperShiftVideo: element.id === "hypershift-video",
-      isHyperShiftAlt: element.alt === "HyperShift",
-    });
-
     const isHyperShift =
       element.id === "hypershift-video" ||
       (element.alt === "HyperShift" &&
         element.closest(".media-container").querySelector("video"));
 
     if (isHyperShift) {
-      console.log("Skipping placeholder for HyperShift");
       return; // Don't replace HyperShift video with placeholder
     }
     element.src =
