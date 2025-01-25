@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
           "Success",
           {
             onHidden: function () {
-              window.location.href = redirectTo;
+              window.location.href = "/";
             },
           }
         );
