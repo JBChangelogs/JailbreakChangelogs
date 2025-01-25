@@ -1,3 +1,47 @@
+const VALID_SORTS = [
+  "vehicle",
+  "spoiler",
+  "rim",
+  "body-color",
+  "texture",
+  "tire-sticker",
+  "tire-style",
+  "drift",
+  "hyperchrome",
+  "furniture",
+  "limited-item",
+];
+
+function isValidHyperChrome(name) {
+  // List of valid HyperChrome colors
+  const validColors = [
+    "HyperBlue",
+    "HyperDiamond",
+    "HyperGreen",
+    "HyperOrange",
+    "HyperPink",
+    "HyperPurple",
+    "HyperRed",
+    "HyperYellow",
+    "HyperShift",
+  ];
+
+  // Remove "Level X" and normalize case for comparison
+  const baseName = name.replace(/\s+Level\s+\d+$/, "").toLowerCase();
+
+  // First try exact match (case-insensitive)
+  if (validColors.some((color) => color.toLowerCase() === baseName)) {
+    return true;
+  }
+
+  // If no exact match, check for close matches (for suggestions)
+  const similarityThreshold = 0.85; // Adjust this value as needed
+  return validColors.some((color) => {
+    const similarity = calculateNameSimilarity(baseName, color.toLowerCase());
+    return similarity > similarityThreshold;
+  });
+}
+
 function calculateNameSimilarity(str1, str2) {
   const len1 = str1.length;
   const len2 = str2.length;
@@ -31,28 +75,111 @@ async function loadSimilarItemsByName(searchName) {
     if (!response.ok) throw new Error("Failed to fetch items");
 
     const items = await response.json();
+    const urlPath = window.location.pathname.split("/");
+    const urlType = urlPath[2];
 
-    // Find items with similar names using fuzzy matching
-    const similarItems = items
-      .filter((item) => {
-        const similarity = calculateNameSimilarity(
-          searchName.toLowerCase(),
-          item.name.toLowerCase()
+    // For HyperChromes, extract the base name without level
+    const isHyperChrome = urlType.toLowerCase() === "hyperchrome";
+    const searchBaseName = isHyperChrome
+      ? searchName.replace(/\s+Level\s+\d+$/, "")
+      : searchName;
+
+    // If we're in HyperChrome category and the search name isn't valid, show no results
+    if (isHyperChrome && !isValidHyperChrome(searchBaseName)) {
+      const similarItemsContainer = document.getElementById("similar-items");
+      if (similarItemsContainer) {
+        similarItemsContainer.innerHTML = `
+          <div class="col-12 text-center">
+            <p class="text-muted">"${searchBaseName}" is not a valid HyperChrome color</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    let similarItems = [];
+
+    // Add HyperShift suggestion for HyperChromes
+    if (isHyperChrome && searchName !== "HyperShift") {
+      // Extract level number if present
+      const levelMatch = searchName.match(/Level\s+(\d+)$/);
+      const level = levelMatch ? parseInt(levelMatch[1]) : 0;
+
+      // Check if level is 4 or higher
+      const isHighLevel = level >= 4;
+      // For lower levels (1-3), randomly decide (30% chance)
+      const showForLowerLevel = level < 4 && Math.random() < 0.3;
+
+      if (isHighLevel || showForLowerLevel) {
+        const hyperShift = items.find(
+          (item) =>
+            item.name === "HyperShift" &&
+            item.type.toLowerCase() === "hyperchrome"
         );
-        return similarity > 0.3;
+        if (hyperShift) {
+          similarItems.push(hyperShift);
+        }
+      }
+    }
+    // Find items with similar names using fuzzy matching AND matching type
+    const otherSimilarItems = items
+      .filter((item) => {
+        // For HyperChromes, first validate that it's a real HyperChrome
+        if (isHyperChrome) {
+          if (!isValidHyperChrome(item.name)) {
+            return false;
+          }
+        }
+
+        // Skip HyperShift if already added
+        if (
+          item.name === "HyperShift" &&
+          similarItems.some((i) => i.name === "HyperShift")
+        ) {
+          return false;
+        }
+
+        // For HyperChromes, compare base names
+        const itemBaseName = isHyperChrome
+          ? item.name.replace(/\s+Level\s+\d+$/, "")
+          : item.name;
+
+        const similarity = calculateNameSimilarity(
+          searchBaseName.toLowerCase(),
+          itemBaseName.toLowerCase()
+        );
+
+        // More lenient similarity threshold for HyperChromes
+        const similarityThreshold = isHyperChrome ? 0.4 : 0.2;
+
+        // Check both name similarity and type match
+        return (
+          similarity > similarityThreshold &&
+          item.type.toLowerCase() === urlType.toLowerCase()
+        );
       })
       .sort((a, b) => {
+        // For sorting, compare base names for HyperChromes
+        const aBaseName = isHyperChrome
+          ? a.name.replace(/\s+Level\s+\d+$/, "")
+          : a.name;
+        const bBaseName = isHyperChrome
+          ? b.name.replace(/\s+Level\s+\d+$/, "")
+          : b.name;
+
         const simA = calculateNameSimilarity(
-          searchName.toLowerCase(),
-          a.name.toLowerCase()
+          searchBaseName.toLowerCase(),
+          aBaseName.toLowerCase()
         );
         const simB = calculateNameSimilarity(
-          searchName.toLowerCase(),
-          b.name.toLowerCase()
+          searchBaseName.toLowerCase(),
+          bBaseName.toLowerCase()
         );
         return simB - simA;
-      })
-      .slice(0, 4);
+      });
+
+    // Combine HyperShift (if added) with other similar items
+    similarItems = [...similarItems, ...otherSimilarItems].slice(0, 4);
 
     const similarItemsContainer = document.getElementById("similar-items");
     if (!similarItemsContainer) return;
@@ -76,13 +203,30 @@ async function loadSimilarItemsByName(searchName) {
              class="card h-100 text-decoration-none hover-effect">
             <div class="card-img-wrapper position-relative h-100">
               <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; height: 100%;">
-                <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-            item.name
-          }.webp" 
-                     class="card-img-top w-100 h-100"
-                     style="object-fit: cover; transition: transform 0.3s ease;"
-                     alt="${item.name}"
-                     onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">
+                ${
+                  item.name === "HyperShift" && item.type === "HyperChrome"
+                    ? `
+                    <video 
+                      src="/assets/images/items/hyperchromes/HyperShift.webm"
+                      class="card-img-top w-100 h-100"
+                      style="object-fit: cover; transition: transform 0.3s ease;"
+                      playsinline 
+                      muted 
+                      loop
+                      autoplay
+                      defaultMuted
+                      alt="${item.name}"
+                    ></video>
+                  `
+                    : `
+                    <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                        item.name
+                      }.webp" 
+                         class="card-img-top w-100 h-100"
+                         style="object-fit: cover; transition: transform 0.3s ease;"
+                         alt="${item.name}"
+                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`
+                }
               </div>
               <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
                    style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
@@ -118,16 +262,21 @@ async function loadSimilarItemsByName(searchName) {
           <p class="text-muted">No similar items found</p>
         </div>
       `;
+
+      const regularSimilarSection = document.querySelector(
+        ".similar-items-section"
+      );
+      if (regularSimilarSection) {
+        regularSimilarSection.style.display = "none";
+      }
     }
   } catch (error) {
     console.error("Error loading similar items:", error);
-    const similarItemsContainer = document.getElementById("similar-items");
-    if (similarItemsContainer) {
-      similarItemsContainer.innerHTML = `
-        <div class="col-12 text-center">
-          <p class="text-muted">Failed to load similar items</p>
-        </div>
-      `;
+    const similarItemsSection = document.querySelector(
+      ".similar-items-section"
+    );
+    if (similarItemsSection) {
+      similarItemsSection.style.display = "none";
     }
   }
 }
@@ -322,11 +471,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       demand: 15, // Demand similarity has medium importance
       notes: 5, // Notes similarity has low importance
       tradable: 15, // New weight for tradable status
+      hyperchrome: 25, // New weight for HyperChrome matching
     };
 
     // 1. Type Matching (35 points)
     if (currentItem.type === comparisonItem.type) {
       score += weights.type;
+
+      // Extra points for HyperChrome items
+      if (currentItem.type.toLowerCase() === "hyperchrome") {
+        score += weights.hyperchrome;
+
+        // Even more points if one is HyperShift
+        if (
+          currentItem.name === "HyperShift" ||
+          comparisonItem.name === "HyperShift"
+        ) {
+          score += weights.hyperchrome * 0.5; // Additional bonus for HyperShift
+        }
+      }
     }
 
     // 2. Limited Status (20 points)
@@ -691,15 +854,50 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         const items = await response.json();
 
-        // Calculate similarity scores for all items
-        const scoredItems = items
-          .filter((item) => item.id !== currentItem.id) // Exclude current item
+        // For HyperChrome items, check if we should show HyperShift
+        let scoredItems = [];
+        if (
+          currentItem.type.toLowerCase() === "hyperchrome" &&
+          currentItem.name !== "HyperShift"
+        ) {
+          // Check if it's Level 4 or 5
+          const isHighLevel = currentItem.name.match(/Level [45]$/);
+          // For lower levels, randomly decide (30% chance)
+          const showForLowerLevel = Math.random() < 0.3;
+
+          if (isHighLevel || showForLowerLevel) {
+            const hyperShift = items.find(
+              (item) =>
+                item.name === "HyperShift" &&
+                item.type.toLowerCase() === "hyperchrome"
+            );
+            if (hyperShift) {
+              scoredItems.push({
+                ...hyperShift,
+                similarityScore: 999, // Ensure it appears first
+              });
+            }
+          }
+        }
+
+        // Add other items
+        const otherItems = items
+          .filter(
+            (item) =>
+              item.id !== currentItem.id &&
+              !(
+                item.name === "HyperShift" &&
+                item.type.toLowerCase() === "hyperchrome"
+              )
+          )
           .map((item) => ({
             ...item,
             similarityScore: calculateSimilarityScore(currentItem, item),
           }))
-          .sort((a, b) => b.similarityScore - a.similarityScore) // Sort by score
-          .slice(0, 4); // Get top 4 most similar items
+          .sort((a, b) => b.similarityScore - a.similarityScore);
+
+        // Combine HyperShift (if added) with top items
+        scoredItems = [...scoredItems, ...otherItems].slice(0, 4);
 
         // Display the similar items
         const container = document.getElementById("similar-items");
@@ -709,18 +907,35 @@ document.addEventListener("DOMContentLoaded", async () => {
           const card = document.createElement("div");
           card.className = "col-lg-3 col-md-3 col-6"; // Changed to col-6 for mobile (2 per row)
           card.innerHTML = `
-            <a href="/item/${item.type}/${encodeURIComponent(item.name)}" 
-              class="text-decoration-none similar-item-card">
-             <div class="card h-100 ${
-               item.tradable === 0 ? "not-tradable-card" : ""
-             }">
-                <div class="card-img-wrapper position-relative" style="aspect-ratio: 16/9;">
-                  <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-            item.name
-          }.webp" 
+          <a href="/item/${item.type}/${encodeURIComponent(item.name)}" 
+            class="text-decoration-none similar-item-card">
+            <div class="card h-100 ${
+              item.tradable === 0 ? "not-tradable-card" : ""
+            }">
+              <div class="card-img-wrapper position-relative" style="aspect-ratio: 16/9;">
+                ${
+                  item.name === "HyperShift" && item.type === "HyperChrome"
+                    ? `
+                    <video 
+                      src="/assets/images/items/hyperchromes/HyperShift.webm"
                       class="card-img-top" 
+                      style="width: 100%; height: 100%; object-fit: cover;"
+                      playsinline 
+                      muted 
+                      loop
+                      autoplay
+                      defaultMuted
                       alt="${item.name}"
-                      onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">
+                    ></video>
+                  `
+                    : `
+                    <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                        item.name
+                      }.webp" 
+                         class="card-img-top" 
+                         alt="${item.name}"
+                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`
+                }
                   ${
                     item.similarityScore > 75
                       ? '<span class="badge bg-success position-absolute top-0 end-0 m-2 best-match-badge">Best Match</span>'
@@ -1310,6 +1525,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     loadSimilarItems(item);
   }
+
   function showErrorMessage(message) {
     hideLoadingOverlay();
     const urlPath = window.location.pathname.split("/");
@@ -1319,11 +1535,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       .trim()
       .replace(/\s+/g, " ");
 
+    // Hide comments section
     const commentsSection = document.querySelector(".comment-container");
     if (commentsSection) {
       commentsSection.style.display = "none";
-    } else {
-      console.log("Comments section not found");
     }
 
     if (window.commentsManagerInstance) {
@@ -1331,6 +1546,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const container = document.getElementById("item-container");
+
+    // Check if category is valid
+    const isValidCategory = VALID_SORTS.some(
+      (category) => category.toLowerCase() === itemType.toLowerCase()
+    );
+    // Hide similar items section if category is invalid
+    const similarItemsSection = document.querySelector(
+      ".similar-items-section"
+    );
+    if (similarItemsSection) {
+      similarItemsSection.style.display = "none"; // Hide the entire section
+    }
+
     container.innerHTML = `
     <div class="container mt-5">
       <div class="alert alert-danger text-center" role="alert">
@@ -1338,58 +1566,74 @@ document.addEventListener("DOMContentLoaded", async () => {
           <i class="bi bi-exclamation-circle-fill" style="font-size: 2rem;"></i>
         </div>
         <h4 class="alert-heading mb-3">Item Not Found</h4>
-        <p>"${searchName}" is not a valid ${itemType}</p>
+        <p>${
+          isValidCategory
+            ? `"${searchName}" is not a valid ${itemType}`
+            : `Invalid category "${itemType}"`
+        }</p>
         <div class="mt-4 d-flex flex-column flex-md-row gap-3 justify-content-center">
+          ${
+            isValidCategory
+              ? `<a href="/values?sort=${itemType}s&valueSort=cash-desc" 
+                class="btn btn-outline-primary"
+                style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
+                onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
+                onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
+              <i class="bi bi-grid me-2"></i>Browse Other ${
+                itemType.charAt(0).toUpperCase() + itemType.slice(1)
+              }s
+            </a>`
+              : ""
+          }
           <a href="/values" 
-             class="btn btn-primary"
-             style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--text-primary);"
-             onmouseover="this.style.backgroundColor='var(--accent-color-light)'; this.style.borderColor='var(--accent-color-light)';"
-             onmouseout="this.style.backgroundColor='var(--accent-color)'; this.style.borderColor='var(--accent-color)';">
-            <i class="bi bi-arrow-left me-2"></i>Back to All Items
-          </a>
-          <a href="/values?sort=${itemType}s&valueSort=cash-desc" 
              class="btn btn-outline-primary"
              style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
              onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
              onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
-            <i class="bi bi-grid me-2"></i>Browse ${
-              itemType.charAt(0).toUpperCase() + itemType.slice(1)
-            }s
+            <i class="bi bi-arrow-left me-2"></i>Back to All Items
           </a>
         </div>
       </div>
       
-      <!-- Similar Items Section -->
-      <div class="mt-4">
-        <h5 class="text-center mb-4">
-          <i class="bi bi-search me-2"></i>Did you mean?
-        </h5>
-        <div id="similar-items" class="row g-3">
-          <style>
-            @media (max-width: 768px) {
-              .card-title {
-                font-size: 0.9rem !important;
+      ${
+        isValidCategory
+          ? `
+        <!-- Similar Items Section -->
+        <div class="mt-4">
+          <h5 class="text-center mb-4">
+            <i class="bi bi-search me-2"></i>Did you mean?
+          </h5>
+          <div id="similar-items" class="row g-3">
+            <style>
+              @media (max-width: 768px) {
+                .card-title {
+                  font-size: 0.9rem !important;
+                }
+                .card-overlay h6 {
+                  font-size: 0.85rem !important;
+                }
+                .card-overlay small {
+                  font-size: 0.75rem !important;
+                }
               }
-              .card-overlay h6 {
-                font-size: 0.85rem !important;
-              }
-              .card-overlay small {
-                font-size: 0.75rem !important;
-              }
-            }
-          </style>
-          <div class="col-12 text-center text-muted">
-            <div class="spinner-border spinner-border-sm me-2" role="status">
-              <span class="visually-hidden">Loading...</span>
+            </style>
+            <div class="col-12 text-center text-muted">
+              <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              Looking for similar items...
             </div>
-            Looking for similar items...
           </div>
         </div>
-      </div>
-    </div>
-  `;
+      `
+          : ""
+      }
+    </div>`;
 
-    loadSimilarItemsByName(searchName);
+    // Only load similar items if category is valid
+    if (isValidCategory) {
+      loadSimilarItemsByName(searchName);
+    }
   }
 
   // Update handleimage function to skip HyperShift
