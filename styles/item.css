@@ -1,47 +1,5 @@
-/* Dark Theme Colors */
-[data-bs-theme="dark"] body {
-  --common-bg-color: #2e3944; /* Dark background */
-  --content-h1: #d3d9d4; /* Lighter Blue for Dark Mode */
-  --content-h2: #748d92; /* Softer Red for Dark Mode */
-  --content-h3: #748d92; /* Light Gray for H3 and Paragraph Text */
-  --content-paragraph: #d3d9d4; /* Light Gray for Paragraphs */
-  --content-bullet: #748d92; /* Lighter Blue for Bullets */
-  --content-sub-bullet: #748d92; /* Softer Red for Bullets */
-  --text-color: #ffffff; /* White Text */
+@import "colors.css";
 
-  --header-text: #ffffff; /* White for Header Text */
-  --button-primary-bg: #124e66; /* Dark Blue for Primary Button Background */
-  --button-primary-text: #eeeeee; /* White for Primary Button Text */
-  --button-primary-hover-bg: #212a31; /* Darker Blue for Hover */
-  /* Mention Colors */
-  --mention-color: #748d92; /* Teal color for Mentions */
-  --mention-bg: #212a31; /* Dark blue-gray for Mention Background */
-  --at-color: #d3d9d4; /* Bright teal for '@' Symbol */
-  --username-color: #76abae; /* Soft cyan for Username */
-  --mention-hover-bg: #124e66; /* Hover Background Color for Mentions */
-
-  --highlight-bg: rgba(
-    255,
-    165,
-    0,
-    0.4
-  ); /* Semi-transparent Orange for Highlights */
-  --highlight-text: #ffffff; /* White for Highlighted Text */
-  --selection-bg: #4682b4; /* Steel Blue for Selection Background */
-  --selection-text: #ffffff; /* White for Selection Text */
-  --glow-color: #4b4b4b; /* Dark Gray for Glow Effects */
-
-  /* Gray Scale */
-  --gray-100: #333333; /* Very Dark Gray */
-  --gray-200: #444444; /* Darker Gray */
-  --gray-300: #555555; /* Dark Gray */
-  --gray-400: #666666; /* Gray */
-  --gray-500: #777777; /* Medium Gray */
-  --gray-600: #888888; /* Slate Gray */
-  --gray-700: #999999; /* Light Slate Gray */
-  --gray-800: #aaaaaa; /* Light Gray */
-  --gray-900: #bbbbbb; /* Very Light Gray */
-}
 html,
 body {
   max-width: 100%;
@@ -238,12 +196,10 @@ body {
   cursor: default;
 }
 
-/* Add a subtle animation for legend transitions */
 .chart-container .chartjs-legend-item {
   transition: all 0.2s ease;
 }
 
-/* Add tooltip explaining the legend is clickable */
 .chart-container .chartjs-legend {
   position: relative;
 }
@@ -269,11 +225,26 @@ body {
 .chart-container {
   width: 100%;
   margin: 0 auto;
-  background-color: rgba(46, 57, 68, 0.3);
+  background-color: var(--bg-primary);
   --legend-hover-bg: rgba(18, 78, 102, 0.2);
   border-radius: 12px;
   padding: 15px;
   position: relative;
+}
+
+.chart-container .chartjs-text {
+  fill: var(--text-primary) !important; /* Using your light grayish-green */
+  color: var(--text-primary) !important;
+}
+
+.chart-container .chartjs-axis-label,
+.chart-container .chartjs-tick {
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+}
+
+.chart-container .chartjs-grid-line {
+  stroke: rgba(116, 141, 146, 0.1) !important;
 }
 
 .chart-wrapper {

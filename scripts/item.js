@@ -1246,7 +1246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                       },
                     },
                     grid: {
-                      color: "rgba(46, 57, 68, 0.1)",
+                      color: "rgba(211, 217, 212, 0.1)", // Updated grid line color
                       borderColor: "#2E3944",
                       tickColor: "#2E3944",
                       lineWidth: 1,
@@ -1273,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                       },
                     },
                     grid: {
-                      color: "rgba(46, 57, 68, 0.1)",
+                      color: "rgba(211, 217, 212, 0.1)", // Updated grid line color
                       borderColor: "#2E3944",
                       tickColor: "#2E3944",
                       display: true,
