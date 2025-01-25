@@ -97,14 +97,46 @@ async function loadSimilarItemsByName(searchName) {
       return;
     }
 
+    let similarItems = [];
+
+    // Add HyperShift suggestion for HyperChromes
+    if (isHyperChrome && searchName !== "HyperShift") {
+      // Extract level number if present
+      const levelMatch = searchName.match(/Level\s+(\d+)$/);
+      const level = levelMatch ? parseInt(levelMatch[1]) : 0;
+
+      // Check if level is 4 or higher
+      const isHighLevel = level >= 4;
+      // For lower levels (1-3), randomly decide (30% chance)
+      const showForLowerLevel = level < 4 && Math.random() < 0.3;
+
+      if (isHighLevel || showForLowerLevel) {
+        const hyperShift = items.find(
+          (item) =>
+            item.name === "HyperShift" &&
+            item.type.toLowerCase() === "hyperchrome"
+        );
+        if (hyperShift) {
+          similarItems.push(hyperShift);
+        }
+      }
+    }
     // Find items with similar names using fuzzy matching AND matching type
-    const similarItems = items
+    const otherSimilarItems = items
       .filter((item) => {
         // For HyperChromes, first validate that it's a real HyperChrome
         if (isHyperChrome) {
           if (!isValidHyperChrome(item.name)) {
             return false;
           }
+        }
+
+        // Skip HyperShift if already added
+        if (
+          item.name === "HyperShift" &&
+          similarItems.some((i) => i.name === "HyperShift")
+        ) {
+          return false;
         }
 
         // For HyperChromes, compare base names
@@ -144,8 +176,10 @@ async function loadSimilarItemsByName(searchName) {
           bBaseName.toLowerCase()
         );
         return simB - simA;
-      })
-      .slice(0, 4);
+      });
+
+    // Combine HyperShift (if added) with other similar items
+    similarItems = [...similarItems, ...otherSimilarItems].slice(0, 4);
 
     const similarItemsContainer = document.getElementById("similar-items");
     if (!similarItemsContainer) return;
