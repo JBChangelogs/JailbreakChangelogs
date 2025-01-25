@@ -97,7 +97,7 @@ $(document).ready(function () {
           // Show success toast
           toastr.success("Successfully logged in with Discord!", "Welcome", {
             onHidden: function () {
-              window.location.href = redirectTo;
+              window.location.href = "/";
             },
           });
           return;
