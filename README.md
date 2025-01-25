@@ -9,7 +9,7 @@
 > [!NOTE]
 > This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
-![Logo](/assets/logos/JB%20Changelogs%20Banner%20(PNG).webp)
+![Logo](</assets/logos/JB%20Changelogs%20Banner%20(PNG).webp>)
 
 # Roblox Jailbreak Changelogs
 
@@ -25,7 +25,7 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 
 - **Community Engagement:** Join discussions by commenting on changelogs and season entries, with secure OAuth authentication ensuring quality interactions.
 
-- **Trading System:** Post trade advertisements, browse listings, and find the perfect deals for in-game items.
+- **Trading System:** Post trade advertisements, browse through different vlaues, and find the perfect deals for your trades.
 
 - **Trade Analytics:** Access official trading statistics from Badimo, including circulation numbers and trade frequency for vehicles and customizations.
 
