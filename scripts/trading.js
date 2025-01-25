@@ -18,7 +18,11 @@ let activeBottomSheet = null;
 let startY = 0;
 let currentY = 0;
 let initialTransform = 0;
+let tradeSortOrder = "latest";
 const currentUserId = sessionStorage.getItem("userid");
+const TRADES_PER_PAGE = 6;
+let currentTradesPage = 1;
+let allTradeAds = [];
 
 async function canCreateTradeAd() {
   const token = Cookies.get("token");
@@ -1451,48 +1455,77 @@ async function updateTradeAd(tradeId) {
     toastr.error("Failed to update trade advertisement");
   }
 }
-// Add these variables at the top with other global variables
-const TRADES_PER_PAGE = 6;
-let currentTradesPage = 1;
-let allTradeAds = [];
+
+function sortTradeAds(order) {
+  tradeSortOrder = order;
+  allTradeAds.sort((a, b) => {
+    const timeA = parseInt(a.created_at);
+    const timeB = parseInt(b.created_at);
+    return order === "latest" ? timeB - timeA : timeA - timeB;
+  });
+  loadTradeAds();
+}
 
 // Function to create a trade ad
 async function loadTradeAds() {
   try {
     const tradeAdsSection = document.querySelector(".trade-ads-section");
-    if (!tradeAdsSection) {
-      return;
-    }
+    if (!tradeAdsSection) return;
 
-    // First fetch just the count to know how many skeletons to show
-    const countResponse = await fetch(
+    // Show loading state
+    tradeAdsSection.innerHTML = `
+      <div class="trade-ads-grid">
+        <div class="trade-ad header-container">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="trade-ads-header">
+              <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
+            </h3>
+            <div class="sort-controls">
+              <select class="form-select form-select-sm" onchange="sortTradeAds(this.value)">
+                <option value="latest" ${
+                  tradeSortOrder === "latest" ? "selected" : ""
+                }>Latest First</option>
+                <option value="oldest" ${
+                  tradeSortOrder === "oldest" ? "selected" : ""
+                }>Oldest First</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        ${Array(TRADES_PER_PAGE).fill(createSkeletonTradeAd()).join("")}
+      </div>
+    `;
+
+    // Fetch and process data
+    const response = await fetch(
       "https://api3.jailbreakchangelogs.xyz/trades/list"
     );
-    const data = await countResponse.json();
-    const expectedCount = Array.isArray(data)
-      ? Math.min(data.length, TRADES_PER_PAGE)
-      : 0;
-
-    // Show skeleton loading state with the expected number of items
-    tradeAdsSection.innerHTML = `
-    <div class="trade-ads-grid">
-      <div class="trade-ad header-container">
-        <h3 class="trade-ads-header"><i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements</h3>
-      </div>
-      ${Array(expectedCount).fill(createSkeletonTradeAd()).join("")}
-    </div>
-  `;
-
-    // Process the already fetched data
+    const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
+
+    // Sort trade ads
+    allTradeAds.sort((a, b) => {
+      const timeA = parseInt(a.created_at);
+      const timeB = parseInt(b.created_at);
+      return tradeSortOrder === "latest" ? timeB - timeA : timeA - timeB;
+    });
 
     if (allTradeAds.length === 0) {
       tradeAdsSection.innerHTML = `
         <div class="trade-ads-grid">
           <div class="trade-ad header-container">
-            <h3 class="trade-ads-header"><i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements</h3>
-            <div class="no-trades-message">No trade advertisements found</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <h3 class="trade-ads-header">
+                <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
+              </h3>
+              <div class="sort-controls">
+                <select class="form-select form-select-sm" disabled>
+                  <option>Latest First</option>
+                </select>
+              </div>
+            </div>
           </div>
+          <div class="no-trades-message">No trade advertisements found</div>
         </div>
       `;
       return;
@@ -1510,10 +1543,25 @@ async function loadTradeAds() {
     );
     const tradeHTMLs = await Promise.all(tradePromises);
 
+    // Render the final HTML
     tradeAdsSection.innerHTML = `
       <div class="trade-ads-grid">
         <div class="trade-ad header-container">
-          <h3 class="trade-ads-header"><i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements</h3>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="trade-ads-header">
+              <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
+            </h3>
+            <div class="sort-controls">
+              <select class="form-select form-select-sm" onchange="sortTradeAds(this.value)">
+                <option value="latest" ${
+                  tradeSortOrder === "latest" ? "selected" : ""
+                }>Latest First</option>
+                <option value="oldest" ${
+                  tradeSortOrder === "oldest" ? "selected" : ""
+                }>Oldest First</option>
+              </select>
+            </div>
+          </div>
         </div>
         ${tradeHTMLs.join("")}
       </div>
@@ -1807,45 +1855,44 @@ async function createTradeAdHTML(trade) {
     }
 
     tradeAdElement.innerHTML = `
-      <div class="trade-ad">
-       <div class="trader-info">
-        <div class="trader-info">
-         <img src="${
-           authorDetails?.roblox_avatar ||
-           getFallbackAvatar(authorDetails?.roblox_username)
-         }" 
-          alt="${authorDetails?.roblox_username || "Unknown"}" 
-          class="trader-avatar"
-          onerror="this.onerror=null; this.src='${getFallbackAvatar(
-            authorDetails?.roblox_username
-          )}'"
-          width="64"
-          height="64">
-          <div class="trader-details">
-            <a href="https://www.roblox.com/users/${
-              authorDetails?.roblox_id
-            }/profile" 
-              class="trader-name"
-              target="_blank" 
-              rel="noopener noreferrer">
-              ${authorDetails?.roblox_display_name || "Unknown"} 
-              <span class="text-muted">(${
-                authorDetails?.roblox_id || "Unknown ID"
-              })</span>
-            </a>
-            <a href="https://www.roblox.com/users/${
-              authorDetails?.roblox_id
-            }/profile" 
-              class="trader-username text-muted" 
-              target="_blank" 
-              rel="noopener noreferrer">
-              @${authorDetails?.roblox_username || "unknown"}
-            </a>
-          </div>
+       <div class="trade-ad" data-trade-id="${trade.id}">
+        <div class="trade-status ${(trade.status || "Pending").toLowerCase()}">
+          ${trade.status || "Pending"}
         </div>
-
-
-
+        <div class="trader-info">
+          <img src="${
+            authorDetails?.roblox_avatar ||
+            getFallbackAvatar(authorDetails?.roblox_username)
+          }" 
+            alt="${authorDetails?.roblox_username || "Unknown"}" 
+            class="trader-avatar"
+            onerror="this.onerror=null; this.src='${getFallbackAvatar(
+              authorDetails?.roblox_username
+            )}'"
+            width="64"
+            height="64">
+            <div class="trader-details">
+              <a href="https://www.roblox.com/users/${
+                authorDetails?.roblox_id
+              }/profile" 
+                class="trader-name"
+                target="_blank" 
+                rel="noopener noreferrer">
+                ${authorDetails?.roblox_display_name || "Unknown"} 
+                <span class="text-muted">(${
+                  authorDetails?.roblox_id || "Unknown ID"
+                })</span>
+              </a>
+              <a href="https://www.roblox.com/users/${
+                authorDetails?.roblox_id
+              }/profile" 
+                class="trader-username text-muted" 
+                target="_blank" 
+                rel="noopener noreferrer">
+                @${authorDetails?.roblox_username || "unknown"}
+              </a>
+            </div>
+          </div>
         </div>
 
         <div class="trade-sides-container">
@@ -1864,41 +1911,37 @@ async function createTradeAdHTML(trade) {
           </div>
         </div>
 
-        <div class="trade-ad-footer">
-          <div class="trade-timestamp">
-            <i class="bi bi-clock"></i> ${formatTimestamp(trade.created_at)}
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <a href="/trading/ad/${String(
-              trade.id
-            )}" class="btn btn-sm btn-outline-info">
-              <i class="bi bi-eye"></i> View Details
-            </a>
-            ${
-              authorDetails?.id === currentUserId
-                ? `
-                <button class="btn btn-sm btn-outline-primary" onclick="editTradeAd('${String(
-                  trade.id
-                )}')">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteTradeAd('${String(
-                  trade.id
-                )}')">
-                  <i class="bi bi-trash"></i>
-                </button>
-                `
-                : ""
-            }
-          <div class="trade-status ${(
-            trade.status || "Pending"
-          ).toLowerCase()}">
-            ${trade.status || "Pending"}
-          </div>
-
-          </div>
+      <div class="trade-ad-footer">
+      <div class="d-flex justify-content-between align-items-center w-100">
+        <div class="trade-timestamp">
+          <i class="bi bi-clock"></i> ${formatTimestamp(trade.created_at)}
         </div>
-      </div>`;
+        <div class="d-flex align-items-center gap-2">
+          <a href="/trading/ad/${String(
+            trade.id
+          )}" class="btn btn-sm btn-outline-info">
+            <i class="bi bi-eye"></i> View Details
+          </a>
+          ${
+            authorDetails?.id === currentUserId
+              ? `
+            <button class="btn btn-sm btn-outline-primary" onclick="editTradeAd('${String(
+              trade.id
+            )}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteTradeAd('${String(
+              trade.id
+            )}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          `
+              : ""
+          }
+        </div>
+      </div>
+    </div>
+  </div>`;
   } catch (error) {
     console.error("Error creating trade ad:", error);
     // Keep the skeleton state if there's an error

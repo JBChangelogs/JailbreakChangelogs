@@ -1651,10 +1651,11 @@ video.card-img-top {
 .trade-ad h3.trade-ads-header {
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
   text-align: center;
-  padding: 0.5rem 0; /* Reduced from 1rem */
-  margin-bottom: 0.5rem; /* Reduced from 1.5rem */
+  padding: 0.5rem 0;
+  margin-bottom: 0;
   color: var(--text-primary);
   letter-spacing: 0.5px;
+  font-size: 1.2rem;
 }
 
 /* Add a bottom border for visual separation */
@@ -1663,6 +1664,9 @@ video.card-img-top {
   border-radius: 8px;
   padding: 0.5rem;
   margin-bottom: 1rem;
+}
+.trade-ad .d-flex.justify-content-between.align-items-center {
+  gap: 1rem;
 }
 
 .trade-preview h3 {
@@ -1966,6 +1970,7 @@ video.card-img-top {
   padding: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
 /* Trade Ad Header */
@@ -2052,6 +2057,26 @@ video.card-img-top {
 }
 
 @media (max-width: 768px) {
+  .trade-ad .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem;
+  }
+
+  .trade-ads-header {
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .sort-controls {
+    width: 100%;
+  }
+
+  .sort-controls .form-select {
+    width: 100%;
+  }
+
   #availableItemsModal .modal-header {
     padding: 0.75rem;
     flex-wrap: wrap;
@@ -2403,8 +2428,6 @@ video.card-img-top {
   }
 
   .trade-status {
-    width: 100%;
-    text-align: center;
     font-size: 0.8rem;
     padding: 0.35rem 0.75rem;
   }
@@ -2619,12 +2642,40 @@ video.card-img-top {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+.sort-controls {
+  min-width: 140px;
+}
+
+.sort-controls .form-select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  height: auto;
+}
+
+.sort-controls .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(18, 78, 102, 0.25);
+}
+
+.sort-controls .form-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .trade-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 2;
+  text-transform: capitalize;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .trade-status.pending {
