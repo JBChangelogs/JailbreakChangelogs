@@ -1,3 +1,137 @@
+function calculateNameSimilarity(str1, str2) {
+  const len1 = str1.length;
+  const len2 = str2.length;
+  const matrix = Array(len1 + 1)
+    .fill()
+    .map(() => Array(len2 + 1).fill(0));
+
+  for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+  for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+
+  const maxLen = Math.max(len1, len2);
+  return 1 - matrix[len1][len2] / maxLen;
+}
+
+async function loadSimilarItemsByName(searchName) {
+  try {
+    const response = await fetch(
+      "https://api3.jailbreakchangelogs.xyz/items/list"
+    );
+    if (!response.ok) throw new Error("Failed to fetch items");
+
+    const items = await response.json();
+
+    // Find items with similar names using fuzzy matching
+    const similarItems = items
+      .filter((item) => {
+        const similarity = calculateNameSimilarity(
+          searchName.toLowerCase(),
+          item.name.toLowerCase()
+        );
+        return similarity > 0.3;
+      })
+      .sort((a, b) => {
+        const simA = calculateNameSimilarity(
+          searchName.toLowerCase(),
+          a.name.toLowerCase()
+        );
+        const simB = calculateNameSimilarity(
+          searchName.toLowerCase(),
+          b.name.toLowerCase()
+        );
+        return simB - simA;
+      })
+      .slice(0, 4);
+
+    const similarItemsContainer = document.getElementById("similar-items");
+    if (!similarItemsContainer) return;
+
+    if (similarItems.length > 0) {
+      // Hide the regular similar-items-section if it exists
+      const regularSimilarSection = document.querySelector(
+        ".similar-items-section"
+      );
+      if (regularSimilarSection) {
+        regularSimilarSection.style.display = "none";
+      }
+
+      similarItemsContainer.innerHTML = similarItems
+        .map(
+          (item) => `
+        <div class="col-lg-3 col-md-6 col-6">
+          <a href="/item/${item.type.toLowerCase()}/${encodeURIComponent(
+            item.name
+          )}" 
+             class="card h-100 text-decoration-none hover-effect">
+            <div class="card-img-wrapper position-relative h-100">
+              <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; height: 100%;">
+                <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+            item.name
+          }.webp" 
+                     class="card-img-top w-100 h-100"
+                     style="object-fit: cover; transition: transform 0.3s ease;"
+                     alt="${item.name}"
+                     onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">
+              </div>
+              <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
+                   style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                <h6 class="card-title mb-1 text-white">${item.name}</h6>
+                <small class="text-light">${item.type}</small>
+              </div>
+            </div>
+          </a>
+        </div>
+      `
+        )
+        .join("");
+
+      // Add hover effect styles
+      const style = document.createElement("style");
+      style.textContent = `
+        .hover-effect:hover img {
+          transform: scale(1.05);
+        }
+        .hover-effect {
+          transition: transform 0.3s ease;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .hover-effect:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+      `;
+      document.head.appendChild(style);
+    } else {
+      similarItemsContainer.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted">No similar items found</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error("Error loading similar items:", error);
+    const similarItemsContainer = document.getElementById("similar-items");
+    if (similarItemsContainer) {
+      similarItemsContainer.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted">Failed to load similar items</p>
+        </div>
+      `;
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   function showLoadingOverlay() {
     $("#loading-overlay").addClass("show");
@@ -62,7 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function loadItemDetails() {
-    showLoadingOverlay(); // Show loading when starting to fetch
+    showLoadingOverlay();
 
     try {
       const urlPath = window.location.pathname.split("/");
@@ -71,6 +205,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const itemName = decodeURIComponent(rawItemName)
         .trim()
         .replace(/\s+/g, " ");
+
+      if (!urlType || !itemName) {
+        throw new Error("Invalid URL format");
+      }
 
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
@@ -83,16 +221,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         }
       );
+
+      if (!response.ok) {
+        throw new Error("Item not found");
+      }
+
       const item = await response.json();
 
-      if (item && !item.error) {
+      if (item && !item.error && item.type) {
         displayItemDetails(item);
       } else {
-        showErrorMessage("Item Not Found.");
+        throw new Error("Invalid item data received");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      showErrorMessage("Error Loading item details");
+      showErrorMessage(
+        error.message === "Item not found"
+          ? "Item Not Found"
+          : "Error Loading item details"
+      );
     } finally {
       hideLoadingOverlay();
     }
@@ -940,19 +1087,40 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
         
             ${graphSection}`;
-
+    // First, check if the item exists before initializing comments
     if (window.commentsManagerInstance) {
+      // Clear existing comments
       window.commentsManagerInstance.clearComments();
-      window.commentsManagerInstance.type = item.type.toLowerCase();
-      window.commentsManagerInstance.itemId = item.id;
-      window.commentsManagerInstance.loadComments();
+
+      // Only proceed if item exists and has valid properties
+      if (item && item.id && item.type) {
+        window.commentsManagerInstance.type = item.type.toLowerCase();
+        window.commentsManagerInstance.itemId = item.id;
+        window.commentsManagerInstance.itemName = item.name;
+        window.commentsManagerInstance.loadComments();
+      } else {
+        // Hide comments section if item doesn't exist
+        const commentsSection = document.querySelector("comment-container");
+        if (commentsSection) {
+          commentsSection.style.display = "none";
+        }
+      }
     } else {
-      window.commentsManagerInstance = new CommentsManager(
-        item.type.toLowerCase(),
-        item.id,
-        item.name
-      );
-      window.commentsManagerInstance.loadComments();
+      // Only create new instance if item exists and has valid properties
+      if (item && item.id && item.type) {
+        window.commentsManagerInstance = new CommentsManager(
+          item.type.toLowerCase(),
+          item.id,
+          item.name
+        );
+        window.commentsManagerInstance.loadComments();
+      } else {
+        // Hide comments section if item doesn't exist
+        const commentsSection = document.querySelector("comment-container");
+        if (commentsSection) {
+          commentsSection.style.display = "none";
+        }
+      }
     }
 
     // Only initialize chart if values exist
@@ -1139,22 +1307,92 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
       }, 100);
     }
-    // Add at the end of displayItemDetails function
+
     loadSimilarItems(item);
   }
-
   function showErrorMessage(message) {
     hideLoadingOverlay();
+    const urlPath = window.location.pathname.split("/");
+    const itemType = urlPath[2];
+    const rawItemName = urlPath.pop();
+    const searchName = decodeURIComponent(rawItemName)
+      .trim()
+      .replace(/\s+/g, " ");
+
+    console.log("[Debug] Showing error message for invalid item");
+    const commentsSection = document.querySelector(".comment-container");
+    if (commentsSection) {
+      console.log("[Debug] Found comments section, hiding it");
+      commentsSection.style.display = "none";
+    } else {
+      console.log("[Debug] Comments section not found");
+    }
+
+    if (window.commentsManagerInstance) {
+      console.log("[Debug] Clearing existing CommentsManager instance");
+      window.commentsManagerInstance = null;
+    }
+
     const container = document.getElementById("item-container");
     container.innerHTML = `
-            <div class="container mt-5">
-                <div class="alert alert-danger text-center role="alert">
-                   ${message}
-                   <br>
-                   <a href="/values" class="btn btn-primary mt-3">Back to All Items</a>
-                </div>
+    <div class="container mt-5">
+      <div class="alert alert-danger text-center" role="alert">
+        <div class="mb-3">
+          <i class="bi bi-exclamation-circle-fill" style="font-size: 2rem;"></i>
+        </div>
+        <h4 class="alert-heading mb-3">Item Not Found</h4>
+        <p>"${searchName}" is not a valid ${itemType}</p>
+        <div class="mt-4 d-flex flex-column flex-md-row gap-3 justify-content-center">
+          <a href="/values" 
+             class="btn btn-primary"
+             style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--text-primary);"
+             onmouseover="this.style.backgroundColor='var(--accent-color-light)'; this.style.borderColor='var(--accent-color-light)';"
+             onmouseout="this.style.backgroundColor='var(--accent-color)'; this.style.borderColor='var(--accent-color)';">
+            <i class="bi bi-arrow-left me-2"></i>Back to All Items
+          </a>
+          <a href="/values?sort=${itemType}&valueSort=cash-desc" 
+             class="btn btn-outline-primary"
+             style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
+             onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
+             onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
+            <i class="bi bi-grid me-2"></i>Browse ${
+              itemType.charAt(0).toUpperCase() + itemType.slice(1)
+            }
+          </a>
+        </div>
+      </div>
+      
+      <!-- Similar Items Section -->
+      <div class="mt-4">
+        <h5 class="text-center mb-4">
+          <i class="bi bi-search me-2"></i>Did you mean?
+        </h5>
+        <div id="similar-items" class="row g-3">
+          <style>
+            @media (max-width: 768px) {
+              .card-title {
+                font-size: 0.9rem !important;
+              }
+              .card-overlay h6 {
+                font-size: 0.85rem !important;
+              }
+              .card-overlay small {
+                font-size: 0.75rem !important;
+              }
+            }
+          </style>
+          <div class="col-12 text-center text-muted">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
-        `;
+            Looking for similar items...
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+    loadSimilarItemsByName(searchName);
   }
 
   // Update handleimage function to skip HyperShift

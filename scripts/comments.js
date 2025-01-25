@@ -190,15 +190,56 @@ class CommentsManager {
   }
 
   async loadComments() {
-    if (this._isLoading) return; // Prevent concurrent loads
+    if (this._isLoading) {
+      console.log("[Debug] Comments already loading, skipping");
+      return;
+    }
+
+    console.log("[Debug] Starting loadComments");
+    console.log("[Debug] Item details:", {
+      type: this.type,
+      itemId: this.itemId,
+      itemName: this.itemName,
+    });
 
     // Check if elements are initialized
     if (!this.commentsList || !this.paginationControls) {
       console.error("[Debug] Comments elements not initialized yet");
-      // Try to initialize elements
       if (!this.initializeElements()) {
-        return; // Exit if initialization fails
+        console.error("[Debug] Failed to initialize elements");
+        return;
       }
+    }
+
+    try {
+      console.log("[Debug] Verifying item existence");
+      const itemResponse = await fetch(
+        `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+          this.itemName
+        )}&type=${this.type}`
+      );
+
+      if (!itemResponse.ok) {
+        console.log(
+          "[Debug] Item verification failed, status:",
+          itemResponse.status
+        );
+        // Fix: Use correct class selector with dot
+        const commentsSection = document.querySelector(".comment-container");
+        if (commentsSection) {
+          console.log("[Debug] Hiding comments section");
+          commentsSection.style.display = "none";
+          window.commentsManagerInstance = null;
+        } else {
+          console.log("[Debug] Comments section not found");
+        }
+        return;
+      }
+
+      console.log("[Debug] Item verification successful");
+    } catch (error) {
+      console.error("[Debug] Error verifying item existence:", error);
+      return;
     }
 
     this._isLoading = true;
