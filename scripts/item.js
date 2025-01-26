@@ -1290,7 +1290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                               item.name
                             }?</strong>
                             <button
-                              onclick="window.open('https://discord.com/invite/baHCsb8N5A', '_blank', 'noopener,noreferrer')"
+                              onclick="window.open('https://discord.com/invite/jailbreaktrading', '_blank', 'noopener,noreferrer')"
                               class="discord-button"
                             >
                               Visit Jailbreak Trading Core!
