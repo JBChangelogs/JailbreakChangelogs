@@ -20,6 +20,28 @@ body {
   transition: all 0.3s ease;
 }
 
+.badge.bg-primary {
+  background-color: var(--accent-color) !important;
+  color: var(--text-primary);
+  border: 1px solid var(--accent-color-light);
+  transition: all 0.2s ease;
+}
+
+.badge.bg-primary i {
+  color: var(--text-primary);
+}
+
+.badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.badge i {
+  font-size: 0.9rem;
+}
+
 .search-box:focus-within {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2) !important;
   transform: translateY(-2px);
