@@ -12,6 +12,23 @@
   --selection-bg: var(--button-primary);
   --selection-text: var(--text-body);
 }
+
+.early-badge {
+  display: none;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #ffd700; /* Golden color */
+  transition: transform 0.2s ease;
+}
+
+.early-badge:hover {
+  transform: scale(1.1);
+}
+
+.early-badge i {
+  animation: sparkle 2s infinite;
+}
+
 /* Connections Section */
 .connections-list {
   display: flex;
