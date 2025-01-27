@@ -126,7 +126,8 @@
           <li class="breadcrumb-item"><a href="/users">Users</a></li>
           <li class="breadcrumb-item" aria-current="page">
             <a href="/users/<%= userData.id %>"
-              >@<%= userData.global_name || userData.username %></a
+              >@ <%= userData.global_name === 'None' ? userData.username :
+              userData.global_name %></a
             >
           </li>
           <li class="breadcrumb-item active" aria-current="page">Followers</li>
@@ -134,7 +135,8 @@
       </nav>
       <h2 class="mb-4">
         <%= user && userData.id === user.id ? 'My followers' :
-        `${userData.global_name}'s followers` %>
+        `${userData.global_name === 'None' || !userData.global_name ?
+        userData.username : userData.global_name}'s followers` %>
       </h2>
       <div class="social-nav">
         <a

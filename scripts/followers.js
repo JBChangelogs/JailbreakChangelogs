@@ -29,13 +29,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const subtitleElement = document.querySelector("h4");
 
   if (titleElement && loggedInUserId === userId) {
-    titleElement.textContent = "My followers";
+    titleElement.textContent = "Followers";
   }
 
   // Keep the friends heading consistent
   if (subtitleElement) {
     subtitleElement.textContent =
-      loggedInUserId === userId ? "My Friends" : "Friends";
+      loggedInUserId === userId ? "My Followers" : "Followers";
   }
 
   const showfollowers = JSON.parse(showingfollowers);
@@ -99,8 +99,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (subtitleElement) {
       subtitleElement.textContent =
         loggedInUserId === userId
-          ? `My Friends (${count})`
-          : `Friends (${count})`;
+          ? `My Followers (${count})`
+          : `Followers (${count})`;
     }
   }
 
