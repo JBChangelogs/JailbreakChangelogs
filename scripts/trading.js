@@ -1222,6 +1222,7 @@ async function deleteTradeAd(tradeId) {
     toastr.error("Failed to delete trade advertisement");
   }
 }
+
 async function editTradeAd(tradeId) {
   try {
     // Update URL with edit parameter
@@ -1322,7 +1323,6 @@ async function editTradeAd(tradeId) {
       }
 
       // After loading trade data and before calling previewTrade
-
       await previewTrade();
       // Set the initial status in the dropdown
       const statusSelect = document.getElementById("trade-status-select");
@@ -1406,7 +1406,6 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    // First url declaration - for API endpoint
     const apiUrl = `https://api3.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}`;
 
     const tradeData = {
@@ -1429,39 +1428,14 @@ async function updateTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    toastr.success("Trade advertisement updated successfully!");
+    toastr.success("Your trade ad will be updated shortly!");
 
-    // Second url declaration - for window location
-    const pageUrl = new URL(window.location);
-    pageUrl.searchParams.delete("edit");
-    window.history.replaceState({}, "", pageUrl);
-
-    // Store the button reference before resetting
-    const confirmButton = document.getElementById("confirm-trade-btn");
-
-    // Reset trade (which might remove the button)
-    resetTrade();
-
-    // Update button if it still exists
-    if (confirmButton) {
-      confirmButton.innerHTML = '<i class="bi bi-eye"></i> Preview Trade';
-      confirmButton.onclick = previewTrade;
-    }
-
-    // Only refresh the specific trade that was updated
-    const updatedTrade = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
-    ).then((res) => res.json());
-
-    if (updatedTrade) {
-      const tradeElement = document.querySelector(
-        `[data-trade-id="${tradeId}"]`
-      );
-      if (tradeElement) {
-        const newTradeHtml = await createTradeAdHTML(updatedTrade);
-        tradeElement.outerHTML = newTradeHtml;
-      }
-    }
+    // Wait for 1.5 seconds before reloading
+    setTimeout(() => {
+      const pageUrl = new URL(window.location);
+      pageUrl.searchParams.delete("edit");
+      window.location.href = pageUrl.toString();
+    }, 1500);
   } catch (error) {
     console.error("Error updating trade:", error);
     toastr.error("Failed to update trade advertisement");
@@ -1694,7 +1668,6 @@ async function fetchUserDetails(userId) {
   }
 }
 
-// Updated createTradeAdHTML function
 async function createTradeAdHTML(trade) {
   // Start with a skeleton template
   const container = document.createElement("div");
