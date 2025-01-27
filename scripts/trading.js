@@ -1428,14 +1428,14 @@ async function updateTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    toastr.success("Your trade ad will be updated shortly!");
-
-    // Wait for 1.5 seconds before reloading
-    setTimeout(() => {
-      const pageUrl = new URL(window.location);
-      pageUrl.searchParams.delete("edit");
-      window.location.href = pageUrl.toString();
-    }, 1500);
+    // Show success toast with a callback for page reload
+    toastr.success("Your trade ad will be updated shortly!", "", {
+      timeOut: 1500,
+      onHidden: function () {
+        // Use window.location.replace instead of modifying URL and using href
+        window.location.replace("/trading");
+      },
+    });
   } catch (error) {
     console.error("Error updating trade:", error);
     toastr.error("Failed to update trade advertisement");
