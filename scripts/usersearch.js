@@ -111,9 +111,9 @@ const createUserCard = async (user) => {
            }&bold=true&format=svg'"
          >
          <div class="user-info overflow-hidden flex-grow-1">
-           <h5 class="user-name text-truncate mb-1 fs-6">${
-             user.global_name
-           }</h5>
+         <h5 class="user-name text-truncate mb-1 fs-6">${
+           user.global_name === "None" ? user.username : user.global_name
+         }</h5>
            <p class="user-username text-muted small mb-0">@${user.username}</p>
          </div>
          <a href="/users/${

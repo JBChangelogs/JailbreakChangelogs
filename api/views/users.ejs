@@ -8,10 +8,7 @@
     <base href="/" />
 
     <!-- Primary Meta Tags -->
-    <meta
-      name="title"
-      content="<%= userData.global_name %> (@<%= userData.username %>) | Jailbreak Changelogs"
-    />
+    <meta name="title" content="<%= userData.global_name === 'None' ? userData.username : userData.global_name %> (@<%= userData.username %>) | Jailbreak Changelogs" />
     <meta name="author" content="Jailbreak Changelogs" />
     <meta
       name="description"
@@ -193,7 +190,7 @@
             <!-- Wrapper div for name and both buttons -->
             <div class="name-and-button">
               <h2 class="user-display-name d-flex align-items-center">
-                <%= userData.global_name %>
+                <%= userData.global_name === 'None' ? userData.username : userData.global_name %>
                 <span id="crown" class="ms-2 crown-wrapper" style="display: none">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="crown-icon">
                     <path fill="#ffd700" d="m12 6l4 6l5-4l-2 10H5L3 8l5 4z" />

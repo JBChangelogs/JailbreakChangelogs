@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
     textarea.style.minHeight = "150px";
     textarea.style.resize = "none";
     textarea.maxLength = 500;
-    textarea.value = userBio.innerText;
+    textarea.value = userBio.innerHTML.replace(/<br>/g, "\n");
 
     // custom styling
     textarea.style.backgroundColor = "#212a31"; // --bg-primary
@@ -833,7 +833,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Set description text
       const description = bioData.description || "No description provided";
-      userBio.innerHTML = linkifyText(description);
+      userBio.innerHTML = linkifyText(description.replace(/\n/g, "<br>"));
 
       // Format and set date
       // Only use last_updated if it's different from created_at
