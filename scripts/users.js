@@ -709,14 +709,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // early adopter badge click handler
-
   const earlyBadge = document.getElementById("early-badge");
   if (earlyBadge) {
     earlyBadge.addEventListener("click", function () {
       toastControl.showToast(
         "success",
-        "This user was one of the first 100 members to join Jailbreak Changelogs!",
-        "First 100 Users!"
+        `This user was user #${udata.usernumber} to join Jailbreak Changelogs!`,
+        "Early Adopter!"
       );
     });
   }
@@ -780,10 +779,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
       const earlyBadge = document.getElementById("early-badge");
       if (earlyBadge) {
-        const createdAt = parseInt(userData.created_at);
-        const earlyAdopterCutoff = 1738000989; // 100th user timestamp
-
-        if (createdAt > earlyAdopterCutoff) {
+        // Check if usernumber is 100 or less
+        if (userData.usernumber > 100) {
           earlyBadge.style.display = "none";
         } else {
           earlyBadge.style.display = "inline-block";

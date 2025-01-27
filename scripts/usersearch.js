@@ -31,7 +31,10 @@ const fetchTotalUsers = async () => {
       throw new Error("Failed to fetch user count");
     }
     const users = await response.json();
-    const totalUsers = users.length;
+
+    // Find the highest usernumber
+    const totalUsers = Math.max(...users.map((user) => user.usernumber));
+
     elements.totalUsersCount.innerHTML = `<i class="bi bi-person-lines-fill me-1"></i>Total Users: ${totalUsers.toLocaleString()}`;
   } catch (error) {
     console.error("Error fetching total users:", error);
