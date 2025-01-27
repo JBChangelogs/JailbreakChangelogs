@@ -185,11 +185,6 @@ function handleTouchStart(e) {
     return;
   }
 
-  console.log("Touch Start:", {
-    target: e.target,
-    clientY: e.touches[0].clientY,
-  });
-
   e.preventDefault();
   startY = e.touches[0].clientY;
   const bottomSheet = document.querySelector(".bottom-sheet");
@@ -211,11 +206,6 @@ function handleTouchMove(e) {
   if (deltaY < 0) {
     return;
   }
-
-  console.log("Touch Move:", {
-    deltaY,
-    currentY,
-  });
 
   e.preventDefault();
   bottomSheet.style.transform = `translateY(${deltaY}px)`;
@@ -1232,6 +1222,7 @@ async function deleteTradeAd(tradeId) {
     toastr.error("Failed to delete trade advertisement");
   }
 }
+
 async function editTradeAd(tradeId) {
   try {
     // Update URL with edit parameter
@@ -1331,6 +1322,20 @@ async function editTradeAd(tradeId) {
         valueDifferencesContainer.innerHTML = renderValueDifferences();
       }
 
+      // After loading trade data and before calling previewTrade
+      await previewTrade();
+      // Set the initial status in the dropdown
+      const statusSelect = document.getElementById("trade-status-select");
+      if (statusSelect) {
+        statusSelect.value = trade.status || "Pending";
+      }
+
+      // Hide the confirm trade button
+      const confirmTradeBtn = document.getElementById("confirm-trade-btn");
+      if (confirmTradeBtn) {
+        confirmTradeBtn.style.display = "none";
+      }
+
       // Add update/cancel buttons
       const previewActions = document.querySelector(".preview-actions");
       if (previewActions) {
@@ -1364,6 +1369,13 @@ function cancelEdit() {
   url.searchParams.delete("edit");
   window.history.replaceState({}, "", url);
 
+  // Show the confirm trade button again
+  const confirmTradeBtn = document.getElementById("confirm-trade-btn");
+  if (confirmTradeBtn) {
+    confirmTradeBtn.style.display = "block";
+    confirmTradeBtn.innerHTML = '<i class="bi bi-eye"></i> Preview Trade';
+  }
+
   resetTrade();
   window.location.reload();
 }
@@ -1394,7 +1406,6 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    // First url declaration - for API endpoint
     const apiUrl = `https://api3.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}`;
 
     const tradeData = {
@@ -1417,39 +1428,14 @@ async function updateTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    toastr.success("Trade advertisement updated successfully!");
-
-    // Second url declaration - for window location
-    const pageUrl = new URL(window.location);
-    pageUrl.searchParams.delete("edit");
-    window.history.replaceState({}, "", pageUrl);
-
-    // Store the button reference before resetting
-    const confirmButton = document.getElementById("confirm-trade-btn");
-
-    // Reset trade (which might remove the button)
-    resetTrade();
-
-    // Update button if it still exists
-    if (confirmButton) {
-      confirmButton.innerHTML = '<i class="bi bi-eye"></i> Preview Trade';
-      confirmButton.onclick = previewTrade;
-    }
-
-    // Only refresh the specific trade that was updated
-    const updatedTrade = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
-    ).then((res) => res.json());
-
-    if (updatedTrade) {
-      const tradeElement = document.querySelector(
-        `[data-trade-id="${tradeId}"]`
-      );
-      if (tradeElement) {
-        const newTradeHtml = await createTradeAdHTML(updatedTrade);
-        tradeElement.outerHTML = newTradeHtml;
-      }
-    }
+    // Show success toast with a callback for page reload
+    toastr.success("Your trade ad will be updated shortly!", "", {
+      timeOut: 1500,
+      onHidden: function () {
+        // Use window.location.replace instead of modifying URL and using href
+        window.location.replace("/trading");
+      },
+    });
   } catch (error) {
     console.error("Error updating trade:", error);
     toastr.error("Failed to update trade advertisement");
@@ -1682,7 +1668,6 @@ async function fetchUserDetails(userId) {
   }
 }
 
-// Updated createTradeAdHTML function
 async function createTradeAdHTML(trade) {
   // Start with a skeleton template
   const container = document.createElement("div");
@@ -2037,12 +2022,16 @@ async function previewTrade() {
   if (!(await canCreateTradeAd())) {
     return;
   }
-  // Get elements with error checking
+
+  // Get elements and check URL parameters
   const previewSection = document.getElementById("trade-preview");
   const availableContainer = document.getElementById(
     "available-items-container"
   );
   const confirmButton = document.getElementById("confirm-trade-btn");
+  const urlParams = new URLSearchParams(window.location.search);
+  const isEditing = urlParams.has("edit");
+  const tradeId = urlParams.get("edit");
 
   // Check if required elements exist
   if (!previewSection || !availableContainer || !confirmButton) {
@@ -2072,20 +2061,84 @@ async function previewTrade() {
   renderPreviewItems("preview-offering-items", offeringItems);
   renderPreviewItems("preview-requesting-items", requestingItems);
 
-  // Add preview actions
+  // Add value differences
   const valueDifferencesContainer =
     document.getElementById("value-differences");
+  if (!valueDifferencesContainer) {
+    console.error("Value differences container not found!");
+    return;
+  }
   valueDifferencesContainer.innerHTML = renderValueDifferences();
+
+  if (isEditing) {
+    console.log("Creating status select container for edit mode");
+
+    // Create status select container
+    const statusSelectContainer = document.createElement("div");
+    statusSelectContainer.className = "confirm-trade-wrapper mt-4";
+    statusSelectContainer.innerHTML = `
+      <div class="status-container">
+        <label for="trade-status-select" class="form-label">Trade Status</label>
+        <select id="trade-status-select" class="form-select">
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+    `;
+
+    // Insert status select after value differences
+    valueDifferencesContainer.insertAdjacentElement(
+      "afterend",
+      statusSelectContainer
+    );
+  }
 
   // Add preview actions
   const previewActions = document.createElement("div");
   previewActions.className = "preview-actions mt-4 text-center";
-  previewActions.innerHTML = `
-  <button class="btn btn-primary" onclick="createTradeAd()">
-    <i class="bi bi-plus-circle me-2"></i>Create Trade Ad
-  </button>
-`;
-  valueDifferencesContainer.after(previewActions);
+
+  if (isEditing) {
+    previewActions.innerHTML = `
+      <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
+        <i class="bi bi-save"></i> Update Trade
+      </button>
+      <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
+        <i class="bi bi-x-circle"></i> Cancel
+      </button>
+    `;
+  } else {
+    previewActions.innerHTML = `
+      <button class="btn btn-primary" onclick="createTradeAd()">
+        <i class="bi bi-plus-circle me-2"></i>Create Trade Ad
+      </button>
+    `;
+  }
+
+  // Insert preview actions
+  const existingPreviewActions = document.querySelector(".preview-actions");
+  if (existingPreviewActions) {
+    existingPreviewActions.remove();
+  }
+
+  if (isEditing) {
+    // Insert after status select container
+    const statusSelectContainer = document.querySelector(
+      ".confirm-trade-wrapper"
+    );
+    if (statusSelectContainer) {
+      statusSelectContainer.insertAdjacentElement("afterend", previewActions);
+    } else {
+      console.error(
+        "Status select container not found for inserting preview actions!"
+      );
+      valueDifferencesContainer.insertAdjacentElement(
+        "afterend",
+        previewActions
+      );
+    }
+  } else {
+    valueDifferencesContainer.insertAdjacentElement("afterend", previewActions);
+  }
 }
 
 function renderPreviewItems(containerId, items) {
@@ -2248,18 +2301,6 @@ function renderValueDifferences() {
       </div>
     </div>
   `;
-}
-function editTrade() {
-  // Hide preview and show original sections
-  document.getElementById("trade-preview").style.display = "none";
-  document.getElementById("available-items-container").style.display = "block";
-  document.getElementById("confirm-trade-btn").style.display = "block";
-
-  // Remove preview actions
-  const previewActions = document.querySelector(".preview-actions");
-  if (previewActions) {
-    previewActions.remove();
-  }
 }
 
 async function submitTrade() {
