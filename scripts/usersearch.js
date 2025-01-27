@@ -38,7 +38,7 @@ const fetchTotalUsers = async () => {
     elements.totalUsersCount.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Failed to load user count`;
   }
 };
-// Message Templates
+
 const messages = {
   minLength: `
     <div class="col-12 text-center py-5">
@@ -54,6 +54,14 @@ const messages = {
         <i class="bi bi-search me-2"></i>
         No results found :(
       </div>
+    </div>
+  `,
+  resultsCount: (count) => `
+    <div class="mb-3 text-center">
+      <span class="badge bg-primary">
+        <i class="bi bi-people-fill me-1"></i>
+        ${count} user${count !== 1 ? "s" : ""} found
+      </span>
     </div>
   `,
 };
@@ -141,10 +149,15 @@ const showMessage = (message) => {
 
 // User Display Logic
 const displayUsers = async (users) => {
+  // Add results count at the top
+  const resultsCountHTML = messages.resultsCount(users.length);
+
   const userCards = await Promise.all(
     users.map((user) => createUserCard(user))
   );
+
   elements.usersGrid.innerHTML = `
+    ${resultsCountHTML}
     <div class="row g-4">
       ${userCards.join("")}
     </div>
@@ -154,15 +167,22 @@ const displayUsers = async (users) => {
 // API Functions
 const searchUsers = async (searchTerm) => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/users/get/name?name=${searchTerm}`
-    );
+    const response = await fetch(`${API_BASE_URL}/users/list`);
     if (!response.ok) {
-      throw new Error(
-        response.status === 404 ? "No users found" : "Server error"
-      );
+      throw new Error("Server error");
     }
-    return await response.json();
+    const users = await response.json();
+
+    // Case-insensitive search for both username and global_name
+    const searchTermLower = searchTerm.toLowerCase();
+    const filteredUsers = users.filter(
+      (user) =>
+        user.username.toLowerCase().includes(searchTermLower) ||
+        (user.global_name &&
+          user.global_name.toLowerCase().includes(searchTermLower))
+    );
+
+    return filteredUsers;
   } catch (error) {
     console.error("Search error:", error);
     return [];
