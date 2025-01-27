@@ -707,6 +707,20 @@ document.addEventListener("DOMContentLoaded", function () {
       settings_button.classList.remove("d-none");
     }
   }
+
+  // early adopter badge click handler
+
+  const earlyBadge = document.getElementById("early-badge");
+  if (earlyBadge) {
+    earlyBadge.addEventListener("click", function () {
+      toastControl.showToast(
+        "success",
+        "This user was one of the first 100 members to join Jailbreak Changelogs!",
+        "First 100 Users!"
+      );
+    });
+  }
+
   async function fetchUserBio(userId) {
     try {
       // First get user data for member since date
@@ -762,10 +776,21 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error(`User data fetch failed: ${userResponse.status}`);
       }
       const userData = await userResponse.json();
+
+      // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
+      const earlyBadge = document.getElementById("early-badge");
+      if (earlyBadge) {
+        const createdAt = parseInt(userData.created_at);
+        const earlyAdopterCutoff = 1738000989; // 100th user timestamp
+
+        if (createdAt > earlyAdopterCutoff) {
+          earlyBadge.style.display = "none";
+        } else {
+          earlyBadge.style.display = "inline-block";
+        }
+      }
+
       const usernameContainer = document.querySelector(".username-link");
-      // if (usernameContainer) {
-      //   usernameContainer.textContent = "@" + usernameContainer.textContent;
-      // }
       const memberSince = new Date(
         parseInt(userData.created_at) * 1000
       ).toLocaleDateString("en-GB", {
