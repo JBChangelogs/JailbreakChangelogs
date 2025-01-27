@@ -714,7 +714,7 @@ document.addEventListener("DOMContentLoaded", function () {
     earlyBadge.addEventListener("click", function () {
       toastControl.showToast(
         "success",
-        `This user was user #${udata.usernumber} to join Jailbreak Changelogs!`,
+        `This user was user #${udata.usernumber}/100 to join Jailbreak Changelogs!`,
         "Early Adopter!"
       );
     });

@@ -65,13 +65,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const subtitleElement = document.querySelector("h4");
 
   if (titleElement && loggedInUserId === userId) {
-    titleElement.textContent = "My following";
+    titleElement.textContent = "Following";
   }
 
   // Keep the friends heading consistent
   if (subtitleElement) {
     subtitleElement.textContent =
-      loggedInUserId === userId ? "My Friends" : "Friends";
+      loggedInUserId === userId ? "My Following" : "Following";
   }
 
   // Async function to fetch followers
@@ -109,8 +109,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (subtitleElement) {
       subtitleElement.textContent =
         loggedInUserId === userId
-          ? `My Friends (${count})`
-          : `Friends (${count})`;
+          ? `My Following (${count})`
+          : `Following (${count})`;
     }
   } else {
     console.error("Could not find followingCount element");
