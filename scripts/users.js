@@ -933,21 +933,24 @@ document.addEventListener("DOMContentLoaded", function () {
             item = await seasonResponse.json();
             rewards = await rewardsResponse.json();
             item.rewards = rewards;
-
-            // Add image URL for season
-            const level10Reward = item.rewards?.find?.(
-              (reward) => reward.requirement === "Level 10"
-            );
-            item.image_url =
-              level10Reward?.link || "assets/images/changelogs/347.webp";
-
             return item;
 
-          // New item types
-          case "Vehicle":
+          case "trade":
+            url = `https://api3.jailbreakchangelogs.xyz/trades/get?id=${comment.item_id}`;
+            break;
+
+          // Existing item types
+          case "vehicle":
           case "spoiler":
-          case "color":
+          case "rim":
+          case "body-color":
+          case "texture":
+          case "tire-sticker":
+          case "tire-style":
+          case "drift":
+          case "hyperchrome":
           case "furniture":
+          case "limited-item":
             url = `https://api3.jailbreakchangelogs.xyz/items/get?type=${comment.item_type}&id=${comment.item_id}`;
             break;
 
@@ -973,8 +976,14 @@ document.addEventListener("DOMContentLoaded", function () {
           item = await response.json();
         }
 
-        // Clear timeout since request completed
-        clearTimeout(timeoutId);
+        // For trade comments, modify the item object
+        if (comment.item_type === "trade") {
+          item = {
+            ...item,
+            title: `Trade #${comment.item_id}`,
+            type: "Trade",
+          };
+        }
 
         return item;
       } finally {
@@ -1106,7 +1115,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   let currentPage = 1;
-  const commentsPerPage = 3;
+  const commentsPerPage = 6;
 
   async function fetchUserComments(userId) {
     const recentComments = document.getElementById("comments-list");
@@ -1182,10 +1191,26 @@ document.addEventListener("DOMContentLoaded", function () {
             (reward) => reward.requirement === "Level 10"
           );
           imageUrl = level10Reward?.link || "assets/images/changelogs/347.webp";
+        } else if (comment.item_type === "trade") {
+          // Handle trade comments
+          imageUrl = "assets/backgrounds/background11.webp"; // Default image for trades
+          displayTitle = `Trade #${comment.item_id}`;
+          displayType = "Trade";
+          viewPath = `/trading/ad/${comment.item_id}`; // Correct path for trade pages
         } else if (
-          ["Vehicle", "Spoiler", "Color", "Furniture", "Rim"].includes(
-            comment.item_type
-          )
+          [
+            "vehicle",
+            "spoiler",
+            "rim",
+            "body-color",
+            "texture",
+            "tire-sticker",
+            "tire-style",
+            "drift",
+            "hyperchrome",
+            "furniture",
+            "limited-item",
+          ].includes(comment.item_type.toLowerCase())
         ) {
           // Updated image URL structure to match the correct path
           const itemType = comment.item_type.toLowerCase() + "s"; // Add 's' to pluralize
