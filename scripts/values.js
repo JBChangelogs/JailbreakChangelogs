@@ -407,8 +407,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Close to none",
         "Very Low",
         "Low",
-        "Decent",
         "Medium",
+        "Decent",
         "High",
         "Very High",
       ];
