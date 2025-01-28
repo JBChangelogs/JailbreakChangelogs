@@ -1276,22 +1276,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Fetch data
-      const [followingArray, followersArray, userSettings] = await Promise.all([
+      const [followingArray, followersArray] = await Promise.all([
         fetchUserFollowing(userId),
         fetchUserFollowers(userId),
-        fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          }
-        )
-          .then((res) => res.json())
-          .catch(() => ({})),
       ]);
 
       // Update follow button state
@@ -1314,7 +1301,6 @@ document.addEventListener("DOMContentLoaded", function () {
       followingLink.href = `/users/${userId}/following`; // Remove the conditional
 
       const followingCount_span = document.createElement("span");
-      // Always show count for profile owner
       followingCount_span.textContent = followingCount;
       followingCount_span.classList.add("fw-bold");
       followingCount_span.style.color = "#748D92";
@@ -1326,17 +1312,16 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       followingLink.appendChild(followingCount_span);
+      // Handle singular/plural for "following" (always plural)
       followingLink.appendChild(document.createTextNode(" Following"));
       followingLink.classList.add("text-decoration-none");
       followingLink.style.color = "#D3D9D4";
 
       // Create followers link
       const followersLink = document.createElement("a");
-      // CHANGE THIS PART - Always show links for profile owner
-      followersLink.href = `/users/${userId}/followers`; // Remove the conditional
+      followersLink.href = `/users/${userId}/followers`;
 
       const followersCount_span = document.createElement("span");
-      // Always show count for profile owner
       followersCount_span.textContent = followersCount;
       followersCount_span.classList.add("fw-bold");
       followersCount_span.style.color = "#748D92";
@@ -1348,7 +1333,12 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       followersLink.appendChild(followersCount_span);
-      followersLink.appendChild(document.createTextNode(" Followers"));
+      // Handle singular/plural for "followers"
+      followersLink.appendChild(
+        document.createTextNode(
+          followersCount === 1 ? " Follower" : " Followers"
+        )
+      );
       followersLink.classList.add("text-decoration-none");
       followersLink.style.color = "#D3D9D4";
 
@@ -1475,14 +1465,24 @@ document.addEventListener("DOMContentLoaded", function () {
   async function addFollow(userId) {
     try {
       const user = Cookies.get("token");
+      // Get the target user ID from the URL
+      const pathSegments = window.location.pathname.split("/");
+      const targetUserId = pathSegments[2]; // This gets the ID from /users/{id}
+
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/users/followers/add`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
           },
-          body: JSON.stringify({ follower: user, following: userId }),
+          body: JSON.stringify({
+            follower: user, // The logged-in user's token
+            following: targetUserId, // The ID from the URL
+          }),
         }
       );
 
@@ -1526,6 +1526,9 @@ document.addEventListener("DOMContentLoaded", function () {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
           },
           body: JSON.stringify({ follower: user, following: userId }),
         }
@@ -1568,7 +1571,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const user = Cookies.get("token");
     if (!user) {
-      // User is not logged in
       toastControl.showToast(
         "error",
         "You are not logged in to perform this action.",
@@ -1577,34 +1579,48 @@ document.addEventListener("DOMContentLoaded", function () {
       follow_button.disabled = false;
       return;
     }
+
+    // Get the ID of the user being followed/unfollowed from the URL
+    const pathSegments = window.location.pathname.split("/");
+    const targetUserId = pathSegments[2]; // This is the ID of the user being followed/unfollowed
+
     if (follow_button.textContent === "Follow") {
-      addFollow(userId)
-        .then(() => {
-          toastControl.showToast(
-            "success",
-            "User followed successfully.",
-            "Success"
-          );
-          follow_button.textContent = "Unfollow";
+      addFollow(targetUserId)
+        .then((success) => {
+          if (success) {
+            toastControl.showToast(
+              "success",
+              "User followed successfully.",
+              "Success"
+            );
+            follow_button.textContent = "Unfollow";
+            // Refresh counts after successful follow
+            updateUserCounts(targetUserId);
+          }
         })
         .finally(() => {
           follow_button.disabled = false;
         });
     } else {
-      removeFollow(userId)
-        .then(() => {
-          toastControl.showToast(
-            "success",
-            "User unfollowed successfully.",
-            "Success"
-          );
-          follow_button.textContent = "Follow";
+      removeFollow(targetUserId)
+        .then((success) => {
+          if (success) {
+            toastControl.showToast(
+              "success",
+              "User unfollowed successfully.",
+              "Success"
+            );
+            follow_button.textContent = "Follow";
+            // Refresh counts after successful unfollow
+            updateUserCounts(targetUserId);
+          }
         })
         .finally(() => {
           follow_button.disabled = false;
         });
     }
   });
+
   function AlertToast(message) {
     toastControl.showToast("info", message, "Alert");
   }
@@ -1664,6 +1680,7 @@ document.addEventListener("DOMContentLoaded", function () {
       '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
     loadProfileSettings();
   });
+
   async function loadProfileSettings() {
     try {
       const response = await fetch(

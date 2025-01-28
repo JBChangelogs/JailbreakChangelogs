@@ -25,6 +25,77 @@ document.addEventListener("DOMContentLoaded", async () => {
   const showFollowing = JSON.parse(showingfollowing);
   const userId = segments[2];
 
+  const displayUsers = (users) => {
+    if (users.length > 0) {
+      usersGrid.innerHTML = `
+        <div class="row g-4">
+          ${users
+            .map((user) => {
+              if (user.isBanned) {
+                return `
+                <div class="user-card-wrapper">
+                  <div class="card user-card">
+                    <div class="card-body">
+                      <div class="user-info-container">
+                        <img 
+                          src="https://ui-avatars.com/api/?background=212a31&color=fff&size=128&rounded=true&name=?&bold=true&format=svg"
+                          class="user-avatar rounded-circle" 
+                          alt="Banned User"
+                          style="border-color: #124E66;"
+                        >
+                        <div class="user-info">
+                          <h5 class="user-name text-truncate text-danger">Account Suspended</h5>
+                          <p class="user-username text-truncate text-muted">This user has been banned</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+              } else {
+                return `
+                <div class="user-card-wrapper" onclick="window.location.href='/users/${
+                  user.id
+                }'">
+                  <div class="card user-card">
+                    <div class="card-body">
+                      <div class="user-info-container">
+                        <img 
+                          src="${user.avatarUrl}"
+                          class="user-avatar rounded-circle" 
+                          alt="${user.username}"
+                          style="border-color: ${decimalToHex(
+                            user.accent_color
+                          )};"
+                          onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
+                            user.username
+                          }&bold=true&format=svg'"
+                        >
+                        <div class="user-info">
+                          <h5 class="user-name text-truncate">${
+                            user.global_name === "None"
+                              ? user.username
+                              : user.global_name
+                          }</h5>
+                          <p class="user-username text-truncate">@${
+                            user.username
+                          }</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+              }
+            })
+            .join("")}
+        </div>
+      `;
+    } else {
+      usersGrid.innerHTML = '<p class="text-muted">No following yet</p>';
+    }
+  };
+
   if (!document.getElementById("usersGrid")) {
     return; // Exit if the grid doesn't exist (means we're showing the private message)
   }
@@ -117,6 +188,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (following.length > 0) {
+    const processedUsers = [];
+
     for (const followedUser of following) {
       try {
         const response = await fetch(
@@ -125,73 +198,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (response.status === 403) {
           // Handle banned user
-          const userCard = document.createElement("div");
-          userCard.className = "user-card mb-3";
-          userCard.innerHTML = `
-            <div class="card user-card border-0 shadow-sm">
-              <div class="card-body position-relative p-3">
-                <div class="d-flex align-items-center">
-                  <div class="me-4">
-                    <img src="https://ui-avatars.com/api/?background=212a31&color=fff&size=128&rounded=true&name=?&bold=true&format=svg" 
-                         class="user-avatar rounded-circle" 
-                         width="60"
-                         height="60"
-                       style="border: 3px solid ${decimalToHex(
-                         userData.accent_color
-                       )};"
-                  </div>
-                  <div class="flex-grow-1">
-                    <div class="text-decoration-none">
-                      <h5 class="user-name card-title mb-2 text-danger">Account Suspended</h5>
-                    </div>
-                    <p class="user-username card-text text-muted mb-0">This user has been banned</p>
-                  </div>
-                </div>
-              </div>
-            </div>`;
-          usersGrid.appendChild(userCard);
+          processedUsers.push({
+            id: followedUser.following_id,
+            isBanned: true,
+          });
         } else {
-          // Handle active user
           const userData = await response.json();
           const avatarUrl = await getAvatarUrl(userData);
-
-          const userCard = document.createElement("div");
-          userCard.className = "user-card mb-3";
-          userCard.innerHTML = `
-            <div class="card user-card border-0 shadow-sm">
-              <div class="card-body position-relative p-3">
-                <div class="d-flex align-items-center">
-                  <div class="me-4">
-                    <img src="${avatarUrl}" 
-                         class="user-avatar rounded-circle" 
-                         width="48"
-                         height="48"
-                         style="border: 3px solid ${decimalToHex(
-                           userData.accent_color
-                         )};"
-                         onerror="handleinvalidImage(this)">
-                  </div>
-                  <div class="flex-grow-1">
-                    <a href="/users/${
-                      userData.id
-                    }" class="text-decoration-none">
-                      <h5 class="user-name card-title mb-2">${
-                        userData.global_name
-                      }</h5>
-                    </a>
-                    <p class="user-username card-text text-muted mb-0">@${
-                      userData.username
-                    }</p>
-                  </div>
-                </div>
-              </div>
-            </div>`;
-          usersGrid.appendChild(userCard);
+          processedUsers.push({
+            ...userData,
+            avatarUrl,
+          });
         }
       } catch (error) {
         console.error("Error processing following:", error);
       }
     }
+
+    displayUsers(processedUsers);
   } else {
     usersGrid.innerHTML = '<p class="text-muted">No following yet</p>';
   }
