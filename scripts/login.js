@@ -11,43 +11,7 @@ function checkAndStoreReportIssue() {
 
 $(document).ready(function () {
   checkAndStoreReportIssue();
-  toastr.options = {
-    positionClass: "toast-top-right",
-    closeButton: true,
-    progressBar: true,
-    preventDuplicates: true,
-    timeOut: 3000,
-    extendedTimeOut: 1000,
-    showEasing: "swing",
-    hideEasing: "linear",
-    showMethod: "fadeIn",
-    hideMethod: "fadeOut",
-    // Prevent layout shifts
-    newestOnTop: false,
-    maxOpened: 1,
-    // Fixed positioning
-    containerId: "toast-container",
-    // Add some margin from the top
-    toastClass: "toast",
-    target: "body",
-    containerId: "toast-container",
-    // Prevent toast from expanding viewport
-    maxWidth: "100%",
-    width: "auto",
-    // Ensure toast container stays within viewport
-    tapToDismiss: true,
-    onShown: function () {
-      // Force the toast container to stay within viewport
-      const container = document.getElementById(toastr.options.containerId);
-      if (container) {
-        container.style.maxWidth = "100vw";
-        container.style.width = "auto";
-        container.style.right = "0";
-        container.style.bottom = "0";
-        container.style.position = "fixed";
-      }
-    },
-  };
+
   const ageCheck = $("#ageCheck");
   const tosCheck = $("#tosCheck");
   const loginButton = $("#login-button");
@@ -110,37 +74,27 @@ $(document).ready(function () {
           sessionStorage.setItem("userid", userData.id);
 
           // Show success toast
-          toastr.success("Successfully logged in with Discord!", "Welcome", {
-            onHidden: function () {
-              const hasReportIssue = localStorage.getItem(
-                "reportIssueRedirect"
-              );
-              if (hasReportIssue) {
-                localStorage.removeItem("reportIssueRedirect");
-                window.location.href = "/?report-issue";
-              } else {
-                window.location.href = "/";
-              }
-            },
-          });
+          notyf.success("Successfully logged in with Discord!");
+          setTimeout(() => {
+            const hasReportIssue = localStorage.getItem("reportIssueRedirect");
+            if (hasReportIssue) {
+              localStorage.removeItem("reportIssueRedirect");
+              window.location.href = "/?report-issue";
+            } else {
+              window.location.href = "/";
+            }
+          }, 4500); // Match the duration from Notyf config
           return;
         }
       })
       .catch((error) => {
         if (error.message === "banned") {
-          toastr.error(
-            "Your account has been banned from Jailbreak Changelogs.",
-            "Access Denied",
-            {
-              positionClass: "toast-bottom-right",
-              timeOut: 5000,
-              closeButton: true,
-              progressBar: true,
-              onHidden: function () {
-                window.location.href = "/";
-              },
-            }
+          notyf.error(
+            "Your account has been banned from Jailbreak Changelogs."
           );
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 4500);
         } else {
           console.error("Login error:", error);
           window.location.href = "/";

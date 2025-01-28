@@ -1,12 +1,3 @@
-// Configure toastr
-toastr.options = {
-  positionClass: "toast-bottom-right",
-  closeButton: true,
-  progressBar: true,
-  preventDuplicates: true,
-  timeOut: 3000,
-};
-
 function showLoadingOverlay() {
   $("#loading-overlay").addClass("show");
 }
@@ -49,7 +40,7 @@ async function deleteTradeAd(tradeId) {
   try {
     const token = Cookies.get("token");
     if (!token) {
-      toastr.error("Please login to delete trade advertisements");
+      notyf.error("Please login to delete trade advertisements");
       return;
     }
 
@@ -71,14 +62,14 @@ async function deleteTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    toastr.success("Trade advertisement deleted successfully!");
+    notyf.success("Trade advertisement deleted successfully!");
     // Redirect to trading page after successful deletion
     setTimeout(() => {
       window.location.href = "/trading";
     }, 1500);
   } catch (error) {
     console.error("Error deleting trade:", error);
-    toastr.error("Failed to delete trade advertisement");
+    notyf.error("Failed to delete trade advertisement");
   }
 }
 

@@ -1,12 +1,3 @@
-// Configure toastr
-toastr.options = {
-  positionClass: "toast-bottom-right",
-  closeButton: true,
-  progressBar: true,
-  preventDuplicates: true,
-  timeOut: 3000,
-};
-
 const tooltipTriggerList = document.querySelectorAll(
   '[data-bs-toggle="tooltip"]'
 );
@@ -27,7 +18,7 @@ let allTradeAds = [];
 async function canCreateTradeAd() {
   const token = Cookies.get("token");
   if (!token) {
-    toastr.error("Please login first");
+    notyf.error("Please login first");
     return false;
   }
 
@@ -42,10 +33,12 @@ async function canCreateTradeAd() {
 
     // Check if user has Roblox data
     if (!userData.roblox_id || !userData.roblox_username) {
-      toastr.error("Please link your Roblox account first", "", {
-        timeOut: 5000,
-        closeButton: true,
-        onclick: function () {
+      notyf.error({
+        message: "Please link your Roblox account first",
+        duration: 5000,
+        dismissible: true,
+        ripple: true,
+        onClick: function () {
           window.location.href = "/roblox";
         },
       });
@@ -55,7 +48,7 @@ async function canCreateTradeAd() {
     return true;
   } catch (error) {
     console.error("Error checking trade permissions:", error);
-    toastr.error("Failed to verify trade permissions");
+    notyf.error("Failed to verify trade permissions");
     return false;
   }
 }
@@ -400,7 +393,7 @@ async function loadItems() {
     displayAvailableItems("requesting");
   } catch (error) {
     console.error("Error loading items:", error);
-    toastr.error("Failed to load items");
+    notyf.error("Failed to load items");
   }
 }
 
@@ -409,12 +402,12 @@ function addItemToTrade(item, tradeType) {
 
   // Check if item is tradable
   if (item.tradable === 0) {
-    toastr.error(`${item.name} is not tradable and cannot be added to trades`);
+    notyf.error(`${item.name} is not tradable and cannot be added to trades`);
     return;
   }
 
   if (items.length >= 8) {
-    toastr.error(`You can only add up to 8 items to ${tradeType}`);
+    notyf.error(`You can only add up to 8 items to ${tradeType}`);
     return;
   }
 
@@ -482,7 +475,7 @@ function quickAddItem(itemName, itemType) {
         updateTradeSummary();
         updatePreviewIfVisible(); // Add this line
       } else {
-        toastr.error("No empty slots available");
+        notyf.error("No empty slots available");
       }
       return;
     }
@@ -512,7 +505,7 @@ function quickAddItem(itemName, itemType) {
       updateTradeSummary();
       updatePreviewIfVisible(); // Add this line
     } else {
-      toastr.error(
+      notyf.error(
         `No empty slots available in ${
           currentTradeType === "offering" ? "Offer" : "Request"
         }`
@@ -1193,7 +1186,7 @@ async function deleteTradeAd(tradeId) {
   try {
     const token = Cookies.get("token");
     if (!token) {
-      toastr.error("Please login to delete trade advertisements");
+      notyf.error("Please login to delete trade advertisements");
       return;
     }
 
@@ -1215,11 +1208,11 @@ async function deleteTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    toastr.success("Trade advertisement deleted successfully!");
+    notyf.success("Trade advertisement deleted successfully!");
     await loadTradeAds(); // Refresh the trade ads list
   } catch (error) {
     console.error("Error deleting trade:", error);
-    toastr.error("Failed to delete trade advertisement");
+    notyf.error("Failed to delete trade advertisement");
   }
 }
 
@@ -1233,7 +1226,7 @@ async function editTradeAd(tradeId) {
     // Check authentication
     const token = Cookies.get("token");
     if (!token) {
-      toastr.error("Please login to edit trade advertisements");
+      notyf.error("Please login to edit trade advertisements");
       url.searchParams.delete("edit");
       window.history.replaceState({}, "", url);
       return;
@@ -1255,7 +1248,7 @@ async function editTradeAd(tradeId) {
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
-      toastr.error("Trade advertisement not found");
+      notyf.error("Trade advertisement not found");
       url.searchParams.delete("edit");
       window.history.replaceState({}, "", url);
       return;
@@ -1267,9 +1260,7 @@ async function editTradeAd(tradeId) {
 
     // Verify ownership
     if (trade.author !== userData.id) {
-      toastr.error(
-        "You don't have permission to edit this trade advertisement"
-      );
+      notyf.error("You don't have permission to edit this trade advertisement");
       setTimeout(() => {
         window.location.href = "/trading";
       }, 3000);
@@ -1277,12 +1268,12 @@ async function editTradeAd(tradeId) {
     }
 
     // Show success toast
-    toastr.success(
+    notyf.success(
       `Editing Trade #${tradeId} by ${
         authorDetails?.roblox_username || "Unknown"
       }`,
       "",
-      { timeOut: 5000 }
+      { timeOut: 4500 }
     );
 
     // Reset current trade
@@ -1357,7 +1348,7 @@ async function editTradeAd(tradeId) {
     }
   } catch (error) {
     console.error("Error in editTradeAd:", error);
-    toastr.error("Failed to load trade for editing");
+    notyf.error("Failed to load trade for editing");
     const url = new URL(window.location);
     url.searchParams.delete("edit");
     window.history.replaceState({}, "", url);
@@ -1384,7 +1375,7 @@ async function updateTradeAd(tradeId) {
   try {
     const token = Cookies.get("token");
     if (!token) {
-      toastr.error("Please login to update trade advertisements");
+      notyf.error("Please login to update trade advertisements");
       return;
     }
 
@@ -1402,7 +1393,7 @@ async function updateTradeAd(tradeId) {
     );
 
     if (!offeringList.length || !requestingList.length) {
-      toastr.error("Please add items to both sides of the trade");
+      notyf.error("Please add items to both sides of the trade");
       return;
     }
 
@@ -1429,7 +1420,7 @@ async function updateTradeAd(tradeId) {
     }
 
     // Show success toast with a callback for page reload
-    toastr.success("Your trade ad will be updated shortly!", "", {
+    notyf.success("Your trade ad will be updated shortly!", "", {
       timeOut: 1500,
       onHidden: function () {
         // Use window.location.replace instead of modifying URL and using href
@@ -1438,7 +1429,7 @@ async function updateTradeAd(tradeId) {
     });
   } catch (error) {
     console.error("Error updating trade:", error);
-    toastr.error("Failed to update trade advertisement");
+    notyf.error("Failed to update trade advertisement");
   }
 }
 
@@ -1573,7 +1564,7 @@ async function loadTradeAds() {
     `;
   } catch (error) {
     console.error("Error loading trade ads:", error);
-    toastr.error("Failed to load trade ads");
+    notyf.error("Failed to load trade ads");
   }
 }
 
@@ -1621,7 +1612,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (err) {
       console.error("Error restoring pending trade:", err);
-      toastr.error("Failed to restore your pending trade");
+      notyf.error("Failed to restore your pending trade");
     }
   }
 
@@ -2001,7 +1992,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (err) {
       console.error("Error restoring pending trade:", err);
-      toastr.error("Failed to restore your pending trade");
+      notyf.error("Failed to restore your pending trade");
     }
   }
 
@@ -2036,7 +2027,7 @@ async function previewTrade() {
   // Check if required elements exist
   if (!previewSection || !availableContainer || !confirmButton) {
     console.error("Required elements not found in the DOM");
-    toastr.error("An error occurred while preparing the trade preview");
+    notyf.error("An error occurred while preparing the trade preview");
     return;
   }
 
@@ -2046,7 +2037,7 @@ async function previewTrade() {
   );
 
   if (!hasOfferingItems || !hasRequestingItems) {
-    toastr.error(
+    notyf.error(
       "Please add at least one item to both offering and requesting sections"
     );
     return;
@@ -2305,7 +2296,7 @@ function renderValueDifferences() {
 
 async function submitTrade() {
   // Show a simple message when trade is submitted
-  toastr.info("This is a demo version. Trade submission is disabled.");
+  notyf.info("This is a demo version. Trade submission is disabled.");
 
   if (submitButton) {
     submitButton.disabled = false;
@@ -2368,7 +2359,7 @@ function resetTrade() {
     }
   } catch (error) {
     console.error("Error in resetTrade:", error);
-    toastr.error("An error occurred while resetting the trade");
+    notyf.error("An error occurred while resetting the trade");
   }
 }
 
@@ -2381,14 +2372,14 @@ async function createTradeAd() {
     // Check for authentication token first
     const token = Cookies.get("token");
     if (!token) {
-      toastr.error("Please login to create a trade advertisement");
+      notyf.error("Please login to create a trade advertisement");
       return;
     }
 
     // Get user ID from session storage
     const userId = sessionStorage.getItem("userid");
     if (!userId) {
-      toastr.error("User session not found. Please login again");
+      notyf.error("User session not found. Please login again");
       return;
     }
 
@@ -2400,7 +2391,7 @@ async function createTradeAd() {
 
     // Validate trade
     if (!offeringList.length || !requestingList.length) {
-      toastr.error("Please add items to both sides of the trade");
+      notyf.error("Please add items to both sides of the trade");
       return;
     }
 
@@ -2428,7 +2419,7 @@ async function createTradeAd() {
     }
 
     // On success
-    toastr.success("Trade advertisement created successfully!");
+    notyf.success("Trade advertisement created successfully!");
     resetTrade();
 
     // Update UI
@@ -2441,7 +2432,7 @@ async function createTradeAd() {
     await loadTradeAds();
   } catch (error) {
     console.error("Error creating trade:", error);
-    toastr.error("Failed to create trade advertisement");
+    notyf.error("Failed to create trade advertisement");
   }
   // Initialize bottom sheet
   initializeBottomSheet();

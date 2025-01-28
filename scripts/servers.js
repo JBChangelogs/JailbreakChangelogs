@@ -1,25 +1,5 @@
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-  // Configure toastr options if available
-  if (typeof toastr !== "undefined") {
-    toastr.options = {
-      closeButton: true,
-      debug: false,
-      newestOnTop: true,
-      progressBar: true,
-      positionClass: "toast-bottom-right",
-      preventDuplicates: false,
-      onclick: null,
-      showDuration: "300",
-      hideDuration: "1000",
-      timeOut: "5000",
-      extendedTimeOut: "1000",
-      showEasing: "swing",
-      hideEasing: "linear",
-      showMethod: "fadeIn",
-      hideMethod: "fadeOut",
-    };
-  }
   const addServerForm = document.getElementById("addServerForm");
   if (addServerForm) {
     addServerForm.reset();
@@ -70,26 +50,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Toast notification helper
 function showToast(message, type = "info") {
-  // Check if toastr is properly loaded
-  if (typeof toastr === "undefined") {
-    console.log(`${type}: ${message}`);
-    alert(message);
-    return;
-  }
-
   try {
     switch (type) {
       case "success":
-        toastr.success(message);
+        notyf.success(message);
         break;
       case "error":
-        toastr.error(message);
+        notyf.error(message);
         break;
       case "warning":
-        toastr.warning(message);
+        notyf.warning(message);
         break;
       default:
-        toastr.info(message);
+        notyf.info(message);
     }
   } catch (error) {
     console.log(`${type}: ${message}`);
@@ -236,7 +209,7 @@ async function createServerCard(server, number) {
   const ownerName = await fetchUserInfo(server.owner);
 
   // Check if current user is the owner
-  const token = getAuthToken();
+  const token = Cookies.get("token");
   let isOwner = false;
 
   if (token) {
@@ -379,7 +352,7 @@ async function editServer(serverId) {
 async function handleEditServer(event, serverId) {
   event.preventDefault();
 
-  const token = getAuthToken();
+  const token = Cookies.get("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;
@@ -499,7 +472,7 @@ document
   });
 
 async function deleteServer(serverId) {
-  const token = getAuthToken();
+  const token = Cookies.get("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;
@@ -540,7 +513,7 @@ async function deleteServer(serverId) {
 
 // Check authentication and show modal
 function checkAuthAndShowModal() {
-  const token = getAuthToken();
+  const token = Cookies.get("token");
   if (!token) {
     sessionStorage.setItem("redirectUrl", window.location.href);
     window.location.href = "/login";
@@ -574,7 +547,7 @@ async function isDuplicateLink(link, excludeId = null) {
 async function handleAddServer(event) {
   event.preventDefault();
 
-  const token = getAuthToken();
+  const token = Cookies.get("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;
@@ -604,18 +577,6 @@ async function handleAddServer(event) {
     return;
   }
 
-  // Add expiration date validation
-  const expirationDate = new Date(form.expiresAt.value);
-  const now = new Date();
-  const daysDifference = Math.ceil(
-    (expirationDate - now) / (1000 * 60 * 60 * 24)
-  );
-
-  if (daysDifference < 5) {
-    showToast("Server expiration must be at least 5 days from now", "error");
-    return;
-  }
-
   submitBtn.disabled = true;
   if (spinner) spinner.classList.remove("d-none");
 
@@ -631,7 +592,7 @@ async function handleAddServer(event) {
       token: token,
     };
 
-    // Skip expiration validation if "Never" is selected
+    // Only validate expiration if not "Never Expires"
     if (!neverExpires) {
       const expirationDate = new Date(form.expiresAt.value);
       const now = new Date();

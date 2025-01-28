@@ -91,10 +91,10 @@
   border-width: 0.25em;
   border-style: solid;
   border-radius: 50%;
-  border-top-color: #31b1ff;
-  border-right-color: #31b1ff;
-  border-bottom-color: #ff341c;
-  border-left-color: #ff341c;
+  border-top-color: #124e66;
+  border-right-color: #124e66;
+  border-bottom-color: #212a31;
+  border-left-color: #212a31;
   animation: spinner-rotation 1s linear infinite;
 }
 

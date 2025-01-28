@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const follow_button = document.getElementById("follow-button");
   const settings_button = document.getElementById("settings-button");
   const pathSegments = window.location.pathname.split("/");
+  const earlyBadge = document.getElementById("early-badge");
 
   // Get if we're in private profile view
   const isPrivateView =
@@ -87,6 +88,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const input = document.getElementById("bannerInput");
   const save_settings_button = document.getElementById("settings-submit");
   const save_settings_loading = document.getElementById("settings-loading");
+
+  if (earlyBadge) {
+    earlyBadge.addEventListener("click", function () {
+      toastControl.showToast(
+        "special",
+        `This user was user #${udata.usernumber}/100 to join Jailbreak Changelogs!`
+      );
+    });
+  }
 
   if (permissions.profile_public === 0 && loggedinuserId !== userId) {
     // If profile is private and viewer is not the owner
@@ -206,31 +216,26 @@ document.addEventListener("DOMContentLoaded", function () {
       event.preventDefault();
       const icon = button.querySelector("i");
       const isCurrentlyEnabled = icon.classList.contains("bi-check-lg");
-      updateButtonState(button, isCurrentlyEnabled ? 0 : 1); // Convert to 0/1
+      updateButtonState(button, isCurrentlyEnabled ? 0 : 1);
 
       // Special handling for discord banner button
       if (button === use_discord_banner_button) {
         bannerInput.style.display = isCurrentlyEnabled ? "block" : "none";
         if (isCurrentlyEnabled) {
-          // When switching to custom banner, fetch and show the current custom banner URL
+          // When switching to custom banner
           fetch(
             `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
           )
             .then((response) => response.json())
             .then((data) => {
-              if (
-                data.image_url &&
-                !data.image_url.includes("/assets/backgrounds/background") &&
-                data.image_url !== "NONE"
-              ) {
-                bannerInput.value = data.image_url;
-              } else {
-                bannerInput.value = "";
+              const input = document.getElementById("bannerInput");
+              // Check if there's a valid image URL and populate it
+              if (data.image_url && data.image_url !== "NONE") {
+                input.value = data.image_url;
               }
             })
             .catch((error) => {
               console.error("Error fetching custom banner:", error);
-              bannerInput.value = "";
             });
         }
       }
@@ -298,10 +303,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!settingsBody.banner_discord) {
         const image = document.getElementById("bannerInput").value.trim();
 
-        // Only update custom banner if there's actually a value
-        if (image && image !== "") {
+        // Fetch current banner data first
+        const currentBannerResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${token}`
+        );
+        const currentBanner = await currentBannerResponse.json();
+
+        // Only update if the new value is different from the current one
+        if (image !== currentBanner.image_url) {
           const bannerUrl = `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
-            image
+            image || "NONE"
           )}`;
 
           const bannerResponse = await fetch(bannerUrl, {
@@ -319,18 +330,6 @@ document.addEventListener("DOMContentLoaded", function () {
               `Banner update failed! status: ${bannerResponse.status}`
             );
           }
-        } else {
-          // If no custom banner provided, set it to "NONE"
-          const bannerUrl = `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=NONE`;
-          await fetch(bannerUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          });
         }
       }
 
@@ -385,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
     textarea.style.minHeight = "150px";
     textarea.style.resize = "none";
     textarea.maxLength = 500;
-    textarea.value = stripHtml(userBio.innerHTML).replace(/<br>/g, "\n");
+    textarea.value = stripHtml(userBio.innerHTML.replace(/<br\s*\/?>/g, "\n"));
 
     // custom styling
     textarea.style.backgroundColor = "#212a31"; // --bg-primary
@@ -469,7 +468,6 @@ document.addEventListener("DOMContentLoaded", function () {
           throw new Error("Failed to update bio");
         }
 
-        // Update successful
         toastControl.showToast(
           "success",
           "Bio updated successfully",
@@ -511,61 +509,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Toast control mechanism
   const toastControl = {
-    lastToastTime: 0,
-    minInterval: 1000, // Minimum time between toasts (1 second)
-    queue: [],
-    isProcessing: false,
-
-    async showToast(type, message, title) {
-      const currentTime = Date.now();
-
-      // If trying to show toast too soon after the last one, queue it
-      if (currentTime - this.lastToastTime < this.minInterval) {
-        this.queue.push({ type, message, title });
-        if (!this.isProcessing) {
-          this.processQueue();
-        }
-        return;
-      }
-
-      // Show the toast
-      this.displayToast(type, message, title);
-      this.lastToastTime = currentTime;
-    },
-
-    async processQueue() {
-      if (this.queue.length === 0) {
-        this.isProcessing = false;
-        return;
-      }
-
-      this.isProcessing = true;
-      const { type, message, title } = this.queue.shift();
-      this.displayToast(type, message, title);
-      this.lastToastTime = Date.now();
-
-      // Process next toast after interval
-      setTimeout(() => this.processQueue(), this.minInterval);
-    },
-
-    displayToast(type, message, title) {
-      const toastOptions = {
-        positionClass: "toast-bottom-right",
-        timeOut: 3000,
-        closeButton: true,
-        progressBar: true,
-        preventDuplicates: true,
-      };
-
+    showToast(type, message, title) {
       switch (type) {
         case "success":
-          toastr.success(message, title, toastOptions);
+          notyf.success(message);
           break;
         case "error":
-          toastr.error(message, title, toastOptions);
+          notyf.error(message);
           break;
         case "info":
-          toastr.info(message, title, toastOptions);
+          notyf.info(message);
+          break;
+        case "special":
+          notyf.open({
+            type: "special",
+            message: message,
+          });
           break;
       }
     },
@@ -714,18 +673,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // early adopter badge click handler
-  const earlyBadge = document.getElementById("early-badge");
-  if (earlyBadge) {
-    earlyBadge.addEventListener("click", function () {
-      toastControl.showToast(
-        "success",
-        `This user was user #${udata.usernumber}/100 to join Jailbreak Changelogs!`,
-        "Early Adopter!"
-      );
-    });
-  }
-
   async function fetchUserBio(userId) {
     try {
       // First get user data for member since date
@@ -783,7 +730,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const userData = await userResponse.json();
 
       // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
-      const earlyBadge = document.getElementById("early-badge");
+
       if (earlyBadge) {
         // Check if usernumber is 100 or less
         if (userData.usernumber > 100) {
@@ -1801,7 +1748,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ); // Update button class based on value
             show_comments_button.innerHTML = recentCommentsIcon.outerHTML; // Update button with the icon
             break;
-          // In the loadProfileSettings function, modify the banner_discord case:
+
           case "banner_discord":
             const bannerDiscordIcon = document.createElement("i");
             bannerDiscordIcon.classList.add(
@@ -1822,9 +1769,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // Show/hide input field based on the value
             bannerInput.style.display = value === 1 ? "none" : "block";
 
-            // Add this new code to fetch and display current custom banner URL
-            if (!value) {
-              // If Discord banner is disabled
+            // If Discord banner is disabled, fetch and populate custom banner URL
+            if (value === 0) {
               fetch(
                 `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
               )
