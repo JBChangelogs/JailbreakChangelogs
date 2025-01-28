@@ -160,17 +160,16 @@ const fetchAvatar = async (userId, avatarHash, format) => {
 };
 
 // User Card Template
+// Update createUserCard function
 const createUserCard = async (user) => {
   let avatarUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
 
   if (user.avatar) {
     try {
-      // Try GIF first
       const gifUrl = await fetchAvatar(user.id, user.avatar, "gif");
       if (gifUrl) {
         avatarUrl = gifUrl;
       } else {
-        // Fallback to PNG if GIF doesn't exist
         const pngUrl = await fetchAvatar(user.id, user.avatar, "png");
         if (pngUrl) {
           avatarUrl = pngUrl;
@@ -182,35 +181,32 @@ const createUserCard = async (user) => {
   }
 
   return `
-  <div class="user-card-wrapper">
-    <div class="card user-card border-0 shadow-sm">
-      <div class="card-body p-3">
-        <div class="d-flex align-items-center gap-2">
-          <img 
-            src="${avatarUrl}"
-            class="user-avatar rounded-circle flex-shrink-0" 
-            alt="${user.username}"
-            width="60"
-            height="60"
-            style="border: 3px solid ${decimalToHex(user.accent_color)};"
-            onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
-              user.username
-            }&bold=true&format=svg'"
-          >
-          <div class="user-info overflow-hidden flex-grow-1">
-            <h5 class="user-name text-truncate mb-1 fs-6">${
-              user.global_name === "None" ? user.username : user.global_name
-            }</h5>
-            <p class="user-username text-muted small mb-0">@${user.username}</p>
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${
+      user.id
+    }'">
+      <div class="card user-card">
+        <div class="card-body">
+          <div class="user-info-container">
+            <img 
+              src="${avatarUrl}"
+              class="user-avatar rounded-circle" 
+              alt="${user.username}"
+              style="border-color: ${decimalToHex(user.accent_color)};"
+              onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
+                user.username
+              }&bold=true&format=svg'"
+            >
+            <div class="user-info">
+              <h5 class="user-name text-truncate">${
+                user.global_name === "None" ? user.username : user.global_name
+              }</h5>
+              <p class="user-username text-truncate">@${user.username}</p>
+            </div>
           </div>
-          <a href="/users/${user.id}" class="btn btn-primary btn-sm ms-2">
-            View
-          </a>
         </div>
       </div>
     </div>
-  </div>
-`;
+  `;
 };
 
 // Display Functions

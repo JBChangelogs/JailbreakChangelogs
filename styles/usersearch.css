@@ -6,44 +6,6 @@ body {
   color: var(--text-body);
 }
 
-.pagination .page-link i {
-  font-size: 0.875rem;
-  line-height: 1;
-}
-
-.pagination .page-item.disabled .page-link i {
-  opacity: 0.5;
-}
-
-.pagination .page-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(18, 78, 102, 0.25);
-  background-color: var(--accent-color);
-  color: var(--text-primary);
-}
-
-.pagination .page-link {
-  background-color: var(--bg-primary);
-  border-color: var(--accent-color);
-  color: var(--text-primary);
-}
-
-.pagination .page-link:hover {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color-light);
-  color: var(--text-primary);
-}
-
-.pagination .page-item.active .page-link {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color-light);
-}
-
-.pagination .page-item.disabled .page-link {
-  background-color: var(--bg-primary);
-  border-color: var(--accent-color);
-  color: var(--text-muted);
-}
-
 .fade-transition {
   transition: opacity 0.3s ease-in-out;
 }
@@ -164,80 +126,12 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(18, 78, 102, 0.25);
 }
 
-#user-results {
-  min-height: 500px;
-  position: relative;
-  background-color: #212a31;
-  padding: 1.5rem 1.5rem 6rem 1.5rem;
-}
-
-.pagination-wrapper {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  padding: 1rem;
-  background: var(--bg-primary); /* Match parent background */
-}
-
 /* Grid Container Styles */
-
-#usersGrid {
-  margin-bottom: 2rem;
-}
-
-.row.g-4 {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 1rem;
-  margin: 0; /* Remove default margins */
-}
 
 .col-12.col-md-6.col-lg-4 {
   width: 100%;
   padding: 0;
   margin: 0;
-}
-
-nav[aria-label="User pagination"] {
-  width: 100%;
-}
-
-.pagination {
-  margin-bottom: 0;
-}
-
-/* User Card Styles */
-.user-card {
-  background: var(--background-dark);
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-  height: 100%;
-  margin: 0;
-}
-
-.user-card .card-body {
-  padding: 0.875rem !important;
-}
-
-.user-avatar {
-  object-fit: cover;
-  border: 2px solid var(--button-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-name {
-  color: var(--text-body);
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.2rem !important;
-  transition: color 0.2s ease;
-}
-
-.user-username {
-  color: var(--text-secondary) !important;
-  font-size: 0.9rem;
 }
 
 .loading-spinner {
@@ -358,78 +252,6 @@ h1.display-5 {
 
 /* Small devices (phones) */
 @media (max-width: 576px) {
-  #user-results {
-    min-height: 600px;
-    padding-bottom: 8rem; /* Increase padding bottom for mobile */
-  }
-
-  .pagination-wrapper {
-    padding: 1rem 0.5rem; /* Reduce horizontal padding on mobile */
-  }
-
-  .pagination {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  /* Show essential pagination elements */
-  .pagination .page-item {
-    display: flex !important; /* Override any previous display:none */
-  }
-
-  /* Style the page input container */
-  .page-input-container {
-    width: 60px;
-    margin: 0 0.5rem;
-  }
-
-  .page-input {
-    width: 100% !important;
-    height: 34px;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    text-align: center;
-  }
-
-  /* Style the "of X" text */
-  .page-text.small {
-    padding: 0.375rem 0;
-    margin: 0 0.5rem;
-  }
-
-  /* Adjust spacing for arrows */
-  .pagination .page-link {
-    padding: 0.375rem 0.75rem;
-    min-width: 34px;
-    text-align: center;
-  }
-
-  /* Keep the current page visible */
-  .pagination .page-item .page-link.active {
-    display: block !important;
-  }
-
-  /* Layout for mobile */
-  .pagination .page-item {
-    margin: 0 2px;
-    display: flex !important;
-  }
-
-  /* Ensure consistent height */
-  .pagination .page-link,
-  .page-input,
-  .page-text.small {
-    height: 34px;
-    line-height: 1.5;
-  }
-
-  .pagination .page-item.active,
-  .pagination .page-item:first-child,
-  .pagination .page-item:last-child {
-    display: flex !important;
-  }
-
   /* Adjust search box */
   .search-box {
     padding: 0.5rem;
@@ -448,25 +270,6 @@ h1.display-5 {
     font-size: 1.8rem;
   }
 
-  .user-avatar {
-    width: 48px !important;
-    height: 48px !important;
-  }
-  .card-body {
-    padding: 0.5rem !important;
-  }
-
-  .user-name {
-    font-size: 0.85rem;
-  }
-  .user-username {
-    font-size: 0.75rem;
-  }
-
-  /* Adjust user cards */
-  .user-card {
-    margin: 0.5rem 0;
-  }
   .custom-spinner {
     width: 30px;
     height: 30px;
@@ -477,39 +280,159 @@ h1.display-5 {
   .no-results-message {
     padding: 2rem 1rem;
   }
+}
+/* Grid Layout */
+.row.g-4 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1rem;
+}
 
-  #usersGrid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    margin-bottom: 3rem;
-  }
+/* User Card Styles */
+.user-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
 
-  .row.g-4 {
-    margin-bottom: 2rem; /* Add margin to the grid container */
-  }
+.user-card:hover {
+  border-color: var(--accent-color-light);
+  transform: translateY(-2px);
+}
 
-  .user-card .card-body {
-    padding: 0.75rem !important;
-  }
+.card-body {
+  padding: 1.25rem !important;
+}
+
+.user-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--accent-color);
+  transition: border-color 0.2s ease;
+}
+
+.user-card:hover .user-avatar {
+  border-color: var(--accent-color-light);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem !important;
+  cursor: pointer;
+}
+
+.user-username {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+  margin-top: 2rem;
+}
+
+.pagination {
+  gap: 0.5rem;
+}
+
+.pagination .page-link {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color-light);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color-light);
+  color: var(--text-primary);
+}
+
+.pagination .page-input {
+  width: 60px;
+  text-align: center;
+  padding: 0.5rem;
+  height: 38px;
+}
+
+.page-text {
+  color: var(--text-muted);
 }
 
 /* Medium devices (tablets) */
 @media (max-width: 768px) {
-  /* Adjust container padding */
-  .results-container {
+  .row.g-4 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+  }
+
+  .card-body {
     padding: 1rem !important;
   }
 
-  /* Adjust user grid */
-  .user-grid {
-    gap: 1rem;
+  .user-avatar {
+    width: 40px;
+    height: 40px;
   }
 
-  /* Disable hover effects on touch devices */
-  .user-card:hover {
-    transform: none;
-    box-shadow: none !important;
+  .pagination {
+    gap: 0.25rem;
+  }
+
+  .pagination .page-link {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .pagination .page-input {
+    width: 45px;
+    height: 32px;
+    padding: 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  /* Hide some page numbers on mobile */
+  .pagination .page-item:not(:first-child):not(:last-child):not(.active) {
+    display: none;
+  }
+
+  /* Always show the input and "of X" text */
+  .pagination .page-item:has(.page-input),
+  .pagination .page-item:has(.page-text) {
+    display: block !important;
+  }
+
+  .page-text {
+    font-size: 0.9rem;
+  }
+
+  /* Adjust container padding */
+  .results-container {
+    padding: 1rem !important;
   }
 
   .search-box:focus-within {
@@ -518,6 +441,22 @@ h1.display-5 {
 
   .btn-primary:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .pagination .page-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .pagination .page-input {
+    width: 40px;
+    height: 30px;
+  }
+
+  .page-text {
+    font-size: 0.85rem;
   }
 }
 
