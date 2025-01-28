@@ -95,11 +95,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userid = sessionStorage.getItem("userid");
 
   function clearSessionAndReload() {
+    // Store report-issue flag if it exists before clearing
+    const hasReportIssue = new URLSearchParams(window.location.search).has(
+      "report-issue"
+    );
+
     Cookies.remove("token");
     sessionStorage.clear();
-    window.location.reload();
-  }
 
+    // If report-issue flag was present, store in localStorage
+    if (hasReportIssue) {
+      localStorage.setItem("reportIssueRedirect", "true");
+      window.location.href = "/login";
+    } else {
+      window.location.reload();
+    }
+  }
   // Check and clear invalid session state
   if (!token && (user || userid)) {
     clearSessionAndReload();
@@ -446,5 +457,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       sessionStorage.setItem("campaign", campaign);
     }
+  }
+  // Check for stored report-issue redirect
+  if (token && localStorage.getItem("reportIssueRedirect")) {
+    localStorage.removeItem("reportIssueRedirect");
+    window.location.href = "/?report-issue";
   }
 });
