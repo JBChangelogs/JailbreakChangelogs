@@ -5,13 +5,6 @@ class CommentsManager {
       return window.commentsManagerInstance;
     }
 
-    toastr.options = {
-      positionClass: "toast-bottom-right",
-      timeOut: 3000,
-      closeButton: true,
-      progressBar: true,
-    };
-
     this.type = type;
     this.itemId = itemId;
     this.itemName = itemName;
@@ -283,15 +276,9 @@ class CommentsManager {
             You're being rate limited. Please wait a moment before trying again.
           </li>
         `;
-        toastr.warning(
+        notyf.warning(
           "You're being rate limited. Please wait a moment before trying again.",
-          "Rate Limit",
-          {
-            timeOut: 5000,
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-bottom-right",
-          }
+          "Rate Limit"
         );
       } else {
         this.commentsList.innerHTML = `
@@ -301,7 +288,7 @@ class CommentsManager {
           </li>
         `;
         if (!error.message.includes("404")) {
-          toastr.error("Failed to load comments. Please try again.");
+          notyf.error("Failed to load comments. Please try again.");
         }
       }
     } finally {
@@ -675,23 +662,17 @@ class CommentsManager {
 
       this.input.value = "";
       await this.loadComments();
-      toastr.success("Comment added successfully");
+      notyf.success("Comment added successfully");
     } catch (error) {
       console.error("[Debug] Error in submitComment:", error);
 
       if (error.message === "rate_limit" || error.response?.status === 429) {
-        toastr.warning(
+        notyf.warning(
           "You're being rate limited. Please wait a moment before trying again.",
-          "Rate Limit",
-          {
-            timeOut: 5000,
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-bottom-right",
-          }
+          "Rate Limit"
         );
       } else {
-        toastr.error("Failed to post comment. Please try again.");
+        notyf.error("Failed to post comment. Please try again.");
       }
     }
   }
@@ -732,11 +713,11 @@ class CommentsManager {
 
       if (!response.ok) throw new Error("Failed to delete comment");
 
-      toastr.success("Comment deleted successfully");
+      notyf.success("Comment deleted successfully");
       await this.loadComments();
     } catch (error) {
       console.error("Error deleting comment:", error);
-      toastr.error("Failed to delete comment. Please try again.");
+      notyf.error("Failed to delete comment. Please try again.");
     }
   }
 
@@ -796,11 +777,11 @@ class CommentsManager {
       if (!response.ok) throw new Error("Failed to edit comment");
 
       this.editModal.hide();
-      toastr.success("Comment edited successfully");
+      notyf.success("Comment edited successfully");
       await this.loadComments();
     } catch (error) {
       console.error("Error editing comment:", error);
-      toastr.error("Failed to edit comment. Please try again.");
+      notyf.error("Failed to edit comment. Please try again.");
     }
   }
 }

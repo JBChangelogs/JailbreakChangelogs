@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const follow_button = document.getElementById("follow-button");
   const settings_button = document.getElementById("settings-button");
   const pathSegments = window.location.pathname.split("/");
+  const earlyBadge = document.getElementById("early-badge");
 
   // Get if we're in private profile view
   const isPrivateView =
@@ -87,6 +88,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const input = document.getElementById("bannerInput");
   const save_settings_button = document.getElementById("settings-submit");
   const save_settings_loading = document.getElementById("settings-loading");
+
+  if (earlyBadge) {
+    earlyBadge.addEventListener("click", function () {
+      toastControl.showToast(
+        "special",
+        `This user was user #${udata.usernumber}/100 to join Jailbreak Changelogs!`
+      );
+    });
+  }
 
   if (permissions.profile_public === 0 && loggedinuserId !== userId) {
     // If profile is private and viewer is not the owner
@@ -385,7 +395,7 @@ document.addEventListener("DOMContentLoaded", function () {
     textarea.style.minHeight = "150px";
     textarea.style.resize = "none";
     textarea.maxLength = 500;
-    textarea.value = stripHtml(userBio.innerHTML).replace(/<br>/g, "\n");
+    textarea.value = stripHtml(userBio.innerHTML.replace(/<br\s*\/?>/g, "\n"));
 
     // custom styling
     textarea.style.backgroundColor = "#212a31"; // --bg-primary
@@ -469,7 +479,6 @@ document.addEventListener("DOMContentLoaded", function () {
           throw new Error("Failed to update bio");
         }
 
-        // Update successful
         toastControl.showToast(
           "success",
           "Bio updated successfully",
@@ -511,61 +520,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Toast control mechanism
   const toastControl = {
-    lastToastTime: 0,
-    minInterval: 1000, // Minimum time between toasts (1 second)
-    queue: [],
-    isProcessing: false,
-
-    async showToast(type, message, title) {
-      const currentTime = Date.now();
-
-      // If trying to show toast too soon after the last one, queue it
-      if (currentTime - this.lastToastTime < this.minInterval) {
-        this.queue.push({ type, message, title });
-        if (!this.isProcessing) {
-          this.processQueue();
-        }
-        return;
-      }
-
-      // Show the toast
-      this.displayToast(type, message, title);
-      this.lastToastTime = currentTime;
-    },
-
-    async processQueue() {
-      if (this.queue.length === 0) {
-        this.isProcessing = false;
-        return;
-      }
-
-      this.isProcessing = true;
-      const { type, message, title } = this.queue.shift();
-      this.displayToast(type, message, title);
-      this.lastToastTime = Date.now();
-
-      // Process next toast after interval
-      setTimeout(() => this.processQueue(), this.minInterval);
-    },
-
-    displayToast(type, message, title) {
-      const toastOptions = {
-        positionClass: "toast-bottom-right",
-        timeOut: 3000,
-        closeButton: true,
-        progressBar: true,
-        preventDuplicates: true,
-      };
-
+    showToast(type, message, title) {
       switch (type) {
         case "success":
-          toastr.success(message, title, toastOptions);
+          notyf.success(message);
           break;
         case "error":
-          toastr.error(message, title, toastOptions);
+          notyf.error(message);
           break;
         case "info":
-          toastr.info(message, title, toastOptions);
+          notyf.info(message);
+          break;
+        case "special":
+          notyf.open({
+            type: "special",
+            message: message,
+          });
           break;
       }
     },
@@ -714,18 +684,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // early adopter badge click handler
-  const earlyBadge = document.getElementById("early-badge");
-  if (earlyBadge) {
-    earlyBadge.addEventListener("click", function () {
-      toastControl.showToast(
-        "success",
-        `This user was user #${udata.usernumber}/100 to join Jailbreak Changelogs!`,
-        "Early Adopter!"
-      );
-    });
-  }
-
   async function fetchUserBio(userId) {
     try {
       // First get user data for member since date
@@ -783,7 +741,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const userData = await userResponse.json();
 
       // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
-      const earlyBadge = document.getElementById("early-badge");
+
       if (earlyBadge) {
         // Check if usernumber is 100 or less
         if (userData.usernumber > 100) {

@@ -638,32 +638,17 @@ $(document).ready(function () {
 
   // Function to show a toast notification after copying the changelog
   function copiedChangelogToast(message) {
-    toastr.success(message, "Changelog copied!", {
-      positionClass: "toast-bottom-right", // Position at the bottom right
-      timeOut: 3000, // Toast will disappear after 3 seconds
-      closeButton: true, // Add a close button
-      progressBar: true, // Show a progress bar
-    });
+    notyf.success(message, "Changelog copied!");
   }
 
   // Toast function for clearing filters
   function clearedFilterToast(message) {
-    toastr.success(message, "Filter cleared!", {
-      positionClass: "toast-bottom-right", // Position at the bottom right
-      timeOut: 3000, // Toast will disappear after 3 seconds
-      closeButton: true, // Add a close button
-      progressBar: true, // Show a progress bar
-    });
+    notyf.success(message, "Filter cleared!");
   }
 
   // Toast function for latest changelog
   function changelogToast(message) {
-    toastr.info(message, "Changelog", {
-      positionClass: "toast-bottom-right", // Position at the bottom right
-      timeOut: 3000, // Toast will disappear after 3 seconds
-      closeButton: true, // Add a close button
-      progressBar: true, // Show a progress bar
-    });
+    notyf.info(message, "Changelog");
   }
 
   // Function to highlight specific text in a string based on a query

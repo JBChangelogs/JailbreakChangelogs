@@ -30,26 +30,6 @@ clearSearchBtn.addEventListener("click", function () {
   displayData(); // Refresh the table data
 });
 
-function configureToastr() {
-  toastr.options = {
-    closeButton: true,
-    debug: false,
-    newestOnTop: false,
-    progressBar: true,
-    positionClass: "toast-bottom-right",
-    preventDuplicates: false,
-    onclick: null,
-    showDuration: "300",
-    hideDuration: "1000",
-    timeOut: "5000",
-    extendedTimeOut: "1000",
-    showEasing: "swing",
-    hideEasing: "linear",
-    showMethod: "fadeIn",
-    hideMethod: "fadeOut",
-  };
-}
-
 function fetchAndDisplayTradeData() {
   const apiUrl = "/trade-data";
 
@@ -174,7 +154,7 @@ function clearFilters() {
   displayData();
 
   // Show toast notification
-  toastr.success("Filters have been cleared", "Clear Filters");
+  notyf.success("Filters have been cleared", "Clear Filters");
 
   // Disable the button
   const clearButton = document.getElementById("clearFilters");
@@ -242,7 +222,6 @@ function updateTypeFilter(data) {
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchAndDisplayTradeData();
-  configureToastr();
 
   document.getElementById("searchInput").addEventListener("input", displayData);
   document.getElementById("filterType").addEventListener("change", displayData);

@@ -26,16 +26,7 @@ body::before {
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 1;
 }
-#toast-container {
-  max-width: 100vw !important;
-  width: auto !important;
-  padding: 0 15px !important;
-}
 
-#toast-container > .toast {
-  max-width: 100% !important;
-  width: auto !important;
-}
 .site-logo {
   position: absolute;
   top: 30px;
@@ -205,14 +196,6 @@ body::before {
 }
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  #toast-container {
-    right: 0 !important;
-    bottom: 0 !important;
-  }
-
-  #toast-container > .toast {
-    margin: 10px auto !important;
-  }
   .site-logo {
     top: 20px;
     left: 20px;

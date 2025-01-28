@@ -82,14 +82,14 @@ window.shareCurrentView = debounce(function () {
   navigator.clipboard
     .writeText(shareUrl)
     .then(() => {
-      toastr.success("Link copied to clipboard!", "Share", {
+      notyf.success("Link copied to clipboard!", "Share", {
         timeOut: 2000,
         closeButton: true,
         positionClass: "toast-bottom-right",
       });
     })
     .catch(() => {
-      toastr.error("Failed to copy link", "Share Error", {
+      notyf.error("Failed to copy link", "Share Error", {
         timeOut: 2000,
         closeButton: true,
         positionClass: "toast-bottom-right",
@@ -1158,7 +1158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateSearchPlaceholder();
 
-    toastr.success("Filters have been reset", "Filters Reset");
+    notyf.success("Filters have been reset", "Filters Reset");
   }, 500);
 
   // Modify the value-sort-dropdown options in the HTML
@@ -1186,24 +1186,6 @@ document.addEventListener("DOMContentLoaded", () => {
     valueSortDropdown.value = savedValueSort || "cash-desc";
     sortItems(); // Apply initial sort
   }
-
-  // Add toastr configuration
-  toastr.options = {
-    closeButton: true,
-    debug: false,
-    newestOnTop: true,
-    progressBar: true,
-    positionClass: "toast-bottom-right",
-    preventDuplicates: false,
-    showDuration: "300",
-    hideDuration: "1000",
-    timeOut: "3000",
-    extendedTimeOut: "1000",
-    showEasing: "swing",
-    hideEasing: "linear",
-    showMethod: "fadeIn",
-    hideMethod: "fadeOut",
-  };
 
   loadItems(); // Initial load
 

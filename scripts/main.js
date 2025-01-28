@@ -1,3 +1,73 @@
+window.notyf = new Notyf({
+  duration: 4500,
+  position: {
+    x: "right",
+    y: "bottom",
+  },
+  types: [
+    {
+      type: "info",
+      background: "#2196f3",
+      dismissible: true,
+      icon: {
+        className: "bi bi-info-circle",
+        tagName: "i",
+        color: "white",
+      },
+    },
+    {
+      type: "success",
+      background: "#4caf50",
+      dismissible: true,
+      icon: {
+        className: "bi bi-check-circle",
+        tagName: "i",
+        color: "white",
+      },
+    },
+    {
+      type: "warning",
+      background: "#ff9800",
+      dismissible: true,
+      icon: {
+        className: "bi bi-exclamation-triangle",
+        tagName: "i",
+        color: "white",
+      },
+    },
+    {
+      type: "error",
+      background: "#b20b0b",
+      dismissible: true,
+      icon: {
+        className: "bi bi-exclamation-circle",
+        tagName: "i",
+        color: "white",
+      },
+    },
+    {
+      type: "special",
+      background: "#9c27b0", // Purple color
+      dismissible: true,
+      icon: {
+        className: "bi bi-star-fill", // Star icon for special notifications
+        tagName: "i",
+        color: "white",
+      },
+    },
+  ],
+  ripple: true,
+  dismissible: true,
+  rippleEffect: true,
+});
+
+window.notyf.info = (message) => window.notyf.open({ type: "info", message });
+window.notyf.success = (message) =>
+  window.notyf.open({ type: "success", message });
+window.notyf.warning = (message) =>
+  window.notyf.open({ type: "warning", message });
+window.notyf.error = (message) => window.notyf.open({ type: "error", message });
+
 function cleanupURL() {
   const url = new URL(window.location);
   if (url.searchParams.has("report-issue")) {
@@ -7,14 +77,6 @@ function cleanupURL() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Configure toastr options
-  toastr.options = {
-    closeButton: true,
-    progressBar: true,
-    positionClass: "toast-bottom-right",
-    timeOut: 3000,
-  };
-
   // Handle issue submission
   const reportIssueBtn = document.querySelector(
     '[data-bs-target="#reportIssueModal"]'
@@ -35,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
     reportIssueBtn.removeAttribute("data-bs-target");
     reportIssueBtn.onclick = (e) => {
       e.preventDefault();
-      toastr.error("Please sign in to report issues");
+      notyf.error("Please sign in to report issues");
 
       // Redirect to login page after 3 seconds
       setTimeout(() => {
@@ -86,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const descriptionInput = document.getElementById("issueDescription");
           descriptionInput.classList.add("is-invalid");
           hasError = true;
-          toastr.error(
+          notyf.error(
             `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters long`
           );
         }
@@ -95,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const titleInput = document.getElementById("issueTitle");
           titleInput.classList.add("is-invalid");
           hasError = true;
-          toastr.error(
+          notyf.error(
             `Title must be at least ${MIN_TITLE_LENGTH} characters long`
           );
         }
@@ -156,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
           })
           .catch((error) => {
             console.error("Error submitting issue:", error);
-            toastr.error(
+            notyf.error(
               "There was an error submitting your issue. Please try again."
             );
 
@@ -174,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("report-issue")) {
       if (!token || !hasValidUser) {
-        toastr.error("Please sign in to report issues");
+        notyf.error("Please sign in to report issues");
         setTimeout(() => {
           window.location.href = "/login";
         }, 3000);
@@ -617,24 +679,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       sessionStorage.removeItem("campaign");
     } else {
-      toastr.options = {
-        closeButton: true,
-        debug: false,
-        newestOnTop: false,
-        progressBar: true,
-        positionClass: "toast-bottom-right",
-        preventDuplicates: true,
-        showDuration: "300",
-        hideDuration: "1000",
-        timeOut: "7000",
-        extendedTimeOut: "1000",
-        showEasing: "swing",
-        hideEasing: "linear",
-        showMethod: "fadeIn",
-        hideMethod: "fadeOut",
-      };
-
-      toastr.info(
+      notyf.info(
         "We noticed you're visiting from a campaign. Please log in to count your visit!",
         "Campaign Visit"
       );
