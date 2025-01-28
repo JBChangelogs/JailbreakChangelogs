@@ -365,6 +365,12 @@ document.addEventListener("DOMContentLoaded", function () {
     cancelBioButton.classList.add("d-none");
   }
 
+  function stripHtml(html) {
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || "";
+  }
+
   // Handle edit button click
   editBioButton.addEventListener("click", function () {
     // Hide edit button, show save and cancel
@@ -379,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
     textarea.style.minHeight = "150px";
     textarea.style.resize = "none";
     textarea.maxLength = 500;
-    textarea.value = userBio.innerHTML.replace(/<br>/g, "\n");
+    textarea.value = stripHtml(userBio.innerHTML).replace(/<br>/g, "\n");
 
     // custom styling
     textarea.style.backgroundColor = "#212a31"; // --bg-primary
