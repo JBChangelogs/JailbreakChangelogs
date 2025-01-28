@@ -409,6 +409,13 @@
             const successMessage = document.getElementById("successMessage");
             successMessage.classList.remove("d-none");
 
+            // Clear the report-issue parameter from URL if it exists
+            const url = new URL(window.location);
+            if (url.searchParams.has("report-issue")) {
+              url.searchParams.delete("report-issue");
+              window.history.replaceState({}, "", url);
+            }
+
             // Close modal after 2 seconds
             setTimeout(() => {
               const modal = bootstrap.Modal.getInstance(
