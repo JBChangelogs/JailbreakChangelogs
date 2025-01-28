@@ -291,7 +291,7 @@ h1.display-5 {
 
 /* User Card Styles */
 .user-card {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   border: 1px solid var(--accent-color);
   border-radius: 0.75rem;
   transition: all 0.2s ease;
@@ -317,7 +317,7 @@ h1.display-5 {
 .user-avatar {
   width: 48px;
   height: 48px;
-  border: 2px solid var(--accent-color);
+  border: 3px solid var(--accent-color);
   transition: border-color 0.2s ease;
 }
 
