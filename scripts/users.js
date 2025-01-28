@@ -216,31 +216,26 @@ document.addEventListener("DOMContentLoaded", function () {
       event.preventDefault();
       const icon = button.querySelector("i");
       const isCurrentlyEnabled = icon.classList.contains("bi-check-lg");
-      updateButtonState(button, isCurrentlyEnabled ? 0 : 1); // Convert to 0/1
+      updateButtonState(button, isCurrentlyEnabled ? 0 : 1);
 
       // Special handling for discord banner button
       if (button === use_discord_banner_button) {
         bannerInput.style.display = isCurrentlyEnabled ? "block" : "none";
         if (isCurrentlyEnabled) {
-          // When switching to custom banner, fetch and show the current custom banner URL
+          // When switching to custom banner
           fetch(
             `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
           )
             .then((response) => response.json())
             .then((data) => {
-              if (
-                data.image_url &&
-                !data.image_url.includes("/assets/backgrounds/background") &&
-                data.image_url !== "NONE"
-              ) {
-                bannerInput.value = data.image_url;
-              } else {
-                bannerInput.value = "";
+              const input = document.getElementById("bannerInput");
+              // Check if there's a valid image URL and populate it
+              if (data.image_url && data.image_url !== "NONE") {
+                input.value = data.image_url;
               }
             })
             .catch((error) => {
               console.error("Error fetching custom banner:", error);
-              bannerInput.value = "";
             });
         }
       }
@@ -308,10 +303,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!settingsBody.banner_discord) {
         const image = document.getElementById("bannerInput").value.trim();
 
-        // Only update custom banner if there's actually a value
-        if (image && image !== "") {
+        // Fetch current banner data first
+        const currentBannerResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${token}`
+        );
+        const currentBanner = await currentBannerResponse.json();
+
+        // Only update if the new value is different from the current one
+        if (image !== currentBanner.image_url) {
           const bannerUrl = `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
-            image
+            image || "NONE"
           )}`;
 
           const bannerResponse = await fetch(bannerUrl, {
@@ -329,18 +330,6 @@ document.addEventListener("DOMContentLoaded", function () {
               `Banner update failed! status: ${bannerResponse.status}`
             );
           }
-        } else {
-          // If no custom banner provided, set it to "NONE"
-          const bannerUrl = `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=NONE`;
-          await fetch(bannerUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          });
         }
       }
 
@@ -1759,7 +1748,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ); // Update button class based on value
             show_comments_button.innerHTML = recentCommentsIcon.outerHTML; // Update button with the icon
             break;
-          // In the loadProfileSettings function, modify the banner_discord case:
+
           case "banner_discord":
             const bannerDiscordIcon = document.createElement("i");
             bannerDiscordIcon.classList.add(
@@ -1780,9 +1769,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // Show/hide input field based on the value
             bannerInput.style.display = value === 1 ? "none" : "block";
 
-            // Add this new code to fetch and display current custom banner URL
-            if (!value) {
-              // If Discord banner is disabled
+            // If Discord banner is disabled, fetch and populate custom banner URL
+            if (value === 0) {
               fetch(
                 `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
               )
