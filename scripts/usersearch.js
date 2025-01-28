@@ -1,7 +1,7 @@
 // Constants
 const API_BASE_URL = "https://api3.jailbreakchangelogs.xyz";
 const DISCORD_CDN = "https://cdn.discordapp.com";
-const USERS_PER_PAGE = 16;
+const USERS_PER_PAGE = 15;
 let currentPage = 1;
 let allUsers = [];
 
