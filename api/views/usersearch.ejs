@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="/" />
-    
+
     <!-- Updated meta description for the users page -->
-    <meta name="description" content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!" />
-    
+    <meta
+      name="description"
+      content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!"
+    />
+
     <!-- Open Graph metadata for social media sharing -->
     <meta property="og:title" content="Jailbreak Changelogs | User Search" />
-    <meta property="og:description" content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!" />
+    <meta
+      property="og:description"
+      content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!"
+    />
     <meta property="og:image" content="<%= logoUrl %>" />
     <meta property="og:image:width" content="4000" />
     <meta property="og:image:height" content="900" />
@@ -20,44 +26,71 @@
     <!-- Metadata for SEO -->
     <meta name="robots" content="index, follow" />
 
-    <meta name="keywords" content="Jailbreak users, user profiles, community members, contributions, comments, user statistics, profile management, user interactions, Roblox Jailbreak community" />
-
+    <meta
+      name="keywords"
+      content="Jailbreak users, user profiles, community members, contributions, comments, user statistics, profile management, user interactions, Roblox Jailbreak community"
+    />
 
     <!-- Twitter Card metadata -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Jailbreak Changelogs | User Search" />
-    <meta name="twitter:description" content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!" />
+    <meta
+      name="twitter:description"
+      content="Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!"
+    />
     <meta property="twitter:image" content="<%= logoUrl %>" />
-    
+
     <title><%= title %></title>
     <link rel="canonical" href="https://jailbreakchangelogs.xyz/users" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css" integrity="sha256-IwkvZNRC/3S26O1gWwjBINmrPZ4zYvPX4z/98OKWHkQ=" crossorigin="anonymous">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css"
+      integrity="sha256-IwkvZNRC/3S26O1gWwjBINmrPZ4zYvPX4z/98OKWHkQ="
+      crossorigin="anonymous"
+    />
 
     <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-  />
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
 
     <link rel="stylesheet" href="styles/usersearch.css" />
     <link rel="stylesheet" href="styles/main.css" />
 
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','GTM-KM853GJ6');</script>
-      <!-- End Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
 
-      <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
-      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-      <!-- End Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
 
@@ -66,24 +99,31 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">User Search</li>
+            <li class="breadcrumb-item active" aria-current="page">
+              User Search
+            </li>
           </ol>
         </nav>
-        
+
         <div class="container px-3">
           <div class="text-center mb-3">
             <h1 class="fs-3 fw-bold">
               <i class="bi bi-people-fill me-2"></i>User Search
             </h1>
-            <p class="text-muted small mb-2">Find users by their username or display name</p>
+            <p class="text-muted small mb-2">
+              Find users by their username or display name
+            </p>
             <p class="text-muted small" id="total-users-count">
               <i class="bi bi-person-lines-fill me-1"></i>Loading user count...
             </p>
           </div>
-          
+
           <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
-              <div class="search-box shadow-sm p-2 mb-3" style="background-color: #212a31;">
+              <div
+                class="search-box shadow-sm p-2 mb-3"
+                style="background-color: #212a31"
+              >
                 <div class="input-group">
                   <span class="input-group-text">
                     <i class="bi bi-search"></i>
@@ -95,7 +135,12 @@
                     class="form-control ps-0"
                     autocomplete="off"
                   />
-                  <button class="btn btn-outline-secondary" id="clearButton" type="button" style="display: none;">
+                  <button
+                    class="btn btn-outline-secondary"
+                    id="clearButton"
+                    type="button"
+                    style="display: none"
+                  >
                     <i class="bi bi-x-lg"></i>
                   </button>
                   <button class="btn btn-primary px-3" id="searchButton">
@@ -104,44 +149,94 @@
                 </div>
               </div>
             </div>
-          </div>          
+          </div>
         </div>
-        
-          <div class="row justify-content-center">
-            <div class="col-12">
-              <div id="user-results" class="results-container fade-in" style="display: none; background-color: #212A31; padding: 1.5rem;">
-                <div id="loading-spinner" class="loading-spinner" style="display: none;">
-                  <div class="custom-spinner"></div>
-                </div> 
-                <div id="usersGrid" class="user-grid">
+
+        <div class="row justify-content-center">
+          <div class="col-12">
+            <!-- Removed display: none from results-container -->
+            <div
+              id="user-results"
+              class="results-container fade-in"
+              style="background-color: #212a31; padding: 1.5rem"
+            >
+              <!-- Updated loading spinner -->
+              <div id="loading-spinner" class="text-center py-4">
+                <div
+                  class="spinner-border"
+                  style="color: #1d7da3"
+                  role="status"
+                >
+                  <span class="visually-hidden">Loading...</span>
                 </div>
+              </div>
+
+              <div id="usersGrid" class="user-grid">
+                <!-- Users will be populated here -->
+              </div>
+
+              <!-- Added pagination controls -->
+              <div
+                id="pagination-controls"
+                class="d-flex justify-content-center mt-4"
+              >
+                <!-- Pagination will be populated here -->
               </div>
             </div>
           </div>
-          
-          
         </div>
-        
-        
       </div>
     </div>
 
     <%- include('partials/footer') %>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-     <!-- jQuery -->
-     <script
-     src="https://code.jquery.com/jquery-3.7.1.min.js"
-     integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-     crossorigin="anonymous"
-   ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <!-- jQuery -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
 
-   <script src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js" integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE=" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
+      integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE="
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/usersearch.js"></script>
-    
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
-  crossorigin="anonymous"></script>
-  <script async src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
+
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      async
+      src="https://fundingchoicesmessages.google.com/i/pub-8152532464536367?ers=1"
+    ></script>
+    <script>
+      (function () {
+        function signalGooglefcPresent() {
+          if (!window.frames["googlefcPresent"]) {
+            if (document.body) {
+              const iframe = document.createElement("iframe");
+              iframe.style =
+                "width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;";
+              iframe.style.display = "none";
+              iframe.name = "googlefcPresent";
+              document.body.appendChild(iframe);
+            } else {
+              setTimeout(signalGooglefcPresent, 0);
+            }
+          }
+        }
+        signalGooglefcPresent();
+      })();
+    </script>
   </body>
 </html>
