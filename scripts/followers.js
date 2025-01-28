@@ -106,8 +106,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Clear existing content
   usersGrid.innerHTML = "";
+  const displayUsers = (users) => {
+    if (users.length > 0) {
+      usersGrid.innerHTML = `
+        <div class="row g-4">
+          ${users
+            .map(
+              (user) => `
+            <div class="user-card-wrapper" onclick="window.location.href='/users/${
+              user.id
+            }'">
+             <div class="card user-card">
+                <div class="card-body">
+                  <div class="user-info-container">
+                    <img 
+                      src="${user.avatarUrl}"
+                      class="user-avatar rounded-circle" 
+                      alt="${user.username}"
+                      style="border-color: ${decimalToHex(user.accent_color)};"
+                      onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
+                        user.username
+                      }&bold=true&format=svg'"
+                    >
+                    <div class="user-info">
+                      <h5 class="user-name text-truncate">${
+                        user.global_name === "None"
+                          ? user.username
+                          : user.global_name
+                      }</h5>
+                      <p class="user-username text-truncate">@${
+                        user.username
+                      }</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      `;
+    } else {
+      usersGrid.innerHTML = '<p class="text-muted">No followers yet</p>';
+    }
+  };
 
   if (followers.length > 0) {
+    const processedUsers = [];
+
     for (const follower of followers) {
       try {
         const response = await fetch(
@@ -117,43 +164,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (response.ok) {
           const userData = await response.json();
           const avatarUrl = await getAvatarUrl(userData);
-
-          // Insert the card template here
-          const userCard = document.createElement("div");
-          userCard.className = "user-card mb-3";
-          userCard.innerHTML = `
-          <div class="card user-card border-0 shadow-sm">
-            <div class="card-body position-relative p-3">
-              <div class="d-flex align-items-center">
-                <div class="me-4">
-                  <img src="${avatarUrl}" 
-                       class="user-avatar rounded-circle" 
-                       width="60"
-                       height="60"
-                       style="border: 3px solid ${decimalToHex(
-                         userData.accent_color
-                       )};"
-                       onerror="handleinvalidImage(this)">
-                </div>
-                <div class="flex-grow-1">
-                  <a href="/users/${userData.id}" class="text-decoration-none">
-                    <h5 class="user-name card-title mb-2">${
-                      userData.global_name
-                    }</h5>
-                  </a>
-                  <p class="user-username card-text text-muted mb-0">@${
-                    userData.username
-                  }</p>
-                </div>
-              </div>
-            </div>
-          </div>`;
-          usersGrid.appendChild(userCard);
+          processedUsers.push({
+            ...userData,
+            avatarUrl,
+          });
         }
       } catch (error) {
         console.error("Error processing follower:", error);
       }
     }
+
+    displayUsers(processedUsers);
   } else {
     usersGrid.innerHTML = '<p class="text-muted">No followers yet</p>';
   }
