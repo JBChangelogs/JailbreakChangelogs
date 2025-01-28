@@ -1,4 +1,188 @@
+function cleanupURL() {
+  const url = new URL(window.location);
+  if (url.searchParams.has("report-issue")) {
+    url.searchParams.delete("report-issue");
+    window.history.replaceState({}, "", url.toString());
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  // Configure toastr options
+  toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: "toast-bottom-right",
+    timeOut: 3000,
+  };
+
+  // Handle issue submission
+  const reportIssueBtn = document.querySelector(
+    '[data-bs-target="#reportIssueModal"]'
+  );
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="));
+  const userId = sessionStorage.getItem("userId");
+  const userData = sessionStorage.getItem("user");
+
+  // Check if either userId directly or user object exists
+  const hasValidUser = userId || (userData && JSON.parse(userData).id);
+
+  // Handle non-authenticated users
+  if (!token || !hasValidUser) {
+    // User is not authenticated
+    reportIssueBtn.classList.add("disabled");
+    reportIssueBtn.removeAttribute("data-bs-target");
+    reportIssueBtn.onclick = (e) => {
+      e.preventDefault();
+      toastr.error("Please sign in to report issues");
+
+      // Redirect to login page after 3 seconds
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 3000);
+    };
+  } else {
+    // Remove disabled state if it was previously set
+    reportIssueBtn.classList.remove("disabled");
+    reportIssueBtn.removeAttribute("title");
+    reportIssueBtn.style.cursor = "pointer";
+
+    // Get the actual user ID either from userId or user object
+    const actualUserId = userId || JSON.parse(userData).id;
+
+    // Reset form when opening modal
+    reportIssueBtn.addEventListener("click", () => {
+      document.getElementById("reportIssueForm").reset();
+      document.getElementById("successMessage").classList.add("d-none");
+      // Re-enable form elements if they were disabled
+      const form = document.getElementById("reportIssueForm");
+      form
+        .querySelectorAll("input, textarea")
+        .forEach((el) => (el.disabled = false));
+      document.getElementById("submitIssue").disabled = false;
+    });
+
+    document
+      .getElementById("submitIssue")
+      .addEventListener("click", function () {
+        const title = document.getElementById("issueTitle").value;
+        const description = document.getElementById("issueDescription").value;
+
+        // Clear previous validation styling
+        document
+          .querySelectorAll(".invalid-feedback")
+          .forEach((el) => el.remove());
+        document.getElementById("issueTitle").classList.remove("is-invalid");
+        document
+          .getElementById("issueDescription")
+          .classList.remove("is-invalid");
+
+        let hasError = false;
+        const MIN_TITLE_LENGTH = 10;
+        const MIN_DESCRIPTION_LENGTH = 25;
+
+        if (description.length < MIN_DESCRIPTION_LENGTH) {
+          const descriptionInput = document.getElementById("issueDescription");
+          descriptionInput.classList.add("is-invalid");
+          hasError = true;
+          toastr.error(
+            `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters long`
+          );
+        }
+
+        if (title.length < MIN_TITLE_LENGTH) {
+          const titleInput = document.getElementById("issueTitle");
+          titleInput.classList.add("is-invalid");
+          hasError = true;
+          toastr.error(
+            `Title must be at least ${MIN_TITLE_LENGTH} characters long`
+          );
+        }
+
+        if (hasError) {
+          return; // Stop submission if validation fails
+        }
+
+        // Disable form while submitting
+        const form = document.getElementById("reportIssueForm");
+        const submitBtn = document.getElementById("submitIssue");
+        form
+          .querySelectorAll("input, textarea")
+          .forEach((el) => (el.disabled = true));
+        submitBtn.disabled = true;
+
+        // Submit the issue
+        fetch("https://api3.jailbreakchangelogs.xyz/issues/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "jailbreakchangelogs.xyz",
+          },
+          body: JSON.stringify({
+            user: actualUserId,
+            title: title,
+            description: description,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // Show success message
+            const successMessage = document.getElementById("successMessage");
+            successMessage.classList.remove("d-none");
+
+            // Clean up URL parameter
+            cleanupURL();
+
+            // Close modal after 2 seconds
+            setTimeout(() => {
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("reportIssueModal")
+              );
+              modal.hide();
+
+              // Reset form and hide success message
+              setTimeout(() => {
+                form.reset();
+                successMessage.classList.add("d-none");
+                form
+                  .querySelectorAll("input, textarea")
+                  .forEach((el) => (el.disabled = false));
+                submitBtn.disabled = false;
+              }, 500);
+            }, 2000);
+          })
+          .catch((error) => {
+            console.error("Error submitting issue:", error);
+            toastr.error(
+              "There was an error submitting your issue. Please try again."
+            );
+
+            // Re-enable form on error
+            form
+              .querySelectorAll("input, textarea")
+              .forEach((el) => (el.disabled = false));
+            submitBtn.disabled = false;
+          });
+      });
+  }
+
+  // Check for report-issue parameter
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("report-issue")) {
+      if (!token || !hasValidUser) {
+        toastr.error("Please sign in to report issues");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
+      } else {
+        reportIssueBtn.click();
+      }
+    }
+  });
   const sideMenu = document.getElementById("sideMenu");
   const mobileViewUpdates = document.getElementById("mobileViewUpdates");
 
