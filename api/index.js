@@ -966,14 +966,6 @@ app.get("/api", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/faq.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "../FAQ.png"));
-});
-
-app.get("/icon-512.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "../icon-512.png"));
-});
-
 // Handle unknown routes by serving index.html
 app.get("*", (req, res) => {
   res.redirect("/");

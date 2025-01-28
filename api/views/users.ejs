@@ -137,7 +137,6 @@
     <!-- End Google Tag Manager (noscript) -->
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
-    <%- include('partials/announcement') %>
     <!-- Breadcrumb Navigation -->
     <div class="container mt-4">
       <nav aria-label="breadcrumb">
@@ -145,7 +144,7 @@
           <li class="breadcrumb-item"><a href="/">Home</a></li>
           <li class="breadcrumb-item"><a href="/users">Users</a></li>
           <li class="breadcrumb-item active" aria-current="page">
-            @<%= userData.global_name || userData.username %>
+            @<%= userData.global_name === 'None' ? userData.username : userData.global_name %>
           </li>
         </ol>
       </nav>

@@ -1,4 +1,16 @@
+function checkAndStoreReportIssue() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const referrerParams = new URLSearchParams(
+    document.referrer.split("?")[1] || ""
+  );
+
+  if (urlParams.has("report-issue") || referrerParams.has("report-issue")) {
+    localStorage.setItem("reportIssueRedirect", "true");
+  }
+}
+
 $(document).ready(function () {
+  checkAndStoreReportIssue();
   toastr.options = {
     positionClass: "toast-top-right",
     closeButton: true,
@@ -60,7 +72,10 @@ $(document).ready(function () {
     !currentPath.includes("/login") &&
     !window.location.href.includes("discord.com")
   ) {
-    sessionStorage.setItem("loginRedirect", currentPath);
+    if (window.location.search.includes("report-issue")) {
+      localStorage.setItem("reportIssueRedirect", "true");
+    }
+    localStorage.setItem("loginRedirect", currentPath);
   }
 
   DiscordLoginButton.addEventListener("click", () => {
@@ -97,7 +112,15 @@ $(document).ready(function () {
           // Show success toast
           toastr.success("Successfully logged in with Discord!", "Welcome", {
             onHidden: function () {
-              window.location.href = "/";
+              const hasReportIssue = localStorage.getItem(
+                "reportIssueRedirect"
+              );
+              if (hasReportIssue) {
+                localStorage.removeItem("reportIssueRedirect");
+                window.location.href = "/?report-issue";
+              } else {
+                window.location.href = "/";
+              }
             },
           });
           return;
