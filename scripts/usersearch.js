@@ -119,9 +119,7 @@ const createUserCard = async (user) => {
          }</h5>
            <p class="user-username text-muted small mb-0">@${user.username}</p>
          </div>
-         <a href="/users/${
-           user.id
-         }" class="btn btn-primary btn-sm rounded-pill ms-2">
+         <a href="/users/${user.id}" class="btn btn-primary btn-sm ms-2">
            View
          </a>
        </div>

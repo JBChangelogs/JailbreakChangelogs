@@ -74,7 +74,7 @@ body {
 .btn-primary {
   background-color: var(--button-primary);
   border-color: var(--button-primary);
-  border-radius: 0.8rem;
+
   transition: all 0.2s ease;
 }
 
