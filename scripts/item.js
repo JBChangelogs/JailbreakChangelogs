@@ -1026,21 +1026,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>
   `
       : "";
+    function formatPriceValue(price) {
+      if (!price || price === "N/A") return "No Price Data";
+
+      // Remove any commas and convert to lowercase
+      price = price.toString().toLowerCase().replace(/,/g, "");
+
+      // Handle M/m suffix
+      if (price.endsWith("m")) {
+        const number = parseFloat(price) * 1000000;
+        return number.toLocaleString("en-US");
+      }
+
+      // Handle K/k suffix
+      if (price.endsWith("k")) {
+        const number = parseFloat(price) * 1000;
+        return number.toLocaleString("en-US");
+      }
+
+      // Handle plain numbers
+      const number = parseFloat(price);
+      if (!isNaN(number)) {
+        return number.toLocaleString("en-US");
+      }
+
+      return price;
+    }
+
     const priceSection =
       item.type.toLowerCase() === "vehicle"
         ? `
-<div class="col-md-6 mt-3">
-  <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
-    <h4 class="text-muted mb-3 d-flex align-items-center">
-      <i class="bi bi-tag-fill me-2"></i>
-      Price
-    </h4>
-    <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
-      ${item.price && item.price !== "N/A" ? item.price : "No Price Data"}
-    </p>
-  </div>
-</div>
-`
+    <div class="col-md-6 mt-3">
+      <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
+        <h4 class="text-muted mb-3 d-flex align-items-center">
+          <i class="bi bi-tag-fill me-2"></i>
+          Price
+        </h4>
+        <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
+          ${formatPriceValue(item.price)}
+        </p>
+      </div>
+    </div>
+    `
         : "";
 
     // Health section for vehicles
