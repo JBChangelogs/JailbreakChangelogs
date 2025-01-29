@@ -85,14 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const userId = sessionStorage.getItem("userId");
   const userData = sessionStorage.getItem("user");
 
-  // Debug logs for initial state
-  console.log("[Debug] Initial setup:");
-  console.log("- Report button exists:", !!reportIssueBtn);
-  console.log("- Has token:", !!token);
-
   // Check for stored redirect first
   if (token && localStorage.getItem("reportIssueRedirect")) {
-    console.log("[Debug] Found stored redirect - handling now");
     localStorage.removeItem("reportIssueRedirect");
     window.location.href = "/?report-issue";
     return; // Stop execution here since we're redirecting
@@ -100,19 +94,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check for report-issue parameter
   const urlParams = new URLSearchParams(window.location.search);
-  console.log("[Debug] URL parameters:", urlParams.toString());
 
   if (urlParams.has("report-issue")) {
-    console.log("[Debug] Found report-issue parameter");
-
     if (!token) {
-      console.log("[Debug] No token - showing error and redirecting");
       window.notyf.error("Please sign in to report issues");
       setTimeout(() => {
         window.location.href = "/login";
       }, 3000);
     } else {
-      console.log("[Debug] Has token - triggering report modal");
       reportIssueBtn?.click();
     }
     cleanupURL();
