@@ -456,16 +456,22 @@
 
 /* Logo positioning */
 .custom-navbar-color .navbar-brand {
-  margin-right: 48px; /* Space between logo and nav items */
+  margin-right: 48px;
+  margin-left: -60px; /* Pull logo left on desktop */
   padding: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .navbar-logo {
-  height: 70px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-  margin: -10px 0; /* to prevent increasing navbar height */
+  height: 70px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  margin: -10px 0 !important;
+  position: relative;
+  z-index: 2;
 }
 
 /* Navigation items positioning */
@@ -842,15 +848,18 @@ body.menu-open {
     border-radius: 0.5rem !important;
   }
 
-  .navbar-logo {
-    height: 50px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    display: inline-block;
-    margin-left: -5px; /* Move logo slightly to the left on mobile */
+  .custom-navbar-color .navbar-brand {
+    margin-right: 20px; /* Reduced margin on mobile */
+    margin-left: -10px; /* Pull logo slightly left */
   }
+
+  .navbar-logo {
+    height: 50px !important;
+    margin-left: 0 !important; /* Remove left margin on mobile */
+  }
+
   .custom-navbar-color .container-fluid {
-    padding-left: 10px; /* Reduced left padding */
+    padding-left: 16px !important; /* Adjust container padding */
   }
 }
 
