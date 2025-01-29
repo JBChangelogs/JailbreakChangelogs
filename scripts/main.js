@@ -81,17 +81,45 @@ document.addEventListener("DOMContentLoaded", function () {
   const reportIssueBtn = document.querySelector(
     '[data-bs-target="#reportIssueModal"]'
   );
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="));
+  const token = Cookies.get("token");
   const userId = sessionStorage.getItem("userId");
   const userData = sessionStorage.getItem("user");
 
-  // Check if either userId directly or user object exists
-  const hasValidUser = userId || (userData && JSON.parse(userData).id);
+  // Debug logs for initial state
+  console.log("[Debug] Initial setup:");
+  console.log("- Report button exists:", !!reportIssueBtn);
+  console.log("- Has token:", !!token);
+
+  // Check for stored redirect first
+  if (token && localStorage.getItem("reportIssueRedirect")) {
+    console.log("[Debug] Found stored redirect - handling now");
+    localStorage.removeItem("reportIssueRedirect");
+    window.location.href = "/?report-issue";
+    return; // Stop execution here since we're redirecting
+  }
+
+  // Check for report-issue parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log("[Debug] URL parameters:", urlParams.toString());
+
+  if (urlParams.has("report-issue")) {
+    console.log("[Debug] Found report-issue parameter");
+
+    if (!token) {
+      console.log("[Debug] No token - showing error and redirecting");
+      window.notyf.error("Please sign in to report issues");
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 3000);
+    } else {
+      console.log("[Debug] Has token - triggering report modal");
+      reportIssueBtn?.click();
+    }
+    cleanupURL();
+  }
 
   // Handle non-authenticated users
-  if (!token || !hasValidUser) {
+  if (!token) {
     // User is not authenticated
     reportIssueBtn.classList.add("disabled");
     reportIssueBtn.removeAttribute("data-bs-target");
@@ -231,20 +259,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Check for report-issue parameter
-  document.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("report-issue")) {
-      if (!token || !hasValidUser) {
-        notyf.error("Please sign in to report issues");
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 3000);
-      } else {
-        reportIssueBtn.click();
-      }
-    }
-  });
   const sideMenu = document.getElementById("sideMenu");
   const mobileViewUpdates = document.getElementById("mobileViewUpdates");
 
@@ -341,21 +355,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userid = sessionStorage.getItem("userid");
 
   function clearSessionAndReload() {
-    // Store report-issue flag if it exists before clearing
-    const hasReportIssue = new URLSearchParams(window.location.search).has(
-      "report-issue"
-    );
-
     Cookies.remove("token");
     sessionStorage.clear();
-
-    // If report-issue flag was present, store in localStorage
-    if (hasReportIssue) {
-      localStorage.setItem("reportIssueRedirect", "true");
-      window.location.href = "/login";
-    } else {
-      window.location.reload();
-    }
   }
   // Check and clear invalid session state
   if (!token && (user || userid)) {
@@ -686,10 +687,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       sessionStorage.setItem("campaign", campaign);
     }
-  }
-  // Check for stored report-issue redirect
-  if (token && localStorage.getItem("reportIssueRedirect")) {
-    localStorage.removeItem("reportIssueRedirect");
-    window.location.href = "/?report-issue";
   }
 });
