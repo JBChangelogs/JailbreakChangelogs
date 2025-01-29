@@ -1026,6 +1026,50 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>
   `
       : "";
+    const priceSection =
+      item.type.toLowerCase() === "vehicle"
+        ? `
+<div class="col-md-6 mt-3">
+  <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
+    <h4 class="text-muted mb-3 d-flex align-items-center">
+      <i class="bi bi-tag-fill me-2"></i>
+      Price
+    </h4>
+    <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
+      ${item.price && item.price !== "N/A" ? item.price : "No Price Data"}
+    </p>
+  </div>
+</div>
+`
+        : "";
+
+    // Health section for vehicles
+    const healthSection =
+      item.type.toLowerCase() === "vehicle"
+        ? `
+<div class="col-md-6 mt-3">
+  <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
+    <h4 class="text-muted mb-3 d-flex align-items-center">
+      <i class="bi bi-heart-fill me-2"></i>
+      Vehicle Health
+    </h4>
+    <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
+      ${item.health ? item.health : "No Health Data"}
+    </p>
+    <small class="text-muted mt-2 d-block">
+      If any data for health is incorrect dm 
+      <a href="https://discord.com/users/1123014543891775509" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style="color: #76ABAE;">
+        @PikachuWolverine
+      </a> 
+      on discord.
+    </small>
+  </div>
+</div>
+`
+        : "";
 
     const notesSection = hasNotes
       ? `
@@ -1070,18 +1114,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         `
         }
         
-        <!-- Cash Value Card -->
-        <div class="col-md-6">
-          <div class="value-card p-4 rounded-3" style="background-color: rgba(24, 101, 131, 0.1); border: 1px solid rgba(24, 101, 131, 0.2);">
-            <h4 class="text-muted mb-3 d-flex align-items-center">
-              <i class="bi bi-cash-stack me-2"></i>
-              Cash Value
-            </h4>
-            <p class="h2 mb-0" style="color: rgb(24, 101, 131); font-weight: 600;">
-              ${hasValue ? value : "No Cash Value"}
-            </p>
-          </div>
+       <!-- Cash Value Card -->
+      <div class="col-md-6">
+        <div class="value-card p-4 rounded-3" style="background-color: rgba(24, 101, 131, 0.1); border: 1px solid rgba(24, 101, 131, 0.2);">
+          <h4 class="text-muted mb-3 d-flex align-items-center">
+            <i class="bi bi-cash-stack me-2"></i>
+            Cash Value
+          </h4>
+          <p class="h2 mb-0" style="color: rgb(24, 101, 131); font-weight: 600;">
+            ${hasValue ? value : "No Cash Value"}
+          </p>
         </div>
+      </div>
     
         <!-- Duped Value Card with Owners -->
         <div class="col-md-6">
@@ -1172,10 +1216,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             </p>
           </div>
         </div>
+         <!-- Price Card (vehicles only) -->
+      ${priceSection}
+
+      <!-- Health Card (vehicles only) -->
+      ${healthSection}
       </div>
     </div>
-
   `;
+
     // Determine if we should show the graph
     const graphSection = hasValues
       ? `
@@ -1259,33 +1308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                           </div>
                         `
                         }
-                        
-                        ${
-                          item.type.toLowerCase() === "vehicle"
-                            ? `
-                          <!-- Health Card -->
-                          <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
-                            <h4 class="text-muted mb-3 d-flex align-items-center">
-                              <i class="bi bi-heart-fill me-2"></i>
-                              Vehicle Health
-                            </h4>
-                            <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
-                              ${item.health ? item.health : "No Health Data"}
-                            </p>
-                            <small class="text-muted mt-2 d-block">
-                              If any data for health is incorrect dm 
-                              <a href="https://discord.com/users/1123014543891775509" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style="color: #76ABAE;">
-                                @PikachuWolverine
-                              </a> 
-                              on discord.
-                            </small>
-                          </div>
-                        `
-                            : ""
-                        }
+                      
                       </div>
                     </div>
 
