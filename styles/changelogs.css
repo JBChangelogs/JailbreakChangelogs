@@ -898,14 +898,6 @@ button {
   text-align: center;
 }
 
-.changelog-intro .lead {
-  color: var(--text-primary);
-  font-size: 1.15rem;
-  line-height: 1.7;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
 .feature-grid .feature-item i {
   color: var(--accent-color-light) !important;
 }
@@ -967,8 +959,10 @@ button {
 
 .changelog-intro .lead {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .feature-grid {
