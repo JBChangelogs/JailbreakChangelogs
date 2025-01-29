@@ -358,6 +358,92 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply value sorting
     if (valueSortType === "random") {
       filteredItems = shuffleArray([...filteredItems]);
+    } else if (valueSortType === "favorites") {
+      const token = Cookies.get("token");
+      if (!token) {
+        // Show login message if not logged in
+        filteredItems = [];
+        let itemsRow = itemsContainer.querySelector(".row");
+        if (!itemsRow) {
+          itemsRow = document.createElement("div");
+          itemsRow.classList.add("row");
+          itemsContainer.appendChild(itemsRow);
+        }
+        itemsRow.innerHTML = `
+          <div class="col-12">
+            <div class="no-favorites-message">
+              <i class="bi bi-star"></i>
+              <h4>Login Required</h4>
+              <p>You need to be logged in to view your favorite items</p>
+              <div class="login-prompt">
+                <a href="/login" class="login-link">Login now</a>
+              </div>
+            </div>
+          </div>
+        `;
+        updateTotalItemsCount();
+        updateTotalItemsLabel("favorites");
+        return;
+      }
+
+      // Get only favorited items
+      let favoriteItems = allItems.filter((item) => item.is_favorite);
+
+      // Apply category filter if not on all-items
+      if (itemType !== "all-items") {
+        if (itemType === "limited-items") {
+          favoriteItems = favoriteItems.filter((item) => item.is_limited);
+        } else if (itemType === "hyperchromes") {
+          favoriteItems = favoriteItems.filter(
+            (item) => item.type === "HyperChrome"
+          );
+        } else {
+          const normalizedFilterType = itemType.slice(0, -1); // Remove 's' from end
+          favoriteItems = favoriteItems.filter((item) => {
+            const normalizedItemType = item.type
+              .toLowerCase()
+              .replace(" ", "-");
+            return normalizedItemType === normalizedFilterType;
+          });
+        }
+      }
+
+      filteredItems = favoriteItems;
+
+      if (filteredItems.length === 0) {
+        let itemsRow = itemsContainer.querySelector(".row");
+        if (!itemsRow) {
+          itemsRow = document.createElement("div");
+          itemsRow.classList.add("row");
+          itemsContainer.appendChild(itemsRow);
+        }
+        const categoryName =
+          itemType === "all-items"
+            ? ""
+            : ` in ${itemType
+                .split("-")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")}`;
+        itemsRow.innerHTML = `
+          <div class="col-12">
+            <div class="no-favorites-message">
+              <i class="bi bi-star"></i>
+              <h4>No Favorites Yet${categoryName}</h4>
+              <p>You haven't added any ${
+                categoryName
+                  ? `favorite items${categoryName}`
+                  : "items to your favorites"
+              }</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      currentPage = 1;
+      displayItems();
+      updateTotalItemsLabel("favorites");
+      return;
     } else if (valueSortType !== "none") {
       const [valueType, direction] = valueSortType.split("-");
       filteredItems.sort((a, b) => {
@@ -679,6 +765,36 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       allItems = await response.json();
 
+      // Add favorite status to items if user is logged in and we have user data
+      const token = Cookies.get("token");
+      const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+
+      if (token && userData.id) {
+        try {
+          const favoritesResponse = await fetch(
+            `https://api3.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Origin: "https://jailbreakchangelogs.xyz",
+              },
+            }
+          );
+          if (favoritesResponse.ok) {
+            const favorites = await favoritesResponse.json();
+            // Extract just the item_ids from the favorites array
+            const favoriteIds = favorites.map((fav) => fav.item_id);
+            // Mark items as favorite if their ID is in the favoriteIds array
+            allItems = allItems.map((item) => ({
+              ...item,
+              is_favorite: favoriteIds.includes(item.id),
+            }));
+          }
+        } catch (error) {
+          console.error("Error fetching favorites:", error);
+        }
+      }
+
       // Initialize filteredItems
       filteredItems = [...allItems];
 
@@ -892,7 +1008,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createItemCard(item) {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4"); // Added col-6 for mobile
+    cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
+
+    const favoriteIconHtml = `
+      <div class="favorite-icon position-absolute top-0 start-0 p-2" 
+           style="z-index: 1000; opacity: 1; transition: opacity 0.2s ease-in-out;">
+        <i class="bi bi-star${item.is_favorite ? "-fill" : ""} text-warning" 
+           style="font-size: 1.5rem; filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));"></i>
+      </div>
+    `;
 
     // Determine color based on item type
     if (item.type === "Vehicle") color = "#c82c2c";
@@ -906,77 +1030,116 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "HyperChrome") color = "#E91E63";
     if (item.type === "Furniture") color = "#9C6644";
 
-    // Determine the image URL directly from item type
-    const mediaElement =
-      item.type === "Drift"
-        ? `<div class="media-container">
-        <div class="card-spinner">
-          <div class="custom-spinner"></div>
-        </div>
-        <img 
-            src="/assets/images/items/480p/drifts/${item.name}.webp"
-            class="card-img-top thumbnail"
-            alt="${item.name}"
-            style="opacity: 0; z-index: 2;"
-            onerror="handleimage(this)"
-            onload="setTimeout(() => {
-              this.style.opacity = '1';
-              this.previousElementSibling.style.display = 'none';
-            }, 1000)"
-        >
-        <video 
-            src="/assets/images/items/drifts/${item.name}.webm"
-            class="card-img-top video-player"
-            style="opacity: 0; z-index: 1;"
-            playsinline 
-            muted 
-            loop
-        ></video>
-      </div>`
-        : item.type === "HyperChrome" && item.name === "HyperShift"
-        ? `<div class="media-container">
-        <div class="card-spinner">
-          <div class="custom-spinner"></div>
-        </div>
-        <video 
-            src="/assets/images/items/hyperchromes/HyperShift.webm"
-            class="card-img-top"
-            style="opacity: 0; transition: opacity 0.3s ease-in-out;"
-            playsinline 
-            muted 
-            loop
-            autoplay
-            id="hypershift-video"
-            onloadeddata="setTimeout(() => {
-              this.style.opacity = '1';
-              this.previousElementSibling.style.display = 'none';
-            }, 1000)"
-            onerror="handleimage(this)"
-        ></video>
-      </div>`
-        : `<div class="media-container">
-        <div class="card-spinner">
-          <div class="custom-spinner"></div>
-        </div>
-        <img 
-            onerror="handleimage(this)" 
-            id="${item.name}" 
-            src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-            item.name
-          }.webp" 
-            class="card-img-top" 
-            alt="${item.name}" 
-            style="opacity: 0; transition: opacity 0.3s ease-in-out;"
-            onload="setTimeout(() => {
-              this.style.opacity = '1';
-              this.previousElementSibling.style.display = 'none';
-            }, 1000)"
-        >
-      </div>`;
+    // Modify the mediaElement template to ensure favorite icon is rendered
+    const mediaElement = `
+        <div class="media-container position-relative">
+            ${favoriteIconHtml}
+            <div class="card-spinner">
+                <div class="custom-spinner"></div>
+            </div>
+            ${
+              item.type === "Drift"
+                ? `<img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" style="opacity: 0; z-index: 2;" onerror="handleimage(this)" onload="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)">
+                   <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0; z-index: 1;" playsinline muted loop></video>`
+                : item.type === "HyperChrome" && item.name === "HyperShift"
+                ? `<video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" style="opacity: 0;" playsinline muted loop autoplay id="hypershift-video" onloadeddata="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)" onerror="handleimage(this)"></video>`
+                : `<img onerror="handleimage(this)" id="${
+                    item.name
+                  }" src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                    item.name
+                  }.webp" class="card-img-top" alt="${
+                    item.name
+                  }" style="opacity: 0;" onload="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)">`
+            }
+        </div>`;
 
     // Format values
     const cashValue = formatValue(item.cash_value);
     const dupedValue = formatValue(item.duped_value);
+    // Add this function to values.js
+    window.handleFavorite = async function (event, itemId) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const token = Cookies.get("token");
+      if (!token) {
+        notyf.error("Please login to favorite items", {
+          position: "bottom-right",
+          duration: 2000,
+        });
+        return;
+      }
+
+      const iconElement = event.target
+        .closest(".favorite-icon")
+        .querySelector("i");
+      const isFavorited = iconElement.classList.contains("bi-star-fill");
+
+      try {
+        const response = await fetch(
+          "https://api3.jailbreakchangelogs.xyz/favorites/add",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+
+              Origin: "https://jailbreakchangelogs.xyz",
+            },
+            body: JSON.stringify({
+              item_id: itemId,
+              owner: token, // Just send the token directly
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        // Success case
+        iconElement.classList.toggle("bi-star");
+        iconElement.classList.toggle("bi-star-fill");
+
+        const item = allItems.find((item) => item.id === itemId);
+        if (item) {
+          item.is_favorite = !isFavorited;
+        }
+
+        notyf.success(
+          isFavorited
+            ? "Item removed from favorites"
+            : "Item added to favorites",
+          {
+            position: "bottom-right",
+            duration: 2000,
+          }
+        );
+      } catch (error) {
+        console.error("Error updating favorite:", error);
+        notyf.error("Failed to update favorite status", {
+          position: "bottom-right",
+          duration: 2000,
+        });
+      }
+    };
+
+    // Add this to your CSS or style tag
+    const style = document.createElement("style");
+    style.textContent = `
+  .favorite-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  .items-card:hover .favorite-icon {
+    opacity: 1;
+  }
+  
+  .favorite-icon i {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+  }
+`;
+    document.head.appendChild(style);
 
     let badgeHtml = "";
     let typeBadgeHtml = "";
@@ -1014,50 +1177,60 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
     `;
 
-    // Create card with conditional badges
-    cardDiv.innerHTML = `
-    <div class="card items-card shadow-sm ${
-      item.is_limited ? "limited-item" : ""
-    }" 
-         onclick="handleCardClick('${
-           item.name
-         }', '${item.type.toLowerCase()}', event)" 
-         onmousedown="handleCardClick('${
-           item.name
-         }', '${item.type.toLowerCase()}', event)"
-         style="cursor: pointer;">
-        ${mediaElement}
-        <div class="item-card-body text-center">
-            <div class="badges-container d-flex justify-content-center gap-2">
-                ${typeBadgeHtml}
-                ${badgeHtml}
+    // Create card with all elements
+    const cardHtml = `
+        <div class="card items-card shadow-sm ${
+          item.is_limited ? "limited-item" : ""
+        }" 
+             onclick="handleCardClick('${
+               item.name
+             }', '${item.type.toLowerCase()}', event)" 
+             style="cursor: pointer;">
+            <div class="position-relative">
+                ${mediaElement}
+                <div class="item-card-body text-center">
+                    <div class="badges-container d-flex justify-content-center gap-2">
+                        ${typeBadgeHtml}
+                        ${badgeHtml}
+                    </div>
+                    <h5 class="card-title">${item.name}</h5>
+                    <div class="value-container">
+                        <div class="d-flex justify-content-between align-items-center mb-2 value-row">
+                            <span>Cash Value:</span>
+                            <span class="cash-value" data-value="${
+                              cashValue.numeric
+                            }">${cashValue.display}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 value-row">
+                            <span>Duped Value:</span>
+                            <span class="duped-value" data-value="${
+                              dupedValue.numeric
+                            }">${dupedValue.display}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center value-row">
+                            <span>Demand:</span>
+                            <span class="demand-value">${
+                              item.demand === "'N/A'" || item.demand === "N/A"
+                                ? "No Demand"
+                                : item.demand || "No Value"
+                            }</span>
+                        </div>
+                         ${lastUpdatedHtml}
+                    </div>
+                </div>
             </div>
-            <h5 class="card-title">${item.name}</h5>
-            <div class="value-container">
-                <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                    <span>Cash Value:</span>
-                    <span class="cash-value" data-value="${
-                      cashValue.numeric
-                    }">${cashValue.display}</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                    <span>Duped Value:</span>
-                    <span class="duped-value" data-value="${
-                      dupedValue.numeric
-                    }">${dupedValue.display}</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center value-row">
-                    <span>Demand:</span>
-                    <span class="demand-value">${
-                      item.demand === "'N/A'" || item.demand === "N/A"
-                        ? "No Demand"
-                        : item.demand || "No Value"
-                    }</span>
-                </div>
-                 ${lastUpdatedHtml}
-            </div>
-        </div>
-    </div>`;
+        </div>`;
+
+    cardDiv.innerHTML = cardHtml;
+
+    // Add event listener for the favorite icon
+    const favoriteIcon = cardDiv.querySelector(".favorite-icon");
+    if (favoriteIcon) {
+      favoriteIcon.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.handleFavorite(e, item.id);
+      });
+    }
 
     // Add hover event listeners for drift videos
     if (item.type === "Drift") {
@@ -1078,6 +1251,13 @@ document.addEventListener("DOMContentLoaded", () => {
         video.currentTime = 0;
       });
     }
+
+    // Modify the card click handler to not interfere with favorite icon
+    cardDiv.querySelector(".items-card").addEventListener("click", (e) => {
+      if (!e.target.closest(".favorite-icon")) {
+        handleCardClick(item.name, item.type.toLowerCase(), e);
+      }
+    });
 
     // Return the created element
     return cardDiv;
@@ -1167,6 +1347,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (valueSortDropdown) {
     valueSortDropdown.innerHTML = `
     <option value="random">Random</option>
+    <option value="favorites">My Favorites</option>
     <option value="separator" disabled>───── Alphabetically ─────</option>
     <option value="alpha-asc">Name (A to Z)</option>
     <option value="alpha-desc">Name (Z to A)</option>
@@ -1258,7 +1439,9 @@ function clearSearch() {
 function updateTotalItemsLabel(itemType) {
   const totalItemsLabel = document.getElementById("total-items-label");
   if (totalItemsLabel) {
-    if (itemType === "all-items") {
+    if (itemType === "favorites") {
+      totalItemsLabel.textContent = "Total Favorites: ";
+    } else if (itemType === "all-items") {
       totalItemsLabel.textContent = "Total Items: ";
     } else {
       let categoryName;

@@ -32,10 +32,10 @@ body {
   transition: all 0.3s ease;
 }
 .media-container {
-  position: relative;
+  position: relative !important;
   width: 100%;
   aspect-ratio: 16/9 !important;
-  overflow: hidden;
+  overflow: visible !important;
   background-color: var(--bg-secondary);
   margin-bottom: 0;
 }
@@ -1306,4 +1306,91 @@ body {
   .limited-badge {
     font-size: 0.7rem;
   }
+}
+
+.favorite-icon {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 1000 !important;
+  opacity: 0;
+  width: 32px;
+  height: 32px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: opacity 0.2s ease-in-out;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  border-radius: 50%; /* Make it circular */
+  backdrop-filter: blur(2px);
+}
+
+.media-container:hover .favorite-icon {
+  opacity: 1;
+}
+
+.favorite-icon i {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+  font-size: 1rem !important;
+  color: #ffd700;
+}
+
+/* Add responsive adjustments for mobile */
+@media (max-width: 576px) {
+  .favorite-icon {
+    width: 28px;
+    height: 28px;
+    top: 6px !important;
+    left: 6px !important;
+  }
+
+  .favorite-icon i {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Add after the other value-sort-dropdown styles */
+#value-sort-dropdown option[value="favorites"] {
+  color: #ffd700;
+  font-weight: 500;
+}
+
+.no-favorites-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.no-favorites-message i {
+  font-size: 2rem;
+  color: #ffd700;
+  margin-bottom: 1rem;
+}
+
+.no-favorites-message h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.no-favorites-message p {
+  margin-bottom: 0;
+}
+
+.no-favorites-message .login-prompt {
+  margin-top: 1rem;
+}
+
+.no-favorites-message .login-link {
+  color: var(--accent-color-light);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.no-favorites-message .login-link:hover {
+  text-decoration: underline;
 }
