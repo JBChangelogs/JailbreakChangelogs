@@ -75,15 +75,15 @@ $(document).ready(function () {
 
           // Show success toast
           notyf.success("Successfully logged in with Discord!");
-          setTimeout(() => {
-            const hasReportIssue = localStorage.getItem("reportIssueRedirect");
-            if (hasReportIssue) {
-              localStorage.removeItem("reportIssueRedirect");
-              window.location.href = "/?report-issue";
-            } else {
-              window.location.href = "/";
-            }
-          }, 4500); // Match the duration from Notyf config
+
+          // Immediate redirect
+          const hasReportIssue = localStorage.getItem("reportIssueRedirect");
+          if (hasReportIssue) {
+            localStorage.removeItem("reportIssueRedirect");
+            window.location.href = "/?report-issue";
+          } else {
+            window.location.href = "/";
+          }
           return;
         }
       })
