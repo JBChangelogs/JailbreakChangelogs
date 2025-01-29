@@ -1174,6 +1174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </div>
     </div>
+
   `;
     // Determine if we should show the graph
     const graphSection = hasValues
@@ -1232,8 +1233,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div class="media-container-wrapper">
                   <!-- Main Item Info Section -->
                   <div class="row mb-4">
-                      <!-- Left Side - Image -->
-                      <div class="col-md-5 p-3">
+                     <!-- Left Side - Image and Health -->
+                    <div class="col-md-5 p-3">
+                      <div class="d-flex flex-column gap-3">
                         ${
                           item.type === "Drift"
                             ? element
@@ -1257,7 +1259,35 @@ document.addEventListener("DOMContentLoaded", async () => {
                           </div>
                         `
                         }
+                        
+                        ${
+                          item.type.toLowerCase() === "vehicle"
+                            ? `
+                          <!-- Health Card -->
+                          <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
+                            <h4 class="text-muted mb-3 d-flex align-items-center">
+                              <i class="bi bi-heart-fill me-2"></i>
+                              Vehicle Health
+                            </h4>
+                            <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
+                              ${item.health ? item.health : "No Health Data"}
+                            </p>
+                            <small class="text-muted mt-2 d-block">
+                              If any data for health is incorrect dm 
+                              <a href="https://discord.com/users/1123014543891775509" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style="color: #76ABAE;">
+                                @PikachuWolverine
+                              </a> 
+                              on discord.
+                            </small>
+                          </div>
+                        `
+                            : ""
+                        }
                       </div>
+                    </div>
 
                       <!-- Right Side - Item Details -->
                       <div class="col-md-7 p-3">
