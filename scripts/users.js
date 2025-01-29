@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const bannerContainer = document.querySelector(".banner-container");
+  if (bannerContainer) {
+    bannerContainer.classList.add("loading"); // Add loading state immediately
+  }
   const permissions = JSON.parse(settings);
   const udata = JSON.parse(userData);
 
@@ -579,6 +583,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function fetchUserBanner(userId) {
+    const bannerContainer = document.querySelector(".banner-container");
+    const userBanner = document.getElementById("banner");
+
     try {
       let image;
       const randomNumber = Math.floor(Math.random() * 12) + 1;
@@ -635,26 +642,27 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Update banner image
-      const userBanner = document.getElementById("banner");
-      if (userBanner) {
-        userBanner.src = image;
-        banner = image;
+      const img = new Image();
+      img.onload = () => {
+        userBanner.src = img.src;
+        bannerContainer.classList.remove("loading");
+        userBanner.style.opacity = "1";
+      };
+      img.src = image; // image is your banner URL
 
-        userBanner.onerror = () => {
-          console.error("Failed to load banner image:", image);
-          userBanner.src = fallbackBanner;
-          banner = fallbackBanner;
-        };
-      }
+      img.onerror = () => {
+        console.error("Failed to load banner image:", image);
+        userBanner.src = fallbackBanner;
+        bannerContainer.classList.remove("loading");
+        userBanner.style.opacity = "1";
+      };
     } catch (error) {
       console.error("Error fetching banner:", error);
       const randomNumber = Math.floor(Math.random() * 12) + 1;
       const fallbackBanner = `/assets/backgrounds/background${randomNumber}.webp`;
-      const userBanner = document.getElementById("banner");
-      if (userBanner) {
-        userBanner.src = fallbackBanner;
-        banner = fallbackBanner;
-      }
+      userBanner.src = fallbackBanner;
+      bannerContainer.classList.remove("loading");
+      userBanner.style.opacity = "1";
     }
   }
 
