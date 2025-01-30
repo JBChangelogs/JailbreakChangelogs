@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "category-tire-styles": "name-tire-styles",
         "category-drifts": "name-drifts",
         "category-furnitures": "name-furnitures",
+        "category-favorites": "name-all-items",
       };
 
       // Find the matching category class
@@ -133,10 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
       // Get the corresponding sort value
       const sortValue = categoryClasses[categoryClass];
 
-      // Update sort dropdown and trigger sort
+      // Update sort dropdown and value sort dropdown
       const sortDropdown = document.getElementById("sort-dropdown");
-      if (sortDropdown) {
+      const valueSortDropdown = document.getElementById("value-sort-dropdown");
+
+      if (sortDropdown && valueSortDropdown) {
         sortDropdown.value = sortValue;
+
+        // Set value sort dropdown based on category
+        if (categoryClass === "category-favorites") {
+          valueSortDropdown.value = "favorites";
+        } else {
+          // Reset to default cash-desc for all other categories
+          valueSortDropdown.value = "cash-desc";
+        }
+
         window.sortItems();
 
         // Add smooth scroll to items container with offset
@@ -147,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const filterControls = document.querySelector(".filter-controls");
 
             // Calculate position with offset
-            const offset = 150; // Adjust this value to control the padding from top
+            const offset = 90; // Adjust this value to control the padding from top
             const elementPosition = itemsContainer.getBoundingClientRect().top;
             const offsetPosition =
               elementPosition +
@@ -162,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 100);
         }
       } else {
-        console.error("Sort dropdown not found");
+        console.error("Dropdowns not found");
       }
     });
   });
@@ -372,7 +384,10 @@ document.addEventListener("DOMContentLoaded", () => {
         itemsRow.innerHTML = `
           <div class="col-12">
             <div class="no-favorites-message">
-              <i class="bi bi-star"></i>
+             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+</svg>
               <h4>Login Required</h4>
               <p>You need to be logged in to view your favorite items</p>
               <div class="login-prompt">
@@ -427,7 +442,10 @@ document.addEventListener("DOMContentLoaded", () => {
         itemsRow.innerHTML = `
           <div class="col-12">
             <div class="no-favorites-message">
-              <i class="bi bi-star"></i>
+             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+</svg>  
               <h4>No Favorites Yet${categoryName}</h4>
               <p>You haven't added any ${
                 categoryName
@@ -1011,12 +1029,18 @@ document.addEventListener("DOMContentLoaded", () => {
     cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
 
     const favoriteIconHtml = `
-      <div class="favorite-icon position-absolute top-0 start-0 p-2" 
-           style="z-index: 1000; opacity: 1; transition: opacity 0.2s ease-in-out;">
-        <i class="bi bi-star${item.is_favorite ? "-fill" : ""} text-warning" 
-           style="font-size: 1.5rem; filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));"></i>
-      </div>
-    `;
+    <div class="favorite-icon position-absolute top-0 start-0 p-2" 
+         style="z-index: 1000; opacity: 1; transition: opacity 0.2s ease-in-out;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));">
+        <rect width="24" height="24" fill="none" />
+        <path fill="${item.is_favorite ? "#f8ff00" : "none"}" 
+              stroke="${item.is_favorite ? "none" : "#f8ff00"}"
+              stroke-width="1.5"
+              d="M12.954 1.7a1 1 0 0 0-1.908-.001l-2.184 6.92l-6.861-.005a1 1 0 0 0-.566 1.826l5.498 3.762l-2.067 6.545A1 1 0 0 0 6.4 21.86l5.6-4.006l5.594 4.007a1 1 0 0 0 1.536-1.114l-2.067-6.545l5.502-3.762a1 1 0 0 0-.566-1.826l-6.866.005z" />
+      </svg>
+    </div>
+  `;
 
     // Determine color based on item type
     if (item.type === "Vehicle") color = "#c82c2c";
@@ -1147,7 +1171,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "HyperChrome") {
       badgeHtml = `
             <span class="hyperchrome-badge" style="color: black;">
-                <i class="bi bi-stars"></i>HyperChrome
+               <svg xmlns="http://www.w3.org/2000/svg" width="8.75" height="14" viewBox="0 0 320 512">
+	<rect width="320" height="512" fill="none" />
+	<path fill="#000" d="M32 32C32 14.3 46.3 0 64 0h192c17.7 0 32 14.3 32 32s-14.3 32-32 32H64c-17.7 0-32-14.3-32-32M0 160c0-35.3 28.7-64 64-64h192c35.3 0 64 28.7 64 64v288c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm96 64c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h128c17.7 0 32-14.3 32-32v-96c0-17.7-14.3-32-32-32z" />
+</svg>HyperChrome
             </span>
         `;
       typeBadgeHtml = "";
@@ -1161,7 +1188,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (item.is_limited) {
         badgeHtml = `
                 <span class="badge limited-badge">
-                    <i class="bi bi-star-fill me-1"></i>Limited
+                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+</svg>Limited
                 </span>
             `;
       }
@@ -1169,7 +1199,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const lastUpdatedHtml = `
     <div class="mt-2 d-flex align-items-center">
         <small class="text-muted" style="font-size: 0.8rem;">
-            <i class="bi bi-clock-history me-1"></i>
+           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="#748d92">
+		<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+		<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+		<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+	</g>
+</svg>
             Last Updated: ${
               item.last_updated ? formatTimeAgo(item.last_updated) : "N/A"
             }

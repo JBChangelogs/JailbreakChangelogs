@@ -648,9 +648,6 @@ body {
   color: #d3d9d4;
 }
 
-.toggle-icon {
-  color: #748d92;
-}
 .filter-controls {
   background-color: #2e3944;
 }
@@ -756,6 +753,13 @@ body {
 }
 .category-hyperchromes i {
   color: #e91e63;
+}
+
+.category-favorites {
+  background-color: rgba(255, 215, 0, 0.1);
+}
+.category-favorites i {
+  color: #ffd700;
 }
 
 .category-tire-stickers {
@@ -1034,13 +1038,13 @@ body {
     background-color: rgba(18, 78, 102, 0.1);
   }
 
-  .contributor-header i.toggle-icon {
+  .contributor-header .toggle-icon {
     margin-left: auto;
     transition: transform 0.3s ease;
     display: inline-block;
   }
 
-  .contributor-header i.toggle-icon.collapsed {
+  .contributor-header .toggle-icon.collapsed {
     transform: rotate(180deg);
   }
 
