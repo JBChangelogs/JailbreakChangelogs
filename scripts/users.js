@@ -809,7 +809,8 @@ document.addEventListener("DOMContentLoaded", function () {
       userDateBio.innerHTML = `
             <div class="mb-2">Last updated: ${date}</div>
             <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
-            <div style="color: #748D92;">Member since: ${memberSince}</div>
+           <div style="color: #748D92;">Member #${udata.usernumber} since ${memberSince}</div>
+
         `;
 
       await fetchUserBanner(userId);
