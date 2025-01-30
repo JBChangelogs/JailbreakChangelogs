@@ -1979,10 +1979,11 @@ video.card-img-top {
 /* Trade Ad Header */
 .trade-ad-header {
   display: flex;
-  align-items: center;
-  padding-bottom: 16px;
+  align-items: flex-start; /* Change from center to flex-start */
+  padding: 2rem 0 1rem; /* Add top padding to account for status badge */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
+  position: relative; /* Ensure positioning context for status badge */
 }
 
 .trader-info {
@@ -1990,25 +1991,28 @@ video.card-img-top {
   align-items: center;
   gap: 12px;
   flex: 1;
-}
-
-.trader-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
+  min-width: 0; /* Allow flex item to shrink */
+  padding-right: 100px; /* Make space for status badge */
 }
 
 .trader-details {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* Allow flex item to shrink */
+  overflow: hidden; /* Prevent overflow */
 }
 
 .trader-name {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block;
 }
+
 .trader-name,
 .trader-username {
   color: var(--text-primary);
@@ -2029,6 +2033,11 @@ video.card-img-top {
 .trader-username {
   font-size: 0.9rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block;
 }
 
 /* Trade Sides Container */
@@ -2461,6 +2470,31 @@ video.card-img-top {
 }
 
 @media (max-width: 576px) {
+  .trade-ad-header {
+    padding-top: 2.5rem; /* Slightly more space on mobile */
+  }
+
+  .trader-info {
+    padding-right: 0; /* Remove padding on mobile */
+  }
+
+  /* ...rest of existing mobile styles... */
+  .trader-info {
+    margin-top: 1.5rem; /* Slightly less space on very small screens */
+  }
+
+  .trader-name {
+    font-size: 0.9rem;
+  }
+
+  .trader-username {
+    font-size: 0.75rem;
+  }
+
+  .trade-status {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
   .trader-name {
     font-size: 0.9rem;
   }
@@ -2670,8 +2704,9 @@ video.card-img-top {
 
 .trade-status {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 0;
+  right: 0;
+  margin: 12px;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
