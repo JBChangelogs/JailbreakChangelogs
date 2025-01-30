@@ -130,7 +130,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // Helper function to update button state
   function updateButtonState(button, value) {
     const icon = document.createElement("i");
-    icon.classList.add("bi", value === 1 ? "bi-check-lg" : "bi-x-lg");
+    icon.innerHTML =
+      value === 1
+        ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+            </svg>
+        `
+        : `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+            </svg>
+        `;
 
     button.classList.remove("btn-danger", "btn-success", "btn-secondary");
     button.classList.add("btn", value === 1 ? "btn-success" : "btn-danger");
@@ -219,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", function (event) {
       event.preventDefault();
       const icon = button.querySelector("i");
-      const isCurrentlyEnabled = icon.classList.contains("bi-check-lg");
+      const isCurrentlyEnabled = icon.innerHTML.includes("M12.736 3.97");
       updateButtonState(button, isCurrentlyEnabled ? 0 : 1);
 
       // Special handling for discord banner button
@@ -257,27 +270,27 @@ document.addEventListener("DOMContentLoaded", function () {
       const settingsBody = {
         profile_public: profile_public_button
           .querySelector("i")
-          .classList.contains("bi-check-lg")
+          .innerHTML.includes("M12.736 3.97")
           ? 1
           : 0,
         hide_followers: hide_followers_button
           .querySelector("i")
-          .classList.contains("bi-check-lg")
+          .innerHTML.includes("M12.736 3.97")
           ? 1
           : 0,
         hide_following: hide_following_button
           .querySelector("i")
-          .classList.contains("bi-check-lg")
+          .innerHTML.includes("M12.736 3.97")
           ? 1
           : 0,
         show_recent_comments: show_comments_button
           .querySelector("i")
-          .classList.contains("bi-check-lg")
+          .innerHTML.includes("M12.736 3.97")
           ? 1
           : 0,
         banner_discord: use_discord_banner_button
           .querySelector("i")
-          .classList.contains("bi-check-lg")
+          .innerHTML.includes("M12.736 3.97")
           ? 1
           : 0,
       };
@@ -694,7 +707,10 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="alert alert-danger border-0 shadow-sm" role="alert" style="background-color: #2E3944; border-left: 4px solid #dc3545;">
       <div class="d-flex align-items-center">
         <div class="me-3">
-          <i class="bi bi-shield-x-fill text-danger" style="font-size: 1.5rem;"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#dc3545" fill-rule="evenodd" d="M11.577 4.237a.25.25 0 0 0-.354 0L9.037 6.423a.25.25 0 0 0 0 .354l8.186 8.186a.25.25 0 0 0 .354 0l2.186-2.186a.25.25 0 0 0 0-.354zm-1.414-1.06a1.75 1.75 0 0 1 2.474 0l8.186 8.186a1.75 1.75 0 0 1 0 2.474l-2.186 2.186a1.75 1.75 0 0 1-2.474 0L13.8 13.661l-6.67 6.67a2.447 2.447 0 0 1-3.46-3.461l6.67-6.67l-2.363-2.363a1.75 1.75 0 0 1 0-2.474zM11.4 11.26l-6.67 6.67a.947.947 0 1 0 1.34 1.339l6.67-6.67z" clip-rule="evenodd" />
+</svg>
         </div>
         <div>
           <h6 class="alert-heading mb-1" style="color: #dc3545;">Account Suspended</h6>
@@ -1260,7 +1276,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       recentComments.innerHTML = `
         <div class="text-center p-3" style="color: #748D92;">
-          <i class="bi bi-chat-square-text me-2"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none">
+		<path fill="#748D92" d="m13.087 21.388l.645.382zm.542-.916l-.646-.382zm-3.258 0l-.645.382zm.542.916l.646-.382zm-8.532-5.475l.693-.287zm5.409 3.078l-.013.75zm-2.703-.372l-.287.693zm16.532-2.706l.693.287zm-5.409 3.078l-.012-.75zm2.703-.372l.287.693zm.7-15.882l-.392.64zm1.65 1.65l.64-.391zM4.388 2.738l-.392-.64zm-1.651 1.65l-.64-.391zM9.403 19.21l.377-.649zm4.33 2.56l.541-.916l-1.29-.764l-.543.916zm-4.007-.916l.542.916l1.29-.764l-.541-.916zm2.715.152a.52.52 0 0 1-.882 0l-1.291.764c.773 1.307 2.69 1.307 3.464 0zM10.5 2.75h3v-1.5h-3zm10.75 7.75v1h1.5v-1zm-18.5 1v-1h-1.5v1zm-1.5 0c0 1.155 0 2.058.05 2.787c.05.735.153 1.347.388 1.913l1.386-.574c-.147-.352-.233-.782-.278-1.441c-.046-.666-.046-1.51-.046-2.685zm6.553 6.742c-1.256-.022-1.914-.102-2.43-.316L4.8 19.313c.805.334 1.721.408 2.977.43zM1.688 16.2A5.75 5.75 0 0 0 4.8 19.312l.574-1.386a4.25 4.25 0 0 1-2.3-2.3zm19.562-4.7c0 1.175 0 2.019-.046 2.685c-.045.659-.131 1.089-.277 1.441l1.385.574c.235-.566.338-1.178.389-1.913c.05-.729.049-1.632.049-2.787zm-5.027 8.241c1.256-.021 2.172-.095 2.977-.429l-.574-1.386c-.515.214-1.173.294-2.428.316zm4.704-4.115a4.25 4.25 0 0 1-2.3 2.3l.573 1.386a5.75 5.75 0 0 0 3.112-3.112zM13.5 2.75c1.651 0 2.837 0 3.762.089c.914.087 1.495.253 1.959.537l.783-1.279c-.739-.452-1.577-.654-2.6-.752c-1.012-.096-2.282-.095-3.904-.095zm9.25 7.75c0-1.622 0-2.891-.096-3.904c-.097-1.023-.299-1.862-.751-2.6l-1.28.783c.285.464.451 1.045.538 1.96c.088.924.089 2.11.089 3.761zm-3.53-7.124a4.25 4.25 0 0 1 1.404 1.403l1.279-.783a5.75 5.75 0 0 0-1.899-1.899zM10.5 1.25c-1.622 0-2.891 0-3.904.095c-1.023.098-1.862.3-2.6.752l.783 1.28c.464-.285 1.045-.451 1.96-.538c.924-.088 2.11-.089 3.761-.089zM2.75 10.5c0-1.651 0-2.837.089-3.762c.087-.914.253-1.495.537-1.959l-1.279-.783c-.452.738-.654 1.577-.752 2.6C1.25 7.61 1.25 8.878 1.25 10.5zm1.246-8.403a5.75 5.75 0 0 0-1.899 1.899l1.28.783a4.25 4.25 0 0 1 1.402-1.403zm7.02 17.993c-.202-.343-.38-.646-.554-.884a2.2 2.2 0 0 0-.682-.645l-.754 1.297c.047.028.112.078.224.232c.121.166.258.396.476.764zm-3.24-.349c.44.008.718.014.93.037c.198.022.275.054.32.08l.754-1.297a2.2 2.2 0 0 0-.909-.274c-.298-.033-.657-.038-1.069-.045zm6.498 1.113c.218-.367.355-.598.476-.764c.112-.154.177-.204.224-.232l-.754-1.297c-.29.17-.5.395-.682.645c-.173.238-.352.54-.555.884zm1.924-2.612c-.412.007-.771.012-1.069.045c-.311.035-.616.104-.909.274l.754 1.297c.045-.026.122-.058.32-.08c.212-.023.49-.03.93-.037z" />
+		<path stroke="#748D92" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11h.009m3.982 0H12m3.991 0H16" />
+	</g>
+</svg>
           This user has no comments
         </div>`;
     } finally {
@@ -1377,7 +1399,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if (recentComments) {
       recentComments.innerHTML = `
       <div class="text-center p-3" style="color: #748D92;">
-        <i class="bi bi-eye-slash me-2"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="#748D92">
+		<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+		<path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+		<path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+	</g>
+</svg>
         This user has disabled the display of their comments
       </div>`;
     }
@@ -1717,10 +1746,20 @@ document.addEventListener("DOMContentLoaded", function () {
         switch (key) {
           case "hide_followers":
             const hideFollowersIcon = document.createElement("i");
-            hideFollowersIcon.classList.add(
-              "bi",
-              value === 1 ? "bi-check-lg" : "bi-x-lg"
-            );
+            hideFollowersIcon.innerHTML =
+              value === 1
+                ? `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+                </svg>
+            `
+                : `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+            `;
 
             hide_followers_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
             hide_followers_button.classList.add(
@@ -1732,10 +1771,20 @@ document.addEventListener("DOMContentLoaded", function () {
           case "hide_following":
             // Logic for hide_following
             const hideFollowingIcon = document.createElement("i");
-            hideFollowingIcon.classList.add(
-              "bi",
-              value === 1 ? "bi-check-lg" : "bi-x-lg"
-            ); // Set the icon based on the value
+            hideFollowingIcon.innerHTML =
+              value === 1
+                ? `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+                </svg>
+            `
+                : `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+            `;
 
             hide_following_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
             hide_following_button.classList.add(
@@ -1747,10 +1796,20 @@ document.addEventListener("DOMContentLoaded", function () {
           case "profile_public":
             // Logic for profile_public
             const profilePublicIcon = document.createElement("i");
-            profilePublicIcon.classList.add(
-              "bi",
-              value === 1 ? "bi-check-lg" : "bi-x-lg"
-            ); // Set icon based on public/private status
+            profilePublicIcon.innerHTML =
+              value === 1
+                ? `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+        </svg>
+    `
+                : `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+        </svg>
+    `;
 
             profile_public_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
             profile_public_button.classList.add(
@@ -1762,10 +1821,19 @@ document.addEventListener("DOMContentLoaded", function () {
           case "show_recent_comments":
             // Logic for show_recent_comments
             const recentCommentsIcon = document.createElement("i");
-            recentCommentsIcon.classList.add(
-              "bi",
-              value ? "bi-check-lg" : "bi-x-lg"
-            ); // Set icon based on the value
+            recentCommentsIcon.innerHTML = value
+              ? `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+                </svg>
+            `
+              : `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <rect width="16" height="16" fill="none" />
+                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+            `;
 
             show_comments_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
             show_comments_button.classList.add(
@@ -1777,10 +1845,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
           case "banner_discord":
             const bannerDiscordIcon = document.createElement("i");
-            bannerDiscordIcon.classList.add(
-              "bi",
-              value === 1 ? "bi-check-lg" : "bi-x-lg"
-            );
+            bannerDiscordIcon.innerHTML =
+              value === 1
+                ? `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+        </svg>
+    `
+                : `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+        </svg>
+    `;
 
             use_discord_banner_button.classList.remove(
               "btn-danger",

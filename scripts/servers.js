@@ -146,7 +146,10 @@ async function fetchServers() {
     serverList.innerHTML = `
       <div class="col-12">
         <div class="alert alert-danger d-flex flex-column align-items-center justify-content-center gap-2 py-4">
-          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12 16a1 1 0 1 0 1 1a1 1 0 0 0-1-1m10.67 1.47l-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53m-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51a1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1" />
+</svg>
           <div class="d-flex flex-column align-items-center">
             <h5 class="mb-1">Couldn't fetch private servers</h5>
             <p class="mb-0">Please try again or <a href="mailto:support@jailbreakchangelogs.xyz" class="alert-link">contact us</a> if the problem persists.</p>
@@ -236,11 +239,17 @@ async function createServerCard(server, number) {
     ? `
   <button class="btn btn-outline-warning btn-sm" onclick="editServer('${server.id}')" 
     data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Server">
-    <i class="bi bi-pencil"></i>
+ <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="m14.06 9l.94.94L5.92 19H5v-.92zm3.6-6c-.25 0-.51.1-.7.29l-1.83 1.83l3.75 3.75l1.83-1.83c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z" />
+</svg>
   </button>
   <button class="btn btn-outline-danger btn-sm" onclick="deleteServer('${server.id}')"
     data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Server">
-    <i class="bi bi-trash"></i>
+ <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>
   </button>
 `
     : "";
@@ -259,7 +268,13 @@ async function createServerCard(server, number) {
                 server.link
               }"
                 data-bs-toggle="tooltip" data-bs-placement="top" title="Copy Link">
-                <i class="bi bi-clipboard"></i>
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+		<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+	</g>
+</svg>
               </button>
               <a href="${
                 server.link
