@@ -55,11 +55,6 @@
       crossorigin="anonymous"
     />
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    />
-
     <link rel="stylesheet" href="/styles/colors.css" />
     <link rel="stylesheet" href="/styles/usersearch.css" />
     <link rel="stylesheet" href="styles/main.css" />
@@ -109,13 +104,39 @@
         <div class="container px-3">
           <div class="text-center mb-3">
             <h1 class="fs-3 fw-bold">
-              <i class="bi bi-people-fill me-2"></i>User Search
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 16 16"
+              >
+                <rect width="16" height="16" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5"
+                  stroke-width="0.5"
+                  stroke="#1d7da3"
+                />
+              </svg>
+              User Search
             </h1>
             <p class="text-muted small mb-2">
               Find users by their username or display name
             </p>
             <p class="text-muted small" id="total-users-count">
-              <i class="bi bi-person-lines-fill me-1"></i>Loading user count...
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+              >
+                <rect width="16" height="16" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"
+                />
+              </svg>
+              Loading user count...
             </p>
           </div>
 
@@ -127,7 +148,28 @@
               >
                 <div class="input-group">
                   <span class="input-group-text">
-                    <i class="bi bi-search"></i>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 48 48"
+                    >
+                      <rect width="48" height="48" fill="none" />
+                      <g
+                        fill="none"
+                        stroke="#748d92"
+                        stroke-linejoin="round"
+                        stroke-width="4"
+                      >
+                        <path
+                          d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485"
+                        />
+                      </g>
+                    </svg>
                   </span>
                   <input
                     type="text"
@@ -142,10 +184,61 @@
                     type="button"
                     style="display: none"
                   >
-                    <i class="bi bi-x-lg"></i>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 32 32"
+                    >
+                      <rect width="32" height="32" fill="none" />
+                      <path
+                        fill="currentColor"
+                        d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m5.4 21L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
+                      />
+                    </svg>
                   </button>
                   <button class="btn btn-primary px-3" id="searchButton">
-                    <i class="bi bi-arrow-right accent-icon"></i>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                    >
+                      <rect width="24" height="24" fill="none" />
+                      <g
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-dasharray="20"
+                          stroke-dashoffset="20"
+                          d="M3 12h17.5"
+                        >
+                          <animate
+                            fill="freeze"
+                            attributeName="stroke-dashoffset"
+                            dur="0.2s"
+                            values="20;0"
+                          />
+                        </path>
+                        <path
+                          stroke-dasharray="12"
+                          stroke-dashoffset="12"
+                          d="M21 12l-7 7M21 12l-7 -7"
+                        >
+                          <animate
+                            fill="freeze"
+                            attributeName="stroke-dashoffset"
+                            begin="0.2s"
+                            dur="0.2s"
+                            values="12;0"
+                          />
+                        </path>
+                      </g>
+                    </svg>
                   </button>
                 </div>
               </div>

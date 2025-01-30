@@ -113,7 +113,10 @@ function initializeBottomSheet() {
   bottomSheet.innerHTML = `
     <div class="bottom-sheet-header">
       <button type="button" class="bottom-sheet-close">
-        <i class="bi bi-x-lg"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
+	<rect width="32" height="32" fill="none" />
+	<path fill="currentColor" d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m5.4 21L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z" />
+</svg>
       </button>
       <h3 class="bottom-sheet-title"></h3>
     </div>
@@ -635,7 +638,13 @@ function displayAvailableItems(type) {
     container.innerHTML = `
       <div class="col-12 text-center py-4">
         <div class="no-results">
-          <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+	<rect width="48" height="48" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		<path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
+		<path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
+	</g>
+</svg>
           <p class="mb-0">${
             currentCategory === "all-items"
               ? "No items matched your search"
@@ -664,7 +673,13 @@ function displayAvailableItems(type) {
     container.innerHTML = `
       <div class="col-12 text-center py-4">
         <div class="no-results">
-          <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+	<rect width="48" height="48" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		<path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
+		<path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
+	</g>
+</svg>
           <p class="mb-0">No ${selectedOption} found</p>
         </div>
       </div>
@@ -728,16 +743,30 @@ function displayAvailableItems(type) {
                     item.duped_value || 0
                   )}</span>
                 </div>
-                <div class="info-row ${item.is_limited ? "limited-item" : ""}">
-                  <span class="info-label">Limited:</span>
-                  <span class="info-value">
-                    ${
-                      item.is_limited
-                        ? '<i class="bi bi-star-fill text-warning me-1"></i>Yes'
-                        : "No"
-                    }
-                  </span>
-                </div>
+              <div class="info-row ${item.is_limited ? "limited-item" : ""}">
+                <span class="info-label">Limited:</span>
+                <span class="info-value">
+                  ${
+                    item.is_limited
+                      ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                          <rect width="512" height="512" fill="none" />
+                          <defs>
+                            <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                              <stop offset="0" stop-color="#fcd966" />
+                              <stop offset=".5" stop-color="#fcd966" />
+                              <stop offset="1" stop-color="#fccd34" />
+                            </linearGradient>
+                          </defs>
+                          <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                            <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                            <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                          </path>
+                        </svg>Yes`
+                      : "No"
+                  }
+                </span>
+              </div>
+
                 <div class="info-row">
                   <span class="info-label">Demand:</span>
                   <span class="info-value demand-${(
@@ -865,13 +894,19 @@ function renderPagination(totalPages, type) {
       <button class="pagination-button" onclick="changePage(${
         currentPage - 1
       }, '${type}')" ${currentPage === 1 ? "disabled" : ""}>
-        <i class="bi bi-chevron-left"></i>
+     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#fff" d="m14 18l-6-6l6-6l1.4 1.4l-4.6 4.6l4.6 4.6z" />
+</svg>
       </button>
       <span class="pagination-info">Page ${currentPage} of ${totalPages}</span>
       <button class="pagination-button" onclick="changePage(${
         currentPage + 1
       }, '${type}')" ${currentPage === totalPages ? "disabled" : ""}>
-        <i class="bi bi-chevron-right"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#fff" d="M12.6 12L8 7.4L9.4 6l6 6l-6 6L8 16.6z" />
+</svg>
       </button>
     </div>
   `;
@@ -991,7 +1026,13 @@ function createPlaceholderCard(index, tradeType) {
         <div class="trade-card empty-slot" 
              onclick="handlePlaceholderClick(${index}, '${tradeType}')">
           <div class="empty-slot-content">
-            <i class="bi bi-plus-circle"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<circle cx="12" cy="12" r="10" />
+		<path d="M8 12h8m-4-4v8" />
+	</g>
+</svg>
             <span>Empty Slot</span>
           </div>
         </div>
@@ -1097,7 +1138,10 @@ function renderTradeItems(tradeType) {
           ${getItemImageElement(item)}
           ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
           <div class="remove-icon" onclick="event.stopPropagation(); removeItem(${index}, '${tradeType}')">
-            <i class="bi bi-trash"></i>
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>
           </div>
         </div>
         <div class="trade-card-info">
@@ -1332,10 +1376,16 @@ async function editTradeAd(tradeId) {
       if (previewActions) {
         previewActions.innerHTML = `
           <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
-            <i class="bi bi-save"></i> Update Trade
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#fff" d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-9 11q1.25 0 2.125-.875T15 15t-.875-2.125T12 12t-2.125.875T9 15t.875 2.125T12 18m-6-8h9V6H6z" />
+</svg>Update Trade
           </button>
           <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
-            <i class="bi bi-x-circle"></i> Cancel
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#fff" d="m8.4 17l3.6-3.6l3.6 3.6l1.4-1.4l-3.6-3.6L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4l3.6 3.6L7 15.6zm3.6 5q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
+</svg> Cancel
           </button>
         `;
       }
@@ -1364,7 +1414,16 @@ function cancelEdit() {
   const confirmTradeBtn = document.getElementById("confirm-trade-btn");
   if (confirmTradeBtn) {
     confirmTradeBtn.style.display = "block";
-    confirmTradeBtn.innerHTML = '<i class="bi bi-eye"></i> Preview Trade';
+    confirmTradeBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <g fill="#fff">
+                <path d="M15 12a3 3 0 1 1-6 0a3 3 0 0 1 6 0" />
+                <path d="M21.894 11.553C19.736 7.236 15.904 5 12 5s-7.736 2.236-9.894 6.553a1 1 0 0 0 0 .894C4.264 16.764 8.096 19 12 19s7.736-2.236 9.894-6.553a1 1 0 0 0 0-.894M12 17c-2.969 0-6.002-1.62-7.87-5C5.998 8.62 9.03 7 12 7s6.002 1.62 7.87 5c-1.868 3.38-4.901 5-7.87 5" />
+            </g>
+        </svg>
+        Preview Trade
+    `;
   }
 
   resetTrade();
@@ -1455,8 +1514,17 @@ async function loadTradeAds() {
         <div class="trade-ad header-container">
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="trade-ads-header">
-              <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
-            </h3>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" style="margin-right: 8px;">
+        <rect width="16" height="16" fill="none" />
+        <g fill="#fff">
+            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+        </g>
+    </svg>
+    Recent Trade Advertisements
+</h3>
+
             <div class="sort-controls">
               <select class="form-select form-select-sm" onchange="sortTradeAds(this.value)">
                 <option value="latest" ${
@@ -1492,9 +1560,18 @@ async function loadTradeAds() {
         <div class="trade-ads-grid">
           <div class="trade-ad header-container">
             <div class="d-flex justify-content-between align-items-center">
-              <h3 class="trade-ads-header">
-                <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
-              </h3>
+             <h3 class="trade-ads-header">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" style="margin-right: 8px;">
+        <rect width="16" height="16" fill="none" />
+        <g fill="#fff">
+            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+        </g>
+    </svg>
+    Recent Trade Advertisements
+</h3>
+
               <div class="sort-controls">
                 <select class="form-select form-select-sm" disabled>
                   <option>Latest First</option>
@@ -1525,9 +1602,18 @@ async function loadTradeAds() {
       <div class="trade-ads-grid">
         <div class="trade-ad header-container">
           <div class="d-flex justify-content-between align-items-center">
-            <h3 class="trade-ads-header">
-              <i class="bi bi-clock-history me-2"></i>Recent Trade Advertisements
-            </h3>
+           <h3 class="trade-ads-header">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" style="margin-right: 8px;">
+        <rect width="16" height="16" fill="none" />
+        <g fill="#fff">
+            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+        </g>
+    </svg>
+    Recent Trade Advertisements
+</h3>
+
             <div class="sort-controls">
               <select class="form-select form-select-sm" onchange="sortTradeAds(this.value)">
                 <option value="latest" ${
@@ -1549,13 +1635,19 @@ async function loadTradeAds() {
           <button class="pagination-button" onclick="changeTradesPage(${
             currentTradesPage - 1
           })" ${currentTradesPage === 1 ? "disabled" : ""}>
-            <i class="bi bi-chevron-left"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 7l-5 5l5 5" />
+</svg>
           </button>
           <span class="pagination-info">Page ${currentTradesPage} of ${totalPages}</span>
           <button class="pagination-button" onclick="changeTradesPage(${
             currentTradesPage + 1
           })" ${currentTradesPage === totalPages ? "disabled" : ""}>
-            <i class="bi bi-chevron-right"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 7l5 5l-5 5" />
+</svg>
           </button>
         </div>
       `
@@ -1890,13 +1982,26 @@ async function createTradeAdHTML(trade) {
       <div class="trade-ad-footer">
       <div class="d-flex justify-content-between align-items-center w-100">
         <div class="trade-timestamp">
-          <i class="bi bi-clock"></i> ${formatTimestamp(trade.created_at)}
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="#748d92">
+		<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+		<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+		<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+	</g>
+</svg> ${formatTimestamp(trade.created_at)}
         </div>
         <div class="d-flex align-items-center gap-2">
           <a href="/trading/ad/${String(
             trade.id
           )}" class="btn btn-sm btn-outline-info">
-            <i class="bi bi-eye"></i> View Details
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+		<path d="M15 12a3 3 0 1 1-6 0a3 3 0 0 1 6 0" />
+		<path d="M2 12c1.6-4.097 5.336-7 10-7s8.4 2.903 10 7c-1.6 4.097-5.336 7-10 7s-8.4-2.903-10-7" />
+	</g>
+</svg> View Details
           </a>
           ${
             authorDetails?.id === currentUserId
@@ -1904,12 +2009,19 @@ async function createTradeAdHTML(trade) {
             <button class="btn btn-sm btn-outline-primary" onclick="editTradeAd('${String(
               trade.id
             )}')">
-              <i class="bi bi-pencil"></i>
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M5 18.08V19h.92l9.06-9.06l-.92-.92z" opacity="0.3" />
+	<path fill="currentColor" d="M20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83l3.75 3.75zM3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM5.92 19H5v-.92l9.06-9.06l.92.92z" />
+</svg>
             </button>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteTradeAd('${String(
               trade.id
             )}')">
-              <i class="bi bi-trash"></i>
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>
             </button>
           `
               : ""
@@ -2091,16 +2203,28 @@ async function previewTrade() {
   if (isEditing) {
     previewActions.innerHTML = `
       <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
-        <i class="bi bi-save"></i> Update Trade
+       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3m3-10H5V5h10z" />
+</svg> Update Trade
       </button>
       <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
-        <i class="bi bi-x-circle"></i> Cancel
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
+	<rect width="32" height="32" fill="none" />
+	<path fill="currentColor" d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m5.4 21L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z" />
+</svg>Cancel
       </button>
     `;
   } else {
     previewActions.innerHTML = `
       <button class="btn btn-primary" onclick="createTradeAd()">
-        <i class="bi bi-plus-circle me-2"></i>Create Trade Ad
+       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<circle cx="12" cy="12" r="10" />
+		<path d="M8 12h8m-4-4v8" />
+	</g>
+</svg></i> Create Trade Ad
       </button>
     `;
   }
@@ -2179,9 +2303,23 @@ function renderPreviewItems(containerId, items) {
       ${item.name}
       ${
         item.is_limited
-          ? '<i class="bi bi-star-fill text-warning ms-1"></i>'
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="none" />
+                <defs>
+                    <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#fcd966" />
+                        <stop offset=".5" stop-color="#fcd966" />
+                        <stop offset="1" stop-color="#fccd34" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                    <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                    <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                </path>
+            </svg>`
           : ""
       }
+    
     </div>
     <div class="item-details">
       <div class="demand-indicator demand-${(
@@ -2198,7 +2336,18 @@ function renderPreviewItems(containerId, items) {
   const valuesHtml = `
     <div class="side-values-summary">
       <h6>
-        <i class="bi bi-calculator me-2"></i>
+        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                        >
+                          <rect width="20" height="20" fill="none" />
+                          <path
+                            fill="currentColor"
+                            d="M15 2H5c-.6 0-1 .4-1 1v14c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1M6.5 16.8c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.4c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m3.5 7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.4c-.7 0-1.2-.6-1.2-1.2s.5-1.4 1.2-1.4s1.2.6 1.2 1.2s-.5 1.4-1.2 1.4m4.8 5.7c0 .7-.6 1.2-1.2 1.2s-1.2-.6-1.2-1.2V12c0-.7.6-1.2 1.2-1.2s1.2.6 1.2 1.2zm-1.3-5.7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2M15 6.4H5V3h10z"
+                          />
+                        </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
         } Totals
@@ -2248,7 +2397,10 @@ function renderValueDifferences() {
   return `
     <div class="value-differences">
       <h6 class="difference-title">
-        <i class="bi bi-arrow-left-right me-2"></i>Value Differences
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 3l4 4l-4 4m4-4H4m4 14l-4-4l4-4m-4 4h16" />
+</svg>Value Differences
       </h6>
       <div class="difference-content">
         <div class="difference-row">
@@ -2260,15 +2412,27 @@ function renderValueDifferences() {
               ${cashDiff >= 0 ? "+" : ""}${formatValue(cashDiff, true)}
             </span>
           </div>
-          <div class="difference-indicator">
-            <i class="bi ${
-              cashDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : cashDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+        <div class="difference-indicator">
+          ${
+            cashDiff > 0
+              ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none" />
+                  <g fill="none" fill-rule="evenodd">
+                    <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                    <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                  </g>
+                </svg>`
+              : cashDiff < 0
+              ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none" />
+                  <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                </svg>`
+              : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                  <rect width="16" height="16" fill="none" />
+                  <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                </svg>`
+          }
+        </div>
         </div>
         <div class="difference-row">
           <div class="difference-label">
@@ -2280,28 +2444,30 @@ function renderValueDifferences() {
             </span>
           </div>
           <div class="difference-indicator">
-            <i class="bi ${
-              dupedDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : dupedDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+              ${
+                dupedDiff > 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <g fill="none" fill-rule="evenodd">
+                        <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                        <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                      </g>
+                    </svg>`
+                  : dupedDiff < 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                    </svg>`
+                  : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                      <rect width="16" height="16" fill="none" />
+                      <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                    </svg>`
+              }
+            </div>
         </div>
       </div>
     </div>
   `;
-}
-
-async function submitTrade() {
-  // Show a simple message when trade is submitted
-  notyf.info("This is a demo version. Trade submission is disabled.");
-
-  if (submitButton) {
-    submitButton.disabled = false;
-    submitButton.innerHTML = '<i class="bi bi-upload me-2"></i>Post Trade';
-  }
 }
 
 function calculateTotalValue(items, valueType) {
@@ -2341,7 +2507,7 @@ function resetTrade() {
     // Handle confirm button if it exists
     if (confirmButton) {
       confirmButton.innerHTML =
-        '<i class="bi bi-plus-circle"></i> Create Trade';
+        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 12h8m-4-4v8" /></g></svg> Create Trade';
       confirmButton.onclick = previewTrade;
 
       // Only try to append if both container and button exist

@@ -34,7 +34,22 @@
           type="button"
           aria-label="Close menu"
         >
-          <i class="bi bi-x-lg fs-4"></i>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 32 32"
+          >
+            <rect width="32" height="32" fill="none" />
+            <path
+              fill="currentColor"
+              d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+            />
+            <path
+              fill="currentColor"
+              d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
+            />
+          </svg>
         </button>
         <!-- Login/Profile Section (Added to side menu) -->
         <div class="mobile-profile-section mb-3 mt-4" id="mobileProfileSection">
@@ -235,28 +250,40 @@
         return `
           <div class="profile-actions">
             <a class="nav-link" href="/users/${userId}">
-              <i class="bi bi-person me-1"></i> Profile
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M8 7a4 4 0 1 1 8 0a4 4 0 0 1-8 0m0 6a5 5 0 0 0-5 5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3a5 5 0 0 0-5-5z" clip-rule="evenodd" />
+</svg>
+             Profile
             </a>
             ${
               !hasRoblox
                 ? `
             <a class="nav-link" href="/roblox">
-              <svg class="me-1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 24 24">
-                <path fill="#030000" d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"></path>
-              </svg> Authenticate with Roblox
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z" />
+</svg> Authenticate with Roblox
             </a>
             `
                 : ""
             }
             <a class="nav-link text-danger" href="" onclick="logout()">
-              <i class="bi bi-box-arrow-right me-1"></i> Log out
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
+</svg>
+              Log out
             </a>
           </div>
         `;
       } else {
         return `
           <a class="nav-link" href="/login">
-            <i class="bi bi-discord me-1"></i> Authenticate with Discord
+           <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
+	<rect width="256" height="199" fill="none" />
+	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
+</svg></i> Authenticate with Discord
           </a>
         `;
       }
@@ -271,7 +298,11 @@
         return `
           <li>
             <a class="dropdown-item" href="/users/${userId}">
-              <i class="bi bi-person me-1"></i> Profile
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M8 7a4 4 0 1 1 8 0a4 4 0 0 1-8 0m0 6a5 5 0 0 0-5 5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3a5 5 0 0 0-5-5z" clip-rule="evenodd" />
+</svg>
+               Profile
             </a>
           </li>
           ${
@@ -279,9 +310,10 @@
               ? `
           <li>
             <a class="dropdown-item" href="/roblox">
-              <svg class="me-1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 24 24">
-                <path fill="#030000" d="M20.4,5.6L7.6,2.4C7.466,2.366,7.331,2.35,7.199,2.35c-0.739,0-1.411,0.5-1.599,1.25L2.4,16.4	c-0.221,0.884,0.316,1.779,1.2,2l12.8,3.2c0.134,0.034,0.269,0.05,0.401,0.05c0.739,0,1.411-0.5,1.599-1.25l3.2-12.8	C21.821,6.716,21.284,5.821,20.4,5.6z M9.155,12.882l0.749-3c0.114-0.454,0.521-0.758,0.969-0.758c0.08,0,0.162,0.01,0.243,0.03	l3,0.75c0.536,0.134,0.861,0.677,0.728,1.213l-0.749,2.999c-0.114,0.454-0.521,0.758-0.969,0.758c-0.08,0-0.162-0.01-0.243-0.03	l-3-0.75C9.347,13.961,9.021,13.418,9.155,12.882z"></path>
-              </svg> Authenticate with Roblox
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z" />
+</svg> Authenticate with Roblox
             </a>
           </li>`
               : ""
@@ -289,7 +321,11 @@
           <li><hr class="dropdown-divider"></li>
           <li>
             <a class="dropdown-item text-danger" href="" onclick="logout()">
-              <i class="bi bi-box-arrow-right me-1"></i> Log out
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
+</svg>
+             Log out
             </a>
           </li>
         `;
@@ -297,7 +333,10 @@
         return `
           <li>
             <a class="dropdown-item" href="/login">
-              <i class="bi bi-discord me-1"></i> Authenticate with Discord
+              <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
+	<rect width="256" height="199" fill="none" />
+	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
+</svg></i> Authenticate with Discord
             </a>
           </li>
         `;

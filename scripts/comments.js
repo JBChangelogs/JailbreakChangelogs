@@ -53,7 +53,16 @@ class CommentsManager {
 
     this.input.disabled = false;
     this.input.placeholder = "Write a comment...";
-    this.submitBtn.textContent = "Submit";
+    this.submitBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none">
+		<path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z" />
+		<path fill="#fff" d="M20.235 5.686c.432-1.195-.726-2.353-1.921-1.92L3.709 9.048c-1.199.434-1.344 2.07-.241 2.709l4.662 2.699l4.163-4.163a1 1 0 0 1 1.414 1.414L9.544 15.87l2.7 4.662c.638 1.103 2.274.957 2.708-.241z" />
+	</g>
+</svg>
+        Submit
+    `;
     this.submitBtn.classList.add("btn-primary");
     this.submitBtn.classList.remove("btn-secondary");
     this.submitBtn.disabled = false; // Make sure to enable the submit button
@@ -248,7 +257,10 @@ class CommentsManager {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center" style="background-color: #212a31;">
             <div class="py-3">
-              <i class="bi bi-chat-left-dots mb-2" style="font-size: 1.5rem; color: #6c757d;"></i>
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
+          </svg>
               <p class="mb-0 text-muted">No comments yet</p>
               <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
             </div>
@@ -272,7 +284,10 @@ class CommentsManager {
       if (error.message === "rate_limit" || response?.status === 429) {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center text-warning">
-            <i class="bi bi-exclamation-triangle me-2"></i>
+           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
+          </svg>
             You're being rate limited. Please wait a moment before trying again.
           </li>
         `;
@@ -283,7 +298,10 @@ class CommentsManager {
       } else {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center text-danger">
-            <i class="bi bi-exclamation-circle me-2"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
+          </svg>
             Failed to load comments. Please try again.
           </li>
         `;
@@ -316,7 +334,10 @@ class CommentsManager {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center" style="background-color: #212a31;">
               <div class="py-3">
-                  <i class="bi bi-chat-left-dots mb-2" style="font-size: 1.5rem; color: #6c757d;"></i>
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
+              </svg>
                   <p class="mb-0 text-muted">No comments yet</p>
                   <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
               </div>
@@ -448,14 +469,23 @@ class CommentsManager {
                     ? `
                     <div class="comment-actions">
                         <button class="comment-actions-toggle" aria-label="Comment actions">
-                            <i class="bi bi-three-dots-vertical"></i>
+                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M9.5 13a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0" />
+</svg>
                         </button>
                         <div class="comment-actions-menu d-none">
                             <button class="comment-action-item edit-comment">
-                                <i class="bi bi-pencil me-2"></i>Edit
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="m14.06 9.02l.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83l3.75 3.75l1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z" />
+</svg>Edit
                             </button>
                             <button class="comment-action-item delete-comment delete">
-                                <i class="bi bi-trash me-2"></i>Delete
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>Delete
                             </button>
                         </div>
                     </div>
@@ -521,11 +551,17 @@ class CommentsManager {
     this.paginationControls.innerHTML = `
       <button class="btn btn-sm btn-primary pagination-btn me-2" 
               ${this.currentPage === 1 ? "disabled" : ""}>
-        <i class="bi bi-chevron-left"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="m14 18l-6-6l6-6l1.4 1.4l-4.6 4.6l4.6 4.6z" />
+</svg>
       </button>
       <button class="btn btn-sm btn-primary pagination-btn ms-2" 
               ${this.currentPage === totalPages ? "disabled" : ""}>
-        <i class="bi bi-chevron-right"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12.6 12L8 7.4L9.4 6l6 6l-6 6L8 16.6z" />
+</svg>
       </button>
     `;
 

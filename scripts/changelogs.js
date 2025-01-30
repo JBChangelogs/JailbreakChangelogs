@@ -313,10 +313,10 @@ $(document).ready(function () {
       $mobileDropdown.append(noDataItem);
       $desktopDropdown.append(noDataItem);
       $mobileDropdownButton.html(
-        '<i class="bi bi-calendar-event me-2"></i>No data for selected dates'
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates'
       );
       $desktopDropdownButton.html(
-        '<i class="bi bi-calendar-event me-2"></i>No data for selected dates'
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates'
       );
     } else {
       const sortedChangelogs = changelogs.sort((a, b) => b.id - a.id);
@@ -344,7 +344,8 @@ $(document).ready(function () {
 
       // Update the dropdown button text
       if (buttonText) {
-        const iconHtml = '<i class="bi bi-calendar-event me-2"></i>';
+        const iconHtml =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>';
         $mobileDropdownButton.html(`${iconHtml}${buttonText}`);
         $desktopDropdownButton.html(`${iconHtml}${buttonText}`);
       }
@@ -586,7 +587,8 @@ $(document).ready(function () {
     const $desktopDropdownButton = $("#desktopChangelogDropdown");
 
     // Start with the calendar icon
-    let buttonText = '<i class="bi bi-calendar-event me-2"></i>';
+    let buttonText =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>';
 
     // Set the button text based on the input
     if (text === "default") {
@@ -707,18 +709,31 @@ $(document).ready(function () {
           )}</h2>`; // Convert to H2
         } else if (line.startsWith("- - ")) {
           return `<div class="d-flex mb-2 position-relative">
-                          <i class="bi bi-arrow-return-right text-custom-icon position-absolute" style="left: 20px; font-size: 1.5rem;"></i>
-                          <p class="lead mb-0 ms-4 ps-4">${wrapMentions(
-                            line.substring(4)
-                          )}</p>
-                      </div>`; // Convert to styled list item
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16" class="position-absolute" style="left: 20px; top: 2px;">
+                          <rect width="16" height="16" fill="none" />
+                          <path fill="#748d92" fill-rule="evenodd" d="M1.5 1.5A.5.5 0 0 0 1 2v4.8a2.5 2.5 0 0 0 2.5 2.5h9.793l-3.347 3.346a.5.5 0 0 0 .708.708l4.2-4.2a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 8.3H3.5A1.5 1.5 0 0 1 2 6.8V2a.5.5 0 0 0-.5-.5" />
+                      </svg>
+                      <p class="lead mb-0 ms-4 ps-4">${wrapMentions(
+                        line.substring(4)
+                      )}</p>
+                  </div>`;
         } else if (line.startsWith("- ")) {
           return `<div class="d-flex mb-2 position-relative">
-                          <i class="bi bi-arrow-right text-custom-icon position-absolute" style="left: 0; font-size: 1.5rem;"></i>
-                          <p class="lead mb-0 ms-4 ps-1">${wrapMentions(
-                            line.substring(2)
-                          )}</p>
-                      </div>`; // Convert to another styled list item
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="position-absolute" style="left: 0; top: 2px;">
+                                      <rect width="24" height="24" fill="none" />
+                                      <g fill="none" stroke="#748d92" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                          <path stroke-dasharray="20" stroke-dashoffset="20" d="M3 12h17.5">
+                                              <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="20;0" />
+                                          </path>
+                                          <path stroke-dasharray="12" stroke-dashoffset="12" d="M21 12l-7 7M21 12l-7 -7">
+                                              <animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.2s" values="12;0" />
+                                          </path>
+                                      </g>
+                                  </svg>
+                                  <p class="lead mb-0 ms-4 ps-1">${wrapMentions(
+                                    line.substring(2)
+                                  )}</p>
+                              </div>`;
         } else if (
           line.startsWith("(audio)") ||
           line.startsWith("(video)") ||
@@ -818,7 +833,10 @@ $(document).ready(function () {
         $("#content").html(`
           <div class="api-error-container">
             <div class="api-error-icon">
-              <i class="bi bi-exclamation-triangle-fill"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
+</svg>
             </div>
             <h2 class="api-error-title">Unable to Load Data</h2>
             <p class="api-error-message">
@@ -836,7 +854,10 @@ $(document).ready(function () {
         $("#sidebarImage").html(`
           <div class="api-error-container">
             <div class="api-error-icon">
-              <i class="bi bi-exclamation-triangle-fill"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
+</svg>
             </div>
             <h2 class="api-error-title">Unable to Load Changelog Image</h2>
           </div>
@@ -1225,7 +1246,13 @@ $(document).ready(function () {
                             <div class="d-flex flex-column">
                                 <small class="text-muted mb-1">Previous Changelog</small>
                                 <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-arrow-left"></i>
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                      <rect width="24" height="24" fill="none" />
+                                      <g fill="none">
+                                        <path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                                        <path fill="currentColor" d="M3.283 10.94a1.5 1.5 0 0 0 0 2.12l5.656 5.658a1.5 1.5 0 1 0 2.122-2.122L7.965 13.5H19.5a1.5 1.5 0 0 0 0-3H7.965l3.096-3.096a1.5 1.5 0 1 0-2.122-2.121z" />
+                                      </g>
+                                    </svg>
                                     <span>${extractDate(
                                       prevChangelog.title
                                     )}</span>
@@ -1251,7 +1278,13 @@ $(document).ready(function () {
                                     <span>${extractDate(
                                       nextChangelog.title
                                     )}</span>
-                                    <i class="bi bi-arrow-right"></i>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                    <rect width="24" height="24" fill="none" />
+                                    <g fill="none">
+                                      <path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                                      <path fill="currentColor" d="m15.06 5.283l5.657 5.657a1.5 1.5 0 0 1 0 2.12l-5.656 5.658a1.5 1.5 0 0 1-2.122-2.122l3.096-3.096H4.5a1.5 1.5 0 0 1 0-3h11.535L12.94 7.404a1.5 1.5 0 0 1 2.122-2.121Z" />
+                                    </g>
+                                  </svg>
                                 </div>
                             </div>
                         </a>
