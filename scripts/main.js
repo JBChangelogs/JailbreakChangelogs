@@ -9,51 +9,31 @@ window.notyf = new Notyf({
       type: "info",
       background: "#2196f3",
       dismissible: true,
-      icon: {
-        className: "bi bi-info-circle",
-        tagName: "i",
-        color: "white",
-      },
+      icon: false,
     },
     {
       type: "success",
       background: "#4caf50",
       dismissible: true,
-      icon: {
-        className: "bi bi-check-circle",
-        tagName: "i",
-        color: "white",
-      },
+      icon: false,
     },
     {
       type: "warning",
       background: "#ff9800",
       dismissible: true,
-      icon: {
-        className: "bi bi-exclamation-triangle",
-        tagName: "i",
-        color: "white",
-      },
+      icon: false,
     },
     {
       type: "error",
       background: "#b20b0b",
       dismissible: true,
-      icon: {
-        className: "bi bi-exclamation-circle",
-        tagName: "i",
-        color: "white",
-      },
+      icon: false,
     },
     {
       type: "special",
-      background: "#9c27b0", // Purple color
+      background: "#9c27b0",
       dismissible: true,
-      icon: {
-        className: "bi bi-star-fill", // Star icon for special notifications
-        tagName: "i",
-        color: "white",
-      },
+      icon: false,
     },
   ],
   ripple: true,
