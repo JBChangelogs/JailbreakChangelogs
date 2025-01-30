@@ -27,18 +27,21 @@ const elements = {
 };
 
 const messages = {
-  loading: `
-    <div class="col-12 text-center py-5">
-      <div class="search-message text-muted">
-        <i class="bi bi-arrow-repeat spin me-2" style="color: var(--accent-color-light);"></i>
-        Loading users...
-      </div>
-    </div>
-  `,
+  // loading: `
+  //   <div class="col-12 text-center py-5">
+  //     <div class="search-message text-muted">
+  //       <i class="bi bi-arrow-repeat spin me-2" style="color: var(--accent-color-light);"></i>
+  //       Loading users...
+  //     </div>
+  //   </div>
+  // `,
   noUsers: `
     <div class="col-12 text-center py-5">
       <div class="no-results-message text-muted">
-        <i class="bi bi-exclamation-circle me-2"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0m9-3v4m0 3v.01" />
+</svg>
         No users found
       </div>
     </div>
@@ -46,7 +49,10 @@ const messages = {
   resultsCount: (count, isSearch = false) => `
   <div class="mb-3 text-center">
     <span class="badge bg-primary">
-      <i class="bi bi-people-fill me-1"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
+</svg>
       ${
         isSearch ? count : Math.max(...allUsers.map((user) => user.usernumber))
       } users found
@@ -57,7 +63,10 @@ const messages = {
   error: `
     <div class="col-12 text-center py-5">
       <div class="no-results-message text-muted">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12 16a1 1 0 1 0 1 1a1 1 0 0 0-1-1m10.67 1.47l-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53m-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51a1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1" />
+</svg>
         Unable to load users. Please try again later.
       </div>
     </div>
@@ -100,7 +109,10 @@ const createPaginationControls = (totalUsers) => {
           <a class="page-link" href="#" data-page="${
             currentPage - 1
           }" aria-label="Previous">
-            <i class="bi bi-chevron-left"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 7l-5 5l5 5" />
+</svg>
           </a>
         </li>
 
@@ -143,7 +155,10 @@ const createPaginationControls = (totalUsers) => {
           <a class="page-link" href="#" data-page="${
             currentPage + 1
           }" aria-label="Next">
-            <i class="bi bi-chevron-right"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 7l5 5l-5 5" />
+</svg>
           </a>
         </li>
       </ul>
@@ -335,7 +350,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch(`${API_BASE_URL}/users/list`);
     if (response.status === 404) {
       showMessage(messages.error);
-      elements.totalUsersCount.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Service unavailable`;
+      elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12 16a1 1 0 1 0 1 1a1 1 0 0 0-1-1m10.67 1.47l-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53m-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51a1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1" />
+</svg> Service unavailable`;
       return;
     }
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -345,7 +363,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Update total users count
     const totalUsers = Math.max(...users.map((user) => user.usernumber));
-    elements.totalUsersCount.innerHTML = `<i class="bi bi-person-lines-fill me-1"></i>Total Users: ${totalUsers.toLocaleString()}`;
+    elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
+</svg> Total Users: ${totalUsers.toLocaleString()}`;
 
     // Display initial user cards
     await displayUsers(users, 1);
@@ -353,7 +374,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error loading users:", error);
     showMessage(messages.error);
-    elements.totalUsersCount.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Service unavailable`;
+    elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12 16a1 1 0 1 0 1 1a1 1 0 0 0-1-1m10.67 1.47l-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53m-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51a1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1" />
+</svg> Service unavailable`;
   }
 
   // Event listeners

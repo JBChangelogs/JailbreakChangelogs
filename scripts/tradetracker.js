@@ -85,10 +85,13 @@ function displayData() {
       "d-flex flex-column align-items-center justify-content-center";
 
     // Add an icon
-    const icon = document.createElement("i");
-    icon.className = "bi bi-exclamation-circle mb-3";
-    icon.style.fontSize = "2.5rem";
-    icon.style.color = "#ff6b6b"; // Lighter, more vibrant red
+    const icon = document.createElement("div");
+    icon.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" class="mb-3">
+        <rect width="24" height="24" fill="none" />
+        <path fill="none" stroke="#ff6b6b" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0a9 9 0 0 1 18 0" />
+      </svg>
+    `;
 
     // Create and style the message
     const messageText = document.createElement("div");
