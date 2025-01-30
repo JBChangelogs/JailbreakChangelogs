@@ -2224,7 +2224,7 @@ async function previewTrade() {
 		<circle cx="12" cy="12" r="10" />
 		<path d="M8 12h8m-4-4v8" />
 	</g>
-</svg></i>Create Trade Ad
+</svg></i> Create Trade Ad
       </button>
     `;
   }
@@ -2412,15 +2412,27 @@ function renderValueDifferences() {
               ${cashDiff >= 0 ? "+" : ""}${formatValue(cashDiff, true)}
             </span>
           </div>
-          <div class="difference-indicator">
-            <i class="bi ${
-              cashDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : cashDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+        <div class="difference-indicator">
+          ${
+            cashDiff > 0
+              ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none" />
+                  <g fill="none" fill-rule="evenodd">
+                    <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                    <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                  </g>
+                </svg>`
+              : cashDiff < 0
+              ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none" />
+                  <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                </svg>`
+              : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                  <rect width="16" height="16" fill="none" />
+                  <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                </svg>`
+          }
+        </div>
         </div>
         <div class="difference-row">
           <div class="difference-label">
@@ -2432,14 +2444,26 @@ function renderValueDifferences() {
             </span>
           </div>
           <div class="difference-indicator">
-            <i class="bi ${
-              dupedDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : dupedDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+              ${
+                dupedDiff > 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <g fill="none" fill-rule="evenodd">
+                        <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                        <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                      </g>
+                    </svg>`
+                  : dupedDiff < 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                    </svg>`
+                  : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                      <rect width="16" height="16" fill="none" />
+                      <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                    </svg>`
+              }
+            </div>
         </div>
       </div>
     </div>

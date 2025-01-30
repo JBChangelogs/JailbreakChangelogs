@@ -1,12 +1,3 @@
-// Configure toastr
-toastr.options = {
-  positionClass: "toast-bottom-right",
-  closeButton: true,
-  progressBar: true,
-  preventDuplicates: true,
-  timeOut: 3000,
-};
-
 // Store all items and current trade items
 let allItems = [];
 const offeringItems = [];
@@ -49,7 +40,7 @@ async function loadItems() {
     displayAvailableItems("requesting");
   } catch (error) {
     console.error("Error loading items:", error);
-    toastr.error("Failed to load items");
+    notyf.error("Failed to load items");
   }
 }
 
@@ -124,44 +115,46 @@ function renderPreviewItems(containerId, items) {
       }
     });
 
-  // In both calculator.js and trading.js, update the itemsHtml section in renderPreviewItems:
-  const itemsHtml = uniqueItems
-    .map(
-      ({ item, count }) => `
-    <div class="preview-item" 
-         data-bs-toggle="tooltip" 
-         data-bs-placement="top" 
-         title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
-        item.demand || "N/A"
-      }">
-      <div class="preview-item-image-container">
-        ${getItemImageElement(item)}
-        ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
-      </div>
-      <div class="item-name">
-        ${item.name}
-        ${
-          item.is_limited
-            ? '<i class="bi bi-star-fill text-warning ms-1"></i>'
-            : ""
-        }
-      </div>
-      <div class="item-details">
-        <div class="demand-indicator demand-${(
-          item.demand || "0"
-        ).toLowerCase()}">
-          Demand: ${item.demand || "N/A"}
-        </div>
-      </div>
-    </div>
-  `
-    )
-    .join("");
+  // const itemsHtml = uniqueItems
+  //   .map(
+  //     ({ item, count }) => `
+  //   <div class="preview-item"
+  //        data-bs-toggle="tooltip"
+  //        data-bs-placement="top"
+  //        title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
+  //       item.demand || "N/A"
+  //     }">
+  //     <div class="preview-item-image-container">
+  //       ${getItemImageElement(item)}
+  //       ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
+  //     </div>
+  //     <div class="item-name">
+  //       ${item.name}
+  //       ${
+  //         item.is_limited
+  //           ? '<i class="bi bi-star-fill text-warning ms-1"></i>'
+  //           : ""
+  //       }
+  //     </div>
+  //     <div class="item-details">
+  //       <div class="demand-indicator demand-${(
+  //         item.demand || "0"
+  //       ).toLowerCase()}">
+  //         Demand: ${item.demand || "N/A"}
+  //       </div>
+  //     </div>
+  //   </div>
+  // `
+  //   )
+  //   .join("");
 
   const valuesHtml = `
     <div class="side-values-summary">
       <h6>
-        <i class="bi bi-calculator me-2"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+</svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
         } Totals
@@ -200,7 +193,10 @@ function renderValueDifferences() {
   return `
     <div class="value-differences">
       <h6 class="difference-title">
-        <i class="bi bi-arrow-left-right me-2"></i>Value Differences
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 6H3m18 0l-4 4m4-4l-4-4M3 18h18M3 18l4 4m-4-4l4-4" />
+</svg> Value Differences
       </h6>
       <div class="difference-content">
         <div class="difference-row">
@@ -212,15 +208,27 @@ function renderValueDifferences() {
               ${cashDiff >= 0 ? "+" : ""}${formatValue(cashDiff, true)}
             </span>
           </div>
-          <div class="difference-indicator">
-            <i class="bi ${
-              cashDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : cashDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+           <div class="difference-indicator">
+              ${
+                cashDiff > 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <g fill="none" fill-rule="evenodd">
+                        <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                        <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                      </g>
+                    </svg>`
+                  : cashDiff < 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                    </svg>`
+                  : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                      <rect width="16" height="16" fill="none" />
+                      <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                    </svg>`
+              }
+            </div>
         </div>
         <div class="difference-row">
           <div class="difference-label">
@@ -232,14 +240,26 @@ function renderValueDifferences() {
             </span>
           </div>
           <div class="difference-indicator">
-            <i class="bi ${
-              dupedDiff > 0
-                ? "bi-arrow-up-circle-fill text-success"
-                : dupedDiff < 0
-                ? "bi-arrow-down-circle-fill text-danger"
-                : "bi-dash-circle-fill text-muted"
-            }"></i>
-          </div>
+              ${
+                dupedDiff > 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <g fill="none" fill-rule="evenodd">
+                        <path d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.105.074l.014.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.092l.01-.009l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                        <path fill="#00c853" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m-4.242 9.996a1 1 0 0 0 1.414 0L11 10.167v6.076a1 1 0 1 0 2 0v-6.076l1.829 1.829a1 1 0 0 0 1.414-1.415l-3.536-3.535a1 1 0 0 0-1.414 0L7.758 10.58a1 1 0 0 0 0 1.415Z" />
+                      </g>
+                    </svg>`
+                  : dupedDiff < 0
+                  ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <rect width="24" height="24" fill="none" />
+                      <path fill="#ff5252" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m3.69 11.86l-3 2.86a.5.5 0 0 1-.15.1a.5.5 0 0 1-.16.1a.94.94 0 0 1-.76 0a1 1 0 0 1-.33-.21l-3-3a1 1 0 0 1 1.42-1.42l1.29 1.3V8a1 1 0 0 1 2 0v5.66l1.31-1.25a1 1 0 0 1 1.38 1.45" />
+                    </svg>`
+                  : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                      <rect width="16" height="16" fill="none" />
+                      <path fill="#748d92" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                    </svg>`
+              }
+            </div>
         </div>
       </div>
     </div>
@@ -250,7 +270,7 @@ function renderValueDifferences() {
 function addItemToTrade(item, tradeType) {
   const items = tradeType === "Offer" ? offeringItems : requestingItems;
   if (items.length >= 8) {
-    toastr.error(`You can only add up to 8 items to ${tradeType}`);
+    notyf.error(`You can only add up to 8 items to ${tradeType}`);
     return;
   }
 
@@ -258,7 +278,7 @@ function addItemToTrade(item, tradeType) {
   const itemCount = Object.values(items).filter((item) => item).length;
 
   if (itemCount >= 8) {
-    toastr.warning(`Maximum of 8 items reached for ${tradeType} side`, "", {
+    notyf.warning(`Maximum of 8 items reached for ${tradeType} side`, "", {
       timeOut: 2000,
       closeButton: true,
       progressBar: true,
@@ -329,7 +349,7 @@ function quickAddItem(itemName, itemType) {
 
         updatePreview(); // Add this line
       } else {
-        toastr.error("No empty slots available");
+        notyf.error("No empty slots available");
       }
       return;
     }
@@ -359,7 +379,7 @@ function quickAddItem(itemName, itemType) {
 
       updatePreview(); // Add this line
     } else {
-      toastr.error(
+      notyf.error(
         `No empty slots available in ${
           currentTradeType === "offering" ? "Offer" : "Request"
         }`
@@ -504,7 +524,13 @@ function displayAvailableItems(type) {
     container.innerHTML = `
       <div class="col-12 text-center py-4">
         <div class="no-results">
-          <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
+	<rect width="48" height="48" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		<path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
+		<path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
+	</g>
+</svg>
           <p class="mb-0">No ${selectedOption} found</p>
         </div>
       </div>
@@ -569,7 +595,20 @@ function displayAvailableItems(type) {
           <span class="info-value">
             ${
               item.is_limited
-                ? '<i class="bi bi-star-fill text-warning me-1"></i>Yes'
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                          <rect width="512" height="512" fill="none" />
+                          <defs>
+                            <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                              <stop offset="0" stop-color="#fcd966" />
+                              <stop offset=".5" stop-color="#fcd966" />
+                              <stop offset="1" stop-color="#fccd34" />
+                            </linearGradient>
+                          </defs>
+                          <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                            <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                            <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                          </path>
+                        </svg>Yes`
                 : "No"
             }
           </span>
@@ -597,13 +636,19 @@ function renderPagination(totalPages, type) {
       <button class="pagination-button" onclick="changePage(${
         currentPage - 1
       }, '${type}')" ${currentPage === 1 ? "disabled" : ""}>
-        <i class="bi bi-chevron-left"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 7l-5 5l5 5" />
+</svg>
       </button>
       <span class="pagination-info">Page ${currentPage} of ${totalPages}</span>
       <button class="pagination-button" onclick="changePage(${
         currentPage + 1
       }, '${type}')" ${currentPage === totalPages ? "disabled" : ""}>
-        <i class="bi bi-chevron-right"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 7l5 5l-5 5" />
+</svg>
       </button>
     </div>
   `;
@@ -726,7 +771,10 @@ function createPlaceholderCard(index, tradeType) {
         <div class="trade-card empty-slot" 
              onclick="handlePlaceholderClick(${index}, '${tradeType}')">
           <div class="empty-slot-content">
-            <i class="bi bi-plus-circle"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m1 5h-2v4H7v2h4v4h2v-4h4v-2h-4z" />
+</svg>
             <span>Empty Slot</span>
           </div>
         </div>
@@ -836,7 +884,10 @@ function renderTradeItems(tradeType) {
                     : ""
                 }
                 <div class="remove-icon" onclick="event.stopPropagation(); removeItem(${index}, '${tradeType}')">
-                  <i class="bi bi-trash"></i>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>
                 </div>
               </div>
               <div class="trade-card-info">
@@ -987,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (err) {
       console.error("Error restoring pending trade:", err);
-      toastr.error("Failed to restore your pending trade");
+      notyf.error("Failed to restore your pending trade");
     }
   }
 
@@ -1013,7 +1064,7 @@ function previewTrade() {
   );
 
   if (!hasOfferingItems || !hasRequestingItems) {
-    toastr.error(
+    notyf.error(
       "Please add at least one item to both offering and requesting sections"
     );
     return;
@@ -1067,45 +1118,57 @@ function renderPreviewItems(containerId, items) {
   const itemsHtml = uniqueItems
     .map(
       ({ item, count }) => `
-      <div class="trade-ad-item">
-        <div class="trade-ad-item-content">
-          <div class="item-image-container">
-            ${getItemImageElement(item)}
-            ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
-          </div>
-          <div class="item-details">
-            <div class="item-name">${item.name}</div>
-            <div class="item-values">
-              <div class="value-badge">
-                <span class="value-label">Cash Value:</span>
-                <span class="value-amount">${formatValue(
-                  item.cash_value,
-                  true
-                )}</span>
-              </div>
-              <div class="value-badge">
-                <span class="value-label">Duped Value:</span>
-                <span class="value-amount">${formatValue(
-                  item.duped_value || 0,
-                  true
-                )}</span>
-              </div>
-              <div class="value-badge">
-                <span class="value-label">Type:</span>
-                <span class="value-amount">${item.type}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="preview-item" 
+       data-bs-toggle="tooltip" 
+       data-bs-placement="top" 
+       title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
+        item.demand || "N/A"
+      }">
+    <div class="preview-item-image-container">
+      ${getItemImageElement(item)}
+      ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
+    </div>
+    <div class="item-name">
+      ${item.name}
+      ${
+        item.is_limited
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="none" />
+                <defs>
+                    <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#fcd966" />
+                        <stop offset=".5" stop-color="#fcd966" />
+                        <stop offset="1" stop-color="#fccd34" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                    <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                    <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                </path>
+            </svg>`
+          : ""
+      }
+    
+    </div>
+    <div class="item-details">
+      <div class="demand-indicator demand-${(
+        item.demand || "0"
+      ).toLowerCase()}">
+        Demand: ${item.demand || "N/A"}
       </div>
-    `
+    </div>
+  </div>
+`
     )
     .join("");
 
   const valuesHtml = `
     <div class="side-values-summary">
       <h6>
-        <i class="bi bi-calculator me-2"></i>
+       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+</svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
         } Totals
@@ -1138,20 +1201,6 @@ function editTrade() {
   document.getElementById("available-items-list").style.display = "block";
   document.getElementById("confirm-trade-btn").style.display = "block";
   document.getElementById("trade-preview").style.display = "none";
-}
-
-async function submitTrade() {
-  // Show a simple message when trade is submitted
-  toastr.info("This is a demo version. Trade submission is disabled.");
-
-  // Reset button state after showing message
-  const submitButton = document.querySelector(
-    "#trade-preview-container .btn-success"
-  );
-  if (submitButton) {
-    submitButton.disabled = false;
-    submitButton.innerHTML = '<i class="bi bi-upload me-2"></i>Post Trade';
-  }
 }
 
 function calculateTotalValue(items, valueType) {
