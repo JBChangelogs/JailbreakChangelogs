@@ -949,6 +949,16 @@ app.get("/tradetracker", (req, res) => {
   });
 });
 
+app.get("/roadmap", (req, res) => {
+  res.render("roadmap", {
+    title: "Roadmap / Changelogs",
+    logoUrl: "/assets/logos/JB Changelogs Banner.webp",
+    logoAlt: "Roadmap Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
+});
+
 app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 12) + 1;
   const image = `/assets/backgrounds/background${randomNumber}.webp`;
