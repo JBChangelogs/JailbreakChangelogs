@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Get logged in user from session storage
-  const loggedInUserId = sessionStorage.getItem("userid");
+  const loggedInUserId = localStorage.getItem("userid");
   const path = window.location.pathname;
   const segments = path.split("/");
   const userId = segments[2];

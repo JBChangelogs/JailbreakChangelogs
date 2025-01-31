@@ -407,7 +407,7 @@ async function loadTradeData() {
 
     // Update trade actions
     const actionsContainer = document.querySelector(".trade-actions");
-    if (trade.author === sessionStorage.getItem("userid")) {
+    if (trade.author === localStorage.getItem("userid")) {
       actionsContainer.innerHTML = `
           <a href="/trading?edit=${tradeId}" class="btn btn-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">

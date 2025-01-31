@@ -42,11 +42,17 @@ window.notyf = new Notyf({
 });
 
 window.notyf.info = (message) => window.notyf.open({ type: "info", message });
+
 window.notyf.success = (message) =>
   window.notyf.open({ type: "success", message });
+
 window.notyf.warning = (message) =>
   window.notyf.open({ type: "warning", message });
+
 window.notyf.error = (message) => window.notyf.open({ type: "error", message });
+
+window.notyf.special = (message) =>
+  window.notyf.open({ type: "special", message });
 
 function cleanupURL() {
   const url = new URL(window.location);
@@ -62,8 +68,8 @@ document.addEventListener("DOMContentLoaded", function () {
     '[data-bs-target="#reportIssueModal"]'
   );
   const token = Cookies.get("token");
-  const userId = sessionStorage.getItem("userId");
-  const userData = sessionStorage.getItem("user");
+  const userId = localStorage.getItem("userId");
+  const userData = localStorage.getItem("user");
 
   // Check for stored redirect first
   if (token && localStorage.getItem("reportIssueRedirect")) {
@@ -319,14 +325,33 @@ function updateVersionDisplay(data) {
 document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("freshlogin")) {
+    // Get user data from localStorage
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    if (userData && userData.usernumber) {
+      notyf.special(
+        `Welcome to Jailbreak Changelogs! You are user #${userData.usernumber}`
+      );
+
+      // Clean up the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }
+
   const token = Cookies.get("token");
-  const user = sessionStorage.getItem("user");
-  const userid = sessionStorage.getItem("userid");
+  const user = localStorage.getItem("user");
+  const userid = localStorage.getItem("userid");
 
   function clearSessionAndReload() {
+    localStorage.removeItem("avatar");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userid");
     Cookies.remove("token");
-    sessionStorage.clear();
+    window.location.href = "/";
   }
+
   // Check and clear invalid session state
   if (!token && (user || userid)) {
     clearSessionAndReload();
@@ -350,9 +375,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Check and set avatar
       const avatarUrl = await window.checkAndSetAvatar(userData);
-      sessionStorage.setItem("avatar", avatarUrl);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      sessionStorage.setItem("userid", userData.id);
+      localStorage.setItem("avatar", avatarUrl);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userid", userData.id);
 
       // Update profile pictures if they exist
       const profilePicture = document.getElementById("profile-picture");
@@ -368,7 +393,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      clearSessionAndReload();
+      // Clear all user data
+      localStorage.removeItem("avatar");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userid");
+      Cookies.remove("token");
+
+      // Redirect to home page
+      window.location.href = "/";
     }
   }
 
@@ -539,9 +571,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           Cookies.remove("token");
           Cookies.set("token", token, { expires: 7 });
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          sessionStorage.setItem("user", JSON.stringify(userData));
-          sessionStorage.setItem("avatar", avatarURL);
-          sessionStorage.setItem("userid", userData.id);
+          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem("avatar", avatarURL);
+          localStorage.setItem("userid", userData.id);
           closeModal();
           window.location.reload();
         })
