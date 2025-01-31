@@ -42,11 +42,17 @@ window.notyf = new Notyf({
 });
 
 window.notyf.info = (message) => window.notyf.open({ type: "info", message });
+
 window.notyf.success = (message) =>
   window.notyf.open({ type: "success", message });
+
 window.notyf.warning = (message) =>
   window.notyf.open({ type: "warning", message });
+
 window.notyf.error = (message) => window.notyf.open({ type: "error", message });
+
+window.notyf.special = (message) =>
+  window.notyf.open({ type: "special", message });
 
 function cleanupURL() {
   const url = new URL(window.location);
@@ -318,6 +324,29 @@ function updateVersionDisplay(data) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("freshlogin")) {
+    // Get user data from localStorage
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (userData && userData.usernumber) {
+      // Welcome message
+      notyf.special("Welcome to Jailbreak Changelogs!");
+
+      // Special user number message
+      setTimeout(() => {
+        notyf.open({
+          type: "special",
+          message: `You are user #${userData.usernumber}`,
+        });
+      }, 500); // Small delay between toasts
+
+      // Clean up the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }
 
   const token = Cookies.get("token");
   const user = localStorage.getItem("user");

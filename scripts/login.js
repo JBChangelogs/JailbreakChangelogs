@@ -79,7 +79,7 @@ $(document).ready(function () {
             localStorage.removeItem("reportIssueRedirect");
             window.location.href = "/?report-issue";
           } else {
-            window.location.href = "/";
+            window.location.href = "/?freshlogin=true";
           }
           return;
         }
@@ -91,7 +91,7 @@ $(document).ready(function () {
           );
           setTimeout(() => {
             window.location.href = "/";
-          }, 4500);
+          }, 3500);
         } else {
           console.error("Login error:", error);
           window.location.href = "/";
