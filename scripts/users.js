@@ -1956,16 +1956,16 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
 
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/users/delete",
+        `https://api3.jailbreakchangelogs.xyz/users/delete?token=${encodeURIComponent(
+          token
+        )}`,
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
             "Cache-Control": "no-cache, no-store, must-revalidate",
             Pragma: "no-cache",
             Expires: "0",
           },
-          body: JSON.stringify({ user: token }),
         }
       );
 
