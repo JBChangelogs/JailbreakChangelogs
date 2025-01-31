@@ -370,9 +370,23 @@
     });
 
     window.logout = function () {
-      Cookies.remove("token");
+      // Remove auth-related data from localStorage
+      localStorage.removeItem("user");
+      localStorage.removeItem("avatar");
+      localStorage.removeItem("userid");
+
+      // Remove token cookie
+      Cookies.remove("token", {
+        path: "/",
+        secure: true,
+        sameSite: "Strict",
+      });
+
+      // Update UI
       updateContent();
-      window.location.reload();
+
+      // Redirect to home page
+      window.location.href = "/";
     };
 
     updateContent();
