@@ -444,6 +444,10 @@ class CommentsManager {
       ? await window.checkAndSetAvatar(userDetails)
       : fallbackAvatar;
 
+    const userNameElement = userDetails?.isDeleted
+      ? `<span class="comment-author text-muted">${displayName}</span>`
+      : `<a href="/users/${comment.user_id}" class="comment-author">${displayName}</a>`;
+
     li.innerHTML = `
     <div class="d-flex align-items-start">
         <img src="${avatarUrl}" 
@@ -456,9 +460,7 @@ class CommentsManager {
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="mb-0">
-                        <a href="/users/${
-                          comment.user_id
-                        }" class="comment-author">${displayName}</a>
+                     ${userNameElement}
                     </h6>
                     <small class="text-muted">
                         ${displayDate}
@@ -541,6 +543,7 @@ class CommentsManager {
           global_name: "Deleted User",
           id: userId,
           avatar: null, // No avatar for deleted users
+          isDeleted: true,
         };
       }
 
