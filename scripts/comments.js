@@ -533,11 +533,22 @@ class CommentsManager {
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}`
       );
+
+      // If user is not found (404), return default deleted user data
+      if (response.status === 404) {
+        return {
+          username: "Deleted User",
+          global_name: "Deleted User",
+          id: userId,
+          avatar: null, // No avatar for deleted users
+        };
+      }
+
       if (!response.ok) throw new Error("Failed to fetch user details");
       return await response.json();
     } catch (error) {
       console.error("Error fetching user details:", error);
-      return null;
+      return;
     }
   }
 
