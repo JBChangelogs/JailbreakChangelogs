@@ -243,11 +243,23 @@ const showMessage = (message) => {
   elements.userResults.style.display = "block";
 };
 
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 // User Display Logic
 const displayUsers = async (users, page = 1) => {
+  // Shuffle the users array before pagination
+  const shuffledUsers = shuffleArray(users);
+
   const startIndex = (page - 1) * USERS_PER_PAGE;
   const endIndex = startIndex + USERS_PER_PAGE;
-  const usersToDisplay = users.slice(startIndex, endIndex);
+  const usersToDisplay = shuffledUsers.slice(startIndex, endIndex);
 
   const userCards = await Promise.all(
     usersToDisplay.map((user) => createUserCard(user))
