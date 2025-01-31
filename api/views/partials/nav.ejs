@@ -216,7 +216,7 @@
 
     // Simply check if token cookie exists
     const isLoggedIn = !!Cookies.get("token");
-    const avatarUrl = sessionStorage.getItem("avatar");
+    const avatarUrl = localStorage.getItem("avatar");
 
     async function setProfilePictureSrc(imgElement, src) {
       if (imgElement) {
@@ -224,7 +224,7 @@
           if (src) {
             imgElement.src = src;
           } else {
-            const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+            const userData = JSON.parse(localStorage.getItem("user") || "{}");
             if (userData.id) {
               const avatarUrl = await window.checkAndSetAvatar(userData);
               imgElement.src = avatarUrl;
@@ -243,7 +243,7 @@
 
     function getProfileContent(isLoggedIn) {
       if (isLoggedIn) {
-        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
         const hasRoblox = userData.roblox_id != null;
         const userId = userData.id;
 
@@ -291,7 +291,7 @@
 
     function getDropdownContent(isLoggedIn) {
       if (isLoggedIn) {
-        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
         const hasRoblox = userData.roblox_id != null;
         const userId = userData.id;
 
@@ -345,7 +345,7 @@
 
     function updateContent() {
       if (isLoggedIn) {
-        const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
         if (!userData.id) {
           setTimeout(updateContent, 100);
           return;

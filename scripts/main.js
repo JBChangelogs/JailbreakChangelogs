@@ -62,8 +62,8 @@ document.addEventListener("DOMContentLoaded", function () {
     '[data-bs-target="#reportIssueModal"]'
   );
   const token = Cookies.get("token");
-  const userId = sessionStorage.getItem("userId");
-  const userData = sessionStorage.getItem("user");
+  const userId = localStorage.getItem("userId");
+  const userData = localStorage.getItem("user");
 
   // Check for stored redirect first
   if (token && localStorage.getItem("reportIssueRedirect")) {
@@ -320,12 +320,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
   const token = Cookies.get("token");
-  const user = sessionStorage.getItem("user");
-  const userid = sessionStorage.getItem("userid");
+  const user = localStorage.getItem("user");
+  const userid = localStorage.getItem("userid");
 
   function clearSessionAndReload() {
     Cookies.remove("token");
-    sessionStorage.clear();
+    // sessionStorage.clear();
   }
   // Check and clear invalid session state
   if (!token && (user || userid)) {
@@ -350,9 +350,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Check and set avatar
       const avatarUrl = await window.checkAndSetAvatar(userData);
-      sessionStorage.setItem("avatar", avatarUrl);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      sessionStorage.setItem("userid", userData.id);
+      localStorage.setItem("avatar", avatarUrl);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userid", userData.id);
 
       // Update profile pictures if they exist
       const profilePicture = document.getElementById("profile-picture");
@@ -539,9 +539,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           Cookies.remove("token");
           Cookies.set("token", token, { expires: 7 });
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          sessionStorage.setItem("user", JSON.stringify(userData));
-          sessionStorage.setItem("avatar", avatarURL);
-          sessionStorage.setItem("userid", userData.id);
+          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem("avatar", avatarURL);
+          localStorage.setItem("userid", userData.id);
           closeModal();
           window.location.reload();
         })

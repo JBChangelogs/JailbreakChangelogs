@@ -785,7 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Add favorite status to items if user is logged in and we have user data
       const token = Cookies.get("token");
-      const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
       if (token && userData.id) {
         try {
@@ -1080,7 +1080,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Format values
     const cashValue = formatValue(item.cash_value);
     const dupedValue = formatValue(item.duped_value);
-    // Add this function to values.js
     window.handleFavorite = async function (event, itemId) {
       event.preventDefault();
       event.stopPropagation();
@@ -1094,10 +1093,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const iconElement = event.target
+      // Update this section to work with SVG
+      const svgPath = event.target
         .closest(".favorite-icon")
-        .querySelector("i");
-      const isFavorited = iconElement.classList.contains("bi-star-fill");
+        .querySelector("path");
+      const isFavorited = svgPath.getAttribute("fill") === "#f8ff00";
 
       try {
         const response = await fetch(
@@ -1106,12 +1106,11 @@ document.addEventListener("DOMContentLoaded", () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-
               Origin: "https://jailbreakchangelogs.xyz",
             },
             body: JSON.stringify({
               item_id: itemId,
-              owner: token, // Just send the token directly
+              owner: token,
             }),
           }
         );
@@ -1120,9 +1119,14 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error(`Request failed with status ${response.status}`);
         }
 
-        // Success case
-        iconElement.classList.toggle("bi-star");
-        iconElement.classList.toggle("bi-star-fill");
+        // Update SVG appearance
+        if (isFavorited) {
+          svgPath.setAttribute("fill", "none");
+          svgPath.setAttribute("stroke", "#f8ff00");
+        } else {
+          svgPath.setAttribute("fill", "#f8ff00");
+          svgPath.setAttribute("stroke", "none");
+        }
 
         const item = allItems.find((item) => item.id === itemId);
         if (item) {

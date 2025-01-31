@@ -10,7 +10,7 @@ let startY = 0;
 let currentY = 0;
 let initialTransform = 0;
 let tradeSortOrder = "latest";
-const currentUserId = sessionStorage.getItem("userid");
+const currentUserId = localStorage.getItem("userid");
 const TRADES_PER_PAGE = 6;
 let currentTradesPage = 1;
 let allTradeAds = [];
@@ -2543,7 +2543,7 @@ async function createTradeAd() {
     }
 
     // Get user ID from session storage
-    const userId = sessionStorage.getItem("userid");
+    const userId = localStorage.getItem("userid");
     if (!userId) {
       notyf.error("User session not found. Please login again");
       return;

@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Get if we're in private profile view
   const isPrivateView =
     permissions.profile_public === 0 &&
-    sessionStorage.getItem("userid") !== pathSegments[pathSegments.length - 1];
+    localStorage.getItem("userid") !== pathSegments[pathSegments.length - 1];
 
   // If we're in private view, don't proceed with button-related code
   if (isPrivateView) {
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "recent-comments-button"
   );
 
-  const loggedinuserId = sessionStorage.getItem("userid");
+  const loggedinuserId = localStorage.getItem("userid");
   const userId = pathSegments[pathSegments.length - 1];
   const card_pagination = document.getElementById("card-pagination");
   const userBanner = document.getElementById("banner");
@@ -1442,15 +1442,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserFollowers(userId) {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`,
-        {
-          headers: {
-            Authorization: sessionStorage.getItem("userid"),
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-            // Add any other required headers
-          },
-        }
+        `https://api3.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
       );
 
       // Handle 404 as a valid "no followers" response
