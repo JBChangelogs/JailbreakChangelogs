@@ -329,18 +329,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (urlParams.has("freshlogin")) {
     // Get user data from localStorage
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
-
     if (userData && userData.usernumber) {
-      // Welcome message
-      notyf.special("Welcome to Jailbreak Changelogs!");
-
-      // Special user number message
-      setTimeout(() => {
-        notyf.open({
-          type: "special",
-          message: `You are user #${userData.usernumber}`,
-        });
-      }, 500); // Small delay between toasts
+      notyf.special(
+        `Welcome to Jailbreak Changelogs! You are user #${userData.usernumber}`
+      );
 
       // Clean up the URL
       const newUrl = window.location.pathname;
