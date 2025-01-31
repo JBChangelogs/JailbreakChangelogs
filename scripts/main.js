@@ -353,9 +353,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userid = localStorage.getItem("userid");
 
   function clearSessionAndReload() {
+    localStorage.removeItem("avatar");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userid");
     Cookies.remove("token");
-    // sessionStorage.clear();
+    window.location.href = "/";
   }
+
   // Check and clear invalid session state
   if (!token && (user || userid)) {
     clearSessionAndReload();
@@ -397,7 +401,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      clearSessionAndReload();
+      // Clear all user data
+      localStorage.removeItem("avatar");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userid");
+      Cookies.remove("token");
+
+      // Redirect to home page
+      window.location.href = "/";
     }
   }
 

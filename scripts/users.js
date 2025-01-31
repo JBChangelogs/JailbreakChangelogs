@@ -1919,4 +1919,86 @@ document.addEventListener("DOMContentLoaded", function () {
   close_settings_button.addEventListener("click", function () {
     settings_modal.style.display = "none";
   });
+
+  // Delete account functionality
+  const deleteAccountButton = document.getElementById("delete-account-button");
+  const deleteConfirmation = document.getElementById("delete-confirmation");
+  const confirmDeleteButton = document.getElementById("confirm-delete");
+  const cancelDeleteButton = document.getElementById("cancel-delete");
+
+  deleteAccountButton.addEventListener("click", function () {
+    deleteConfirmation.style.display = "block";
+    deleteAccountButton.style.display = "none";
+  });
+
+  cancelDeleteButton.addEventListener("click", function () {
+    deleteConfirmation.style.display = "none";
+    deleteAccountButton.style.display = "block";
+  });
+
+  confirmDeleteButton.addEventListener("click", async function () {
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        toastControl.showToast(
+          "error",
+          "You must be logged in to delete your account",
+          "Error"
+        );
+        return;
+      }
+
+      // Disable the button and show loading state
+      confirmDeleteButton.disabled = true;
+      confirmDeleteButton.innerHTML = `
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Deleting...
+    `;
+
+      const response = await fetch(
+        "https://api3.jailbreakchangelogs.xyz/users/delete",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+          body: JSON.stringify({ user: token }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Show success message
+      toastControl.showToast(
+        "success",
+        "Account deleted successfully. Redirecting...",
+        "Success"
+      );
+
+      // Clear cookies and local storage
+      Cookies.remove("token");
+      localStorage.clear();
+
+      // Redirect to home page after a short delay
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toastControl.showToast(
+        "error",
+        "Failed to delete account. Please try again.",
+        "Error"
+      );
+
+      // Reset button state
+      confirmDeleteButton.disabled = false;
+      confirmDeleteButton.innerHTML = "Yes, Delete My Account";
+    }
+  });
 });
