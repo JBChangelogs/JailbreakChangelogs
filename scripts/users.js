@@ -92,6 +92,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const input = document.getElementById("bannerInput");
   const save_settings_button = document.getElementById("settings-submit");
   const save_settings_loading = document.getElementById("settings-loading");
+  const hide_favorites_button = document.getElementById(
+    "hide-favorites-button"
+  );
 
   if (earlyBadge) {
     earlyBadge.addEventListener("click", function () {
@@ -160,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       show_comments_button,
       hide_following_button,
       hide_followers_button,
+      hide_favorites_button,
       use_discord_banner_button,
     ];
 
@@ -227,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
     show_comments_button,
     hide_following_button,
     hide_followers_button,
+    hide_favorites_button,
     use_discord_banner_button,
   ].forEach((button) => {
     button.addEventListener("click", function (event) {
@@ -289,6 +294,11 @@ document.addEventListener("DOMContentLoaded", function () {
           ? 1
           : 0,
         banner_discord: use_discord_banner_button
+          .querySelector("i")
+          .innerHTML.includes("M12.736 3.97")
+          ? 1
+          : 0,
+        hide_favorites: hide_favorites_button
           .querySelector("i")
           .innerHTML.includes("M12.736 3.97")
           ? 1
@@ -1887,6 +1897,26 @@ document.addEventListener("DOMContentLoaded", function () {
                   console.error("Error fetching custom banner:", error);
                 });
             }
+            break;
+          case "hide_favorites":
+            const hideFavoritesIcon = document.createElement("i");
+            hideFavoritesIcon.innerHTML =
+              value === 1
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                  <rect width="16" height="16" fill="none" />
+                  <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
+              </svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                  <rect width="16" height="16" fill="none" />
+                  <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+              </svg>`;
+
+            hide_favorites_button.classList.remove("btn-danger", "btn-success");
+            hide_favorites_button.classList.add(
+              "btn",
+              value === 1 ? "btn-success" : "btn-danger"
+            );
+            hide_favorites_button.innerHTML = hideFavoritesIcon.outerHTML;
             break;
         }
       }
