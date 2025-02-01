@@ -1093,7 +1093,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Update this section to work with SVG
+      // Get the SVG path element
       const svgPath = event.target
         .closest(".favorite-icon")
         .querySelector("path");
@@ -1101,9 +1101,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const response = await fetch(
-          "https://api3.jailbreakchangelogs.xyz/favorites/add",
+          `https://api3.jailbreakchangelogs.xyz/favorites/${
+            isFavorited ? "remove" : "add"
+          }`,
           {
-            method: "POST",
+            method: isFavorited ? "DELETE" : "POST", // Use DELETE for remove, POST for add
             headers: {
               "Content-Type": "application/json",
               Origin: "https://jailbreakchangelogs.xyz",
@@ -1128,11 +1130,13 @@ document.addEventListener("DOMContentLoaded", () => {
           svgPath.setAttribute("stroke", "none");
         }
 
+        // Update item's favorite status in allItems array
         const item = allItems.find((item) => item.id === itemId);
         if (item) {
           item.is_favorite = !isFavorited;
         }
 
+        // Show success message
         notyf.success(
           isFavorited
             ? "Item removed from favorites"
