@@ -370,34 +370,50 @@
           <!-- Comments Section -->
           <div class="row mb-4">
             <div class="col-12">
-              <!-- Comments content... -->
-              <div
-                class="d-flex flex-wrap justify-content-between align-items-center mb-3"
-              >
-                <h5 class="mb-2 mb-sm-0">Recent Comments</h5>
-                <div
-                  class="card-pagination"
-                  id="card-pagination"
-                  style="display: none; align-items: center; margin-bottom: 0"
-                >
-                  <div
-                    id="paginationControls"
-                    class="pagination d-flex align-items-center hidden"
-                  ></div>
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <!-- Add tab navigation -->
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">
+                      Recent Comments
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab">
+                      Favorite Items
+                    </button>
+                  </li>
+                </ul>
+                
+                <div class="card-pagination" id="card-pagination" style="display: none; align-items: center; margin-bottom: 0">
+                  <div id="paginationControls" class="pagination d-flex align-items-center hidden"></div>
                 </div>
               </div>
-
-              <div class="card bg-dark text-light">
-                <div class="card-body p-0">
-                  <div id="comments-list" class="comments-container">
-                    <div class="comments-loading">
-                      <div class="spinner-wrapper">
-                        <span
-                          id="loading-spinner"
-                          class="spinner-border"
-                          role="status"
-                          aria-hidden="true"
-                        ></span>
+          
+              <div class="tab-content">
+                <!-- Comments tab -->
+                <div class="tab-pane fade show active" id="comments" role="tabpanel">
+                  <div class="card bg-dark text-light">
+                    <div class="card-body p-0">
+                      <div id="comments-list" class="comments-container">
+                        <div class="comments-loading">
+                          <div class="spinner-wrapper">
+                            <span id="loading-spinner" class="spinner-border" role="status" aria-hidden="true"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <!-- Favorites tab -->
+                <div class="tab-pane fade" id="favorites" role="tabpanel">
+                  <div class="card bg-dark text-light">
+                    <div class="card-body p-0">
+                      <div id="favorites-container" class="favorites-container">
+                        <div class="row g-3" id="favorites-grid">
+                          <!-- Favorites will be populated here -->
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -405,6 +421,7 @@
               </div>
             </div>
           </div>
+          
         </div>
       </div>
     </div>

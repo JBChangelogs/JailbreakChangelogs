@@ -441,7 +441,7 @@ body {
   margin: 0 auto;
   margin-left: 0;
   margin-right: 0;
-  background-color: #2e3944;
+  background-color: var(--bg-primary) !important;
   border-radius: 12px;
   padding: 24px;
 }
@@ -489,7 +489,7 @@ body {
 
 /* Enhanced Contributors Section Styling */
 .contributor-card {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   border: none;
   transition: transform 0.2s ease;
 }
@@ -550,7 +550,7 @@ body {
   display: flex;
   align-items: center;
   padding: 1rem;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   border-radius: 12px;
   transition: all 0.3s ease;
   border: 1px solid transparent;

@@ -6,6 +6,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const permissions = JSON.parse(settings);
   const udata = JSON.parse(userData);
 
+  const favoritesTab = document.getElementById("favorites-tab");
+  if (favoritesTab) {
+    favoritesTab.addEventListener("click", function () {
+      currentPage = 1; // Reset to first page when switching tabs
+      const userId = window.location.pathname.split("/").pop();
+      fetchUserFavorites(userId);
+    });
+  }
+
   // Handle Discord connection
   const discordConnection = document.getElementById("discord-connection");
   if (discordConnection) {
@@ -1061,7 +1070,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const doubleLeftArrow = createButton("<<", currentPage === 1, () => {
       if (currentPage > 1) {
         currentPage = 1;
-        fetchUserComments(userId);
+        const activeTab = document.querySelector(".nav-link.active").id;
+        if (activeTab === "favorites-tab") {
+          fetchUserFavorites(userId);
+        } else {
+          fetchUserComments(userId);
+        }
       }
     });
     paginationContainer.appendChild(doubleLeftArrow);
@@ -1070,7 +1084,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const leftArrow = createButton("<", currentPage === 1, () => {
       if (currentPage > 1) {
         currentPage--;
-        fetchUserComments(userId);
+        const activeTab = document.querySelector(".nav-link.active").id;
+        if (activeTab === "favorites-tab") {
+          fetchUserFavorites(userId);
+        } else {
+          fetchUserComments(userId);
+        }
       }
     });
     paginationContainer.appendChild(leftArrow);
@@ -1096,7 +1115,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const newPage = parseInt(pageInput.value);
       if (newPage >= 1 && newPage <= totalPages) {
         currentPage = newPage;
-        fetchUserComments(userId);
+        const activeTab = document.querySelector(".nav-link.active").id;
+        if (activeTab === "favorites-tab") {
+          fetchUserFavorites(userId);
+        } else {
+          fetchUserComments(userId);
+        }
       } else {
         pageInput.value = currentPage;
       }
@@ -1107,7 +1131,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const rightArrow = createButton(">", currentPage === totalPages, () => {
       if (currentPage < totalPages) {
         currentPage++;
-        fetchUserComments(userId);
+        const activeTab = document.querySelector(".nav-link.active").id;
+        if (activeTab === "favorites-tab") {
+          fetchUserFavorites(userId);
+        } else {
+          fetchUserComments(userId);
+        }
       }
     });
     paginationContainer.appendChild(rightArrow);
@@ -1118,7 +1147,12 @@ document.addEventListener("DOMContentLoaded", function () {
       currentPage === totalPages,
       () => {
         currentPage = totalPages;
-        fetchUserComments(userId);
+        const activeTab = document.querySelector(".nav-link.active").id;
+        if (activeTab === "favorites-tab") {
+          fetchUserFavorites(userId);
+        } else {
+          fetchUserComments(userId);
+        }
       }
     );
     paginationContainer.appendChild(doubleRightArrow);
@@ -1129,20 +1163,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchUserComments(userId) {
     const recentComments = document.getElementById("comments-list");
-    let loadingSpinner = document.getElementById("loading-spinner");
 
-    if (!recentComments) {
-      console.error("comments-list element not found");
-      return;
-    }
+    // Show loading spinner in card body
+    recentComments.innerHTML = `
+      <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
+        <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 200px;">
+          <div class="text-center">
+            <div class="spinner-border text-light mb-2" role="status">
+              <span class="visually-hidden">Loading recent comments...</span>
+            </div>
+            <p class="mb-0">Loading recent comments...</p>
+          </div>
+        </div>
+      </div>`;
 
     try {
-      recentComments.innerHTML = `
-            <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
-                <span class="text-light mb-2">Loading comments...</span>
-                <span id="loading-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            </div>`;
-
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
@@ -1286,19 +1321,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
       recentComments.innerHTML = `
         <div class="text-center p-3" style="color: #748D92;">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<g fill="none">
-		<path fill="#748D92" d="m13.087 21.388l.645.382zm.542-.916l-.646-.382zm-3.258 0l-.645.382zm.542.916l.646-.382zm-8.532-5.475l.693-.287zm5.409 3.078l-.013.75zm-2.703-.372l-.287.693zm16.532-2.706l.693.287zm-5.409 3.078l-.012-.75zm2.703-.372l.287.693zm.7-15.882l-.392.64zm1.65 1.65l.64-.391zM4.388 2.738l-.392-.64zm-1.651 1.65l-.64-.391zM9.403 19.21l.377-.649zm4.33 2.56l.541-.916l-1.29-.764l-.543.916zm-4.007-.916l.542.916l1.29-.764l-.541-.916zm2.715.152a.52.52 0 0 1-.882 0l-1.291.764c.773 1.307 2.69 1.307 3.464 0zM10.5 2.75h3v-1.5h-3zm10.75 7.75v1h1.5v-1zm-18.5 1v-1h-1.5v1zm-1.5 0c0 1.155 0 2.058.05 2.787c.05.735.153 1.347.388 1.913l1.386-.574c-.147-.352-.233-.782-.278-1.441c-.046-.666-.046-1.51-.046-2.685zm6.553 6.742c-1.256-.022-1.914-.102-2.43-.316L4.8 19.313c.805.334 1.721.408 2.977.43zM1.688 16.2A5.75 5.75 0 0 0 4.8 19.312l.574-1.386a4.25 4.25 0 0 1-2.3-2.3zm19.562-4.7c0 1.175 0 2.019-.046 2.685c-.045.659-.131 1.089-.277 1.441l1.385.574c.235-.566.338-1.178.389-1.913c.05-.729.049-1.632.049-2.787zm-5.027 8.241c1.256-.021 2.172-.095 2.977-.429l-.574-1.386c-.515.214-1.173.294-2.428.316zm4.704-4.115a4.25 4.25 0 0 1-2.3 2.3l.573 1.386a5.75 5.75 0 0 0 3.112-3.112zM13.5 2.75c1.651 0 2.837 0 3.762.089c.914.087 1.495.253 1.959.537l.783-1.279c-.739-.452-1.577-.654-2.6-.752c-1.012-.096-2.282-.095-3.904-.095zm9.25 7.75c0-1.622 0-2.891-.096-3.904c-.097-1.023-.299-1.862-.751-2.6l-1.28.783c.285.464.451 1.045.538 1.96c.088.924.089 2.11.089 3.761zm-3.53-7.124a4.25 4.25 0 0 1 1.404 1.403l1.279-.783a5.75 5.75 0 0 0-1.899-1.899zM10.5 1.25c-1.622 0-2.891 0-3.904.095c-1.023.098-1.862.3-2.6.752l.783 1.28c.464-.285 1.045-.451 1.96-.538c.924-.088 2.11-.089 3.761-.089zM2.75 10.5c0-1.651 0-2.837.089-3.762c.087-.914.253-1.495.537-1.959l-1.279-.783c-.452.738-.654 1.577-.752 2.6C1.25 7.61 1.25 8.878 1.25 10.5zm1.246-8.403a5.75 5.75 0 0 0-1.899 1.899l1.28.783a4.25 4.25 0 0 1 1.402-1.403zm7.02 17.993c-.202-.343-.38-.646-.554-.884a2.2 2.2 0 0 0-.682-.645l-.754 1.297c.047.028.112.078.224.232c.121.166.258.396.476.764zm-3.24-.349c.44.008.718.014.93.037c.198.022.275.054.32.08l.754-1.297a2.2 2.2 0 0 0-.909-.274c-.298-.033-.657-.038-1.069-.045zm6.498 1.113c.218-.367.355-.598.476-.764c.112-.154.177-.204.224-.232l-.754-1.297c-.29.17-.5.395-.682.645c-.173.238-.352.54-.555.884zm1.924-2.612c-.412.007-.771.012-1.069.045c-.311.035-.616.104-.909.274l.754 1.297c.045-.026.122-.058.32-.08c.212-.023.49-.03.93-.037z" />
-		<path stroke="#748D92" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11h.009m3.982 0H12m3.991 0H16" />
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="#748D92">
+		<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+		<path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+		<path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
 	</g>
 </svg>
           This user has no comments
         </div>`;
-    } finally {
-      if (loadingSpinner) {
-        loadingSpinner.remove();
-      }
     }
   }
 
@@ -1399,7 +1431,10 @@ document.addEventListener("DOMContentLoaded", function () {
   updateUIForUser();
 
   // Find this section in the code (around line 704)
-  if (permissions.show_recent_comments === 1) {
+  if (
+    permissions.show_recent_comments === 1 ||
+    localStorage.getItem("userid") === userId
+  ) {
     card_pagination.style.display = "block";
     fetchUserComments(userId);
   } else {
@@ -1408,16 +1443,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const recentComments = document.getElementById("comments-list");
     if (recentComments) {
       recentComments.innerHTML = `
-      <div class="text-center p-3" style="color: #748D92;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<g fill="#748D92">
-		<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
-		<path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
-		<path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
-	</g>
-</svg>
-        This user has disabled the display of their comments
+      <div class="col-12 text-center p-4">
+        <div class="hidden-message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <g fill="#748D92">
+              <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+              <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+              <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+            </g>
+          </svg>
+          <h4>Comments Hidden</h4>
+          <p>This user has chosen to keep their comments private</p>
+        </div>
       </div>`;
     }
   }
@@ -1670,9 +1708,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   crown.addEventListener("click", function () {
     fetch(`/owner/check/${userId}`, {
-      method: "GET", // Specify the method, e.g., GET
+      method: "GET",
       headers: {
-        "Content-Type": "application/json", // Set content type to JSON
+        "Content-Type": "application/json",
       },
     })
       .then((response) => {
@@ -1688,8 +1726,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       })
       .catch((error) => {
-        console.error("Error fetching owner status:", error);
-        AlertToast("There was an error checking the owner's status.");
+        console.error("Error checking owner status:", error);
       });
   });
 
@@ -2031,4 +2068,342 @@ document.addEventListener("DOMContentLoaded", function () {
       confirmDeleteButton.innerHTML = "Yes, Delete My Account";
     }
   });
+
+  async function fetchUserFavorites(userId) {
+    const favoritesContainer = document.getElementById("favorites-grid");
+    const card_pagination = document.getElementById("card-pagination");
+
+    // Show loading spinner in favorites grid
+    favoritesContainer.innerHTML = `
+      <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 200px;">
+        <div class="text-center">
+          <div class="spinner-border text-light mb-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mb-0">Loading favorites...</p>
+        </div>
+      </div>`;
+
+    try {
+      // Check if user is profile owner
+      const isProfileOwner = localStorage.getItem("userid") === userId;
+
+      // First check user settings
+      const settingsResponse = await fetch(
+        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${userId}`
+      );
+      if (!settingsResponse.ok) {
+        throw new Error("Failed to fetch user settings");
+      }
+      const settings = await settingsResponse.json();
+
+      // Only apply hide_favorites if not profile owner
+      if (settings.hide_favorites === 1 && !isProfileOwner) {
+        card_pagination.style.display = "none";
+        favoritesContainer.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="hidden-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <g fill="#748d92">
+                  <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+                  <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+                  <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+                </g>
+              </svg>
+              <h4>Favorites Hidden</h4>
+              <p>This user has chosen to keep their favorites private</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const response = await fetch(
+        `https://api3.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
+      );
+
+      if (response.status === 404) {
+        card_pagination.style.display = "none";
+        favoritesContainer.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="no-favorites-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+              </svg>
+              <h4>No Favorites Yet</h4>
+              <p>This user hasn't added any items to their favorites</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const favorites = await response.json();
+
+      // Check if user has no favorites but settings allow viewing
+      if (favorites.length === 0) {
+        card_pagination.style.display = "none";
+        favoritesContainer.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="no-favorites-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+              </svg>
+              <h4>No Favorites Yet</h4>
+              <p>This user hasn't added any items to their favorites</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      // Fetch full item details for each favorite
+      const itemPromises = favorites.map(async (fav) => {
+        const itemResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/items/get?id=${fav.item_id}`
+        );
+        if (!itemResponse.ok) return null;
+        const item = await itemResponse.json();
+        // Add the favorite id to the item object
+        item.favorite_id = fav.item_id;
+        return item;
+      });
+
+      const items = (await Promise.all(itemPromises)).filter(
+        (item) => item !== null
+      );
+
+      if (items.length === 0) {
+        card_pagination.style.display = "none";
+        favoritesContainer.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="no-favorites-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+              </svg>
+              <h4>No Favorites Found</h4>
+              <p>No favorite items could be loaded</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      // Pagination logic
+      const itemsPerPage = 12;
+      const totalPages = Math.ceil(items.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
+
+      // Show pagination controls if there's more than one page
+      if (totalPages > 1) {
+        card_pagination.style.display = "flex";
+        renderPaginationControls(totalPages);
+      } else {
+        card_pagination.style.display = "none";
+      }
+
+      // Clear and populate the favorites container
+      favoritesContainer.innerHTML = paginatedItems
+        .map((item) => {
+          const itemType = item.type.toLowerCase();
+
+          // Check specifically for HyperShift by favorite_id
+          if (item.favorite_id === 587 && item.name === "HyperShift") {
+            const card = `
+              <div class="col-6 col-md-4 col-lg-3">
+                <a href="/item/${itemType}/${encodeURIComponent(
+              item.name
+            )}" class="text-decoration-none">
+                  <div class="card items-card">
+                    <div class="position-relative">
+                      <div class="media-container">
+                        <video 
+                          src="/assets/images/items/hyperchromes/HyperShift.webm" 
+                          class="card-img-top" 
+                          playsinline 
+                          muted 
+                          loop 
+                          autoplay
+                          style="width: 100%; height: auto;"
+                        >
+                        </video>
+                      </div>
+                      <div class="item-card-body text-center">
+                        <div class="badges-container d-flex justify-content-center gap-2">
+                          <span class="badge item-type-badge" style="background-color: ${getTypeColor(
+                            itemType
+                          )}">${item.type}</span>
+                        </div>
+                        <h5 class="card-title">${item.name}</h5>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>`;
+            return card;
+          }
+
+          // Normal items handling (existing code)
+          if (itemType === "drift") {
+            imageUrl = `/assets/images/items/480p/drifts/${item.name}.webp`;
+          } else {
+            imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
+          }
+
+          return `
+          <div class="col-6 col-md-4 col-lg-3">
+            <a href="/item/${itemType}/${encodeURIComponent(
+            item.name
+          )}" class="text-decoration-none">
+              <div class="card items-card">
+                <div class="position-relative">
+                  <div class="media-container">
+                    <img src="${imageUrl}" class="card-img-top" alt="${
+            item.name
+          }">
+                  </div>
+                  <div class="item-card-body text-center">
+                    <div class="badges-container d-flex justify-content-center gap-2">
+                      <span class="badge item-type-badge" style="background-color: ${getTypeColor(
+                        itemType
+                      )}">${item.type}</span>
+                    </div>
+                    <h5 class="card-title">${item.name}</h5>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+        })
+        .join("");
+
+      // Remove drift video hover effects since we're not using videos anymore
+      const driftCards = document.querySelectorAll(".items-card");
+      driftCards.forEach((card) => {
+        const video = card.querySelector("video");
+        const thumbnail = card.querySelector(".thumbnail");
+        // Only remove videos that aren't HyperShift
+        if (video && !video.src.includes("HyperShift")) {
+          video.remove();
+        }
+        if (thumbnail) {
+          thumbnail.style.opacity = "1";
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      card_pagination.style.display = "none";
+      favoritesContainer.innerHTML = `
+        <div class="col-12 text-center p-4">
+          <div class="error-message">
+            <h4>Error Loading Favorites</h4>
+            <p>There was an error loading favorite items</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  // Helper function to get color for item type
+  function getTypeColor(type) {
+    const colors = {
+      vehicle: "#c82c2c",
+      spoiler: "#C18800",
+      rim: "#6335B1",
+      "tire-sticker": "#1CA1BD",
+      "tire-style": "#4CAF50",
+      drift: "#FF4500",
+      "body-color": "#8A2BE2",
+      texture: "#708090",
+      hyperchrome: "#E91E63",
+      furniture: "#9C6644",
+    };
+    return colors[type] || "#748D92";
+  }
+
+  // Add loading spinner to favorite action
+  window.handleFavorite = async function (event, itemId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const token = Cookies.get("token");
+    if (!token) {
+      notyf.error("Please login to favorite items", {
+        position: "bottom-right",
+        duration: 2000,
+      });
+      return;
+    }
+
+    const favoriteIcon = event.target.closest(".favorite-icon");
+    const svgPath = favoriteIcon.querySelector("path");
+    const isFavorited = svgPath.getAttribute("fill") === "#f8ff00";
+
+    // Add loading spinner
+    const originalHTML = favoriteIcon.innerHTML;
+    favoriteIcon.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    favoriteIcon.style.pointerEvents = "none";
+
+    try {
+      const response = await fetch(
+        `https://api3.jailbreakchangelogs.xyz/favorites/${
+          isFavorited ? "remove" : "add"
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+          body: JSON.stringify({
+            item_id: itemId,
+            owner: token,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      // Restore original icon with updated state
+      favoriteIcon.innerHTML = originalHTML;
+      if (isFavorited) {
+        svgPath.setAttribute("fill", "none");
+        svgPath.setAttribute("stroke", "#f8ff00");
+      } else {
+        svgPath.setAttribute("fill", "#f8ff00");
+        svgPath.setAttribute("stroke", "none");
+      }
+
+      const item = allItems.find((item) => item.id === itemId);
+      if (item) {
+        item.is_favorite = !isFavorited;
+      }
+
+      notyf.success(
+        isFavorited ? "Item removed from favorites" : "Item added to favorites",
+        {
+          position: "bottom-right",
+          duration: 2000,
+        }
+      );
+    } catch (error) {
+      console.error("Error updating favorite:", error);
+      notyf.error("Failed to update favorite status", {
+        position: "bottom-right",
+        duration: 2000,
+      });
+      // Restore original icon on error
+      favoriteIcon.innerHTML = originalHTML;
+    } finally {
+      favoriteIcon.style.pointerEvents = "auto";
+    }
+  };
 });
