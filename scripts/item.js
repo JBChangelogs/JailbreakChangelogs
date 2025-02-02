@@ -1033,42 +1033,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (price.toLowerCase().includes("robux")) {
         // Extract the numeric value
         const numericValue = price.replace(/[^0-9]/g, "");
-        return `${numericValue} <img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: middle; margin-left: 4px;">`;
+        return `<img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
       }
 
       // Handle k/m suffixes first
       const lowerPrice = price.toString().toLowerCase();
       if (lowerPrice.endsWith("k")) {
         const baseNumber = parseFloat(lowerPrice.replace("k", "")) * 1000;
-        return `${baseNumber.toLocaleString()} <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="#25ea5d" d="M16 14H2v-1h13V6h1z" />
-	<path fill="#25ea5d" d="M13 4v7H1V4zm1-1H0v9h14z" />
-	<path fill="#25ea5d" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
-</svg>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+<rect width="16" height="16" fill="none" />
+<path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+<path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+<path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+</svg> ${baseNumber.toLocaleString()}`;
       }
       if (lowerPrice.endsWith("m")) {
         const baseNumber = parseFloat(lowerPrice.replace("m", "")) * 1000000;
-        return `${baseNumber.toLocaleString()} <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="#25ea5d" d="M16 14H2v-1h13V6h1z" />
-	<path fill="#25ea5d" d="M13 4v7H1V4zm1-1H0v9h14z" />
-	<path fill="#25ea5d" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
-</svg>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+<rect width="16" height="16" fill="none" />
+<path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+<path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+<path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+</svg> ${baseNumber.toLocaleString()}`;
       }
 
       // Handle plain numbers
       const numericValue = parseFloat(price.toString().replace(/[^0-9.]/g, ""));
       if (!isNaN(numericValue) && numericValue > 1) {
-        return `${numericValue.toLocaleString()} <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align: middle; margin-left: 4px;">
-          <rect width="24" height="24" fill="none"/>
-          <path fill="#25ea5d" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/>
-        </svg>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align: -0.1em; margin-left: 2px;">
+    <rect width="24" height="24" fill="none"/>
+    <path fill="#76ABAE" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/>
+  </svg> ${numericValue.toLocaleString()}`;
       }
 
       return price;
     }
-
     const priceSection =
       item.type.toLowerCase() === "vehicle"
         ? `
@@ -1076,7 +1075,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
         <h4 class="text-muted mb-3 d-flex align-items-center">
           <i class="bi bi-tag-fill me-2"></i>
-          Price
+          Original Price
         </h4>
         <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
           ${formatPriceValue(item.price)}
