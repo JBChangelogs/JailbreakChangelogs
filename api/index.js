@@ -958,6 +958,15 @@ app.get("/roadmap", (req, res) => {
     MIN_DESCRIPTION_LENGTH,
   });
 });
+app.get("/redeem", (req, res) => {
+  res.render("redeem", {
+    title: "Reedem A Code / Changelogs",
+    logoUrl: "/assets/logos/JB Changelogs Banner.webp",
+    logoAlt: "Redeem Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
+});
 
 app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 12) + 1;
