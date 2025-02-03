@@ -114,7 +114,7 @@
           <div class="side-menu-brand">
             <img
               class="navbar-logo-small"
-              src="<%= logoUrl %>"
+              src="<%= ['/values', '/trading', '/values/calculator'].includes(locals.req?.path) || locals.req?.path?.startsWith('/trading/ad') ? '/assets/logos/JB Changelogs (Collab).webp' : '/assets/logos/JB Changelogs Banner.webp' %>"
               alt="<%= logoAlt %>"
             />
           </div>
