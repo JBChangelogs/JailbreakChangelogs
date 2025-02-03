@@ -1163,7 +1163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <i class="bi bi-cash-stack me-2"></i>
             Cash Value
           </h4>
-          <p class="h2 mb-0" style="color: rgb(24, 101, 131); font-weight: 600;">
+          <p class="h2 mb-0" style="color: rgb(29, 125, 163); font-weight: 600;">
             ${hasValue ? value : "No Cash Value"}
           </p>
         </div>
@@ -1462,7 +1462,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   {
                     label: "Cash Value",
                     data: values,
-                    borderColor: "rgb(24, 101, 131)",
+                    borderColor: "rgb(29, 125, 163)",
                     backgroundColor: "rgba(24, 101, 131, 0.1)",
                     tension: 0.4,
                     fill: true,
