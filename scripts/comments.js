@@ -400,6 +400,10 @@ class CommentsManager {
         ? userDetails.username
         : comment.author;
 
+    const userNameElement = userDetails?.isDeleted
+      ? `<span class="comment-author text-muted">${displayName}</span>`
+      : `<a href="/users/${comment.user_id}" class="comment-author">${displayName}</a>`;
+
     // Check ownership
     if (token) {
       try {
@@ -439,23 +443,19 @@ class CommentsManager {
     li.className = "list-group-item comment-item";
     li.dataset.commentId = comment.id;
 
-    // Use the avatar from user details if available
-    const avatarUrl = userDetails
-      ? await window.checkAndSetAvatar(userDetails)
-      : fallbackAvatar;
-
-    const userNameElement = userDetails?.isDeleted
-      ? `<span class="comment-author text-muted">${displayName}</span>`
-      : `<a href="/users/${comment.user_id}" class="comment-author">${displayName}</a>`;
+    // Handle deleted user avatar differently
+    const avatarElement = userDetails?.isDeleted
+      ? `<div class="rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #134d64;">${userDetails.avatar}</div>`
+      : `<img src="${await window.checkAndSetAvatar(userDetails)}" 
+          class="rounded-circle me-2" 
+          width="40" 
+          height="40"
+          onerror="this.src='${fallbackAvatar}'"
+          alt="${displayName}'s avatar">`;
 
     li.innerHTML = `
     <div class="d-flex align-items-start">
-        <img src="${avatarUrl}" 
-            class="rounded-circle me-2" 
-            width="40" 
-            height="40"
-            onerror="this.src='${fallbackAvatar}'"
-            alt="${displayName}'s avatar">
+        ${avatarElement}
         <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -542,7 +542,11 @@ class CommentsManager {
           username: "Deleted User",
           global_name: "Deleted User",
           id: userId,
-          avatar: null, // No avatar for deleted users
+          avatar: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 32 32">
+	<rect width="32" height="32" fill="none" />
+	<path fill="none" d="M8.007 24.93A4.996 4.996 0 0 1 13 20h6a4.996 4.996 0 0 1 4.993 4.93a11.94 11.94 0 0 1-15.986 0M20.5 12.5A4.5 4.5 0 1 1 16 8a4.5 4.5 0 0 1 4.5 4.5" />
+	<path fill="currentColor" d="M26.749 24.93A13.99 13.99 0 1 0 2 16a13.9 13.9 0 0 0 3.251 8.93l-.02.017c.07.084.15.156.222.239c.09.103.187.2.28.3q.418.457.87.87q.14.124.28.242q.48.415.99.782c.044.03.084.069.128.1v-.012a13.9 13.9 0 0 0 16 0v.012c.044-.031.083-.07.128-.1q.51-.368.99-.782q.14-.119.28-.242q.451-.413.87-.87c.093-.1.189-.197.28-.3c.071-.083.152-.155.222-.24ZM16 8a4.5 4.5 0 1 1-4.5 4.5A4.5 4.5 0 0 1 16 8M8.007 24.93A4.996 4.996 0 0 1 13 20h6a4.996 4.996 0 0 1 4.993 4.93a11.94 11.94 0 0 1-15.986 0" />
+</svg>`,
           isDeleted: true,
         };
       }
