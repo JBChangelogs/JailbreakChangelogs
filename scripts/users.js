@@ -1499,7 +1499,6 @@ document.addEventListener("DOMContentLoaded", function () {
         `https://api3.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
       );
 
-      // Handle 404 as a valid "no followers" response
       if (response.status === 404) {
         return [];
       }
@@ -1509,14 +1508,25 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const followers = await response.json();
-      return Array.isArray(followers) ? followers : [];
+      const validUsers = [];
+
+      // Check each follower to see if they still exist
+      for (const user of followers) {
+        const userCheckResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.follower_id}`
+        );
+        if (userCheckResponse.ok) {
+          validUsers.push(user);
+        }
+      }
+
+      return validUsers;
     } catch (error) {
       console.error("Error fetching followers:", error);
-      return []; // Return empty array on error
+      return [];
     }
   }
 
-  // Similarly modify the fetchUserFollowing function (around line 1277)
   async function fetchUserFollowing(userId) {
     try {
       const response = await fetch(
@@ -1539,10 +1549,22 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const following = await response.json();
-      return Array.isArray(following) ? following : [];
+      const validUsers = [];
+
+      // Check each user to see if they still exist
+      for (const user of following) {
+        const userCheckResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.following_id}`
+        );
+        if (userCheckResponse.ok) {
+          validUsers.push(user);
+        }
+      }
+
+      return validUsers;
     } catch (error) {
       console.error("Error fetching following:", error);
-      return []; // Return empty array on error
+      return [];
     }
   }
 

@@ -107,7 +107,7 @@ body {
   position: relative;
   bottom: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 2; /* Lower z-index so it stays below side menu */
 }
 
 .spinner-border {
@@ -1316,7 +1316,7 @@ body {
   position: absolute !important;
   top: 8px !important;
   left: 8px !important;
-  z-index: 1000 !important;
+  z-index: 10 !important; /* Lower z-index so it stays below side menu */
   opacity: 0;
   width: 32px;
   height: 32px;
@@ -1397,4 +1397,20 @@ body {
 
 .no-favorites-message .login-link:hover {
   text-decoration: underline;
+}
+
+/* Add helper class for when side menu is open */
+body.menu-open {
+  overflow: hidden !important;
+  padding-right: var(
+    --scrollbar-width,
+    0
+  ) !important; /* Prevent layout shift */
+  touch-action: none !important; /* Prevent touch scrolling on mobile */
+}
+
+/* Add helper class for content when menu is open */
+.menu-open #items-container {
+  height: 100vh;
+  overflow: hidden;
 }

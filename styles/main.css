@@ -575,96 +575,9 @@
 }
 body.menu-open {
   overflow: hidden;
-}
-
-/* Off-screen Side Menu Styles */
-.side-menu {
+  height: 100vh;
   position: fixed;
-  top: 0;
-  right: -405px;
-  width: 400px;
-  max-width: 90vw;
-  height: 100%;
-  background-color: #1c242a;
-  z-index: 1000;
-  overflow-x: hidden;
-  transition: right 0.4s ease-in-out, visibility 0.4s ease-in-out; /* Add visibility to transition */
-  padding-top: 20px;
-  padding-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-  visibility: hidden; /* Start hidden */
-}
-
-/* Show the side menu */
-.side-menu.active {
-  right: 0;
-  visibility: visible;
-}
-
-/* Side menu content styles */
-.side-menu-content {
-  padding: 0 1.5rem;
-  text-align: left;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  transform: translateX(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Show content when menu is active */
-.side-menu.active .side-menu-content {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.side-menu.show .nav-item {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Navigation styles within the side menu */
-.side-menu .navbar-nav {
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 1rem;
-}
-
-/* Individual nav items */
-.side-menu .nav-item {
-  margin: 0.5rem 0; /* Increased margin for spacing */
   width: 100%;
-}
-
-/* Navigation link styles */
-.side-menu .nav-link {
-  font-size: 1.2rem; /* Slightly smaller for better readability */
-  color: #d3d9d4; /* Light color for better visibility */
-  padding: 0.75rem 1rem; /* More padding for larger touch target */
-  border-radius: 5px; /* Rounded corners for modern look */
-  background-color: transparent; /* Make background transparent */
-  transition: background-color 0.3s, color 0.3s; /* Transition for hover effect */
-}
-
-/* Hover effect for links */
-.side-menu .nav-link:hover {
-  background-color: rgba(211, 217, 212, 0.1); /* Subtle hover background */
-  color: #ffffff; /* Change text color on hover */
-}
-
-/* Animation for menu items */
-.side-menu .nav-item {
-  opacity: 1;
-  transform: none;
-}
-
-/* Show nav items with animation */
-.side-menu.show .nav-item {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 /* Offcanvas header styles */
@@ -787,13 +700,161 @@ body.menu-open {
   margin-right: 0.5rem;
   opacity: 0.8;
 }
-
-/* Mobile horizontal separator */
-.side-menu .nav-separator {
+/* Mobile Side Menu */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
   width: 100%;
-  height: 1px;
+  height: 100vh;
+  background-color: #1a222a;
+  z-index: 9999;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-menu.active {
+  right: 0;
+}
+
+/* Add backdrop styles */
+.side-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998; /* Just below side menu */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.side-menu-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Side Menu Header */
+.side-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.side-menu-brand {
+  height: 40px;
+}
+
+.navbar-logo-small {
+  height: 40px;
+  width: auto;
+}
+
+.side-menu-close {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 0.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.side-menu-close:hover {
+  opacity: 1;
+}
+
+/* Side Menu Content */
+.side-menu-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Side Menu Navigation */
+.side-menu-nav {
+  padding: 1rem 1rem 2rem; /* Increase bottom padding */
+  flex: 1;
+}
+
+.side-menu-section {
+  margin-bottom: 1.5rem;
+}
+
+.side-menu-section-title {
+  color: #748d92;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.side-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.side-menu-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  margin: 12px 0;
+  color: #ffffff;
+}
+
+/* Mobile Profile Section */
+.mobile-profile-section {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-profile-section .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.mobile-profile-section .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar Styling */
+.side-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.side-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.side-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.side-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (min-width: 992px) {
+  .side-menu {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {

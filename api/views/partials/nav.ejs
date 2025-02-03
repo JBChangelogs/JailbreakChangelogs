@@ -1,174 +1,174 @@
 <nav class="navbar navbar-expand-lg custom-navbar-color sticky-top">
-  <div class="container-fluid">
-    <!-- Navbar brand with logo -->
-    <a class="navbar-brand d-flex align-items-center" href="/">
-      <img class="navbar-logo" src="<%= logoUrl %>" alt="<%= logoAlt %>" />
-    </a>
-
-    <div class="d-flex d-lg-none align-items-center">
-      <button
-        id="mobileAvatarToggle"
-        class="btn p-0"
-        type="button"
-        aria-controls="sideMenu"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <img
-          src=""
-          alt="Profile"
-          class="rounded-circle"
-          id="profile-picture-mobile"
-          width="34"
-          height="34"
-        />
-      </button>
+  <div
+    class="container-fluid d-flex justify-content-between align-items-center"
+  >
+    <!-- Left side - Logo -->
+    <div class="navbar-brand-container">
+      <a class="navbar-brand" href="/">
+        <img class="navbar-logo" src="<%= logoUrl %>" alt="<%= logoAlt %>" />
+      </a>
     </div>
 
-    <!-- Full-screen overlay menu for mobile -->
-    <div id="sideMenu" class="side-menu d-lg-none">
-      <div class="side-menu-content">
+    <!-- Right side - Navigation and Profile -->
+    <div class="navbar-content-right">
+      <!-- Mobile avatar toggle -->
+      <div class="d-flex d-lg-none align-items-center">
         <button
-          id="sideMenuClose"
-          class="btn position-absolute top-0 end-0 text-white"
+          id="mobileAvatarToggle"
+          class="btn p-0"
           type="button"
-          aria-label="Close menu"
+          aria-controls="sideMenu"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 32 32"
-          >
-            <rect width="32" height="32" fill="none" />
-            <path
-              fill="currentColor"
-              d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
-            />
-            <path
-              fill="currentColor"
-              d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
-            />
-          </svg>
+          <img
+            src=""
+            alt="Profile"
+            class="rounded-circle"
+            id="profile-picture-mobile"
+            width="34"
+            height="34"
+          />
         </button>
-        <!-- Login/Profile Section (Added to side menu) -->
-        <div class="mobile-profile-section mb-3 mt-4" id="mobileProfileSection">
-          <!-- This section will be populated by JavaScript -->
-        </div>
+      </div>
 
-        <div class="nav-separator"></div>
-
-        <nav class="navbar-nav">
+      <!-- Desktop menu -->
+      <div class="navbar-desktop-menu d-none d-lg-flex">
+        <ul class="navbar-nav align-items-center">
           <!-- Game Status & Updates -->
-          <div class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="/changelogs">Changelogs</a>
-          </div>
-          <div class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/seasons">Seasons</a>
-          </div>
-
-          <div class="nav-separator"></div>
+          </li>
 
           <!-- Core Trading Features -->
-          <div class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="/trading">Trading</a>
-          </div>
-          <div class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/values">Values</a>
-          </div>
-          <div class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/tradetracker">Trade Tracker</a>
-          </div>
-
-          <div class="nav-separator"></div>
+          </li>
 
           <!-- Community & Tools -->
-          <div class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="/users">Users</a>
-          </div>
-          <div class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/servers">Servers</a>
-          </div>
-          <div class="nav-item">
-            <a class="nav-link" href="/bot">Our Discord Bot</a>
-          </div>
-
-          <div class="nav-separator"></div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/bot">Discord Bot</a>
+          </li>
 
           <!-- Help -->
-          <div class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="/faq">FAQ</a>
-          </div>
-        </nav>
+          </li>
+
+          <!-- Profile picture icon with dropdown (visible on desktop) -->
+          <li class="nav-item dropdown ms-2">
+            <a
+              class="nav-link dropdown-toggle-no-caret"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src=""
+                alt="Profile"
+                class="rounded-circle"
+                id="profile-picture"
+                width="32"
+                height="32"
+              />
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-dark dropdown-menu-end"
+              aria-labelledby="navbarDropdown"
+              id="userDropdown"
+            >
+              <!-- Dropdown items will be populated by JavaScript -->
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Desktop menu (hidden on mobile) -->
-    <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <!-- Game Status & Updates -->
-        <li class="nav-item">
-          <a class="nav-link" href="/changelogs">Changelogs</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/seasons">Seasons</a>
-        </li>
-
-        <!-- Core Trading Features -->
-        <li class="nav-item">
-          <a class="nav-link" href="/trading">Trading</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/values">Values</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/tradetracker">Trade Tracker</a>
-        </li>
-
-        <!-- Community & Tools -->
-        <li class="nav-item">
-          <a class="nav-link" href="/users">Users</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/servers">Servers</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/bot">Discord Bot</a>
-        </li>
-
-        <!-- Help -->
-        <li class="nav-item">
-          <a class="nav-link" href="/faq">FAQ</a>
-        </li>
-
-        <!-- Profile picture icon with dropdown (visible on desktop) -->
-        <li class="nav-item dropdown d-none d-lg-block ms-2">
-          <a
-            class="nav-link dropdown-toggle-no-caret"
-            href="#"
-            id="navbarDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
+    <!-- Full-screen overlay menu for mobile -->
+    <div id="sideMenuBackdrop" class="side-menu-backdrop"></div>
+    <div id="sideMenu" class="side-menu d-lg-none">
+      <div class="side-menu-content">
+        <!-- Header with close button -->
+        <div class="side-menu-header">
+          <div class="side-menu-brand">
             <img
-              src=""
-              alt="Profile"
-              class="rounded-circle"
-              id="profile-picture"
-              width="32"
-              height="32"
+              class="navbar-logo-small"
+              src="<%= logoUrl %>"
+              alt="<%= logoAlt %>"
             />
-          </a>
-          <ul
-            class="dropdown-menu dropdown-menu-dark dropdown-menu-end"
-            aria-labelledby="navbarDropdown"
-            id="userDropdown"
+          </div>
+          <button
+            id="sideMenuClose"
+            class="side-menu-close"
+            aria-label="Close menu"
           >
-            <!-- Dropdown items will be populated by JavaScript -->
-          </ul>
-        </li>
-      </ul>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="mobile-profile-section" id="mobileProfileSection">
+          <!-- This section will be populated by JavaScript -->
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="side-menu-nav">
+          <div class="side-menu-section">
+            <div class="side-menu-section-title">Game & Updates</div>
+            <a class="side-menu-item" href="/changelogs">Changelogs</a>
+            <a class="side-menu-item" href="/seasons">Seasons</a>
+          </div>
+
+          <div class="side-menu-section">
+            <div class="side-menu-section-title">Trading</div>
+            <a class="side-menu-item" href="/trading">Trading</a>
+            <a class="side-menu-item" href="/values">Values</a>
+            <a class="side-menu-item" href="/tradetracker">Trade Tracker</a>
+          </div>
+
+          <div class="side-menu-section">
+            <div class="side-menu-section-title">Community</div>
+            <a class="side-menu-item" href="/users">Users</a>
+            <a class="side-menu-item" href="/servers">Servers</a>
+            <a class="side-menu-item" href="/bot">Discord Bot</a>
+          </div>
+
+          <div class="side-menu-section">
+            <div class="side-menu-section-title">Help</div>
+            <a class="side-menu-item" href="/faq">FAQ</a>
+          </div>
+        </nav>
+      </div>
     </div>
   </div>
 </nav>
@@ -176,19 +176,31 @@
 <script>
   window.openSideMenu = function () {
     const sideMenu = document.getElementById("sideMenu");
+    const backdrop = document.getElementById("sideMenuBackdrop");
     const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
     if (sideMenu && mobileAvatarToggle) {
+      document.body.classList.add("menu-open");
       sideMenu.classList.add("active");
+      backdrop.classList.add("active");
       mobileAvatarToggle.setAttribute("aria-expanded", "true");
+
+      // Store current scroll position
+      window.menuScrollPos = window.scrollY;
     }
   };
 
   window.closeSideMenu = function () {
     const sideMenu = document.getElementById("sideMenu");
+    const backdrop = document.getElementById("sideMenuBackdrop");
     const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
     if (sideMenu && mobileAvatarToggle) {
+      document.body.classList.remove("menu-open");
       sideMenu.classList.remove("active");
+      backdrop.classList.remove("active");
       mobileAvatarToggle.setAttribute("aria-expanded", "false");
+
+      // Restore scroll position
+      window.scrollTo(0, window.menuScrollPos || 0);
     }
   };
 
@@ -213,6 +225,7 @@
       "mobileProfileSection"
     );
     const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
+    const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
 
     // Simply check if token cookie exists
     const isLoggedIn = !!Cookies.get("token");
@@ -285,7 +298,9 @@
         `;
       } else {
         return `
-          <a class="nav-link" href="/login">
+          <a class="nav-link" href="/login?redirect=${encodeURIComponent(
+            window.location.pathname + window.location.search
+          )}">
            <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
 	<rect width="256" height="199" fill="none" />
 	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
@@ -338,7 +353,9 @@
       } else {
         return `
           <li>
-            <a class="dropdown-item" href="/login">
+            <a class="dropdown-item" href="/login?redirect=${encodeURIComponent(
+              window.location.pathname + window.location.search
+            )}">
               <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
 	<rect width="256" height="199" fill="none" />
 	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
@@ -396,6 +413,13 @@
     };
 
     updateContent();
+
+    // Close menu when clicking backdrop
+    if (sideMenuBackdrop) {
+      sideMenuBackdrop.addEventListener("click", function () {
+        window.closeSideMenu();
+      });
+    }
   });
   if (sideMenuClose) {
     sideMenuClose.addEventListener("click", function () {
@@ -403,6 +427,28 @@
       mobileAvatarToggle.setAttribute("aria-expanded", "false");
     });
   }
+
+  // Add event listener to prevent scroll propagation
+  document.addEventListener("DOMContentLoaded", function () {
+    const sideMenu = document.getElementById("sideMenu");
+    if (sideMenu) {
+      sideMenu.addEventListener(
+        "wheel",
+        function (e) {
+          e.stopPropagation();
+        },
+        { passive: true }
+      );
+
+      sideMenu.addEventListener(
+        "touchmove",
+        function (e) {
+          e.stopPropagation();
+        },
+        { passive: true }
+      );
+    }
+  });
 </script>
 
 <style>
@@ -412,8 +458,7 @@
   }
 
   .mobile-profile-section {
-    padding: 0 1rem; /* Change padding to only left and right */
-    margin-top: 4rem; /* Space for close button */
+    margin-top: 1rem; /* Space for close button */
   }
 
   #sideMenuClose {
@@ -444,5 +489,107 @@
   }
   .nav-separator {
     margin: 0.5rem 0;
+  }
+
+  /* Navbar structure */
+  .custom-navbar-color .container-fluid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1920px;
+    padding: 0 24px;
+    height: 100%;
+  }
+
+  /* Logo section */
+  .navbar-brand-wrapper {
+    flex: 0 0 auto;
+    margin-right: 20px;
+  }
+
+  .navbar-brand {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Desktop menu section */
+  .navbar-desktop-menu {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .navbar-desktop-menu .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Reduced from 1rem to 0.5rem */
+  }
+
+  /* Ensure nav items don't wrap */
+  .navbar-desktop-menu .nav-item {
+    white-space: nowrap;
+  }
+
+  /* Keep existing styles */
+  /* ...existing styles... */
+
+  /* Updated navbar styles */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+  }
+
+  .container-fluid {
+    width: 100%;
+    max-width: none;
+    padding: 0 24px;
+    margin: 0;
+  }
+
+  /* Left side - Logo */
+  .navbar-brand-container {
+    position: absolute;
+    left: 24px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Right side - Navigation and Profile */
+  .navbar-content-right {
+    position: absolute;
+    right: 24px;
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-desktop-menu .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Ensure everything stays in place when zooming */
+  @media screen and (min-width: 992px) {
+    .navbar-content-right {
+      display: flex !important;
+    }
+
+    .navbar-desktop-menu {
+      display: flex !important;
+    }
+  }
+
+  /* Profile dropdown positioning */
+  .nav-item.dropdown.ms-2 {
+    margin-left: 0.75rem !important; /* Reduced from default 2rem */
+    margin-right: -0.5rem; /* Push slightly closer to edge */
+  }
+
+  /* Nav link padding adjustment */
+  .custom-navbar-color .nav-link {
+    padding: 4px 6px; /* Reduced horizontal padding from 8px to 6px */
   }
 </style>
