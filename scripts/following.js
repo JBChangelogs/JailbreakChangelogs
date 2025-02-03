@@ -92,7 +92,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       `;
     } else {
-      usersGrid.innerHTML = '<p class="text-muted">No following yet</p>';
+      const isOwnProfile = loggedInUserId === userId;
+      usersGrid.innerHTML = `
+        <div class="text-center my-5 pt-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 36 36" class="text-muted mb-3">
+            <rect width="36" height="36" fill="none" />
+            <path fill="currentColor" d="M30.47 24.37a17.16 17.16 0 0 0-24.93 0A2 2 0 0 0 5 25.74V31a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-5.26a2 2 0 0 0-.53-1.37M29 31H7v-5.27a15.17 15.17 0 0 1 22 0Z" />
+            <path fill="currentColor" d="M18 17a7 7 0 0 0 4.45-1.6h-.22a3.68 3.68 0 0 1-2.23-.8a5 5 0 1 1 1.24-8.42l1-1.76A7 7 0 1 0 18 17" />
+            <path fill="currentColor" d="M26.85 1.14L21.13 11a1.28 1.28 0 0 0 1.1 2h11.45a1.28 1.28 0 0 0 1.1-2l-5.72-9.86a1.28 1.28 0 0 0-2.21 0" />
+          </svg>
+          <p class="text-muted h5 fw-light">No following yet</p>
+          <p class="text-muted small">${
+            isOwnProfile
+              ? "Follow other users to see them here"
+              : "This user isn't following anyone yet"
+          }</p>
+        </div>`;
     }
   };
 
@@ -166,29 +181,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     usersGrid.textContent = "This user has their following hidden.";
     if (followingCountElement) {
       followingCountElement.textContent = "(0)";
+      if (subtitleElement) {
+        subtitleElement.textContent =
+          loggedInUserId === userId ? "My Following (0)" : "Following (0)";
+      }
     }
     return;
   }
 
   const following = await fetchFollowing(userId);
 
-  // Update the count immediately when we get the data
-  if (followingCountElement) {
-    const count = Array.isArray(following) ? following.length : 0;
-    followingCountElement.textContent = `(${count})`;
-
-    if (subtitleElement) {
-      subtitleElement.textContent =
-        loggedInUserId === userId
-          ? `My Following (${count})`
-          : `Following (${count})`;
-    }
-  } else {
-    console.error("Could not find followingCount element");
-  }
-
   if (following.length > 0) {
     const processedUsers = [];
+    let validUserCount = 0;
 
     for (const followedUser of following) {
       try {
@@ -197,27 +202,61 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
         if (response.status === 403) {
-          // Handle banned user
           processedUsers.push({
             id: followedUser.following_id,
             isBanned: true,
           });
-        } else {
+          validUserCount++;
+        } else if (response.ok) {
           const userData = await response.json();
           const avatarUrl = await getAvatarUrl(userData);
           processedUsers.push({
             ...userData,
             avatarUrl,
           });
+          validUserCount++;
         }
       } catch (error) {
         console.error("Error processing following:", error);
       }
     }
 
+    // Update count only after processing all users
+    if (followingCountElement) {
+      followingCountElement.textContent = `(${validUserCount})`;
+      if (subtitleElement) {
+        subtitleElement.textContent =
+          loggedInUserId === userId
+            ? `My Following (${validUserCount})`
+            : `Following (${validUserCount})`;
+      }
+    }
+
     displayUsers(processedUsers);
   } else {
-    usersGrid.innerHTML = '<p class="text-muted">No following yet</p>';
+    // Show zero for empty following
+    if (followingCountElement) {
+      followingCountElement.textContent = "(0)";
+      if (subtitleElement) {
+        subtitleElement.textContent =
+          loggedInUserId === userId ? "My Following (0)" : "Following (0)";
+      }
+    }
+    usersGrid.innerHTML = `
+      <div class="text-center my-5 pt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 36 36" class="text-muted mb-3">
+          <rect width="36" height="36" fill="none" />
+          <path fill="currentColor" d="M30.47 24.37a17.16 17.16 0 0 0-24.93 0A2 2 0 0 0 5 25.74V31a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-5.26a2 2 0 0 0-.53-1.37M29 31H7v-5.27a15.17 15.17 0 0 1 22 0Z" />
+          <path fill="currentColor" d="M18 17a7 7 0 0 0 4.45-1.6h-.22a3.68 3.68 0 0 1-2.23-.8a5 5 0 1 1 1.24-8.42l1-1.76A7 7 0 1 0 18 17" />
+          <path fill="currentColor" d="M26.85 1.14L21.13 11a1.28 1.28 0 0 0 1.1 2h11.45a1.28 1.28 0 0 0 1.1-2l-5.72-9.86a1.28 1.28 0 0 0-2.21 0" />
+        </svg>
+        <p class="text-muted h5 fw-light">No following yet</p>
+        <p class="text-muted small">${
+          loggedInUserId === userId
+            ? "Follow other users to see them here"
+            : "This user isn't following anyone yet"
+        }</p>
+      </div>`;
   }
 });
 

@@ -720,23 +720,29 @@ document.addEventListener("DOMContentLoaded", function () {
         `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}`
       );
 
+      // Handle 404 - user not found
+      if (userResponse.status === 404) {
+        window.location.href = "/users";
+        return;
+      }
+
       // Handle banned user case
       if (userResponse.status === 403) {
         userBio.innerHTML = `
     <div class="alert alert-danger border-0 shadow-sm" role="alert" style="background-color: #2E3944; border-left: 4px solid #dc3545;">
       <div class="d-flex align-items-center">
-        <div class="me-3">
-         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="#dc3545" fill-rule="evenodd" d="M11.577 4.237a.25.25 0 0 0-.354 0L9.037 6.423a.25.25 0 0 0 0 .354l8.186 8.186a.25.25 0 0 0 .354 0l2.186-2.186a.25.25 0 0 0 0-.354zm-1.414-1.06a1.75 1.75 0 0 1 2.474 0l8.186 8.186a1.75 1.75 0 0 1 0 2.474l-2.186 2.186a1.75 1.75 0 0 1-2.474 0L13.8 13.661l-6.67 6.67a2.447 2.447 0 0 1-3.46-3.461l6.67-6.67l-2.363-2.363a1.75 1.75 0 0 1 0-2.474zM11.4 11.26l-6.67 6.67a.947.947 0 1 0 1.34 1.339l6.67-6.67z" clip-rule="evenodd" />
-</svg>
-        </div>
-        <div>
-          <h6 class="alert-heading mb-1" style="color: #dc3545;">Account Suspended</h6>
-          <p class="mb-0" style="color: #D3D9D4;">
-            This user's account has been suspended for violating our community guidelines.
-          </p>
-        </div>
+      <div class="me-3">
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+    <rect width="24" height="24" fill="none" />
+    <path fill="#dc3545" fill-rule="evenodd" d="M11.577 4.237a.25.25 0 0 0-.354 0L9.037 6.423a.25.25 0 0 0 0 .354l8.186 8.186a.25.25 0 0 0 .354 0l2.186-2.186a.25.25 0 0 0 0-.354zm-1.414-1.06a1.75 1.75 0 0 1 2.474 0l8.186 8.186a1.75 1.75 0 0 1 0 2.474l-2.186 2.186a1.75 1.75 0 0 1-2.474 0L13.8 13.661l-6.67 6.67a2.447 2.447 0 0 1-3.46-3.461l6.67-6.67l-2.363-2.363a1.75 1.75 0 0 1 0-2.474zM11.4 11.26l-6.67 6.67a.947.947 0 1 0 1.34 1.339l6.67-6.67z" clip-rule="evenodd" />
+  </svg>
+      </div>
+      <div>
+        <h6 class="alert-heading mb-1" style="color: #dc3545;">Account Suspended</h6>
+        <p class="mb-0" style="color: #D3D9D4;">
+        This user's account has been suspended for violating our community guidelines.
+        </p>
+      </div>
       </div>
     </div>`;
 
@@ -770,10 +776,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!userResponse.ok) {
         throw new Error(`User data fetch failed: ${userResponse.status}`);
       }
+
+      // Rest of the existing code...
       const userData = await userResponse.json();
 
       // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
-
       if (earlyBadge) {
         // Check if usernumber is 100 or less
         if (userData.usernumber > 100) {
@@ -809,10 +816,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (bioResponse.status === 404) {
         userBio.textContent = "No description provided";
         userDateBio.innerHTML = `
-                <div class="mb-2">Last updated: Never</div>
-                <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
-                <div style="color: #748D92;">Member since: ${memberSince}</div>
-            `;
+          <div class="mb-2">Last updated: Never</div>
+          <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
+          <div style="color: #748D92;">Member since: ${memberSince}</div>
+        `;
         return;
       }
 
@@ -842,11 +849,10 @@ document.addEventListener("DOMContentLoaded", function () {
           : formatDate(lastUpdatedTimestamp / 1000); // Convert back to seconds for formatDate
 
       userDateBio.innerHTML = `
-            <div class="mb-2">Last updated: ${date}</div>
-            <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
-           <div style="color: #748D92;">Member #${udata.usernumber} since ${memberSince}</div>
-
-        `;
+        <div class="mb-2">Last updated: ${date}</div>
+        <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
+         <div style="color: #748D92;">Member #${udata.usernumber} since ${memberSince}</div>
+      `;
 
       await fetchUserBanner(userId);
     } catch (error) {
@@ -1493,7 +1499,6 @@ document.addEventListener("DOMContentLoaded", function () {
         `https://api3.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
       );
 
-      // Handle 404 as a valid "no followers" response
       if (response.status === 404) {
         return [];
       }
@@ -1503,14 +1508,25 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const followers = await response.json();
-      return Array.isArray(followers) ? followers : [];
+      const validUsers = [];
+
+      // Check each follower to see if they still exist
+      for (const user of followers) {
+        const userCheckResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.follower_id}`
+        );
+        if (userCheckResponse.ok) {
+          validUsers.push(user);
+        }
+      }
+
+      return validUsers;
     } catch (error) {
       console.error("Error fetching followers:", error);
-      return []; // Return empty array on error
+      return [];
     }
   }
 
-  // Similarly modify the fetchUserFollowing function (around line 1277)
   async function fetchUserFollowing(userId) {
     try {
       const response = await fetch(
@@ -1533,10 +1549,22 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const following = await response.json();
-      return Array.isArray(following) ? following : [];
+      const validUsers = [];
+
+      // Check each user to see if they still exist
+      for (const user of following) {
+        const userCheckResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.following_id}`
+        );
+        if (userCheckResponse.ok) {
+          validUsers.push(user);
+        }
+      }
+
+      return validUsers;
     } catch (error) {
       console.error("Error fetching following:", error);
-      return []; // Return empty array on error
+      return [];
     }
   }
 

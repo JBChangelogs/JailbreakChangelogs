@@ -1136,6 +1136,44 @@ button {
     font-size: 0.85rem;
     margin-bottom: 0.5rem;
   }
+
+  /* Adjust container padding */
+  .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* Make content take full width */
+  #main-container .col-12 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Adjust content wrapper */
+  #content-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Make sidebar image container full width */
+  #sidebar-image-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Adjust quick links for mobile */
+  .quick-nav-link {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Ensure content section uses full width */
+  #content {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 /* For even smaller screens (576px and below) */
 @media (max-width: 576px) {
@@ -1158,6 +1196,17 @@ button {
   .feature-item {
     padding: 0.75rem;
   }
+
+  .container-fluid {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+
+  /* Further reduce any remaining margins */
+  #main-container [class*="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 }
 
 /* Extra small mobile devices (up to 400px) */
@@ -1166,4 +1215,25 @@ button {
     padding-left: 5px;
     padding-right: 5px; /* Ensure no edge space on very small screens */
   }
+}
+
+/* Prevent horizontal scrolling */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure container doesn't cause overflow */
+.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure main container stays within bounds */
+#main-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }

@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           localStorage.setItem("avatar", avatarURL);
           localStorage.setItem("userid", userData.id);
           closeModal();
-          window.location.reload();
+          window.location.reload(); // Just reload the current page instead of redirecting
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
