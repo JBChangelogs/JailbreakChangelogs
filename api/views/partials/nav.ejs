@@ -5,7 +5,11 @@
     <!-- Left side - Logo -->
     <div class="navbar-brand-container">
       <a class="navbar-brand" href="/">
-        <img class="navbar-logo" src="<%= logoUrl %>" alt="<%= logoAlt %>" />
+        <img
+          class="navbar-logo"
+          src="<%= ['/values', '/trading', '/values/calculator'].includes(locals.req?.path) || locals.req?.path?.startsWith('/trading/ad') ? '/assets/logos/JB Changelogs (Collab).webp' : '/assets/logos/JB Changelogs Banner.webp' %>"
+          alt="<%= logoAlt %>"
+        />
       </a>
     </div>
 
@@ -121,17 +125,28 @@
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="32"
+              height="32"
               viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
             >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
+              <rect width="24" height="24" fill="none" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-dasharray="12"
+                stroke-dashoffset="12"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 12l7 7M12 12l-7 -7M12 12l-7 7M12 12l7 -7"
+              >
+                <animate
+                  fill="freeze"
+                  attributeName="stroke-dashoffset"
+                  dur="0.3s"
+                  values="12;0"
+                />
+              </path>
             </svg>
           </button>
         </div>
