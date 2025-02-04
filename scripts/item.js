@@ -1056,6 +1056,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           .join(" - ");
       }
 
+      // Handle combined "Free / X Robux" format
+      if (price.includes("/")) {
+        const [free, robuxPart] = price.split("/").map((part) => part.trim());
+        // If first part is "Free" and second part contains Robux
+        if (
+          free.toLowerCase() === "free" &&
+          robuxPart.toLowerCase().includes("robux")
+        ) {
+          const numericValue = robuxPart.replace(/[^0-9]/g, "");
+          return `Free / <img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
+        }
+      }
+
       // Handle regular prices (non-ranges)
       if (typeof price === "string") {
         // Check for Robux values
