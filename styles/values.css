@@ -334,21 +334,6 @@ body {
   transform: translateY(-2px);
 }
 
-.contributor-item {
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  padding: 8px 12px;
-  border-radius: 6px;
-}
-
-.contributor-item:hover {
-  transform: translateX(5px);
-  background-color: var(--bg-secondary);
-}
-
-.contributor-link {
-  transition: color 0.2s ease;
-}
-
 .contributor-link:hover {
   color: var(--text-primary) !important;
 }
@@ -360,14 +345,14 @@ body {
       padding-box,
     linear-gradient(
         124deg,
-        #428ffe,
-        #9bfefe,
-        #77fe0b,
-        #fffe5b,
-        #fe13ff,
-        #fa6ffe,
-        #fb3c0c,
-        #ffff00
+        #2170cc,
+        #7acccc,
+        #5cc809,
+        #cccc49,
+        #cc10cc,
+        #c855cc,
+        #c93009,
+        #cccc00
       )
       border-box;
   background-size: 1800% 1800%;
@@ -383,14 +368,14 @@ body {
       padding-box,
     linear-gradient(
         124deg,
-        #428ffe,
-        #9bfefe,
-        #77fe0b,
-        #fffe5b,
-        #fe13ff,
-        #fa6ffe,
-        #fb3c0c,
-        #ffff00
+        #2170cc,
+        #7acccc,
+        #5cc809,
+        #cccc49,
+        #cc10cc,
+        #c855cc,
+        #c93009,
+        #cccc00
       )
       border-box;
   background-size: 1800% 1800%;
@@ -457,17 +442,17 @@ body {
   font-weight: 600;
   background: linear-gradient(
     124deg,
-    #428ffe,
-    #9bfefe,
-    #77fe0b,
-    #fffe5b,
-    #fe13ff,
-    #fa6ffe,
-    #fb3c0c,
-    #ffff00
+    #2170cc,
+    #7acccc,
+    #5cc809,
+    #cccc49,
+    #cc10cc,
+    #c855cc,
+    #c93009,
+    #cccc00
   );
   background-size: 1800% 1800%;
-  color: white;
+  color: var(--text-primary);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   animation: rainbow 18s ease infinite;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -558,9 +543,13 @@ body {
 
 .contributor-item:hover {
   transform: translateY(-3px);
-  background-color: var(--bg-primary);
-  border-color: var(--accent-color);
+  background-color: var(--accent-color);
+  border-color: var(--accent-color-light);
   box-shadow: 0 4px 15px rgba(18, 78, 102, 0.2);
+}
+
+.contributor-link {
+  transition: color 0.2s ease;
 }
 
 .contributor-avatar {
@@ -916,6 +905,7 @@ body {
   font-size: 0.95rem; /* Increased from default size */
   padding: 0.35rem 0.7rem; /* Increased padding */
   border-radius: 20px;
+  color: var(--text-primary); /* Add this line */
 }
 
 @media (max-width: 768px) {

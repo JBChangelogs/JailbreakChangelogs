@@ -909,9 +909,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           card.innerHTML = `
           <a href="/item/${item.type}/${encodeURIComponent(item.name)}" 
             class="text-decoration-none similar-item-card">
-            <div class="card h-100 ${
-              item.tradable === 0 ? "not-tradable-card" : ""
-            }">
+            <div class="card h-100">
               <div class="card-img-wrapper position-relative" style="aspect-ratio: 16/9;">
                 ${
                   item.name === "HyperShift" && item.type === "HyperChrome"
