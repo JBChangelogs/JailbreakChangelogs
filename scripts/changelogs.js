@@ -1303,26 +1303,40 @@ $(document).ready(function () {
     if (changelogId) {
       const changelog = changelogsData.find((cl) => cl.id === changelogId);
       if (changelog) {
+        // Immediately clear comments before any other operations
+        if (window.commentsManagerInstance) {
+          window.commentsManagerInstance.clearComments();
+        }
+
         const newUrl = `/changelogs/${changelogId}`;
         history.pushState({}, "", newUrl);
 
-        // First update the content
+        // Update content and breadcrumb
         displayChangelog(changelog);
         updateChangelogBreadcrumb(changelogId);
 
-        // Update comments if necessary
-        if (window.commentsManagerInstance) {
-          window.commentsManagerInstance.clearComments();
-          window.commentsManagerInstance.type = "changelog";
-          window.commentsManagerInstance.itemId = changelogId;
-          window.commentsManagerInstance.loadComments();
-        }
+        // handle comment loading
+        const loadComments = () => {
+          return new Promise((resolve) => {
+            if (window.commentsManagerInstance) {
+              window.commentsManagerInstance.type = "changelog";
+              window.commentsManagerInstance.itemId = changelogId;
+              // Ensure comments are completely cleared before loading new ones
+              setTimeout(() => {
+                window.commentsManagerInstance.loadComments();
+                resolve();
+              }, 100);
+            } else {
+              resolve();
+            }
+          });
+        };
 
-        // Then scroll to content with offset
-        setTimeout(() => {
+        // Execute the comment loading and scrolling in sequence
+        loadComments().then(() => {
           const contentElement = document.getElementById("content-wrapper");
           if (contentElement) {
-            const offset = 80; // Adjust this value based on your header height
+            const offset = 80;
             const elementPosition = contentElement.getBoundingClientRect().top;
             const offsetPosition =
               elementPosition + window.pageYOffset - offset;
@@ -1332,7 +1346,7 @@ $(document).ready(function () {
               behavior: "smooth",
             });
           }
-        }, 100);
+        });
       }
     }
   });
