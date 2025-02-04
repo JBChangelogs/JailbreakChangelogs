@@ -541,6 +541,24 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Apply last updated sorting
+    else if (
+      valueSortType === "last-updated-desc" ||
+      valueSortType === "last-updated-asc"
+    ) {
+      filteredItems.sort((a, b) => {
+        // Handle null/undefined timestamps
+        if (!a.last_updated && !b.last_updated) return 0;
+        if (!a.last_updated) return 1;
+        if (!b.last_updated) return -1;
+
+        // Sort by timestamp
+        return valueSortType === "last-updated-desc"
+          ? b.last_updated - a.last_updated
+          : a.last_updated - b.last_updated;
+      });
+    }
+
     // Now update UI after all filtering and sorting is done
     updateSearchPlaceholder();
     updateTotalItemsLabel(itemType);
@@ -1401,6 +1419,9 @@ document.addEventListener("DOMContentLoaded", () => {
     <option value="separator" disabled>───── Demand ─────</option>
     <option value="demand-asc">Demand (Low to High)</option>
     <option value="demand-desc">Demand (High to Low)</option>
+    <option value="separator" disabled>───── Last Updated ─────</option>
+    <option value="last-updated-asc">Last Updated (Oldest to Newest)</option>
+    <option value="last-updated-desc">Last Updated (Newest to Oldest)</option>
   `;
 
     // Check sessionStorage first, fallback to random
