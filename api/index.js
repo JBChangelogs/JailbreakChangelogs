@@ -958,6 +958,7 @@ app.get("/roadmap", (req, res) => {
     MIN_DESCRIPTION_LENGTH,
   });
 });
+
 app.get("/redeem", (req, res) => {
   res.render("redeem", {
     title: "Reedem A Code / Changelogs",
