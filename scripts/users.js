@@ -713,6 +713,59 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function formatTimeDifference(timestamp) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+
+    if (diff < 60) {
+      return "just now";
+    } else if (diff < 3600) {
+      const minutes = Math.floor(diff / 60);
+      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+    } else if (diff < 86400) {
+      const hours = Math.floor(diff / 3600);
+      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+    } else if (diff < 2592000) {
+      // 30 days
+      const days = Math.floor(diff / 86400);
+      return `${days} ${days === 1 ? "day" : "days"} ago`;
+    } else {
+      // Format as date if more than 30 days
+      return new Date(timestamp * 1000).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    }
+  }
+
+  function updateUserPresence(userData) {
+    const statusIndicator = document.getElementById("status-indicator");
+    const lastSeenElement = document.getElementById("last-seen");
+
+    // Update status indicator with tooltip
+    if (userData.presence && userData.presence.status === "Online") {
+      statusIndicator.className = "status-indicator status-online";
+      statusIndicator.setAttribute("data-bs-toggle", "tooltip");
+      statusIndicator.setAttribute("data-bs-placement", "top");
+      statusIndicator.setAttribute("title", "Online");
+      lastSeenElement.textContent = "Online";
+    } else {
+      statusIndicator.className = "status-indicator status-offline";
+      statusIndicator.setAttribute("data-bs-toggle", "tooltip");
+      statusIndicator.setAttribute("data-bs-placement", "top");
+      statusIndicator.setAttribute("title", "Offline");
+      // Show "Last seen unknown" if last_seen is null
+      lastSeenElement.textContent =
+        userData.last_seen === null
+          ? "Last seen unknown"
+          : `Last seen ${formatTimeDifference(userData.last_seen)}`;
+    }
+
+    // Initialize tooltip
+    new bootstrap.Tooltip(statusIndicator);
+  }
+
   async function fetchUserBio(userId) {
     try {
       // First get user data for member since date
@@ -849,10 +902,24 @@ document.addEventListener("DOMContentLoaded", function () {
           : formatDate(lastUpdatedTimestamp / 1000); // Convert back to seconds for formatDate
 
       userDateBio.innerHTML = `
-        <div class="mb-2">Last updated: ${date}</div>
-        <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
-         <div style="color: #748D92;">Member #${udata.usernumber} since ${memberSince}</div>
-      `;
+          <div class="mb-2">Last updated: ${date}</div>
+          <hr class="my-2" style="border-color: #748D92; opacity: 0.2;">
+          <div style="color: #748D92;">
+            Member #${udata.usernumber} since ${memberSince}
+            <div id="last-seen" class="mt-1" style="font-size: 0.9em;">
+              ${
+                userData.presence?.status === "Online"
+                  ? "Online"
+                  : userData.last_seen
+                  ? `Last seen ${formatTimeDifference(userData.last_seen)}`
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+
+      // Update presence status
+      updateUserPresence(userData);
 
       await fetchUserBanner(userId);
     } catch (error) {

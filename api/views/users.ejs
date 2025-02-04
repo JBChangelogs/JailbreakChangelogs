@@ -169,13 +169,17 @@
         <div class="user-info-section">
           <!-- Avatar -->
           <div class="avatar-wrapper">
-            <img
-              src="<%= avatar %>"
-              id="user-avatar"
-              class="user-avatar"
-              alt="User Avatar"
-            />
+            <div class="avatar-container">
+              <img
+                src="<%= avatar %>"
+                id="user-avatar"
+                class="user-avatar"
+                alt="User Avatar"
+              />
+              <div id="status-indicator" class="status-indicator"></div>
+            </div>
           </div>
+          
 
           <div class="user-name-container">
             <!-- Wrapper div for name and both buttons -->
