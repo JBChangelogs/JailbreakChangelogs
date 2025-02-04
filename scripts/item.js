@@ -1029,41 +1029,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     function formatPriceValue(price) {
       if (!price || price === "N/A") return "No Price Data";
 
-      // Check if price contains "Robux"
-      if (price.toLowerCase().includes("robux")) {
-        // Extract the numeric value
-        const numericValue = price.replace(/[^0-9]/g, "");
-        return `<img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
+      // Check if price contains a range (e.g. "100k - 5m")
+      if (price.includes("-")) {
+        const cashIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+          <rect width="16" height="16" fill="none" />
+          <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+          <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+          <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+        </svg>`;
+
+        return price
+          .split("-")
+          .map((part) => {
+            part = part.trim();
+            // Parse each part of the range
+            if (part.toLowerCase().endsWith("k")) {
+              const num =
+                parseFloat(part.toLowerCase().replace("k", "")) * 1000;
+              return `${cashIcon} ${num.toLocaleString()}`;
+            }
+            if (part.toLowerCase().endsWith("m")) {
+              const num =
+                parseFloat(part.toLowerCase().replace("m", "")) * 1000000;
+              return `${cashIcon} ${num.toLocaleString()}`;
+            }
+            return `${cashIcon} ${parseFloat(part).toLocaleString()}`;
+          })
+          .join(" - ");
       }
 
-      // Handle k/m suffixes first
-      const lowerPrice = price.toString().toLowerCase();
-      if (lowerPrice.endsWith("k")) {
-        const baseNumber = parseFloat(lowerPrice.replace("k", "")) * 1000;
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
-<rect width="16" height="16" fill="none" />
-<path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
-<path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
-<path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
-</svg> ${baseNumber.toLocaleString()}`;
-      }
-      if (lowerPrice.endsWith("m")) {
-        const baseNumber = parseFloat(lowerPrice.replace("m", "")) * 1000000;
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
-<rect width="16" height="16" fill="none" />
-<path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
-<path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
-<path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
-</svg> ${baseNumber.toLocaleString()}`;
+      // Handle regular prices (non-ranges)
+      if (typeof price === "string") {
+        // Check for Robux values
+        if (price.toLowerCase().includes("robux")) {
+          const numericValue = price.replace(/[^0-9]/g, "");
+          return `<img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
+        }
+
+        // Handle k/m suffixes
+        const lowerPrice = price.toLowerCase();
+        if (lowerPrice.endsWith("k")) {
+          const baseNumber = parseFloat(lowerPrice.replace("k", "")) * 1000;
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+        <rect width="16" height="16" fill="none" />
+        <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+        <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+        <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+        </svg> ${baseNumber.toLocaleString()}`;
+        }
+        if (lowerPrice.endsWith("m")) {
+          const baseNumber = parseFloat(lowerPrice.replace("m", "")) * 1000000;
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+        <rect width="16" height="16" fill="none" />
+        <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+        <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+        <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+        </svg> ${baseNumber.toLocaleString()}`;
+        }
       }
 
-      // Handle plain numbers
+      // Handle numeric values
       const numericValue = parseFloat(price.toString().replace(/[^0-9.]/g, ""));
       if (!isNaN(numericValue) && numericValue > 1) {
         return `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align: -0.1em; margin-left: 2px;">
-    <rect width="24" height="24" fill="none"/>
-    <path fill="#76ABAE" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/>
-  </svg> ${numericValue.toLocaleString()}`;
+      <rect width="24" height="24" fill="none"/>
+      <path fill="#76ABAE" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/>
+    </svg> ${numericValue.toLocaleString()}`;
       }
 
       return price;
