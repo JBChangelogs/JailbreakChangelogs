@@ -337,9 +337,35 @@ body {
 }
 
 /* Avatar Styles */
+
 .avatar-wrapper {
   position: relative;
   margin: -75px 1rem 1rem;
+  display: inline-block;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.status-indicator {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #212a31; /* Match your background color */
+  bottom: 3px;
+  right: 3px;
+  z-index: 2;
+}
+
+.status-online {
+  background-color: #4caf50; /* Green for online */
+}
+
+.status-offline {
+  background-color: #748d92; /* Gray for offline */
 }
 /* Profile Layout */
 .user-profile {
