@@ -1334,7 +1334,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     container.innerHTML = `
             <!-- Breadcrumb Navigation -->
-            <div class="container-fluid mt-3">
+            <div class="container-fluid mt-1">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -1351,7 +1351,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </nav>
              </div>
     
-           <div class="container-fluid mt-5">
+           <div class="container-fluid mt-1">
               <div class="media-container-wrapper">
                   <!-- Main Item Info Section -->
                   <div class="row mb-4">
@@ -1387,25 +1387,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                       <!-- Right Side - Item Details -->
                       <div class="col-md-7 p-3">
-                          <!-- Item Title and Type Badge -->
-                        <div class="d-flex align-items-center mb-4">
-                            <h1 class="mb-0 me-3 h2" style="font-weight: 600;">${
-                              item.name
-                            }</h1>
-                            ${typeBadgeHtml}
-                            ${
-                              item.tradable === 0
-                                ? `
-                              <span class="badge bg-danger ms-2" style="font-size: 0.9rem;">
-                               Not Tradable
-                              </span>
-                            `
-                                : ""
-                            }
-                        </div>
+                          <!-- Item Title and Badge Container -->
+                          <div class="item-header d-flex align-items-center mb-4">
+                              <h1 class="mb-0 me-3 h2" style="font-weight: 600;">${
+                                item.name
+                              }</h1>
+                              <div class="badge-container d-flex align-items-center gap-2">
+                                  ${
+                                    item.type === "HyperChrome"
+                                      ? `<span class="hyperchrome-badge">HyperChrome</span>`
+                                      : `<span class="badge" style="background-color: ${color};">${item.type}</span>`
+                                  }
+                                  ${
+                                    item.tradable === 0
+                                      ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
+                                      : ""
+                                  }
+                              </div>
+                          </div>
                            ${
                              item.description && item.description !== "N/A"
-                               ? `<p class="text-muted mb-0">${item.description}</p>`
+                               ? `<div class="item-description collapsed">
+                                    ${item.description}
+                                    <div class="read-more-fade"></div>
+                                  </div>
+                                  <button class="read-more-btn">
+                                    <i class="bi bi-chevron-down"></i>Read More
+                                  </button>`
                                : ""
                            }
                           <!-- Values Section -->
@@ -1428,6 +1436,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
         
             ${graphSection}`;
+
+    // Initialize description toggle after DOM update
+    setTimeout(() => {
+      initializeDescriptionToggle();
+    }, 100);
+
     // First, check if the item exists before initializing comments
     if (window.commentsManagerInstance) {
       // Clear existing comments
@@ -1806,4 +1820,36 @@ function handleinvalidImage() {
       username
     )}&bold=true&format=svg`;
   }, 0);
+}
+
+// Add this function at the start of the file, after the constants
+function initializeDescriptionToggle() {
+  const description = document.querySelector(".item-description");
+  const readMoreBtn = document.querySelector(".read-more-btn");
+
+  if (description && readMoreBtn) {
+    // Check if we need the read more button
+    const needsReadMore = description.scrollHeight > 80;
+
+    if (!needsReadMore) {
+      readMoreBtn.style.display = "none";
+      description.classList.remove("collapsed");
+      description.classList.add("expanded");
+      return;
+    }
+
+    // Make sure button is visible and description is collapsed initially
+    readMoreBtn.style.display = "flex";
+    description.classList.add("collapsed");
+    description.classList.remove("expanded");
+
+    readMoreBtn.addEventListener("click", () => {
+      const isCollapsed = description.classList.contains("collapsed");
+      description.classList.toggle("collapsed");
+      description.classList.toggle("expanded");
+      readMoreBtn.innerHTML = isCollapsed
+        ? '<i class="bi bi-chevron-up"></i>Show Less'
+        : '<i class="bi bi-chevron-down"></i>Read More';
+    });
+  }
 }

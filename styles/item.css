@@ -375,6 +375,108 @@ body {
   }
 }
 
+/* Standard badge styling */
+.badge-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px; /* Consistent height for all badges */
+}
+
+.badge-container .badge,
+.badge-container .hyperchrome-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px; /* Fixed height for all badges */
+  padding: 0 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 20px;
+  white-space: nowrap;
+  line-height: 1;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .badge-container {
+    height: 30px;
+    gap: 8px;
+  }
+
+  .badge-container .badge,
+  .badge-container .hyperchrome-badge {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-radius: 15px;
+  }
+
+  /* Move badge container below title on mobile */
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .item-header h1 {
+    margin-bottom: 8px;
+  }
+
+  .badge-container {
+    height: 28px;
+    margin-left: 0;
+  }
+
+  .badge-container .badge,
+  .badge-container .hyperchrome-badge {
+    height: 26px;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-radius: 15px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+  .badge-container {
+    height: 26px;
+    gap: 6px;
+  }
+
+  .badge-container .badge,
+  .badge-container .hyperchrome-badge {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    letter-spacing: 0.2px;
+    border-radius: 12px;
+  }
+
+  /* Further reduce title size */
+  .badge-container h1.h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .badge-container {
+    height: 32px;
+    gap: 8px;
+  }
+
+  .badge-container .badge,
+  .badge-container .hyperchrome-badge {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+
 /* Similar Items Section Styling */
 .similar-items-section {
   padding: 1rem 0;
@@ -760,4 +862,68 @@ body {
   .similar-item-card .card-body {
     padding: 0.5rem;
   }
+}
+
+/* Item description styling */
+.item-description {
+  background-color: var(--bg-primary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 12px 0;
+  position: relative;
+  transition: max-height 0.3s ease-out;
+}
+
+.item-description.collapsed {
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.item-description.expanded {
+  max-height: 1000px;
+}
+
+.read-more-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--bg-primary));
+  pointer-events: none;
+  /* Hide the fade effect when expanded */
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.item-description.expanded .read-more-fade {
+  opacity: 0;
+}
+
+.read-more-btn {
+  color: var(--accent-color-light);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.read-more-btn:hover {
+  text-decoration: underline;
+}
+
+.read-more-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--bg-primary));
+  pointer-events: none;
 }
