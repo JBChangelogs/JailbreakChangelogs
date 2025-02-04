@@ -49,7 +49,6 @@ body {
   font-size: 1.2rem;
   font-weight: bold;
   margin: 10px 0;
-  letter-spacing: 1px;
 }
 
 .card-text {
@@ -342,17 +341,17 @@ body {
   font-weight: 600;
   background: linear-gradient(
     124deg,
-    #428ffe,
-    #9bfefe,
-    #77fe0b,
-    #fffe5b,
-    #fe13ff,
-    #fa6ffe,
-    #fb3c0c,
-    #ffff00
+    #2170cc,
+    #7acccc,
+    #5cc809,
+    #cccc49,
+    #cc10cc,
+    #c855cc,
+    #c93009,
+    #cccc00
   );
   background-size: 1800% 1800%;
-  color: white;
+  color: var(--text-primary);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   animation: rainbow 18s ease infinite;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -396,6 +395,7 @@ body {
   border-radius: 20px;
   white-space: nowrap;
   line-height: 1;
+  color: var(--text-primary) !important;
   margin: 0;
 }
 
