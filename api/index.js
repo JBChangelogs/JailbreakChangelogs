@@ -986,6 +986,23 @@ app.get("/api", (req, res) => {
   res.redirect("/");
 });
 
+// Add this new route
+app.get("/settings", (req, res) => {
+  const token = req.cookies?.token;
+  if (!token) {
+    res.redirect("/login");
+    return;
+  }
+
+  res.render("settings", {
+    title: "Settings / Changelogs",
+    logoUrl: "/assets/logos/Banner_Background.webp",
+    logoAlt: "Settings Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
+});
+
 // Handle unknown routes by serving index.html
 app.get("*", (req, res) => {
   res.redirect("/");

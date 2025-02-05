@@ -15,28 +15,64 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  const follow_button = document.getElementById("follow-button");
+  const settings_button = document.getElementById("settings-button");
+  const pathSegments = window.location.pathname.split("/");
+  const earlyBadge = document.getElementById("early-badge");
+  const loggedinuserId = localStorage.getItem("userid");
+  const userId = pathSegments[pathSegments.length - 1];
+  const card_pagination = document.getElementById("card-pagination");
+  const userBanner = document.getElementById("banner");
+
   // Handle Discord connection
   const discordConnection = document.getElementById("discord-connection");
   if (discordConnection) {
-    const discordUsername = discordConnection.querySelector(".connection-text");
+    if (permissions.hide_connections === 1 && loggedinuserId !== userId) {
+      discordConnection.innerHTML = `
+        <div class="connection-hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <g fill="#748D92">
+              <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+              <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+              <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+            </g>
+          </svg>
+          <span class="connection-text">Connection Hidden</span>
+        </div>`;
+    } else {
+      const discordUsername =
+        discordConnection.querySelector(".connection-text");
+      discordUsername.textContent = udata.username;
+      discordConnection.addEventListener("click", function () {
+        if (!udata.id) {
+          console.error("Discord ID not found in user data");
+          return;
+        }
+        const discordUrl = `https://discord.com/users/${udata.id}`;
 
-    discordUsername.textContent = udata.username;
-
-    discordConnection.addEventListener("click", function () {
-      if (!udata.id) {
-        console.error("Discord ID not found in user data");
-        return;
-      }
-      const discordUrl = `https://discord.com/users/${udata.id}`;
-
-      window.open(discordUrl, "_blank", "noopener,noreferrer");
-    });
+        window.open(discordUrl, "_blank", "noopener,noreferrer");
+      });
+    }
   }
 
   // Handle Roblox connection
   const robloxConnection = document.getElementById("roblox-connection");
   if (robloxConnection) {
-    if (udata.roblox_username && udata.roblox_id) {
+    if (permissions.hide_connections === 1 && loggedinuserId !== userId) {
+      robloxConnection.innerHTML = `
+        <div class="connection-hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <g fill="#748D92">
+              <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+              <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+              <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+            </g>
+          </svg>
+          <span class="connection-text">Connection Hidden</span>
+        </div>`;
+    } else if (udata.roblox_username && udata.roblox_id) {
       const robloxUsername = robloxConnection.querySelector(".connection-text");
 
       robloxUsername.textContent = udata.roblox_username;
@@ -53,11 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  const follow_button = document.getElementById("follow-button");
-  const settings_button = document.getElementById("settings-button");
-  const pathSegments = window.location.pathname.split("/");
-  const earlyBadge = document.getElementById("early-badge");
-
   // Get if we're in private profile view
   const isPrivateView =
     permissions.profile_public === 0 &&
@@ -71,10 +102,10 @@ document.addEventListener("DOMContentLoaded", function () {
     "recent-comments-button"
   );
 
-  const loggedinuserId = localStorage.getItem("userid");
-  const userId = pathSegments[pathSegments.length - 1];
-  const card_pagination = document.getElementById("card-pagination");
-  const userBanner = document.getElementById("banner");
+  // const loggedinuserId = localStorage.getItem("userid");
+  // const userId = pathSegments[pathSegments.length - 1];
+  // const card_pagination = document.getElementById("card-pagination");
+  // const userBanner = document.getElementById("banner");
 
   // Get button elements
   const editBioButton = document.getElementById("edit-bio-button");
@@ -83,27 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const userBio = document.getElementById("userBio");
   const characterCount = document.getElementById("character-count");
   const userDateBio = document.getElementById("description-updated-date");
-
-  // Settings modal related elements
-  const settingsModal = document.getElementById("settingsModal");
-  const profile_public_button = document.getElementById(
-    "profile-public-button"
-  );
-  const show_comments_button = document.getElementById("show-comments-button");
-  const hide_following_button = document.getElementById(
-    "hide-following-button"
-  );
-  const hide_followers_button = document.getElementById(
-    "hide-followers-button"
-  );
-  const use_discord_banner_button = document.getElementById("usediscordBanner");
-  const bannerInput = document.getElementById("input-for-banner");
-  const input = document.getElementById("bannerInput");
-  const save_settings_button = document.getElementById("settings-submit");
-  const save_settings_loading = document.getElementById("settings-loading");
-  const hide_favorites_button = document.getElementById(
-    "hide-favorites-button"
-  );
 
   if (earlyBadge) {
     earlyBadge.addEventListener("click", function () {
@@ -139,254 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Helper function to update button state
-  function updateButtonState(button, value) {
-    const icon = document.createElement("i");
-    icon.innerHTML =
-      value === 1
-        ? `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                <rect width="16" height="16" fill="none" />
-                <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-            </svg>
-        `
-        : `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                <rect width="16" height="16" fill="none" />
-                <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-            </svg>
-        `;
-
-    button.classList.remove("btn-danger", "btn-success", "btn-secondary");
-    button.classList.add("btn", value === 1 ? "btn-success" : "btn-danger");
-    button.innerHTML = icon.outerHTML;
-  }
-
   // Handle settings button click
-  settings_button.addEventListener("click", async function () {
-    settingsModal.style.display = "block";
-
-    // Show loading state for all buttons
-    const buttons = [
-      profile_public_button,
-      show_comments_button,
-      hide_following_button,
-      hide_followers_button,
-      hide_favorites_button,
-      use_discord_banner_button,
-    ];
-
-    buttons.forEach((button) => {
-      button.classList.remove("btn-danger", "btn-success");
-      button.classList.add("btn-secondary");
-      button.innerHTML =
-        '<span class="spinner-border spinner-border-sm" role="status"></span>';
-    });
-
-    await loadProfileSettings();
-  });
-
-  // Load settings from API
-  async function loadProfileSettings() {
-    try {
-      const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${loggedinuserId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const settings = await response.json();
-
-      // Update button states based on settings
-      updateButtonState(profile_public_button, settings.profile_public);
-      updateButtonState(show_comments_button, settings.show_recent_comments);
-
-      // Only hide following/followers for other users' profiles
-      if (loggedinuserId !== userId) {
-        updateButtonState(hide_following_button, settings.hide_following);
-        updateButtonState(hide_followers_button, settings.hide_followers);
-      } else {
-        // For own profile, always show following/followers
-        hide_following_button.style.display = "none";
-        hide_followers_button.style.display = "none";
-      }
-
-      // Handle banner settings
-      updateButtonState(use_discord_banner_button, settings.banner_discord);
-      bannerInput.style.display = settings.banner_discord ? "none" : "block";
-      if (!settings.banner_discord && banner && banner !== "NONE") {
-        bannerInput.value = banner;
-      }
-    } catch (error) {
-      console.error("Error loading profile settings:", error);
-      toastControl.showToast("error", "Failed to load settings", "Error");
-    }
-  }
-
-  // Toggle button handlers
-  [
-    profile_public_button,
-    show_comments_button,
-    hide_following_button,
-    hide_followers_button,
-    hide_favorites_button,
-    use_discord_banner_button,
-  ].forEach((button) => {
-    button.addEventListener("click", function (event) {
-      event.preventDefault();
-      const icon = button.querySelector("i");
-      const isCurrentlyEnabled = icon.innerHTML.includes("M12.736 3.97");
-      updateButtonState(button, isCurrentlyEnabled ? 0 : 1);
-
-      // Special handling for discord banner button
-      if (button === use_discord_banner_button) {
-        bannerInput.style.display = isCurrentlyEnabled ? "block" : "none";
-        if (isCurrentlyEnabled) {
-          // When switching to custom banner
-          fetch(
-            `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              const input = document.getElementById("bannerInput");
-              // Check if there's a valid image URL and populate it
-              if (data.image_url && data.image_url !== "NONE") {
-                input.value = data.image_url;
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching custom banner:", error);
-            });
-        }
-      }
-    });
-  });
-
-  // Save settings handler
-  save_settings_button.addEventListener("click", async function (event) {
-    event.preventDefault();
-
-    save_settings_loading.style.display = "block";
-    save_settings_button.disabled = true;
-
-    try {
-      const settingsBody = {
-        profile_public: profile_public_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-        hide_followers: hide_followers_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-        hide_following: hide_following_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-        show_recent_comments: show_comments_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-        banner_discord: use_discord_banner_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-        hide_favorites: hide_favorites_button
-          .querySelector("i")
-          .innerHTML.includes("M12.736 3.97")
-          ? 1
-          : 0,
-      };
-
-      const token = Cookies.get("token");
-
-      // Update settings
-      const settingsResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-          body: JSON.stringify(settingsBody),
-        }
-      );
-
-      if (!settingsResponse.ok) {
-        throw new Error(`HTTP error! status: ${settingsResponse.status}`);
-      }
-
-      // Update banner if custom banner is enabled
-      if (!settingsBody.banner_discord) {
-        const image = document.getElementById("bannerInput").value.trim();
-
-        // Fetch current banner data first
-        const currentBannerResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${token}`
-        );
-        const currentBanner = await currentBannerResponse.json();
-
-        // Only update if the new value is different from the current one
-        if (image !== currentBanner.image_url) {
-          const bannerUrl = `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
-            image || "NONE"
-          )}`;
-
-          const bannerResponse = await fetch(bannerUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          });
-
-          if (!bannerResponse.ok) {
-            throw new Error(
-              `Banner update failed! status: ${bannerResponse.status}`
-            );
-          }
-        }
-      }
-
-      // Show success message
-      toastControl.showToast(
-        "success",
-        "Settings updated successfully",
-        "Success"
-      );
-
-      // Add a small delay before reloading to ensure the toast is visible
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      console.error("Error saving settings:", error);
-      toastControl.showToast("error", "Failed to update settings", "Error");
-    } finally {
-      save_settings_loading.style.display = "none";
-      save_settings_button.disabled = false;
-    }
+  settings_button.addEventListener("click", function () {
+    window.location.href = "/settings";
   });
 
   // Show edit button only for logged in user viewing their own profile
@@ -743,26 +508,50 @@ document.addEventListener("DOMContentLoaded", function () {
     const statusIndicator = document.getElementById("status-indicator");
     const lastSeenElement = document.getElementById("last-seen");
 
-    // Update status indicator with tooltip
-    if (userData.presence && userData.presence.status === "Online") {
+    // Clean up existing tooltip
+    const tooltipInstance = bootstrap.Tooltip.getInstance(statusIndicator);
+    if (tooltipInstance) {
+      tooltipInstance.dispose();
+    }
+
+    // Check if presence is hidden for non-profile owners
+    if (permissions.hide_presence === 1 && loggedinuserId !== userId) {
+      statusIndicator.className = "status-indicator status-offline";
+      statusIndicator.setAttribute("data-bs-toggle", "tooltip");
+      statusIndicator.setAttribute("data-bs-placement", "top");
+      statusIndicator.setAttribute("title", "Status Hidden");
+      lastSeenElement.innerHTML = `
+        <span style="color: #748D92;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" style="vertical-align: -1px;">
+            <rect width="16" height="16" fill="none" />
+            <g fill="currentColor">
+              <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+              <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+              <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+            </g>
+          </svg>
+          Last seen hidden
+        </span>`;
+    } else if (userData.presence && userData.presence.status === "Online") {
       statusIndicator.className = "status-indicator status-online";
       statusIndicator.setAttribute("data-bs-toggle", "tooltip");
       statusIndicator.setAttribute("data-bs-placement", "top");
       statusIndicator.setAttribute("title", "Online");
       lastSeenElement.textContent = "Online";
     } else {
-      statusIndicator.className = "status-indicator status-offline";
-      statusIndicator.setAttribute("data-bs-toggle", "tooltip");
-      statusIndicator.setAttribute("data-bs-placement", "top");
-      statusIndicator.setAttribute("title", "Offline");
-      // Show "Last seen unknown" if last_seen is null
-      lastSeenElement.textContent =
+      const lastSeenText =
         userData.last_seen === null
           ? "Last seen unknown"
           : `Last seen ${formatTimeDifference(userData.last_seen)}`;
+
+      statusIndicator.className = "status-indicator status-offline";
+      statusIndicator.setAttribute("data-bs-toggle", "tooltip");
+      statusIndicator.setAttribute("data-bs-placement", "top");
+      statusIndicator.setAttribute("title", lastSeenText);
+      lastSeenElement.textContent = lastSeenText;
     }
 
-    // Initialize tooltip
+    // Initialize tooltip - now this runs for ALL cases
     new bootstrap.Tooltip(statusIndicator);
   }
 
@@ -1823,345 +1612,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         console.error("Error checking owner status:", error);
       });
-  });
-
-  settings_button.addEventListener("click", function () {
-    const settingsModal = document.getElementById("settingsModal");
-    settingsModal.style.display = "block";
-    profile_public_button.classList.remove("btn-danger", "btn-success");
-    show_comments_button.classList.remove("btn-danger", "btn-success");
-    hide_following_button.classList.remove("btn-danger", "btn-success");
-    hide_followers_button.classList.remove("btn-danger", "btn-success");
-    use_discord_banner_button.classList.remove("btn-danger", "btn-success");
-
-    profile_public_button.classList.add("btn-secondary");
-    show_comments_button.classList.add("btn-secondary");
-    hide_following_button.classList.add("btn-secondary");
-    hide_followers_button.classList.add("btn-secondary");
-    use_discord_banner_button.classList.add("btn-secondary");
-
-    profile_public_button.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
-    show_comments_button.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
-    hide_following_button.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
-    hide_followers_button.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
-    use_discord_banner_button.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="false"></span><span id="button-text"></span>';
-    loadProfileSettings();
-  });
-
-  async function loadProfileSettings() {
-    try {
-      const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${loggedinuserId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const settings = await response.json();
-
-      // Process each setting
-      for (const [key, value] of Object.entries(settings)) {
-        switch (key) {
-          case "hide_followers":
-            const hideFollowersIcon = document.createElement("i");
-            hideFollowersIcon.innerHTML =
-              value === 1
-                ? `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-                </svg>
-            `
-                : `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-            `;
-
-            hide_followers_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
-            hide_followers_button.classList.add(
-              "btn",
-              value === 1 ? "btn-success" : "btn-danger"
-            );
-            hide_followers_button.innerHTML = hideFollowersIcon.outerHTML; // Update button with the icon
-            break;
-          case "hide_following":
-            // Logic for hide_following
-            const hideFollowingIcon = document.createElement("i");
-            hideFollowingIcon.innerHTML =
-              value === 1
-                ? `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-                </svg>
-            `
-                : `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-            `;
-
-            hide_following_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
-            hide_following_button.classList.add(
-              "btn",
-              value === 1 ? "btn-success" : "btn-danger"
-            ); // Update button class based on value
-            hide_following_button.innerHTML = hideFollowingIcon.outerHTML; // Update button with the icon
-            break;
-          case "profile_public":
-            // Logic for profile_public
-            const profilePublicIcon = document.createElement("i");
-            profilePublicIcon.innerHTML =
-              value === 1
-                ? `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-        </svg>
-    `
-                : `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-        </svg>
-    `;
-
-            profile_public_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
-            profile_public_button.classList.add(
-              "btn",
-              value === 1 ? "btn-success" : "btn-danger"
-            ); // Update button class based on value
-            profile_public_button.innerHTML = profilePublicIcon.outerHTML; // Update button with the icon
-            break;
-          case "show_recent_comments":
-            // Logic for show_recent_comments
-            const recentCommentsIcon = document.createElement("i");
-            recentCommentsIcon.innerHTML = value
-              ? `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-                </svg>
-            `
-              : `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                    <rect width="16" height="16" fill="none" />
-                    <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-            `;
-
-            show_comments_button.classList.remove("btn-danger", "btn-success"); // Clear previous button classes
-            show_comments_button.classList.add(
-              "btn",
-              value ? "btn-success" : "btn-danger"
-            ); // Update button class based on value
-            show_comments_button.innerHTML = recentCommentsIcon.outerHTML; // Update button with the icon
-            break;
-
-          case "banner_discord":
-            const bannerDiscordIcon = document.createElement("i");
-            bannerDiscordIcon.innerHTML =
-              value === 1
-                ? `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-        </svg>
-    `
-                : `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-        </svg>
-    `;
-
-            use_discord_banner_button.classList.remove(
-              "btn-danger",
-              "btn-success"
-            );
-            use_discord_banner_button.classList.add(
-              "btn",
-              value === 1 ? "btn-success" : "btn-danger"
-            );
-            use_discord_banner_button.innerHTML = bannerDiscordIcon.outerHTML;
-
-            // Show/hide input field based on the value
-            bannerInput.style.display = value === 1 ? "none" : "block";
-
-            // If Discord banner is disabled, fetch and populate custom banner URL
-            if (value === 0) {
-              fetch(
-                `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${loggedinuserId}`
-              )
-                .then((response) => response.json())
-                .then((data) => {
-                  const input = document.getElementById("bannerInput");
-                  if (
-                    data.image_url &&
-                    !data.image_url.includes(
-                      "/assets/backgrounds/background"
-                    ) &&
-                    data.image_url !== "NONE"
-                  ) {
-                    input.value = data.image_url;
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error fetching custom banner:", error);
-                });
-            }
-            break;
-          case "hide_favorites":
-            const hideFavoritesIcon = document.createElement("i");
-            hideFavoritesIcon.innerHTML =
-              value === 1
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                  <rect width="16" height="16" fill="none" />
-                  <path fill="currentColor" d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06a.733.733 0 0 1 1.047 0l3.052 3.093l5.4-6.425z" />
-              </svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                  <rect width="16" height="16" fill="none" />
-                  <path fill="currentColor" d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-              </svg>`;
-
-            hide_favorites_button.classList.remove("btn-danger", "btn-success");
-            hide_favorites_button.classList.add(
-              "btn",
-              value === 1 ? "btn-success" : "btn-danger"
-            );
-            hide_favorites_button.innerHTML = hideFavoritesIcon.outerHTML;
-            break;
-        }
-      }
-    } catch (error) {
-      console.error("Error loading profile settings:", error);
-    }
-  }
-
-  async function validateImageURL(url) {
-    if (!url || url.trim() === "" || url === "NONE") {
-      return "None";
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Origin: "",
-        },
-      });
-
-      return response.ok ? url : "None";
-    } catch (error) {
-      return "None";
-    }
-  }
-
-  const close_settings_button = document.getElementById("close-settings");
-  const settings_modal = document.getElementById("settingsModal");
-  close_settings_button.addEventListener("click", function () {
-    settings_modal.style.display = "none";
-  });
-
-  // Delete account functionality
-  const deleteAccountButton = document.getElementById("delete-account-button");
-  const deleteConfirmation = document.getElementById("delete-confirmation");
-  const confirmDeleteButton = document.getElementById("confirm-delete");
-  const cancelDeleteButton = document.getElementById("cancel-delete");
-
-  deleteAccountButton.addEventListener("click", function () {
-    deleteConfirmation.style.display = "block";
-    deleteAccountButton.style.display = "none";
-  });
-
-  cancelDeleteButton.addEventListener("click", function () {
-    deleteConfirmation.style.display = "none";
-    deleteAccountButton.style.display = "block";
-  });
-
-  confirmDeleteButton.addEventListener("click", async function () {
-    try {
-      const token = Cookies.get("token");
-      if (!token) {
-        toastControl.showToast(
-          "error",
-          "You must be logged in to delete your account",
-          "Error"
-        );
-        return;
-      }
-
-      // Disable the button and show loading state
-      confirmDeleteButton.disabled = true;
-      confirmDeleteButton.innerHTML = `
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      Deleting...
-    `;
-
-      const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/delete?token=${encodeURIComponent(
-          token
-        )}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Show success message
-      toastControl.showToast(
-        "success",
-        "Account deleted successfully. Redirecting...",
-        "Success"
-      );
-
-      // Clear cookies and local storage
-      Cookies.remove("token");
-      localStorage.clear();
-
-      // Redirect to home page after a short delay
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      toastControl.showToast(
-        "error",
-        "Failed to delete account. Please try again.",
-        "Error"
-      );
-
-      // Reset button state
-      confirmDeleteButton.disabled = false;
-      confirmDeleteButton.innerHTML = "Yes, Delete My Account";
-    }
   });
 
   async function fetchUserFavorites(userId) {
