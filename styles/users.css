@@ -13,16 +13,54 @@
   --selection-text: var(--text-body);
 }
 
+.badges-container {
+  display: none; /* Changed from flex to none by default */
+  align-items: center;
+  padding: 2px 8px; /* Reduced from 4px to 2px vertical padding */
+  background-color: rgba(33, 42, 49, 0.471);
+  border-radius: 8px;
+  min-height: 32px; /* Reduced from 36px to 32px */
+  gap: 4px; /* Added gap property with smaller value (was previously using gap-2 class which is 8px) */
+  opacity: 0; /* Add opacity control */
+  transition: opacity 0.2s ease; /* Smooth transition */
+}
+
+.badges-container.visible {
+  display: flex;
+  opacity: 1;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.badge-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.badge-item svg {
+  width: 24px;
+  height: 24px;
+}
+
 .early-badge {
   display: none;
   margin-left: 8px;
   cursor: pointer;
-  color: #ffd700; /* Golden color */
+  color: #ffd700 !important; /* Added !important to ensure color override */
   transition: transform 0.2s ease;
 }
 
-.early-badge:hover {
-  transform: scale(1.1);
+.early-badge svg {
+  fill: #ffd700 !important; /* Added to ensure SVG fill color */
 }
 
 .crown-wrapper:hover {
