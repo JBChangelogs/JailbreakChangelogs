@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialize all tooltips
+  const tooltipTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="tooltip"]'
+  );
+  const tooltipList = [...tooltipTriggerList].map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
+
   const bannerContainer = document.querySelector(".banner-container");
   if (bannerContainer) {
     bannerContainer.classList.add("loading"); // Add loading state immediately
@@ -345,7 +353,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return response.ok ? url : null;
     } catch (error) {
       if (error.name === "AbortError") {
-        console.log("Banner fetch timed out");
       }
       return null;
     } finally {
@@ -1590,30 +1597,6 @@ document.addEventListener("DOMContentLoaded", function () {
     toastControl.showToast("success", message, "Alert");
   }
 
-  crown.addEventListener("click", function () {
-    fetch(`/owner/check/${userId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          AlertToast("This user created Jailbreak Changelogs!");
-        } else {
-          SuccessToast(
-            'The only owners of Jailbreak Changelogs are <a href="/users/659865209741246514" target="_blank" rel="noopener noreferrer">@Jakobiis</a> and <a href="/users/1019539798383398946" target="_blank" rel="noopener noreferrer">@Jalenzz</a>'
-          );
-          AlertToast(
-            "This crown is given out to the creators of Jailbreak Changelogs! Unfortunately, this user is not one of them 🤣"
-          );
-        }
-      })
-      .catch((error) => {
-        console.error("Error checking owner status:", error);
-      });
-  });
-
   async function fetchUserFavorites(userId) {
     const favoritesContainer = document.getElementById("favorites-grid");
     const card_pagination = document.getElementById("card-pagination");
@@ -1951,4 +1934,72 @@ document.addEventListener("DOMContentLoaded", function () {
       favoriteIcon.style.pointerEvents = "auto";
     }
   };
+
+  // Initialize badge elements once at the top
+  const crown = document.getElementById("crown");
+  const badgesContainer = document.querySelector(".badges-container");
+
+  // Hide badges container by default
+  if (badgesContainer) {
+    badgesContainer.style.display = "none";
+  }
+
+  function updateBadgesVisibility() {
+    if (!badgesContainer) return;
+
+    const hasCrown = crown?.style?.display === "inline-block";
+    const hasEarlyBadge = earlyBadge?.style?.display === "inline-block";
+
+    if (hasCrown || hasEarlyBadge) {
+      badgesContainer.classList.add("visible");
+    } else {
+      badgesContainer.classList.remove("visible");
+    }
+  }
+
+  // Initial state
+  if (badgesContainer) {
+    badgesContainer.classList.remove("visible");
+  }
+
+  // Set initial badge states
+  if (udata.usernumber <= 100) {
+    earlyBadge.style.display = "inline-block";
+  } else {
+    earlyBadge.style.display = "none";
+  }
+
+  if (userId === "659865209741246514" || userId === "1019539798383398946") {
+    crown.style.display = "inline-block";
+  } else {
+    crown.style.display = "none";
+  }
+
+  // Update visibility after setting states
+  updateBadgesVisibility();
+
+  // Add crown click handler
+  crown.addEventListener("click", function () {
+    fetch(`/owner/check/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          AlertToast("This user created Jailbreak Changelogs!");
+        } else {
+          SuccessToast(
+            'The only owners of Jailbreak Changelogs are <a href="/users/659865209741246514" target="_blank" rel="noopener noreferrer">@Jakobiis</a> and <a href="/users/1019539798383398946" target="_blank" rel="noopener noreferrer">@Jalenzz</a>'
+          );
+          AlertToast(
+            "This crown is given out to the creators of Jailbreak Changelogs! Unfortunately, this user is not one of them 🤣"
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking owner status:", error);
+      });
+  });
 });
