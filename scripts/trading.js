@@ -1751,6 +1751,16 @@ async function fetchUserDetails(userId) {
   }
 }
 
+function hasValidRobloxData(authorDetails) {
+  return !!(
+    authorDetails?.roblox_id &&
+    authorDetails?.roblox_username &&
+    authorDetails?.roblox_display_name &&
+    authorDetails?.roblox_avatar &&
+    authorDetails?.roblox_join_date
+  );
+}
+
 async function createTradeAdHTML(trade) {
   // Start with a skeleton template
   const container = document.createElement("div");
@@ -1760,6 +1770,11 @@ async function createTradeAdHTML(trade) {
   try {
     // Fetch user details first
     const authorDetails = await fetchUserDetails(trade.author);
+    
+    // Skip this trade ad if author has no valid Roblox data
+    if (!hasValidRobloxData(authorDetails)) {
+      return '';
+    }
 
     // Helper function to fetch avatar with format fallbacks
     async function getAvatarUrl(userId, avatarHash) {

@@ -221,6 +221,19 @@ async function loadTradeData() {
     );
     const author = await authorResponse.json();
 
+    // Check if author has valid Roblox data
+    if (
+      !author?.roblox_id ||
+      !author?.roblox_username ||
+      !author?.roblox_display_name ||
+      !author?.roblox_avatar ||
+      !author?.roblox_join_date
+    ) {
+      // Redirect to trading page if no valid Roblox data
+      window.location.href = "/trading";
+      return;
+    }
+
     // Process offering items
     const offeringIds = trade.offering.split(",").filter((id) => id);
     const offeringItems = await Promise.all(
