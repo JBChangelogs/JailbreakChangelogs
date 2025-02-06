@@ -15,11 +15,11 @@
 
     <!-- Right side - Navigation and Profile -->
     <div class="navbar-content-right">
-      <!-- Mobile avatar toggle -->
+      <!-- Mobile avatar toggle with text -->
       <div class="d-flex d-lg-none align-items-center">
         <button
           id="mobileAvatarToggle"
-          class="btn p-0"
+          class="btn p-0 d-flex align-items-center gap-2"
           type="button"
           aria-controls="sideMenu"
           aria-expanded="false"
@@ -33,6 +33,7 @@
             width="34"
             height="34"
           />
+          <span class="login-text text-white"></span>
         </button>
       </div>
 
@@ -74,10 +75,10 @@
             <a class="nav-link" href="/faq">FAQ</a>
           </li>
 
-          <!-- Profile picture icon with dropdown (visible on desktop) -->
+          <!-- Profile picture icon with text and dropdown (visible on desktop) -->
           <li class="nav-item dropdown ms-2">
             <a
-              class="nav-link dropdown-toggle-no-caret"
+              class="nav-link dropdown-toggle-no-caret d-flex align-items-center gap-2"
               href="#"
               id="navbarDropdown"
               role="button"
@@ -92,6 +93,7 @@
                 width="32"
                 height="32"
               />
+              <span class="login-text text-white"></span>
             </a>
             <ul
               class="dropdown-menu dropdown-menu-dark dropdown-menu-end"
@@ -288,7 +290,7 @@
 	<rect width="24" height="24" fill="none" />
 	<path fill="currentColor" fill-rule="evenodd" d="M8 7a4 4 0 1 1 8 0a4 4 0 0 1-8 0m0 6a5 5 0 0 0-5 5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3a5 5 0 0 0-5-5z" clip-rule="evenodd" />
 </svg>
-             Profile
+             View Profile
             </a>
             ${
               !hasRoblox
@@ -338,7 +340,7 @@
 	<rect width="24" height="24" fill="none" />
 	<path fill="currentColor" fill-rule="evenodd" d="M8 7a4 4 0 1 1 8 0a4 4 0 0 1-8 0m0 6a5 5 0 0 0-5 5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3a5 5 0 0 0-5-5z" clip-rule="evenodd" />
 </svg>
-               Profile
+               View Profile
             </a>
           </li>
           ${
@@ -399,6 +401,30 @@
       setProfilePictureSrc(profilePicture, avatarUrl);
       setProfilePictureSrc(mobileProfilePicture, avatarUrl);
     }
+
+    // Add text next to avatars based on login status
+    const updateLoginText = () => {
+      const loginTextElements = document.querySelectorAll(".login-text");
+      const isLoggedIn = !!Cookies.get("token");
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+      loginTextElements.forEach((element) => {
+        if (isLoggedIn) {
+          element.textContent =
+            userData.username || userData.global_name || "User";
+        } else {
+          element.textContent = "Login";
+        }
+      });
+    };
+
+    // Call updateLoginText initially and whenever auth state changes
+    updateLoginText();
+    const origUpdateContent = updateContent;
+    updateContent = function () {
+      origUpdateContent();
+      updateLoginText();
+    };
 
     // Toggle side menu with mobile avatar
     mobileAvatarToggle.addEventListener("click", function () {
@@ -606,5 +632,38 @@
   /* Nav link padding adjustment */
   .custom-navbar-color .nav-link {
     padding: 4px 6px; /* Reduced horizontal padding from 8px to 6px */
+  }
+
+  /* Login text styles */
+  .login-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  /* Adjust button padding for mobile view */
+  #mobileAvatarToggle {
+    padding: 4px 8px;
+  }
+
+  /* Media queries */
+  @media screen and (max-width: 576px) {
+    .custom-navbar-color .navbar-brand {
+      margin-right: 20px;
+      margin-left: -15px; /* Increased leftward shift from -10px to -15px */
+    }
+
+    .navbar-logo {
+      height: 40px !important;
+      margin-left: -5px !important; /* Added negative margin to pull logo left */
+    }
+
+    .custom-navbar-color .container-fluid {
+      padding-left: 12px !important; /* Reduced left padding to help shift logo left */
+    }
+
+    /* Add margin to move mobile avatar toggle right */
+    #mobileAvatarToggle {
+      margin-right: -10px;
+    }
   }
 </style>
