@@ -341,18 +341,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchBanner(userId, bannerHash, format) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    async function tryBannerUrl(baseUrl, size = null) {
+      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
+      try {
+        const response = await fetch(url, {
+          method: "HEAD",
+          signal: controller.signal,
+        });
+        return response.ok ? url : null;
+      } catch {
+        return null;
+      }
+    }
 
     try {
-      const url = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}`;
-      const response = await fetch(url, {
-        method: "HEAD",
-        signal: controller.signal,
-      });
+      const baseUrl = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}`;
 
-      return response.ok ? url : null;
+      // Try with size parameter first
+      const withSize = await tryBannerUrl(baseUrl, 4096);
+      if (withSize) return withSize;
+
+      // Try without size parameter
+      const withoutSize = await tryBannerUrl(baseUrl);
+      if (withoutSize) return withoutSize;
+
+      return null;
     } catch (error) {
       if (error.name === "AbortError") {
+        console.log("Banner fetch timed out");
       }
       return null;
     } finally {
