@@ -314,32 +314,24 @@ class CommentsManager {
     }
   }
 
-  renderComments() {
+  async renderComments() {
     if (this._renderTimeout) {
       clearTimeout(this._renderTimeout);
     }
 
-    // Show loading state immediately
-    this.commentsList.innerHTML = `
-    <li class="list-group-item comments-loading">
-      <div class="spinner mb-2"></div>
-      <div>Loading comments...</div>
-    </li>
-  `;
-
-    this._renderTimeout = setTimeout(async () => {
+    try {
       this.commentsList.innerHTML = "";
 
       if (this.comments.length === 0) {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center" style="background-color: #212a31;">
               <div class="py-3">
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
-                <rect width="16" height="16" fill="none" />
-                <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
-              </svg>
-                  <p class="mb-0 text-muted">No comments yet</p>
-                  <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+                  <rect width="16" height="16" fill="none" />
+                  <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
+                </svg>
+                <p class="mb-0 text-muted">No comments yet</p>
+                <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
               </div>
           </li>
         `;
@@ -347,35 +339,202 @@ class CommentsManager {
         return;
       }
 
-      // Sort comments based on selection
-      const commentsToRender = [...this.comments];
-      if (this.sortOrder === "oldest") {
-        commentsToRender.reverse();
-      }
+      // Sort comments based on date
+      const commentsToRender = [...this.comments].sort((a, b) => {
+        const dateA = parseInt(a.date);
+        const dateB = parseInt(b.date);
+        return this.sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      });
 
-      // Calculate pagination indices
+      // Calculate pagination
       const totalPages = Math.ceil(
         commentsToRender.length / this.commentsPerPage
       );
       const startIndex = (this.currentPage - 1) * this.commentsPerPage;
       const endIndex = startIndex + this.commentsPerPage;
-
-      // Get comments for current page
       const commentsToShow = commentsToRender.slice(startIndex, endIndex);
 
-      // Wait for all comments to render in sequence
-      for (const comment of commentsToShow) {
-        await this.renderCommentItem(comment);
-      }
+      // Generate all comments HTML first
+      const allCommentsHTML = await Promise.all(
+        commentsToShow.map((comment) => this.generateCommentHTML(comment))
+      );
 
-      // Handle pagination display
+      // Create a temporary div to parse HTML
+      const temp = document.createElement("div");
+      temp.innerHTML = allCommentsHTML.join("");
+
+      // Process all comments at once
+      const commentElements = temp.children;
+      const fragment = document.createDocumentFragment();
+
+      // Convert HTMLCollection to Array for forEach
+      Array.from(commentElements).forEach((commentElement, index) => {
+        const comment = commentsToShow[index];
+
+        // Set up show more functionality
+        const commentText = commentElement.querySelector(".comment-text");
+        const showMoreBtn = commentElement.querySelector(".show-more-btn");
+
+        if (commentText && showMoreBtn) {
+          // Need to add to DOM first to check scrollHeight
+          fragment.appendChild(commentElement);
+          this.commentsList.appendChild(fragment);
+
+          if (commentText.scrollHeight > 300) {
+            commentText.classList.add("truncated");
+            showMoreBtn.classList.add("visible");
+          }
+
+          showMoreBtn.addEventListener("click", () => {
+            const isExpanded = commentText.classList.contains("expanded");
+            commentText.classList.toggle("expanded");
+            commentText.classList.toggle("truncated");
+            showMoreBtn.textContent = isExpanded ? "Show more" : "Show less";
+          });
+        }
+
+        // Set up action buttons if present
+        if (commentElement.querySelector(".comment-actions")) {
+          this.setupCommentActions(commentElement, comment);
+        }
+      });
+
+      // Handle pagination
       if (totalPages > 1) {
         this.renderPagination(totalPages);
         this.paginationControls.style.display = "flex";
       } else {
         this.paginationControls.style.display = "none";
       }
-    }, 50);
+    } catch (error) {
+      console.error("Error rendering comments:", error);
+      this.commentsList.innerHTML = `
+        <li class="list-group-item text-center text-danger">
+          Error loading comments. Please try again.
+        </li>
+      `;
+    }
+  }
+
+  async generateCommentHTML(comment) {
+    const token = Cookies.get("token");
+    let isOwner = false;
+    let userDetails = null;
+
+    try {
+      // Fetch user details
+      if (comment.user_id) {
+        userDetails = await this.fetchUserDetails(comment.user_id);
+      }
+
+      // Check ownership
+      if (token) {
+        const response = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+        );
+        if (response.ok) {
+          const userData = await response.json();
+          isOwner = userData.id === comment.user_id;
+        }
+      }
+    } catch (error) {
+      console.error("Error generating comment HTML:", error);
+    }
+
+    // Determine display name from user details
+    const displayName =
+      userDetails && userDetails.global_name !== "None"
+        ? userDetails.global_name
+        : userDetails
+        ? userDetails.username
+        : comment.author;
+
+    const userNameElement = userDetails?.isDeleted
+      ? `<span class="comment-author text-muted">${displayName}</span>`
+      : `<a href="/users/${comment.user_id}" class="comment-author">${displayName}</a>`;
+
+    const formatDate = (timestamp) => {
+      return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+    };
+
+    const displayDate = comment.edited_at
+      ? `Last edited ${formatDate(comment.edited_at)}`
+      : formatDate(comment.date);
+
+    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
+      displayName
+    )}&bold=true&format=svg`;
+
+    // Handle deleted user avatar differently
+    const avatarElement = userDetails?.isDeleted
+      ? `<div class="rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #134d64;">${userDetails.avatar}</div>`
+      : `<img src="${await window.checkAndSetAvatar(userDetails)}" 
+          class="rounded-circle me-2" 
+          width="40" 
+          height="40"
+          onerror="this.src='${fallbackAvatar}'"
+          alt="${displayName}'s avatar">`;
+
+    return `
+      <li class="list-group-item comment-item" data-comment-id="${comment.id}">
+        <div class="d-flex align-items-start">
+          ${avatarElement}
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">
+                  ${userNameElement}
+                </h6>
+                <small class="text-muted">
+                  ${displayDate}
+                </small>
+              </div>
+              ${isOwner ? this.generateActionButtons() : ""}
+            </div>
+            <div class="comment-content">
+              <p class="comment-text mb-0">${this.escapeHtml(
+                comment.content
+              )}</p>
+              <button class="show-more-btn">Show more</button>
+            </div>
+          </div>
+        </div>
+      </li>
+    `;
+  }
+
+  generateActionButtons() {
+    return `
+      <div class="comment-actions">
+        <button class="comment-actions-toggle" aria-label="Comment actions">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M9.5 13a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0" />
+          </svg>
+        </button>
+        <div class="comment-actions-menu d-none">
+          <button class="comment-action-item edit-comment">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+              <rect width="24" height="24" fill="none" />
+              <path fill="currentColor" d="m14.06 9.02l.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83l3.75 3.75l1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z" />
+            </svg>Edit
+          </button>
+          <button class="comment-action-item delete-comment delete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+              <rect width="24" height="24" fill="none" />
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+            </svg>Delete
+          </button>
+        </div>
+      </div>
+    `;
   }
 
   async renderCommentItem(comment) {
