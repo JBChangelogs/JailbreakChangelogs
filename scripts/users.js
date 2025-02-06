@@ -580,6 +580,36 @@ document.addEventListener("DOMContentLoaded", function () {
     new bootstrap.Tooltip(statusIndicator);
   }
 
+  function showLoginRecommendationBanner(userData) {
+    if (userData.last_seen === null) {
+      const userBio = document.getElementById("userBio");
+      const bannerHTML = `
+        <div class="alert alert-info border-0 shadow-sm mb-4" role="alert" 
+             style="background-color: var(--bg-secondary); border-left: 4px solid var(--accent-color-light);">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="#1d7da3" d="M13.435 2.075a3.33 3.33 0 0 0-2.87 0c-.394.189-.755.497-1.26.928l-.079.066a2.56 2.56 0 0 1-1.58.655l-.102.008c-.662.053-1.135.09-1.547.236a3.33 3.33 0 0 0-2.03 2.029c-.145.412-.182.885-.235 1.547l-.008.102a2.56 2.56 0 0 1-.655 1.58l-.066.078c-.431.506-.74.867-.928 1.261a3.33 3.33 0 0 0 0 2.87c.189.394.497.755.928 1.26l.066.079c.41.48.604.939.655 1.58l.008.102c.053.662.09 1.135.236 1.547a3.33 3.33 0 0 0 2.029 2.03c.412.145.885.182 1.547.235l.102.008c.629.05 1.09.238 1.58.655l.078.066c.506.431.867.74 1.261.928a3.33 3.33 0 0 0 2.87 0c.394-.189.755-.497 1.26-.928l.079-.066c.48-.41.939-.604 1.58-.655l.102-.008c.662-.053 1.135-.09 1.547-.236a3.33 3.33 0 0 0 2.03-2.029c.145-.412.182-.885.235-1.547l.008-.102c.05-.629.238-1.09.655-1.58l.066-.079c.431-.505.74-.866.928-1.26a3.33 3.33 0 0 0 0-2.87c-.189-.394-.497-.755-.928-1.26l-.066-.079a2.56 2.56 0 0 1-.655-1.58l-.008-.102c-.053-.662-.09-1.135-.236-1.547a3.33 3.33 0 0 0-2.029-2.03c-.412-.145-.885-.182-1.547-.235l-.102-.008a2.56 2.56 0 0 1-1.58-.655l-.079-.066c-.505-.431-.866-.74-1.26-.928M12 7.25a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0V8a.75.75 0 0 1 .75-.75M10.75 16a.75.75 0 0 1 .5-.707v-3.586a.75.75 0 0 1 .25-1.457h.5a.75.75 0 0 1 .75.75v4.293a.75.75 0 0 1-.25 1.457h-1a.75.75 0 0 1-.75-.75" />
+</svg>
+            </div>
+            <div>
+              <h6 class="alert-heading mb-1" style="color: var(--accent-color-light);">
+                Are you the owner of this profile?
+              </h6>
+              <p class="mb-0" style="color: var(--text-primary);">
+                Login to enable status indicators and last seen timestamps. Your Discord avatar, banner, 
+                and username changes will automatically sync with your profile.
+              </p>
+            </div>
+          </div>
+        </div>`;
+
+      // Insert banner before the user bio
+      userBio.insertAdjacentHTML("beforebegin", bannerHTML);
+    }
+  }
+
   async function fetchUserBio(userId) {
     try {
       // First get user data for member since date
@@ -646,6 +676,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Rest of the existing code...
       const userData = await userResponse.json();
+
+      showLoginRecommendationBanner(userData);
 
       // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
       if (earlyBadge) {
