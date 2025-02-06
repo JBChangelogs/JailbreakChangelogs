@@ -319,7 +319,22 @@ class CommentsManager {
       clearTimeout(this._renderTimeout);
     }
 
+    // Keep existing content while loading
+    const currentHeight = this.commentsList.offsetHeight;
+    this.commentsList.style.minHeight = `${currentHeight}px`;
+
     try {
+      // Show loading state but maintain height
+      const loadingHtml = `
+        <li class="list-group-item comments-loading">
+          <div class="spinner mb-2"></div>
+          <div>Loading comments...</div>
+        </li>
+      `;
+
+      this.commentsList.innerHTML = loadingHtml;
+
+      // Rest of your existing renderComments code...
       this.commentsList.innerHTML = "";
 
       if (this.comments.length === 0) {
@@ -413,6 +428,11 @@ class CommentsManager {
           Error loading comments. Please try again.
         </li>
       `;
+    } finally {
+      // Remove the fixed height after transition
+      setTimeout(() => {
+        this.commentsList.style.minHeight = "";
+      }, 300); // Match the transition duration
     }
   }
 
@@ -725,31 +745,90 @@ class CommentsManager {
     }
 
     this.paginationControls.style.display = "flex";
+
+    // Create an array of page numbers to show
+    let pages = [];
+    const maxVisiblePages = 5;
+    const halfVisible = Math.floor(maxVisiblePages / 2);
+
+    if (totalPages <= maxVisiblePages) {
+      // If total pages is less than max visible, show all pages
+      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    } else {
+      // Calculate range of pages to show
+      let start = Math.max(this.currentPage - halfVisible, 1);
+      let end = Math.min(start + maxVisiblePages - 1, totalPages);
+
+      // Adjust start if we're near the end
+      if (end === totalPages) {
+        start = Math.max(end - maxVisiblePages + 1, 1);
+      }
+
+      // Generate page numbers
+      pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+      // Add ellipsis if needed
+      if (start > 1) {
+        pages.unshift(1);
+        if (start > 2) pages.splice(1, 0, "...");
+      }
+      if (end < totalPages) {
+        if (end < totalPages - 1) pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    // Generate pagination HTML
     this.paginationControls.innerHTML = `
       <button class="btn btn-sm btn-primary pagination-btn me-2" 
               ${this.currentPage === 1 ? "disabled" : ""}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="m14 18l-6-6l6-6l1.4 1.4l-4.6 4.6l4.6 4.6z" />
-</svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+          <rect width="24" height="24" fill="none" />
+          <path fill="currentColor" d="m14 18l-6-6l6-6l1.4 1.4l-4.6 4.6l4.6 4.6z" />
+        </svg>
       </button>
+      ${pages
+        .map((page) => {
+          if (page === "...") {
+            return `<span class="px-2">...</span>`;
+          }
+          return `
+          <button class="btn btn-sm ${
+            this.currentPage === page ? "btn-primary" : "btn-outline-primary"
+          } mx-1"
+                  ${this.currentPage === page ? "disabled" : ""}>
+            ${page}
+          </button>
+        `;
+        })
+        .join("")}
       <button class="btn btn-sm btn-primary pagination-btn ms-2" 
               ${this.currentPage === totalPages ? "disabled" : ""}>
-       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M12.6 12L8 7.4L9.4 6l6 6l-6 6L8 16.6z" />
-</svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+          <rect width="24" height="24" fill="none" />
+          <path fill="currentColor" d="M12.6 12L8 7.4L9.4 6l6 6l-6 6L8 16.6z" />
+        </svg>
       </button>
     `;
 
-    const [prevBtn, nextBtn] =
+    // Add event listeners
+    const [prevBtn, ...pageButtons] =
       this.paginationControls.querySelectorAll("button");
+    const nextBtn = pageButtons.pop();
+
     prevBtn.addEventListener("click", () =>
       this.changePage(this.currentPage - 1)
     );
     nextBtn.addEventListener("click", () =>
       this.changePage(this.currentPage + 1)
     );
+
+    pageButtons.forEach((btn) => {
+      const pageNum = parseInt(btn.textContent);
+      if (!isNaN(pageNum)) {
+        btn.addEventListener("click", () => this.changePage(pageNum));
+      }
+    });
   }
 
   changePage(newPage) {

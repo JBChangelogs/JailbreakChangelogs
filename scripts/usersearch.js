@@ -1,6 +1,5 @@
 // Constants
 const API_BASE_URL = "https://api3.jailbreakchangelogs.xyz";
-const DISCORD_CDN = "https://cdn.discordapp.com";
 const USERS_PER_PAGE = 15;
 let currentPage = 1;
 let allUsers = [];
@@ -168,31 +167,14 @@ const createPaginationControls = (totalUsers) => {
 
   return paginationHTML;
 };
-const fetchAvatar = async (userId, avatarHash, format) => {
-  const url = `${DISCORD_CDN}/avatars/${userId}/${avatarHash}.${format}`;
-  const response = await fetch(url, { method: "HEAD" });
-  return response.ok ? url : null;
-};
 
 // User Card Template
-// Update createUserCard function
 const createUserCard = async (user) => {
-  let avatarUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
-
-  if (user.avatar) {
-    try {
-      const gifUrl = await fetchAvatar(user.id, user.avatar, "gif");
-      if (gifUrl) {
-        avatarUrl = gifUrl;
-      } else {
-        const pngUrl = await fetchAvatar(user.id, user.avatar, "png");
-        if (pngUrl) {
-          avatarUrl = pngUrl;
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching avatar:", error);
-    }
+  let avatarUrl;
+  try {
+    avatarUrl = await window.checkAndSetAvatar(user);
+  } catch (error) {
+    console.error("Error fetching avatar:", error);
   }
 
   return `
@@ -207,9 +189,7 @@ const createUserCard = async (user) => {
               class="user-avatar rounded-circle" 
               alt="${user.username}"
               style="border-color: ${decimalToHex(user.accent_color)};"
-              onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
-                user.username
-              }&bold=true&format=svg'"
+              onerror="this.src='${window.checkAndSetAvatar(user)}'"
             >
             <div class="user-info">
               <h5 class="user-name text-truncate">${

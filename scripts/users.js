@@ -344,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
     try {
-      const url = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}?size=4096`;
+      const url = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}`;
       const response = await fetch(url, {
         method: "HEAD",
         signal: controller.signal,
@@ -1329,15 +1329,63 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function setAvatarWithFallback(username) {
+  async function setAvatarWithFallback(username) {
     const userAvatar = document.getElementById("user-avatar");
     const fallbackUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
       username
     )}&bold=true&format=svg`;
 
-    userAvatar.onerror = function () {
+    async function tryAvatarUrl(baseUrl, size = null) {
+      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
+      try {
+        const response = await fetch(url, { method: "HEAD" });
+        return response.ok ? url : null;
+      } catch {
+        return null;
+      }
+    }
+
+    try {
+      // Get avatar hash from udata (assuming udata is available in scope)
+      if (!udata.avatar) {
+        userAvatar.src = fallbackUrl;
+        return;
+      }
+
+      // Try GIF format with size
+      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}.gif`;
+      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
+      if (gifWithSize) {
+        userAvatar.src = gifWithSize;
+        return;
+      }
+
+      // Try GIF format without size
+      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
+      if (gifNoSize) {
+        userAvatar.src = gifNoSize;
+        return;
+      }
+
+      // Try WebP format with size
+      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}.webp`;
+      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
+      if (webpWithSize) {
+        userAvatar.src = webpWithSize;
+        return;
+      }
+
+      // Try WebP format without size
+      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
+      if (webpNoSize) {
+        userAvatar.src = webpNoSize;
+        return;
+      }
+
       userAvatar.src = fallbackUrl;
-    };
+    } catch {
+      userAvatar.src = fallbackUrl;
+    }
   }
 
   userAvatar = document.getElementById("user-avatar");

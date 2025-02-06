@@ -49,6 +49,9 @@
 #paginationControls {
   justify-content: center !important;
   margin-top: 1rem !important;
+  margin: 2rem 0 !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
 }
 
 /* Adjust spacing between pagination buttons */
@@ -74,6 +77,8 @@
 #comments-list {
   width: 100% !important;
   padding: 0 !important;
+  min-height: 900px !important;
+  transition: all 0.3s ease-in-out !important;
 }
 .comment-item {
   width: 100% !important;
@@ -546,4 +551,44 @@
     flex-wrap: nowrap !important;
     gap: 0.5rem !important;
   }
+}
+
+/* Style for page number buttons */
+.pagination .btn-outline-primary {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-primary) !important;
+  border: 1px solid var(--accent-color) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.pagination .btn-outline-primary:hover {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--accent-color-light) !important;
+  color: var(--text-primary) !important;
+}
+
+.pagination .btn-primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.pagination .btn-primary:disabled {
+  background-color: var(--accent-color-light) !important;
+  border-color: var(--accent-color-light) !important;
+  opacity: 0.7 !important;
+}
+
+.pagination span {
+  color: var(--text-muted) !important;
+}
+
+/* Center pagination and maintain consistent spacing */
+#paginationControls button {
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0.25rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
