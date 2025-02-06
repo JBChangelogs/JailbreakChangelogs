@@ -238,24 +238,38 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileViewUpdates = document.getElementById("mobileViewUpdates");
 
   window.checkAndSetAvatar = async function (userData) {
-    const gifUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif?size=128`;
-    const webpUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp?size=128`;
     const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
       userData.username
     )}&bold=true&format=svg`;
 
-    try {
-      // Check GIF
-      const gifResponse = await fetch(gifUrl, { method: "HEAD" });
-      if (gifResponse.ok) {
-        return gifUrl;
+    async function tryAvatarUrl(baseUrl, size = null) {
+      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
+      try {
+        const response = await fetch(url, { method: "HEAD" });
+        return response.ok ? url : null;
+      } catch {
+        return null;
       }
+    }
 
-      // Check WEBP
-      const webpResponse = await fetch(webpUrl, { method: "HEAD" });
-      if (webpResponse.ok) {
-        return webpUrl;
-      }
+    try {
+      // Try GIF format with size
+      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif`;
+      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
+      if (gifWithSize) return gifWithSize;
+
+      // Try GIF format without size
+      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
+      if (gifNoSize) return gifNoSize;
+
+      // Try WebP format with size
+      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`;
+      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
+      if (webpWithSize) return webpWithSize;
+
+      // Try WebP format without size
+      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
+      if (webpNoSize) return webpNoSize;
 
       return fallbackAvatar;
     } catch {
