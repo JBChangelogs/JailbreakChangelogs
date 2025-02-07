@@ -116,3 +116,33 @@ $(document).ready(function () {
       });
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const ageCheck = document.getElementById("ageCheck");
+  const tosCheck = document.getElementById("tosCheck");
+  const loginButton = document.getElementById("login-button");
+
+  // Initialize tooltip
+  const tooltip = new bootstrap.Tooltip(loginButton, {
+    title: "Please agree to the terms and confirm your age",
+    trigger: "hover",
+    placement: "top",
+  });
+
+  function updateLoginButton() {
+    const isValid = ageCheck.checked && tosCheck.checked;
+    loginButton.disabled = !isValid;
+
+    // Show/hide tooltip based on button state
+    if (isValid) {
+      tooltip.disable();
+    } else {
+      tooltip.enable();
+    }
+  }
+
+  ageCheck.addEventListener("change", updateLoginButton);
+  tosCheck.addEventListener("change", updateLoginButton);
+
+  // ...rest of existing login code...
+});

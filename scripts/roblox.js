@@ -2,24 +2,40 @@ document.addEventListener("DOMContentLoaded", function () {
   const ageCheck = document.getElementById("ageCheck");
   const tosCheck = document.getElementById("tosCheck");
   const loginButton = document.getElementById("button");
+
+  // Initialize tooltip
+  const tooltip = new bootstrap.Tooltip(loginButton, {
+    title: "Please agree to the terms and confirm your age",
+    trigger: "hover",
+    placement: "top",
+  });
+
   if (window.location.href.includes("/roblox")) {
     console.log("Detected roblox page access");
     const token = Cookies.get("token");
     console.log("Token status:", token ? "REDACTED" : "Not found");
 
     if (!token) {
-      notyf.warning(
+      notyf.error(
         "You need to connect your Discord account first before linking your Roblox account."
       );
       setTimeout(() => {
         window.location.href = "/login";
-      }, 4500);
+      }, 3000);
       return;
     }
   }
 
   function updateLoginButton() {
-    loginButton.disabled = !(ageCheck.checked && tosCheck.checked);
+    const isValid = ageCheck.checked && tosCheck.checked;
+    loginButton.disabled = !isValid;
+
+    // Show/hide tooltip based on button state
+    if (isValid) {
+      tooltip.disable();
+    } else {
+      tooltip.enable();
+    }
   }
 
   ageCheck.addEventListener("change", updateLoginButton);
@@ -59,14 +75,12 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         console.log(data);
-        // Show success message
         notyf.success("Your Roblox account has been successfully connected!");
         setTimeout(() => {
           window.location.href = "/";
         }, 4500);
       })
       .catch((error) => {
-        // Show error message
         notyf.error(
           "An error occurred while connecting your Roblox account. Please try again."
         );

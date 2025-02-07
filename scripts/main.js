@@ -41,18 +41,33 @@ window.notyf = new Notyf({
   rippleEffect: true,
 });
 
+// Make notyf methods global through window object
 window.notyf.info = (message) => window.notyf.open({ type: "info", message });
-
 window.notyf.success = (message) =>
   window.notyf.open({ type: "success", message });
-
 window.notyf.warning = (message) =>
   window.notyf.open({ type: "warning", message });
-
 window.notyf.error = (message) => window.notyf.open({ type: "error", message });
-
 window.notyf.special = (message) =>
   window.notyf.open({ type: "special", message });
+
+// Global variables
+let globalUserData = null;
+const token = Cookies.get("token");
+const userid = localStorage.getItem("userid"); // Single declaration
+
+function parseUserData() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (e) {
+    console.error("Failed to parse user data:", e);
+    return null;
+  }
+}
+
+// Initialize global user data
+globalUserData = parseUserData();
 
 function cleanupURL() {
   const url = new URL(window.location);
@@ -63,44 +78,39 @@ function cleanupURL() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Handle issue submission
-  const reportIssueBtn = document.querySelector(
-    '[data-bs-target="#reportIssueModal"]'
-  );
-  const token = Cookies.get("token");
-  const userId = localStorage.getItem("userId");
-  const userData = localStorage.getItem("user");
-
   const urlParams = new URLSearchParams(window.location.search);
 
+  // Single welcome message function
+  function showWelcomeMessage() {
+    if (globalUserData) {
+      const name = globalUserData.username || globalUserData.global_name;
+      if (name) {
+        notyf.special(`Hello, ${name}!`);
+      }
+    }
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+
+  // Only show welcome message for freshlogin
+  if (urlParams.has("freshlogin")) {
+    showWelcomeMessage();
+  }
+
+  // Handle report issue flow without welcome message
   if (urlParams.has("report-issue")) {
     if (!token) {
-      window.notyf.error("Please sign in to report issues");
-      localStorage.setItem("reportIssueRedirect", "true"); // Store redirect intention
+      notyf.error("Please sign in to report issues");
+      localStorage.setItem("reportIssueRedirect", "true");
       setTimeout(() => {
         window.location.href =
           "/login?redirect=" +
           encodeURIComponent(window.location.pathname + window.location.search);
       }, 3000);
-      return; // Stop execution here
+      return;
     } else {
-      reportIssueBtn?.click();
+      document.querySelector('[data-bs-target="#reportIssueModal"]')?.click();
       cleanupURL();
     }
-  }
-
-  // Only show welcome message if not handling report-issue
-  if (urlParams.has("freshlogin") && !urlParams.has("report-issue")) {
-    const userData = JSON.parse(localStorage.getItem("user") || "{}");
-    if (userData) {
-      const name = userData.username || userData.global_name;
-      if (name) {
-        notyf.special(`Hello, ${name}!`);
-      }
-    }
-    // Clean up the URL
-    const newUrl = window.location.pathname;
-    window.history.replaceState({}, "", newUrl);
   }
 
   // Check for stored redirect first
@@ -111,6 +121,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Handle non-authenticated users
+  const reportIssueBtn = document.querySelector(
+    '[data-bs-target="#reportIssueModal"]'
+  );
+
   if (!token) {
     // User is not authenticated
     reportIssueBtn.classList.add("disabled");
@@ -130,8 +144,8 @@ document.addEventListener("DOMContentLoaded", function () {
     reportIssueBtn.removeAttribute("title");
     reportIssueBtn.style.cursor = "pointer";
 
-    // Get the actual user ID either from userId or user object
-    const actualUserId = userId || JSON.parse(userData).id;
+    // Get the actual user ID either from userId or globalUserData object
+    const actualUserId = userid || globalUserData.id;
 
     // Reset form when opening modal
     reportIssueBtn.addEventListener("click", () => {
@@ -399,15 +413,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Fix error handling for user data
-  const userData = localStorage.getItem("user");
   let parsedUserData = null;
   try {
-    parsedUserData = userData ? JSON.parse(userData) : null;
+    const storedUserData = localStorage.getItem("user");
+    parsedUserData = storedUserData ? JSON.parse(storedUserData) : null;
   } catch (e) {
     console.error("Failed to parse user data:", e);
   }
 
-  // Update user data check
+  // Update user data check and welcome message
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
     if (
@@ -423,11 +437,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Update the session check
-  const token = Cookies.get("token");
-  const userid = localStorage.getItem("userid");
-
-  // Only clear session if we have local data but no token
-  if (!token && (userData || userid)) {
+  // Remove duplicate userid declaration and use the global one
+  if (!token && (globalUserData || userid)) {
     clearSessionAndReload();
     return;
   }
@@ -448,7 +459,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // Update storage with fresh data
+      // Update both global and storage
+      globalUserData = freshUserData;
       localStorage.setItem("user", JSON.stringify(freshUserData));
       localStorage.setItem("userid", freshUserData.id);
 
@@ -488,20 +500,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.history.replaceState({}, "", newUrl);
   }
 
-  const token = Cookies.get("token");
   const user = localStorage.getItem("user");
-  const userid = localStorage.getItem("userid");
 
   function clearSessionAndReload() {
+    globalUserData = null;
     localStorage.removeItem("avatar");
     localStorage.removeItem("user");
     localStorage.removeItem("userid");
+    localStorage.removeItem("showWelcome");
     Cookies.remove("token", {
       path: "/",
       secure: true,
       sameSite: "Strict",
     });
-    window.location.reload(); // Always just reload, don't redirect
+    window.location.reload();
   }
 
   // Check and clear invalid session state
