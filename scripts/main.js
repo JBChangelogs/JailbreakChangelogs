@@ -356,7 +356,123 @@ function updateVersionDisplay(data) {
 document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
+  window.checkAndSetAvatar = async function (userData) {
+    if (!userData || !userData.username) return null;
+
+    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
+      userData.username
+    )}&bold=true&format=svg`;
+
+    async function tryAvatarUrl(baseUrl, size = null) {
+      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
+      try {
+        const response = await fetch(url, { method: "HEAD" });
+        return response.ok ? url : null;
+      } catch {
+        return null;
+      }
+    }
+
+    try {
+      // Try GIF format with size
+      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif`;
+      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
+      if (gifWithSize) return gifWithSize;
+
+      // Try GIF format without size
+      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
+      if (gifNoSize) return gifNoSize;
+
+      // Try WebP format with size
+      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`;
+      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
+      if (webpWithSize) return webpWithSize;
+
+      // Try WebP format without size
+      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
+      if (webpNoSize) return webpNoSize;
+
+      return fallbackAvatar;
+    } catch {
+      return fallbackAvatar;
+    }
+  };
+
+  // Fix error handling for user data
+  const userData = localStorage.getItem("user");
+  let parsedUserData = null;
+  try {
+    parsedUserData = userData ? JSON.parse(userData) : null;
+  } catch (e) {
+    console.error("Failed to parse user data:", e);
+  }
+
+  // Update user data check
   const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
+    if (
+      parsedUserData &&
+      (parsedUserData.global_name || parsedUserData.username)
+    ) {
+      notyf.special(
+        `Hello, ${parsedUserData.global_name || parsedUserData.username}!`
+      );
+    }
+    // Clean up URL
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+
+  // Update the session check
+  const token = Cookies.get("token");
+  const userid = localStorage.getItem("userid");
+
+  // Only clear session if we have local data but no token
+  if (!token && (userData || userid)) {
+    clearSessionAndReload();
+    return;
+  }
+
+  // Update avatar setting logic
+  if (token) {
+    try {
+      const response = await fetch(
+        "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
+      );
+      if (!response.ok) {
+        throw new Error("Invalid response");
+      }
+
+      const freshUserData = await response.json();
+      if (!freshUserData) {
+        clearSessionAndReload();
+        return;
+      }
+
+      // Update storage with fresh data
+      localStorage.setItem("user", JSON.stringify(freshUserData));
+      localStorage.setItem("userid", freshUserData.id);
+
+      // Only try to set avatar if we have valid user data
+      if (freshUserData.id && freshUserData.avatar) {
+        const avatarUrl = await window.checkAndSetAvatar(freshUserData);
+        if (avatarUrl) {
+          localStorage.setItem("avatar", avatarUrl);
+
+          const profilePicture = document.getElementById("profile-picture");
+          const mobileProfilePicture = document.getElementById(
+            "profile-picture-mobile"
+          );
+
+          if (profilePicture) profilePicture.src = avatarUrl;
+          if (mobileProfilePicture) mobileProfilePicture.src = avatarUrl;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      clearSessionAndReload();
+    }
+  }
+
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Show welcome message for both freshlogin and report-issue params
