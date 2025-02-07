@@ -986,7 +986,6 @@ app.get("/api", (req, res) => {
   res.redirect("/");
 });
 
-// Add this new route
 app.get("/settings", (req, res) => {
   const token = req.cookies?.token;
   if (!token) {
@@ -998,6 +997,16 @@ app.get("/settings", (req, res) => {
     title: "Settings / Changelogs",
     logoUrl: "/assets/logos/Banner_Background.webp",
     logoAlt: "Settings Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
+});
+
+app.get("/exploiters", (req, res) => {
+  res.render("exploiters", {
+    title: "Find Exploiters / Changelogs",
+    logoUrl: "/assets/logos/Banner_Background.webp",
+    logoAlt: "Exploiters Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
   });
