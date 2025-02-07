@@ -12,6 +12,13 @@ function checkAndStoreReportIssue() {
 $(document).ready(function () {
   checkAndStoreReportIssue();
 
+  // Store redirect URL if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectUrl = urlParams.get("redirect");
+  if (redirectUrl) {
+    localStorage.setItem("loginRedirect", redirectUrl);
+  }
+
   const ageCheck = $("#ageCheck");
   const tosCheck = $("#tosCheck");
   const loginButton = $("#login-button");
@@ -64,7 +71,6 @@ $(document).ready(function () {
         }
         return response.json();
       })
-
       .then((userData) => {
         if (userData && userData.id && userData.avatar) {
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
@@ -73,14 +79,25 @@ $(document).ready(function () {
           localStorage.setItem("avatar", avatarURL);
           localStorage.setItem("userid", userData.id);
 
-          // Immediate redirect
-          const hasReportIssue = localStorage.getItem("reportIssueRedirect");
-          if (hasReportIssue) {
+          // Check for report-issue first
+          if (localStorage.getItem("reportIssueRedirect")) {
             localStorage.removeItem("reportIssueRedirect");
-            window.location.href = "/?report-issue";
-          } else {
-            window.location.href = "/?freshlogin=true";
+            window.location.href = "/?report-issue&freshlogin=true";
+            return;
           }
+
+          // Then check for regular redirect
+          const storedRedirect = localStorage.getItem("loginRedirect");
+          if (storedRedirect) {
+            window.location.href = `${storedRedirect}${
+              storedRedirect.includes("?") ? "&" : "?"
+            }freshlogin=true`;
+            localStorage.removeItem("loginRedirect");
+            return;
+          }
+
+          // Default to home with welcome message
+          window.location.href = "/?freshlogin=true";
           return;
         }
       })

@@ -71,26 +71,43 @@ document.addEventListener("DOMContentLoaded", function () {
   const userId = localStorage.getItem("userId");
   const userData = localStorage.getItem("user");
 
-  // Check for stored redirect first
-  if (token && localStorage.getItem("reportIssueRedirect")) {
-    localStorage.removeItem("reportIssueRedirect");
-    window.location.href = "/?report-issue";
-    return; // Stop execution here since we're redirecting
-  }
-
-  // Check for report-issue parameter
   const urlParams = new URLSearchParams(window.location.search);
 
   if (urlParams.has("report-issue")) {
     if (!token) {
       window.notyf.error("Please sign in to report issues");
+      localStorage.setItem("reportIssueRedirect", "true"); // Store redirect intention
       setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href =
+          "/login?redirect=" +
+          encodeURIComponent(window.location.pathname + window.location.search);
       }, 3000);
+      return; // Stop execution here
     } else {
       reportIssueBtn?.click();
+      cleanupURL();
     }
-    cleanupURL();
+  }
+
+  // Only show welcome message if not handling report-issue
+  if (urlParams.has("freshlogin") && !urlParams.has("report-issue")) {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    if (userData) {
+      const name = userData.username || userData.global_name;
+      if (name) {
+        notyf.special(`Hello, ${name}!`);
+      }
+    }
+    // Clean up the URL
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
+  }
+
+  // Check for stored redirect first
+  if (token && localStorage.getItem("reportIssueRedirect")) {
+    localStorage.removeItem("reportIssueRedirect");
+    window.location.href = "/?report-issue";
+    return; // Stop execution here since we're redirecting
   }
 
   // Handle non-authenticated users
@@ -340,18 +357,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has("freshlogin")) {
-    // Get user data from localStorage
-    const userData = JSON.parse(localStorage.getItem("user") || "{}");
-    if (userData && userData.usernumber) {
-      notyf.special(
-        `Welcome to Jailbreak Changelogs! You are user #${userData.usernumber}`
-      );
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
-      // Clean up the URL
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, "", newUrl);
+  // Show welcome message for both freshlogin and report-issue params
+  if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
+    if (userData && userData.global_name) {
+      notyf.special(`Hello, ${userData.global_name}!`);
+    } else if (userData && userData.username) {
+      notyf.special(`Hello, ${userData.username}!`);
     }
+
+    // Clean up the URL
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
   }
 
   const token = Cookies.get("token");
@@ -362,8 +380,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("avatar");
     localStorage.removeItem("user");
     localStorage.removeItem("userid");
-    Cookies.remove("token");
-    window.location.href = "/";
+    Cookies.remove("token", {
+      path: "/",
+      secure: true,
+      sameSite: "Strict",
+    });
+    window.location.reload(); // Always just reload, don't redirect
   }
 
   // Check and clear invalid session state
@@ -411,10 +433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.removeItem("avatar");
       localStorage.removeItem("user");
       localStorage.removeItem("userid");
-      Cookies.remove("token");
-
-      // Redirect to home page
-      window.location.href = "/";
+      window.location.reload();
     }
   }
 
@@ -703,4 +722,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       sessionStorage.setItem("campaign", campaign);
     }
   }
+
+  window.logout = function () {
+    // Remove auth-related data from localStorage
+    localStorage.removeItem("user");
+    localStorage.removeItem("avatar");
+    localStorage.removeItem("userid");
+    localStorage.removeItem("showWelcome");
+
+    // Remove token cookie
+    Cookies.remove("token", {
+      path: "/",
+      secure: true,
+      sameSite: "Strict",
+    });
+
+    // Reload current page instead of redirecting
+    window.location.reload();
+  };
 });

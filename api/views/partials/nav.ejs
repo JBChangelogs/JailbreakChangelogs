@@ -304,11 +304,11 @@
             `
                 : ""
             }
-            <a class="nav-link text-danger" href="" onclick="logout()">
+            <a class="nav-link text-danger" href="#" onclick="event.preventDefault(); logout()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
-</svg>
+                <rect width="24" height="24" fill="none" />
+                <path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
+              </svg>
               Log out
             </a>
           </div>
@@ -358,11 +358,11 @@
           }
           <li><hr class="dropdown-divider"></li>
           <li>
-            <a class="dropdown-item text-danger" href="" onclick="logout()">
+            <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); logout()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
-</svg>
+                <rect width="24" height="24" fill="none" />
+                <path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
+              </svg>
              Log out
             </a>
           </li>
@@ -432,26 +432,6 @@
       this.setAttribute("aria-expanded", !isExpanded);
       sideMenu.classList.toggle("active");
     });
-
-    window.logout = function () {
-      // Remove auth-related data from localStorage
-      localStorage.removeItem("user");
-      localStorage.removeItem("avatar");
-      localStorage.removeItem("userid");
-
-      // Remove token cookie
-      Cookies.remove("token", {
-        path: "/",
-        secure: true,
-        sameSite: "Strict",
-      });
-
-      // Update UI
-      updateContent();
-
-      // Redirect to home page
-      window.location.href = "/";
-    };
 
     updateContent();
 
