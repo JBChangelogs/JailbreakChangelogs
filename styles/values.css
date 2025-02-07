@@ -26,7 +26,7 @@ body {
   color: var(--text-muted) !important;
 }
 .clear-button:hover {
-  background-color: var(--text-muted) !important;
+  background-color: var (--text-muted) !important;
   color: var (--text-primary) !important;
   border-color: var(--text-muted) !important;
   transition: all 0.3s ease;
@@ -93,6 +93,30 @@ body {
   height: auto; /* Change from 100% to auto */
   position: relative;
   margin-bottom: 1rem;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+.items-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.items-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.items-card:hover::before {
+  opacity: 1;
 }
 .items-card:hover {
   transform: translateY(-5px);
@@ -279,16 +303,7 @@ body {
 }
 
 .card-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%; /* Changed from fixed height */
-  width: 100%;
-  position: absolute; /* Added */
-  top: 0; /* Added */
-  left: 0; /* Added */
-  background-color: #212a31;
-  border-radius: 8px 8px 0 0;
+  display: none;
 }
 
 .custom-spinner {
@@ -1315,14 +1330,18 @@ body {
   justify-content: center;
   cursor: pointer;
   pointer-events: auto !important;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease;
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   border-radius: 50%; /* Make it circular */
   backdrop-filter: blur(2px);
+  transform: scale(0.8);
+  visibility: hidden;
 }
 
-.media-container:hover .favorite-icon {
+.items-card:hover .favorite-icon {
   opacity: 1;
+  transform: scale(1);
+  visibility: visible; /* Show on hover */
 }
 
 .favorite-icon i {
@@ -1342,6 +1361,21 @@ body {
 
   .favorite-icon i {
     font-size: 0.9rem !important;
+  }
+}
+
+/* Modify the touch device styles */
+@media (hover: none) {
+  .favorite-icon {
+    opacity: 0; /* Start invisible on mobile */
+    visibility: hidden;
+    transform: scale(0.8);
+  }
+
+  .items-card:active .favorite-icon {
+    opacity: 0.8;
+    visibility: visible;
+    transform: scale(1);
   }
 }
 
@@ -1403,4 +1437,25 @@ body.menu-open {
 .menu-open #items-container {
   height: 100vh;
   overflow: hidden;
+}
+
+.items-card:active {
+  transform: translateY(-2px);
+}
+
+.items-card .card-title,
+.items-card .value-container {
+  cursor: pointer;
+}
+
+@media (hover: none) {
+  /* For touch devices, always show favorite icon with reduced opacity */
+  .favorite-icon {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  .items-card:hover {
+    transform: none;
+  }
 }

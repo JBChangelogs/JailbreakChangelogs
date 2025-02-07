@@ -35,6 +35,26 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/assets", (req, res, next) => {
+  // 1 year cache for assets
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  res.setHeader("Expires", oneYearFromNow.toUTCString());
+  next();
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/assets/")) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    res.setHeader("Expires", oneYearFromNow.toUTCString());
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "../")));
 app.use(
   cors({
@@ -44,7 +64,6 @@ app.use(
 
 app.use(cookieParser());
 
-// Serve the changelogs.html file
 app.get("/trade-data", async (req, res) => {
   try {
     // Fetch data from the external API
