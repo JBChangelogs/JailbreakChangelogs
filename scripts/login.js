@@ -33,8 +33,20 @@ $(document).ready(function () {
   ageCheck.change(updateLoginButton);
   tosCheck.change(updateLoginButton);
 
-  const OauthRedirect =
-    "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Fjailbreakchangelogs.xyz%2Flogin&scope=identify&prompt=none";
+  const currentDomain = window.location.hostname;
+  let OauthRedirect;
+
+  if (currentDomain === "jailbreakchangelogs.xyz") {
+    OauthRedirect =
+      "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Fjailbreakchangelogs.xyz%2Flogin&scope=identify&prompt=none";
+  } else if (currentDomain === "testing.jailbreakchangelogs.xyz") {
+    OauthRedirect =
+      "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Ftesting.jailbreakchangelogs.xyz%2Flogin&scope=identify";
+  } else {
+    OauthRedirect =
+      "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Ftesting.jailbreakchangelogs.xyz%2Flogin&scope=identify";
+  }
+
   const DiscordLoginButton = document.getElementById("login-button");
   // Only store the path if it's not /login and not a Discord OAuth URL
   const currentPath = window.location.pathname + window.location.search;
