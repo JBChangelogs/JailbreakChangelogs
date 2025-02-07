@@ -126,6 +126,9 @@ async function fetchServers() {
 
     if (loading) loading.remove();
 
+    // Add total count display
+    document.querySelector('.total-count').textContent = `Total Servers (${servers.length})`;
+
     if (!servers || servers.length === 0) {
       serverList.innerHTML = `
         <div class="col-12 text-center">
