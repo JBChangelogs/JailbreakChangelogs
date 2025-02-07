@@ -628,7 +628,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  showSkeletonCards();
   document.getElementById("sort-dropdown").addEventListener("change", () => {
     window.sortItems();
   });
@@ -868,50 +867,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function showSkeletonCards() {
-    const itemsContainer = document.querySelector("#items-container");
-    if (!itemsContainer) return;
-
-    let itemsRow = itemsContainer.querySelector(".row");
-    if (!itemsRow) {
-      itemsRow = document.createElement("div");
-      itemsRow.classList.add("row");
-      itemsContainer.appendChild(itemsRow);
-    }
-
-    // Create 12 cards with spinners
-    const spinnerCards = Array(12)
-      .fill(null)
-      .map(() => {
-        const cardDiv = document.createElement("div");
-        cardDiv.classList.add("col-md-4", "col-lg-3", "mb-4");
-        cardDiv.innerHTML = `
-          <div class="card items-card shadow-sm" style="cursor: pointer; height: 450px; position: relative;">
-            <div class="card-spinner">
-              <div class="custom-spinner"></div>
-            </div>
-            <div class="item-card-body text-center" style="padding-top: 32px;">
-              <h5 class="card-title" style="visibility: hidden;">Placeholder</h5>
-              <div class="value-container" style="visibility: hidden;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span>Cash Value:</span>
-                  <span>0</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span>Duped Value:</span>
-                  <span>0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        return cardDiv;
-      });
-
-    itemsRow.innerHTML = "";
-    itemsRow.append(...spinnerCards);
-  }
-
   function updateTotalItemsCount() {
     const totalItemsElement = document.getElementById("total-items");
     if (totalItemsElement) {
@@ -1072,26 +1027,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "HyperChrome") color = "#E91E63";
     if (item.type === "Furniture") color = "#9C6644";
 
-    // Modify the mediaElement template to ensure favorite icon is rendered
+    // Modify the mediaElement template - remove spinner and loading transitions
     const mediaElement = `
         <div class="media-container position-relative">
             ${favoriteIconHtml}
-            <div class="card-spinner">
-                <div class="custom-spinner"></div>
-            </div>
             ${
               item.type === "Drift"
-                ? `<img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" style="opacity: 0; z-index: 2;" onerror="handleimage(this)" onload="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)">
-                   <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0; z-index: 1;" playsinline muted loop></video>`
+                ? `<img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" onerror="handleimage(this)">
+                   <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0;" playsinline muted loop></video>`
                 : item.type === "HyperChrome" && item.name === "HyperShift"
-                ? `<video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" style="opacity: 0;" playsinline muted loop autoplay id="hypershift-video" onloadeddata="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)" onerror="handleimage(this)"></video>`
+                ? `<video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" playsinline muted loop autoplay id="hypershift-video" onerror="handleimage(this)"></video>`
                 : `<img onerror="handleimage(this)" id="${
                     item.name
                   }" src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
                     item.name
-                  }.webp" class="card-img-top" alt="${
-                    item.name
-                  }" style="opacity: 0;" onload="setTimeout(() => { this.style.opacity = '1'; this.previousElementSibling.style.display = 'none'; }, 1000)">`
+                  }.webp" class="card-img-top" alt="${item.name}">`
             }
         </div>`;
 
