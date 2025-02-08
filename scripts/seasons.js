@@ -147,7 +147,7 @@ $(document).ready(function () {
                       <div class="no-description">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8s3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
+	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
 </svg>
                           <p class="text-muted">No description available.</p>
                       </div>`
@@ -181,7 +181,7 @@ $(document).ready(function () {
                         <div class="no-description">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8s3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
+	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
 </svg>
                             <p class="text-muted">No description available.</p>
                         </div>`
@@ -525,9 +525,26 @@ $(document).ready(function () {
     if (!timeRemaining) return;
 
     const countdownColor = getCountdownColor(timeRemaining.days);
+    const isNextSeasonCountdown = elementId === "next-season-countdown";
+    const isSubmissionsOpen = title.includes("submissions close in:");
+
+    // Create submission notice for next season only when submissions are open
+    const submissionNotice =
+      isNextSeasonCountdown && isSubmissionsOpen
+        ? `
+      <div class="submission-notice">
+        <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ij9taa/season_25_entries_pixel_arcade/?sort=new" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="btn btn-sm btn-outline-info">
+          <i class="fas fa-external-link-alt me-1"></i>Submit a Creation
+        </a>
+      </div>
+    `
+        : "";
 
     $(`#${elementId}`).html(`
-      <div class="season-countdown text-center">
+      <div class="season-countdown">
         <h3 class="countdown-title">${title}</h3>
         <div class="countdown-timer">
           <div class="countdown-item">
@@ -547,6 +564,7 @@ $(document).ready(function () {
             <span class="countdown-label">Seconds</span>
           </div>
         </div>
+        ${submissionNotice}
       </div>
     `);
   }

@@ -551,10 +551,13 @@ span {
 /* Season Countdown Styles */
 .season-countdown {
   background: var(--bg-secondary);
-  padding: 1.25rem; /* Reduced from 1.5rem */
-  border-radius: 8px; /* Reduced from 12px */
+  padding: 1.25rem;
+  border-radius: 8px;
   border: 1px solid var(--accent-color);
-  margin: 1.5rem 0; /* Reduced from 2rem */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
 }
 .countdown-title {
   color: var(--text-primary);
@@ -566,8 +569,10 @@ span {
 .countdown-timer {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 1rem; /* Reduced from 1.5rem */
   margin-top: 0.75rem; /* Reduced from 1rem */
+  flex: 1;
 }
 
 .countdown-item {
@@ -627,6 +632,7 @@ span {
 
 .countdown-wrapper {
   height: 100%;
+  display: flex;
 }
 
 .countdown-status {
@@ -739,4 +745,22 @@ span {
     font-size: 0.9rem;
     margin-bottom: 0.4rem;
   }
+}
+
+/* Submission Notice Styles */
+.submission-notice {
+  margin-top: auto;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.submission-notice .btn-outline-info {
+  color: #8ecae6;
+  border-color: #8ecae6;
+  transition: all 0.2s ease;
+}
+
+.submission-notice .btn-outline-info:hover {
+  background-color: #8ecae6;
+  color: #212a31;
 }
