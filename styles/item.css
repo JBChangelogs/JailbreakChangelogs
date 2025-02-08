@@ -677,6 +677,27 @@ body {
     font-size: 0.8rem; /* Smaller badge */
     padding: 4px 8px;
   }
+
+  .similar-item-card {
+    margin-bottom: 1rem;
+  }
+
+  .similar-item-card .card-img-wrapper {
+    height: 200px; /* Taller image for single-column layout */
+  }
+
+  .similar-item-card .card-title {
+    font-size: 1.1rem; /* Slightly larger title for single item */
+  }
+
+  .similar-item-card .card-body {
+    padding: 1rem;
+  }
+
+  /* Adjust spacing between cards */
+  .col-12:not(:last-child) .similar-item-card {
+    margin-bottom: 1.5rem;
+  }
 }
 
 /* For extra small devices */
