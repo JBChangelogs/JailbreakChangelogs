@@ -1667,6 +1667,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 color: "#D3D9D4",
               },
             },
+            minTickInterval: 1,
+            min: 0,
+            tickAmount: 10, // Force exactly 10 labels
             labels: {
               style: {
                 color: "#D3D9D4",
