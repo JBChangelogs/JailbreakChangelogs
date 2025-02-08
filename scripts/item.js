@@ -1767,6 +1767,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
         document.head.appendChild(style);
 
+        // Show loading state immediately after chart initialization
+        chart.showLoading("Loading data...");
+
         // Add fullscreen click handler
         let isInFullscreen = false;
 
