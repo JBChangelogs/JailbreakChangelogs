@@ -1316,14 +1316,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="row mb-4" style="padding-top: 40px;">
         <div class="col-12">
           <div class="card chart-container">
-            <div class="card-header text-center">
-              <h3 class="card-title" style="font-weight: revert; font-family: 'Luckiest Guy', cursive;">
-                Value History for ${item.name}
-              </h3>
-            </div>
             <div class="card-body">
               <div class="chart-wrapper">
-                <canvas id="combinedChart"></canvas>
+                <div id="combinedChart"></div>
               </div>
             </div>
           </div>
@@ -1492,179 +1487,128 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Only initialize chart if values exist
     if (hasValues) {
       setTimeout(() => {
-        const ctx = document.getElementById("combinedChart")?.getContext("2d");
-        if (!ctx) return;
-
-        const dates = [];
-        const values = [];
-        const duped_values = [];
         fetch(`https://api3.jailbreakchangelogs.xyz/item/history?id=${item.id}`)
           .then((response) => response.json())
           .then((data) => {
-            for (const item of data) {
-              const date = formatChartDate(item.date);
-              dates.push(date);
-              const value = formatChartValue(item.cash_value);
-              values.push(value);
-              const duped_value = formatChartValue(item.duped_value);
-              duped_values.push(duped_value);
-            }
-            // Initialize the chart after data is ready
-            new Chart(ctx, {
-              type: "line",
-              data: {
-                labels: dates,
-                datasets: [
-                  {
-                    label: "Cash Value",
-                    data: values,
-                    borderColor: "rgb(29, 125, 163)",
-                    backgroundColor: "rgba(24, 101, 131, 0.1)",
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 2,
+            const chartData = data.map((item) => ({
+              x: item.date * 1000, // Convert to milliseconds
+              y: formatChartValue(item.cash_value),
+            }));
+
+            const dupedChartData = data.map((item) => ({
+              x: item.date * 1000,
+              y: formatChartValue(item.duped_value),
+            }));
+
+            Highcharts.chart("combinedChart", {
+              chart: {
+                type: "line",
+                backgroundColor: "transparent",
+                style: {
+                  fontFamily:
+                    '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                },
+              },
+              title: {
+                text: `Value History for ${item.name}`,
+                style: {
+                  color: "#D3D9D4",
+                  fontWeight: "bold",
+                  fontFamily: '"Luckiest Guy", cursive',
+                  letterSpacing: "1px",
+                },
+              },
+              credits: {
+                enabled: false,
+              },
+              xAxis: {
+                type: "datetime",
+                labels: {
+                  style: {
+                    color: "#D3D9D4",
                   },
+                },
+                lineColor: "#2E3944",
+                tickColor: "#2E3944",
+                gridLineColor: "rgba(211, 217, 212, 0.1)",
+                gridLineWidth: 1,
+                gridLineDashStyle: "Dot",
+              },
+              yAxis: {
+                title: {
+                  text: "Value",
+                  style: {
+                    color: "#D3D9D4",
+                  },
+                },
+                labels: {
+                  style: {
+                    color: "#D3D9D4",
+                  },
+                  formatter: function () {
+                    if (this.value >= 1000000) {
+                      return (this.value / 1000000).toFixed(1) + "M";
+                    } else if (this.value >= 1000) {
+                      return (this.value / 1000).toFixed(1) + "K";
+                    }
+                    return this.value;
+                  },
+                },
+                gridLineColor: "rgba(211, 217, 212, 0.1)",
+                gridLineWidth: 1,
+                gridLineDashStyle: "Dot",
+              },
+              legend: {
+                itemStyle: {
+                  color: "#D3D9D4",
+                },
+                itemHoverStyle: {
+                  color: "#ffffff",
+                },
+              },
+              plotOptions: {
+                line: {
+                  marker: {
+                    enabled: false,
+                  },
+                },
+                series: {
+                  animation: {
+                    duration: 1000,
+                  },
+                },
+              },
+              series: [
+                {
+                  name: "Cash Value",
+                  data: chartData,
+                  color: "rgb(29, 125, 163)",
+                  lineWidth: 2,
+                },
+                {
+                  name: "Duped Value",
+                  data: dupedChartData.some((point) => point.y > 0)
+                    ? dupedChartData
+                    : [],
+                  color: "#748D92",
+                  lineWidth: 2,
+                },
+              ],
+              responsive: {
+                rules: [
                   {
-                    label: "Duped Value",
-                    data: duped_values.every((value) => value === 0)
-                      ? []
-                      : duped_values,
-                    borderColor: "#748D92",
-                    backgroundColor: "rgba(116, 141, 146, 0.1)",
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 2,
+                    condition: {
+                      maxWidth: 500,
+                    },
+                    chartOptions: {
+                      legend: {
+                        layout: "horizontal",
+                        align: "center",
+                        verticalAlign: "bottom",
+                      },
+                    },
                   },
                 ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                  mode: "index",
-                  intersect: false,
-                },
-                plugins: {
-                  legend: {
-                    position: "top",
-                    align: "start",
-                    labels: {
-                      color: "#D3D9D4",
-                      usePointStyle: true,
-                      padding: 20,
-                      font: {
-                        size: window.innerWidth < 768 ? 11 : 13,
-                        weight: "bold",
-                      },
-                      generateLabels: function (chart) {
-                        const defaultLabels =
-                          Chart.defaults.plugins.legend.labels.generateLabels(
-                            chart
-                          );
-                        return defaultLabels.map((label) => ({
-                          ...label,
-                          borderRadius: 4,
-                          textAlign: "left",
-                          padding: window.innerWidth < 768 ? 12 : 8,
-                        }));
-                      },
-                    },
-                    onHover: function (event, legendItem, legend) {
-                      document.body.style.cursor = "pointer";
-                      if (legendItem) {
-                        legendItem.fillStyle = legendItem.strokeStyle + "40";
-                      }
-                    },
-                    onLeave: function (event, legendItem, legend) {
-                      document.body.style.cursor = "default";
-                      if (legendItem) {
-                        legendItem.fillStyle = legendItem.strokeStyle + "20";
-                      }
-                    },
-                    title: {
-                      display: true,
-                      text: "Click legends to show/hide data series",
-                      padding: {
-                        top: 10,
-                        bottom: 20,
-                      },
-                      color: "#748D92",
-                      font: {
-                        size: window.innerWidth < 768 ? 10 : 11,
-                        style: "italic",
-                        weight: "normal",
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    type: "linear",
-                    display: true,
-                    title: {
-                      display: true,
-                      text: "Value",
-                      color: "#D3D9D4",
-                      font: {
-                        size: 14,
-                        weight: "bold",
-                      },
-                    },
-                    grid: {
-                      color: "rgba(211, 217, 212, 0.1)", // Updated grid line color
-                      borderColor: "#2E3944",
-                      tickColor: "#2E3944",
-                      lineWidth: 1,
-                      borderDash: [5, 5],
-                      drawBorder: true,
-                      drawTicks: true,
-                    },
-                    ticks: {
-                      color: "#D3D9D4",
-                      padding: 10,
-                      callback: function (value) {
-                        return value.toLocaleString();
-                      },
-                    },
-                  },
-                  x: {
-                    title: {
-                      display: true,
-                      text: "Date",
-                      color: "#D3D9D4",
-                      font: {
-                        size: 14,
-                        weight: "bold",
-                      },
-                    },
-                    grid: {
-                      color: "rgba(211, 217, 212, 0.1)", // Updated grid line color
-                      borderColor: "#2E3944",
-                      tickColor: "#2E3944",
-                      display: true,
-                      lineWidth: 1,
-                      borderDash: [5, 5],
-                      drawBorder: true,
-                      drawTicks: true,
-                    },
-                    ticks: {
-                      color: "#D3D9D4",
-                      padding: 10,
-                      font: {
-                        size: 11,
-                      },
-                    },
-                  },
-                },
-
-                padding: {
-                  left: 5,
-                  right: 5,
-                  top: 20,
-                  bottom: 5,
-                },
-                layout: {},
               },
             });
           })
@@ -1679,6 +1623,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function showErrorMessage(message) {
     hideLoadingOverlay();
+
     const urlPath = window.location.pathname.split("/");
     const itemType = urlPath[2];
     const rawItemName = urlPath.pop();
@@ -1697,7 +1642,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const container = document.getElementById("item-container");
-
     // Check if category is valid
     const isValidCategory = VALID_SORTS.some(
       (category) => category.toLowerCase() === itemType.toLowerCase()
@@ -1745,7 +1689,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           </a>
         </div>
       </div>
-      
       ${
         isValidCategory
           ? `
