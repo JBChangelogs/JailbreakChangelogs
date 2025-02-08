@@ -228,8 +228,9 @@ body {
   background-color: var(--bg-primary);
   --legend-hover-bg: rgba(18, 78, 102, 0.2);
   border-radius: 12px;
-  padding: 15px;
+  padding: 12px; /* Reduced padding */
   position: relative;
+  height: 100%; /* Add this */
 }
 
 .chart-container .chartjs-text {
@@ -250,9 +251,22 @@ body {
 .chart-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9; /* This maintains a consistent ratio */
-  min-height: 300px; /* Minimum height on all devices */
-  max-height: 450px; /* Maximum height to prevent too large charts */
+  height: 600px; /* Change from aspect-ratio to fixed height */
+  min-height: 400px; /* Increased minimum height */
+  max-height: 600px; /* Increased maximum height */
+}
+
+.highcharts-container {
+  height: 100% !important;
+}
+
+.highcharts-background {
+  height: 100%;
+}
+
+#combinedChart {
+  height: 100% !important;
+  min-height: 400px;
 }
 
 .video-player {
@@ -438,6 +452,16 @@ body {
     font-size: 0.85rem;
     letter-spacing: 0.3px;
     border-radius: 15px;
+  }
+
+  .chart-wrapper {
+    height: 400px; /* Adjusted height for mobile */
+    aspect-ratio: 16/12; /* Slightly taller on mobile */
+    min-height: 350px;
+  }
+
+  .chart-container {
+    padding: 8px; /* Even less padding on mobile */
   }
 }
 

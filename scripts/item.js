@@ -1660,13 +1660,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             gridLineWidth: 1,
           },
           yAxis: {
-            opposite: false, // Keep y-axis on the left
+            opposite: false,
             title: {
               text: "Value",
               style: {
                 color: "#D3D9D4",
               },
             },
+            min: 0, // Force axis to start at 0
+            tickAmount: 10, // Show 10 ticks
             labels: {
               style: {
                 color: "#D3D9D4",
@@ -1682,6 +1684,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             },
             gridLineColor: "rgba(211, 217, 212, 0.1)",
             gridLineWidth: 1,
+            startOnTick: true, // Ensure it starts at the min value
+            endOnTick: true, // Ensure it ends at a nice rounded value
+            alignTicks: true, // Align ticks with grid lines
           },
           legend: {
             enabled: true,
