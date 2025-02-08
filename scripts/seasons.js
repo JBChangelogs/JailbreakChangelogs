@@ -4,7 +4,7 @@ $(document).ready(function () {
   const $carouselInner = $("#carousel-inner");
   const $seasonList = $("#seasonList"); // Reference to the season dropdown
   // let userdata = null;
-  let latestSeason = null;
+  const latestSeason = 24; // Define the current season number
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
@@ -55,48 +55,20 @@ $(document).ready(function () {
   }
 
   function loadAllData() {
-    const latestSeasonPromise = fetch(
-      "https://api3.jailbreakchangelogs.xyz/seasons/latest",
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://jailbreakchangelogs.xyz",
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((latestSeasonData) => {
-        if (!latestSeasonData.start_date || !latestSeasonData.end_date) {
-          console.error("Missing date information in latest season data");
-        }
-
-        if (window.countdownInterval) {
-          clearInterval(window.countdownInterval);
-        }
-
-        window.countdownInterval = updateCountdown(
-          latestSeasonData.start_date,
-          latestSeasonData.end_date,
-          latestSeasonData.season,
-          latestSeasonData.title
-        );
-        return latestSeasonData;
+    showLoadingOverlay(); // Show loading when starting to fetch data
+    return fetchAllSeasons()
+      .then((seasons) => {
+        populateSeasonDropdown(seasons);
+        setInterval(() => updateCountdowns(seasons), 1000);
+        return [seasons, seasons.find((s) => s.season === latestSeason)];
       })
       .catch((error) => {
-        console.error("Error fetching latest season:", error);
-        return null;
-      });
-
-    return Promise.all([fetchAllSeasons(), latestSeasonPromise])
-      .then(([seasons, latest]) => {
-        latestSeason = latest;
-        return [seasons, latest];
-      })
-      .catch((error) => {
-        console.error("Error in Promise.all:", error);
+        console.error("Error loading data:", error);
+        hideLoadingOverlay(); // Hide loading on error
         throw error;
       });
   }
+
   // Function to populate the season dropdown menu
   function populateSeasonDropdown(seasonData) {
     if (!Array.isArray(seasonData) || seasonData.length === 0) {
@@ -109,19 +81,24 @@ $(document).ready(function () {
 
     $seasonList.empty();
 
-    seasonData.forEach((season) => {
+    // Filter out seasons with no rewards and sort by season number descending
+    const validSeasons = seasonData
+      .filter((season) => season.rewards !== "No rewards found")
+      .sort((a, b) => b.season - a.season);
+
+    validSeasons.forEach((season) => {
       const listItem = $(`
-            <li class="w-100">
-                <a class="dropdown-item season-dropdown-item w-100" 
-                   href="/seasons/${season.season}" 
-                   data-season-id="${season.season}">
-                    <span class="badge me-2" style="background-color: #124E66; color: #D3D9D4">
-                        Season ${season.season}
-                    </span>
-                    ${season.title}
-                </a>
-            </li>
-        `);
+        <li class="w-100">
+            <a class="dropdown-item season-dropdown-item w-100" 
+               href="/seasons/${season.season}" 
+               data-season-id="${season.season}">
+                <span class="badge me-2" style="background-color: #124E66; color: #D3D9D4">
+                    Season ${season.season}
+                </span>
+                ${season.title}
+            </a>
+        </li>
+      `);
       $seasonList.append(listItem);
     });
   }
@@ -170,7 +147,7 @@ $(document).ready(function () {
                       <div class="no-description">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
+	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8s3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
 </svg>
                           <p class="text-muted">No description available.</p>
                       </div>`
@@ -204,7 +181,7 @@ $(document).ready(function () {
                         <div class="no-description">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
+	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8s3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
 </svg>
                             <p class="text-muted">No description available.</p>
                         </div>`
@@ -252,6 +229,9 @@ $(document).ready(function () {
         '<p class="text-warning">No rewards data available.</p>'
       );
     }
+
+    // Hide loading overlay after everything is displayed
+    hideLoadingOverlay();
   }
 
   // Helper function to format the description
@@ -310,109 +290,20 @@ $(document).ready(function () {
     });
   }
 
-  function updateCountdown(startDate, endDate, seasonNumber, seasonTitle) {
-    // Show loading overlay immediately when function starts
-    showLoadingOverlay();
-
-    const startTimestamp = parseInt(startDate);
-    const endTimestamp = parseInt(endDate);
-    const $countdownDays = $("#countdown-days");
-    const $countdownHours = $("#countdown-hours");
-    const $countdownMinutes = $("#countdown-minutes");
-    const $countdownSeconds = $("#countdown-seconds");
-    const $countdownMode = $("#countdown-mode");
-    const $seasonNumber = $("#season-number");
-    const $seasonTitle = $("#season-title");
-
-    $seasonNumber.text(seasonNumber);
-    $seasonTitle.text(seasonTitle);
-
-    function calculateTimeRemaining(targetDate) {
-      const now = Math.floor(Date.now() / 1000);
-      const difference = targetDate - now;
-
-      if (difference <= 0) return null;
-
-      const days = Math.floor(difference / 86400);
-      const hours = Math.floor((difference % 86400) / 3600);
-      const minutes = Math.floor((difference % 3600) / 60);
-      const seconds = Math.floor(difference % 60);
-
-      return { days, hours, minutes, seconds };
-    }
-
-    let initialUpdateDone = false;
-
-    function updateTimer() {
-      const currentTime = Math.floor(Date.now() / 1000);
-      let timeRemaining;
-
-      // Before season starts
-      if (currentTime < startTimestamp) {
-        timeRemaining = calculateTimeRemaining(startTimestamp);
-        $countdownMode.text("Starts in");
-      }
-      // During season
-      else if (currentTime < endTimestamp) {
-        timeRemaining = calculateTimeRemaining(endTimestamp);
-        $countdownMode.text("Ends in");
-      }
-      // After season ended
-      else {
-        $countdownMode.text("Season Ended");
-        $countdownDays.text("00");
-        $countdownHours.text("00");
-        $countdownMinutes.text("00");
-        $countdownSeconds.text("00");
-
-        // Hide loading overlay if this is the first update
-        if (!initialUpdateDone) {
-          hideLoadingOverlay();
-          initialUpdateDone = true;
-        }
-        return;
-      }
-
-      if (timeRemaining) {
-        const countdownColor = getCountdownColor(timeRemaining.days);
-
-        // Apply the color to the countdown numbers
-        $countdownDays.css("color", countdownColor);
-        $countdownHours.css("color", countdownColor);
-        $countdownMinutes.css("color", countdownColor);
-        $countdownSeconds.css("color", countdownColor);
-
-        // Update the countdown numbers
-        $countdownDays.text(timeRemaining.days.toString().padStart(2, "0"));
-        $countdownHours.text(timeRemaining.hours.toString().padStart(2, "0"));
-        $countdownMinutes.text(
-          timeRemaining.minutes.toString().padStart(2, "0")
-        );
-        $countdownSeconds.text(
-          timeRemaining.seconds.toString().padStart(2, "0")
-        );
-
-        // Hide loading overlay after first successful update
-        if (!initialUpdateDone) {
-          hideLoadingOverlay();
-          initialUpdateDone = true;
-        }
-      }
-    }
-
-    // Initial update
-    updateTimer();
-
-    // Update every second
-    return setInterval(updateTimer, 1000);
-  }
-
   function loadSeasonDetails(season) {
     return fetchAllSeasons()
       .then((allSeasons) => {
         const seasonData = allSeasons.find(
           (s) => s.season === parseInt(season)
         );
+
+        if (!seasonData || seasonData.rewards === "No rewards found") {
+          // Redirect to latest season if trying to access unreleased season
+          const newUrl = `${window.location.origin}/seasons/${latestSeason}`;
+          window.history.replaceState({}, "", newUrl);
+          return loadSeasonDetails(latestSeason);
+        }
+
         if (seasonData) {
           displaySeasonDetails(season, seasonData);
           updateCarousel(seasonData.rewards);
@@ -553,5 +444,110 @@ $(document).ready(function () {
         username
       )}&bold=true&format=svg`;
     }, 0);
+  }
+
+  function formatTimeDifference(timeRemaining) {
+    if (!timeRemaining) return null;
+    return {
+      days: Math.floor(timeRemaining / 86400),
+      hours: Math.floor((timeRemaining % 86400) / 3600),
+      minutes: Math.floor((timeRemaining % 3600) / 60),
+      seconds: Math.floor(timeRemaining % 60),
+    };
+  }
+
+  function updateCountdowns(seasons) {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const currentSeason = seasons.find((s) => s.season === latestSeason);
+    const nextSeason = seasons.find((s) => s.season === latestSeason + 1);
+
+    // Current season countdown
+    if (currentSeason && currentSeason.end_date) {
+      const timeToEnd = parseInt(currentSeason.end_date) - currentTime;
+      const remaining = formatTimeDifference(timeToEnd);
+
+      // If there's no next season make current season centered
+      const columnClass = !nextSeason
+        ? "col-12 col-md-6 mb-3 mx-auto"
+        : "col-12 col-md-6 mb-3";
+
+      // Update the column class
+      $("#current-season-countdown").parent().attr("class", columnClass);
+
+      if (timeToEnd <= 0) {
+        $("#current-season-countdown").html(`
+          <div class="season-ended">
+            <i class="fas fa-clock"></i>Season ${currentSeason.season} has ended
+          </div>
+        `);
+      } else {
+        updateCountdownDisplay(
+          "current-season-countdown",
+          remaining,
+          `Season ${currentSeason.season} / ${currentSeason.title} ends in:`
+        );
+      }
+    }
+
+    // Next season countdown
+    const $nextSeasonContainer = $("#next-season-countdown").parent();
+    if (!nextSeason) {
+      $nextSeasonContainer.hide();
+    } else {
+      $nextSeasonContainer.show();
+      if (!nextSeason.start_date && nextSeason.end_date) {
+        const timeToEnd = parseInt(nextSeason.end_date) - currentTime;
+        if (timeToEnd <= 0) {
+          updateCountdownDisplay(
+            "next-season-countdown",
+            { days: 0, hours: 0, minutes: 0, seconds: 0 },
+            `Season ${nextSeason.season} / ${nextSeason.title} submissions closed`
+          );
+        } else {
+          const remaining = formatTimeDifference(timeToEnd);
+          updateCountdownDisplay(
+            "next-season-countdown",
+            remaining,
+            `Season ${nextSeason.season} / ${nextSeason.title} submissions close in:`
+          );
+        }
+      } else {
+        updateCountdownDisplay(
+          "next-season-countdown",
+          { days: 0, hours: 0, minutes: 0, seconds: 0 },
+          `Season ${nextSeason.season} / ${nextSeason.title} submissions closed`
+        );
+      }
+    }
+  }
+
+  function updateCountdownDisplay(elementId, timeRemaining, title) {
+    if (!timeRemaining) return;
+
+    const countdownColor = getCountdownColor(timeRemaining.days);
+
+    $(`#${elementId}`).html(`
+      <div class="season-countdown text-center">
+        <h3 class="countdown-title">${title}</h3>
+        <div class="countdown-timer">
+          <div class="countdown-item">
+            <span style="color: ${countdownColor}">${timeRemaining.days.toString().padStart(2, "0")}</span>
+            <span class="countdown-label">Days</span>
+          </div>
+          <div class="countdown-item">
+            <span style="color: ${countdownColor}">${timeRemaining.hours.toString().padStart(2, "0")}</span>
+            <span class="countdown-label">Hours</span>
+          </div>
+          <div class="countdown-item">
+            <span style="color: ${countdownColor}">${timeRemaining.minutes.toString().padStart(2, "0")}</span>
+            <span class="countdown-label">Minutes</span>
+          </div>
+          <div class="countdown-item">
+            <span style="color: ${countdownColor}">${timeRemaining.seconds.toString().padStart(2, "0")}</span>
+            <span class="countdown-label">Seconds</span>
+          </div>
+        </div>
+      </div>
+    `);
   }
 });
