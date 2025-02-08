@@ -1572,6 +1572,40 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
           navigator: {
             enabled: false,
+            series: [
+              {
+                color: "#1d7da3", // Cash value - inside color
+                lineWidth: 2,
+                fillOpacity: 0.3, // More visible fill
+                type: "areaspline",
+              },
+              {
+                color: "#748d92", // Duped value - inside color
+                lineWidth: 2,
+                fillOpacity: 0.3,
+                type: "areaspline",
+              },
+            ],
+            height: 60,
+            maskFill: "rgba(46, 57, 68, 0.6)", // Using bg-secondary with opacity
+            maskInside: true,
+            outlineColor: "#2e3944", // Using bg-secondary for outline
+            outlineWidth: 1,
+            xAxis: {
+              labels: {
+                style: {
+                  color: "#d3d9d4",
+                },
+              },
+              gridLineColor: "rgba(211, 217, 212, 0.1)",
+            },
+            handles: {
+              backgroundColor: "#2e3944", // Using bg-secondary
+              borderColor: "#1d7da3", // accent-color-light
+              borderWidth: 2,
+              height: 20,
+              width: 10,
+            },
           },
           scrollbar: {
             enabled: false,
@@ -1660,6 +1694,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
           plotOptions: {
             series: {
+              showInNavigator: true,
               animation: {
                 duration: 1000,
               },
@@ -1728,11 +1763,52 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.head.appendChild(style);
 
         // Add fullscreen click handler
+        let isInFullscreen = false;
+
         document
           .getElementById("fullscreen")
           .addEventListener("click", function () {
-            chart.fullscreen.open();
+            const isEnteringFullscreen = !chart.fullscreen.isOpen;
+
+            // Toggle fullscreen first
+            chart.fullscreen.toggle();
+
+            // Then update navigator
+            setTimeout(() => {
+              chart.update({
+                navigator: {
+                  enabled: isEnteringFullscreen,
+                },
+              });
+
+              if (isEnteringFullscreen) {
+                // Update navigator data only when entering fullscreen
+                chart.navigator.series[0].setData(chart.series[0].options.data);
+              }
+            }, 100);
           });
+
+        // Add fullscreen exit handler
+        Highcharts.addEvent(chart, "fullscreenExit", function () {
+          // Ensure navigator is disabled on fullscreen exit
+          chart.update({
+            navigator: {
+              enabled: false,
+            },
+          });
+        });
+
+        // Add document-level fullscreen change listener
+        document.addEventListener("fullscreenchange", function () {
+          if (!document.fullscreenElement) {
+            // Extra safety - ensure navigator is hidden when exiting fullscreen via Escape key
+            chart.update({
+              navigator: {
+                enabled: false,
+              },
+            });
+          }
+        });
 
         // Fetch data
         fetch(`https://api3.jailbreakchangelogs.xyz/item/history?id=${item.id}`)
@@ -1748,7 +1824,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               y: formatChartValue(item.duped_value),
             }));
 
-            // Update series data
+            // Update main series data
             chart.series[0].setData(chartData);
             chart.series[1].setData(
               dupedChartData.some((point) => point.y > 0) ? dupedChartData : []
