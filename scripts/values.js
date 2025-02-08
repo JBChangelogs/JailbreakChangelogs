@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allItems = []; // Store all items
   let currentPage = 1;
-  const itemsPerPage = 12;
+  const itemsPerPage = 24;
   let filteredItems = [];
   let isLoading = false;
   let sort = ""; // Track current sort state

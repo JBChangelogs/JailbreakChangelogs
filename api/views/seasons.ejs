@@ -182,95 +182,21 @@
                 customization items. Level up, earn XP, and unlock special
                 prizes during these time-limited events.
               </p>
-              <!-- Add Season Countdown -->
-              <div class="season-countdown text-center my-4">
-                <h3 class="countdown-title">
-                  Season <span id="season-number"></span> /
-                  <span id="season-title"></span>
-                  <span id="countdown-mode"></span>
-                </h3>
 
-                <div class="countdown-timer">
-                  <div class="countdown-item">
-                    <span id="countdown-days">00</span>
-                    <span class="countdown-label">Days</span>
-                  </div>
-                  <div class="countdown-item">
-                    <span id="countdown-hours">00</span>
-                    <span class="countdown-label">Hours</span>
-                  </div>
-                  <div class="countdown-item">
-                    <span id="countdown-minutes">00</span>
-                    <span class="countdown-label">Minutes</span>
-                  </div>
-                  <div class="countdown-item">
-                    <span id="countdown-seconds">00</span>
-                    <span class="countdown-label">Seconds</span>
+              <!-- Keep only the new countdowns container -->
+              <div class="countdowns-container row mt-4">
+                <!-- Current Season Countdown -->
+                <div class="col-12 col-md-6 mb-3">
+                  <div id="current-season-countdown" class="countdown-wrapper">
+                    <!-- Current season countdown will be inserted here -->
                   </div>
                 </div>
-              </div>
 
-              <div class="feature-grid mt-4">
-                <div class="feature-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                  >
-                    <rect width="24" height="24" fill="none" />
-                    <path
-                      fill="#1d7da3"
-                      d="M12 11q.825 0 1.413-.587T14 9t-.587-1.412T12 7t-1.412.588T10 9t.588 1.413T12 11M7 21v-2h4v-3.1q-1.225-.275-2.187-1.037T7.4 12.95q-1.875-.225-3.137-1.637T3 8V7q0-.825.588-1.412T5 5h2V3h10v2h2q.825 0 1.413.588T21 7v1q0 1.9-1.263 3.313T16.6 12.95q-.45 1.15-1.412 1.913T13 15.9V19h4v2zm0-10.2V7H5v1q0 .95.55 1.713T7 10.8m10 0q.9-.325 1.45-1.088T19 8V7h-2z"
-                    />
-                  </svg>
-                  <h5>Limited-Time Rewards</h5>
-                  <p>
-                    Browse exclusive vehicles, items, and customizations
-                    available only during specific seasons. Track current and
-                    past seasonal rewards all in one place.
-                  </p>
-                </div>
-
-                <div class="feature-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                  >
-                    <rect width="24" height="24" fill="none" />
-                    <path
-                      fill="#1d7da3"
-                      d="m19 1l-1.26 2.75L15 5l2.74 1.26L19 9l1.25-2.74L23 5l-2.75-1.25M9 4L6.5 9.5L1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5M19 15l-1.26 2.74L15 19l2.74 1.25L19 23l1.25-2.75L23 19l-2.75-1.26"
-                    />
-                  </svg>
-                  <h5>Season Progress</h5>
-                  <p>
-                    View level requirements and bonus rewards for each season to
-                    help you track seasonal milestones.
-                  </p>
-                </div>
-
-                <div class="feature-item">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                  >
-                    <rect width="24" height="24" fill="none" />
-                    <path
-                      fill="#1d7da3"
-                      d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z"
-                    />
-                  </svg>
-                  <h5>Season History</h5>
-                  <p>
-                    Access complete information about past seasons, including
-                    theme details, special events, and exclusive content from
-                    previous seasons.
-                  </p>
+                <!-- Next Season Countdown -->
+                <div class="col-12 col-md-6 mb-3">
+                  <div id="next-season-countdown" class="countdown-wrapper">
+                    <!-- Next season countdown will be inserted here -->
+                  </div>
                 </div>
               </div>
             </div>
