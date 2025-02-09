@@ -1,5 +1,3 @@
-@import "colors.css";
-
 [data-bs-theme="dark"] body {
   /* Only keep functional colors that aren't in colors.css */
   --border-color: rgba(116, 141, 146, 0.2);

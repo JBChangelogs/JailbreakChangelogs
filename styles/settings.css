@@ -1,9 +1,3 @@
-@import "colors.css";
-
-[data-bs-theme="dark"] body {
-  background-color: var(--bg-secondary);
-}
-
 /* Toggle Switch Styles */
 .form-switch {
   padding-left: 3em;

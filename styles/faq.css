@@ -1,11 +1,8 @@
-@import url("colors.css");
-
 /* Adjust the body when menu is opened */
 body.menu-open {
   overflow: hidden;
 }
 body {
-  background-image: url("https://cdn.jailbreakchangelogs.xyz/backgrounds/background5.webp");
   background-size: cover;
   background-attachment: fixed;
   background-position: center;

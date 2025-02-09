@@ -1,7 +1,4 @@
-@import url("colors.css");
-
 [data-bs-theme="dark"] body {
-  background-color: var(--bg-secondary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

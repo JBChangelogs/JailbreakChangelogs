@@ -1,5 +1,3 @@
-@import url("colors.css");
-
 #comment-sort {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
