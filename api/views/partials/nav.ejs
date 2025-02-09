@@ -40,42 +40,76 @@
       <!-- Desktop menu -->
       <div class="navbar-desktop-menu d-none d-lg-flex">
         <ul class="navbar-nav align-items-center">
-          <!-- Game Status & Updates -->
-          <li class="nav-item">
-            <a class="nav-link" href="/changelogs">Changelogs</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/seasons">Seasons</a>
-          </li>
-
-          <!-- Core Trading Features -->
-          <li class="nav-item">
-            <a class="nav-link" href="/trading">Trading</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/values">Values</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/tradetracker">Trade Tracker</a>
-          </li>
-
-          <!-- Community & Tools -->
-          <li class="nav-item">
-            <a class="nav-link" href="/users">Users</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/servers">Servers</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/bot">Discord Bot</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/exploiters">Report Exploiters</a>
+          <!-- Game Updates -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" href="#" data-bs-toggle="dropdown">
+              Game Updates
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                class="dropdown-arrow"
+              >
+                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+              </svg>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li>
+                <a class="dropdown-item" href="/changelogs">Changelogs</a>
+              </li>
+              <li><a class="dropdown-item" href="/seasons">Seasons</a></li>
+            </ul>
           </li>
 
-          <!-- Help -->
-          <li class="nav-item">
-            <a class="nav-link" href="/faq">FAQ</a>
+          <!-- Trading -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" href="#" data-bs-toggle="dropdown">
+              Trading
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                class="dropdown-arrow"
+              >
+                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+              </svg>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="/trading">Trading</a></li>
+              <li><a class="dropdown-item" href="/values">Values</a></li>
+              <li>
+                <a class="dropdown-item" href="/tradetracker">Trade Tracker</a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Community -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" href="#" data-bs-toggle="dropdown">
+              Community
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                class="dropdown-arrow"
+              >
+                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+              </svg>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="/users">Users</a></li>
+              <li><a class="dropdown-item" href="/servers">Servers</a></li>
+              <li><a class="dropdown-item" href="/bot">Discord Bot</a></li>
+              <li>
+                <a class="dropdown-item" href="/exploiters"
+                  >Report Exploiters</a
+                >
+              </li>
+              <li><a class="dropdown-item" href="/faq">FAQ</a></li>
+            </ul>
           </li>
 
           <!-- Profile picture icon with text and dropdown (visible on desktop) -->
@@ -474,16 +508,40 @@
       );
     }
   });
+
+  // Add this to enable hover dropdowns without clicking
+  document.addEventListener("DOMContentLoaded", function () {
+    const dropdowns = document.querySelectorAll(".navbar-nav .dropdown");
+
+    dropdowns.forEach((dropdown) => {
+      dropdown.addEventListener("mouseenter", function () {
+        this.querySelector(".dropdown-menu").classList.add("show");
+      });
+
+      dropdown.addEventListener("mouseleave", function () {
+        this.querySelector(".dropdown-menu").classList.remove("show");
+      });
+    });
+  });
 </script>
 
 <style>
-  /* Add these styles to your CSS */
+  :root {
+    --bg-primary: #212a31;
+    --bg-secondary: #2e3944;
+    --accent-color: #124e66;
+    --accent-color-light: #1d7da3;
+    --text-muted: #748d92;
+    --text-primary: #d3d9d4;
+  }
+
+  /* Navbar base styles */
   .dropdown-toggle-no-caret::after {
     display: none !important;
   }
 
   .mobile-profile-section {
-    margin-top: 1rem; /* Space for close button */
+    margin-top: 1rem;
   }
 
   #sideMenuClose {
@@ -495,11 +553,11 @@
 
   .side-menu-content .nav-link {
     padding: 0.5rem 0;
-    color: white;
+    color: var(--text-primary);
   }
 
   .mobile-profile-section .nav-link {
-    color: white;
+    color: var(--text-primary);
     display: block;
     padding: 0.5rem 0;
   }
@@ -509,9 +567,11 @@
     flex-direction: column;
     gap: 0.5rem;
   }
+
   .side-menu-content .nav-item {
     padding: 0 1rem;
   }
+
   .nav-separator {
     margin: 0.5rem 0;
   }
@@ -524,9 +584,9 @@
     max-width: 1920px;
     padding: 0 24px;
     height: 100%;
+    background-color: var(--bg-primary);
   }
 
-  /* Logo section */
   .navbar-brand-wrapper {
     flex: 0 0 auto;
     margin-right: 20px;
@@ -539,7 +599,6 @@
     align-items: center;
   }
 
-  /* Desktop menu section */
   .navbar-desktop-menu {
     flex: 0 0 auto;
     margin-left: auto;
@@ -548,23 +607,19 @@
   .navbar-desktop-menu .navbar-nav {
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* Reduced from 1rem to 0.5rem */
+    gap: 0.5rem;
   }
 
-  /* Ensure nav items don't wrap */
   .navbar-desktop-menu .nav-item {
     white-space: nowrap;
   }
 
-  /* Keep existing styles */
-  /* ...existing styles... */
-
-  /* Updated navbar styles */
   .navbar {
     position: sticky;
     top: 0;
     z-index: 1000;
     width: 100%;
+    background-color: var(--bg-primary);
   }
 
   .container-fluid {
@@ -574,7 +629,7 @@
     margin: 0;
   }
 
-  /* Left side - Logo */
+  /* Navigation positioning */
   .navbar-brand-container {
     position: absolute;
     left: 24px;
@@ -582,7 +637,6 @@
     align-items: center;
   }
 
-  /* Right side - Navigation and Profile */
   .navbar-content-right {
     position: absolute;
     right: 24px;
@@ -590,13 +644,173 @@
     align-items: center;
   }
 
-  .navbar-desktop-menu .navbar-nav {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  /* Enhanced nav-link styles */
+  .nav-link {
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 4px 6px;
+    color: var(--text-primary);
   }
 
-  /* Ensure everything stays in place when zooming */
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 50%;
+    background: var(--accent-color-light);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+    opacity: 1;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-1px);
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    color: var(--accent-color-light);
+  }
+
+  /* Dropdown styles */
+  .dropdown-menu {
+    margin-top: 0;
+    padding: 0.5rem 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dropdown-item {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-primary);
+  }
+
+  .dropdown-item:hover {
+    background: var(--bg-primary);
+    padding-left: 1.5rem;
+    color: var(--accent-color-light);
+  }
+
+  .dropdown-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--accent-color-light);
+    transition: all 0.2s ease;
+  }
+
+  .dropdown-item:hover::before {
+    height: 70%;
+  }
+
+  /* Mobile menu styles */
+  .side-menu-item {
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.25rem;
+    display: block;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .side-menu-item:hover {
+    background: var(--bg-secondary);
+    padding-left: 1.75rem;
+    color: var(--accent-color-light);
+  }
+
+  .side-menu-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--accent-color-light);
+    transition: all 0.2s ease;
+  }
+
+  .side-menu-item:hover::before {
+    height: 70%;
+  }
+
+  /* Profile elements */
+  .profile-button,
+  #mobileAvatarToggle {
+    transition: all 0.3s ease;
+  }
+
+  .profile-button:hover,
+  #mobileAvatarToggle:hover {
+    transform: translateY(-1px);
+    background: var(--bg-secondary);
+    border-radius: 6px;
+  }
+
+  /* Icon animations */
+  .nav-icon,
+  .dropdown-item svg,
+  .side-menu-item svg {
+    transition: transform 0.2s ease;
+  }
+
+  .nav-link:hover .nav-icon,
+  .dropdown-item:hover svg,
+  .side-menu-item:hover svg {
+    transform: scale(1.1);
+  }
+
+  /* Dropdown positioning */
+  .navbar-nav .nav-item.dropdown {
+    position: relative;
+    z-index: 1001;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    min-width: 200px;
+    z-index: 1002;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .nav-item.dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .nav-item.dropdown.ms-2 .dropdown-menu {
+    left: auto;
+    right: 0;
+    transform: translateY(-10px);
+  }
+
+  .nav-item.dropdown.ms-2:hover .dropdown-menu {
+    transform: translateY(0);
+  }
+
+  /* Media queries */
   @media screen and (min-width: 992px) {
     .navbar-content-right {
       display: flex !important;
@@ -607,45 +821,21 @@
     }
   }
 
-  /* Profile dropdown positioning */
-  .nav-item.dropdown.ms-2 {
-    margin-left: 0.75rem !important; /* Reduced from default 2rem */
-    margin-right: -0.5rem; /* Push slightly closer to edge */
-  }
-
-  /* Nav link padding adjustment */
-  .custom-navbar-color .nav-link {
-    padding: 4px 6px; /* Reduced horizontal padding from 8px to 6px */
-  }
-
-  /* Login text styles */
-  .login-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  /* Adjust button padding for mobile view */
-  #mobileAvatarToggle {
-    padding: 4px 8px;
-  }
-
-  /* Media queries */
   @media screen and (max-width: 576px) {
     .custom-navbar-color .navbar-brand {
       margin-right: 20px;
-      margin-left: -15px; /* Increased leftward shift from -10px to -15px */
+      margin-left: -15px;
     }
 
     .navbar-logo {
       height: 40px !important;
-      margin-left: -5px !important; /* Added negative margin to pull logo left */
+      margin-left: -5px !important;
     }
 
     .custom-navbar-color .container-fluid {
-      padding-left: 12px !important; /* Reduced left padding to help shift logo left */
+      padding-left: 12px !important;
     }
 
-    /* Add margin to move mobile avatar toggle right */
     #mobileAvatarToggle {
       margin-right: -10px;
     }
