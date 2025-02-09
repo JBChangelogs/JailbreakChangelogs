@@ -1,6 +1,3 @@
-@import "colors.css";
-
-/* Dark Theme Colors */
 [data-bs-theme="dark"] body {
   --common-bg-color: var(--bg-secondary);
   --content-h1: var(--text-primary);

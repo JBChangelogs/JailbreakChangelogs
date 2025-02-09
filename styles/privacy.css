@@ -1,10 +1,7 @@
-@import url("colors.css");
-
 .bg-custom {
   background-color: var(--bg-primary);
 }
 body {
-  background-image: url("https://cdn.jailbreakchangelogs.xyz/backgrounds/background8.webp");
   background-size: cover;
   background-attachment: fixed;
   background-position: center;

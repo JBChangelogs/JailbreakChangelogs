@@ -1,5 +1,3 @@
-@import "colors.css";
-
 /* Dark Theme Styles */
 [data-bs-theme="dark"] body {
   /* Main Colors */
@@ -34,9 +32,6 @@
   --gray-700: #999999;
   --gray-800: #aaaaaa;
   --gray-900: #bbbbbb;
-}
-[data-bs-theme="dark"] body {
-  background-color: var(--common-bg-color);
 }
 
 /* Dark Theme Specific Styles */

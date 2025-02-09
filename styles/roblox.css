@@ -1,16 +1,13 @@
-@import url("colors.css");
-
 body,
 html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: "Poppins", sans-serif;
-  background-color: #212a3100; /* Main background */
+  background-color: var(--bg-primary) !important;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("https://cdn.jailbreakchangelogs.xyz/backgrounds/background8.webp");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

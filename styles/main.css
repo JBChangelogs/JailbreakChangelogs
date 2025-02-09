@@ -1,3 +1,11 @@
+[data-bs-theme="dark"] body {
+  background-color: var(--bg-secondary);
+}
+
+[data-bs-theme="dark"] #loading-overlay {
+  background-color: var(--bg-secondary);
+}
+
 .user-card {
   background: var(--bg-secondary);
   border: 1px solid var(--accent-color);

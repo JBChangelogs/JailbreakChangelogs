@@ -1,23 +1,19 @@
-@import url("colors.css");
-
 body,
 html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: "Poppins", sans-serif;
-  background-color: var(--bg-primary); /* Main background */
+  background-color: var(--bg-primary) !important; /* Main background */
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("https://cdn.jailbreakchangelogs.xyz/backgrounds/background4.webp");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   box-sizing: border-box;
 }
 body::before {
-  content: "";
   position: fixed;
   top: 0;
   left: 0;
