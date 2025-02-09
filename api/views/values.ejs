@@ -17,28 +17,7 @@
     />
     <meta
       name="keywords"
-      content="<% allItems?.forEach(item => { %>
-      jailbreak <%= item.name %>,
-      jailbreak wiki <%= item.name %>,
-      <%= item.name %> value jailbreak,
-      roblox jailbreak <%= item.name %>,
-      jb wiki <%= item.name %>,
-      <%= item.name %> price jailbreak,
-      jb trading <%= item.name %>,
-      jb value <%= item.name %>,
-      jailbreak trading <%= item.name %>,
-      jailbreak trade <%= item.name %>,
-      what is <%= item.name %> worth in jailbreak,
-      how much is <%= item.name %> worth in jailbreak,
-      <%= item.name %> trading value,
-      <%= item.name %> jb price,
-      <%= item.name %> trading guide,
-      <% }); %>
-      Jailbreak values, Jailbreak trading values,
-      Jailbreak item prices, Jailbreak vehicle values,
-      Jailbreak limited values, Jailbreak trading guide,
-      Jailbreak market prices, Jailbreak item worth,
-      Jailbreak trading prices, Roblox Jailbreak values"
+      content="Jailbreak values, Jailbreak Wiki, Jb values, Roblox Jailbreak values, Jailbreak item prices, Jailbreak vehicle values, Jailbreak limited items, Jailbreak trading system, Jailbreak value list, Jailbreak rare items, Jailbreak limited vehicles, Jailbreak trading prices, Jailbreak item, Jailbreak trading calculator, Jailbreak value checker, Jailbreak trading community, jbtc, jailbreak trading core"
     />
     <meta name="author" content="Jailbreak Changelogs" />
 
@@ -640,306 +619,323 @@
           </div>
         </div>
       </div>
+
+      <div class="d-none">
+        <% if (typeof allItems !== 'undefined' && allItems) { %>
+          <% allItems.forEach(function(item) { %>
+            <div class="seo-item" data-type="<%= item.type.toLowerCase() %>">
+              <h2>
+                <a href="/item/<%= item.type.toLowerCase() %>/<%= encodeURIComponent(item.name) %>">
+                  <%= item.name %> - <%= item.type %> Value
+                </a>
+              </h2>
+              <div class="seo-content">
+                <p>
+                  Check the current value and trading details for <%= item.name %> <%= item.type.toLowerCase() %> in Jailbreak.
+                  <% if (item.cash_value) { %>Current value: <%= item.cash_value %><% } %>
+                  <% if (item.is_limited) { %>(Limited Item)<% } %>
+                </p>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
     </div>
 
     <%- include('partials/loading') %>
 
     <div class="container-fluid mt-4">
-      <div class="row g-3">
-        <!-- Search and Filter Section -->
-        <div class="col-12">
-          <div class="filter-controls p-4 rounded shadow-sm">
-            <div class="row g-3 align-items-center">
-              <!-- Search Bar -->
-              <div class="col-md-6">
-                <div class="input-group">
-                  <span class="input-group-text">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 48 48"
-                    >
-                      <rect width="48" height="48" fill="none" />
-                      <g
-                        fill="none"
-                        stroke="#748d92"
-                        stroke-linejoin="round"
-                        stroke-width="4"
-                      >
-                        <path
-                          d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z"
-                        />
-                        <path
-                          stroke-linecap="round"
-                          d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485"
-                        />
-                      </g>
-                    </svg>
-                  </span>
-                  <input
-                    type="text"
-                    id="search-bar"
-                    class="form-control"
-                    placeholder="Search items..."
-                    oninput="filterItems()"
-                  />
-                  <button
-                    class="btn btn-outline-secondary clear-button"
-                    type="button"
-                    id="clear-search"
-                    onclick="clearSearch()"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Clear search"
-                    style="display: none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 32 32"
-                    >
-                      <rect width="32" height="32" fill="none" />
-                      <path
-                        fill="currentColor"
-                        d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <div id="search-messages" class="mt-1">
-                  <!-- Feedback text will be inserted here dynamically -->
-                </div>
-              </div>
-
-              <!-- Sort Dropdown -->
-              <div class="col-md-6">
-                <div class="input-group">
-                  <span class="input-group-text">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 32 32"
-                    >
-                      <rect width="32" height="32" fill="none" />
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 7h22M7 13h18M9 19h14m-12 6h10"
-                      />
-                    </svg>
-                  </span>
-                  <select
-                    id="sort-dropdown"
-                    class="form-select"
-                    onchange="window.sortItems()"
-                  >
-                    <option value="name-all-items">All Items</option>
-                    <option value="name-limited-items">Limited Items</option>
-                    <option value="name-vehicles">Vehicles</option>
-                    <option value="name-spoilers">Spoilers</option>
-                    <option value="name-rims">Rims</option>
-                    <option value="name-body-colors">Body Colors</option>
-                    <option value="name-hyperchromes">HyperChromes</option>
-                    <option value="name-textures">Body Textures</option>
-                    <option value="name-tire-stickers">Tire Stickers</option>
-                    <option value="name-tire-styles">Tire Styles</option>
-                    <option value="name-drifts">Drifts</option>
-                    <option value="name-furnitures">Furniture</option>
-                  </select>
-                  <select
-                    id="value-sort-dropdown"
-                    class="form-select"
-                    onchange="window.sortItems()"
-                  >
-                    <option value="random">Random</option>
-                    <option value="favorites">My Favorites</option>
-                    <option value="separator" disabled>
-                      ───── Last Updated ─────
-                    </option>
-                    <option value="last-updated-desc">
-                      Last Updated (Newest First)
-                    </option>
-                    <option value="last-updated-asc">
-                      Last Updated (Oldest First)
-                    </option>
-                    <option value="separator" disabled>
-                      ───── Alphabetically ─────
-                    </option>
-                    <option value="alpha-asc">Name (A to Z)</option>
-                    <option value="alpha-desc">Name (Z to A)</option>
-                    <option value="separator" disabled>
-                      ───── Values ─────
-                    </option>
-                    <option value="cash-asc">Cash Value (Low to High)</option>
-                    <option value="cash-desc">Cash Value (High to Low)</option>
-                    <option value="duped-asc">Duped Value (Low to High)</option>
-                    <option value="duped-desc">
-                      Duped Value (High to Low)
-                    </option>
-                    <option value="separator" disabled>
-                      ───── Demand ─────
-                    </option>
-                    <option value="demand-asc">Demand (Low to High)</option>
-                    <option value="demand-desc">Demand (High to Low)</option>
-                  </select>
-
-                  <button
-                    class="btn btn-outline-secondary"
-                    type="button"
-                    onclick="clearFilters()"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Clear all filters"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 32 32"
-                    >
-                      <rect width="32" height="32" fill="none" />
-                      <path
-                        fill="currentColor"
-                        d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary"
-                    type="button"
-                    onclick="shareCurrentView()"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Share current view"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect width="24" height="24" fill="none" />
-                      <path
-                        fill="currentColor"
-                        d="m13.12 17.023l-4.199-2.29a4 4 0 1 1 0-5.465l4.2-2.29a4 4 0 1 1 .958 1.755l-4.2 2.29a4 4 0 0 1 0 1.954l4.2 2.29a4 4 0 1 1-.959 1.755M6 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m11-6a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0 12a2 2 0 1 0 0-4a2 2 0 0 0 0 4"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pagination Section -->
-        <div class="col-12">
-          <div class="total-items-section p-3 rounded shadow-sm">
-            <!-- Stack elements vertically on mobile -->
-            <div
-              class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
-            >
-              <!-- Total items info -->
-              <div
-                class="total-items-info order-3 order-md-3 text-center text-md-end"
+      <!-- Items search and filtering section -->
+      <div class="row g-3 align-items-center">
+        <!-- Search Bar -->
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 48 48"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
+                <rect width="48" height="48" fill="none" />
+                <g
+                  fill="none"
+                  stroke="#748d92"
+                  stroke-linejoin="round"
+                  stroke-width="4"
                 >
-                  <rect width="24" height="24" fill="none" />
                   <path
-                    fill="currentColor"
-                    d="M18 4h1V2H5v2zm3 3.5H3v-2h18zM23 9v13H1V9zm-2 2H3v9h18z"
+                    d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z"
                   />
-                </svg>
-                <span id="total-items-label"></span>
-                <span id="total-items"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Items Container -->
-        <div class="col-12">
-          <div id="items-container" class="container-fluid p-0">
-            <div class="row g-3" id="items-list">
-              <!-- Items will be dynamically populated here -->
-            </div>
-            <!-- Add loading spinner -->
-            <div class="loading-spinner">
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Back to top button -->
-        <button
-          id="back-to-top"
-          class="back-to-top-btn"
-          aria-label="Back to top"
-          data-bs-toggle="tooltip"
-          data-bs-placement="left"
-          title="Back to top"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 48 48"
-          >
-            <rect width="48" height="48" fill="none" />
-            <path
-              fill="none"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="4"
-              d="m12 24l12-12l12 12M12 36l12-12l12 12"
+                  <path
+                    stroke-linecap="round"
+                    d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485"
+                  />
+                </g>
+              </svg>
+            </span>
+            <input
+              type="text"
+              id="search-bar"
+              class="form-control"
+              placeholder="Search items..."
+              oninput="filterItems()"
             />
-          </svg>
-        </button>
+            <button
+              class="btn btn-outline-secondary clear-button"
+              type="button"
+              id="clear-search"
+              onclick="clearSearch()"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              title="Clear search"
+              style="display: none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+              >
+                <rect width="32" height="32" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+                />
+                <path
+                  fill="currentColor"
+                  d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
+                />
+              </svg>
+            </button>
+          </div>
+          <div id="search-messages" class="mt-1">
+            <!-- Feedback text will be inserted here dynamically -->
+          </div>
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+              >
+                <rect width="32" height="32" fill="none" />
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 7h22M7 13h18M9 19h14m-12 6h10"
+                />
+              </svg>
+            </span>
+            <select
+              id="sort-dropdown"
+              class="form-select"
+              onchange="window.sortItems()"
+            >
+              <option value="name-all-items">All Items</option>
+              <option value="name-limited-items">Limited Items</option>
+              <option value="name-vehicles">Vehicles</option>
+              <option value="name-spoilers">Spoilers</option>
+              <option value="name-rims">Rims</option>
+              <option value="name-body-colors">Body Colors</option>
+              <option value="name-hyperchromes">HyperChromes</option>
+              <option value="name-textures">Body Textures</option>
+              <option value="name-tire-stickers">Tire Stickers</option>
+              <option value="name-tire-styles">Tire Styles</option>
+              <option value="name-drifts">Drifts</option>
+              <option value="name-furnitures">Furniture</option>
+            </select>
+            <select
+              id="value-sort-dropdown"
+              class="form-select"
+              onchange="window.sortItems()"
+            >
+              <option value="random">Random</option>
+              <option value="favorites">My Favorites</option>
+              <option value="separator" disabled>
+                ───── Last Updated ─────
+              </option>
+              <option value="last-updated-desc">
+                Last Updated (Newest First)
+              </option>
+              <option value="last-updated-asc">
+                Last Updated (Oldest First)
+              </option>
+              <option value="separator" disabled>
+                ───── Alphabetically ─────
+              </option>
+              <option value="alpha-asc">Name (A to Z)</option>
+              <option value="alpha-desc">Name (Z to A)</option>
+              <option value="separator" disabled>
+                ───── Values ─────
+              </option>
+              <option value="cash-asc">Cash Value (Low to High)</option>
+              <option value="cash-desc">Cash Value (High to Low)</option>
+              <option value="duped-asc">Duped Value (Low to High)</option>
+              <option value="duped-desc">
+                Duped Value (High to Low)
+              </option>
+              <option value="separator" disabled>
+                ───── Demand ─────
+              </option>
+              <option value="demand-asc">Demand (Low to High)</option>
+              <option value="demand-desc">Demand (High to Low)</option>
+            </select>
+
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              onclick="clearFilters()"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              title="Clear all filters"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+              >
+                <rect width="32" height="32" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+                />
+                <path
+                  fill="currentColor"
+                  d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
+                />
+              </svg>
+            </button>
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              onclick="shareCurrentView()"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              title="Share current view"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <rect width="24" height="24" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="m13.12 17.023l-4.199-2.29a4 4 0 1 1 0-5.465l4.2-2.29a4 4 0 1 1 .958 1.755l-4.2 2.29a4 4 0 0 1 0 1.954l4.2 2.29a4 4 0 1 1-.959 1.755M6 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m11-6a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0 12a2 2 0 1 0 0-4a2 2 0 0 0 0 4"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- Rest of the content -->
+      <!-- Pagination Section -->
+      <div class="col-12">
+        <div class="total-items-section p-3 rounded shadow-sm">
+          <!-- Stack elements vertically on mobile -->
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+          >
+            <!-- Total items info -->
+            <div
+              class="total-items-info order-3 order-md-3 text-center text-md-end"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+              >
+                <rect width="24" height="24" fill="none" />
+                <path
+                  fill="currentColor"
+                  d="M18 4h1V2H5v2zm3 3.5H3v-2h18zM23 9v13H1V9zm-2 2H3v9h18z"
+                />
+              </svg>
+              <span id="total-items-label"></span>
+              <span id="total-items"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Container -->
+      <div class="col-12">
+        <div id="items-container" class="container-fluid p-0">
+          <div class="row g-3" id="items-list">
+            <!-- Items will be dynamically populated here -->
+          </div>
+          <!-- Add loading spinner -->
+          <div class="loading-spinner">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to top button -->
+      <button
+        id="back-to-top"
+        class="back-to-top-btn"
+        aria-label="Back to top"
+        data-bs-toggle="tooltip"
+        data-bs-placement="left"
+        title="Back to top"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+        >
+          <rect width="48" height="48" fill="none" />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="4"
+            d="m12 24l12-12l12 12M12 36l12-12l12 12"
+          />
+        </svg>
+      </button>
     </div>
+  </div>
 
-    <%- include('partials/footer') %>
+  <%- include('partials/footer') %>
 
-    <!-- Scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
-      integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-    <script src="scripts/main.js"></script>
-    <!-- <script src="scripts/values.js" defer></script> -->
-    <script src="scripts/minified/values.min.js"></script>
-  </body>
+  <!-- Scripts -->
+  <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
+    integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE="
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script src="scripts/main.js"></script>
+  <!-- <script src="scripts/values.js" defer></script> -->
+  <script src="scripts/minified/values.min.js"></script>
+</body>
 </html>
