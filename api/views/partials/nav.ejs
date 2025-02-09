@@ -526,15 +526,6 @@
 </script>
 
 <style>
-  :root {
-    --bg-primary: #212a31;
-    --bg-secondary: #2e3944;
-    --accent-color: #124e66;
-    --accent-color-light: #1d7da3;
-    --text-muted: #748d92;
-    --text-primary: #d3d9d4;
-  }
-
   /* Navbar base styles */
   .dropdown-toggle-no-caret::after {
     display: none !important;
@@ -619,7 +610,7 @@
     top: 0;
     z-index: 1000;
     width: 100%;
-    background-color: var(--bg-primary);
+    background-color: var(--bg-primary) !important;
   }
 
   .container-fluid {
@@ -649,7 +640,7 @@
     position: relative;
     transition: all 0.3s ease;
     padding: 4px 6px;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
   }
 
   .nav-link::after {
@@ -659,7 +650,7 @@
     height: 2px;
     bottom: -2px;
     left: 50%;
-    background: var(--accent-color-light);
+    background: var(--accent-color-light) !important;
     transition: all 0.3s ease;
     transform: translateX(-50%);
     opacity: 0;
@@ -672,17 +663,17 @@
 
   .nav-link:hover {
     transform: translateY(-1px);
-    background: var(--bg-secondary);
+    background: var(--bg-secondary) !important;
     border-radius: 6px;
-    color: var(--accent-color-light);
+    color: var(--accent-color-light) !important;
   }
 
   /* Dropdown styles */
   .dropdown-menu {
     margin-top: 0;
     padding: 0.5rem 0;
-    background: var(--bg-secondary);
-    border: 1px solid var(--accent-color);
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--accent-color) !important;
     border-radius: 6px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
@@ -694,13 +685,13 @@
     padding: 0.75rem 1.25rem;
     transition: all 0.2s ease;
     background: transparent;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
   }
 
   .dropdown-item:hover {
-    background: var(--bg-primary);
+    background: var(--bg-primary) !important;
     padding-left: 1.5rem;
-    color: var(--accent-color-light);
+    color: var(--accent-color-light) !important;
   }
 
   .dropdown-item::before {
@@ -711,7 +702,7 @@
     transform: translateY(-50%);
     width: 3px;
     height: 0;
-    background: var(--accent-color-light);
+    background: var(--accent-color-light) !important;
     transition: all 0.2s ease;
   }
 
