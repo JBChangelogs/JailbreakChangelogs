@@ -1121,7 +1121,6 @@ video.card-img-top {
 
 .trade-card.empty-slot::before {
   content: "";
-  background-image: url("https://jailbreakchangelogs.xyz/assets/bi--plus-circle.png");
   background-size: 3rem 3rem;
   background-repeat: no-repeat;
   background-position: center;
