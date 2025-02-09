@@ -665,6 +665,7 @@ body {
 
 .total-items-section {
   background-color: var(--bg-primary);
+  margin-top: 10px !important;
 }
 
 .total-items-info {
