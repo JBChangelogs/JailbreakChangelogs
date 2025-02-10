@@ -19,7 +19,19 @@ document.addEventListener("DOMContentLoaded", function () {
     favoritesTab.addEventListener("click", function () {
       currentPage = 1; // Reset to first page when switching tabs
       const userId = window.location.pathname.split("/").pop();
+      card_pagination.style.display = "none"; // Hide pagination initially
       fetchUserFavorites(userId);
+    });
+  }
+
+  // Add click handler for comments tab
+  const commentsTab = document.getElementById("comments-tab");
+  if (commentsTab) {
+    commentsTab.addEventListener("click", function () {
+      currentPage = 1; // Reset to first page when switching tabs
+      const userId = window.location.pathname.split("/").pop();
+      card_pagination.style.display = "none"; // Hide pagination initially
+      fetchUserComments(userId);
     });
   }
 
@@ -31,6 +43,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const userId = pathSegments[pathSegments.length - 1];
   const card_pagination = document.getElementById("card-pagination");
   const userBanner = document.getElementById("banner");
+
+  // Initialize pagination visibility at start
+  if (card_pagination) {
+    card_pagination.style.display = "flex";
+  }
 
   // Handle Discord connection
   const discordConnection = document.getElementById("discord-connection");
@@ -590,7 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="me-3">
            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="#1d7da3" d="M13.435 2.075a3.33 3.33 0 0 0-2.87 0c-.394.189-.755.497-1.26.928l-.079.066a2.56 2.56 0 0 1-1.58.655l-.102.008c-.662.053-1.135.09-1.547.236a3.33 3.33 0 0 0-2.03 2.029c-.145.412-.182.885-.235 1.547l-.008.102a2.56 2.56 0 0 1-.655 1.58l-.066.078c-.431.506-.74.867-.928 1.261a3.33 3.33 0 0 0 0 2.87c.189.394.497.755.928 1.26l.066.079c.41.48.604.939.655 1.58l.008.102c.053.662.09 1.135.236 1.547a3.33 3.33 0 0 0 2.029 2.03c.412.145.885.182 1.547.235l.102.008c.629.05 1.09.238 1.58.655l.078.066c.506.431.867.74 1.261.928a3.33 3.33 0 0 0 2.87 0c.394-.189.755-.497 1.26-.928l.079-.066c.48-.41.939-.604 1.58-.655l.102-.008c.662-.053 1.135-.09 1.547-.236a3.33 3.33 0 0 0 2.03-2.029c.145-.412.182-.885.235-1.547l.008-.102c.05-.629.238-1.09.655-1.58l.066-.079c.431-.505.74-.866.928-1.26a3.33 3.33 0 0 0 0-2.87c-.189-.394-.497-.755-.928-1.26l-.066-.079a2.56 2.56 0 0 1-.655-1.58l-.008-.102c-.053-.662-.09-1.135-.236-1.547a3.33 3.33 0 0 0-2.029-2.03c-.412-.145-.885-.182-1.547-.235l-.102-.008a2.56 2.56 0 0 1-1.58-.655l-.079-.066c-.505-.431-.866-.74-1.26-.928M12 7.25a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0V8a.75.75 0 0 1 .75-.75M10.75 16a.75.75 0 0 1 .5-.707v-3.586a.75.75 0 0 1 .25-1.457h.5a.75.75 0 0 1 .75.75v4.293a.75.75 0 0 1-.25 1.457h-1a.75.75 0 0 1-.75-.75" />
+	<path fill="#1d7da3" d="M13.435 2.075a3.33 3.33 0 0 0-2.87 0c-.394.189-.755.497-1.26.928l-.079.066a2.56 2.56 0 0 1-1.58.655l-.102.008c-.662.053-1.135.09-1.547.236a3.33 3.33 0 0 0-2.03 2.029c-.145.412-.182.885-.235 1.547l-.008.102a2.56 2.56 0 0 1-.655 1.58l-.066.078c-.431.506-.74.867-.928 1.261a3.33 3.33 0 0 0 0 2.87c.189.394.497.755.928 1.26l.066.079c.41.48.604.939.655 1.58l.008.102c.053.662.09 1.135.236 1.547a3.33 3.33 0 0 0 2.029 2.03c.412.145.885.182 1.547.235l.102.008c.629.05 1.09.238 1.58.655l.078.066c.506.431.867.74 1.261.928a3.33 3.33 0 0 0 2.87 0c.394-.189.755-.497 1.26-.928l.079-.066c.48-.41.939-.604 1.58-.655l.102-.008c.662-.053 1.135-.09 1.547-.236a3.33 3.33 0 0 0 2.029-2.029c.145-.412.182-.885.235-1.547l.008-.102c.05-.629.238-1.09.655-1.58l.066-.079c.431-.505.74-.866.928-1.26a3.33 3.33 0 0 0 0-2.87c-.189-.394-.497-.755-.928-1.26l-.066-.079a2.56 2.56 0 0 1-.655-1.58l-.008-.102c-.053-.662-.09-1.135-.236-1.547a3.33 3.33 0 0 0-2.029-2.03c-.412-.145-.885-.182-1.547-.235l-.102-.008a2.56 2.56 0 0 1-1.58-.655l-.079-.066c-.505-.431-.866-.74-1.26-.928M12 7.25a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0V8a.75.75 0 0 1 .75-.75M10.75 16a.75.75 0 0 1 .5-.707v-3.586a.75.75 0 0 1 .25-1.457h.5a.75.75 0 0 1 .75.75v4.293a.75.75 0 0 1-.25 1.457h-1a.75.75 0 0 1-.75-.75" />
 </svg>
             </div>
             <div>
@@ -1082,6 +1099,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchUserComments(userId) {
     const recentComments = document.getElementById("comments-list");
+    card_pagination.style.display = "flex"; // Always show pagination
 
     // Show loading spinner in card body
     recentComments.innerHTML = `
@@ -1097,6 +1115,27 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>`;
 
     try {
+      // Check if comments are hidden
+      if (permissions.show_recent_comments === 0 && loggedinuserId !== userId) {
+        recentComments.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="hidden-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <g fill="#748D92">
+                  <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+                  <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+                  <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+                </g>
+              </svg>
+              <h4>Comments Hidden</h4>
+              <p>This user has chosen to keep their comments private</p>
+            </div>
+          </div>`;
+        renderPaginationControls(1); // Show single page pagination
+        return;
+      }
+
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
@@ -1107,25 +1146,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const comments = await response.json();
 
-      if (!Array.isArray(comments)) {
-        console.error("Invalid comments format:", comments);
-        recentComments.innerHTML = "<div>No recent comments.</div>";
-        return;
-      }
-
-      if (comments.length === 0) {
-        recentComments.innerHTML = "<div>No recent comments.</div>";
+      // Handle no comments case
+      if (!Array.isArray(comments) || comments.length === 0) {
+        recentComments.innerHTML = `
+          <div class="col-12 text-center p-4">
+            <div class="no-favorites-message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
+                <rect width="16" height="16" fill="none" />
+                <g fill="#748D92">
+                  <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+                  <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+                </g>
+              </svg>
+              <h4>No Comments Yet</h4>
+              <p>This user hasn't made any comments yet</p>
+            </div>
+          </div>`;
+        renderPaginationControls(1); // Show single page pagination
         return;
       }
 
       // Calculate pagination
       const totalComments = comments.length;
-      const totalPages = Math.ceil(totalComments / commentsPerPage);
+      const totalPages = Math.max(
+        1,
+        Math.ceil(totalComments / commentsPerPage)
+      ); // Always at least 1 page
       const startIndex = (currentPage - 1) * commentsPerPage;
       const paginatedComments = comments.slice(
         startIndex,
         startIndex + commentsPerPage
       );
+
+      // Always show pagination and render controls
+      card_pagination.style.display = "flex";
+      renderPaginationControls(totalPages);
 
       // Clear existing content
       recentComments.innerHTML = "";
@@ -1239,17 +1294,22 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching comments:", error);
 
       recentComments.innerHTML = `
-        <div class="text-center p-3" style="color: #748D92;">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<g fill="#748D92">
-		<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
-		<path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
-		<path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
-	</g>
-</svg>
-          This user has no comments
+        <div class="col-12 text-center p-4">
+          <div class="error-message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
+              <rect width="16" height="16" fill="none" />
+              <g fill="#748D92">
+                <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
+                <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
+                <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
+              </g>
+            </svg>
+            <h4>No Comments Yet</h4>
+            <p>This user has no recent comments</p>
+          </div>
         </div>`;
+      card_pagination.style.display = "flex"; // Keep pagination visible even on error
+      renderPaginationControls(1); // Show single page pagination on error
     }
   }
 
@@ -1697,7 +1757,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchUserFavorites(userId) {
     const favoritesContainer = document.getElementById("favorites-grid");
-    const card_pagination = document.getElementById("card-pagination");
+    card_pagination.style.display = "flex"; // Always show pagination
 
     // Show loading spinner in favorites grid
     favoritesContainer.innerHTML = `
@@ -1723,15 +1783,14 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       const settings = await settingsResponse.json();
 
-      // Only apply hide_favorites if not profile owner
+      // Check if favorites are hidden
       if (settings.hide_favorites === 1 && !isProfileOwner) {
-        card_pagination.style.display = "none";
         favoritesContainer.innerHTML = `
           <div class="col-12 text-center p-4">
             <div class="hidden-message">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16">
                 <rect width="16" height="16" fill="none" />
-                <g fill="#748d92">
+                <g fill="#748D92">
                   <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z" />
                   <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299l.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829" />
                   <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884l-12-12l.708-.708l12 12z" />
@@ -1741,6 +1800,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <p>This user has chosen to keep their favorites private</p>
             </div>
           </div>`;
+        renderPaginationControls(1); // Show single page pagination
         return;
       }
 
@@ -1749,18 +1809,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       if (response.status === 404) {
-        card_pagination.style.display = "none";
-        favoritesContainer.innerHTML = `
-          <div class="col-12 text-center p-4">
-            <div class="no-favorites-message">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
-                <rect width="24" height="24" fill="none" />
-                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
-              </svg>
-              <h4>No Favorites Yet</h4>
-              <p>This user hasn't added any items to their favorites</p>
-            </div>
-          </div>`;
+        showNoFavoritesMessage();
         return;
       }
 
@@ -1770,20 +1819,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const favorites = await response.json();
 
-      // Check if user has no favorites but settings allow viewing
-      if (favorites.length === 0) {
-        card_pagination.style.display = "none";
-        favoritesContainer.innerHTML = `
-          <div class="col-12 text-center p-4">
-            <div class="no-favorites-message">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
-                <rect width="24" height="24" fill="none" />
-                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
-              </svg>
-              <h4>No Favorites Yet</h4>
-              <p>This user hasn't added any items to their favorites</p>
-            </div>
-          </div>`;
+      // Now check favorites length after we have the data
+      if (!favorites || favorites.length === 0) {
+        showNoFavoritesMessage();
         return;
       }
 
@@ -1812,8 +1850,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 <rect width="24" height="24" fill="none" />
                 <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
               </svg>
-              <h4>No Favorites Found</h4>
-              <p>No favorite items could be loaded</p>
+              <h4>No Favorites Yet</h4>
+              <p>This user hasn't added any items to their favorites</p>
             </div>
           </div>`;
         return;
@@ -1821,17 +1859,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Pagination logic
       const itemsPerPage = 12;
-      const totalPages = Math.ceil(items.length / itemsPerPage);
+      const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage)); // Always at least 1 page
       const startIndex = (currentPage - 1) * itemsPerPage;
       const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
-      // Show pagination controls if there's more than one page
-      if (totalPages > 1) {
-        card_pagination.style.display = "flex";
-        renderPaginationControls(totalPages);
-      } else {
-        card_pagination.style.display = "none";
-      }
+      // Always show pagination controls
+      card_pagination.style.display = "flex";
+      renderPaginationControls(totalPages);
 
       // Clear and populate the favorites container
       favoritesContainer.innerHTML = paginatedItems
@@ -1924,7 +1958,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     } catch (error) {
       console.error("Error fetching favorites:", error);
-      card_pagination.style.display = "none";
       favoritesContainer.innerHTML = `
         <div class="col-12 text-center p-4">
           <div class="error-message">
@@ -1932,7 +1965,26 @@ document.addEventListener("DOMContentLoaded", function () {
             <p>There was an error loading favorite items</p>
           </div>
         </div>`;
+      renderPaginationControls(1); // Show single page pagination
     }
+  }
+
+  // Helper function to show no favorites message
+  function showNoFavoritesMessage() {
+    const favoritesContainer = document.getElementById("favorites-grid");
+    card_pagination.style.display = "none";
+    favoritesContainer.innerHTML = `
+      <div class="col-12 text-center p-4">
+        <div class="no-favorites-message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
+          </svg>
+          <h4>No Favorites Yet</h4>
+          <p>This user hasn't added any items to their favorites</p>
+        </div>
+      </div>`;
+    renderPaginationControls(1);
   }
 
   // Helper function to get color for item type
