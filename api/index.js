@@ -643,7 +643,7 @@ const getAvatar = async (userId, avatarHash, username) => {
   }
 
   try {
-    const url = `https://api.codetabs.com/v1/proxy/?quest=https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.png`;
+    const url = `https://api.codetabs.com/v1/proxy?quest=https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.png`;
     const response = await fetch(url, { method: "HEAD" });
     return response.ok ? url : defaultAvatarUrl;
   } catch (error) {
