@@ -63,7 +63,7 @@
       property="og:description"
       content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
     />
-    <meta property="og:image" content="<%= item.image || logoUrl %>" />
+    <meta property="og:image" content="<%= embedImageUrl %>" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -79,7 +79,7 @@
       name="twitter:description"
       content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
     />
-    <meta property="twitter:image" content="<%= logoUrl %>" />
+    <meta property="twitter:image" content="<%= embedImageUrl %>" />
 
     <!-- Additional SEO tags -->
     <meta

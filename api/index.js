@@ -388,6 +388,17 @@ app.get("/item/:type/:item", async (req, res) => {
 
     const item = await response.json();
 
+    // Generate embed image URL - use absolute URLs for embeds
+    let embedImageUrl;
+    if (item.type === "Drift") {
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
+    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.gif`;
+    } else {
+      const pluralType = `${item.type.toLowerCase()}s`;
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
+    }
+
     // Enhanced SEO data
     const seoData = {
       pageTitle: `${itemName} - Jailbreak ${formattedUrlType} Value & Details | JailbreakChangelogs`,
@@ -398,6 +409,7 @@ app.get("/item/:type/:item", async (req, res) => {
       canonicalUrl: `https://jailbreakchangelogs.xyz/item/${formattedUrlType.toLowerCase()}/${encodeURIComponent(
         itemName
       )}`,
+      embedImageUrl: embedImageUrl,
       breadcrumbs: [
         { name: "Home", url: "/" },
         { name: "Values", url: "/values" },
@@ -414,7 +426,7 @@ app.get("/item/:type/:item", async (req, res) => {
       ],
     };
 
-    // If item not found, return error page with SEO data
+    // If item not found, return error page with default image
     if (response.status === 404 || item.error) {
       return res.render("item", {
         ...seoData,
@@ -425,6 +437,8 @@ app.get("/item/:type/:item", async (req, res) => {
         itemType,
         formattedUrlType,
         error: true,
+        embedImageUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
         image_url: "/assets/logos/Logo_Collab_Background.webp",
         item: {
           name: itemName,
@@ -435,29 +449,31 @@ app.get("/item/:type/:item", async (req, res) => {
       });
     }
 
-    // Generate image URL for the item
+    // Generate relative image URL for page display
     let image_url;
     if (item.type === "Drift") {
-      image_url = `/assets/images/items/drifts/thumbnails/${item.name}.webp`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
     } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      image_url = `/assets/images/items/hyperchromes/HyperShift.webm`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm`;
     } else {
       const pluralType = `${item.type.toLowerCase()}s`;
-      image_url = `/assets/images/items/${pluralType}/${item.name}.webp`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
     }
     item.image = image_url;
 
-    // Render page with SEO data
+    // Render page with both relative and absolute image URLs
     res.render("item", {
       ...seoData,
       title: seoData.pageTitle,
-      logoUrl: "/assets/logos/Logo_Collab_Background.webp",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
       logoAlt: "Item Page Logo",
       itemName: item.name,
       itemType,
       formattedUrlType,
       item,
       image_url,
+      embedImageUrl: seoData.embedImageUrl,
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
@@ -465,17 +481,22 @@ app.get("/item/:type/:item", async (req, res) => {
     console.error("Error fetching item data:", error);
     res.render("item", {
       title: `${itemName} - Error | JailbreakChangelogs`,
-      logoUrl: "/assets/logos/Banner_Background.webp",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Item Page Logo",
       itemName,
       itemType,
       formattedUrlType,
       error: true,
       errorMessage: "Internal Server Error",
-      image_url: "/assets/logos/Banner_Background.webp",
+      image_url:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      embedImageUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       item: {
         name: itemName,
-        image: "/assets/logos/Banner_Background.webp",
+        image:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       },
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
