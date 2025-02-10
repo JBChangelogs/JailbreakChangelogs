@@ -633,6 +633,25 @@ app.get("/login", (req, res) => {
   });
 });
 
+const getAvatar = async (userId, avatarHash, username) => {
+  const defaultAvatarUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=300&rounded=true&name=${encodeURIComponent(
+    username
+  )}&bold=true&format=png`;
+
+  if (!avatarHash) {
+    return defaultAvatarUrl;
+  }
+
+  try {
+    const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.png`;
+    const response = await fetch(url, { method: "HEAD" });
+    return response.ok ? url : defaultAvatarUrl;
+  } catch (error) {
+    console.error("Error fetching avatar:", error);
+    return defaultAvatarUrl;
+  }
+};
+
 app.get("/users/:user/followers", async (req, res) => {
   const requestedUser = req.params.user;
   const token = req.cookies?.token;
@@ -720,7 +739,11 @@ app.get("/users/:user/followers", async (req, res) => {
     }
 
     // Step 5: Get avatar URL
-    const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp?size=4096`;
+    const avatar = await getAvatar(
+      userData.id,
+      userData.avatar,
+      userData.username
+    );
 
     // Step 6: Render the followers page
     res.render("followers", {
@@ -833,7 +856,11 @@ app.get("/users/:user/following", async (req, res) => {
     }
 
     // Step 5: Get avatar URL
-    const avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+    const avatar = await getAvatar(
+      userData.id,
+      userData.avatar,
+      userData.username
+    );
 
     // Step 6: Render the following page
     res.render("following", {
@@ -873,39 +900,6 @@ app.get("/users", (req, res) => {
 });
 
 // Route to render a specific user profile
-const getAvatar = async (userId, avatarHash, username) => {
-  const defaultAvatarUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${username}&bold=true&format=svg`;
-
-  if (!avatarHash) {
-    return defaultAvatarUrl;
-  }
-
-  const fetchAvatar = async (format) => {
-    const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}?size=4096`;
-    const response = await fetch(url, { method: "HEAD" });
-    return response.ok ? url : null;
-  };
-
-  try {
-    // Try GIF first for animated avatars
-    const gifUrl = await fetchAvatar("gif");
-    if (gifUrl) {
-      return gifUrl;
-    }
-
-    // Then try WebP for static avatars
-    const webpUrl = await fetchAvatar("webp");
-    if (webpUrl) {
-      return webpUrl;
-    }
-
-    return defaultAvatarUrl;
-  } catch (error) {
-    console.error("Error fetching avatar:", error);
-    return defaultAvatarUrl;
-  }
-};
-
 app.get("/users/:user", async (req, res) => {
   const user = req.params.user;
   const token = req.cookies?.token;

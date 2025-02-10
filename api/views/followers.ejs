@@ -33,9 +33,16 @@
       property="og:description"
       content="Connect with <%= userData.global_name %> and other Jailbreak players. View their followers and join the community discussing Roblox Jailbreak updates."
     />
-    <meta property="og:image" content="<%= logoUrl %>" />
-    <meta property="og:image:width" content="4000" />
-    <meta property="og:image:height" content="900" />
+    <meta
+      property="og:image"
+      content="<%= userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=300` : `https://ui-avatars.com/api/?background=134d64&color=fff&size=300&rounded=true&name=${encodeURIComponent(userData.username)}&bold=true&format=png` %>"
+    />
+    <meta property="og:image:width" content="300" />
+    <meta property="og:image:height" content="300" />
+    <meta
+      property="og:image:alt"
+      content="<%= userData.username %>'s profile picture"
+    />
 
     <meta property="og:site_name" content="Jailbreak Changelogs Users" />
 
@@ -53,7 +60,10 @@
       name="twitter:description"
       content="Connect with <%= userData.global_name %> and other Jailbreak players. View their followers and join the community discussing Roblox Jailbreak updates."
     />
-    <meta property="twitter:image" content="<%= logoUrl %>" />
+    <meta
+      name="twitter:image"
+      content="<%= userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=300` : `https://ui-avatars.com/api/?background=134d64&color=fff&size=300&rounded=true&name=${encodeURIComponent(userData.username)}&bold=true&format=png` %>"
+    />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#124e66" />
 

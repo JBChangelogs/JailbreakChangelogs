@@ -34,11 +34,14 @@
       property="og:description"
       content="Check out <%= userData.global_name %>'s profile on Jailbreak Changelogs. View their contributions and stay connected."
     />
-    <meta property="og:image" content="<%= avatar %>" />
+    <meta property="og:image" content="<%= userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=300` : `https://ui-avatars.com/api/?background=134d64&color=fff&size=300&rounded=true&name=${encodeURIComponent(userData.username)}&bold=true&format=png` %>" />
+    <meta property="og:image:width" content="300" />
+    <meta property="og:image:height" content="300" />
+    <meta property="og:image:alt" content="<%= userData.username %>'s profile picture" />
     <meta property="profile:username" content="<%= userData.username %>" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta
       name="twitter:url"
       content="https://jailbreakchangelogs.xyz/users/<%= userData.id %>"
@@ -51,7 +54,7 @@
       name="twitter:description"
       content="Check out <%= userData.global_name %>'s profile on Jailbreak Changelogs. View their contributions and stay connected."
     />
-    <meta name="twitter:image" content="<%= avatar %>" />
+    <meta name="twitter:image" content="<%= userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=300` : `https://ui-avatars.com/api/?background=134d64&color=fff&size=300&rounded=true&name=${encodeURIComponent(userData.username)}&bold=true&format=png` %>" />
 
     <!-- Additional SEO -->
     <meta name="robots" content="index, follow" />
