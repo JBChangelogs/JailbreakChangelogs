@@ -265,111 +265,126 @@ const shuffleArray = (array) => {
 let shuffledUsers = [];
 let avatarCache = new Map(); // Cache for avatar URLs
 
+// Modified shuffle logic to only shuffle first page
+const getInitialShuffledUsers = (users) => {
+  const firstPage = users.slice(0, USERS_PER_PAGE);
+  const shuffledFirstPage = shuffleArray(firstPage);
+  const restOfUsers = users.slice(USERS_PER_PAGE);
+  return [...shuffledFirstPage, ...restOfUsers];
+};
+
 // User Display Logic
 const displayUsers = async (users, page = 1) => {
-  // Only shuffle if this is a new search or initial load
-  if (users !== shuffledUsers) {
-    shuffledUsers = shuffleArray(users);
-    // Pre-cache avatars for new user set
-    const newUserAvatars = users.filter((user) => !avatarCache.has(user.id));
-    if (newUserAvatars.length > 0) {
-      const newAvatarPromises = newUserAvatars.map(async (user) => {
-        const avatarUrl = await window.checkAndSetAvatar(user);
-        avatarCache.set(user.id, avatarUrl);
-      });
-      await Promise.all(newAvatarPromises);
-    }
-  }
-
   const startIndex = (page - 1) * USERS_PER_PAGE;
   const endIndex = startIndex + USERS_PER_PAGE;
-  const usersToDisplay = shuffledUsers.slice(startIndex, endIndex);
+  const usersToDisplay = users.slice(startIndex, endIndex);
 
-  elements.usersGrid.innerHTML = `
-    ${messages.resultsCount(users.length, users !== allUsers)}
-    <div class="row g-4">
-      ${usersToDisplay
-        .map(
-          (user) => `
-        <div class="user-card-wrapper" onclick="window.location.href='/users/${
-          user.id
-        }'">
-          <div class="card user-card">
-            <div class="card-body">
-              <div class="user-info-container">
-                <img 
-                  src="${avatarCache.get(user.id)}"
-                  class="user-avatar rounded-circle" 
-                  alt="${user.username}"
-                  style="border-color: ${decimalToHex(user.accent_color)};"
-                  loading="lazy"
-                  onerror="this.src='${avatarCache.get(user.id)}'"
-                >
-                <div class="user-info">
-                  <h5 class="user-name text-truncate">${
-                    user.global_name === "None"
-                      ? user.username
-                      : user.global_name
-                  }</h5>
-                  <p class="user-username text-truncate">@${user.username}</p>
-                </div>
-              </div>
+  // Load avatars for current page if not already cached
+  const avatarPromises = usersToDisplay.map(async (user) => {
+    if (!avatarCache.has(user.id)) {
+      const avatarUrl = await window.checkAndSetAvatar(user);
+      avatarCache.set(user.id, avatarUrl);
+    }
+  });
+  await Promise.all(avatarPromises);
+
+  // Generate HTML for user cards
+  const userCardsHTML = usersToDisplay
+    .map(
+      (user) => `
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${
+      user.id
+    }'">
+      <div class="card user-card">
+        <div class="card-body">
+          <div class="user-info-container">
+            <img 
+              src="${avatarCache.get(user.id)}"
+              class="user-avatar rounded-circle" 
+              alt="${user.username}"
+              style="border-color: ${decimalToHex(user.accent_color)};"
+              loading="lazy"
+              onerror="this.src='${avatarCache.get(user.id)}'"
+            >
+            <div class="user-info">
+              <h5 class="user-name text-truncate">${
+                user.global_name === "None" ? user.username : user.global_name
+              }</h5>
+              <p class="user-username text-truncate">@${user.username}</p>
             </div>
           </div>
         </div>
-      `
-        )
-        .join("")}
+      </div>
     </div>
-    ${createPaginationControls(allUsers.length)}
+  `
+    )
+    .join("");
+
+  // Update DOM in a single operation
+  elements.usersGrid.innerHTML = `
+    ${messages.resultsCount(users.length, users !== allUsers)}
+    <div class="row g-4">
+      ${userCardsHTML}
+    </div>
+    ${createPaginationControls(users.length)}
   `;
 
+  // Preload next page avatars
+  const nextPageStart = endIndex;
+  const nextPageEnd = nextPageStart + USERS_PER_PAGE;
+  const nextPageUsers = users.slice(nextPageStart, nextPageEnd);
+
+  // Load next page avatars in the background
+  nextPageUsers.forEach(async (user) => {
+    if (!avatarCache.has(user.id)) {
+      const avatarUrl = await window.checkAndSetAvatar(user);
+      avatarCache.set(user.id, avatarUrl);
+    }
+  });
+
   // Add pagination event listeners
+  const paginationHandler = (e) => {
+    e.preventDefault();
+    const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+    let newPage = currentPage;
+
+    if (e.currentTarget.getAttribute("aria-label") === "Previous") {
+      if (currentPage > 1) newPage--;
+    } else if (e.currentTarget.getAttribute("aria-label") === "Next") {
+      if (currentPage < totalPages) newPage++;
+    } else {
+      newPage = parseInt(e.currentTarget.dataset.page);
+    }
+
+    if (newPage !== currentPage && newPage > 0 && newPage <= totalPages) {
+      currentPage = newPage;
+      displayUsers(users, currentPage);
+    }
+  };
+
   document.querySelectorAll(".pagination .page-link").forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
+    link.addEventListener("click", paginationHandler);
+  });
 
-      // Get the total number of pages
-      const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+  // Optimize page input handler
+  const pageInput = document.querySelector(".page-input");
+  if (pageInput) {
+    pageInput.value = currentPage;
+    pageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const newPage = parseInt(e.target.value);
+        const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
 
-      // Check if clicking on an arrow
-      if (e.currentTarget.getAttribute("aria-label") === "Previous") {
-        if (currentPage > 1) {
-          currentPage--;
-          displayUsers(users, currentPage);
-        }
-      } else if (e.currentTarget.getAttribute("aria-label") === "Next") {
-        if (currentPage < totalPages) {
-          currentPage++;
-          displayUsers(users, currentPage);
-        }
-      } else {
-        // Handle numbered page clicks
-        const newPage = parseInt(e.currentTarget.dataset.page);
-        if (!isNaN(newPage) && newPage > 0) {
+        if (newPage > 0 && newPage <= totalPages) {
           currentPage = newPage;
           displayUsers(users, currentPage);
+        } else {
+          e.target.value = currentPage;
         }
       }
     });
-  });
-
-  // Add page input listener
-  document.querySelector(".page-input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const newPage = parseInt(e.target.value);
-      const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
-
-      if (!isNaN(newPage) && newPage > 0 && newPage <= totalPages) {
-        currentPage = newPage;
-        displayUsers(users, currentPage);
-      } else {
-        // Reset to current page if invalid input
-        e.target.value = currentPage;
-      }
-    }
-  });
+  }
 };
 
 // API Functions
@@ -422,14 +437,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     allUsers = await response.json();
-    shuffledUsers = shuffleArray(allUsers); // Initial shuffle
+    shuffledUsers = getInitialShuffledUsers(allUsers); // Initial shuffle
 
-    // Pre-cache all avatar URLs on initial load
-    const avatarPromises = shuffledUsers.map(async (user) => {
-      const avatarUrl = await window.checkAndSetAvatar(user);
-      avatarCache.set(user.id, avatarUrl);
+    // Pre-cache first page avatars
+    const firstPageUsers = shuffledUsers.slice(0, USERS_PER_PAGE);
+    const avatarPromises = firstPageUsers.map(async (user) => {
+      if (!avatarCache.has(user.id)) {
+        const avatarUrl = await window.checkAndSetAvatar(user);
+        avatarCache.set(user.id, avatarUrl);
+      }
     });
     await Promise.all(avatarPromises);
+
+    // Start background loading of all other avatars
+    const backgroundLoad = async () => {
+      const remainingUsers = shuffledUsers.slice(USERS_PER_PAGE);
+      for (const user of remainingUsers) {
+        if (!avatarCache.has(user.id)) {
+          try {
+            const avatarUrl = await window.checkAndSetAvatar(user);
+            avatarCache.set(user.id, avatarUrl);
+          } catch (error) {
+            console.error(`Failed to load avatar for user ${user.id}:`, error);
+          }
+        }
+        // Small delay to prevent overwhelming the server
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    };
+    backgroundLoad(); // Start background loading
 
     // Update total users count
     const totalUsers = Math.max(...allUsers.map((user) => user.usernumber));
