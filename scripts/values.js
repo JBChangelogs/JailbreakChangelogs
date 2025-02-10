@@ -1028,7 +1028,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Furniture") color = "#9C6644";
 
     // Modify the mediaElement template - remove spinner and loading transitions
-    const mediaElement = `
+    let mediaElement = `
         <div class="media-container position-relative">
             ${favoriteIconHtml}
             ${
@@ -1044,6 +1044,20 @@ document.addEventListener("DOMContentLoaded", () => {
                   }.webp" class="card-img-top" alt="${item.name}">`
             }
         </div>`;
+
+    // Case for HyperShift inside createItemCard function
+    if (item.name === "HyperShift" && item.type === "HyperChrome") {
+      mediaElement = `
+        <div class="media-container position-relative">
+            ${favoriteIconHtml}
+            <img 
+                src="/assets/images/items/hyperchromes/HyperShift.gif"
+                class="card-img-top"
+                alt="${item.name}"
+                style="width: 100%; height: 100%; object-fit: contain;"
+            >
+        </div>`;
+    }
 
     // Format values
     const cashValue = formatValue(item.cash_value);

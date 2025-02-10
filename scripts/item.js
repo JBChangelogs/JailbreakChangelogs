@@ -206,17 +206,12 @@ async function loadSimilarItemsByName(searchName) {
                 ${
                   item.name === "HyperShift" && item.type === "HyperChrome"
                     ? `
-                    <video 
-                      src="/assets/images/items/hyperchromes/HyperShift.webm"
+                    <img 
+                      src="/assets/images/items/hyperchromes/HyperShift.gif"
                       class="card-img-top w-100 h-100"
                       style="object-fit: cover; transition: transform 0.3s ease;"
-                      playsinline 
-                      muted 
-                      loop
-                      autoplay
-                      defaultMuted
                       alt="${item.name}"
-                    ></video>
+                    >
                   `
                     : `
                     <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
@@ -748,18 +743,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       element = `
       <div class="media-container ${item.is_limited ? "limited-item" : ""}">
           <div class="skeleton-loader"></div>
-          <video 
-              src="/assets/images/items/hyperchromes/HyperShift.webm"
-              class="video-player card-img-top"
-              playsinline 
-              muted 
-              loop
-              autoplay
-              id="hypershift-video"
-              onloadeddata="this.parentElement.querySelector('.skeleton-loader').style.display='none'; this.style.opacity='1'"
+          <img 
+              src="/assets/images/items/hyperchromes/HyperShift.gif"
+              class="card-img-top"
+              onload="this.parentElement.querySelector('.skeleton-loader').style.display='none'; this.style.opacity='1'"
               onerror="handleimage(this)"
               style="width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease;"
-          ></video>
+              alt="HyperShift"
+          />
       </div>
   `;
     } else {
@@ -914,17 +905,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ${
                   item.name === "HyperShift" && item.type === "HyperChrome"
                     ? `
-                    <video 
-                      src="/assets/images/items/hyperchromes/HyperShift.webm"
+                    <img 
+                      src="/assets/images/items/hyperchromes/HyperShift.gif"
                       class="card-img-top" 
                       style="width: 100%; height: 100%; object-fit: cover;"
-                      playsinline 
-                      muted 
-                      loop
-                      autoplay
-                      defaultMuted
                       alt="${item.name}"
-                    ></video>
+                    />
                   `
                     : `
                     <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
@@ -1322,7 +1308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               </div>
               <button id="fullscreen" class="btn btn-secondary mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1-.5-.5zm-9.5 9a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
                 </svg>
                 Toggle Fullscreen
               </button>
