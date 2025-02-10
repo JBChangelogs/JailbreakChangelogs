@@ -81,21 +81,16 @@ const createPaginationControls = (totalUsers) => {
     // If 6 or fewer pages, show all
     pages = Array.from({ length: totalPages }, (_, i) => i + 1);
   } else {
-    // Always show first 3 and last 3 when current page is at edges
+    // Show different number of pages based on current page position
     if (currentPage <= 3) {
-      pages = [1, 2, 3, 4, 5, 6];
+      // Near start: show first 4 pages
+      pages = [1, 2, 3, 4];
     } else if (currentPage >= totalPages - 2) {
-      pages = Array.from({ length: 6 }, (_, i) => totalPages - 5 + i);
+      // Near end: show last 4 pages
+      pages = Array.from({ length: 4 }, (_, i) => totalPages - 3 + i);
     } else {
-      // Show 3 pages before and 3 after current page
-      pages = [
-        currentPage - 2,
-        currentPage - 1,
-        currentPage,
-        currentPage + 1,
-        currentPage + 2,
-        currentPage + 3,
-      ];
+      // Middle: show current page and surrounding pages
+      pages = [currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
     }
   }
 
@@ -109,12 +104,29 @@ const createPaginationControls = (totalUsers) => {
             currentPage - 1
           }" aria-label="Previous">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 7l-5 5l5 5" />
-</svg>
+              <rect width="24" height="24" fill="none" />
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 7l-5 5l5 5" />
+            </svg>
           </a>
         </li>
 
+        <!-- First page if not in first group -->
+        ${
+          currentPage > 3
+            ? `
+          <li class="page-item">
+            <a class="page-link" href="#" data-page="1">1</a>
+          </li>
+          ${
+            currentPage > 4
+              ? '<li class="page-item disabled"><span class="page-link">...</span></li>'
+              : ""
+          }
+        `
+            : ""
+        }
+
+        <!-- Main page numbers -->
         ${pages
           .map(
             (page) => `
@@ -133,7 +145,24 @@ const createPaginationControls = (totalUsers) => {
         `
           )
           .join("")}
-        
+
+        <!-- Last page if not in last group -->
+        ${
+          currentPage < totalPages - 2
+            ? `
+          ${
+            currentPage < totalPages - 3
+              ? '<li class="page-item disabled"><span class="page-link">...</span></li>'
+              : ""
+          }
+          <li class="page-item">
+            <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+          </li>
+        `
+            : ""
+        }
+
+        <!-- Page input -->
         <li class="page-item">
           <div class="page-input-container">
             <input type="number" 
@@ -154,10 +183,10 @@ const createPaginationControls = (totalUsers) => {
           <a class="page-link" href="#" data-page="${
             currentPage + 1
           }" aria-label="Next">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 7l5 5l-5 5" />
-</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <rect width="24" height="24" fill="none" />
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 7l5 5l-5 5" />
+            </svg>
           </a>
         </li>
       </ul>
@@ -232,26 +261,68 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
+// Shuffle once when users are first loaded
+let shuffledUsers = [];
+let avatarCache = new Map(); // Cache for avatar URLs
+
 // User Display Logic
 const displayUsers = async (users, page = 1) => {
-  // Shuffle the users array before pagination
-  const shuffledUsers = shuffleArray(users);
+  // Only shuffle if this is a new search or initial load
+  if (users !== shuffledUsers) {
+    shuffledUsers = shuffleArray(users);
+    // Pre-cache avatars for new user set
+    const newUserAvatars = users.filter((user) => !avatarCache.has(user.id));
+    if (newUserAvatars.length > 0) {
+      const newAvatarPromises = newUserAvatars.map(async (user) => {
+        const avatarUrl = await window.checkAndSetAvatar(user);
+        avatarCache.set(user.id, avatarUrl);
+      });
+      await Promise.all(newAvatarPromises);
+    }
+  }
 
   const startIndex = (page - 1) * USERS_PER_PAGE;
   const endIndex = startIndex + USERS_PER_PAGE;
   const usersToDisplay = shuffledUsers.slice(startIndex, endIndex);
 
-  const userCards = await Promise.all(
-    usersToDisplay.map((user) => createUserCard(user))
-  );
-
   elements.usersGrid.innerHTML = `
-  ${messages.resultsCount(users.length, users !== allUsers)}
-  <div class="row g-4">
-    ${userCards.join("")}
-  </div>
-  ${createPaginationControls(allUsers.length)}
-`;
+    ${messages.resultsCount(users.length, users !== allUsers)}
+    <div class="row g-4">
+      ${usersToDisplay
+        .map(
+          (user) => `
+        <div class="user-card-wrapper" onclick="window.location.href='/users/${
+          user.id
+        }'">
+          <div class="card user-card">
+            <div class="card-body">
+              <div class="user-info-container">
+                <img 
+                  src="${avatarCache.get(user.id)}"
+                  class="user-avatar rounded-circle" 
+                  alt="${user.username}"
+                  style="border-color: ${decimalToHex(user.accent_color)};"
+                  loading="lazy"
+                  onerror="this.src='${avatarCache.get(user.id)}'"
+                >
+                <div class="user-info">
+                  <h5 class="user-name text-truncate">${
+                    user.global_name === "None"
+                      ? user.username
+                      : user.global_name
+                  }</h5>
+                  <p class="user-username text-truncate">@${user.username}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+    ${createPaginationControls(allUsers.length)}
+  `;
 
   // Add pagination event listeners
   document.querySelectorAll(".pagination .page-link").forEach((link) => {
@@ -350,18 +421,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-    const users = await response.json();
-    allUsers = users; // Store globally for later use
+    allUsers = await response.json();
+    shuffledUsers = shuffleArray(allUsers); // Initial shuffle
+
+    // Pre-cache all avatar URLs on initial load
+    const avatarPromises = shuffledUsers.map(async (user) => {
+      const avatarUrl = await window.checkAndSetAvatar(user);
+      avatarCache.set(user.id, avatarUrl);
+    });
+    await Promise.all(avatarPromises);
 
     // Update total users count
-    const totalUsers = Math.max(...users.map((user) => user.usernumber));
+    const totalUsers = Math.max(...allUsers.map((user) => user.usernumber));
     elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
 	<rect width="16" height="16" fill="none" />
 	<path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
 </svg> Total Users: ${totalUsers.toLocaleString()}`;
 
     // Display initial user cards
-    await displayUsers(users, 1);
+    await displayUsers(shuffledUsers, 1);
     hideLoading();
   } catch (error) {
     console.error("Error loading users:", error);

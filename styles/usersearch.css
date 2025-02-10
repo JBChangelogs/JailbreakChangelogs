@@ -413,6 +413,26 @@ h1.display-5 {
     font-size: 0.9rem;
   }
 
+  /* Show more page numbers on mobile */
+  .pagination .page-item {
+    display: block !important;
+  }
+
+  /* Make ellipsis more compact */
+  .pagination .page-item.disabled .page-link {
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Ensure input and "of X" text stay visible */
+  .pagination .page-item:has(.page-input),
+  .pagination .page-item:has(.page-text) {
+    display: block !important;
+  }
+
+  .page-text {
+    font-size: 0.9rem;
+  }
+
   /* Hide some page numbers on mobile */
   .pagination .page-item:not(:first-child):not(:last-child):not(.active) {
     display: none;
@@ -423,8 +443,7 @@ h1.display-5 {
   .pagination .page-item:has(.page-text) {
     display: block !important;
   }
-
-  .page-text {
+  z .page-text {
     font-size: 0.9rem;
   }
 
