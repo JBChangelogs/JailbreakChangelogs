@@ -64,6 +64,30 @@ app.use(
 
 app.use(cookieParser());
 
+app.get("/proxy", async (req, res) => {
+  const url = req.query.url;
+  if (!url) {
+    return res.status(400).json({ error: "URL query parameter is required" });
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return res
+        .status(response.status)
+        .json({ error: "Failed to fetch the URL" });
+    }
+
+    // Set the same content type as the fetched resource
+    res.setHeader("Content-Type", response.headers.get("content-type"));
+
+    // Pipe the response stream directly to the client
+    response.body.pipe(res);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch the URL" });
+  }
+});
+
 app.get("/trade-data", async (req, res) => {
   try {
     // Fetch data from the external API
