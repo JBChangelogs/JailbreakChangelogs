@@ -1085,6 +1085,17 @@ app.get("/redeem", (req, res) => {
   });
 });
 
+app.get("/dupes", (req, res) => {
+  res.render("dupes", {
+    title: "Find Duped Items / Changelogs",
+    logoUrl:
+      "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+    logoAlt: "Dupes Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
+});
+
 app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 12) + 1;
   const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
