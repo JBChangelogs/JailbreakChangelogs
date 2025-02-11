@@ -424,7 +424,7 @@
 .username-clear {
   position: absolute;
   right: 0.75rem;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   background: none;
   border: none;
