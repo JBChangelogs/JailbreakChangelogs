@@ -37,6 +37,13 @@ function displayDupes(dupes, append = false) {
   const startIndex = currentPage * ITEMS_PER_PAGE;
   let displayDupes = [...dupes];
 
+  // Hide load more button if total items are 50 or less
+  const loadMoreBtn = document.getElementById("loadMore");
+  if (loadMoreBtn) {
+    loadMoreBtn.style.display =
+      dupes.length <= ITEMS_PER_PAGE ? "none" : "block";
+  }
+
   if (isReversed) {
     displayDupes = displayDupes
       .slice(startIndex, startIndex + ITEMS_PER_PAGE)
@@ -336,10 +343,10 @@ function loadMore() {
   currentPage++;
   const start = currentPage * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
-  const moreDupes = filteredDupes.slice(start, end);
 
-  displayDupes(moreDupes, true);
+  displayDupes(filteredDupes, true);
 
+  // Hide load more button if we've displayed all items
   if (end >= filteredDupes.length) {
     document.getElementById("loadMore").style.display = "none";
   }

@@ -502,9 +502,9 @@
 }
 
 .load-more-button {
-  background: transparent;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
+  /* border: 2px solid var(--accent-color); */
+  background: var(--accent-color);
+  color: var(--text-primary);
   padding: 0.75rem 2rem;
   border-radius: 24px;
   font-weight: 500;
@@ -513,7 +513,7 @@
 }
 
 .load-more-button:hover {
-  background: var(--accent-color);
+  background: var(--accent-color-light);
   color: var(--text-primary);
 }
 
