@@ -260,20 +260,23 @@
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s ease;
+  align-items: center;
 }
 
 .search-input-wrapper:focus-within {
   border-color: var(--accent-color-light);
   box-shadow: 0 0 0 4px rgba(18, 78, 102, 0.1);
+  background: var(--bg-secondary);
 }
 
 .search-input {
   flex: 1;
   padding: 1rem 1.5rem;
-  background: transparent;
-  border: none;
+  background: var(--bg-primary) !important;
+  border: none !important;
   color: var(--text-primary);
   font-size: 1.1rem;
+  outline: none !important;
 }
 .search-input::placeholder {
   color: var(--text-muted);
@@ -283,6 +286,9 @@
   display: flex;
   align-items: center;
   padding-right: 0.5rem;
+  height: 100%;
+  border-left: none;
+  background: transparent;
 }
 
 .search-button,
@@ -526,14 +532,25 @@
 }
 
 .loading-spinner {
-  position: relative; /* Added */
   width: 40px;
   height: 40px;
   border: 3px solid var(--accent-color);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: auto; /* Added */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 /* Result item card styles */

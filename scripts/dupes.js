@@ -175,8 +175,13 @@ function updateItemStats(dupes, filteredUsername = "") {
   }
 }
 
-// Add function to handle share button click
+// Update handleShare function
 function handleShare(item) {
+  if (!item || !item.name) {
+    notyf.info("Please search for an item first to get its share link");
+    return;
+  }
+
   const baseUrl = window.location.origin + window.location.pathname;
   const shareUrl = `${baseUrl}?item=${encodeURIComponent(
     item.name
