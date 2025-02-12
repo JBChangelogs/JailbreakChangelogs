@@ -45,20 +45,22 @@ const messages = {
       </div>
     </div>
   `,
-  resultsCount: (count, isSearch = false) => `
-  <div class="mb-3 text-center">
-    <span class="badge bg-primary">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
-</svg>
-      ${
-        isSearch ? count : Math.max(...allUsers.map((user) => user.usernumber))
-      } users found
-    </span>
-  </div>
-`,
-
+  resultsCount: (count, isSearch = false) => {
+    const highestUserNumber = Math.max(
+      ...allUsers.map((user) => user.usernumber)
+    );
+    return `
+      <div class="mb-3 text-center">
+        <span class="badge bg-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
+          </svg>
+          ${highestUserNumber} users found
+        </span>
+      </div>
+    `;
+  },
   error: `
     <div class="col-12 text-center py-5">
       <div class="no-results-message text-muted">
@@ -322,7 +324,7 @@ const displayUsers = async (users, page = 1) => {
 
   // Update DOM in a single operation
   elements.usersGrid.innerHTML = `
-    ${messages.resultsCount(users.length, users !== allUsers)}
+    ${messages.resultsCount(users.length)}
     <div class="row g-4">
       ${userCardsHTML}
     </div>
@@ -402,6 +404,13 @@ const searchUsers = (searchTerm) => {
 const handleSearch = async () => {
   const searchTerm = elements.searchInput.value.trim();
 
+  if (!searchTerm) {
+    // If search is empty, show all users with total count
+    await displayUsers(allUsers, 1);
+    hideLoading();
+    return;
+  }
+
   showLoading();
   const searchTermLower = searchTerm.toLowerCase();
 
@@ -415,7 +424,31 @@ const handleSearch = async () => {
   if (filteredUsers.length === 0) {
     showMessage(messages.noUsers);
   } else {
-    await displayUsers(filteredUsers, 1);
+    // Show search results with "X of Y users found" format
+    const highestUserNumber = Math.max(
+      ...allUsers.map((user) => user.usernumber)
+    );
+    const userCardsHTML = await Promise.all(
+      filteredUsers
+        .slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE)
+        .map((user) => createUserCard(user))
+    );
+
+    elements.usersGrid.innerHTML = `
+      <div class="mb-3 text-center">
+        <span class="badge bg-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <rect width="16" height="16" fill="none" />
+            <path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
+          </svg>
+          ${filteredUsers.length} of ${highestUserNumber} users found
+        </span>
+      </div>
+      <div class="row g-4">
+        ${userCardsHTML.join("")}
+      </div>
+      ${createPaginationControls(filteredUsers.length)}
+    `;
     hideLoading();
   }
 };
@@ -437,6 +470,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     allUsers = await response.json();
+    const highestUserNumber = Math.max(
+      ...allUsers.map((user) => user.usernumber)
+    );
+
+    // Update total users count
+    elements.totalUsersCount.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="none" />
+        <path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
+      </svg> 
+      Total Users: ${highestUserNumber.toLocaleString()}
+    `;
+
     shuffledUsers = getInitialShuffledUsers(allUsers); // Initial shuffle
 
     // Pre-cache first page avatars
@@ -467,12 +513,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     backgroundLoad(); // Start background loading
 
-    // Update total users count
-    const totalUsers = Math.max(...allUsers.map((user) => user.usernumber));
-    elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
-</svg> Total Users: ${totalUsers.toLocaleString()}`;
+    // Update total users count using highest usernumber
+
+    elements.totalUsersCount.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="none" />
+        <path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
+      </svg> 
+      Total Users: ${highestUserNumber.toLocaleString()}
+    `;
 
     // Display initial user cards
     await displayUsers(shuffledUsers, 1);
