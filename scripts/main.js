@@ -503,6 +503,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user = localStorage.getItem("user");
 
   function clearSessionAndReload() {
+    console.log("[Debug] Clearing session and reloading...");
+    console.log("[Debug] Previous state:", {
+      globalUserData,
+      avatar: localStorage.getItem("avatar"),
+      user: localStorage.getItem("user"),
+      userid: localStorage.getItem("userid"),
+      token: Cookies.get("token"),
+    });
+
     globalUserData = null;
     localStorage.removeItem("avatar");
     localStorage.removeItem("user");
@@ -513,6 +522,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       secure: true,
       sameSite: "Strict",
     });
+    console.log("[Debug] Session cleared, reloading page");
     window.location.reload();
   }
 
@@ -852,20 +862,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   window.logout = function () {
-    // Remove auth-related data from localStorage
+    console.log("[Debug] User initiated logout");
+    console.log("[Debug] Previous state:", {
+      user: localStorage.getItem("user"),
+      avatar: localStorage.getItem("avatar"),
+      userid: localStorage.getItem("userid"),
+      token: Cookies.get("token"),
+    });
+
     localStorage.removeItem("user");
     localStorage.removeItem("avatar");
     localStorage.removeItem("userid");
     localStorage.removeItem("showWelcome");
 
-    // Remove token cookie
     Cookies.remove("token", {
       path: "/",
       secure: true,
       sameSite: "Strict",
     });
 
-    // Reload current page instead of redirecting
+    console.log("[Debug] Logout complete, reloading page");
     window.location.reload();
   };
 });

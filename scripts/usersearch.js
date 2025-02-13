@@ -405,7 +405,6 @@ const handleSearch = async () => {
   const searchTerm = elements.searchInput.value.trim();
 
   if (!searchTerm) {
-    // If search is empty, show all users with total count
     await displayUsers(allUsers, 1);
     hideLoading();
     return;
@@ -414,48 +413,28 @@ const handleSearch = async () => {
   showLoading();
   const searchTermLower = searchTerm.toLowerCase();
 
-  const filteredUsers = allUsers.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchTermLower) ||
-      (user.global_name &&
-        user.global_name.toLowerCase().includes(searchTermLower))
-  );
+  const filteredUsers = allUsers.filter((user) => {
+    const usernameMatch = user.username.toLowerCase().includes(searchTermLower);
+    const globalNameMatch =
+      user.global_name &&
+      user.global_name.toLowerCase().includes(searchTermLower);
+    return usernameMatch || globalNameMatch;
+  });
 
   if (filteredUsers.length === 0) {
     showMessage(messages.noUsers);
   } else {
-    // Show search results with "X of Y users found" format
-    const highestUserNumber = Math.max(
-      ...allUsers.map((user) => user.usernumber)
-    );
-    const userCardsHTML = await Promise.all(
-      filteredUsers
-        .slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE)
-        .map((user) => createUserCard(user))
-    );
-
-    elements.usersGrid.innerHTML = `
-      <div class="mb-3 text-center">
-        <span class="badge bg-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
-          </svg>
-          ${filteredUsers.length} of ${highestUserNumber} users found
-        </span>
-      </div>
-      <div class="row g-4">
-        ${userCardsHTML.join("")}
-      </div>
-      ${createPaginationControls(filteredUsers.length)}
-    `;
+    await displayUsers(filteredUsers, 1);
     hideLoading();
   }
 };
 
-// Modify the DOMContentLoaded event listener to this:
 document.addEventListener("DOMContentLoaded", async () => {
-  // Initial load - fetch users once and use for everything
+  let searchInputValue = elements.searchInput.value.trim();
+
+  // Show clear button if there's an initial search term
+  elements.clearButton.style.display = searchInputValue ? "block" : "none";
+
   showLoading();
   try {
     const response = await fetch(`${API_BASE_URL}/users/list`);
@@ -470,6 +449,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     allUsers = await response.json();
+
     const highestUserNumber = Math.max(
       ...allUsers.map((user) => user.usernumber)
     );
@@ -523,11 +503,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       Total Users: ${highestUserNumber.toLocaleString()}
     `;
 
-    // Display initial user cards
-    await displayUsers(shuffledUsers, 1);
+    // Important: Check if search input has changed during loading
+    const currentSearchTerm = elements.searchInput.value.trim();
+    if (currentSearchTerm !== searchInputValue) {
+      searchInputValue = currentSearchTerm;
+      // Update clear button visibility for the new search term
+      elements.clearButton.style.display = currentSearchTerm ? "block" : "none";
+    }
+
+    // Check if there was an initial search term
+    if (searchInputValue) {
+      const searchTermLower = searchInputValue.toLowerCase();
+
+      const filteredUsers = allUsers.filter((user) => {
+        const usernameMatch = user.username
+          .toLowerCase()
+          .includes(searchTermLower);
+        const globalNameMatch =
+          user.global_name &&
+          user.global_name.toLowerCase().includes(searchTermLower);
+        return usernameMatch || globalNameMatch;
+      });
+
+      if (filteredUsers.length === 0) {
+        showMessage(messages.noUsers);
+      } else {
+        await displayUsers(filteredUsers, 1);
+      }
+    } else {
+      await displayUsers(shuffledUsers, 1);
+    }
+
     hideLoading();
   } catch (error) {
-    console.error("Error loading users:", error);
+    console.error("Error in initialization:", error);
     showMessage(messages.error);
     elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />

@@ -185,6 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .value.toLowerCase();
     const searchBar = document.getElementById("search-bar");
     const sortValue = document.getElementById("sort-dropdown").value;
+    const valueSortType = document.getElementById("value-sort-dropdown").value;
 
     const itemsContainer = document.querySelector("#items-container");
     const searchMessages = document.getElementById("search-messages");
@@ -196,7 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("searchTerm");
     }
 
-    // Remove any existing feedback messages
     if (searchMessages) {
       searchMessages.innerHTML = "";
     }
@@ -207,82 +207,98 @@ document.addEventListener("DOMContentLoaded", () => {
       const parts = sortValue.split("-");
       const itemType = parts.slice(1).join("-");
       categoryFilteredItems = allItems.filter((item) => {
-        // Special handling for limited items
         if (itemType === "limited-items") {
           return item.is_limited;
         }
-        // Regular category filtering
         const normalizedItemType = item.type.toLowerCase().replace(" ", "-");
         const normalizedFilterType = itemType.slice(0, -1);
         return normalizedItemType === normalizedFilterType;
       });
     }
 
-    if (searchTerm.length === 0) {
+    // Apply search filter
+    if (searchTerm.length > 0) {
+      filteredItems = categoryFilteredItems.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm)
+      );
+    } else {
       filteredItems = categoryFilteredItems;
-      searchBar.classList.remove("is-invalid");
-
-      // Get current value sort type
-      const valueSortDropdown = document.getElementById("value-sort-dropdown");
-      const valueSortType = valueSortDropdown?.value || "cash-desc";
-
-      // Apply the current sort
-      if (valueSortType === "random") {
-        filteredItems = shuffleArray([...filteredItems]);
-      } else if (valueSortType === "cash-desc") {
-        filteredItems.sort((a, b) => {
-          const valueA = formatValue(a.cash_value).numeric;
-          const valueB = formatValue(b.cash_value).numeric;
-          return valueB - valueA;
-        });
-      } else if (valueSortType === "alpha-desc") {
-        filteredItems.sort((a, b) => b.name.localeCompare(a.name));
-      }
-
-      let itemsRow = itemsContainer.querySelector(".row");
-      if (!itemsRow) {
-        itemsRow = document.createElement("div");
-        itemsRow.classList.add("row");
-        itemsContainer.appendChild(itemsRow);
-      }
-      const itemType = sortValue.split("-").slice(1).join("-");
-      updateTotalItemsLabel(itemType);
-
-      currentPage = 1;
-      displayItems();
-      updateTotalItemsCount(); // Make sure count is updated
-      return;
     }
 
-    // Check if current category is Rims
-    const isRimsCategory = sortValue === "name-rims";
-    const minCharacters = isRimsCategory ? 1 : 1;
+    // Apply the current sort after filtering
+    if (valueSortType === "random") {
+      filteredItems = shuffleArray([...filteredItems]);
+    } else if (valueSortType.startsWith("cash-")) {
+      filteredItems.sort((a, b) => {
+        const valueA = formatValue(a.cash_value).numeric;
+        const valueB = formatValue(b.cash_value).numeric;
+        return valueSortType === "cash-asc" ? valueA - valueB : valueB - valueA;
+      });
+    } else if (valueSortType.startsWith("duped-")) {
+      filteredItems.sort((a, b) => {
+        const valueA = formatValue(a.duped_value).numeric;
+        const valueB = formatValue(b.duped_value).numeric;
+        return valueSortType === "duped-asc"
+          ? valueA - valueB
+          : valueB - valueA;
+      });
+    } else if (valueSortType.startsWith("alpha-")) {
+      filteredItems.sort((a, b) => {
+        return valueSortType === "alpha-asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      });
+    } else if (valueSortType.startsWith("demand-")) {
+      const demandOrder = [
+        "Close to none",
+        "Very Low",
+        "Low",
+        "Medium",
+        "Decent",
+        "High",
+        "Very High",
+      ];
+      filteredItems.sort((a, b) => {
+        let demandA = a.demand === "N/A" ? "-" : a.demand || "-";
+        let demandB = b.demand === "N/A" ? "-" : b.demand || "-";
 
-    if (searchTerm.length < minCharacters) {
-      if (searchMessages) {
-        searchMessages.innerHTML = `
-                <div class="search-feedback">
-                    Please enter at least ${minCharacters} character${
-          minCharacters > 1 ? "s" : ""
-        } to search
-                </div>
-            `;
-      }
-      return;
+        if (demandA === "-" && demandB === "-") return 0;
+        if (demandA === "-") return 1;
+        if (demandB === "-") return -1;
+
+        const indexA = demandOrder.findIndex(
+          (d) => d.toLowerCase() === demandA.toLowerCase()
+        );
+        const indexB = demandOrder.findIndex(
+          (d) => d.toLowerCase() === demandB.toLowerCase()
+        );
+
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+
+        return valueSortType === "demand-asc"
+          ? indexA - indexB
+          : indexB - indexA;
+      });
+    } else if (valueSortType.startsWith("last-updated-")) {
+      filteredItems.sort((a, b) => {
+        if (!a.last_updated && !b.last_updated) return 0;
+        if (!a.last_updated) return 1;
+        if (!b.last_updated) return -1;
+
+        return valueSortType === "last-updated-asc"
+          ? a.last_updated - b.last_updated
+          : b.last_updated - a.last_updated;
+      });
     }
 
-    searchBar.classList.remove("is-invalid");
-    filteredItems = categoryFilteredItems.filter((item) =>
-      item.name.toLowerCase().includes(searchTerm)
-    );
-
-    // Important: Update the total items count and label AFTER filtering
+    // Update UI
     const itemType = sortValue.split("-").slice(1).join("-");
     updateTotalItemsLabel(itemType);
     updateTotalItemsCount();
 
-    // No results message if no items found
-    if (filteredItems.length === 0) {
+    // Display no results message if needed
+    if (filteredItems.length === 0 && searchTerm.length > 0) {
       let itemsRow = itemsContainer.querySelector(".row");
       if (!itemsRow) {
         itemsRow = document.createElement("div");
@@ -290,12 +306,9 @@ document.addEventListener("DOMContentLoaded", () => {
         itemsContainer.appendChild(itemsRow);
       }
 
-      const sortValue = document.getElementById("sort-dropdown").value;
-      const categoryParts = sortValue.split("-");
-      const categoryName = categoryParts.slice(1).join(" ");
       const categoryMessage =
         sortValue !== "name-all-items"
-          ? ` under category "${categoryName.replace(/-/g, " ")}"`
+          ? ` under category "${itemType.replace(/-/g, " ")}"`
           : "";
 
       itemsRow.innerHTML = `
@@ -311,7 +324,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentPage = 1;
     displayItems();
-    // updateTotalItemsCount();
   }, 300);
 
   const itemsContainer = document.querySelector("#items-container");
