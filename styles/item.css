@@ -970,3 +970,37 @@ body {
   background: linear-gradient(transparent, var(--bg-primary));
   pointer-events: none;
 }
+
+/* Favorites badge styling */
+.favorites-badge {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 8px 12px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 20px !important;
+  transition: all 0.2s ease !important;
+}
+
+.favorites-badge svg {
+  transition: transform 0.2s ease;
+}
+
+.favorites-badge:hover svg {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments for favorites badge */
+@media (max-width: 768px) {
+  .favorites-badge {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .favorites-badge svg {
+    width: 14px;
+    height: 14px;
+  }
+}

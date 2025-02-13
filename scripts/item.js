@@ -342,6 +342,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadItemDetails() {
     showLoadingOverlay();
 
+    function handleCommentScroll() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("comments")) {
+        // Wait for content to load
+        setTimeout(() => {
+          const commentsSection = document.querySelector(".comment-container");
+          if (commentsSection) {
+            const offset = 30; // 30px offset from the top
+            const elementPosition = commentsSection.getBoundingClientRect().top;
+            const offsetPosition =
+              elementPosition + window.pageYOffset - offset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+
+            // Clean up URL
+            const url = window.location.pathname;
+            window.history.replaceState({}, "", url);
+          }
+        }, 1000); // Wait for content to render
+      }
+    }
+
     try {
       const urlPath = window.location.pathname.split("/");
       const urlType = urlPath[2];
@@ -377,6 +402,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         throw new Error("Invalid item data received");
       }
+
+      handleCommentScroll();
     } catch (error) {
       console.error("Error fetching data:", error);
       showErrorMessage(
@@ -1401,6 +1428,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                                       ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
                                       : ""
                                   }
+                                  <span class="badge favorites-badge" style="background-color: #ffea005f; display: flex; align-items: center; gap: 4px;">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512">
+                                      <rect width="512" height="512" fill="none" />
+                                      <path fill="#ffb636" d="m252.5 381l-128 49c-5.9 2.2-12.1-2.3-11.8-8.6l7-136.9c.1-2.1-.6-4.2-1.9-5.9L31.6 172c-4-4.9-1.6-12.2 4.5-13.9l132.4-35.6c2.1-.6 3.9-1.9 5-3.7L248.3 4c3.4-5.3 11.2-5.3 14.6 0l74.8 114.9c1.2 1.8 3 3.1 5 3.7l132.4 35.6c6.1 1.6 8.5 9 4.5 13.9l-86.1 106.6c-1.3 1.7-2 3.8-1.9 5.9l7 136.9c.3 6.3-5.9 10.8-11.8 8.6l-128-49c-2.1-.8-4.3-.8-6.3-.1" />
+                                      <path fill="#ffd469" d="m456.1 51.7l-41-41c-1.2-1.2-2.8-1.7-4.4-1.5s-3.1 1.2-3.9 2.6l-42.3 83.3c-1.2 2.1-.8 4.6.9 6.3c1 1 2.4 1.5 3.7 1.5c.9 0 1.8-.2 2.6-.7L454.9 60c1.4-.8 2.4-2.2 2.6-3.9c.3-1.6-.3-3.2-1.4-4.4m-307 43.5l-42.3-83.3c-.8-1.4-2.2-2.4-3.9-2.6c-1.6-.2-3.3.3-4.4 1.5l-41 41c-1.2 1.2-1.7 2.8-1.5 4.4s1.2 3.1 2.6 3.9l83.3 42.3c.8.5 1.7.7 2.6.7c1.4 0 2.7-.5 3.7-1.5c1.7-1.8 2-4.4.9-6.4m140.7 410l-29-88.8c-.2-.9-.7-1.7-1.3-2.3c-1-1-2.3-1.5-3.7-1.5c-2.4 0-4.4 1.6-5.1 3.9l-29 88.8c-.4 1.6-.1 3.3.9 4.6s2.5 2.1 4.2 2.1h57.9c1.6 0 3.2-.8 4.2-2.1c1.1-1.4 1.4-3.1.9-4.7" />
+                                    </svg>
+                                    <span id="favorites-count">0</span>
+                                  </span>
                               </div>
                           </div>
                            ${
@@ -1884,6 +1919,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     loadSimilarItems(item);
+
+    function formatFavoritesCount(count) {
+      if (count >= 1000000) {
+        return (count / 1000000).toFixed(1) + "M";
+      } else if (count >= 1000) {
+        return (count / 1000).toFixed(1) + "K";
+      }
+      return count.toString();
+    }
+
+    // Fetch favorites count
+    fetch(`https://api3.jailbreakchangelogs.xyz/item/favorites?id=${item.id}`)
+      .then((response) => response.json())
+      .then((count) => {
+        const favoritesCount = document.getElementById("favorites-count");
+        if (favoritesCount) {
+          favoritesCount.textContent = formatFavoritesCount(count);
+        }
+      })
+      .catch((error) => console.error("Error fetching favorites:", error));
   }
 
   function showErrorMessage(message) {
