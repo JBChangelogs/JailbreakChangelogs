@@ -1,4 +1,4 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   const apiUrl = "https://api3.jailbreakchangelogs.xyz/changelogs/list";
   const imageElement = document.getElementById("sidebarImage");
   const sectionsElement = document.getElementById("content");
@@ -17,9 +17,9 @@ $(document).ready(function () {
     document.getElementById("dateFilterModal")
   );
 
-  // jQuery references for search results and navbar
-  const $searchResultsContainer = $("#search-results");
-  const $navbarCollapse = $("#navbarContent");
+  // Native references for search results and navbar
+  const searchResultsContainer = document.querySelector("#search-results");
+  const navbarCollapse = document.querySelector("#navbarContent");
   const debounceLatestChangelog = (function () {
     let timeoutId = null;
     const delay = 4700; // Same as random changelog delay for consistency
@@ -62,55 +62,59 @@ $(document).ready(function () {
       breadcrumbHtml;
   }
 
-  $("#latestChangelogBtn, #latestChangelogMobileBtn").on("click", function () {
-    const $btn = $(this);
+  document
+    .querySelector("#latestChangelogBtn, #latestChangelogMobileBtn")
+    .addEventListener("click", function () {
+      const btn = this;
 
-    // Check if button is already disabled
-    if ($btn.prop("disabled")) {
-      return;
-    }
-
-    debounceLatestChangelog(() => {
-      if (changelogsData && changelogsData.length > 0) {
-        const latestChangelog = changelogsData[0];
-        const currentChangelogId = parseInt(
-          window.location.pathname.split("/").pop()
-        );
-
-        // Only proceed if we're not already on the latest changelog
-        if (currentChangelogId !== latestChangelog.id) {
-          const newUrl = `/changelogs/${latestChangelog.id}`;
-          history.pushState({}, "", newUrl);
-          displayChangelog(latestChangelog);
-          updateChangelogBreadcrumb(latestChangelog.id);
-
-          if (window.commentsManagerInstance) {
-            window.commentsManagerInstance.clearComments();
-            window.commentsManagerInstance.type = "changelog";
-            window.commentsManagerInstance.itemId = latestChangelog.id;
-            window.commentsManagerInstance.loadComments();
-          }
-
-          changelogToast("Showing latest changelog");
-        }
+      // Check if button is already disabled
+      if (btn.disabled) {
+        return;
       }
-    });
-    // Add visual feedback by disabling the button temporarily
-    $btn.prop("disabled", true).addClass("disabled");
 
-    // Re-enable the button after the delay
-    setTimeout(() => {
-      $btn.prop("disabled", false).removeClass("disabled");
-    }, 4700);
-  });
+      debounceLatestChangelog(() => {
+        if (changelogsData && changelogsData.length > 0) {
+          const latestChangelog = changelogsData[0];
+          const currentChangelogId = parseInt(
+            window.location.pathname.split("/").pop()
+          );
+
+          // Only proceed if we're not already on the latest changelog
+          if (currentChangelogId !== latestChangelog.id) {
+            const newUrl = `/changelogs/${latestChangelog.id}`;
+            history.pushState({}, "", newUrl);
+            displayChangelog(latestChangelog);
+            updateChangelogBreadcrumb(latestChangelog.id);
+
+            if (window.commentsManagerInstance) {
+              window.commentsManagerInstance.clearComments();
+              window.commentsManagerInstance.type = "changelog";
+              window.commentsManagerInstance.itemId = latestChangelog.id;
+              window.commentsManagerInstance.loadComments();
+            }
+
+            changelogToast("Showing latest changelog");
+          }
+        }
+      });
+      // Add visual feedback by disabling the button temporarily
+      btn.disabled = true;
+      btn.classList.add("disabled");
+
+      // Re-enable the button after the delay
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      }, 4700);
+    });
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
-    $("#loading-overlay").addClass("show");
+    document.querySelector("#loading-overlay").classList.add("show");
   }
 
   function hideLoadingOverlay() {
-    $("#loading-overlay").removeClass("show");
+    document.querySelector("#loading-overlay").classList.remove("show");
   }
 
   showLoadingOverlay();
@@ -296,13 +300,17 @@ $(document).ready(function () {
 
   /// Function to populate the changelog dropdowns for mobile and desktop
   function populateChangelogDropdown(changelogs, buttonText) {
-    const $mobileDropdown = $("#mobileChangelogList");
-    const $desktopDropdown = $("#desktopChangelogList");
-    const $mobileDropdownButton = $("#mobileChangelogDropdown");
-    const $desktopDropdownButton = $("#desktopChangelogDropdown");
+    const mobileDropdown = document.querySelector("#mobileChangelogList");
+    const desktopDropdown = document.querySelector("#desktopChangelogList");
+    const mobileDropdownButton = document.querySelector(
+      "#mobileChangelogDropdown"
+    );
+    const desktopDropdownButton = document.querySelector(
+      "#desktopChangelogDropdown"
+    );
 
-    $mobileDropdown.empty();
-    $desktopDropdown.empty();
+    mobileDropdown.innerHTML = "";
+    desktopDropdown.innerHTML = "";
 
     if (changelogs.length === 0) {
       const noDataItem = `
@@ -310,14 +318,12 @@ $(document).ready(function () {
           <span class="dropdown-item-text">No data for selected dates</span>
       </li>
     `;
-      $mobileDropdown.append(noDataItem);
-      $desktopDropdown.append(noDataItem);
-      $mobileDropdownButton.html(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates'
-      );
-      $desktopDropdownButton.html(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates'
-      );
+      mobileDropdown.innerHTML = noDataItem;
+      desktopDropdown.innerHTML = noDataItem;
+      mobileDropdownButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates';
+      desktopDropdownButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>No data for selected dates';
     } else {
       const sortedChangelogs = changelogs.sort((a, b) => b.id - a.id);
 
@@ -325,46 +331,50 @@ $(document).ready(function () {
         const fullTitle = changelog.title;
         const truncatedTitle = truncateText(fullTitle, 37);
 
-        $mobileDropdown.append(`
+        mobileDropdown.innerHTML += `
         <li class="w-100">
             <a class="dropdown-item changelog-dropdown-item w-100" href="?changelog=${changelog.id}" data-changelog-id="${changelog.id}" title="${fullTitle}">
                 <span class="changelog-title">${truncatedTitle}</span>
             </a>
         </li>
-      `);
+      `;
 
-        $desktopDropdown.append(`
+        desktopDropdown.innerHTML += `
         <li class="w-100">
             <a class="dropdown-item changelog-dropdown-item w-100" href="?changelog=${changelog.id}" data-changelog-id="${changelog.id}">
                 <span class="changelog-title">${fullTitle}</span>
             </a>
         </li>
-      `);
+      `;
       });
 
       // Update the dropdown button text
       if (buttonText) {
         const iconHtml =
           '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="me-2"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2zM4 9v10h16V9zm2 4h5v4H6z" /></svg>';
-        $mobileDropdownButton.html(`${iconHtml}${buttonText}`);
-        $desktopDropdownButton.html(`${iconHtml}${buttonText}`);
+        mobileDropdownButton.innerHTML = `${iconHtml}${buttonText}`;
+        desktopDropdownButton.innerHTML = `${iconHtml}${buttonText}`;
       }
 
       // Add click event handlers for the dropdown items
-      $(".changelog-dropdown-item").on("click", function (e) {
-        e.preventDefault();
-        const changelogId = $(this).data("changelog-id");
+      document.querySelectorAll(".changelog-dropdown-item").forEach((item) => {
+        item.addEventListener("click", function (e) {
+          e.preventDefault();
+          const changelogId = this.dataset.changelogId;
 
-        // Update the URL without reloading the page
-        const newUrl = `/changelogs/${changelogId}`;
-        history.pushState({}, "", newUrl);
+          // Update the URL without reloading the page
+          const newUrl = `/changelogs/${changelogId}`;
+          history.pushState({}, "", newUrl);
 
-        // Find the selected changelog
-        const selectedChangelog = changelogs.find((cl) => cl.id == changelogId);
-        if (selectedChangelog) {
-          displayChangelog(selectedChangelog);
-          updateChangelogBreadcrumb(changelogId);
-        }
+          // Find the selected changelog
+          const selectedChangelog = changelogs.find(
+            (cl) => cl.id == changelogId
+          );
+          if (selectedChangelog) {
+            displayChangelog(selectedChangelog);
+            updateChangelogBreadcrumb(changelogId);
+          }
+        });
       });
     }
   }
@@ -388,17 +398,19 @@ $(document).ready(function () {
     }
   }
 
-  const $searchInput = $('input[aria-label="Search changelogs"]');
-  const $exampleQueries = $("#exampleQueries");
-  const $clearButton = $("#clearSearch");
+  const searchInput = document.querySelector(
+    'input[aria-label="Search changelogs"]'
+  );
+  const exampleQueries = document.querySelector("#exampleQueries");
+  const clearButton = document.querySelector("#clearSearch");
 
   // Event listener for input in the search field
-  $searchInput.on("input", function () {
+  searchInput.addEventListener("input", function () {
     clearTimeout(debounceTimer); // Clear the previous timer
-    const query = $(this).val().trim(); // Get the trimmed query
-    $exampleQueries.addClass("d-none"); // Hide example queries
+    const query = this.value.trim(); // Get the trimmed query
+    exampleQueries.classList.add("d-none"); // Hide example queries
 
-    $clearButton.toggle(query.length > 0);
+    clearButton.style.display = query.length > 0 ? "block" : "none";
 
     if (query.length > 0) {
       // Only search if there's actual input
@@ -413,17 +425,19 @@ $(document).ready(function () {
 
   // Unified clear search function
   function clearSearch() {
-    $searchInput.val("").blur(); // Add blur() to remove focus
-    $clearButton.hide();
-    $searchResultsContainer.empty().hide();
-    $exampleQueries.removeClass("d-none");
+    searchInput.value = "";
+    searchInput.blur(); // Add blur() to remove focus
+    clearButton.style.display = "none";
+    searchResultsContainer.innerHTML = "";
+    searchResultsContainer.style.display = "none";
+    exampleQueries.classList.remove("d-none");
   }
 
   // Update clear button click handler
-  $clearButton.on("click", clearSearch);
+  clearButton.addEventListener("click", clearSearch);
 
   // Update keyboard event handler
-  $searchInput.on("keydown", function (e) {
+  searchInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent default form submission behavior
       focusOnSearchResults(); // Focus on the search results
@@ -435,48 +449,48 @@ $(document).ready(function () {
   });
 
   // Handle example query click
-  $(".example-query").on("click", function (e) {
-    e.preventDefault(); // Prevent default action
-    const query = $(this).text(); // Get the example query text
-    $searchInput.val(query); // Set the search input to the example query
-    $clearButton.show();
-    performSearch(); // Perform the search
-    $exampleQueries.addClass("d-none"); // Hide example queries
+  document.querySelectorAll(".example-query").forEach((item) => {
+    item.addEventListener("click", function (e) {
+      e.preventDefault(); // Prevent default action
+      const query = this.textContent; // Get the example query text
+      searchInput.value = query; // Set the search input to the example query
+      clearButton.style.display = "block";
+      performSearch(); // Perform the search
+      exampleQueries.classList.add("d-none"); // Hide example queries
+    });
   });
 
   // Show example queries when clicking on the search input
-  $searchInput.on("focus", function () {
-    if ($(this).val().trim() === "") {
-      $exampleQueries.removeClass("d-none"); // Show example queries if input is empty
+  searchInput.addEventListener("focus", function () {
+    if (this.value.trim() === "") {
+      exampleQueries.classList.remove("d-none"); // Show example queries if input is empty
     }
   });
 
   // Hide example queries when clicking outside the search input or example queries container
-  $(document).on("click", function (event) {
+  document.addEventListener("click", function (event) {
     // Check if the click event is not triggered on the example queries themselves
     if (
-      !$exampleQueries.is(event.target) &&
-      // Check if the click event is not triggered on any descendants of the example queries
-      $exampleQueries.has(event.target).length === 0 &&
+      !exampleQueries.contains(event.target) &&
       // Check if the click event is not triggered on the search input
-      !$(event.target).is($searchInput)
+      !searchInput.contains(event.target)
     ) {
       // If all conditions are true, hide the example queries
-      $exampleQueries.addClass("d-none"); // Hide if clicked outside
+      exampleQueries.classList.add("d-none"); // Hide if clicked outside
     }
   });
 
   // Hide example queries on page load if search input is empty
-  $(document).ready(function () {
-    if ($searchInput.val().trim() === "") {
-      $exampleQueries.addClass("d-none"); // Hide example queries if input is empty
+  document.addEventListener("DOMContentLoaded", function () {
+    if (searchInput.value.trim() === "") {
+      exampleQueries.classList.add("d-none"); // Hide example queries if input is empty
     }
   });
 
   // Function to focus on the first search result
   function focusOnSearchResults() {
-    if ($searchResultsContainer.children().length > 0) {
-      $searchResultsContainer.children().first().focus(); // Focus on the first result
+    if (searchResultsContainer.children.length > 0) {
+      searchResultsContainer.children[0].focus(); // Focus on the first result
     }
   }
 
@@ -583,8 +597,12 @@ $(document).ready(function () {
    */
   function updateDropdownButton(text) {
     // Select the dropdown buttons for mobile and desktop views
-    const $mobileDropdownButton = $("#mobileChangelogDropdown");
-    const $desktopDropdownButton = $("#desktopChangelogDropdown");
+    const mobileDropdownButton = document.querySelector(
+      "#mobileChangelogDropdown"
+    );
+    const desktopDropdownButton = document.querySelector(
+      "#desktopChangelogDropdown"
+    );
 
     // Start with the calendar icon
     let buttonText =
@@ -598,8 +616,8 @@ $(document).ready(function () {
     }
 
     // Update both mobile and desktop buttons with the new text
-    $mobileDropdownButton.html(buttonText);
-    $desktopDropdownButton.html(buttonText);
+    mobileDropdownButton.innerHTML = buttonText;
+    desktopDropdownButton.innerHTML = buttonText;
   }
 
   // Initialize the dropdown instance for Bootstrap
@@ -612,16 +630,16 @@ $(document).ready(function () {
 
   // Function to open the changelog dropdown
   function openChangelogDropdown() {
-    const $mobileDropdownEl = $("#mobileChangelogDropdown"); // Mobile dropdown reference
-    const $desktopDropdownEl = $("#desktopChangelogDropdown"); // Desktop dropdown reference
+    const mobileDropdownEl = document.querySelector("#mobileChangelogDropdown"); // Mobile dropdown reference
+    const desktopDropdownEl = document.querySelector(
+      "#desktopChangelogDropdown"
+    ); // Desktop dropdown reference
 
     // Get or create Bootstrap dropdown instances
-    const mobileDropdownInstance = bootstrap.Dropdown.getOrCreateInstance(
-      $mobileDropdownEl[0]
-    );
-    const desktopDropdownInstance = bootstrap.Dropdown.getOrCreateInstance(
-      $desktopDropdownEl[0]
-    );
+    const mobileDropdownInstance =
+      bootstrap.Dropdown.getOrCreateInstance(mobileDropdownEl);
+    const desktopDropdownInstance =
+      bootstrap.Dropdown.getOrCreateInstance(desktopDropdownEl);
 
     // Force the dropdown to show
     mobileDropdownInstance.show();
@@ -629,11 +647,11 @@ $(document).ready(function () {
 
     // Ensure the dropdown stays open
     setTimeout(() => {
-      if (!$mobileDropdownEl.hasClass("show")) {
-        $mobileDropdownEl.dropdown("show");
+      if (!mobileDropdownEl.classList.contains("show")) {
+        mobileDropdownEl.dropdown("show");
       }
-      if (!$desktopDropdownEl.hasClass("show")) {
-        $desktopDropdownEl.dropdown("show");
+      if (!desktopDropdownEl.classList.contains("show")) {
+        desktopDropdownEl.dropdown("show");
       }
     }, 100);
   }
@@ -820,17 +838,25 @@ $(document).ready(function () {
 
   // Make the function globally accessible
   window.fetchDataFromAPI = function () {
-    return $.getJSON(apiUrl)
-      .done((data) => {
+    showLoadingOverlay();
+    return fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
         processChangelogData(data);
       })
-      .fail((jqXHR, textStatus, errorThrown) => {
-        console.error("Error fetching changelogs:", errorThrown);
+      .catch((error) => {
+        console.error("Error fetching changelogs:", error);
 
-        const errorMessage = getErrorMessage(jqXHR.status);
+        const errorMessage = getErrorMessage(error.status || 0);
 
-        // Update main content
-        $("#content").html(`
+        // Update main content using native DOM methods
+        const contentElement = document.getElementById("content");
+        contentElement.innerHTML = `
           <div class="api-error-container">
             <div class="api-error-icon">
          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
@@ -852,10 +878,10 @@ $(document).ready(function () {
               You can check our service status at <a href="https://status.jailbreakchangelogs.xyz/" target="_blank" class="status-link">status.jailbreakchangelogs.xyz</a>
             </p>
           </div>
-        `);
+        `;
 
         // Update sidebar image
-        $("#sidebarImage").html(`
+        document.getElementById("sidebarImage").innerHTML = `
           <div class="api-error-container">
             <div class="api-error-icon">
              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
@@ -869,12 +895,14 @@ $(document).ready(function () {
             </div>
             <h2 class="api-error-title">Unable to Load Changelog Image</h2>
           </div>
-        `);
+        `;
 
         // Add event listener after inserting the button
-        $("#retryButton").on("click", () => {
-          fetchDataFromAPI();
-        });
+        document
+          .getElementById("retryButton")
+          ?.addEventListener("click", () => {
+            fetchDataFromAPI();
+          });
 
         hideLoadingOverlay();
       });
@@ -900,7 +928,7 @@ $(document).ready(function () {
 
   // Function to perform a search based on user input
   function performSearch() {
-    const query = $searchInput.val().trim().toLowerCase(); // Get and normalize the search query
+    const query = searchInput.value.trim().toLowerCase(); // Get and normalize the search query
 
     let searchResults = []; // Initialize an array for search results
 
@@ -939,16 +967,16 @@ $(document).ready(function () {
 
   // Function to display search results based on the user's query
   function displaySearchResults(results, query) {
-    $searchResultsContainer.empty(); // Clear previous results
+    searchResultsContainer.innerHTML = ""; // Clear previous results
 
     if (results.length === 0) {
-      $searchResultsContainer.html('<p class="p-3">No results found.</p>'); // Show message if no results
+      searchResultsContainer.innerHTML = '<p class="p-3">No results found.</p>'; // Show message if no results
     } else {
-      const $resultsList = $("<ul>").addClass("list-group list-group-flush"); // Create a list for results
+      const resultsList = document.createElement("ul");
+      resultsList.className = "list-group list-group-flush"; // Create a list for results
       results.forEach((changelog) => {
-        const $listItem = $("<li>").addClass(
-          "list-group-item custom-search-item"
-        ); // Create a list item
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item custom-search-item"; // Create a list item
 
         let previewText = "";
         let highlightedPreview = "";
@@ -1018,16 +1046,16 @@ $(document).ready(function () {
             : "",
         ].join("");
 
-        $listItem.html(`
+        listItem.innerHTML = `
                 <h5 class="mb-1">${highlightText(
                   changelog.title,
                   query
                 )} ${mediaLabels}</h5>
                 <p class="mb-1 small">${highlightText(previewText, query)}</p>
-            `);
+            `;
 
         // Click event to display the selected changelog
-        $listItem.on("click", () => {
+        listItem.addEventListener("click", () => {
           // Update the URL without reloading the page
           const newUrl = `/changelogs/${changelog.id}`;
           history.pushState({}, "", newUrl);
@@ -1050,19 +1078,23 @@ $(document).ready(function () {
           dismissKeyboard();
         });
 
-        $resultsList.append($listItem); // Append the list item to the results list
+        resultsList.appendChild(listItem); // Append the list item to the results list
       });
-      $searchResultsContainer.append($resultsList); // Append the results list to the container
+      searchResultsContainer.appendChild(resultsList); // Append the results list to the container
     }
-    $searchResultsContainer.show(); // Show the search results container
+    searchResultsContainer.style.display = "block"; // Show the search results container
   }
 
   // Prevent body scrolling when interacting with the search results container
-  $searchResultsContainer.on("wheel", function (event) {
+  searchResultsContainer.addEventListener("wheel", function (event) {
     event.stopPropagation(); // Prevent the body from scrolling
   });
 
-  $searchResultsContainer.on("touchstart touchmove", function (event) {
+  searchResultsContainer.addEventListener("touchstart", function (event) {
+    event.stopPropagation(); // Prevent body scrolling on touch devices
+  });
+
+  searchResultsContainer.addEventListener("touchmove", function (event) {
     event.stopPropagation(); // Prevent body scrolling on touch devices
   });
 
@@ -1101,24 +1133,28 @@ $(document).ready(function () {
   const buttons = ["#randomChangelogDesktopBtn", "#randomChangelogMobileBtn"]; // IDs of the buttons
 
   buttons.forEach(function (buttonSelector) {
-    $(buttonSelector).on("click", function () {
-      const $btn = $(this); // Cache the button element
+    document
+      .querySelector(buttonSelector)
+      .addEventListener("click", function () {
+        const btn = this; // Cache the button element
 
-      // Check if the button is disabled
-      if ($btn.prop("disabled")) {
-        return; // Exit if already in slow mode
-      }
+        // Check if the button is disabled
+        if (btn.disabled) {
+          return; // Exit if already in slow mode
+        }
 
-      displayRandomChangelog(); // Call the random changelog function
+        displayRandomChangelog(); // Call the random changelog function
 
-      // Disable the button and add a disabled class for styling
-      $btn.prop("disabled", true).addClass("disabled");
+        // Disable the button and add a disabled class for styling
+        btn.disabled = true;
+        btn.classList.add("disabled");
 
-      // Re-enable the button after the delay
-      setTimeout(function () {
-        $btn.prop("disabled", false).removeClass("disabled");
-      }, slowModeDelay);
-    });
+        // Re-enable the button after the delay
+        setTimeout(function () {
+          btn.disabled = false;
+          btn.classList.remove("disabled");
+        }, slowModeDelay);
+      });
   });
 
   // Function to clean content for search
@@ -1197,34 +1233,38 @@ $(document).ready(function () {
 
   // Click event for changelog dropdown items
   // In changelogs.js - Update the dropdown click handler
-  $(document).on("click", ".changelog-dropdown-item", function (e) {
-    e.preventDefault();
-    const changelogId = $(this).data("changelog-id");
-    const selectedChangelog = changelogsData.find((cl) => cl.id == changelogId);
-
-    if (selectedChangelog) {
-      // Update the URL without reloading the page
-      const newUrl = `/changelogs/${changelogId}`;
-      history.pushState({}, "", newUrl);
-
-      // Display the changelog
-      displayChangelog(selectedChangelog);
-      updateChangelogBreadcrumb(changelogId);
-
-      // Update comments section
-      if (window.commentsManagerInstance) {
-        window.commentsManagerInstance.clearComments();
-        window.commentsManagerInstance.type = "changelog";
-        window.commentsManagerInstance.itemId = changelogId;
-        window.commentsManagerInstance.loadComments();
-      }
-
-      // Close the dropdown
-      const dropdown = bootstrap.Dropdown.getInstance(
-        this.closest(".dropdown-menu").previousElementSibling
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("changelog-dropdown-item")) {
+      e.preventDefault();
+      const changelogId = e.target.dataset.changelogId;
+      const selectedChangelog = changelogsData.find(
+        (cl) => cl.id == changelogId
       );
-      if (dropdown) {
-        dropdown.hide();
+
+      if (selectedChangelog) {
+        // Update the URL without reloading the page
+        const newUrl = `/changelogs/${changelogId}`;
+        history.pushState({}, "", newUrl);
+
+        // Display the changelog
+        displayChangelog(selectedChangelog);
+        updateChangelogBreadcrumb(changelogId);
+
+        // Update comments section
+        if (window.commentsManagerInstance) {
+          window.commentsManagerInstance.clearComments();
+          window.commentsManagerInstance.type = "changelog";
+          window.commentsManagerInstance.itemId = changelogId;
+          window.commentsManagerInstance.loadComments();
+        }
+
+        // Close the dropdown
+        const dropdown = bootstrap.Dropdown.getInstance(
+          e.target.closest(".dropdown-menu").previousElementSibling
+        );
+        if (dropdown) {
+          dropdown.hide();
+        }
       }
     }
   });
@@ -1305,56 +1345,59 @@ $(document).ready(function () {
     `;
   }
 
-  $(document).on("click", ".quick-nav-link", function (e) {
-    e.preventDefault();
-    const changelogId = $(this).data("changelog-id");
-    if (changelogId) {
-      const changelog = changelogsData.find((cl) => cl.id === changelogId);
-      if (changelog) {
-        // Immediately clear comments before any other operations
-        if (window.commentsManagerInstance) {
-          window.commentsManagerInstance.clearComments();
-        }
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("quick-nav-link")) {
+      e.preventDefault();
+      const changelogId = e.target.dataset.changelogId;
+      if (changelogId) {
+        const changelog = changelogsData.find((cl) => cl.id === changelogId);
+        if (changelog) {
+          // Immediately clear comments before any other operations
+          if (window.commentsManagerInstance) {
+            window.commentsManagerInstance.clearComments();
+          }
 
-        const newUrl = `/changelogs/${changelogId}`;
-        history.pushState({}, "", newUrl);
+          const newUrl = `/changelogs/${changelogId}`;
+          history.pushState({}, "", newUrl);
 
-        // Update content and breadcrumb
-        displayChangelog(changelog);
-        updateChangelogBreadcrumb(changelogId);
+          // Update content and breadcrumb
+          displayChangelog(changelog);
+          updateChangelogBreadcrumb(changelogId);
 
-        // handle comment loading
-        const loadComments = () => {
-          return new Promise((resolve) => {
-            if (window.commentsManagerInstance) {
-              window.commentsManagerInstance.type = "changelog";
-              window.commentsManagerInstance.itemId = changelogId;
-              // Ensure comments are completely cleared before loading new ones
-              setTimeout(() => {
-                window.commentsManagerInstance.loadComments();
+          // handle comment loading
+          const loadComments = () => {
+            return new Promise((resolve) => {
+              if (window.commentsManagerInstance) {
+                window.commentsManagerInstance.type = "changelog";
+                window.commentsManagerInstance.itemId = changelogId;
+                // Ensure comments are completely cleared before loading new ones
+                setTimeout(() => {
+                  window.commentsManagerInstance.loadComments();
+                  resolve();
+                }, 100);
+              } else {
                 resolve();
-              }, 100);
-            } else {
-              resolve();
+              }
+            });
+          };
+
+          // Execute the comment loading and scrolling in sequence
+          loadComments().then(() => {
+            const contentElement = document.getElementById("content-wrapper");
+            if (contentElement) {
+              const offset = 80;
+              const elementPosition =
+                contentElement.getBoundingClientRect().top;
+              const offsetPosition =
+                elementPosition + window.pageYOffset - offset;
+
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+              });
             }
           });
-        };
-
-        // Execute the comment loading and scrolling in sequence
-        loadComments().then(() => {
-          const contentElement = document.getElementById("content-wrapper");
-          if (contentElement) {
-            const offset = 80;
-            const elementPosition = contentElement.getBoundingClientRect().top;
-            const offsetPosition =
-              elementPosition + window.pageYOffset - offset;
-
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth",
-            });
-          }
-        });
+        }
       }
     }
   });
@@ -1437,8 +1480,12 @@ $(document).ready(function () {
   }
 
   // Initialize Bootstrap dropdowns
-  bootstrap.Dropdown.getOrCreateInstance($("#mobileChangelogDropdown")[0]);
-  bootstrap.Dropdown.getOrCreateInstance($("#desktopChangelogDropdown")[0]);
+  bootstrap.Dropdown.getOrCreateInstance(
+    document.querySelector("#mobileChangelogDropdown")
+  );
+  bootstrap.Dropdown.getOrCreateInstance(
+    document.querySelector("#desktopChangelogDropdown")
+  );
 
   // State machine for error handling
   const ErrorState = {
@@ -1531,16 +1578,15 @@ $(document).ready(function () {
       const latestDate = new Date(
         sortedData[0].title.split(" ").slice(-3).join(" ")
       );
-      $("#latestUpdateDate").text(
+      document.querySelector("#latestUpdateDate").textContent =
         latestDate.toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
           year: "numeric",
-        })
-      );
+        });
 
       // Update total updates count
-      $("#totalUpdates").text(data.length);
+      document.querySelector("#totalUpdates").textContent = data.length;
 
       // Count major features (sections starting with "Added" or "New")
       let majorFeatureCount = 0;
@@ -1552,7 +1598,7 @@ $(document).ready(function () {
           }
         });
       });
-      $("#majorFeatures").text(majorFeatureCount);
+      document.querySelector("#majorFeatures").textContent = majorFeatureCount;
     }
   }
 });

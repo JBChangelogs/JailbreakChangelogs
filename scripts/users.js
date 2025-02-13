@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       try {
-        const user = Cookies.get("token");
+        const user = getCookie("token");
         if (!user) {
           toastControl.showToast("error", "You must be logged in", "Error");
           return;
@@ -1591,7 +1591,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function addFollow(userId) {
     try {
-      const user = Cookies.get("token");
+      const user = getCookie("token");
       // Get the target user ID from the URL
       const pathSegments = window.location.pathname.split("/");
       const targetUserId = pathSegments[2]; // This gets the ID from /users/{id}
@@ -1646,7 +1646,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function removeFollow(userId) {
     try {
-      const user = Cookies.get("token");
+      const user = getCookie("token");
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/users/followers/remove`,
         {
@@ -1696,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (follow_button.disabled) return;
     follow_button.disabled = true;
 
-    const user = Cookies.get("token");
+    const user = getCookie("token");
     if (!user) {
       toastControl.showToast(
         "error",
@@ -2009,7 +2009,7 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     event.stopPropagation();
 
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to favorite items", {
         position: "bottom-right",

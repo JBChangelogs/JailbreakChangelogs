@@ -47,11 +47,11 @@ function debounce(func, wait) {
 }
 
 function showLoadingOverlay() {
-  $("#loading-overlay").addClass("show");
+  document.querySelector("#loading-overlay").classList.add("show");
 }
 
 function hideLoadingOverlay() {
-  $("#loading-overlay").removeClass("show");
+  document.querySelector("#loading-overlay").classList.remove("show");
 }
 
 // Global shareCurrentView function
@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (valueSortType === "random") {
       filteredItems = shuffleArray([...filteredItems]);
     } else if (valueSortType === "favorites") {
-      const token = Cookies.get("token");
+      const token = getCookie("token");
       if (!token) {
         // Show login message if not logged in
         filteredItems = [];
@@ -813,7 +813,7 @@ document.addEventListener("DOMContentLoaded", () => {
       allItems = await response.json();
 
       // Add favorite status to items if user is logged in and we have user data
-      const token = Cookies.get("token");
+      const token = getCookie("token");
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
       if (token && userData.id) {
@@ -1078,7 +1078,7 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       event.stopPropagation();
 
-      const token = Cookies.get("token");
+      const token = getCookie("token");
       if (!token) {
         notyf.error("Please login to favorite items", {
           position: "bottom-right",

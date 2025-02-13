@@ -215,7 +215,7 @@ async function createServerCard(server, number) {
   const ownerName = await fetchUserInfo(server.owner);
 
   // Check if current user is the owner
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   let isOwner = false;
 
   if (token) {
@@ -370,7 +370,7 @@ async function editServer(serverId) {
 async function handleEditServer(event, serverId) {
   event.preventDefault();
 
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;
@@ -490,7 +490,7 @@ document
   });
 
 async function deleteServer(serverId) {
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;
@@ -531,7 +531,7 @@ async function deleteServer(serverId) {
 
 // Check authentication and show modal
 function checkAuthAndShowModal() {
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     sessionStorage.setItem("redirectUrl", window.location.href);
     window.location.href = "/login";
@@ -565,7 +565,7 @@ async function isDuplicateLink(link, excludeId = null) {
 async function handleAddServer(event) {
   event.preventDefault();
 
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     showToast("Authentication required", "error");
     return;

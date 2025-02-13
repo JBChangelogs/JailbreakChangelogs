@@ -1,18 +1,17 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   // DOM element references
-  const $seasonDetailsContainer = $("#season-details");
-  const $carouselInner = $("#carousel-inner");
-  const $seasonList = $("#seasonList"); // Reference to the season dropdown
-  // let userdata = null;
-  const latestSeason = 24; // Define the current season number
+  const seasonDetailsContainer = document.querySelector("#season-details");
+  const carouselInner = document.querySelector("#carousel-inner");
+  const seasonList = document.querySelector("#seasonList");
+  const latestSeason = 24;
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
-    $("#loading-overlay").addClass("show");
+    document.querySelector("#loading-overlay").classList.add("show");
   }
 
   function hideLoadingOverlay() {
-    $("#loading-overlay").removeClass("show");
+    document.querySelector("#loading-overlay").classList.remove("show");
   }
 
   function getCountdownColor(days) {
@@ -42,12 +41,7 @@ $(document).ready(function () {
 
   function fetchAllSeasons() {
     return fetch("https://api3.jailbreakchangelogs.xyz/seasons/list")
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        return data;
-      })
+      .then((response) => response.json())
       .catch((error) => {
         console.error("Error fetching seasons:", error);
         throw error;
@@ -73,34 +67,36 @@ $(document).ready(function () {
   function populateSeasonDropdown(seasonData) {
     if (!Array.isArray(seasonData) || seasonData.length === 0) {
       console.error("Invalid or empty season data:", seasonData);
-      $seasonList.html(
-        '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>'
-      );
+      seasonList.innerHTML =
+        '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>';
       return;
     }
 
-    $seasonList.empty();
+    seasonList.innerHTML = "";
 
     // Filter out seasons with no rewards and sort by season number descending
     const validSeasons = seasonData
       .filter((season) => season.rewards !== "No rewards found")
       .sort((a, b) => b.season - a.season);
 
-    validSeasons.forEach((season) => {
-      const listItem = $(`
-        <li class="w-100">
-            <a class="dropdown-item season-dropdown-item w-100" 
-               href="/seasons/${season.season}" 
-               data-season-id="${season.season}">
-                <span class="badge me-2" style="background-color: #124E66; color: #D3D9D4">
-                    Season ${season.season}
-                </span>
-                ${season.title}
-            </a>
-        </li>
-      `);
-      $seasonList.append(listItem);
-    });
+    const seasonListHTML = validSeasons
+      .map(
+        (season) => `
+      <li class="w-100">
+        <a class="dropdown-item season-dropdown-item w-100" 
+           href="/seasons/${season.season}" 
+           data-season-id="${season.season}">
+          <span class="badge me-2" style="background-color: #124E66; color: #D3D9D4">
+            Season ${season.season}
+          </span>
+          ${season.title}
+        </a>
+      </li>
+    `
+      )
+      .join("");
+
+    seasonList.innerHTML = seasonListHTML;
   }
 
   function displaySeasonDetails(season, seasonData) {
@@ -127,8 +123,10 @@ $(document).ready(function () {
     const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
     const countdownColor = getCountdownColor(remainingDays);
 
-    $seasonDetailsContainer.html(`
-      <h2 class="season-title display-4 text-custom-header mb-3">Season ${season} / ${seasonData.title}</h2>
+    seasonDetailsContainer.innerHTML = `
+      <h2 class="season-title display-4 text-custom-header mb-3">Season ${season} / ${
+      seasonData.title
+    }</h2>
       <div class="season-description-container">
           <div class="season-dates mb-3">
              <p class="mb-1"><strong>Start Date:</strong> ${formatDate(
@@ -154,41 +152,7 @@ $(document).ready(function () {
               }
           </div>
       </div>
-    `);
-
-    // Update comments header
-    if (window.commentsManagerInstance) {
-      window.commentsManagerInstance.updateCommentsHeader();
-    }
-
-    $seasonDetailsContainer.html(`
-        <h2 class="season-title display-4 text-custom-header mb-3">Season ${season} / ${seasonData.title}</h2>
-        <div class="season-description-container">
-            <div class="season-dates mb-3">
-               <p class="mb-1"><strong>Start Date:</strong> ${formatDate(
-                 startDate
-               )}</p>
-               <p class="mb-1"><strong>End Date:</strong> ${formatDate(
-                 endDate
-               )}</p>
-               <p class="mb-1"><strong>Duration:</strong> ${durationDays} days</p>
-            </div>
-            <div class="season-description-body text-center"> 
-                ${
-                  seasonData.description
-                    ? `<p class="season-description-text">${seasonData.description}</p>`
-                    : `
-                        <div class="no-description">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
-</svg>
-                            <p class="text-muted">No description available.</p>
-                        </div>`
-                }
-            </div>
-        </div>
-      `);
+    `;
 
     // Update comments header
     if (window.commentsManagerInstance) {
@@ -219,13 +183,17 @@ $(document).ready(function () {
         })
         .join("");
 
-      $seasonDetailsContainer.append(`
+      seasonDetailsContainer.insertAdjacentHTML(
+        "beforeend",
+        `
           <div class="rewards-container">
             <h3 class="rewards-title">Season Rewards</h3>
             <div class="rewards-list">${rewardsHTML}</div>
-          </div>`);
+          </div>`
+      );
     } else {
-      $seasonDetailsContainer.append(
+      seasonDetailsContainer.insertAdjacentHTML(
+        "beforeend",
         '<p class="text-warning">No rewards data available.</p>'
       );
     }
@@ -241,24 +209,18 @@ $(document).ready(function () {
 
   // Function to update the carousel with reward images
   function updateCarousel(rewards) {
-    // Clear any existing carousel items
-    $carouselInner.empty();
+    carouselInner.innerHTML = "";
 
     if (!rewards || rewards.length === 0) {
-      // No rewards data available, show a placeholder or message
-      const placeholderItem = $(`
+      carouselInner.innerHTML = `
         <div class="carousel-item active rounded">
           <div class="d-flex align-items-center justify-content-center" style="height: 300px; background-color: #1a2228;">
             <p class="text-light">Reward images not available</p>
           </div>
-        </div>
-      `);
-
-      $carouselInner.append(placeholderItem);
+        </div>`;
       return;
     }
 
-    // Filter rewards based on the criteria
     const filteredRewards = rewards.filter((reward) => {
       const isLevelRequirement = reward.requirement.startsWith("Level");
       const isBonus = reward.bonus === "True";
@@ -266,28 +228,26 @@ $(document).ready(function () {
     });
 
     if (filteredRewards.length === 0) {
-      // No rewards left after filtering, show a message
-      const noRewardsItem = $(`
+      carouselInner.innerHTML = `
         <div class="carousel-item active rounded">
           <div class="d-flex align-items-center justify-content-center" style="height: 300px; background-color: #f8f9fa;">
             <p class="text-muted">No eligible reward images to display</p>
           </div>
-        </div>
-      `);
-      $carouselInner.append(noRewardsItem);
+        </div>`;
       return;
     }
 
-    // Iterate through each filtered reward
-    filteredRewards.forEach((reward, index) => {
-      const isActive = index === 0 ? "active" : "";
-      const carouselItem = $(`
-        <div class="carousel-item ${isActive} rounded"> 
-          <img src="${reward.link}" class="d-block w-100 img-fluid" alt="${reward.item}">
-        </div>
-      `);
-      $carouselInner.append(carouselItem);
-    });
+    carouselInner.innerHTML = filteredRewards
+      .map(
+        (reward, index) => `
+      <div class="carousel-item ${index === 0 ? "active" : ""} rounded"> 
+        <img src="${reward.link}" class="d-block w-100 img-fluid" alt="${
+          reward.item
+        }">
+      </div>
+    `
+      )
+      .join("");
   }
 
   function loadSeasonDetails(season) {
@@ -324,42 +284,42 @@ $(document).ready(function () {
   }
 
   function displayErrorMessage(message) {
-    $seasonDetailsContainer.html(`
+    seasonDetailsContainer.innerHTML = `
       <div class="alert alert-danger" role="alert">
         <h4 class="alert-heading">Error</h4>
         <p>${message}</p>
       </div>
-    `);
+    `;
     updateCarousel([]); // Clear the carousel
     updateBreadcrumb("Error");
     document.title = "Error - Season Details";
   }
 
   // Add event listener for season selection
-  $(document).on("click", ".season-dropdown-item", function (e) {
-    e.preventDefault();
-    const selectedSeason = $(this).data("season-id");
+  document.addEventListener("click", function (e) {
+    if (e.target.closest(".season-dropdown-item")) {
+      e.preventDefault();
+      const selectedSeason = e.target.closest(".season-dropdown-item").dataset
+        .seasonId;
 
-    // Update the URL with the selected season
-    const newUrl = `/seasons/${selectedSeason}`;
-    window.history.pushState({}, "", newUrl);
+      const newUrl = `/seasons/${selectedSeason}`;
+      window.history.pushState({}, "", newUrl);
 
-    // Properly update the CommentsManager with new season ID
-    if (window.commentsManagerInstance) {
-      window.commentsManagerInstance.clearComments();
-      window.commentsManagerInstance.type = "season";
-      window.commentsManagerInstance.itemId = selectedSeason;
-      window.commentsManagerInstance.loadComments(); // Reload comments with new ID
-    } else {
-      // Create new instance if it doesn't exist
-      window.commentsManagerInstance = new CommentsManager(
-        "season",
-        selectedSeason
-      );
-      window.commentsManagerInstance.loadComments();
+      if (window.commentsManagerInstance) {
+        window.commentsManagerInstance.clearComments();
+        window.commentsManagerInstance.type = "season";
+        window.commentsManagerInstance.itemId = selectedSeason;
+        window.commentsManagerInstance.loadComments();
+      } else {
+        window.commentsManagerInstance = new CommentsManager(
+          "season",
+          selectedSeason
+        );
+        window.commentsManagerInstance.loadComments();
+      }
+
+      loadSeasonDetails(parseInt(selectedSeason));
     }
-
-    loadSeasonDetails(parseInt(selectedSeason));
   });
 
   loadAllData()
@@ -391,15 +351,13 @@ $(document).ready(function () {
 
     .catch((error) => {
       console.error("Failed to fetch data:", error);
-      $seasonDetailsContainer.html(`
+      seasonDetailsContainer.innerHTML = `
         <div class="alert alert-danger" role="alert">
           <h4 class="alert-heading">Unable to Load Season Data</h4>
           <p>We're having trouble fetching the season information. Please try refreshing the page or check back later.</p>
-        </div>
-      `);
-      $seasonList.html(
-        '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>'
-      );
+        </div>`;
+      seasonList.innerHTML =
+        '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>';
     });
 
   function formatDate(unixTimestamp) {
@@ -472,14 +430,16 @@ $(document).ready(function () {
         : "col-12 col-md-6 mb-3";
 
       // Update the column class
-      $("#current-season-countdown").parent().attr("class", columnClass);
+      document.querySelector(
+        "#current-season-countdown"
+      ).parentElement.className = columnClass;
 
       if (timeToEnd <= 0) {
-        $("#current-season-countdown").html(`
+        document.querySelector("#current-season-countdown").innerHTML = `
           <div class="season-ended">
             <i class="fas fa-clock"></i>Season ${currentSeason.season} has ended
           </div>
-        `);
+        `;
       } else {
         updateCountdownDisplay(
           "current-season-countdown",
@@ -490,11 +450,13 @@ $(document).ready(function () {
     }
 
     // Next season countdown
-    const $nextSeasonContainer = $("#next-season-countdown").parent();
+    const nextSeasonContainer = document.querySelector(
+      "#next-season-countdown"
+    ).parentElement;
     if (!nextSeason) {
-      $nextSeasonContainer.hide();
+      nextSeasonContainer.style.display = "none";
     } else {
-      $nextSeasonContainer.show();
+      nextSeasonContainer.style.display = "block";
       if (!nextSeason.start_date && nextSeason.end_date) {
         const timeToEnd = parseInt(nextSeason.end_date) - currentTime;
         if (timeToEnd <= 0) {
@@ -543,29 +505,37 @@ $(document).ready(function () {
     `
         : "";
 
-    $(`#${elementId}`).html(`
+    document.querySelector(`#${elementId}`).innerHTML = `
       <div class="season-countdown">
         <h3 class="countdown-title">${title}</h3>
         <div class="countdown-timer">
           <div class="countdown-item">
-            <span style="color: ${countdownColor}">${timeRemaining.days.toString().padStart(2, "0")}</span>
+            <span style="color: ${countdownColor}">${timeRemaining.days
+      .toString()
+      .padStart(2, "0")}</span>
             <span class="countdown-label">Days</span>
           </div>
           <div class="countdown-item">
-            <span style="color: ${countdownColor}">${timeRemaining.hours.toString().padStart(2, "0")}</span>
+            <span style="color: ${countdownColor}">${timeRemaining.hours
+      .toString()
+      .padStart(2, "0")}</span>
             <span class="countdown-label">Hours</span>
           </div>
           <div class="countdown-item">
-            <span style="color: ${countdownColor}">${timeRemaining.minutes.toString().padStart(2, "0")}</span>
+            <span style="color: ${countdownColor}">${timeRemaining.minutes
+      .toString()
+      .padStart(2, "0")}</span>
             <span class="countdown-label">Minutes</span>
           </div>
           <div class="countdown-item">
-            <span style="color: ${countdownColor}">${timeRemaining.seconds.toString().padStart(2, "0")}</span>
+            <span style="color: ${countdownColor}">${timeRemaining.seconds
+      .toString()
+      .padStart(2, "0")}</span>
             <span class="countdown-label">Seconds</span>
           </div>
         </div>
         ${submissionNotice}
       </div>
-    `);
+    `;
   }
 });

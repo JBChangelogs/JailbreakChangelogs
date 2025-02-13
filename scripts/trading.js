@@ -16,7 +16,7 @@ let currentTradesPage = 1;
 let allTradeAds = [];
 
 async function canCreateTradeAd() {
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     notyf.error("Please login first");
     return false;
@@ -1228,7 +1228,7 @@ function toggleConfirmButton() {
 
 async function deleteTradeAd(tradeId) {
   try {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to delete trade advertisements");
       return;
@@ -1268,7 +1268,7 @@ async function editTradeAd(tradeId) {
     window.history.replaceState({}, "", url);
 
     // Check authentication
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to edit trade advertisements");
       url.searchParams.delete("edit");
@@ -1432,7 +1432,7 @@ function cancelEdit() {
 
 async function updateTradeAd(tradeId) {
   try {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to update trade advertisements");
       return;
@@ -2551,7 +2551,7 @@ async function createTradeAd() {
   }
   try {
     // Check for authentication token first
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to create a trade advertisement");
       return;

@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const newValue = currentValue === 1 ? 0 : 1;
 
       try {
-        const token = Cookies.get("token");
+        const token = getCookie("token");
         const response = await fetch(
           `https://api3.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
           {
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        const token = Cookies.get("token");
+        const token = getCookie("token");
         const setting = this.dataset.setting;
         const newValue = this.checked ? 1 : 0;
 
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("updateBannerBtn")
     .addEventListener("click", async () => {
       const imageUrl = document.getElementById("bannerInput").value.trim();
-      const token = Cookies.get("token");
+      const token = getCookie("token");
 
       try {
         const response = await fetch(
@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     try {
-      const token = Cookies.get("token");
+      const token = getCookie("token");
       if (!token) {
         notyf.error("You must be logged in to delete your account");
         return;
