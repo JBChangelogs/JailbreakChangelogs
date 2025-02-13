@@ -14,67 +14,67 @@
 </div>
 <style>
   [data-bs-theme="dark"] #loading-overlay {
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-primary) !important;
   }
 
   /* Loading Overlay Styles */
   #loading-overlay {
-    position: fixed; /* Fixed positioning */
-    top: 0; /* Align to top */
-    left: 0; /* Align to left */
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    display: none; /* Hidden by default */
-    justify-content: center; /* Center items horizontally */
-    align-items: center; /* Center items vertically */
-    z-index: 9999; /* High stacking context */
-    background-color: #ffffff; /* White background */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;
+    background-color: #ffffff !important;
   }
 
   #loading-overlay.show {
-    display: flex; /* Enable flexbox when shown */
-    flex-direction: column; /* Stack items vertically */
-    justify-content: center; /* Center items vertically */
-    align-items: center; /* Center items horizontally */
-    height: 100vh; /* Full height for overlay */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 100vh !important;
   }
 
   /* Loading Logo Styles */
   #loading-overlay .loading-logo {
-    width: 300px; /* Adjust width for logo */
-    height: auto; /* Maintain aspect ratio */
+    width: 300px !important;
+    height: auto !important;
   }
 
   /* Custom Spinner Styles */
   .custom-spinner {
-    width: 50px;
-    height: 50px;
-    border-top-color: #124e66;
-    border-right-color: #124e66;
-    border-bottom-color: #212a31;
-    border-left-color: #212a31;
+    width: 50px !important;
+    height: 50px !important;
+    border-top-color: #124e66 !important;
+    border-right-color: #124e66 !important;
+    border-bottom-color: #2e3944 !important;
+    border-left-color: #2e3944 !important;
   }
   @media (max-width: 576px) {
     #loading-overlay .loading-logo {
-      width: 200px;
-      height: auto;
+      width: 200px !important;
+      height: auto !important;
     }
 
     .custom-spinner {
-      width: 30px;
-      height: 30px;
+      width: 30px !important;
+      height: 30px !important;
     }
   }
 
   @media (max-width: 399px) {
     #loading-overlay .loading-logo {
-      width: 150px; /* Reduced from 200px */
-      height: auto;
+      width: 150px !important;
+      height: auto !important;
     }
 
     .custom-spinner {
-      width: 25px; /* Reduced from 30px */
-      height: 25px;
+      width: 25px !important;
+      height: 25px !important;
     }
   }
 </style>

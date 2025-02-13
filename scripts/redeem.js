@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Get token from cookies
-    const token = Cookies.get("token");
+    const token = getCookie("token");
 
     if (!token) {
       notyf.error("You must be logged in to redeem codes");

@@ -53,7 +53,32 @@ window.notyf.special = (message) =>
 
 // Global variables
 let globalUserData = null;
-const token = Cookies.get("token");
+
+// Cookie helper functions
+window.getCookie = function (name) {
+  const match = document.cookie.match("(^|;) ?" + name + "=([^;]*)(;|$)");
+  return match ? match[2] : null;
+};
+
+window.setCookie = function (name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
+  document.cookie =
+    name +
+    "=" +
+    value +
+    ";path=/;expires=" +
+    d.toUTCString() +
+    ";secure;samesite=Strict";
+};
+
+window.deleteCookie = function (name) {
+  document.cookie =
+    name +
+    "=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;secure;samesite=Strict";
+};
+
+const token = getCookie("token");
 const userid = localStorage.getItem("userid"); // Single declaration
 
 function parseUserData() {
@@ -509,7 +534,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       avatar: localStorage.getItem("avatar"),
       user: localStorage.getItem("user"),
       userid: localStorage.getItem("userid"),
-      token: Cookies.get("token"),
+      token: getCookie("token"),
     });
 
     globalUserData = null;
@@ -517,11 +542,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("user");
     localStorage.removeItem("userid");
     localStorage.removeItem("showWelcome");
-    Cookies.remove("token", {
-      path: "/",
-      secure: true,
-      sameSite: "Strict",
-    });
+    deleteCookie("token");
     console.log("[Debug] Session cleared, reloading page");
     window.location.reload();
   }
@@ -739,8 +760,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (!userData) {
             throw new Error("Invalid token");
           }
-          Cookies.remove("token");
-          Cookies.set("token", token, { expires: 7 });
+          deleteCookie("token");
+          setCookie("token", token, 7);
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
           localStorage.setItem("user", JSON.stringify(userData));
           localStorage.setItem("avatar", avatarURL);
@@ -830,13 +851,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
   window.getAuthToken = function () {
-    return Cookies.get("token");
+    return getCookie("token");
   };
 
   const params = new URLSearchParams(window.location.search);
   const campaign = params.get("campaign") || sessionStorage.getItem("campaign");
   if (campaign) {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (token) {
       fetch(
         "https://api3.jailbreakchangelogs.xyz/campaigns/count?campaign=" +
@@ -864,10 +885,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.logout = function () {
     console.log("[Debug] User initiated logout");
     console.log("[Debug] Previous state:", {
-      user: localStorage.getItem("user"),
-      avatar: localStorage.getItem("avatar"),
-      userid: localStorage.getItem("userid"),
-      token: Cookies.get("token"),
+      user: localStorage.getItem("user") ? "[REDACTED]" : null,
+      avatar: localStorage.getItem("avatar") ? "[REDACTED]" : null,
+      userid: localStorage.getItem("userid") ? "[REDACTED]" : null,
+      token: getCookie("token") ? "[REDACTED]" : null,
     });
 
     localStorage.removeItem("user");
@@ -875,11 +896,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("userid");
     localStorage.removeItem("showWelcome");
 
-    Cookies.remove("token", {
-      path: "/",
-      secure: true,
-      sameSite: "Strict",
-    });
+    deleteCookie("token");
 
     console.log("[Debug] Logout complete, reloading page");
     window.location.reload();

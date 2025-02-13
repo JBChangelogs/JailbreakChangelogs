@@ -33,7 +33,7 @@ class CommentsManager {
   }
 
   checkLoginStatus() {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
 
     if (!this.input || !this.submitBtn) {
       console.error("[Debug] Elements not found in checkLoginStatus");
@@ -437,7 +437,7 @@ class CommentsManager {
   }
 
   async generateCommentHTML(comment) {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     let isOwner = false;
     let userDetails = null;
 
@@ -558,7 +558,7 @@ class CommentsManager {
   }
 
   async renderCommentItem(comment) {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     let isOwner = false;
 
     // First, get user details before creating any HTML
@@ -907,7 +907,7 @@ class CommentsManager {
       return;
     }
 
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       console.error("[Debug] No token found, submission cancelled");
       return;
@@ -970,7 +970,7 @@ class CommentsManager {
   }
 
   async deleteComment(commentId) {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) return;
 
     if (!confirm("Are you sure you want to delete this comment?")) return;
@@ -1037,7 +1037,7 @@ class CommentsManager {
       return;
     }
 
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) return;
 
     const editCommentText = document.getElementById("editCommentText");

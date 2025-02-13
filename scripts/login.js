@@ -44,7 +44,7 @@ $(document).ready(function () {
       "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Ftesting.jailbreakchangelogs.xyz%2Flogin&scope=identify";
   } else {
     OauthRedirect =
-      "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=https%3A%2F%2Ftesting.jailbreakchangelogs.xyz%2Flogin&scope=identify";
+      "https://discord.com/oauth2/authorize?client_id=1281308669299920907&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A5500%2Flogin&scope=identify";
   }
 
   const DiscordLoginButton = document.getElementById("login-button");
@@ -86,7 +86,7 @@ $(document).ready(function () {
       .then((userData) => {
         if (userData && userData.id && userData.avatar) {
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          Cookies.set("token", userData.token, { expires: 7 });
+          window.setCookie("token", userData.token, 7);
           localStorage.setItem("user", JSON.stringify(userData));
           localStorage.setItem("avatar", avatarURL);
           localStorage.setItem("userid", userData.id);

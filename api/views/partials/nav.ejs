@@ -285,7 +285,7 @@
     const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
 
     // Simply check if token cookie exists
-    const isLoggedIn = !!Cookies.get("token");
+    const isLoggedIn = !!getCookie("token");
     const avatarUrl = localStorage.getItem("avatar");
 
     async function setProfilePictureSrc(imgElement, src) {
@@ -445,7 +445,7 @@
     // Add text next to avatars based on login status
     const updateLoginText = () => {
       const loginTextElements = document.querySelectorAll(".login-text");
-      const isLoggedIn = !!Cookies.get("token");
+      const isLoggedIn = !!getCookie("token");
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
       loginTextElements.forEach((element) => {

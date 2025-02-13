@@ -38,7 +38,7 @@ function getItemImageElement(item) {
 // Add this function to trade-ad.js
 async function deleteTradeAd(tradeId) {
   try {
-    const token = Cookies.get("token");
+    const token = getCookie("token");
     if (!token) {
       notyf.error("Please login to delete trade advertisements");
       return;
