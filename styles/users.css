@@ -367,16 +367,6 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.banner-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to bottom, transparent, var(--overlay-dark));
-  border-radius: 0;
-}
-
 /* Avatar Styles */
 .avatar-wrapper {
   position: relative;
