@@ -319,7 +319,7 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: var(--accent-color);
+  background-color: var(--accent-color-light);
   color: var(--text-primary);
   width: 50px; /* Increased from 40px */
   height: 50px; /* Increased from 40px */
@@ -336,7 +336,7 @@ body {
 }
 
 .back-to-top-btn:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--accent-color);
   transform: translateY(-2px);
 }
 
@@ -435,6 +435,12 @@ body {
   background-color: var(--bg-primary) !important;
   border-radius: 12px;
   padding: 24px;
+  padding: 1.25rem !important;
+}
+
+.intro-container h1 {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 /* HyperChrome badge styling */
@@ -832,6 +838,7 @@ body {
 .categories-section {
   border-top: 1px solid rgba(116, 141, 146, 0.2);
   margin-top: 1.5rem;
+  margin-top: 0.75rem;
 }
 
 .categories-section .row {
@@ -1450,4 +1457,31 @@ body.menu-open {
   .items-card:hover {
     transform: none;
   }
+}
+
+.trader-notes {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(18, 78, 102, 0.1);
+  border-radius: 8px;
+}
+
+.trader-notes ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: none;
+}
+
+.trader-notes li {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  position: relative;
+}
+
+.trader-notes li:before {
+  content: "•";
+  position: absolute;
+  left: -1rem;
+  color: var(--accent-color-light);
 }

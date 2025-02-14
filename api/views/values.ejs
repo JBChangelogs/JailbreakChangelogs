@@ -77,8 +77,12 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/values.min.css"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.21/styles/values.min.css"
     />
+    <!-- <link
+      rel="stylesheet"
+      href="/styles/values.css"
+    /> -->
     <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/main.min.css"
@@ -156,12 +160,21 @@
                 <div class="intro-content">
                   <h1 class="mb-3">Roblox Jailbreak Values Guide</h1>
                   <p class="lead mb-3">
-                    Welcome to our Roblox Jailbreak trading values database. Get
-                    accurate, up-to-date values for all tradeable items in
-                    Roblox Jailbreak, from limited vehicles to rare cosmetics.
+                    Welcome to our Roblox Jailbreak trading values database. We've partnered with 
+                    <a href="https://discord.com/invite/jailbreaktrading" rel="noopener noreferrer" class="text-accent">Jailbreak Trading Core</a> 
+                    to bring you the most accurate and up-to-date values for all tradeable items in Roblox Jailbreak, from limited vehicles to rare cosmetics.
                   </p>
 
-                  <div class="row g-3 mb-3">
+                  <!-- Add trader notes -->
+                  <div class="trader-notes">
+                    <ul>
+                      <li>This is NOT an official list, it is 100% community based</li>
+                      <li>Some values may be outdated but we do our best to make sure it's accurate as possible</li>
+                      <li>Please don't 100% rely on the value list, use your own judgment as well</li>
+                    </ul>
+                  </div>
+
+                  <div class="row g-3 mb-2">
                     <div class="col-auto">
                       <a
                         href="/values/calculator"
@@ -208,7 +221,7 @@
                     </div>
                   </div>
 
-                  <div class="values-text d-flex flex-column align-items-start">
+                  <!-- <div class="values-text d-flex flex-column align-items-start">
                     <strong class="mb-2"
                       >Want to make a value suggestion?</strong
                     >
@@ -218,7 +231,7 @@
                     >
                       Join Jailbreak Trading Core!
                     </button>
-                  </div>
+                  </div> -->
                   <div class="categories-section">
                     <h2 class="h6 mb-2">Categories:</h2>
                     <div class="row g-2">
@@ -654,7 +667,7 @@
 
     <%- include('partials/loading') %>
 
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4 items-section-container">
       <!-- Items search and filtering section -->
       <div class="row g-3 align-items-center">
         <!-- Search Bar -->
@@ -944,7 +957,7 @@
     crossorigin="anonymous"
   ></script>
   <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.18/scripts/main.min.js"></script>
-  <!-- <script src="scripts/values.js" defer></script> -->
-  <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.18/scripts/values.min.js"></script>
+  <!-- <script src="scripts/values.js" ></script> -->
+  <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.21/scripts/values.min.js"></script>
 </body>
 </html>
