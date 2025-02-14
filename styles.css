@@ -26,20 +26,7 @@
   }
 }
 .dev-message {
-  font-size: large;
-}
-.sidebar-image {
-  position: fixed;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 480px;
-  height: auto;
-  margin: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
+  font-size: x-large;
 }
 body {
   margin: 0;
@@ -51,24 +38,41 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
-::selection {
-  background-color: #478ccf; /* Choose your preferred color */
-  color: #ffffff; /* Text color when selected */
-}
+
 .container {
   max-width: 800px;
   padding: 20px;
   margin: auto;
-  height: 125vh;
+  height: 95vh;
   display: flex;
   flex-direction: column;
-  /* box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2), 0 -10px 10px rgba(0, 0, 0, 0.2); */
 }
 #content {
   flex: 1;
   overflow-y: auto;
-  box-shadow: 0 6px 6px -6px rgba(0, 0, 0, 0.541);
+}
+.light-mode {
+  background-color: #f2f2f2;
+  color: #333;
+}
+.dark-mode {
+  background-color: #333;
+  color: #ddd;
+}
+#mode-toggle-btn i {
+  margin-right: 0.5rem;
+}
+
+#mode-toggle-btn.dark-mode i:first-child {
+  display: none;
+}
+
+#mode-toggle-btn.light-mode i:last-child {
+  display: none;
 }
 header,
 section,
@@ -133,32 +137,21 @@ button {
   font-weight: bold;
   width: 200px;
 }
-/* phones in potrait */
-@media only screen and (max-width: 1024px) {
+
+@media (max-width: 600px) {
   body {
     flex-direction: column;
-  }
-  .sidebar-image {
-    position: relative;
-    top: auto;
-    right: auto;
-    transform: none;
-    width: 100%;
-    margin: 10px auto;
   }
 
   .container {
     padding: 10px;
-    min-height: 165vh;
+    min-height: 130vh;
     overflow-y: auto;
-    overflow-x: hidden;
-    max-width: 95vw;
-    flex-direction: column;
   }
   header,
   section,
   footer {
-    margin-bottom: 4px;
+    margin-bottom: 10px;
   }
 
   header {
@@ -180,6 +173,10 @@ button {
     margin-bottom: 10px;
     margin-right: 10px;
   }
+  #content {
+    flex: 1;
+    overflow-y: auto;
+  }
   #pagination {
     flex-wrap: wrap;
     justify-content: center;
@@ -192,19 +189,21 @@ button {
   }
 
   .button-container {
+    display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin-top: 10px;
   }
 
   button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border: 2px solid transparent;
     border-radius: 8px;
-    font-size: 0.9em;
+    font-size: 1em;
     cursor: pointer;
-    margin: 5px;
+    margin: 10px;
     background-color: transparent;
+    transition: all 0.3s ease;
   }
   .blue-button:hover {
     color: #000000;
@@ -226,81 +225,21 @@ button {
 h3 p {
   margin: 0;
 }
-
-.pagination-select {
-  font-size: 16px;
-  padding: 8px;
-  padding-right: 30px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%27http://www.w3.org/2000/svg%27 width%3D%2716%27 height%3D%2716%27 fill%3D%27000%27 class%3D%27bi bi-chevron-down%27 viewBox%3D%270 0 16 16%27%3E%3Cpath fill-rule%3D%27evenodd%27 d%3D%27M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z%27/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 12px 12px;
-  min-width: 120px;
-  max-width: 100%;
-  width: auto;
-  margin-right: auto;
+#pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
 }
 
-.pagination-select:focus {
-  outline: none;
-  border-color: #007bff;
+#pagination button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
 }
 
-.pagination-select option {
-  padding: 8px;
-}
-/* phones in landscape */
-@media only screen and (max-width: 926px) and (orientation: landscape) {
-  .container {
-    min-height: 350vh;
-    overflow-y: auto;
-  }
-  #content {
-    overflow-y: auto;
-  }
-  #logo {
-    position: absolute;
-    width: 160px;
-    height: 160px;
-    right: 90px;
-    top: 20px;
-  }
-  .sidebar-image {
-    position: relative;
-    top: auto;
-    right: auto;
-    transform: none;
-    width: 50%;
-    height: auto;
-    margin: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-  }
-}
-/* tablets in portrait and landscape */
-@media only screen and (min-device-width: 1080px) and (max-device-width: 1280px) and (orientation: landscape) {
-  .sidebar-image {
-    position: relative;
-    top: auto;
-    right: auto;
-    transform: none;
-    width: 60%;
-    margin: 10px auto;
-    width: 600px;
-    height: auto;
-    margin: 20px auto;
-  }
-  .container {
-    min-height: 175vh;
-    overflow-y: auto;
-  }
+#pagination button.active {
+  background-color: #007bff;
+  color: white;
 }

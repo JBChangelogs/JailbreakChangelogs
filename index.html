@@ -5,35 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jailbreak Changelogs</title>
     <link rel="stylesheet" href="styles.css" />
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
-      crossorigin="anonymous"
-    ></script>
   </head>
   <body>
     <div class="container">
-      <div class="sidebar-image-wrapper">
-        <img
-          id="sidebarImage"
-          class="sidebar-image"
-          data-src=""
-          alt="Sidebar Image"
-        />
-      </div>
       <header>
         <a href="https://www.roblox.com/games/606849621/Jailbreak">
-          <img
-            src=""
-            alt="Logo"
-            id="logo"
-            loading="lazy"
-            data-src="./images/logo_animated.gif"
-          />
+          <img src="./images/logo.jpg" alt="Logo" id="logo" />
         </a>
         <h1 id="main-title">ChangeLogs</h1>
       </header>
-      <script src="scripts/changelogsviewer.js"></script>
+      <script src="changelogViewer.js"></script>
       <section id="pagination"></section>
       <section id="content"></section>
       <footer>
@@ -52,40 +33,46 @@
             which is one hour behind eastern.
           </p>
         </h4>
-
         <p id="footer-text">
           This website is
+
           <strong>NOT affiliated with Badimo.</strong> This is ran seperately by
+
           <a href="https://www.roblox.com/users/435983066/profile">v3kmw</a>
+
           and
+
           <a href="https://www.roblox.com/users/1910948809/profile"
             >Jalenzz16</a
           >
         </p>
-
         <div class="button-container">
-          <a href="https://www.reddit.com/r/robloxjailbreak/" target="_blank">
-            <button class="blue-button">r/RobloxJailbreak</button>
-          </a>
-
-          <a href="https://discord.com/invite/tWbDg7MbUU" target="_blank">
-            <button class="orange-button">
-              r/RobloxJailbreak Discord Server
-            </button>
-          </a>
-
-          <a href="https://discord.gg/jailbreak" target="_blank">
-            <button class="blue-button">
-              Official Jailbreak Discord Server
-            </button>
-          </a>
-
-          <a
-            href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
-            target="_blank"
+          <button
+            class="blue-button"
+            onclick="window.open('https://www.reddit.com/r/robloxjailbreak/', '_blank')"
           >
-            <button class="orange-button">Jailbreak Wiki Page</button>
-          </a>
+            r/RobloxJailbreak
+          </button>
+
+          <button
+            class="orange-button"
+            onclick="window.open('https://discord.com/invite/tWbDg7MbUU', '_blank')"
+          >
+            r/RobloxJailbreak Discord
+          </button>
+
+          <button
+            class="blue-button"
+            onclick="window.open('https://discord.gg/jailbreaktrading', '_blank')"
+          >
+            Jailbreak Trading Server
+          </button>
+          <button
+            class="orange-button"
+            onclick="window.open('https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home', '_blank')"
+          >
+            Jailbreak Wiki Page
+          </button>
         </div>
       </footer>
     </div>
