@@ -628,123 +628,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (item.is_limited) {
         specialBadgeHtml = `
           <span class="badge limited-badge">
-            <i class="bi bi-star-fill me-1"></i>Limited
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+           <rect width="24" height="24" fill="none" />
+           <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+         </svg> Limited
           </span>
         `;
       }
     }
 
-    function showFirefoxAutoplayNotice() {
-      // Remove existing notice if present
-      const existingNotice = document.querySelector(".firefox-autoplay-notice");
-      if (existingNotice) {
-        existingNotice.remove();
-      }
-
-      const notice = document.createElement("div");
-      notice.className = "firefox-autoplay-notice";
-      notice.innerHTML = `
-        <div style="
-          position: fixed;
-          top: 50px;
-          right: 20px;
-          background: #1E1E1E;
-          border: 2px solid #FF4500;
-          color: #FFFFFF;
-          padding: 15px;
-          border-radius: 8px;
-          max-width: 350px;
-          width: calc(100% - 40px);
-          z-index: 1000;
-          box-shadow: 0 0 20px rgba(255,69,0,0.2);
-          font-family: system-ui, -apple-system, sans-serif;
-          animation: pulse 2s infinite;
-          margin: 0 auto;
-
-    
-        ">
-          <div style="
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 8px;
-          ">
-            <span style="color: #FF4500; font-size: 24px;">⚠️</span>
-            <h4 style="
-              margin: 0;
-              font-size: 16px;
-              color: #FF4500;
-              flex-grow: 1;
-              font-weight: bold;
-            ">Firefox Drift Preview Notice</h4>
-            <button onclick="this.closest('.firefox-autoplay-notice').remove()" 
-              style="
-                background: #FF4500;
-                border: 2px solid #FFFFFF;
-                color: #FFFFFF;
-                cursor: pointer;
-                padding: 4px 8px;
-                line-height: 1;
-                border-radius: 4px;
-                margin-left: 8px;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-              onmouseover="this.style.backgroundColor='#FF6A33'"
-              onmouseout="this.style.backgroundColor='#FF4500'"
-              title="Dismiss">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-          <p style="
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #FFFFFF;
-          ">
-            Hover over the drift image to preview the effect! To enable auto-preview, you'll need to adjust Firefox's autoplay settings. 
-            <a href="https://support.mozilla.org/en-US/kb/block-autoplay#w_always-allow-or-block-media-autoplay" 
-               target="_blank" 
-               style="
-                 color: #FF4500;
-                 text-decoration: underline;
-                 font-weight: 500;
-               ">
-              Learn how to enable autoplay
-            </a>
-          </p>
-        </div>
-      `;
-
-      // Add mobile-specific styles
-      const mobileStyles = document.createElement("style");
-      mobileStyles.textContent = `
-      @media (max-width: 768px) {
-        .firefox-autoplay-notice > div {
-          right: 50% !important;
-          transform: translateX(50%) !important;
-          top: 40px !important;
-          max-width: calc(100% - 40px) !important;
-          font-size: 14px !important;
-        }
-      }
-    `;
-      document.head.appendChild(mobileStyles);
-
-      // Add pulse animation
-      const style = document.createElement("style");
-      style.textContent = `
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(255,69,0,0.4); }
-          70% { box-shadow: 0 0 0 10px rgba(255,69,0,0); }
-          100% { box-shadow: 0 0 0 0 rgba(255,69,0,0); }
-        }
-      `;
-      document.head.appendChild(style);
-      document.body.appendChild(notice);
-    }
     const container = document.getElementById("item-container");
 
     // Determine media element based on type
@@ -948,8 +840,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                          onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`
                 }
                   ${
+                    item.is_limited
+                      ? `<span class="badge limited-badge position-absolute top-0 end-0 m-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+                              <rect width="24" height="24" fill="none" />
+                              <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+                            </svg>
+                            Limited
+                          </span>`
+                      : ""
+                  }
+                  ${
                     item.similarityScore > 75
-                      ? '<span class="badge bg-success position-absolute top-0 end-0 m-2 best-match-badge">Best Match</span>'
+                      ? `<span class="badge bg-success position-absolute top-0 end-0 m-2" style="${
+                          !item.is_limited ? "" : "margin-top: 40px !important;"
+                        }">Best Match</span>`
                       : ""
                   }
                 </div>
@@ -979,14 +884,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                       </p>
                     </div>
                   </div>
-                  ${
-                    item.is_limited
-                      ? '<span class="badge limited-badge"><i class="bi bi-star-fill me-1"></i>Limited</span>'
-                      : ""
-                  }
                   <div class="mt-2">
                     <small class="text-muted demand-tag">
-                      <i class="bi bi-graph-up-arrow me-1"></i>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                        <rect width="16" height="16" fill="none" />
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
+                      </svg>
                       ${
                         item.demand && item.demand !== "N/A"
                           ? item.demand
@@ -1002,7 +905,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                       </span>
                     </small>
                   </div>
-
                 </div>
               </div>
             </a>
@@ -1022,20 +924,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? `
     <div class="col-md-6 mt-3">
       <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
-        <h4 class="text-muted mb-3 d-flex align-items-center">
-          <i class="bi bi-graph-up-arrow me-2"></i>
-          Demand
-        </h4>
-         <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
-                ${
-                  item.demand === "'N/A'" || item.demand === "N/A"
-                    ? "No Demand"
-                    : item.demand
-                }
-            </p>
+      <h4 class="text-muted mb-3 d-flex align-items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <rect width="16" height="16" fill="none" />
+    <path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
+  </svg>
+        Demand
+      </h4>
+       <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
+          ${
+            item.demand === "'N/A'" || item.demand === "N/A"
+              ? "No Demand"
+              : item.demand
+          }
+        </p>
       </div>
     </div>
-  `
+    `
       : "";
     function formatPriceValue(price) {
       if (!price || price === "N/A") return "No Price Data";
@@ -1129,7 +1034,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     <div class="col-md-6 mt-3">
       <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
         <h4 class="text-muted mb-3 d-flex align-items-center">
-          <i class="bi bi-tag-fill me-2"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M21.52 11.615a3.3 3.3 0 0 0-.76-1l-7-7a4.56 4.56 0 0 0-3.25-1.35H5.59a3.31 3.31 0 0 0-3.32 3.31v4.92a4.58 4.58 0 0 0 1.35 3.26l7 7a3.3 3.3 0 0 0 1.08.72c.401.171.833.26 1.27.26a3.33 3.33 0 0 0 2.34-1l2.73-2.72l2.72-2.72a3.3 3.3 0 0 0 .72-1.08a3.35 3.35 0 0 0 0-2.54zm-12.37.28a2.87 2.87 0 1 1 2.87-2.87a2.88 2.88 0 0 1-2.87 2.9z" />
+</svg>
           Original Price
         </h4>
         <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
@@ -1147,7 +1055,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 <div class="col-md-6 mt-3">
   <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
     <h4 class="text-muted mb-3 d-flex align-items-center">
-      <i class="bi bi-heart-fill me-2"></i>
+     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M19 14v3h3v2h-3v3h-2v-3h-3v-2h3v-3zm1.243-9.243a6 6 0 0 1 .507 7.91a6 6 0 0 0-8.06 8.127l-.69.691l-8.479-8.492a6 6 0 0 1 8.48-8.464a6 6 0 0 1 8.242.228" />
+</svg>
       Vehicle Health
     </h4>
     <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
@@ -1173,7 +1084,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="col-md-6 mt-3">
         <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
           <h4 class="text-muted mb-3 d-flex align-items-center">
-            <i class="bi bi-journal-text me-2"></i>
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="currentColor">
+		<path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5" />
+		<path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2" />
+		<path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z" />
+	</g>
+</svg>
             Notes
           </h4>
           <p class="h5 mb-0" style="color: #76ABAE; font-weight: 500; line-height: 1.4;">
@@ -1193,7 +1111,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="col-12">
             <div class="d-flex align-items-center">
               <small class="text-muted">
-                <i class="bi bi-clock-history me-1"></i>
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="currentColor">
+		<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+		<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+		<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+	</g>
+</svg>
                 Last updated: ${formatTimeAgo(item.last_updated)}
               </small>
             </div>
@@ -1203,7 +1128,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="col-12">
             <div class="d-flex align-items-center">
               <small class="text-muted">
-                <i class="bi bi-clock-history me-1"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="currentColor">
+		<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+		<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+		<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+	</g>
+</svg>
                 Last updated: N/A
               </small>
             </div>
@@ -1215,7 +1147,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="col-md-6">
         <div class="value-card p-4 rounded-3" style="background-color: rgba(24, 101, 131, 0.1); border: 1px solid rgba(24, 101, 131, 0.2);">
           <h4 class="text-muted mb-3 d-flex align-items-center">
-            <i class="bi bi-cash-stack me-2"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="currentColor">
+		<path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm7 8a2 2 0 1 0 0-4a2 2 0 0 0 0 4" />
+		<path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2z" />
+	</g>
+</svg>
             Cash Value
           </h4>
           <p class="h2 mb-0" style="color: rgb(29, 125, 163); font-weight: 600;">
@@ -1228,7 +1166,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="col-md-6">
           <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
             <h4 class="text-muted mb-3 d-flex align-items-center">
-              <i class="bi bi-graph-down me-2"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 11.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-1 0v2.6l-3.613-4.417a.5.5 0 0 0-.74-.037L7.06 8.233L3.404 3.206a.5.5 0 0 0-.808.588l4 5.5a.5.5 0 0 0 .758.06l2.609-2.61L13.445 11H10.5a.5.5 0 0 0-.5.5" />
+</svg>
               Duped Value
             </h4>
             <p class="h2 mb-0" style="color: #748D92; font-weight: 600;">
@@ -1242,7 +1183,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                         data-bs-toggle="collapse" data-bs-target="#dupedOwnersList" 
                         aria-expanded="false" aria-controls="dupedOwnersList" 
                         style="color: #748d92;">
-                  <i class="bi bi-people-fill me-1"></i>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
+	<rect width="48" height="48" fill="none" />
+	<path fill="currentColor" d="M16 24a8 8 0 1 0 0-16a8 8 0 0 0 0 16m18 0a6 6 0 1 0 0-12a6 6 0 0 0 0 12M6.75 27A3.75 3.75 0 0 0 3 30.75V32s0 9 13 9s13-9 13-9v-1.25A3.75 3.75 0 0 0 25.25 27zm21.924 11.089c1.376.558 3.119.911 5.325.911c10.5 0 10.5-8 10.5-8v-.25A3.75 3.75 0 0 0 40.75 27H29.607a5.73 5.73 0 0 1 1.391 3.75v1.295l-.001.057l-.006.15q-.008.173-.035.43a10 10 0 0 1-.24 1.325a10.7 10.7 0 0 1-2.042 4.082" />
+</svg>
                   <span class="duped-owners-count">${
                     dupedOwners.count
                   } Known Duped Owner${
@@ -1294,7 +1238,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="col-md-6 mt-3">
           <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
             <h4 class="text-muted mb-3 d-flex align-items-center">
-              <i class="bi bi-graph-up-arrow me-2"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 14 14">
+	<rect width="14" height="14" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+		<path d="M9.5 3.5h4v4" />
+		<path d="M13.5 3.5L7.85 9.15a.5.5 0 0 1-.7 0l-2.3-2.3a.5.5 0 0 0-.7 0L.5 10.5" />
+	</g>
+</svg>
               Demand
             </h4>
             <p class="h2 mb-0" style="color: #76ABAE; font-weight: 600;">
@@ -1307,7 +1257,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="col-md-6 mt-3">
           <div class="value-card p-4 rounded-3" style="background-color: rgba(116, 141, 146, 0.1); border: 1px solid rgba(116, 141, 146, 0.2);">
             <h4 class="text-muted mb-3 d-flex align-items-center">
-              <i class="bi bi-journal-text me-2"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<g fill="currentColor">
+		<path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5" />
+		<path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2" />
+		<path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z" />
+	</g>
+</svg>
               Notes
             </h4>
             <p class="h5 mb-0" style="color: #76ABAE; font-weight: 500; line-height: 1.4;">
@@ -1447,7 +1404,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                    <i class="bi bi-chevron-down"></i>Read More
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <rect width="24" height="24" fill="none" />
+                                    <path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" />
+                                  </svg> Read More
                                   </button>`
                                : ""
                            }
@@ -1980,7 +1940,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     <div class="container mt-5">
       <div class="alert alert-danger text-center" role="alert">
         <div class="mb-3">
-          <i class="bi bi-exclamation-circle-fill" style="font-size: 2rem;"></i>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+	<rect width="16" height="16" fill="none" />
+	<path fill="currentColor" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2a1 1 0 0 0 0-2" />
+</svg>
         </div>
         <h4 class="alert-heading mb-3">Item Not Found</h4>
         <p>${
@@ -1996,9 +1959,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
                 onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
                 onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
-              <i class="bi bi-grid me-2"></i>Browse Other ${
-                itemType.charAt(0).toUpperCase() + itemType.slice(1)
-              }s
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20">
+	<rect width="20" height="20" fill="none" />
+	<path fill="currentColor" fill-rule="evenodd" d="M4.5 4.5v4h4v-4zm-.5-1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V4a.5.5 0 0 0-.5-.5zm7.5 1v4h4v-4zm-.5-1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V4a.5.5 0 0 0-.5-.5zm-6.5 8v4h4v-4zm-.5-1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm7.5 1v4h4v-4zm-.5-1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5z" clip-rule="evenodd" />
+</svg> Browse Other ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}s
             </a>`
               : ""
           }
@@ -2007,7 +1971,17 @@ document.addEventListener("DOMContentLoaded", async () => {
              style="border-color: var(--accent-color-light); color: var(--accent-color-light);"
              onmouseover="this.style.backgroundColor='var(--accent-color)'; this.style.color='var(--text-primary)';"
              onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-color-light)';">
-            <i class="bi bi-arrow-left me-2"></i>Back to All Items
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<path stroke-dasharray="20" stroke-dashoffset="20" d="M21 12h-17.5">
+			<animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="20;0" />
+		</path>
+		<path stroke-dasharray="12" stroke-dashoffset="12" d="M3 12l7 7M3 12l7 -7">
+			<animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.2s" values="12;0" />
+		</path>
+	</g>
+</svg> Back to All Items
           </a>
         </div>
       </div>
@@ -2017,7 +1991,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         <!-- Similar Items Section -->
         <div class="mt-4">
           <h5 class="text-center mb-4">
-            <i class="bi bi-search me-2"></i>Did you mean?
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
+	<rect width="48" height="48" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		<path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
+		<path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
+	</g>
+</svg> Did you mean?
           </h5>
           <div id="similar-items" class="row g-3">
             <style>
@@ -2124,8 +2104,8 @@ function initializeDescriptionToggle() {
       description.classList.toggle("collapsed");
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
-        ? '<i class="bi bi-chevron-up"></i>Show Less'
-        : '<i class="bi bi-chevron-down"></i>Read More';
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z" /></svg>Show Less'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" /></svg>Read More';
     });
   }
 }
