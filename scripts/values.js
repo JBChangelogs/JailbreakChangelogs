@@ -151,26 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         window.sortItems();
 
-        // Add smooth scroll to items container with offset
-        const itemsContainer = document.getElementById("items-container");
-        if (itemsContainer) {
+        // Updated selector to use the unique class
+        const itemsSection = document.querySelector(".items-section-container");
+        if (itemsSection) {
           setTimeout(() => {
-            // Get the filter controls element for reference
-            const filterControls = document.querySelector(".filter-controls");
-
-            // Calculate position with offset
-            const offset = 90; // Adjust this value to control the padding from top
-            const elementPosition = itemsContainer.getBoundingClientRect().top;
-            const offsetPosition =
-              elementPosition +
-              window.pageYOffset -
-              (filterControls.offsetHeight + offset);
-
-            // Smooth scroll to adjusted position
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth",
-            });
+            itemsSection.scrollIntoView({ behavior: "smooth" });
           }, 100);
         }
       } else {
@@ -684,10 +669,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Scroll to top when button is clicked
   backToTopButton.addEventListener("click", () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    const itemsSection = document.querySelector(".items-section-container");
+    if (itemsSection) {
+      itemsSection.scrollIntoView({ behavior: "smooth" });
+    }
   });
 
   // Restore filters from sessionStorage
