@@ -834,6 +834,16 @@ body {
   background-color: #1e2226;
 }
 
+.intro-button-stats {
+  background-color: #2d3238;
+  color: var(--text-primary);
+  border: 1px solid var(--accent-color);
+}
+
+.intro-button-stats:hover {
+  background-color: #1e2226;
+}
+
 /* Categories Section Styles */
 .categories-section {
   border-top: 1px solid rgba(116, 141, 146, 0.2);
