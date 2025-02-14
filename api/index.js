@@ -165,10 +165,20 @@ app.get("/changelogs/:changelog", async (req, res) => {
       ),
     ]);
 
-    if (!latestResponse.ok || !requestedResponse.ok) {
-      throw new Error("Failed to fetch changelog data");
+    // Check if the requested changelog exists
+    if (!requestedResponse.ok) {
+      // If changelog not found, render 404 page
+      return res.status(404).render("404", {
+        title: "404 - Changelog Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
     }
 
+    // Continue with existing logic if changelog exists
     const [latestData, requestedData] = await Promise.all([
       latestResponse.json(),
       requestedResponse.json(),
@@ -210,7 +220,14 @@ app.get("/changelogs/:changelog", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching changelog data:", error);
-    res.status(500).send("Internal Server Error");
+    return res.status(404).render("404", {
+      title: "404 - Changelog Not Found",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "404 Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
   }
 });
 
@@ -1131,9 +1148,16 @@ app.get("/exploiters", (req, res) => {
   });
 });
 
-// Handle unknown routes by serving index.html
+// Handle unknown routes by serving 404 page
 app.get("*", (req, res) => {
-  res.redirect("/");
+  res.status(404).render("404", {
+    title: "404 - Page Not Found",
+    logoUrl:
+      "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+    logoAlt: "404 Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
 });
 
 // Start the server
