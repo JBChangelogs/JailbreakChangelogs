@@ -1151,7 +1151,7 @@ app.get("/redeem", (req, res) => {
   });
 });
 
-app.get("/dupes", (req, res) => {
+app.get("/dupes/calculator", (req, res) => {
   res.render("dupes", {
     title: "Find Duped Items / Changelogs",
     logoUrl:

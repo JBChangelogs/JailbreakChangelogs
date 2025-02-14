@@ -1238,7 +1238,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               dupedOwners
                 ? `
               <div class="mt-3 pt-3 border-top">
-                <button class="btn btn-link text-decoration-none p-0" type="button" 
+                <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" 
                         data-bs-toggle="collapse" data-bs-target="#dupedOwnersList" 
                         aria-expanded="false" aria-controls="dupedOwnersList" 
                         style="color: #748d92;">
@@ -1248,18 +1248,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                   } Known Duped Owner${
                     dupedOwners.count !== 1 ? "s" : ""
                   }</span>
-                  <i class="bi bi-chevron-down ms-1"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 12 12" class="toggle-icon ms-2">
+                    <rect width="12" height="12" fill="none" />
+                    <path fill="#748d92" d="M2.22 7.53a.75.75 0 0 0 1.06 0L6 4.81l2.72 2.72a.75.75 0 0 0 1.06-1.06L6.53 3.22a.75.75 0 0 0-1.06 0L2.22 6.47a.75.75 0 0 0 0 1.06" />
+                  </svg>
                 </button>
                 <div class="collapse mt-3" id="dupedOwnersList">
                   <div class="duped-owners-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px;">
                     ${dupedOwners.list
+                      .sort((a, b) => a.trim().localeCompare(b.trim())) // Sort alphabetically
                       .map(
                         (owner) => `
-                      <a href="https://www.roblox.com/search/users?keyword=${encodeURIComponent(
+                      <a href="/dupes/calculator?duper=${encodeURIComponent(
                         owner.trim()
-                      )}"
-                         target="_blank"
-                         rel="noopener noreferrer"
+                      )}&itemId=${encodeURIComponent(item.id)}"
                          class="duped-owner-item p-2 rounded" 
                          style="
                            background-color: rgba(18, 78, 102, 0.2);
