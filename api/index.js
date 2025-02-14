@@ -168,7 +168,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
     // Check if the requested changelog exists
     if (!requestedResponse.ok) {
       // If changelog not found, render 404 page
-      return res.status(404).render("404", {
+      return res.status(404).render("error", {
         title: "404 - Changelog Not Found",
         logoUrl:
           "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
@@ -220,7 +220,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching changelog data:", error);
-    return res.status(404).render("404", {
+    return res.status(404).render("error", {
       title: "404 - Changelog Not Found",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
@@ -256,7 +256,18 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
 
-    if (response.status === 404 || !response.ok) {
+    if (response.status === 404) {
+      return res.status(404).render("error", {
+        title: "404 - Season Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
+    if (!response.ok) {
       // Redirect to latest season if requested one doesn't exist
       return res.redirect(`/seasons/${latestSeason}`);
     }
@@ -268,6 +279,18 @@ app.get("/seasons/:season", async (req, res) => {
         Origin: "https://jailbreakchangelogs.xyz",
       },
     });
+
+    if (rewardsResponse.status === 404) {
+      return res.status(404).render("error", {
+        title: "404 - Season Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
     if (!rewardsResponse.ok) {
       return res.render("seasons", {
         season: "???",
@@ -944,12 +967,14 @@ app.get("/users", (req, res) => {
 app.get("/users/:user", async (req, res) => {
   const user = req.params.user;
   const token = req.cookies?.token;
-  if (!user) {
-    return res.render("usersearch", {
-      title: "Users - Changelogs",
+
+  // First check if user parameter is a valid number
+  if (!user || !/^\d+$/.test(user)) {
+    return res.status(404).render("error", {
+      title: "404 - User Not Found",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-      logoAlt: "Users Page Logo",
+      logoAlt: "404 Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
@@ -957,6 +982,28 @@ app.get("/users/:user", async (req, res) => {
 
   try {
     // Step 1: Get user data and settings first
+    const userResponse = await fetch(
+      `https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+
+    // Handle both 404 and 422 status codes
+    if (userResponse.status === 404 || userResponse.status === 422) {
+      return res.status(404).render("error", {
+        title: "404 - User Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
     const [settings, userData] = await Promise.all([
       fetch(
         `https://api3.jailbreakchangelogs.xyz/users/settings?user=${user}`,
@@ -970,12 +1017,7 @@ app.get("/users/:user", async (req, res) => {
           },
         }
       ).then((response) => response.json()),
-      fetch(`https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://jailbreakchangelogs.xyz",
-        },
-      }).then((response) => response.json()),
+      userResponse.json(),
     ]);
 
     // Step 2: Verify token and get logged-in user's ID
@@ -1054,7 +1096,14 @@ app.get("/users/:user", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in profile route:", error);
-    res.status(500).send("Error fetching user data");
+    res.status(500).render("error", {
+      title: "500 - Server Error",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Error Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
   }
 });
 
@@ -1150,8 +1199,8 @@ app.get("/exploiters", (req, res) => {
 
 // Handle unknown routes by serving 404 page
 app.get("*", (req, res) => {
-  res.status(404).render("404", {
-    title: "404 - Page Not Found",
+  res.status(404).render("error", {
+    title: "Page Not Found",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "404 Page Logo",

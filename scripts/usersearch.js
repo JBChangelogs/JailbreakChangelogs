@@ -392,6 +392,13 @@ const displayUsers = async (users, page = 1) => {
 // API Functions
 const searchUsers = (searchTerm) => {
   const searchTermLower = searchTerm.toLowerCase();
+
+  // Check if search term is a Discord user ID (17 or 18 digits)
+  if (/^\d{17,19}$/.test(searchTerm)) {
+    return allUsers.filter((user) => user.id === searchTerm);
+  }
+
+  // Regular username/global_name search
   return allUsers.filter(
     (user) =>
       user.username.toLowerCase().includes(searchTermLower) ||
@@ -411,15 +418,7 @@ const handleSearch = async () => {
   }
 
   showLoading();
-  const searchTermLower = searchTerm.toLowerCase();
-
-  const filteredUsers = allUsers.filter((user) => {
-    const usernameMatch = user.username.toLowerCase().includes(searchTermLower);
-    const globalNameMatch =
-      user.global_name &&
-      user.global_name.toLowerCase().includes(searchTermLower);
-    return usernameMatch || globalNameMatch;
-  });
+  const filteredUsers = searchUsers(searchTerm);
 
   if (filteredUsers.length === 0) {
     showMessage(messages.noUsers);
