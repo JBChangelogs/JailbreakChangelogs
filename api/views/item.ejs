@@ -6,14 +6,8 @@
     <meta name="referrer" content="no-referrer" />
 
     <!-- Primary Meta Tags -->
-    <title>
-      <%= item.name %> - Jailbreak <%= itemType %> Value & Details |
-      JailbreakChangelogs
-    </title>
-    <meta
-      name="title"
-      content="<%= item.name %> - Jailbreak <%= itemType %> Value & Details | JailbreakChangelogs"
-    />
+    <title><%= item.name %> - Roblox Jailbreak</title>
+    <meta name="title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       name="description"
       content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest value and details for ${item.name} in Roblox Jailbreak. View current price, trading history, rarity status, and market trends.` %>"
@@ -55,10 +49,7 @@
       property="og:url"
       content="https://jailbreakchangelogs.xyz/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
     />
-    <meta
-      property="og:title"
-      content="<%= item.name %> - Current Value & Details | Jailbreak <%= itemType %>"
-    />
+    <meta property="og:title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       property="og:description"
       content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
@@ -71,10 +62,7 @@
       name="twitter:url"
       content="https://jailbreakchangelogs.xyz/item/<%= itemType %>/<%= encodeURIComponent(item.name) %>"
     />
-    <meta
-      name="twitter:title"
-      content="<%= item.name %> - Jailbreak <%= itemType %> Value & Details"
-    />
+    <meta name="twitter:title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       name="twitter:description"
       content="<%= (item.description && item.description !== 'N/A') ? item.description : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
@@ -98,15 +86,6 @@
     <meta name="twitter:data1" content="<%= itemType %>" />
     <meta name="twitter:label2" content="Current Value" />
     <meta name="twitter:data2" content="<%= item.cash_value %>" />
-
-    <!-- Alternative Title Tags for Better SEO -->
-    <title>
-      <%= item.name %> Value in Jailbreak - Current Price & Trading Guide
-    </title>
-    <meta
-      name="title"
-      content="<%= item.name %> Value in Jailbreak - Current Price & Trading Guide"
-    />
 
     <!-- Enhanced Keywords -->
     <meta
@@ -228,7 +207,7 @@
     <!-- <link rel="stylesheet" href="styles/item.css" /> -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/colors.min.css"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.20/styles/colors.min.css"
     />
     <link
       rel="stylesheet"

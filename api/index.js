@@ -165,10 +165,20 @@ app.get("/changelogs/:changelog", async (req, res) => {
       ),
     ]);
 
-    if (!latestResponse.ok || !requestedResponse.ok) {
-      throw new Error("Failed to fetch changelog data");
+    // Check if the requested changelog exists
+    if (!requestedResponse.ok) {
+      // If changelog not found, render 404 page
+      return res.status(404).render("error", {
+        title: "404 - Changelog Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
     }
 
+    // Continue with existing logic if changelog exists
     const [latestData, requestedData] = await Promise.all([
       latestResponse.json(),
       requestedResponse.json(),
@@ -210,7 +220,14 @@ app.get("/changelogs/:changelog", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching changelog data:", error);
-    res.status(500).send("Internal Server Error");
+    return res.status(404).render("error", {
+      title: "404 - Changelog Not Found",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "404 Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
   }
 });
 
@@ -239,7 +256,18 @@ app.get("/seasons/:season", async (req, res) => {
       },
     });
 
-    if (response.status === 404 || !response.ok) {
+    if (response.status === 404) {
+      return res.status(404).render("error", {
+        title: "404 - Season Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
+    if (!response.ok) {
       // Redirect to latest season if requested one doesn't exist
       return res.redirect(`/seasons/${latestSeason}`);
     }
@@ -251,6 +279,18 @@ app.get("/seasons/:season", async (req, res) => {
         Origin: "https://jailbreakchangelogs.xyz",
       },
     });
+
+    if (rewardsResponse.status === 404) {
+      return res.status(404).render("error", {
+        title: "404 - Season Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
     if (!rewardsResponse.ok) {
       return res.render("seasons", {
         season: "???",
@@ -303,7 +343,7 @@ app.get("/seasons/:season", async (req, res) => {
 
 app.get("/trading", (req, res) => {
   res.render("trading", {
-    title: "Trading / Changelogs",
+    title: "Trading - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
     logoAlt: "Trading Page Logo",
@@ -316,7 +356,7 @@ app.get("/trading", (req, res) => {
 app.get("/trading/ad/:tradeId", (req, res) => {
   const tradeId = req.params.tradeId;
   res.render("trade-ad", {
-    title: `Trade #${tradeId} - Jailbreak Trading`,
+    title: `Trade #${tradeId} - Changelogs`,
     metaDescription: `View trade details for Trade #${tradeId}. Check item values and trade status.`,
     canonicalUrl: `https://jailbreakchangelogs.xyz/trading/ad/${tradeId}`,
     logoUrl:
@@ -332,7 +372,7 @@ app.get("/bot", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 12) + 1;
   const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
   res.render("bot", {
-    title: "Discord Bot / Changelogs",
+    title: "Discord Bot - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Bot Page Logo",
@@ -358,7 +398,7 @@ app.get("/values", async (req, res) => {
     const allItems = await response.json();
 
     res.render("values", {
-      title: "Values / Changelogs",
+      title: "Roblox Jailbreak Values - Changelogs",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
       logoAlt: "Values Page Logo",
@@ -369,7 +409,7 @@ app.get("/values", async (req, res) => {
   } catch (error) {
     console.error("Error fetching items:", error);
     res.render("values", {
-      title: "Values / Changelogs",
+      title: "Roblox Jailbreak Values - Changelogs",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
       logoAlt: "Values Page Logo",
@@ -382,7 +422,7 @@ app.get("/values", async (req, res) => {
 
 app.get("/values/calculator", (req, res) => {
   res.render("calculator", {
-    title: "Value Calculator / Changelogs",
+    title: "Value Calculator - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
     logoAlt: "Values Calculator Logo",
@@ -393,7 +433,7 @@ app.get("/values/calculator", (req, res) => {
 
 app.get("/servers", (req, res) => {
   res.render("servers", {
-    title: "Private Servers / Changelogs",
+    title: "Private Servers - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Servers Logo",
@@ -427,7 +467,7 @@ app.get("/item/:type/:item", async (req, res) => {
     // If item not found, return error page with generic title/description
     if (response.status === 404 || item.error) {
       return res.render("item", {
-        title: "Item Not Found | JailbreakChangelogs",
+        title: "Item Not Found - Changelogs",
         metaDescription:
           "This item does not exist. Check our values page for a complete list of available items.",
         canonicalUrl: "https://jailbreakchangelogs.xyz/values",
@@ -465,7 +505,7 @@ app.get("/item/:type/:item", async (req, res) => {
 
     // Enhanced SEO data
     const seoData = {
-      pageTitle: `${itemName} - Jailbreak ${formattedUrlType} Value & Details | JailbreakChangelogs`,
+      pageTitle: `${itemName} - Roblox Jailbreak`,
       metaDescription:
         item.description && item.description !== "N/A"
           ? item.description
@@ -547,7 +587,7 @@ app.get("/item/:type/:item", async (req, res) => {
   } catch (error) {
     console.error("Error fetching item data:", error);
     res.render("item", {
-      title: `${itemName} - Error | JailbreakChangelogs`,
+      title: `${itemName} - Error - Changelogs`,
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Item Page Logo",
@@ -641,7 +681,7 @@ app.get("/botinvite", (req, res) => {
 
 app.get("/roblox", (req, res) => {
   res.render("roblox", {
-    title: "Roblox Authentication / Changelogs",
+    title: "Roblox Authentication - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Roblox Auth Page Logo",
@@ -650,7 +690,7 @@ app.get("/roblox", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.render("login", {
-    title: "Discord Authentication / Changelogs",
+    title: "Discord Authentication - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Login Page Logo",
@@ -776,7 +816,7 @@ app.get("/users/:user/followers", async (req, res) => {
       showfollowers: true,
       isPrivate: false,
       path: req.path,
-      title: "Followers / Changelogs",
+      title: "Followers - Changelogs",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Users Page Logo",
@@ -914,7 +954,7 @@ app.get("/users/:user/following", async (req, res) => {
 // Render search page
 app.get("/users", (req, res) => {
   res.render("usersearch", {
-    title: "Users / Changelogs",
+    title: "Users - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Users Page Logo",
@@ -927,12 +967,14 @@ app.get("/users", (req, res) => {
 app.get("/users/:user", async (req, res) => {
   const user = req.params.user;
   const token = req.cookies?.token;
-  if (!user) {
-    return res.render("usersearch", {
-      title: "Users / Changelogs",
+
+  // First check if user parameter is a valid number
+  if (!user || !/^\d+$/.test(user)) {
+    return res.status(404).render("error", {
+      title: "404 - User Not Found",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-      logoAlt: "Users Page Logo",
+      logoAlt: "404 Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
@@ -940,6 +982,28 @@ app.get("/users/:user", async (req, res) => {
 
   try {
     // Step 1: Get user data and settings first
+    const userResponse = await fetch(
+      `https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+
+    // Handle both 404 and 422 status codes
+    if (userResponse.status === 404 || userResponse.status === 422) {
+      return res.status(404).render("error", {
+        title: "404 - User Not Found",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "404 Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
     const [settings, userData] = await Promise.all([
       fetch(
         `https://api3.jailbreakchangelogs.xyz/users/settings?user=${user}`,
@@ -953,12 +1017,7 @@ app.get("/users/:user", async (req, res) => {
           },
         }
       ).then((response) => response.json()),
-      fetch(`https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://jailbreakchangelogs.xyz",
-        },
-      }).then((response) => response.json()),
+      userResponse.json(),
     ]);
 
     // Step 2: Verify token and get logged-in user's ID
@@ -1008,7 +1067,7 @@ app.get("/users/:user", async (req, res) => {
         },
         avatar,
         settings,
-        title: "Private Profile / Changelogs",
+        title: "Private Profile - Changelogs",
         logoUrl:
           "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
         logoAlt: "User Profile Logo",
@@ -1026,7 +1085,7 @@ app.get("/users/:user", async (req, res) => {
       userData,
       avatar,
       settings,
-      title: "User Profile / Changelogs",
+      title: "User Profile - Changelogs",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "User Profile Logo",
@@ -1037,13 +1096,20 @@ app.get("/users/:user", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in profile route:", error);
-    res.status(500).send("Error fetching user data");
+    res.status(500).render("error", {
+      title: "500 - Server Error",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Error Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
   }
 });
 
 app.get("/timeline", (req, res) => {
   res.render("timeline", {
-    title: "Timeline / Changelogs",
+    title: "Timeline - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Timeline Page Logo",
@@ -1054,7 +1120,7 @@ app.get("/timeline", (req, res) => {
 
 app.get("/tradetracker", (req, res) => {
   res.render("tradetracker", {
-    title: "Trade Tracker / Changelogs",
+    title: "Trade Tracker - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Trade Tracker Page Logo",
@@ -1065,7 +1131,7 @@ app.get("/tradetracker", (req, res) => {
 
 app.get("/roadmap", (req, res) => {
   res.render("roadmap", {
-    title: "Roadmap / Changelogs",
+    title: "Roadmap - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Roadmap Page Logo",
@@ -1076,7 +1142,7 @@ app.get("/roadmap", (req, res) => {
 
 app.get("/redeem", (req, res) => {
   res.render("redeem", {
-    title: "Reedem A Code / Changelogs",
+    title: "Reedem A Code - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Redeem Page Logo",
@@ -1122,7 +1188,7 @@ app.get("/settings", (req, res) => {
   }
 
   res.render("settings", {
-    title: "Settings / Changelogs",
+    title: "Settings - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Settings Page Logo",
@@ -1133,7 +1199,7 @@ app.get("/settings", (req, res) => {
 
 app.get("/exploiters", (req, res) => {
   res.render("exploiters", {
-    title: "Find Exploiters / Changelogs",
+    title: "Find Exploiters - Changelogs",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "Exploiters Page Logo",
@@ -1142,9 +1208,16 @@ app.get("/exploiters", (req, res) => {
   });
 });
 
-// Handle unknown routes by serving index.html
+// Handle unknown routes by serving 404 page
 app.get("*", (req, res) => {
-  res.redirect("/");
+  res.status(404).render("error", {
+    title: "Page Not Found",
+    logoUrl:
+      "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+    logoAlt: "404 Page Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+  });
 });
 
 // Start the server

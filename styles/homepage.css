@@ -65,14 +65,17 @@
   background-color: var(--accent-color);
   border-color: var(--accent-color);
   color: var(--text-primary);
+  font-weight: bold;
 }
+
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary.active {
-  background-color: var(--bg-primary) !important;
-  border-color: var(--bg-primary) !important;
+  background-color: var(--accent-color-light) !important;
+  border-color: 5px var(--accent-color) !important;
 }
+
 /* made by note */
 .cursive {
   font-size: 0.8rem; /* make the text smaller */
