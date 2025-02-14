@@ -193,7 +193,7 @@ async function calculateDupe() {
             <div class="duped-item-card" style="background: rgba(236, 28, 36, 0.1); border-radius: 12px; border: 1px solid rgba(236, 28, 36, 0.2); padding: 1rem;">
               <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 1rem;">
                 <img 
-                  src="/assets/images/items/${dupe.item.type.toLowerCase()}s/${
+                  src="/assets/images/items/480p/${dupe.item.type.toLowerCase()}s/${
                 dupe.item.name
               }.webp" 
                   class="w-100 h-100"
@@ -249,7 +249,7 @@ async function calculateDupe() {
           <div class="duped-item-card" style="background: rgba(236, 28, 36, 0.1); border-radius: 12px; border: 1px solid rgba(236, 28, 36, 0.2); padding: 1rem;">
             <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 1rem;">
               <img 
-                src="/assets/images/items/${item.type.toLowerCase()}s/${
+                src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
       item.name
     }.webp" 
                 class="w-100 h-100"
@@ -273,28 +273,14 @@ async function calculateDupe() {
   } else {
     resultsContent.innerHTML = `
       <div class="results-card not-dupe">
-        <h4>No dupe found for ${duper}</h4>
-        <div class="duped-items-grid mt-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-          <div class="duped-item-card" style="background: rgba(55, 179, 74, 0.1); border-radius: 12px; border: 1px solid rgba(55, 179, 74, 0.2); padding: 1rem;">
-            <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 1rem;">
-              <img 
-                src="/assets/images/items/${item.type.toLowerCase()}s/${
-      item.name
-    }.webp" 
-                class="w-100 h-100"
-                style="object-fit: contain;"
-                alt="${item.name}"
-                onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'"
-              >
-            </div>
-            <div class="item-info">
-              <h5 class="mb-2 text-truncate" title="${item.name}">${
-      item.name
-    }</h5>
-              <small class="text-muted d-block">No dupe record found</small>
-            </div>
-          </div>
+        <div class="results-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64">
+            <rect width="64" height="64" fill="none" />
+            <path fill="#37b34a" d="M56.734 5.081c-8.437 7.302-15.575 14.253-22.11 23.322c-2.882 4-6.087 8.708-8.182 13.153c-1.196 2.357-3.352 6.04-4.087 9.581c-4.02-3.74-8.338-7.985-12.756-11.31c-3.149-2.369-12.219 2.461-8.527 5.239c6.617 4.977 12.12 11.176 18.556 16.375c2.692 2.172 8.658-2.545 10.06-4.524c4.602-6.52 5.231-14.49 8.585-21.602c5.121-10.877 14.203-19.812 23.17-27.571c5.941-5.541-.195-6.563-4.7-2.663" />
+          </svg>
         </div>
+        <h4>No dupes found for ${duper}</h4>
+        <p class="text-muted">No dupe record found for ${item.name}</p>
       </div>
     `;
   }
@@ -351,21 +337,33 @@ document.addEventListener("DOMContentLoaded", async function () {
     { el: duperInput, type: "duper" },
     { el: itemInput, type: "item" },
   ].forEach(({ el, type }) => {
+    // Add focus event listener
+    el.addEventListener("focus", async () => {
+      const searchTerm = el.value.trim();
+      if (searchTerm.length > 0) {
+        const results = await searchItems(searchTerm, type);
+        const filteredResults = results.filter((item) =>
+          type === "item"
+            ? item.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+            : item.toLowerCase().startsWith(searchTerm.toLowerCase())
+        );
+        displaySearchResults(
+          `${type}Results`,
+          type === "item"
+            ? filteredResults.map((item) => item.name)
+            : filteredResults,
+          `${type}Search`
+        );
+      }
+    });
+
+    // Existing input event listener
     el.addEventListener("input", async (e) => {
       clearTimeout(searchTimeouts[type]);
       const searchTerm = e.target.value.trim();
 
       // Only show suggestions if we have at least 1 character
       if (searchTerm.length > 0) {
-        // For items, only search if we have a duper name
-        if (type === "item") {
-          const duperName = document.getElementById("duperSearch").value.trim();
-          if (!duperName) {
-            document.getElementById(`${type}Results`).style.display = "none";
-            return;
-          }
-        }
-
         searchTimeouts[type] = setTimeout(async () => {
           const results = await searchItems(searchTerm, type);
           const filteredResults = results.filter((item) =>
