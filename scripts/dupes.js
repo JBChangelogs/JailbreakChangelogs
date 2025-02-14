@@ -355,8 +355,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       clearTimeout(searchTimeouts[type]);
       const searchTerm = e.target.value.trim();
 
-      // Only show suggestions if we have at least 2 characters
-      if (searchTerm.length >= 2) {
+      // Only show suggestions if we have at least 1 character
+      if (searchTerm.length > 0) {
         // For items, only search if we have a duper name
         if (type === "item") {
           const duperName = document.getElementById("duperSearch").value.trim();
@@ -368,9 +368,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         searchTimeouts[type] = setTimeout(async () => {
           const results = await searchItems(searchTerm, type);
+          const filteredResults = results.filter((item) =>
+            type === "item"
+              ? item.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+              : item.toLowerCase().startsWith(searchTerm.toLowerCase())
+          );
           displaySearchResults(
             `${type}Results`,
-            type === "item" ? results.map((item) => item.name) : results,
+            type === "item"
+              ? filteredResults.map((item) => item.name)
+              : filteredResults,
             `${type}Search`
           );
         }, 300);

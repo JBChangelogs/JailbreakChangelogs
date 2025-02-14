@@ -201,10 +201,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Apply search filter
+    // Apply search filter if search term exists
     if (searchTerm.length > 0) {
       filteredItems = categoryFilteredItems.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm)
+        item.name.toLowerCase().startsWith(searchTerm)
       );
     } else {
       filteredItems = categoryFilteredItems;
