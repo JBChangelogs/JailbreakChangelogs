@@ -162,11 +162,7 @@
 
 /* Base footer styles */
 .jb-footer {
-  background: linear-gradient(
-    to bottom,
-    var(--jb-footer-bg-primary),
-    var(--jb-footer-bg-secondary)
-  ) !important;
+  background: var(--jb-footer-bg-primary) !important;
   color: var(--jb-footer-text-primary);
   font-family: system-ui, -apple-system, sans-serif;
   padding: var(--jb-footer-spacing-lg) 0;

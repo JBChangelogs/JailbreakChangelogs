@@ -997,6 +997,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createItemCard(item) {
+    console.log("Creating card for:", item.name, item.type);
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
 
@@ -1227,9 +1228,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card items-card shadow-sm ${
           item.is_limited ? "limited-item" : ""
         }" 
-             onclick="handleCardClick('${
-               item.name
-             }', '${item.type.toLowerCase()}', event)" 
              style="cursor: pointer;">
             <div class="position-relative">
                 ${mediaElement}
@@ -1297,36 +1295,88 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Modify the card click handler to not interfere with favorite icon
-    cardDiv.querySelector(".items-card").addEventListener("click", (e) => {
-      if (!e.target.closest(".favorite-icon")) {
-        handleCardClick(item.name, item.type.toLowerCase(), e);
+    // New click handler logic - Update this part only
+    const card = cardDiv.querySelector(".items-card");
+    if (!card) {
+      console.error("Could not find .items-card element for:", item.name);
+      return cardDiv;
+    }
+
+    // Debug click handling setup
+    console.log("Setting up click handler for:", item.name);
+
+    card.addEventListener("click", (e) => {
+      console.log("Raw click event on card:", {
+        item: item.name,
+        type: item.type,
+        target: e.target.tagName,
+        targetClasses: e.target.className,
+        path: e.composedPath().map((el) => ({
+          tag: el.tagName,
+          class: el.className,
+        })),
+      });
+
+      // Always ignore favorite icon clicks
+      if (e.target.closest(".favorite-icon")) {
+        console.log("Favorite icon clicked - ignoring navigation");
+        return;
       }
+
+      // For horns, only navigate if clicking card-body
+      if (item.type === "Horn") {
+        const isCardBody = e.target.closest(".item-card-body");
+        console.log("Horn item clicked:", {
+          isCardBody,
+          shouldNavigate: isCardBody,
+        });
+        if (!isCardBody) {
+          console.log("Horn media clicked - not navigating");
+          return;
+        }
+      }
+
+      // For drift items, check if clicking video/thumbnail
+      if (item.type === "Drift" && e.target.closest(".media-container")) {
+        console.log("Drift media clicked - letting media handler work");
+        return;
+      }
+
+      // Navigate to item page
+      const formattedType = item.type.toLowerCase();
+      const formattedName = encodeURIComponent(item.name);
+      const url = `/item/${formattedType}/${formattedName}`;
+      console.log("Navigating to:", url);
+      window.location.href = url;
     });
 
     // Add click handlers for media containers
     const mediaContainer = cardDiv.querySelector(".media-container");
     if (mediaContainer) {
       mediaContainer.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        // Only prevent default and stop propagation for Drift and Horn items
+        if (item.type === "Drift" || item.type === "Horn") {
+          e.preventDefault();
+          e.stopPropagation();
 
-        if (item.type === "Drift") {
-          const video = mediaContainer.querySelector("video");
-          const thumbnail = mediaContainer.querySelector(".thumbnail");
+          if (item.type === "Drift") {
+            const video = mediaContainer.querySelector("video");
+            const thumbnail = mediaContainer.querySelector(".thumbnail");
 
-          if (video.paused) {
-            video.style.opacity = "1";
-            thumbnail.style.opacity = "0";
-            video.play();
-          } else {
-            video.style.opacity = "0";
-            thumbnail.style.opacity = "1";
-            video.pause();
-            video.currentTime = 0;
+            if (video.paused) {
+              video.style.opacity = "1";
+              thumbnail.style.opacity = "0";
+              video.play();
+            } else {
+              video.style.opacity = "0";
+              thumbnail.style.opacity = "1";
+              video.pause();
+              video.currentTime = 0;
+            }
           }
+          // Horn clicks are handled by onclick attribute
         }
-        // Horn clicks are handled by onclick attribute
+        // For other items, let the click propagate to the card
       });
     }
 
