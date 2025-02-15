@@ -649,14 +649,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       element = `
         <div class="media-container">
           <div class="horn-player-wrapper">
+          <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
             <button class="horn-play-btn" onclick="playHornSound()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" class="play-icon">
-                <rect width="24" height="24" fill="none"/>
-                <path fill="#1d7da3" d="M8 5.14v14l11-7z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="play-icon">
+                <rect width="48" height="48" fill="none" />
+                <g fill="none" stroke-linejoin="round" stroke-width="4">
+                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
+                  <path fill="#43ccf8" stroke="#fff" d="M20 24V17.0718L26 20.5359L32 24L26 27.4641L20 30.9282V24Z" />
+                </g>
               </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" class="pause-icon" style="display: none;">
-                <rect width="24" height="24" fill="none"/>
-                <path fill="#1d7da3" d="M14 19V5h4v14zm-8 0V5h4v14z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="pause-icon" style="display: none;">
+                <rect width="48" height="48" fill="none" />
+                <g fill="none" stroke-linejoin="round" stroke-width="4">
+                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
+                  <path stroke="#fff" stroke-linecap="round" d="M19 18V30" />
+                  <path stroke="#fff" stroke-linecap="round" d="M29 18V30" />
+                </g>
               </svg>
             </button>
             <audio class="horn-audio" preload="none">
@@ -844,22 +852,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="card h-100">
               <div class="card-img-wrapper position-relative" style="aspect-ratio: 16/9;">
                 ${
-                  item.name === "HyperShift" && item.type === "HyperChrome"
-                    ? `
-                    <img 
-                      src="/assets/images/items/hyperchromes/HyperShift.gif"
-                      class="card-img-top" 
-                      style="width: 100%; height: 100%; object-fit: cover;"
-                      alt="${item.name}"
-                    />
-                  `
-                    : `
-                    <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                  item.type.toLowerCase() === "horn"
+                    ? `<img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.name}">`
+                    : item.name === "HyperShift" && item.type === "HyperChrome"
+                    ? `<img src="/assets/images/items/hyperchromes/HyperShift.gif" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.name}">`
+                    : `<img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
                         item.name
-                      }.webp" 
-                         class="card-img-top" 
-                         alt="${item.name}"
-                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`
+                      }.webp" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${
+                        item.name
+                      }">`
                 }
                   ${
                     item.is_limited

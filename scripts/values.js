@@ -1035,14 +1035,22 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="media-container position-relative">
           ${favoriteIconHtml}
           <div class="horn-player-wrapper" data-horn="${item.name}">
+            <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
             <button class="horn-play-btn" onclick="event.preventDefault(); event.stopPropagation(); playHornSound('${item.name}')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="play-icon">
-                <rect width="24" height="24" fill="none" />
-                <path fill="#1d7da3" d="M8 5.14v14l11-7z" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="play-icon">
+                <rect width="48" height="48" fill="none" />
+                <g fill="none" stroke-linejoin="round" stroke-width="4">
+                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
+                  <path fill="#43ccf8" stroke="#fff" d="M20 24V17.0718L26 20.5359L32 24L26 27.4641L20 30.9282V24Z" />
+                </g>
               </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="pause-icon" style="display: none;">
-                <rect width="24" height="24" fill="none" />
-                <path fill="#1d7da3" d="M14 19V5h4v14zm-8 0V5h4v14z" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="pause-icon" style="display: none;">
+                <rect width="48" height="48" fill="none" />
+                <g fill="none" stroke-linejoin="round" stroke-width="4">
+                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
+                  <path stroke="#fff" stroke-linecap="round" d="M19 18V30" />
+                  <path stroke="#fff" stroke-linecap="round" d="M29 18V30" />
+                </g>
               </svg>
             </button>
             <audio class="horn-audio" preload="none">
