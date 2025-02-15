@@ -588,6 +588,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const image_type = item.type.toLowerCase();
 
     // Define color before using it in badge templates
+    let color = "#124e66"; // Default color
     if (item.type === "Vehicle") color = "#c82c2c";
     if (item.type === "Spoiler") color = "#C18800";
     if (item.type === "Rim") color = "#6335B1";
@@ -598,6 +599,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (item.type === "Texture") color = "#708090";
     if (item.type === "HyperChrome") color = "#E91E63";
     if (item.type === "Furniture") color = "#9C6644";
+    if (item.type === "Horn") color = "#4A90E2";
 
     // Modify the badge HTML generation
     let specialBadgeHtml = "";
@@ -641,8 +643,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Determine media element based on type
     let element;
-    // For Drift videos
-    if (item.type === "Drift") {
+    if (item.type.toLowerCase() === "horn") {
+      // Skip image attempt completely for horns, just show the audio player
+      element = `
+        <div class="media-container">
+          <div class="horn-player-wrapper">
+            <button class="horn-play-btn" onclick="playHornSound()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" class="play-icon">
+                <rect width="24" height="24" fill="none"/>
+                <path fill="#1d7da3" d="M8 5.14v14l11-7z"/>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" class="pause-icon" style="display: none;">
+                <rect width="24" height="24" fill="none"/>
+                <path fill="#1d7da3" d="M14 19V5h4v14zm-8 0V5h4v14z"/>
+              </svg>
+            </button>
+            <audio class="horn-audio" preload="none">
+              <source src="/assets/audios/horns/${item.name}.ogg" type="audio/ogg">
+            </audio>
+          </div>
+        </div>`;
+    } else if (item.type === "Drift") {
       element = `
     <div class="media-container ${item.is_limited ? "limited-item" : ""}">
         <video 
@@ -927,7 +948,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h4 class="text-muted mb-3 d-flex align-items-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
     <rect width="16" height="16" fill="none" />
-    <path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
+    <path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767L3.404 11.794a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
   </svg>
         Demand
       </h4>
@@ -1022,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!isNaN(numericValue) && numericValue > 1) {
         return `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align: -0.1em; margin-left: 2px;">
       <rect width="24" height="24" fill="none"/>
-      <path fill="#76ABAE" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/>
+      <path fill="#76ABAE" d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2z"/>
     </svg> ${numericValue.toLocaleString()}`;
       }
 
@@ -1343,7 +1364,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="col-md-5 p-3">
                       <div class="d-flex flex-column gap-3">
                         ${
-                          item.type === "Drift"
+                          item.type.toLowerCase() === "horn"
+                            ? element // For horns, just use the audio player element
+                            : item.type === "Drift"
                             ? element
                             : item.name === "HyperShift" &&
                               item.type === "HyperChrome"
@@ -1406,7 +1429,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                   <button class="read-more-btn">
                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <rect width="24" height="24" fill="none" />
-                                    <path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" />
+                                    <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z" />
                                   </svg> Read More
                                   </button>`
                                : ""
@@ -2049,6 +2072,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadItemDetails();
 });
 
+// Add horn player functionality
+window.playHornSound = function () {
+  const audioElement = document.querySelector(".horn-audio");
+  const playIcon = document.querySelector(".play-icon");
+  const pauseIcon = document.querySelector(".pause-icon");
+
+  if (audioElement) {
+    if (audioElement.paused) {
+      // Add event listener for when audio finishes playing
+      audioElement.addEventListener(
+        "ended",
+        function () {
+          playIcon.style.display = "block";
+          pauseIcon.style.display = "none";
+        },
+        { once: true }
+      );
+
+      audioElement.play();
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "block";
+    } else {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      playIcon.style.display = "block";
+      pauseIcon.style.display = "none";
+    }
+  }
+};
+
 function formatDate(timestamp) {
   // Convert Unix timestamp to milliseconds and create a Date object
   const date = new Date(timestamp * 1000);
@@ -2104,8 +2157,8 @@ function initializeDescriptionToggle() {
       description.classList.toggle("collapsed");
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z" /></svg>Show Less'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" /></svg>Read More';
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z" /></svg>Show Less'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z" /></svg>Read More';
     });
   }
 }
