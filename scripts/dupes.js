@@ -133,7 +133,7 @@ async function calculateDupe() {
     bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
 
   if (!duper) {
-    notyf.error("Please enter duper name");
+    notyf.error("Please enter owner name");
     return;
   }
 
@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const itemId = urlParams.get("itemId");
 
   if (duper && itemId) {
-    // Fill in duper name
+    // Fill in owner name
     document.getElementById("duperSearch").value = duper;
     document.querySelector('[data-input="duperSearch"]').style.display = "flex";
 
@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const itemLabel = document.querySelector('label[for="itemSearch"]');
 
   duperLabel.innerHTML = `
-    Duper Name 
+    Owner Name 
     <span class="text-danger">*</span>
   `;
 
