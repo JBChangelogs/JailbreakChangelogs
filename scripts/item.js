@@ -10,6 +10,7 @@ const VALID_SORTS = [
   "hyperchrome",
   "furniture",
   "limited-item",
+  "horn",
 ];
 
 function isValidHyperChrome(name) {

@@ -10,6 +10,7 @@ const VALID_SORTS = [
   "hyperchromes",
   "furnitures",
   "limited-items",
+  "horns",
 ];
 function formatTimeAgo(timestamp) {
   if (!timestamp) return null;
