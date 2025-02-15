@@ -792,6 +792,14 @@ body {
   color: #4caf50;
 }
 
+.category-horns {
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+.category-horns i {
+  color: #4a90e2;
+}
+
 /* Intro Buttons */
 .intro-buttons {
   display: flex;
@@ -1494,4 +1502,30 @@ body.menu-open {
   position: absolute;
   left: -1rem;
   color: var(--accent-color-light);
+}
+
+.horn-player-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.horn-play-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.horn-play-btn:hover {
+  transform: scale(1.1);
+}
+
+.horn-play-btn svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }

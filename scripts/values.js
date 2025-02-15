@@ -119,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "category-drifts": "name-drifts",
         "category-furnitures": "name-furnitures",
         "category-favorites": "name-all-items",
+        "category-horns": "name-horns",
       };
 
       // Find the matching category class
@@ -1012,7 +1013,8 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
   `;
 
-    // Determine color based on item type
+    // Determine color based on item type - FIX: Declare the color variable
+    let color = "#124e66"; // Default color
     if (item.type === "Vehicle") color = "#c82c2c";
     if (item.type === "Spoiler") color = "#C18800";
     if (item.type === "Rim") color = "#6335B1";
@@ -1023,24 +1025,54 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Texture") color = "#708090";
     if (item.type === "HyperChrome") color = "#E91E63";
     if (item.type === "Furniture") color = "#9C6644";
+    if (item.type === "Horn") color = "#4A90E2";
 
-    // Modify the mediaElement template - remove spinner and loading transitions
-    let mediaElement = `
+    // Modify the mediaElement template
+    let mediaElement;
+    if (item.type === "Horn") {
+      mediaElement = `
+        <div class="media-container position-relative">
+          ${favoriteIconHtml}
+          <div class="horn-player-wrapper" data-horn="${item.name}">
+            <button class="horn-play-btn" onclick="event.preventDefault(); event.stopPropagation(); playHornSound('${item.name}')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="play-icon">
+                <rect width="24" height="24" fill="none" />
+                <path fill="#1d7da3" d="M8 5.14v14l11-7z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="pause-icon" style="display: none;">
+                <rect width="24" height="24" fill="none" />
+                <path fill="#1d7da3" d="M14 19V5h4v14zm-8 0V5h4v14z" />
+              </svg>
+            </button>
+            <audio class="horn-audio" preload="none">
+              <source src="/assets/audios/horns/${item.name}.ogg" type="audio/ogg">
+            </audio>
+          </div>
+        </div>`;
+    } else if (item.type === "Drift") {
+      mediaElement = `
+        <div class="media-container position-relative">
+          ${favoriteIconHtml}
+          <img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" onerror="handleimage(this)">
+          <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0;" playsinline muted loop></video>
+        </div>`;
+    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
+      mediaElement = `
         <div class="media-container position-relative">
             ${favoriteIconHtml}
-            ${
-              item.type === "Drift"
-                ? `<img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" onerror="handleimage(this)">
-                   <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0;" playsinline muted loop></video>`
-                : item.type === "HyperChrome" && item.name === "HyperShift"
-                ? `<video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" playsinline muted loop autoplay id="hypershift-video" onerror="handleimage(this)"></video>`
-                : `<img onerror="handleimage(this)" id="${
-                    item.name
-                  }" src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-                    item.name
-                  }.webp" class="card-img-top" alt="${item.name}">`
-            }
+            <video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" playsinline muted loop autoplay id="hypershift-video" onerror="handleimage(this)"></video>
         </div>`;
+    } else {
+      mediaElement = `
+        <div class="media-container position-relative">
+            ${favoriteIconHtml}
+            <img onerror="handleimage(this)" id="${
+              item.name
+            }" src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+        item.name
+      }.webp" class="card-img-top" alt="${item.name}">
+        </div>`;
+    }
 
     // Case for HyperShift inside createItemCard function
     if (item.name === "HyperShift" && item.type === "HyperChrome") {
@@ -1298,7 +1330,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create a loading queue to prevent overwhelming the browser
     const imageQueue = allItems
       .map((item) => {
-        if (item.type.toLowerCase() === "drift") return null;
+        // Skip drift items and horn items
+        if (
+          item.type.toLowerCase() === "drift" ||
+          item.type.toLowerCase() === "horn"
+        ) {
+          return null;
+        }
 
         const image_type = item.type.toLowerCase();
         return `/assets/images/items/480p/${image_type}s/${item.name}.webp`;
@@ -1585,3 +1623,46 @@ function preloadDriftThumbnails(driftItems) {
     img.src = `/assets/images/items/480p/drifts/${item.name}.webp`;
   });
 }
+
+// Add horn sound playback function
+window.playHornSound = function (hornName) {
+  const hornWrapper = document.querySelector(`[data-horn="${hornName}"]`);
+  const audioElement = hornWrapper.querySelector("audio");
+  const playIcon = hornWrapper.querySelector(".play-icon");
+  const pauseIcon = hornWrapper.querySelector(".pause-icon");
+
+  if (audioElement) {
+    // Stop all other playing horns first and reset their icons
+    document.querySelectorAll(".horn-audio").forEach((audio) => {
+      if (audio !== audioElement) {
+        audio.pause();
+        audio.currentTime = 0;
+        // Reset other horns' icons
+        const otherWrapper = audio.closest(".horn-player-wrapper");
+        otherWrapper.querySelector(".play-icon").style.display = "block";
+        otherWrapper.querySelector(".pause-icon").style.display = "none";
+      }
+    });
+
+    if (audioElement.paused) {
+      // Add event listener for when audio finishes playing
+      audioElement.addEventListener(
+        "ended",
+        function () {
+          playIcon.style.display = "block";
+          pauseIcon.style.display = "none";
+        },
+        { once: true }
+      ); // Use once:true to automatically remove listener after it fires
+
+      audioElement.play();
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "block";
+    } else {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      playIcon.style.display = "block";
+      pauseIcon.style.display = "none";
+    }
+  }
+};
