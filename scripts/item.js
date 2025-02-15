@@ -1411,10 +1411,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                    <rect width="24" height="24" fill="none" />
-                                    <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z" />
-                                  </svg> Read More
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" />
+</svg> Read More
                                   </button>`
                                : ""
                            }
@@ -2161,14 +2161,13 @@ function initializeDescriptionToggle() {
     readMoreBtn.style.display = "flex";
     description.classList.add("collapsed");
     description.classList.remove("expanded");
-
     readMoreBtn.addEventListener("click", () => {
       const isCollapsed = description.classList.contains("collapsed");
       description.classList.toggle("collapsed");
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z" /></svg>Show Less'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z" /></svg>Read More';
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z" /></svg>Show Less'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z" /></svg>Read More';
     });
   }
 }
