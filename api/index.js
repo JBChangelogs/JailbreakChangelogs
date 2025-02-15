@@ -498,6 +498,8 @@ app.get("/item/:type/:item", async (req, res) => {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
     } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.gif`;
+    } else if (item.type === "Horn") {
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/audios/horn_thumbnail.webp`;
     } else {
       const pluralType = `${item.type.toLowerCase()}s`;
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
