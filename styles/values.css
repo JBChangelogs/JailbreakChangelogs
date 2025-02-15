@@ -29,7 +29,14 @@ body {
   overflow: visible !important;
   background-color: var(--bg-secondary);
   margin-bottom: 0;
+  cursor: pointer;
+  transition: filter 0.2s ease;
 }
+
+.media-container:hover {
+  filter: brightness(1.1);
+}
+
 .media-container img,
 .media-container video {
   position: absolute;
@@ -40,6 +47,31 @@ body {
   object-fit: cover;
   transition: opacity 0.3s ease-in-out;
 }
+
+.media-container[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+}
+
+.media-container[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  bottom: calc(100% + 5px);
+}
+
 .item-card-body {
   padding: 0.5rem 0.5rem 1rem; /* Reduce side padding */
   flex-grow: 1;
@@ -47,6 +79,12 @@ body {
   flex-direction: column;
   margin-top: 0;
   background-color: var(--bg-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.item-card-body:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .value-row {
@@ -1512,6 +1550,7 @@ body.menu-open {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .horn-player-wrapper img {
@@ -1519,6 +1558,13 @@ body.menu-open {
   height: 100%;
   object-fit: contain;
   opacity: 0.8; /* Slightly dim the thumbnail */
+}
+
+/* Remove existing horn play button styles */
+.horn-play-btn,
+.play-icon,
+.pause-icon {
+  display: none !important;
 }
 
 .horn-play-btn {
@@ -1562,4 +1608,24 @@ body.menu-open {
     width: 32px; /* Reduced from 40px */
     height: 32px;
   }
+}
+
+.media-tooltip {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.media-container:hover .media-tooltip {
+  opacity: 1;
 }

@@ -906,6 +906,7 @@ document.addEventListener("DOMContentLoaded", function () {
           case "hyperchrome":
           case "furniture":
           case "limited-item":
+          case "horn":
             url = `https://api3.jailbreakchangelogs.xyz/items/get?type=${comment.item_type}&id=${comment.item_id}`;
             break;
 
@@ -1212,7 +1213,8 @@ document.addEventListener("DOMContentLoaded", function () {
           imageUrl = level10Reward?.link || "assets/images/changelogs/347.webp";
         } else if (comment.item_type === "trade") {
           // Handle trade comments
-          imageUrl = "assets/backgrounds/background11.webp"; // Default image for trades
+          imageUrl =
+            "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp"; // Default image for trades
           displayTitle = `Trade #${comment.item_id}`;
           displayType = "Trade";
           viewPath = `/trading/ad/${comment.item_id}`; // Correct path for trade pages
@@ -1229,13 +1231,18 @@ document.addEventListener("DOMContentLoaded", function () {
             "hyperchrome",
             "furniture",
             "limited-item",
+            "horn",
           ].includes(comment.item_type.toLowerCase())
         ) {
           // Updated image URL structure to match the correct path
           const itemType = comment.item_type.toLowerCase() + "s"; // Add 's' to pluralize
-          imageUrl = item.name
-            ? `/assets/images/items/480p/${itemType}/${item.name}.webp` // Added /assets/items/ and .webp extension
-            : "assets/images/changelogs/347.webp";
+          if (comment.item_type === "horn") {
+            imageUrl = "/assets/audios/horn_thumbnail.webp";
+          } else {
+            imageUrl = item.name
+              ? `/assets/images/items/480p/${itemType}/${item.name}.webp`
+              : "assets/images/changelogs/347.webp";
+          }
           displayTitle = item.name || "Unknown Item";
           displayType = item.type || comment.item_type;
           viewPath = `/item/${comment.item_type.toLowerCase()}/${encodeURIComponent(
@@ -2000,6 +2007,7 @@ document.addEventListener("DOMContentLoaded", function () {
       texture: "#708090",
       hyperchrome: "#E91E63",
       furniture: "#9C6644",
+      horn: "#4A90E2",
     };
     return colors[type] || "#748D92";
   }

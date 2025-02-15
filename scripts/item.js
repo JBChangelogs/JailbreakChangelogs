@@ -645,30 +645,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Determine media element based on type
     let element;
     if (item.type.toLowerCase() === "horn") {
-      // Skip image attempt completely for horns, just show the audio player
       element = `
-        <div class="media-container">
-          <div class="horn-player-wrapper">
-          <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
-            <button class="horn-play-btn" onclick="playHornSound()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="play-icon">
-                <rect width="48" height="48" fill="none" />
-                <g fill="none" stroke-linejoin="round" stroke-width="4">
-                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
-                  <path fill="#43ccf8" stroke="#fff" d="M20 24V17.0718L26 20.5359L32 24L26 27.4641L20 30.9282V24Z" />
-                </g>
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="pause-icon" style="display: none;">
-                <rect width="48" height="48" fill="none" />
-                <g fill="none" stroke-linejoin="round" stroke-width="4">
-                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
-                  <path stroke="#fff" stroke-linecap="round" d="M19 18V30" />
-                  <path stroke="#fff" stroke-linecap="round" d="M29 18V30" />
-                </g>
-              </svg>
-            </button>
+        <div class="media-container" data-tooltip="Click to play horn sound">
+          <div class="horn-player-wrapper" onclick="playHornSound(this)">
+            <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
             <audio class="horn-audio" preload="none">
-              <source src="/assets/audios/horns/${item.name}.ogg" type="audio/ogg">
+              <source src="/assets/audios/horns/${item.name}.mp3" type="audio/mp3">
             </audio>
           </div>
         </div>`;
@@ -2110,32 +2092,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Add horn player functionality
-window.playHornSound = function () {
-  const audioElement = document.querySelector(".horn-audio");
-  const playIcon = document.querySelector(".play-icon");
-  const pauseIcon = document.querySelector(".pause-icon");
+window.playHornSound = function (wrapper) {
+  const audio = wrapper.querySelector(".horn-audio");
+  const allAudios = document.querySelectorAll(".horn-audio");
 
-  if (audioElement) {
-    if (audioElement.paused) {
-      // Add event listener for when audio finishes playing
-      audioElement.addEventListener(
-        "ended",
-        function () {
-          playIcon.style.display = "block";
-          pauseIcon.style.display = "none";
-        },
-        { once: true }
-      );
-
-      audioElement.play();
-      playIcon.style.display = "none";
-      pauseIcon.style.display = "block";
-    } else {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      playIcon.style.display = "block";
-      pauseIcon.style.display = "none";
+  // Stop all other playing horns first
+  allAudios.forEach((a) => {
+    if (a !== audio) {
+      a.pause();
+      a.currentTime = 0;
     }
+  });
+
+  if (audio.paused) {
+    audio.play();
+  } else {
+    audio.pause();
+    audio.currentTime = 0;
   }
 };
 

@@ -1032,29 +1032,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let mediaElement;
     if (item.type === "Horn") {
       mediaElement = `
-        <div class="media-container position-relative">
+        <div class="media-container position-relative" onclick="handleHornClick('${item.name}', event)">
           ${favoriteIconHtml}
           <div class="horn-player-wrapper" data-horn="${item.name}">
             <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
-            <button class="horn-play-btn" onclick="event.preventDefault(); event.stopPropagation(); playHornSound('${item.name}')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="play-icon">
-                <rect width="48" height="48" fill="none" />
-                <g fill="none" stroke-linejoin="round" stroke-width="4">
-                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
-                  <path fill="#43ccf8" stroke="#fff" d="M20 24V17.0718L26 20.5359L32 24L26 27.4641L20 30.9282V24Z" />
-                </g>
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" class="pause-icon" style="display: none;">
-                <rect width="48" height="48" fill="none" />
-                <g fill="none" stroke-linejoin="round" stroke-width="4">
-                  <path fill="#2f88ff" stroke="#000" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" />
-                  <path stroke="#fff" stroke-linecap="round" d="M19 18V30" />
-                  <path stroke="#fff" stroke-linecap="round" d="M29 18V30" />
-                </g>
-              </svg>
-            </button>
             <audio class="horn-audio" preload="none">
-              <source src="/assets/audios/horns/${item.name}.ogg" type="audio/ogg">
+              <source src="/assets/audios/horns/${item.name}.mp3" type="audio/mp3">
             </audio>
           </div>
         </div>`;
@@ -1321,6 +1304,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Add click handlers for media containers
+    const mediaContainer = cardDiv.querySelector(".media-container");
+    if (mediaContainer) {
+      mediaContainer.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (item.type === "Drift") {
+          const video = mediaContainer.querySelector("video");
+          const thumbnail = mediaContainer.querySelector(".thumbnail");
+
+          if (video.paused) {
+            video.style.opacity = "1";
+            thumbnail.style.opacity = "0";
+            video.play();
+          } else {
+            video.style.opacity = "0";
+            thumbnail.style.opacity = "1";
+            video.pause();
+            video.currentTime = 0;
+          }
+        }
+        // Horn clicks are handled by onclick attribute
+      });
+    }
+
     // Return the created element
     return cardDiv;
   }
@@ -1563,6 +1572,11 @@ window.handleCardClick = function (name, type, event) {
     return;
   }
 
+  // Only handle navigation if click is in card-body
+  if (!event.target.closest(".item-card-body")) {
+    return;
+  }
+
   event.preventDefault();
 
   // Always convert spaces to hyphens for consistent storage
@@ -1599,6 +1613,31 @@ window.handleCategoryClick = function (event, category) {
   sortItems();
 };
 
+// Add new function for horn playback
+function handleHornClick(hornName, event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const audioElement = document.querySelector(
+    `[data-horn="${hornName}"] audio`
+  );
+
+  // Stop all other playing horns first
+  document.querySelectorAll(".horn-audio").forEach((audio) => {
+    if (audio !== audioElement) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  });
+
+  if (audioElement.paused) {
+    audioElement.play();
+  } else {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+  }
+}
+
 // Make sure sortItems is accessible globally
 if (typeof window.sortItems !== "function") {
   console.warn("sortItems not found on window object, ensuring it's defined");
@@ -1632,46 +1671,3 @@ function preloadDriftThumbnails(driftItems) {
     img.src = `/assets/images/items/480p/drifts/${item.name}.webp`;
   });
 }
-
-// Add horn sound playback function
-window.playHornSound = function (hornName) {
-  const hornWrapper = document.querySelector(`[data-horn="${hornName}"]`);
-  const audioElement = hornWrapper.querySelector("audio");
-  const playIcon = hornWrapper.querySelector(".play-icon");
-  const pauseIcon = hornWrapper.querySelector(".pause-icon");
-
-  if (audioElement) {
-    // Stop all other playing horns first and reset their icons
-    document.querySelectorAll(".horn-audio").forEach((audio) => {
-      if (audio !== audioElement) {
-        audio.pause();
-        audio.currentTime = 0;
-        // Reset other horns' icons
-        const otherWrapper = audio.closest(".horn-player-wrapper");
-        otherWrapper.querySelector(".play-icon").style.display = "block";
-        otherWrapper.querySelector(".pause-icon").style.display = "none";
-      }
-    });
-
-    if (audioElement.paused) {
-      // Add event listener for when audio finishes playing
-      audioElement.addEventListener(
-        "ended",
-        function () {
-          playIcon.style.display = "block";
-          pauseIcon.style.display = "none";
-        },
-        { once: true }
-      ); // Use once:true to automatically remove listener after it fires
-
-      audioElement.play();
-      playIcon.style.display = "none";
-      pauseIcon.style.display = "block";
-    } else {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      playIcon.style.display = "block";
-      pauseIcon.style.display = "none";
-    }
-  }
-};
