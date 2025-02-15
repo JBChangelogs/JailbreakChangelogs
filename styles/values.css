@@ -26,15 +26,16 @@ body {
   position: relative !important;
   width: 100%;
   aspect-ratio: 16/9 !important;
-  overflow: visible !important;
+  overflow: hidden; /* Ensure scaled image stays contained */
   background-color: var(--bg-secondary);
   margin-bottom: 0;
   cursor: pointer;
-  transition: filter 0.2s ease;
+  transition: filter 0.2s ease, background-color 0.2s ease, transform 0.3s ease;
 }
 
+/* Update media container hover */
 .media-container:hover {
-  filter: brightness(1.1);
+  background-color: transparent; /* Remove background change */
 }
 
 .media-container img,
@@ -45,7 +46,12 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease-in-out;
+  transition: transform 0.3s ease, opacity 0.3s ease-in-out;
+}
+
+.media-container:hover img,
+.media-container:hover video {
+  transform: scale(1.05); /* Subtle zoom effect */
 }
 
 .media-container[data-tooltip]::before {
@@ -80,11 +86,22 @@ body {
   margin-top: 0;
   background-color: var(--bg-primary);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .item-card-body:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: transparent; /* Remove background change */
+}
+
+.item-card-body:hover .card-title {
+  color: var(--accent-color-light);
+  transform: translateX(4px); /* Slide right instead of up */
+}
+
+.item-card-body:hover .value-row {
+  transform: none; /* Remove vertical movement */
+  border-left: 2px solid var(--accent-color-light); /* Add subtle left border */
+  padding-left: 10px; /* Add padding to accommodate border */
 }
 
 .value-row {
@@ -94,6 +111,8 @@ body {
   display: flex;
   justify-content: space-between;
   margin: 0;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
 }
 
 .value-row:first-child {
@@ -106,6 +125,10 @@ body {
 
 .value-row:nth-child(3) {
   background: rgba(0, 213, 255, 0.1); /* Demand background */
+}
+
+.value-row:hover {
+  background-color: rgba(29, 125, 163, 0.05); /* Very subtle highlight */
 }
 
 .card {
@@ -139,18 +162,17 @@ body {
   transition: opacity 0.2s ease;
   pointer-events: none;
   z-index: 1;
+  display: none; /* Remove the bright overlay */
 }
+
 .items-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transform: none;
 }
+
 .items-card:hover::before {
   opacity: 1;
 }
-.items-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
+
 .loading-spinner {
   display: none;
   text-align: center;
@@ -1376,7 +1398,7 @@ body {
   position: absolute !important;
   top: 8px !important;
   left: 8px !important;
-  z-index: 10 !important; /* Lower z-index so it stays below side menu */
+  z-index: 20 !important; /* Lower z-index so it stays below side menu */
   opacity: 0;
   width: 32px;
   height: 32px;
@@ -1393,7 +1415,9 @@ body {
   visibility: hidden;
 }
 
-.items-card:hover .favorite-icon {
+.items-card:hover .favorite-icon,
+.media-container:hover .favorite-icon,
+.item-card-body:hover .favorite-icon {
   opacity: 1;
   transform: scale(1);
   visibility: visible; /* Show on hover */
@@ -1416,21 +1440,6 @@ body {
 
   .favorite-icon i {
     font-size: 0.9rem !important;
-  }
-}
-
-/* Modify the touch device styles */
-@media (hover: none) {
-  .favorite-icon {
-    opacity: 0; /* Start invisible on mobile */
-    visibility: hidden;
-    transform: scale(0.8);
-  }
-
-  .items-card:active .favorite-icon {
-    opacity: 0.8;
-    visibility: visible;
-    transform: scale(1);
   }
 }
 
@@ -1504,14 +1513,44 @@ body.menu-open {
 }
 
 @media (hover: none) {
-  /* For touch devices, always show favorite icon with reduced opacity */
+  .media-container:hover {
+    background-color: transparent;
+  }
+
+  .media-container:hover img,
+  .media-container:hover video {
+    transform: none;
+  }
+
+  .item-card-body:hover {
+    background-color: var(--bg-primary);
+  }
+
+  .item-card-body:hover .card-title {
+    transform: none;
+    color: var(--text-primary);
+  }
+
+  .item-card-body:hover .value-row {
+    transform: none;
+    border-left: none;
+    padding-left: 8px;
+  }
+
+  .value-row:hover {
+    background-color: transparent;
+  }
+
   .favorite-icon {
-    opacity: 0.8;
+    opacity: 0; /* Start invisible on mobile */
+    visibility: hidden;
     transform: scale(1);
   }
 
-  .items-card:hover {
-    transform: none;
+  .items-card:active .favorite-icon {
+    opacity: 0.8;
+    visibility: visible;
+    transform: scale(1);
   }
 }
 
