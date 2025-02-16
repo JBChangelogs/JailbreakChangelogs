@@ -311,30 +311,43 @@ app.get("/seasons/:season", async (req, res) => {
     const data = await response.json();
     const rewardsData = await rewardsResponse.json();
 
-    // Find the Level 10 reward
-    const level_10_reward = rewardsData.find(
-      (reward) => reward.requirement === "Level 10"
-    );
+    // Generate image URLs for embedding
+    const baseImageUrl =
+      "https://jailbreakchangelogs.xyz/assets/images/seasons";
 
-    // Ensure we got the reward before accessing properties
-    let image_url =
-      "https://jailbreakchangelogs.xyz/assets/images/changelogs/346.webp";
-    if (level_10_reward) {
-      image_url = level_10_reward.link;
+    // Get level 10 reward
+    const level10Image = `${baseImageUrl}/${seasonId}/10.webp`;
+
+    // Generate array of available level numbers (2-9)
+    const availableLevels = Array.from({ length: 8 }, (_, i) => i + 2);
+
+    // Randomly select 3 unique levels
+    const selectedLevels = [];
+    while (selectedLevels.length < 3 && availableLevels.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableLevels.length);
+      selectedLevels.push(availableLevels.splice(randomIndex, 1)[0]);
     }
 
-    const { season, title } = data; // Adjust the destructured properties based on the API response structure
+    // Create array of image URLs including level 10 and random selections
+    const imageUrls = [
+      level10Image,
+      ...selectedLevels.map(
+        (level) => `${baseImageUrl}/${seasonId}/${level}.webp`
+      ),
+    ];
+
+    const { season, title } = data;
     res.render("seasons", {
       season,
       title,
-      image_url,
+      image_urls: imageUrls, // Pass array of image URLs to template
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Jailbreak Seasons Logo",
       seasonId,
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
-    }); // Render the seasons page with the retrieved data
+    });
   } catch (error) {
     console.error("Error fetching season data:", error);
     res.status(500).send("Internal Server Error");
