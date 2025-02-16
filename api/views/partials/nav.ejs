@@ -42,32 +42,18 @@
       <!-- Desktop menu -->
       <div class="navbar-desktop-menu d-none d-lg-flex">
         <ul class="navbar-nav align-items-center">
-          <!-- Game Updates -->
-          <li class="nav-item dropdown">
-            <a class="nav-link" href="#" data-bs-toggle="dropdown">
-              Game Updates
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                class="dropdown-arrow"
-              >
-                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-              </svg>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark">
-              <li>
-                <a class="dropdown-item" href="/changelogs">Changelogs</a>
-              </li>
-              <li><a class="dropdown-item" href="/seasons">Seasons</a></li>
-            </ul>
+          <!-- Regular nav items -->
+          <li class="nav-item">
+            <a class="nav-link" href="/changelogs">Changelogs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/seasons">Seasons</a>
           </li>
 
-          <!-- Trading -->
+          <!-- Values dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link" href="#" data-bs-toggle="dropdown">
-              Trading
+              Values
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -82,7 +68,7 @@
               <li>
                 <a class="dropdown-item" href="/trading">Create Trade Ad</a>
               </li>
-              <li><a class="dropdown-item" href="/values">Values</a></li>
+              <li><a class="dropdown-item" href="/values">Value List</a></li>
               <li>
                 <a class="dropdown-item" href="/dupes/calculator"
                   >Dupe Calculator</a
@@ -210,9 +196,9 @@
           </div>
 
           <div class="side-menu-section">
-            <div class="side-menu-section-title">Trading</div>
+            <div class="side-menu-section-title">Values</div>
             <a class="side-menu-item" href="/trading">Create Trade Ad</a>
-            <a class="side-menu-item" href="/values">Values</a>
+            <a class="side-menu-item" href="/values">Value List</a>
             <a class="side-menu-item" href="/dupes/calculator"
               >Dupe Calculator</a
             >
@@ -731,7 +717,7 @@
   .main-navigation .side-menu-item:hover {
     background: var(--bg-secondary);
     padding-left: 1.75rem;
-    color: var(--accent-color-light);
+    color: var (--accent-color-light);
   }
 
   .main-navigation .side-menu-item::before {
