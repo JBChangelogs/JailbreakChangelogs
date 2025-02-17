@@ -13,6 +13,41 @@ const MIN_DESCRIPTION_LENGTH = 25;
 const DATA_SOURCE_URL =
   "https://badimo.nyc3.digitaloceanspaces.com/trade/frequency/snapshot/month/latest.json";
 
+const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === "AbortError") {
+      throw new Error("Request timed out");
+    }
+    throw error;
+  }
+};
+
+// Add this helper function at the top with other utility functions
+const safeJsonParse = async (response) => {
+  try {
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON response:", text.substring(0, 100));
+      throw new Error("Invalid JSON response from server");
+    }
+  } catch (e) {
+    throw new Error("Failed to read response");
+  }
+};
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://jailbreakchangelogs.xyz");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
@@ -146,15 +181,18 @@ app.get("/changelogs/:changelog", async (req, res) => {
   let changelogId = req.params.changelog || 1;
 
   try {
-    // Fetch both latest and requested changelog data in parallel
+    // Use Promise.race with timeout for parallel requests
     const [latestResponse, requestedResponse] = await Promise.all([
-      fetch("https://api3.jailbreakchangelogs.xyz/changelogs/latest", {
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://jailbreakchangelogs.xyz",
-        },
-      }),
-      fetch(
+      fetchWithTimeout(
+        "https://api3.jailbreakchangelogs.xyz/changelogs/latest",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://jailbreakchangelogs.xyz",
+          },
+        }
+      ),
+      fetchWithTimeout(
         `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`,
         {
           headers: {
@@ -220,11 +258,24 @@ app.get("/changelogs/:changelog", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching changelog data:", error);
-    return res.status(404).render("error", {
-      title: "404 - Changelog Not Found",
+    if (error.message === "Request timed out") {
+      return res.status(503).render("error", {
+        title: "503 - Service Unavailable",
+        message:
+          "The server is taking too long to respond. Please try again later.",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "Error Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+    return res.status(500).render("error", {
+      title: "500 - Server Error",
+      message: "The server encountered an error while processing your request.",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-      logoAlt: "404 Page Logo",
+      logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
@@ -247,14 +298,22 @@ app.get("/seasons/:season", async (req, res) => {
   const rewardsUrl = `https://api3.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
   const latestSeason = 24;
   try {
-    // Then fetch the requested season
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Origin: "https://jailbreakchangelogs.xyz",
-      },
-    });
+    const [response, rewardsResponse] = await Promise.all([
+      fetchWithTimeout(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }),
+      fetchWithTimeout(rewardsUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }),
+    ]);
 
     if (response.status === 404) {
       return res.status(404).render("error", {
@@ -271,14 +330,6 @@ app.get("/seasons/:season", async (req, res) => {
       // Redirect to latest season if requested one doesn't exist
       return res.redirect(`/seasons/${latestSeason}`);
     }
-
-    const rewardsResponse = await fetch(rewardsUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Origin: "https://jailbreakchangelogs.xyz",
-      },
-    });
 
     if (rewardsResponse.status === 404) {
       return res.status(404).render("error", {
@@ -350,7 +401,27 @@ app.get("/seasons/:season", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching season data:", error);
-    res.status(500).send("Internal Server Error");
+    if (error.message === "Request timed out") {
+      return res.status(503).render("error", {
+        title: "503 - Service Unavailable",
+        message:
+          "The server is taking too long to respond. Please try again later.",
+        logoUrl:
+          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "Error Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+    return res.status(500).render("error", {
+      title: "500 - Server Error",
+      message: "The server encountered an error while processing your request.",
+      logoUrl:
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Error Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
   }
 });
 
@@ -397,7 +468,7 @@ app.get("/bot", (req, res) => {
 
 app.get("/values", async (req, res) => {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       "https://api3.jailbreakchangelogs.xyz/items/list",
       {
         method: "GET",
@@ -408,7 +479,15 @@ app.get("/values", async (req, res) => {
       }
     );
 
-    const allItems = await response.json();
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status}`);
+    }
+
+    const allItems = await safeJsonParse(response);
+
+    if (!Array.isArray(allItems)) {
+      throw new Error("Invalid data format received");
+    }
 
     res.render("values", {
       title: "Roblox Jailbreak Values - Changelogs",
@@ -421,12 +500,15 @@ app.get("/values", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching items:", error);
-    res.render("values", {
-      title: "Roblox Jailbreak Values - Changelogs",
+    return res.status(503).render("error", {
+      title: "503 - Service Unavailable",
+      message:
+        error.message === "Request timed out"
+          ? "The server is taking too long to respond. Please try again later."
+          : "Unable to load items at this time. Please try again later.",
       logoUrl:
-        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
-      logoAlt: "Values Page Logo",
-      allItems: [],
+        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
@@ -1226,7 +1308,9 @@ app.get("/exploiters", (req, res) => {
 // Handle unknown routes by serving 404 page
 app.get("*", (req, res) => {
   res.status(404).render("error", {
-    title: "Page Not Found",
+    title: "404 - Page Not Found",
+    message:
+      "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
     logoUrl:
       "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
     logoAlt: "404 Page Logo",
