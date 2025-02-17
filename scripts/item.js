@@ -289,27 +289,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   function formatTimeAgo(timestamp) {
     if (!timestamp) return null;
 
-    const now = Math.floor(Date.now() / 1000); // Current time in seconds
-    const diff = now - timestamp;
+    // Check and convert timestamp format
+    const timestampInMs =
+      timestamp.toString().length > 10
+        ? timestamp // Already in milliseconds
+        : timestamp * 1000; // Convert seconds to milliseconds
 
-    // Time intervals in seconds
+    const now = Date.now();
+    const diff = now - timestampInMs;
+
+    // Time intervals in milliseconds
     const intervals = {
-      year: 31536000,
-      month: 2592000,
-      week: 604800,
-      day: 86400,
-      hour: 3600,
-      minute: 60,
+      year: 31536000000,
+      month: 2592000000,
+      week: 604800000,
+      day: 86400000,
+      hour: 3600000,
+      minute: 60000,
     };
 
-    if (diff < 60) return "just now";
+    // Only show "just now" if less than a minute ago
+    if (diff < 60000) return "just now";
 
-    for (const [unit, seconds] of Object.entries(intervals)) {
-      const interval = Math.floor(diff / seconds);
+    // Calculate the appropriate time interval
+    for (const [unit, ms] of Object.entries(intervals)) {
+      const interval = Math.floor(diff / ms);
       if (interval >= 1) {
         return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
       }
     }
+
+    return null;
   }
 
   const rawItemName = window.location.pathname.split("/").pop();
@@ -2174,7 +2184,7 @@ function initializeDescriptionToggle() {
       description.classList.toggle("collapsed");
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6 6l-6-6z" /></svg>Show Less'
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6 6l-6-6z" /></svg>Show Less'
         : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z" /></svg>Read More';
     });
   }

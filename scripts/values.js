@@ -15,27 +15,37 @@ const VALID_SORTS = [
 function formatTimeAgo(timestamp) {
   if (!timestamp) return null;
 
-  const now = Math.floor(Date.now() / 1000); // Current time in seconds
-  const diff = now - timestamp;
+  // Check and convert timestamp format
+  const timestampInMs =
+    timestamp.toString().length > 10
+      ? timestamp // Already in milliseconds
+      : timestamp * 1000; // Convert seconds to milliseconds
 
-  // Time intervals in seconds
+  const now = Date.now();
+  const diff = now - timestampInMs;
+
+  // Time intervals in milliseconds
   const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
+    year: 31536000000,
+    month: 2592000000,
+    week: 604800000,
+    day: 86400000,
+    hour: 3600000,
+    minute: 60000,
   };
 
-  if (diff < 60) return "just now";
+  // Only show "just now" if less than a minute ago
+  if (diff < 60000) return "just now";
 
-  for (const [unit, seconds] of Object.entries(intervals)) {
-    const interval = Math.floor(diff / seconds);
+  // Calculate the appropriate time interval
+  for (const [unit, ms] of Object.entries(intervals)) {
+    const interval = Math.floor(diff / ms);
     if (interval >= 1) {
       return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
     }
   }
+
+  return null;
 }
 
 // Global debounce function
