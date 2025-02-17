@@ -358,7 +358,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function formatStamp(unixTimestamp) {
   const date = new Date(unixTimestamp * 1000);
-  return date.toUTCString();
+  return date.toLocaleString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
 }
 
 // Function to check version
