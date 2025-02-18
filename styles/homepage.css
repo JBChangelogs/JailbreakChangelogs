@@ -3,13 +3,8 @@
 }
 
 .creator-link {
-  color: var(--text-muted);
   transition: color 0.2s ease;
   font-weight: 500;
-}
-
-.creator-link:hover {
-  color: var(--accent-color-light);
 }
 
 .heart-icon {

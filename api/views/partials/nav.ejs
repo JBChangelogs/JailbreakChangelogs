@@ -52,7 +52,7 @@
 
           <!-- Values dropdown -->
           <li class="nav-item dropdown">
-            <a class="nav-link" href="#" data-bs-toggle="dropdown">
+            <a class="nav-link no-click-toggle" href="#">
               Values
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -64,11 +64,13 @@
                 <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
               </svg>
             </a>
-            <ul class="dropdown-menu dropdown-menu-dark">
+            <ul class="dropdown-menu dropdown-menu">
+              <li><a class="dropdown-item" href="/values">Value List</a></li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="/trading">Create Trade Ad</a>
               </li>
-              <li><a class="dropdown-item" href="/values">Value List</a></li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="/dupes/calculator"
                   >Dupe Calculator</a
@@ -79,7 +81,7 @@
 
           <!-- Community -->
           <li class="nav-item dropdown">
-            <a class="nav-link" href="#" data-bs-toggle="dropdown">
+            <a class="nav-link no-click-toggle" href="#">
               Community
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -92,15 +94,25 @@
               </svg>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark">
-              <li><a class="dropdown-item" href="/users">Users</a></li>
-              <li><a class="dropdown-item" href="/servers">Servers</a></li>
-              <li><a class="dropdown-item" href="/bot">Discord Bot</a></li>
+              <li><a class="dropdown-item" href="/users">User Search</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="/servers">Private Servers</a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" href="/bot">Our Discord Bot</a></li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="/exploiters"
                   >Report Exploiters</a
                 >
               </li>
-              <li><a class="dropdown-item" href="/faq">FAQ</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="/faq"
+                  >Frequently Asked Questions</a
+                >
+              </li>
             </ul>
           </li>
 
@@ -197,8 +209,8 @@
 
           <div class="side-menu-section">
             <div class="side-menu-section-title">Values</div>
-            <a class="side-menu-item" href="/trading">Create Trade Ad</a>
             <a class="side-menu-item" href="/values">Value List</a>
+            <a class="side-menu-item" href="/trading">Create Trade Ad</a>
             <a class="side-menu-item" href="/dupes/calculator"
               >Dupe Calculator</a
             >
@@ -207,8 +219,8 @@
           <div class="side-menu-section">
             <div class="side-menu-section-title">Community</div>
             <a class="side-menu-item" href="/users">Users</a>
-            <a class="side-menu-item" href="/servers">Servers</a>
-            <a class="side-menu-item" href="/bot">Discord Bot</a>
+            <a class="side-menu-item" href="/servers">Private Servers</a>
+            <a class="side-menu-item" href="/bot">Our Discord Bot</a>
             <a class="side-menu-item" href="/exploiters">Report Exploiters</a>
           </div>
 
@@ -508,13 +520,30 @@
     const dropdowns = document.querySelectorAll(".navbar-nav .dropdown");
 
     dropdowns.forEach((dropdown) => {
-      dropdown.addEventListener("mouseenter", function () {
-        this.querySelector(".dropdown-menu").classList.add("show");
-      });
+      const menu = dropdown.querySelector(".dropdown-menu");
 
-      dropdown.addEventListener("mouseleave", function () {
-        this.querySelector(".dropdown-menu").classList.remove("show");
-      });
+      // Only handle hover events on desktop
+      const handleHover = (e) => {
+        if (window.innerWidth >= 992) {
+          menu.classList.toggle("show", e.type === "mouseenter");
+        }
+      };
+
+      dropdown.addEventListener("mouseenter", handleHover);
+      dropdown.addEventListener("mouseleave", handleHover);
+
+      // For mobile: toggle on click
+      const link = dropdown.querySelector(".no-click-toggle");
+      if (link) {
+        link.addEventListener("click", (e) => {
+          if (window.innerWidth < 992) {
+            e.preventDefault();
+            menu.classList.toggle("show");
+          } else {
+            e.preventDefault(); // Prevent any action on desktop
+          }
+        });
+      }
     });
   });
 </script>
@@ -657,7 +686,7 @@
 
   .main-navigation .nav-link:hover {
     transform: translateY(-1px);
-    background: var(--bg-secondary) !important;
+    background: var(--bg-primary) !important;
     border-radius: 6px;
     color: var(--accent-color-light) !important;
   }
@@ -683,7 +712,7 @@
   }
 
   .main-navigation .dropdown-item:hover {
-    background: var(--bg-primary) !important;
+    background: var(--bg-secondary) !important;
     padding-left: 1.5rem;
     color: var(--accent-color-light) !important;
   }
@@ -823,6 +852,13 @@
 
     .main-navigation #mobileAvatarToggle {
       margin-right: -10px;
+    }
+  }
+
+  /* Add this to prevent dropdown toggle cursor on desktop */
+  @media (min-width: 992px) {
+    .main-navigation .no-click-toggle {
+      cursor: default;
     }
   }
 </style>

@@ -561,10 +561,20 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!a.last_updated) return 1;
         if (!b.last_updated) return -1;
 
+        // Convert timestamps to milliseconds if they're in seconds
+        const timestampA =
+          a.last_updated.toString().length <= 10
+            ? a.last_updated * 1000
+            : a.last_updated;
+        const timestampB =
+          b.last_updated.toString().length <= 10
+            ? b.last_updated * 1000
+            : b.last_updated;
+
         // Sort by timestamp
         return valueSortType === "last-updated-desc"
-          ? b.last_updated - a.last_updated
-          : a.last_updated - b.last_updated;
+          ? timestampB - timestampA
+          : timestampA - timestampB;
       });
     }
 

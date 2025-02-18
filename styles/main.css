@@ -179,14 +179,6 @@
   padding: 0.25rem; /* Reduced from 0.5rem */
 }
 
-.jb-footer__social-link:hover {
-  color: #1da1f2; /* Twitter blue */
-}
-
-.jb-footer__social-link[title*="Discord"]:hover {
-  color: #5865f2; /* Discord blurple */
-}
-
 /* Section styles */
 .jb-footer__section {
   padding: var(--jb-footer-spacing-md);
@@ -223,20 +215,6 @@
 .jb-footer__link:hover {
   color: var(--jb-footer-link-hover);
   transform: translateX(4px);
-}
-
-/* Platform-specific icon colors */
-.jb-footer__link:hover .bi-reddit {
-  color: #ff4500; /* Reddit orange */
-}
-
-.jb-footer__link:hover .bi-discord {
-  color: #5865f2; /* Discord blurple */
-}
-
-/* Keep other icons using default hover color */
-.jb-footer__link:hover .bi:not(.bi-reddit):not(.bi-discord) {
-  color: inherit;
 }
 
 /* Button styles */
