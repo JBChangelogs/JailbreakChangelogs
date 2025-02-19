@@ -413,7 +413,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof value === "string") {
       // Normalize the string: replace comma with period for decimal numbers
       value = value.toLowerCase().replace(",", ".");
-      if (value.endsWith("m")) {
+      if (value.endsWith("b")) {
+        numericValue = parseFloat(value) * 1000000000;
+      } else if (value.endsWith("m")) {
         numericValue = parseFloat(value) * 1000000;
       } else if (value.endsWith("k")) {
         numericValue = parseFloat(value) * 1000;
@@ -942,6 +944,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           .map((part) => {
             part = part.trim();
             // Parse each part of the range
+            if (part.toLowerCase().endsWith("b")) {
+              const num =
+                parseFloat(part.toLowerCase().replace("b", "")) * 1000000000;
+              return `${cashIcon} ${num.toLocaleString()}`;
+            }
             if (part.toLowerCase().endsWith("k")) {
               const num =
                 parseFloat(part.toLowerCase().replace("k", "")) * 1000;
@@ -978,8 +985,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           return `<img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
         }
 
-        // Handle k/m suffixes
+        // Handle b/k/m suffixes
         const lowerPrice = price.toLowerCase();
+        if (lowerPrice.endsWith("b")) {
+          const baseNumber =
+            parseFloat(lowerPrice.replace("b", "")) * 1000000000;
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+        <rect width="16" height="16" fill="none" />
+        <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+        <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+        <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+        </svg> ${baseNumber.toLocaleString()}`;
+        }
         if (lowerPrice.endsWith("k")) {
           const baseNumber = parseFloat(lowerPrice.replace("k", "")) * 1000;
           return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
@@ -1371,7 +1388,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z"/></svg>Read More
                                   </button>`
                                : ""
                            }
@@ -2132,7 +2149,7 @@ function initializeDescriptionToggle() {
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
         ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z"/></svg>Show Less'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More';
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z"/></svg>Read More';
     });
   }
 }
