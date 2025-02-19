@@ -3,8 +3,11 @@
     <% if (type === 'changelog') { %> Comments for Changelog #<%= itemId %> <% }
     else if (type === 'season') { %> Comments for Season <%= itemId %> <% } else
     if (type === 'trade') { %> Comments for Trade #<%= itemId %> <% } else { %>
-    Comments for <%= itemName %> [<%= type.charAt(0).toUpperCase() +
-    type.slice(1) %>] <% } %>
+    Comments for <%= itemName %>
+    <span class="text-muted"
+      >(<%= type.charAt(0).toUpperCase() + type.slice(1) %>)</span
+    >
+    <% } %>
   </h2>
 
   <div class="row justify-content-center">
