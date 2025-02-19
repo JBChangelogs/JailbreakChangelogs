@@ -255,7 +255,7 @@ class CommentsManager {
       // Handle 404 (no comments) separately
       if (response.status === 404) {
         this.commentsList.innerHTML = `
-          <li class="list-group-item text-center" style="background-color: #212a31;">
+          <li class="list-group-item text-center border-0" style="background-color: transparent;">
             <div class="py-3">
            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
             <rect width="16" height="16" fill="none" />
@@ -339,7 +339,7 @@ class CommentsManager {
 
       if (this.comments.length === 0) {
         this.commentsList.innerHTML = `
-          <li class="list-group-item text-center" style="background-color: #212a31;">
+          <li class="list-group-item text-center border-0" style="background-color: transparent;">
               <div class="py-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
                   <rect width="16" height="16" fill="none" />

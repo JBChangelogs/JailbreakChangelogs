@@ -210,7 +210,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.7/styles/item.min.css"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.14/styles/item.min.css"
     />
     <!-- <link rel="stylesheet" href="styles/item.css" /> -->
     <link
@@ -255,27 +255,101 @@
     <%- include('partials/nav') %>
     <%- include('partials/loading') %>
 
-    <div id="item-container">
-      <!-- Item will be loaded here dynamically -->
-    </div>
+    <div class="container-fluid mt-3">
+      <!-- Breadcrumb moved to top -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/values">Values</a></li>
+          <li class="breadcrumb-item">
+            <a
+              href="/values?sort=<%= itemType.toLowerCase() %>s&valueSort=cash-desc"
+            >
+              <%= itemType.charAt(0).toUpperCase() + itemType.slice(1) %>s
+            </a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= item.name %>
+          </li>
+        </ol>
+      </nav>
 
-    <div class="container-fluid mt-4">
-      <div class="similar-items-section">
-        <h3
-          class="mb-4"
-          style="font-family: 'Luckiest Guy', cursive; letter-spacing: 1px"
-        >
-          Similar Items
-        </h3>
-        <div class="row g-4" id="similar-items">
-          <!-- Similar items will be loaded here -->
+      <!-- Tabs Navigation -->
+      <ul
+        class="nav nav-tabs nav-fill justify-content-center mb-0"
+        id="itemTabs"
+        role="tablist"
+      >
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="details-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#details"
+            type="button"
+            role="tab"
+          >
+            Details
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="similar-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#similar"
+            type="button"
+            role="tab"
+          >
+            Similar Items
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="comments-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#comments"
+            type="button"
+            role="tab"
+          >
+            Comments
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tabs Content -->
+      <div class="tab-content" id="itemTabsContent">
+        <!-- Details Tab -->
+        <div class="tab-pane fade show active" id="details" role="tabpanel">
+          <div id="item-container">
+            <!-- Item details will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Similar Items Tab -->
+        <div class="tab-pane fade" id="similar" role="tabpanel">
+          <div class="container">
+            <h3
+              class="mb-4"
+              style="font-family: 'Luckiest Guy', cursive; letter-spacing: 1px"
+            >
+              Similar Items <span class="text-muted">(<%= itemType %>s)</span>
+            </h3>
+            <div class="row g-4" id="similar-items">
+              <!-- Similar items will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Comments Tab -->
+        <div class="tab-pane fade" id="comments" role="tabpanel">
+          <div class="container">
+            <%- include('partials/comments', { type: itemType.toLowerCase(),
+            itemId: item.id, itemName: item.name }) %>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="container">
-      <%- include('partials/comments', { type: itemType.toLowerCase(), itemId:
-      item.id, itemName: item.name }) %>
     </div>
 
     <%- include('partials/footer') %>
@@ -303,8 +377,8 @@
     <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.12/scripts/main.min.js"></script>
     <!-- <script src="scripts/main.js"></script> -->
     <!-- <script src="/scripts/comments.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.18/scripts/comments.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.14/scripts/comments.min.js"></script>
     <!-- <script src="scripts/item.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.11/scripts/item.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.14/scripts/item.min.js"></script>
   </body>
 </html>
