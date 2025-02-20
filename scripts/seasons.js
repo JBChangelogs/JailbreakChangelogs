@@ -14,10 +14,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#loading-overlay").classList.remove("show");
   }
 
-  function getCountdownColor(days) {
-    if (days <= 7) return "#FF4444"; // Red for 7 days or less
-    if (days <= 14) return "#e4c61d"; // Yellow for 14 days or less
-    return "#D3D9D4"; // Default color
+  function getCountdownColor(days, isDoubleXP) {
+    if (isDoubleXP) return "#FFB636"; // Warmer orange for double XP period
+    if (days <= 7) return "#FF6B6B"; // Softer red for urgent (7 days or less)
+    if (days <= 14) return "#FFD93D"; // Brighter yellow for warning (14 days or less)
+    return "#A8B3BC"; // Softer gray-blue for default
   }
 
   function updateBreadcrumb(season) {
@@ -423,13 +424,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentSeason && currentSeason.end_date) {
       const timeToEnd = parseInt(currentSeason.end_date) - currentTime;
       const remaining = formatTimeDifference(timeToEnd);
+      const daysRemaining = Math.ceil(timeToEnd / (24 * 60 * 60));
 
-      // If there's no next season make current season centered
       const columnClass = !nextSeason
         ? "col-12 col-md-6 mb-3 mx-auto"
         : "col-12 col-md-6 mb-3";
 
-      // Update the column class
       document.querySelector(
         "#current-season-countdown"
       ).parentElement.className = columnClass;
@@ -441,10 +441,16 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         `;
       } else {
+        const title =
+          daysRemaining <= 5
+            ? `Season ${currentSeason.season} / ${currentSeason.title} Double XP ends in:`
+            : `Season ${currentSeason.season} / ${currentSeason.title} ends in:`;
+
         updateCountdownDisplay(
           "current-season-countdown",
           remaining,
-          `Season ${currentSeason.season} / ${currentSeason.title} ends in:`
+          title,
+          daysRemaining <= 5
         );
       }
     }
@@ -460,11 +466,18 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!nextSeason.start_date && nextSeason.end_date) {
         const timeToEnd = parseInt(nextSeason.end_date) - currentTime;
         if (timeToEnd <= 0) {
-          updateCountdownDisplay(
-            "next-season-countdown",
-            { days: 0, hours: 0, minutes: 0, seconds: 0 },
-            `Season ${nextSeason.season} / ${nextSeason.title} submissions closed`
-          );
+          document.querySelector("#next-season-countdown").innerHTML = `
+            <div class="season-countdown">
+              <h3 class="countdown-title">Season ${nextSeason.season} / ${nextSeason.title} submissions have closed</h3>
+              <div class="submission-notice" style="padding-top: 0;">
+                <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ij9taa/season_${nextSeason.season}_entries_pixel_arcade/?sort=new" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="btn btn-sm btn-outline-info">
+                  <i class="fas fa-external-link-alt me-1"></i>View Season ${nextSeason.season} Submissions
+                </a>
+              </div>
+            </div>`;
         } else {
           const remaining = formatTimeDifference(timeToEnd);
           updateCountdownDisplay(
@@ -474,19 +487,32 @@ document.addEventListener("DOMContentLoaded", function () {
           );
         }
       } else {
-        updateCountdownDisplay(
-          "next-season-countdown",
-          { days: 0, hours: 0, minutes: 0, seconds: 0 },
-          `Season ${nextSeason.season} / ${nextSeason.title} submissions closed`
-        );
+        // Also update this part to include the full text
+        document.querySelector("#next-season-countdown").innerHTML = `
+          <div class="season-countdown">
+            <h3 class="countdown-title">Season ${nextSeason.season} / ${nextSeason.title} submissions have closed</h3>
+            <div class="submission-notice" style="padding-top: 0;">
+              <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ij9taa/season_${nextSeason.season}_entries_pixel_arcade/?sort=new" 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 class="btn btn-sm btn-outline-info">
+                <i class="fas fa-external-link-alt me-1"></i>View Season ${nextSeason.season} Submissions
+              </a>
+            </div>
+          </div>`;
       }
     }
   }
 
-  function updateCountdownDisplay(elementId, timeRemaining, title) {
+  function updateCountdownDisplay(
+    elementId,
+    timeRemaining,
+    title,
+    isDoubleXP = false
+  ) {
     if (!timeRemaining) return;
 
-    const countdownColor = getCountdownColor(timeRemaining.days);
+    const countdownColor = getCountdownColor(timeRemaining.days, isDoubleXP);
     const isNextSeasonCountdown = elementId === "next-season-countdown";
     const isSubmissionsOpen = title.includes("submissions close in:");
 
