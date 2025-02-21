@@ -1916,7 +1916,10 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           // Normal items handling (existing code)
-          if (itemType === "drift") {
+          let imageUrl;
+          if (itemType === "horn") {
+            imageUrl = "/assets/audios/horn_thumbnail.webp";
+          } else if (itemType === "drift") {
             imageUrl = `/assets/images/items/480p/drifts/${item.name}.webp`;
           } else {
             imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
