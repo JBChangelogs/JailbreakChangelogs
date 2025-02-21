@@ -8,7 +8,7 @@ body {
   color: var(--text-body);
 }
 .privacy-container {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
@@ -17,14 +17,14 @@ h2 {
   color: #ffffff;
 }
 h1 {
-  border-bottom: 2px solid var(--accent-color);
+  border-bottom: 2px solid var(--accent-color-light);
   padding-bottom: 10px;
 }
 h2 {
   font-size: 1.5rem;
   margin-top: 2rem;
   padding-left: 10px;
-  border-left: 4px solid var(--accent-color);
+  border-left: 4px solid var(--accent-color-light);
 }
 .lead {
   color: var(--text-body);
@@ -32,29 +32,11 @@ h2 {
 .text-muted {
   color: var(--text-muted) !important;
 }
-a {
-  color: var(--text-body);
-}
-a:hover {
-  color: var(--text-muted);
-}
+
 .last-updated {
   color: var(--text-muted);
   font-weight: 600;
 }
 .section {
   margin-bottom: 2rem;
-}
-
-.home-button {
-  background-color: var(--accent-color) !important;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-.home-button:hover {
-  background-color: var(--bg-primary) !important;
 }

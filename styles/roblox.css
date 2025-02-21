@@ -25,9 +25,13 @@ html {
 }
 
 .site-logo img {
-  height: 60px; /* Increased from 40px */
-  width: auto;
-  transition: height 0.3s ease;
+  height: 70px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  margin: -10px 0 !important;
+  position: relative;
+  z-index: 2;
 }
 
 .site-logo a {
