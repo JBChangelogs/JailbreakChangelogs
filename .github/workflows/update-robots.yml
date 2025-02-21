@@ -1,0 +1,73 @@
+name: Update Robots.txt
+
+on:
+  push:
+    branches:
+      - main
+      - testing
+
+jobs:
+  update-robots:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update robots.txt
+        run: |
+          if [[ $GITHUB_REF == "refs/heads/main" ]]; then
+            cat > robots.txt << 'EOL'
+            User-agent: *
+            Allow: /
+
+            # Legal Pages - Specify exact paths
+            Allow: /privacy$
+            Allow: /tos$
+
+            # Disallow incorrect legal page paths
+            Disallow: /item/*/privacy
+            Disallow: /item/*/tos
+            Disallow: /*/privacy
+            Disallow: /*/tos
+
+            # Main Value Pages
+            Allow: /values
+            Allow: /values/calculator
+            Allow: /item/*/
+            Allow: /item/*/*
+
+            # Important Trading Sections
+            Allow: /trading
+            Allow: /values?sort=*
+            Allow: /values/calculator
+
+            # Static Resources
+            Allow: /*.css$
+            Allow: /*.js$
+            Allow: /*.webp$
+
+            # Clean URLs
+            Disallow: /*?page=
+            Disallow: /*?filter=
+            Disallow: /api/
+
+            # Disallow recommended Cloudflare endpoints
+            Disallow: /cdn-cgi/
+
+            Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml
+            EOL
+          else
+            cat > robots.txt << 'EOL'
+            User-agent: *
+            Disallow: /
+            EOL
+          fi
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add robots.txt
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update robots.txt based on branch"
+          git push
