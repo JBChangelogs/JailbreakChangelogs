@@ -1,9 +1,6 @@
 User-agent: *
 Allow: /
 
-# Specify main domain only
-Host: jailbreakchangelogs.xyz
-
 # Legal Pages - Specify exact paths
 Allow: /privacy$
 Allow: /tos$
