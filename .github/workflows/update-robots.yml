@@ -3,6 +3,13 @@ name: Update Robots.txt
 on:
   push:
     branches: [main, testing]
+    paths-ignore:
+      - "robots.txt"
+
+# Ensure only one workflow runs at a time
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   update-robots:
@@ -11,6 +18,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Update robots.txt
         run: |
@@ -62,10 +71,28 @@ jobs:
               "Disallow: /" > robots.txt
           fi
 
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet robots.txt; then
+            echo "No changes to robots.txt"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected in robots.txt"
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit changes
+        if: steps.changes.outputs.changes == 'true'
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
           git add robots.txt
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update robots.txt based on branch"
-          git push
+          if ! git commit -m "Update robots.txt based on branch [skip ci]"; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git push || {
+            echo "Failed to push changes"
+            exit 1
+          }
