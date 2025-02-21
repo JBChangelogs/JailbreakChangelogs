@@ -1066,7 +1066,12 @@ document.addEventListener("DOMContentLoaded", () => {
       mediaElement = `
         <div class="media-container position-relative">
           ${favoriteIconHtml}
-          <img src="/assets/images/items/480p/drifts/${item.name}.webp" class="card-img-top thumbnail" alt="${item.name}" onerror="handleimage(this)">
+          <img src="/assets/images/items/480p/drifts/${item.name}.webp"
+               width="854" 
+               height="480"
+               class="card-img-top thumbnail" 
+               alt="${item.name}" 
+               onerror="handleimage(this)">
           <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0;" playsinline muted loop></video>
         </div>`;
     } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
@@ -1076,14 +1081,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" playsinline muted loop autoplay id="hypershift-video" onerror="handleimage(this)"></video>
         </div>`;
     } else {
+      const itemType = item.type.toLowerCase();
       mediaElement = `
         <div class="media-container position-relative">
             ${favoriteIconHtml}
-            <img onerror="handleimage(this)" id="${
-              item.name
-            }" src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-        item.name
-      }.webp" class="card-img-top" alt="${item.name}">
+            <img id="${item.name}" 
+                 src="/assets/images/items/480p/${itemType}s/${item.name}.webp"
+                 width="854"
+                 height="480" 
+                 class="card-img-top"
+                 alt="${item.name}"
+                 onerror="handleimage(this)">
         </div>`;
     }
 
