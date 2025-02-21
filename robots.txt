@@ -35,7 +35,4 @@ Disallow: /api/
 # Disallow recommended Cloudflare endpoints
 Disallow: /cdn-cgi/
 
-# Increased crawl rate for item pages
-Crawl-delay: 0.5
-
 Sitemap: https://jailbreakchangelogs.xyz/sitemap.xml
