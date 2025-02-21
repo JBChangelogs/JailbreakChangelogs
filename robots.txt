@@ -4,6 +4,16 @@ Allow: /
 # Specify main domain only
 Host: jailbreakchangelogs.xyz
 
+# Legal Pages - Specify exact paths
+Allow: /privacy$
+Allow: /tos$
+
+# Disallow incorrect legal page paths
+Disallow: /item/*/privacy
+Disallow: /item/*/tos
+Disallow: /*/privacy
+Disallow: /*/tos
+
 # Main Value Pages
 Allow: /values
 Allow: /values/calculator
