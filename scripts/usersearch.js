@@ -201,10 +201,9 @@ const createPaginationControls = (totalUsers) => {
 
 // User Card Template
 const getBadgeHTML = (usernumber) => {
-  const isSpecialUser = usernumber <= 100;
   return `
     <div class="user-number-badge">
-      <span class="badge bg-secondary ${isSpecialUser ? 'special-user' : ''}">#${usernumber}</span>
+      <span class="badge bg-secondary">#${usernumber}</span>
     </div>
   `;
 };
@@ -218,7 +217,9 @@ const createUserCard = async (user) => {
   }
 
   return `
-    <div class="user-card-wrapper" onclick="window.location.href='/users/${user.id}'">
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${
+      user.id
+    }'">
       <div class="card user-card">
         <div class="card-body">
           ${getBadgeHTML(user.usernumber)}
@@ -300,7 +301,9 @@ const displayUsers = async (users, page = 1) => {
   const userCardsHTML = usersToDisplay
     .map(
       (user) => `
-    <div class="user-card-wrapper" onclick="window.location.href='/users/${user.id}'">
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${
+      user.id
+    }'">
       <div class="card user-card">
         <div class="card-body">
           ${getBadgeHTML(user.usernumber)}

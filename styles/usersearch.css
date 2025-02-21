@@ -361,16 +361,6 @@ h1.display-5 {
   border: 1px solid var(--accent-color);
 }
 
-/* Special badge for first 100 users */
-.user-number-badge .badge.special-user {
-  background: linear-gradient(135deg, #ffd700, #ffa500) !important;
-  color: #000;
-  border: 1px solid #ffd700;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2);
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-}
-
 /* Pagination Styles */
 .pagination-wrapper {
   margin-top: 2rem;
