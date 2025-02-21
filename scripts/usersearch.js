@@ -200,6 +200,15 @@ const createPaginationControls = (totalUsers) => {
 };
 
 // User Card Template
+const getBadgeHTML = (usernumber) => {
+  const isSpecialUser = usernumber <= 100;
+  return `
+    <div class="user-number-badge">
+      <span class="badge bg-secondary ${isSpecialUser ? 'special-user' : ''}">#${usernumber}</span>
+    </div>
+  `;
+};
+
 const createUserCard = async (user) => {
   let avatarUrl;
   try {
@@ -209,11 +218,10 @@ const createUserCard = async (user) => {
   }
 
   return `
-    <div class="user-card-wrapper" onclick="window.location.href='/users/${
-      user.id
-    }'">
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${user.id}'">
       <div class="card user-card">
         <div class="card-body">
+          ${getBadgeHTML(user.usernumber)}
           <div class="user-info-container">
             <img 
               src="${avatarUrl}"
@@ -269,10 +277,8 @@ let avatarCache = new Map(); // Cache for avatar URLs
 
 // Modified shuffle logic to only shuffle first page
 const getInitialShuffledUsers = (users) => {
-  const firstPage = users.slice(0, USERS_PER_PAGE);
-  const shuffledFirstPage = shuffleArray(firstPage);
-  const restOfUsers = users.slice(USERS_PER_PAGE);
-  return [...shuffledFirstPage, ...restOfUsers];
+  // Sort users by usernumber in ascending order instead of shuffling
+  return users.sort((a, b) => a.usernumber - b.usernumber);
 };
 
 // User Display Logic
@@ -294,11 +300,10 @@ const displayUsers = async (users, page = 1) => {
   const userCardsHTML = usersToDisplay
     .map(
       (user) => `
-    <div class="user-card-wrapper" onclick="window.location.href='/users/${
-      user.id
-    }'">
+    <div class="user-card-wrapper" onclick="window.location.href='/users/${user.id}'">
       <div class="card user-card">
         <div class="card-body">
+          ${getBadgeHTML(user.usernumber)}
           <div class="user-info-container">
             <img 
               src="${avatarCache.get(user.id)}"
@@ -448,6 +453,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     allUsers = await response.json();
+    // Sort all users by usernumber
+    allUsers.sort((a, b) => a.usernumber - b.usernumber);
+
+    // Get sorted users instead of shuffled
+    shuffledUsers = allUsers; // No need for getInitialShuffledUsers since we're not shuffling anymore
 
     const highestUserNumber = Math.max(
       ...allUsers.map((user) => user.usernumber)
@@ -461,8 +471,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       </svg> 
       Total Users: ${highestUserNumber.toLocaleString()}
     `;
-
-    shuffledUsers = getInitialShuffledUsers(allUsers); // Initial shuffle
 
     // Pre-cache first page avatars
     const firstPageUsers = shuffledUsers.slice(0, USERS_PER_PAGE);

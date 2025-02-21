@@ -305,6 +305,11 @@ h1.display-5 {
   padding: 1.25rem !important;
 }
 
+/* Adjust card-body position to relative for absolute positioning of badge */
+.user-card .card-body {
+  position: relative;
+}
+
 .user-info-container {
   display: flex;
   align-items: center;
@@ -339,6 +344,31 @@ h1.display-5 {
   color: var(--text-muted);
   font-size: 0.875rem;
   cursor: pointer;
+}
+
+/* User Number Badge Styles */
+.user-number-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.user-number-badge .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-secondary);
+  border: 1px solid var(--accent-color);
+}
+
+/* Special badge for first 100 users */
+.user-number-badge .badge.special-user {
+  background: linear-gradient(135deg, #ffd700, #ffa500) !important;
+  color: #000;
+  border: 1px solid #ffd700;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 /* Pagination Styles */
