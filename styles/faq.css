@@ -115,20 +115,6 @@ h1 {
   font-size: 1em;
   color: var(--text-body);
 }
-a {
-  color: var(--text-muted);
-}
-a:hover {
-  color: var(--text-body);
-}
-
-.breadcrumb-item a {
-  color: var(--accent-color);
-}
-
-.breadcrumb-item.active {
-  color: var(--text-muted);
-}
 
 .accordion-button::after {
   color: var(--text-body);

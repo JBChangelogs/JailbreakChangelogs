@@ -61,10 +61,14 @@
   },
   {
     "question": "How can I connect with JBChangelogs?",
-    "answer": "There are several ways to connect with us:<br>1. Join our Discord server at <a href=\"https://discord.gg/kAuxDntHG9\" target=\"_blank\" rel=\"noopener noreferrer\">discord.gg/kAuxDntHG9</a> to trade, hang out, and discuss the website.<br>2. Follow us on X (Twitter) at <a href=\"https://x.com/JBChangelogs\" target=\"_blank\" rel=\"noopener noreferrer\">@JBChangelogs</a> for website updates and announcements."
+    "answer": "There are several ways to connect with us:<br>1. Join our Discord server at <a href=\"https://discord.gg/kAuxDntHG9\" target=\"_blank\" rel=\"noopener noreferrer\">discord.gg/kAuxDntHG9</a> to trade, hang out, and discuss the website<br>2. Follow us on X (Twitter) at <a href=\"https://x.com/JBChangelogs\" target=\"_blank\" rel=\"noopener noreferrer\">@JBChangelogs</a> for website updates and announcements<br>3. Join our Roblox group at <a href=\"https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about\" target=\"_blank\" rel=\"noopener noreferrer\">Jailbreak Changelogs Group</a><br>4. Follow us on Bluesky at <a href=\"https://bsky.app/profile/jbchangelogs.bsky.social\" target=\"_blank\" rel=\"noopener noreferrer\">@jbchangelogs.bsky.social</a>"
   },
   {
     "question": "Who can I contact if I have questions or need assistance?",
     "answer": "If you need assistance with the website, you can reach out to these Discord users: <a href=\"https://discord.com/users/659865209741246514\" target=\"_blank\" rel=\"noopener noreferrer\">@jakobiis</a> or <a href=\"https://discord.com/users/1019539798383398946\" target=\"_blank\" rel=\"noopener noreferrer\">@jalenzz</a>. Please note that these are Discord usernames and links to the individual profiles."
+  },
+  {
+    "question": "What data is collected when I log in with Discord or Roblox?",
+    "answer": "We only collect data when you choose to authenticate:<br><br><strong>Discord Authentication:</strong><br>• Discord User ID<br>• Discord Avatar<br>• Discord Username and Global Name<br>• Discord Banner<br><br><strong>Roblox Authentication:</strong><br>• Roblox Username<br>• Roblox Player ID<br>• Roblox Display Name<br>• Roblox Avatar<br>• Roblox Join Date<br><br>Important: We only collect publicly available information, and only when you choose to log in. Users who browse without authentication have no personal data stored."
   }
 ]

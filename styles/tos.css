@@ -36,12 +36,6 @@ h2 {
 .section {
   margin-bottom: 2rem;
 }
-a {
-  color: var(--text-body);
-}
-a:hover {
-  color: var(--text-muted);
-}
 .last-updated {
   color: var(--text-muted);
   font-weight: 600;
