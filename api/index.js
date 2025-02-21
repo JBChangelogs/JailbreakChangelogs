@@ -1069,6 +1069,7 @@ app.get("/users/:user", async (req, res) => {
   if (!user || !/^\d+$/.test(user)) {
     return res.status(404).render("error", {
       title: "404 - User Not Found",
+      message: "The requested user profile could not be found.",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "404 Page Logo",
@@ -1078,7 +1079,7 @@ app.get("/users/:user", async (req, res) => {
   }
 
   try {
-    // Step 1: Get user data and settings first
+    // Step 1: Get user data from API
     const userResponse = await fetch(
       `https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`,
       {
@@ -1089,10 +1090,11 @@ app.get("/users/:user", async (req, res) => {
       }
     );
 
-    // Handle both 404 and 422 status codes
+    // Handle user not found
     if (userResponse.status === 404 || userResponse.status === 422) {
       return res.status(404).render("error", {
         title: "404 - User Not Found",
+        message: "The requested user profile could not be found.",
         logoUrl:
           "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
         logoAlt: "404 Page Logo",
@@ -1101,23 +1103,41 @@ app.get("/users/:user", async (req, res) => {
       });
     }
 
-    const [settings, userData] = await Promise.all([
-      fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${user}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-        }
-      ).then((response) => response.json()),
-      userResponse.json(),
-    ]);
+    // Verify the response is valid JSON before parsing
+    const userData = await userResponse.text();
+    let parsedUserData;
+    try {
+      parsedUserData = JSON.parse(userData);
+    } catch (e) {
+      console.error("Failed to parse user data:", e);
+      throw new Error("Invalid response from user API");
+    }
 
-    // Step 2: Verify token and get logged-in user's ID
+    // Step 2: Get user settings
+    const settingsResponse = await fetch(
+      `https://api3.jailbreakchangelogs.xyz/users/settings?user=${user}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+
+    // Parse settings with error handling
+    const settingsData = await settingsResponse.text();
+    let settings;
+    try {
+      settings = JSON.parse(settingsData);
+    } catch (e) {
+      console.error("Failed to parse settings data:", e);
+      throw new Error("Invalid response from settings API");
+    }
+
+    // Step 3: Verify token and get logged-in user's ID
     let loggedInUserId = null;
     if (token) {
       try {
@@ -1142,25 +1162,25 @@ app.get("/users/:user", async (req, res) => {
       }
     }
 
-    // Step 3: Check profile access
+    // Step 4: Check profile access
     const isProfileOwner = loggedInUserId === user;
     const isPrivateProfile = settings.profile_public === 0;
     const canAccessProfile = !isPrivateProfile || isProfileOwner;
 
     // Get avatar
     const avatar = await getAvatar(
-      userData.id,
-      userData.avatar,
-      userData.username
+      parsedUserData.id,
+      parsedUserData.avatar,
+      parsedUserData.username
     );
 
     if (!canAccessProfile) {
       // Render private profile view
       return res.render("users", {
         userData: {
-          ...userData,
-          username: userData.username,
-          id: userData.id,
+          ...parsedUserData,
+          username: parsedUserData.username,
+          id: parsedUserData.id,
         },
         avatar,
         settings,
@@ -1179,7 +1199,7 @@ app.get("/users/:user", async (req, res) => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
 
     res.render("users", {
-      userData,
+      userData: parsedUserData,
       avatar,
       settings,
       title: "User Profile - Changelogs",
@@ -1193,8 +1213,10 @@ app.get("/users/:user", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in profile route:", error);
-    res.status(500).render("error", {
+    return res.status(500).render("error", {
       title: "500 - Server Error",
+      message:
+        "An error occurred while loading the user profile. Please try again later.",
       logoUrl:
         "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Error Page Logo",
