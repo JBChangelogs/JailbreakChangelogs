@@ -45,10 +45,11 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.0.20/styles/colors.min.css"
     />
-    <link
+    <!-- <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/login.min.css"
-    />
+    /> -->
+    <link rel="stylesheet" href="/styles/login.css" />
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -84,9 +85,17 @@
     <div class="site-logo">
       <a href="/">
         <img
-          src="/assets/logos/JB Changelogs Banner.webp"
+          src="/assets/logos/JB-Changelogs-480.webp"
+          srcset="
+            /assets/logos/JB-Changelogs-480.webp 480w,
+            /assets/logos/JB-Changelogs-720.webp 720w,
+            /assets/logos/JB-Changelogs-933.webp 933w
+          "
+          sizes="(min-width: 400px) 311px, calc(38.75vw + 164px)"
           alt="<%= logoAlt %>"
           class="navbar-logo"
+          width="311"
+          height="70"
         />
       </a>
     </div>
@@ -114,9 +123,17 @@
         <!-- <h1>Connect Discord</h1> -->
       </div>
       <img
-        src="/assets/logos/logos--discord.png"
+        src="/assets/logos/logos-discord-200.webp"
+        srcset="
+          /assets/logos/logos-discord-200.webp 200w,
+          /assets/logos/logos-discord-400.webp 400w,
+          /assets/logos/logos-discord-600.webp 600w
+        "
+        sizes="(min-width: 1100px) 200px, 150px"
         alt="Discord Logo"
         class="discord-logo"
+        width="200"
+        height="39"
       />
       <p class="privacy-notice">
         JailbreakChangelogs connects with Discord to build your user profile. We

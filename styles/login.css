@@ -31,9 +31,13 @@ body::before {
 }
 
 .site-logo img {
-  height: 60px; /* Increased from 40px */
-  width: auto;
-  transition: height 0.3s ease;
+  height: 70px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  margin: -10px 0 !important;
+  position: relative;
+  z-index: 2;
 }
 
 .site-logo a {
@@ -108,7 +112,7 @@ body::before {
 }
 
 .discord-logo {
-  width: 200px;
+  width: 150px; /* Change from 200px to 150px base width */
   height: auto;
   margin: 20px auto;
   display: block;
@@ -278,5 +282,12 @@ body::before {
   .roblox-logo {
     width: 150px;
     margin: 10px auto;
+  }
+}
+
+/* Add media query for larger screens */
+@media (min-width: 1080px) {
+  .discord-logo {
+    width: 200px;
   }
 }
