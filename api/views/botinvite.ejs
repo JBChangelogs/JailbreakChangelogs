@@ -3,20 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Invite the Jailbreak Changelogs Discord bot to your server"
+    />
     <title>Bot Invite - Changelogs</title>
     <link rel="canonical" href="https://jailbreakchangelogs.xyz/botinvite" />
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/botinvite.min.css"
+
+    <!-- Social Media Embedding Tags -->
+    <meta property="og:title" content="Invite Jailbreak Changelogs Bot" />
+    <meta
+      property="og:description"
+      content="Invite the Jailbreak Changelogs Discord bot to your server"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#124e66" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@latest/styles/botinvite.min.css"
+    />
 
     <script src="/scripts/main.js"></script>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','GTM-KM853GJ6');</script>
-      <!-- End Google Tag Manager -->
-       
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KM853GJ6");
+    </script>
+    <!-- End Google Tag Manager -->
+
     <script>
       // Initialize countdown value
       let countdownValue = 3;
@@ -32,7 +56,8 @@
           // Redirect to the Discord bot invite page once countdown reaches zero
           if (countdownValue < 0) {
             clearInterval(countdownInterval);
-            window.location.href = "https://discord.com/application-directory/1281308669299920907";
+            window.location.href =
+              "https://discord.com/application-directory/1281308669299920907";
           }
         }, 1000);
       }
@@ -43,9 +68,15 @@
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
-      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-      <!-- End Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KM853GJ6"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div class="container">
       <h1>Invite Jailbreak Changelogs Bot</h1>
       <p>
@@ -53,7 +84,12 @@
         <span id="countdown">3</span> seconds...
       </p>
       <p>
-        <a href="https://discord.com/application-directory/1281308669299920907" target="_blank">Click here</a> if you are not redirected automatically.
+        <a
+          href="https://discord.com/application-directory/1281308669299920907"
+          target="_blank"
+          >Click here</a
+        >
+        if you are not redirected automatically.
       </p>
     </div>
     <script
