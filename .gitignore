@@ -3,3 +3,4 @@ node_modules/
 
 # IDE - VSCode
 .vscode/
+.vercel
