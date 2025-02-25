@@ -1,0 +1,35 @@
+name: Update Version Footer
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
+
+      - name: Make API Request
+        id: api-request
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: ${{ secrets.UPDATE_VERSION_ENDPOINT }}
+          method: "POST"
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: '{"type": "website", "version": "${{ steps.commit-info.outputs.hash }}", "last_updated": "${{ steps.commit-info.outputs.timestamp }}"}'
+
+      - name: Show API Response
+        run: |
+          echo "Response Status: ${{ steps.api-request.outputs.status }}"
+          echo "Response Body: ${{ steps.api-request.outputs.response }}"
