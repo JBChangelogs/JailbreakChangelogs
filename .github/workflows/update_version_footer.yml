@@ -12,7 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
       - name: Get commit info
         id: commit-info
@@ -21,15 +26,19 @@ jobs:
           echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
 
       - name: Make API Request
-        id: api-request
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: ${{ secrets.UPDATE_VERSION_ENDPOINT }}
-          method: "POST"
-          customHeaders: '{"Content-Type": "application/json"}'
-          data: '{"type": "website", "version": "${{ steps.commit-info.outputs.hash }}", "last_updated": "${{ steps.commit-info.outputs.timestamp }}"}'
-
-      - name: Show API Response
         run: |
-          echo "Response Status: ${{ steps.api-request.outputs.status }}"
-          echo "Response Body: ${{ steps.api-request.outputs.response }}"
+          response=$(curl -s -X POST ${{ secrets.UPDATE_VERSION_ENDPOINT }} \
+            -H "Content-Type: application/json" \
+            -d "{\"type\":\"website\",\"version\":\"${{ steps.commit-info.outputs.hash }}\",\"last_updated\":\"${{ steps.commit-info.outputs.timestamp }}\"}" \
+            -w "\n%{http_code}")
+
+          status_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "API Response Status: $status_code"
+          echo "API Response Body: $body"
+
+          if [ "$status_code" -ge 400 ]; then
+            echo "Error: API request failed with status $status_code"
+            exit 1
+          fi
