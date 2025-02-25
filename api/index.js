@@ -284,7 +284,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
 
 app.get("/seasons", async (req, res) => {
   try {
-    const latestSeason = 24;
+    const latestSeason = 25;
     res.redirect(`/seasons/${latestSeason}`);
   } catch (error) {
     console.error("Error fetching latest season:", error);
@@ -296,7 +296,7 @@ app.get("/seasons/:season", async (req, res) => {
   let seasonId = req.params.season;
   const apiUrl = `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const rewardsUrl = `https://api3.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
-  const latestSeason = 24;
+  const latestSeason = 25;
   try {
     const [response, rewardsResponse] = await Promise.all([
       fetchWithTimeout(apiUrl, {

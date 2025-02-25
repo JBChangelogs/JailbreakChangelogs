@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const seasonDetailsContainer = document.querySelector("#season-details");
   const carouselInner = document.querySelector("#carousel-inner");
   const seasonList = document.querySelector("#seasonList");
-  const latestSeason = 24;
+  const latestSeason = 25;
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
@@ -14,7 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#loading-overlay").classList.remove("show");
   }
 
-  function getCountdownColor(days, isDoubleXP) {
+  function getCountdownColor(days, isDoubleXP, isFutureSeason = false) {
+    if (isFutureSeason) return "#4CAF50"; // Green color for future seasons
     if (isDoubleXP) return "#FFB636"; // Warmer orange for double XP period
     if (days <= 7) return "#FF6B6B"; // Softer red for urgent (7 days or less)
     if (days <= 14) return "#FFD93D"; // Brighter yellow for warning (14 days or less)
@@ -105,12 +106,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Calculate duration and format dates
     const startDate = new Date(parseInt(seasonData.start_date) * 1000);
-    const endDate = new Date(parseInt(seasonData.end_date) * 1000);
-    const durationDays = Math.ceil(
-      (endDate - startDate) / (1000 * 60 * 60 * 24)
-    );
+    const now = new Date();
+    const isFutureSeason = startDate > now;
 
-    // Format dates to "Jan 10, 2025" style
+    // Format dates
     const formatDate = (date) => {
       return date.toLocaleDateString("en-US", {
         month: "short",
@@ -119,25 +118,36 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     };
 
-    // Get color based on remaining days
-    const now = new Date();
-    const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-    const countdownColor = getCountdownColor(remainingDays);
+    // Handle future season vs current/past season date display
+    let datesHTML;
+    if (isFutureSeason) {
+      datesHTML = `
+        <div class="season-dates mb-3">
+          <p class="mb-1"><strong>Start Date:</strong> ${formatDate(
+            startDate
+          )}</p>
+        </div>`;
+    } else {
+      const endDate = new Date(parseInt(seasonData.end_date) * 1000);
+      const durationDays = Math.ceil(
+        (endDate - startDate) / (1000 * 60 * 60 * 24)
+      );
+      datesHTML = `
+        <div class="season-dates mb-3">
+          <p class="mb-1"><strong>Start Date:</strong> ${formatDate(
+            startDate
+          )}</p>
+          <p class="mb-1"><strong>End Date:</strong> ${formatDate(endDate)}</p>
+          <p class="mb-1"><strong>Duration:</strong> ${durationDays} days</p>
+        </div>`;
+    }
 
     seasonDetailsContainer.innerHTML = `
       <h2 class="season-title display-4 text-custom-header mb-3">Season ${season} / ${
       seasonData.title
     }</h2>
       <div class="season-description-container">
-          <div class="season-dates mb-3">
-             <p class="mb-1"><strong>Start Date:</strong> ${formatDate(
-               startDate
-             )}</p>
-             <p class="mb-1"><strong>End Date:</strong> ${formatDate(
-               endDate
-             )}</p>
-             <p class="mb-1"><strong>Duration:</strong> ${durationDays} days</p>
-          </div>
+          ${datesHTML}
           <div class="season-description-body text-center"> 
               ${
                 seasonData.description
@@ -145,9 +155,9 @@ document.addEventListener("DOMContentLoaded", function () {
                   : `
                       <div class="no-description">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
-</svg>
+                            <rect width="24" height="24" fill="none" />
+                            <path fill="currentColor" d="M11 9h2V7h-2m1 13c-4.41 0-8-3.59-8-8s3.59 8-8-8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 15h2v-6h-2z" />
+                          </svg>
                           <p class="text-muted">No description available.</p>
                       </div>`
               }
@@ -161,7 +171,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (seasonData.rewards && seasonData.rewards.length > 0) {
-      const rewardsHTML = seasonData.rewards
+      // Sort rewards by requirement
+      const sortedRewards = [...seasonData.rewards].sort((a, b) => {
+        // Helper function to extract level number from requirement
+        const getLevelNumber = (req) => {
+          const match = req.match(/Level (\d+)/);
+          return match ? parseInt(match[1]) : Infinity;
+        };
+
+        // Helper function to extract percentage from requirement
+        const getPercentage = (req) => {
+          const match = req.match(/Top (\d+)%/);
+          return match ? parseInt(match[1]) : -1;
+        };
+
+        const aLevel = getLevelNumber(a.requirement);
+        const bLevel = getLevelNumber(b.requirement);
+
+        const aPercent = getPercentage(a.requirement);
+        const bPercent = getPercentage(b.requirement);
+
+        // If both are percentage requirements
+        if (aPercent !== -1 && bPercent !== -1) {
+          return bPercent - aPercent; // Lower percentage comes first
+        }
+        // If only one is a percentage requirement, it goes last
+        if (aPercent !== -1) return 1;
+        if (bPercent !== -1) return -1;
+        // Otherwise sort by level number
+        return aLevel - bLevel;
+      });
+
+      const rewardsHTML = sortedRewards
         .map((reward, index) => {
           const isBonus = reward.bonus === "True";
           const bonusBadge = isBonus
@@ -421,10 +462,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const nextSeason = seasons.find((s) => s.season === latestSeason + 1);
 
     // Current season countdown
-    if (currentSeason && currentSeason.end_date) {
+    if (currentSeason) {
+      const timeToStart = parseInt(currentSeason.start_date) - currentTime;
       const timeToEnd = parseInt(currentSeason.end_date) - currentTime;
-      const remaining = formatTimeDifference(timeToEnd);
-      const daysRemaining = Math.ceil(timeToEnd / (24 * 60 * 60));
+      const isFutureSeason = timeToStart > 0;
 
       const columnClass = !nextSeason
         ? "col-12 col-md-6 mb-3 mx-auto"
@@ -434,7 +475,16 @@ document.addEventListener("DOMContentLoaded", function () {
         "#current-season-countdown"
       ).parentElement.className = columnClass;
 
-      if (timeToEnd <= 0) {
+      if (isFutureSeason) {
+        // Handle countdown to season start
+        const remaining = formatTimeDifference(timeToStart);
+        updateCountdownDisplay(
+          "current-season-countdown",
+          remaining,
+          `Season ${currentSeason.season} / ${currentSeason.title} starts in:`
+        );
+      } else if (timeToEnd <= 0) {
+        // Handle ended season
         document.querySelector("#current-season-countdown").innerHTML = `
           <div class="season-countdown">
             <h3 class="countdown-title">Season ${currentSeason.season} / ${
@@ -461,6 +511,9 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         `;
       } else {
+        // Handle active season
+        const remaining = formatTimeDifference(timeToEnd);
+        const daysRemaining = Math.ceil(timeToEnd / (24 * 60 * 60));
         const title =
           daysRemaining <= 5
             ? `Season ${currentSeason.season} / ${currentSeason.title} Double XP ends in:`
@@ -532,7 +585,12 @@ document.addEventListener("DOMContentLoaded", function () {
   ) {
     if (!timeRemaining) return;
 
-    const countdownColor = getCountdownColor(timeRemaining.days, isDoubleXP);
+    const isFutureSeason = title.includes("starts in:");
+    const countdownColor = getCountdownColor(
+      timeRemaining.days,
+      isDoubleXP,
+      isFutureSeason
+    );
     const isNextSeasonCountdown = elementId === "next-season-countdown";
     const isSubmissionsOpen = title.includes("submissions close in:");
 
