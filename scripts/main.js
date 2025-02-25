@@ -116,7 +116,6 @@ async function validateUserSession(token) {
 
     SessionLogger.logEvent("validate", "Checking token validity...");
 
-    // Add debugging for network state
     if (SESSION_VALIDATION.debugMode) {
       SessionLogger.logEvent(
         "debug",
@@ -129,9 +128,31 @@ async function validateUserSession(token) {
     const response = await fetch(
       `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
       {
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(1000),
       }
     );
+
+    // Handle 500 errors as retryable errors
+    if (response.status === 500) {
+      SESSION_VALIDATION.currentRetries++;
+      SessionLogger.logEvent(
+        "retry",
+        `Server error (500), retrying... Attempt ${SESSION_VALIDATION.currentRetries}/${SESSION_VALIDATION.maxRetries}`
+      );
+
+      if (SESSION_VALIDATION.currentRetries < SESSION_VALIDATION.maxRetries) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, SESSION_VALIDATION.retryDelay)
+        );
+        return validateUserSession(token);
+      } else {
+        SessionLogger.logEvent(
+          "validate",
+          "Max retries exceeded after 500 errors"
+        );
+        return false;
+      }
+    }
 
     if (!response.ok) {
       SessionLogger.logEvent(
@@ -156,24 +177,21 @@ async function validateUserSession(token) {
       `Session validation error: ${error.message}`
     );
 
-    // If it's a network error or timeout, retry
-    if (
-      (error instanceof TypeError || error.name === "TimeoutError") &&
-      SESSION_VALIDATION.currentRetries < SESSION_VALIDATION.maxRetries
-    ) {
+    // Handle network errors and timeouts
+    if (error instanceof TypeError || error.name === "TimeoutError") {
       SESSION_VALIDATION.currentRetries++;
-      SessionLogger.logEvent(
-        "retry",
-        `Retrying validation in ${SESSION_VALIDATION.retryDelay}ms (${SESSION_VALIDATION.currentRetries}/${SESSION_VALIDATION.maxRetries})`
-      );
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, SESSION_VALIDATION.retryDelay)
-      );
-      return validateUserSession(token);
+      if (SESSION_VALIDATION.currentRetries < SESSION_VALIDATION.maxRetries) {
+        SessionLogger.logEvent(
+          "retry",
+          `Network error, retrying in ${SESSION_VALIDATION.retryDelay}ms (${SESSION_VALIDATION.currentRetries}/${SESSION_VALIDATION.maxRetries})`
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, SESSION_VALIDATION.retryDelay)
+        );
+        return validateUserSession(token);
+      }
     }
 
-    // If we get here, either it's not a network error or we're out of retries
     return false;
   }
 }
@@ -887,8 +905,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  window.logout = function (reason = "user_initiated") {
+  window.logout = async function (reason = "user_initiated") {
     SessionLogger.logEvent("logout", `Logout initiated: ${reason}`);
+
+    const token = getCookie("token");
+    if (token) {
+      try {
+        await fetch(
+          `https://api3.jailbreakchangelogs.xyz/users/token/invalidate?session_token=${token}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error invalidating token:", error);
+      }
+    }
+
     clearSessionWithReason(reason);
     window.location.reload();
   };
