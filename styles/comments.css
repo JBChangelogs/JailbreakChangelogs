@@ -50,6 +50,7 @@
   margin: 2rem 0 !important;
   gap: 0.5rem !important;
   align-items: center !important;
+  display: none !important; /* Add this line to hide by default */
 }
 
 /* Adjust spacing between pagination buttons */
@@ -588,4 +589,65 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Skeleton loader styles */
+.skeleton-comment {
+  background-color: var(--bg-secondary) !important;
+  padding: 1.25rem !important;
+  border-radius: 8px !important;
+  margin-bottom: 0.75rem !important;
+  position: relative !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.skeleton-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: var(--bg-primary) !important;
+}
+
+.skeleton-text {
+  height: 12px !important;
+  background: var(--bg-primary) !important;
+  border-radius: 4px !important;
+  margin: 8px 0 !important;
+}
+
+.skeleton-text.short {
+  width: 150px !important;
+}
+
+.skeleton-text.medium {
+  width: 250px !important;
+}
+
+.skeleton-text.long {
+  width: 350px !important;
+}
+
+.skeleton-shimmer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  animation: shimmer 2s infinite linear !important;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  ) !important;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

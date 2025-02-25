@@ -46,7 +46,9 @@ async function loadItems() {
 
 // Helper function to get item images (copied from trading.js)
 function getItemImageElement(item) {
-  // Special handling for HyperShift
+  if (!item)
+    return "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
+
   if (item.name === "HyperShift") {
     return `<img src="/assets/images/items/hyperchromes/HyperShift.gif" 
                  class="card-img-top w-100 h-100 object-fit-cover"
@@ -54,12 +56,20 @@ function getItemImageElement(item) {
                  onload="this.parentElement.previousElementSibling.style.display='none'">`;
   }
 
+  if (item.type === "Horn") {
+    return `<img src="/assets/audios/horn_thumbnail.webp" 
+                 class="card-img-top w-100 h-100 object-fit-cover"
+                 alt="${item.name}"
+                 onload="this.parentElement.previousElementSibling.style.display='none'"
+                 onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
+  }
+
   if (item.type === "Drift") {
     return `<img src="/assets/images/items/480p/drifts/${item.name}.webp" 
                  class="card-img-top w-100 h-100 object-fit-cover"
                  alt="${item.name}"
                  onload="this.parentElement.previousElementSibling.style.display='none'"
-                 onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+                 onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
   }
 
   return `<img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
@@ -68,7 +78,43 @@ function getItemImageElement(item) {
                class="card-img-top w-100 h-100 object-fit-cover"
                alt="${item.name}"
                onload="this.parentElement.previousElementSibling.style.display='none'"
-               onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+               onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
+}
+
+// Add this new centralized function near the top of the file
+function getItemImagePath(item) {
+  if (!item)
+    return "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
+
+  if (item.name === "HyperShift") {
+    return "/assets/images/items/hyperchromes/HyperShift.gif";
+  }
+
+  if (item.type === "Horn") {
+    return "/assets/audios/horn_thumbnail.webp";
+  }
+
+  if (item.type === "Drift") {
+    return `/assets/images/items/480p/drifts/${item.name}.webp`;
+  }
+
+  // Default path for other items
+  return `/assets/images/items/480p/${item.type.toLowerCase()}s/${
+    item.name
+  }.webp`;
+}
+
+// Update the getItemImageElement function to use the new centralized function
+function getItemImageElement(item) {
+  return `<img src="${getItemImagePath(item)}" 
+               class="card-img-top w-100 h-100 object-fit-cover" 
+               alt="${item?.name || "Item"}"
+               onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
+}
+
+// Update getItemImageUrl to use the new centralized function
+function getItemImageUrl(item) {
+  return getItemImagePath(item);
 }
 
 // Calculate values for each side
@@ -153,7 +199,7 @@ function renderPreviewItems(containerId, items) {
       <h6>
        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
 	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
 </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
@@ -415,15 +461,24 @@ function sortModalItems() {
   }
 
   const sortValue = valueSortDropdown.value;
-
-  // Parse sort parameters
   const [sortType, ...categoryParts] = sortValue.split("-");
   const category = categoryParts.join("-");
 
-  // Start with all items if filteredItems is empty
-  let filtered = filteredItems.length > 0 ? [...filteredItems] : [...allItems];
+  // Always start with all items from allItems, not filteredItems
+  let filtered = [...allItems];
 
-  // Apply category filter
+  // First apply search filter if there's a search term
+  const searchInput = document.getElementById("modal-item-search");
+  const searchTerm = searchInput?.value.toLowerCase().trim();
+  if (searchTerm) {
+    filtered = filtered.filter((item) => {
+      const itemName = item.name.toLowerCase();
+      const itemType = item.type.toLowerCase();
+      return itemName.startsWith(searchTerm) || itemType.startsWith(searchTerm);
+    });
+  }
+
+  // Then apply category filter
   if (category === "limited-items") {
     filtered = filtered.filter((item) => item.is_limited);
   } else if (category !== "all-items") {
@@ -438,25 +493,20 @@ function sortModalItems() {
       "tire-styles": "Tire Style",
       drifts: "Drift",
       furnitures: "Furniture",
+      horns: "Horn",
     };
 
     const targetType = typeMap[category];
-
     if (targetType) {
       filtered = filtered.filter((item) => item.type === targetType);
     }
   }
 
-  // Sort items
+  // Always sort by cash value descending
   filtered.sort((a, b) => {
-    if (sortType === "value") {
-      const aValue = parseFloat(a.cash_value) || 0;
-      const bValue = parseFloat(b.cash_value) || 0;
-      return bValue - aValue; // Sort high to low
-    } else {
-      // Default to name sort
-      return a.name.localeCompare(b.name);
-    }
+    const aValue = parseFloat(a.cash_value) || 0;
+    const bValue = parseFloat(b.cash_value) || 0;
+    return bValue - aValue;
   });
 
   // Update filteredItems and display
@@ -513,6 +563,13 @@ function displayAvailableItems(type) {
     }, 500);
   }
 
+  // Sort filteredItems by cash value descending before displaying
+  filteredItems.sort((a, b) => {
+    const aValue = parseValue(a.cash_value || "0");
+    const bValue = parseValue(b.cash_value || "0");
+    return bValue - aValue;
+  });
+
   // Get the current category from the dropdown
   const sortDropdown = document.getElementById("modal-value-sort-dropdown");
   const selectedOption = sortDropdown
@@ -561,41 +618,48 @@ function displayAvailableItems(type) {
       .map(
         (item) => `
   <div class="col-custom-5">
-    <div class="card available-item-card" 
-         onclick="quickAddItem('${item.name}', '${item.type}')"
-         data-bs-dismiss="modal">
+    <div class="card available-item-card ${
+      item.tradable === 0 ? "not-tradable" : ""
+    }" 
+         onclick="${
+           item.tradable === 0
+             ? ""
+             : `quickAddItem('${item.name}', '${item.type}')`
+         }"
+         ${item.tradable === 0 ? "" : 'data-bs-dismiss="modal"'}>
       <div class="card-header">
         ${item.name}
       </div>
       <div class="position-relative" style="aspect-ratio: 16/9; overflow: hidden;">
-        <div class="spinner-container position-absolute top-50 start-50 translate-middle">
-          <div class="spinner-border custom-spinner" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
         <div class="item-image-wrapper" style="width: 100%; height: 100%;">
           ${getItemImageElement(item)}
         </div>
       </div>
      <div class="card-body">
-        <div class="info-row">
-          <span class="info-label">Type:</span>
-          <span class="info-value">${item.type}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Cash Value:</span>
-          <span class="info-value">${formatValue(item.cash_value)}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Duped Value:</span>
-          <span class="info-value">${formatValue(item.duped_value || 0)}</span>
-        </div>
-        <div class="info-row ${item.is_limited ? "limited-item" : ""}">
-          <span class="info-label">Limited:</span>
-          <span class="info-value">
-            ${
-              item.is_limited
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+        ${
+          item.tradable === 0
+            ? '<div class="not-tradable-label">Not Tradable</div>'
+            : `
+              <div class="info-row">
+                <span class="info-label">Type:</span>
+                <span class="info-value">${item.type}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Cash Value:</span>
+                <span class="info-value">${formatValue(item.cash_value)}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Duped Value:</span>
+                <span class="info-value">${formatValue(
+                  item.duped_value || 0
+                )}</span>
+              </div>
+              <div class="info-row ${item.is_limited ? "limited-item" : ""}">
+                <span class="info-label">Limited:</span>
+                <span class="info-value">
+                  ${
+                    item.is_limited
+                      ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
                           <rect width="512" height="512" fill="none" />
                           <defs>
                             <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
@@ -609,16 +673,18 @@ function displayAvailableItems(type) {
                             <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
                           </path>
                         </svg>Yes`
-                : "No"
-            }
-          </span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Demand:</span>
-          <span class="info-value demand-${(
-            item.demand || "0"
-          ).toLowerCase()}">${item.demand || "N/A"}</span>
-        </div>
+                      : "No"
+                  }
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Demand:</span>
+                <span class="info-value demand-${(
+                  item.demand || "0"
+                ).toLowerCase()}">${item.demand || "N/A"}</span>
+              </div>
+            `
+        }
       </div>
     </div>
   </div>
@@ -687,7 +753,12 @@ function handleSearch(type) {
       filteredItems = allItems.filter((item) => {
         const itemName = item.name.toLowerCase();
         const itemType = item.type.toLowerCase();
-        return itemName.includes(searchTerm) || itemType.includes(searchTerm);
+        // Only return true if name or type starts with the search term
+        return (
+          itemName.startsWith(searchTerm) ||
+          // Only search by type if search term is longer than 1 character
+          (searchTerm.length > 1 && itemType.startsWith(searchTerm))
+        );
       });
     } else {
       filteredItems = [...allItems];
@@ -1167,7 +1238,7 @@ function renderPreviewItems(containerId, items) {
       <h6>
        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
 	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
 </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
@@ -1223,7 +1294,30 @@ function resetTrade() {
   document.getElementById("available-items-list").style.display = "block";
 }
 
+// Update handleModalClose function
+function handleModalClose() {
+  const searchInput = document.getElementById("modal-item-search");
+  const clearButton = document.getElementById("clear-search-btn");
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  if (clearButton) {
+    clearButton.style.display = "none";
+  }
+
+  // Reset filtered items based on current dropdown selection
+  sortModalItems();
+}
+
+// Add event listener for modal close
 document.addEventListener("DOMContentLoaded", () => {
+  const availableItemsModal = document.getElementById("availableItemsModal");
+  if (availableItemsModal) {
+    availableItemsModal.addEventListener("hidden.bs.modal", handleModalClose);
+  }
+
   const sortDropdown = document.getElementById("modal-value-sort-dropdown");
   if (sortDropdown) {
     sortDropdown.addEventListener("change", sortModalItems);

@@ -18,12 +18,19 @@ function getItemImageElement(item) {
                    alt="${item.name}">`;
   }
 
+  if (item.type === "Horn") {
+    return `<img src="/assets/audios/horn_thumbnail.webp" 
+                   class="card-img-top" 
+                   alt="${item.name}"
+                   onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
+  }
+
   // Handle Drift items
   if (item.type === "Drift") {
     return `<img src="/assets/images/items/drifts/thumbnails/${item.name}.webp" 
                    class="card-img-top" 
                    alt="${item.name}"
-                   onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+                   onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
   }
 
   // Regular items
@@ -32,7 +39,7 @@ function getItemImageElement(item) {
   }.webp" 
                  class="card-img-top" 
                  alt="${item.name}"
-                 onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+                 onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
 }
 
 // Add this function to trade-ad.js

@@ -284,27 +284,40 @@ function hideBottomSheet() {
   }
 }
 
-function getItemImageElement(item) {
-  // Special handling for HyperShift
+// Add this new centralized function near the top of the file
+function getItemImagePath(item) {
+  if (!item)
+    return "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
+
   if (item.name === "HyperShift") {
-    return `<img src="/assets/images/items/hyperchromes/HyperShift.gif" 
-                 class="card-img-top" 
-                 alt="${item.name}">`;
+    return "/assets/images/items/hyperchromes/HyperShift.gif";
+  }
+
+  if (item.type === "Horn") {
+    return "/assets/audios/horn_thumbnail.webp";
   }
 
   if (item.type === "Drift") {
-    return `<img src="/assets/images/items/480p/drifts/${item.name}.webp" 
-                 class="card-img-top" 
-                 alt="${item.name}"
-                 onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+    return `/assets/images/items/480p/drifts/${item.name}.webp`;
   }
 
-  return `<img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+  // Default path for other items
+  return `/assets/images/items/480p/${item.type.toLowerCase()}s/${
     item.name
-  }.webp" 
+  }.webp`;
+}
+
+// Update the getItemImageElement function to use the new centralized function
+function getItemImageElement(item) {
+  return `<img src="${getItemImagePath(item)}" 
                class="card-img-top" 
-               alt="${item.name}"
-               onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`;
+               alt="${item?.name || "Item"}"
+               onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`;
+}
+
+// Update getItemImageUrl to use the new centralized function
+function getItemImageUrl(item) {
+  return getItemImagePath(item);
 }
 
 function decimalToHex(decimal) {
@@ -376,7 +389,14 @@ async function loadItems() {
     );
     allItems = await response.json();
 
-    // Reset filtered items to show all items initially
+    // Sort by cash value descending by default - we'll keep this sort for all views
+    allItems.sort((a, b) => {
+      const valueA = parseValue(a.cash_value || 0);
+      const valueB = parseValue(b.cash_value || 0);
+      return valueB - valueA;
+    });
+
+    // Reset filtered items and maintain the same sort
     filteredItems = [...allItems];
 
     // Reset sort dropdown to default "All Items"
@@ -615,6 +635,13 @@ function displayAvailableItems(type) {
     }, 500);
   }
 
+  // Sort filteredItems by cash value descending before displaying
+  filteredItems.sort((a, b) => {
+    const aValue = parseValue(a.cash_value || "0");
+    const bValue = parseValue(b.cash_value || "0");
+    return bValue - aValue;
+  });
+
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -709,16 +736,9 @@ function displayAvailableItems(type) {
               ${item.name}
             </div>
             <div class="position-relative" style="aspect-ratio: 16/9;">
-              <div class="position-absolute top-50 start-50 translate-middle spinner-container">
-                <div class="spinner-border custom-spinner" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              </div>
-      
               <img class="card-img w-100 h-100 object-fit-cover"
                    src="${getItemImageUrl(item)}"
                    alt=""
-                   onload="this.style.display='block'; this.previousElementSibling.style.display='none'"
                    onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; this.style.display='block'; this.previousElementSibling.style.display='none'"
               >
             </div>
@@ -786,19 +806,10 @@ function displayAvailableItems(type) {
 
 // Helper function to get the correct image URL based on item type
 function getItemImageUrl(item) {
-  if (item.name === "HyperShift") {
-    return `/assets/images/items/hyperchromes/HyperShift.gif`;
-  }
-
-  if (item.type === "Drift") {
-    return `/assets/images/items/480p/drifts/${item.name}.webp`;
-  }
-
-  return `/assets/images/items/480p/${item.type.toLowerCase()}s/${
-    item.name
-  }.webp`;
+  return getItemImagePath(item);
 }
 
+// Update the sortModalItems function to use the new centralized function
 function sortModalItems() {
   const valueSortDropdown = document.getElementById(
     "modal-value-sort-dropdown"
@@ -832,12 +843,21 @@ function sortModalItems() {
       "tire-styles": "Tire Style",
       drifts: "Drift",
       furnitures: "Furniture",
+      horns: "Horn", // Add Horn type mapping
     };
 
     const targetType = typeMap[category];
     if (targetType) {
       filtered = filtered.filter((item) => item.type === targetType);
     }
+  } else {
+    // If "All Items" is selected, reset to all items and re-apply initial sort
+    filtered = [...allItems];
+    filtered.sort((a, b) => {
+      const aValue = parseFloat(a.cash_value) || 0;
+      const bValue = parseFloat(b.cash_value) || 0;
+      return bValue - aValue;
+    });
   }
 
   // Apply search filter if there's a search term
@@ -846,19 +866,15 @@ function sortModalItems() {
     filtered = filtered.filter((item) => {
       const itemName = item.name.toLowerCase();
       const itemType = item.type.toLowerCase();
-      return itemName.includes(searchTerm) || itemType.includes(searchTerm);
+      return itemName.startsWith(searchTerm) || itemType.startsWith(searchTerm);
     });
   }
 
-  // Apply sorting
+  // Always sort by cash value descending, regardless of category
   filtered.sort((a, b) => {
-    if (sortType === "value") {
-      const aValue = parseFloat(a.cash_value) || 0;
-      const bValue = parseFloat(b.cash_value) || 0;
-      return bValue - aValue;
-    } else {
-      return a.name.localeCompare(b.name);
-    }
+    const aValue = parseFloat(a.cash_value) || 0;
+    const bValue = parseFloat(b.cash_value) || 0;
+    return bValue - aValue;
   });
 
   // Update filtered items
@@ -869,7 +885,6 @@ function sortModalItems() {
   displayAvailableItems(currentTradeType);
 }
 
-// Helper function to parse values (add if not exists)
 function parseValue(value) {
   if (typeof value === "number") return value;
   if (!value || value === "N/A") return 0;
@@ -942,11 +957,20 @@ function handleSearch(type) {
     currentPage = 1;
 
     // Filter items based on search term
-    filteredItems = allItems.filter((item) => {
-      const itemName = item.name.toLowerCase();
-      const itemType = item.type.toLowerCase();
-      return itemName.includes(searchTerm) || itemType.includes(searchTerm);
-    });
+    if (searchTerm) {
+      filteredItems = allItems.filter((item) => {
+        const itemName = item.name.toLowerCase();
+        const itemType = item.type.toLowerCase();
+        // Only return true if name or type starts with the search term
+        return (
+          itemName.startsWith(searchTerm) ||
+          // Only search by type if search term is longer than 1 character
+          (searchTerm.length > 1 && itemType.startsWith(searchTerm))
+        );
+      });
+    } else {
+      filteredItems = [...allItems];
+    }
 
     // Apply current category filter from dropdown
     const sortDropdown = document.getElementById("modal-value-sort-dropdown");
@@ -1382,8 +1406,8 @@ async function editTradeAd(tradeId) {
 </svg>Update Trade
           </button>
           <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
+	<rect width="32" height="32" fill="none" />
 	<path fill="#fff" d="m8.4 17l3.6-3.6l3.6 3.6l1.4-1.4l-3.6-3.6L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4l3.6 3.6L7 15.6zm3.6 5q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
 </svg> Cancel
           </button>
@@ -1770,10 +1794,10 @@ async function createTradeAdHTML(trade) {
   try {
     // Fetch user details first
     const authorDetails = await fetchUserDetails(trade.author);
-    
+
     // Skip this trade ad if author has no valid Roblox data
     if (!hasValidRobloxData(authorDetails)) {
-      return '';
+      return "";
     }
 
     // Helper function to fetch avatar with format fallbacks
@@ -1831,61 +1855,13 @@ async function createTradeAdHTML(trade) {
       const dupedValueClass =
         item.duped_value !== "N/A" ? "value-available" : "value-na";
 
-      // Special handling for HyperShift
-      if (item.name === "HyperShift") {
-        return `
-          <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(
-            item
-          ).replace(/"/g, "&quot;")})">
-            <div class="trade-ad-item-content">
-              <div class="item-image-container">
-                <img src="/assets/images/items/hyperchromes/HyperShift.gif" alt="${
-                  item.name
-                }">
-                ${multiplierHTML}
-              </div>
-              <div class="item-details">
-                <div class="item-name">${item.name}</div>
-                <div class="item-values">
-                  <div class="value-badge ${cashValueClass}">
-                    <span class="value-label">Cash Value:</span>
-                    <span class="value-amount">${formatValue(
-                      item.cash_value,
-                      true
-                    )}</span>
-                  </div>
-                  <div class="value-badge ${dupedValueClass}">
-                    <span class="value-label">Duped Value:</span>
-                    <span class="value-amount">${formatValue(
-                      item.duped_value,
-                      true
-                    )}</span>
-                  </div>
-                  <div class="value-badge">
-                    <span class="value-label">Type:</span>
-                    <span class="value-amount">${item.type}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>`;
-      }
-
-      // Regular items
-      const imageUrl =
-        item.type === "Drift"
-          ? `/assets/images/items/480p/drifts/${item.name}.webp`
-          : `/assets/images/items/480p/${item.type.toLowerCase()}s/${
-              item.name
-            }.webp`;
-
       return `
         <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(
           item
         ).replace(/"/g, "&quot;")})">
           <div class="trade-ad-item-content">
             <div class="item-image-container">
-              <img src="${imageUrl}" 
+              <img src="${getItemImagePath(item)}" 
                    alt="${item.name}"
                    onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">
               ${multiplierHTML}
@@ -2189,8 +2165,6 @@ async function previewTrade() {
   valueDifferencesContainer.innerHTML = renderValueDifferences();
 
   if (isEditing) {
-    console.log("Creating status select container for edit mode");
-
     // Create status select container
     const statusSelectContainer = document.createElement("div");
     statusSelectContainer.className = "confirm-trade-wrapper mt-4";
@@ -2220,7 +2194,7 @@ async function previewTrade() {
       <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3m3-10H5V5h10z" />
+	<path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3m3-10H5V3h10z" />
 </svg> Update Trade
       </button>
       <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
@@ -2506,7 +2480,21 @@ function resetTrade() {
     const availableContainer = document.getElementById(
       "available-items-container"
     );
-    const confirmButton = document.getElementById("confirm-trade-btn");
+
+    // Update visibility
+    if (previewSection) {
+      previewSection.style.display = "none";
+    }
+    if (availableContainer) {
+      availableContainer.style.display = "block";
+    }
+
+    // Remove any extra preview button that might have been added
+    const extraPreviewBtn =
+      availableContainer?.querySelector("#confirm-trade-btn");
+    if (extraPreviewBtn) {
+      extraPreviewBtn.remove();
+    }
 
     // Remove editing class if container exists
     if (availableContainer) {
@@ -2517,26 +2505,6 @@ function resetTrade() {
     const confirmWrapper = document.querySelector(".confirm-trade-wrapper");
     if (confirmWrapper) {
       confirmWrapper.remove();
-    }
-
-    // Handle confirm button if it exists
-    if (confirmButton) {
-      confirmButton.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none" /><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 12h8m-4-4v8" /></g></svg> Create Trade';
-      confirmButton.onclick = previewTrade;
-
-      // Only try to append if both container and button exist
-      if (availableContainer) {
-        availableContainer.appendChild(confirmButton);
-      }
-    }
-
-    // Update visibility
-    if (previewSection) {
-      previewSection.style.display = "none";
-    }
-    if (availableContainer) {
-      availableContainer.style.display = "block";
     }
   } catch (error) {
     console.error("Error in resetTrade:", error);
@@ -2603,13 +2571,7 @@ async function createTradeAd() {
     notyf.success("Trade advertisement created successfully!");
     resetTrade();
 
-    // Update UI
-    document.getElementById("trade-preview").style.display = "none";
-    document.getElementById("available-items-container").style.display =
-      "block";
-    document.getElementById("confirm-trade-btn").style.display = "block";
-
-    // Refresh trade ads list
+    // Update trade ads list without modifying the preview button
     await loadTradeAds();
   } catch (error) {
     console.error("Error creating trade:", error);

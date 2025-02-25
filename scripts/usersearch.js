@@ -46,9 +46,6 @@ const messages = {
     </div>
   `,
   resultsCount: (count, isSearch = false) => {
-    const highestUserNumber = Math.max(
-      ...allUsers.map((user) => user.usernumber)
-    );
     return `
       <div class="mb-3 text-center">
         <span class="badge bg-primary">
@@ -56,7 +53,7 @@ const messages = {
             <rect width="16" height="16" fill="none" />
             <path fill="currentColor" d="M7 14s-1 0-1-1s1-4 5-4s5 3 5 4s-1 1-1 1zm4-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5" />
           </svg>
-          ${highestUserNumber} users found
+          ${count} of ${allUsers.length} users found
         </span>
       </div>
     `;
@@ -409,9 +406,9 @@ const searchUsers = (searchTerm) => {
   // Regular username/global_name search
   return allUsers.filter(
     (user) =>
-      user.username.toLowerCase().includes(searchTermLower) ||
+      user.username.toLowerCase().startsWith(searchTermLower) ||
       (user.global_name &&
-        user.global_name.toLowerCase().includes(searchTermLower))
+        user.global_name.toLowerCase().startsWith(searchTermLower))
   );
 };
 
@@ -462,17 +459,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Get sorted users instead of shuffled
     shuffledUsers = allUsers; // No need for getInitialShuffledUsers since we're not shuffling anymore
 
-    const highestUserNumber = Math.max(
-      ...allUsers.map((user) => user.usernumber)
-    );
-
-    // Update total users count
+    // Update total users count using array length
     elements.totalUsersCount.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
         <rect width="16" height="16" fill="none" />
         <path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
       </svg> 
-      Total Users: ${highestUserNumber.toLocaleString()}
+      Total Users: ${allUsers.length.toLocaleString()}
     `;
 
     // Pre-cache first page avatars
@@ -510,7 +503,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <rect width="16" height="16" fill="none" />
         <path fill="currentColor" d="M6 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6m-5 6s-1 0-1-1s1-4 6-4s6 3 6 4s-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
       </svg> 
-      Total Users: ${highestUserNumber.toLocaleString()}
+      Total Users: ${allUsers.length.toLocaleString()}
     `;
 
     // Important: Check if search input has changed during loading
@@ -528,10 +521,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const filteredUsers = allUsers.filter((user) => {
         const usernameMatch = user.username
           .toLowerCase()
-          .includes(searchTermLower);
+          .startsWith(searchTermLower);
         const globalNameMatch =
           user.global_name &&
-          user.global_name.toLowerCase().includes(searchTermLower);
+          user.global_name.toLowerCase().startsWith(searchTermLower);
         return usernameMatch || globalNameMatch;
       });
 

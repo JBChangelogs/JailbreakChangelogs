@@ -81,6 +81,70 @@ window.deleteCookie = function (name) {
 const token = getCookie("token");
 const userid = localStorage.getItem("userid"); // Single declaration
 
+// session utilities
+const SessionLogger = {
+  debug: true,
+  logEvent(type, details) {
+    if (this.debug) {
+      console.log(`[Session:${type}]`, details);
+    }
+  },
+};
+
+async function validateUserSession(token) {
+  if (!token) {
+    SessionLogger.logEvent("validate", "No token found");
+    return false;
+  }
+
+  try {
+    SessionLogger.logEvent("validate", "Checking token validity...");
+    const response = await fetch(
+      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+    );
+
+    if (!response.ok) {
+      SessionLogger.logEvent(
+        "validate",
+        `Token validation failed: ${response.status}`
+      );
+      return false;
+    }
+
+    const userData = await response.json();
+    if (!userData || !userData.id) {
+      SessionLogger.logEvent("validate", "Invalid user data received");
+      return false;
+    }
+
+    SessionLogger.logEvent("validate", "Token validated successfully");
+    return true;
+  } catch (error) {
+    SessionLogger.logEvent(
+      "error",
+      `Session validation error: ${error.message}`
+    );
+    return false;
+  }
+}
+
+function clearSessionWithReason(reason) {
+  SessionLogger.logEvent("logout", {
+    reason,
+    previousState: {
+      hadToken: !!getCookie("token"),
+      hadUserData: !!localStorage.getItem("user"),
+      hadUserId: !!localStorage.getItem("userid"),
+    },
+  });
+
+  localStorage.removeItem("user");
+  localStorage.removeItem("avatar");
+  localStorage.removeItem("userid");
+  localStorage.removeItem("showWelcome");
+  deleteCookie("token");
+}
+
 function parseUserData() {
   try {
     const stored = localStorage.getItem("user");
@@ -102,7 +166,7 @@ function cleanupURL() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const urlParams = new URLSearchParams(window.location.search);
 
   // Single welcome message function
@@ -354,6 +418,31 @@ document.addEventListener("DOMContentLoaded", function () {
   sideMenu.querySelectorAll(".nav-link, .btn").forEach((link) => {
     link.addEventListener("click", toggleMenu);
   });
+
+  try {
+    if (token) {
+      const isValid = await validateUserSession(token);
+      if (!isValid) {
+        clearSessionWithReason("invalid_session");
+        window.location.reload();
+        return;
+      }
+    } else if (globalUserData || userid) {
+      clearSessionWithReason("missing_token");
+      window.location.reload();
+      return;
+    }
+
+    // ...rest of existing DOMContentLoaded code...
+  } catch (error) {
+    SessionLogger.logEvent(
+      "error",
+      `Critical initialization error: ${error.message}`
+    );
+    notyf.error(
+      "An error occurred while loading your session. Please try again."
+    );
+  }
 });
 
 function formatStamp(unixTimestamp) {
@@ -403,222 +492,52 @@ function updateVersionDisplay(data) {
 document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
-  window.checkAndSetAvatar = async function (userData) {
-    if (!userData || !userData.username) return null;
-
-    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      userData.username
-    )}&bold=true&format=svg`;
-
-    async function tryAvatarUrl(baseUrl, size = null) {
-      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
-      try {
-        const response = await fetch(url, { method: "HEAD" });
-        return response.ok ? url : null;
-      } catch {
-        return null;
-      }
-    }
-
-    try {
-      // Try GIF format with size
-      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif`;
-      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
-      if (gifWithSize) return gifWithSize;
-
-      // Try GIF format without size
-      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
-      if (gifNoSize) return gifNoSize;
-
-      // Try WebP format with size
-      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`;
-      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
-      if (webpWithSize) return webpWithSize;
-
-      // Try WebP format without size
-      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
-      if (webpNoSize) return webpNoSize;
-
-      return fallbackAvatar;
-    } catch {
-      return fallbackAvatar;
-    }
-  };
-
-  // Fix error handling for user data
-  let parsedUserData = null;
-  try {
-    const storedUserData = localStorage.getItem("user");
-    parsedUserData = storedUserData ? JSON.parse(storedUserData) : null;
-  } catch (e) {
-    console.error("Failed to parse user data:", e);
-  }
-
-  // Update user data check and welcome message
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
-    if (
-      parsedUserData &&
-      (parsedUserData.global_name || parsedUserData.username)
-    ) {
-      notyf.special(
-        `Hello, ${parsedUserData.global_name || parsedUserData.username}!`
-      );
-    }
-    // Clean up URL
-    window.history.replaceState({}, "", window.location.pathname);
-  }
-
-  // Update the session check
-  // Remove duplicate userid declaration and use the global one
-  if (!token && (globalUserData || userid)) {
-    clearSessionAndReload();
-    return;
-  }
-
-  // Update avatar setting logic
+  // Handle token validation and user data in one place
   if (token) {
     try {
       const response = await fetch(
         "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
       );
-      if (!response.ok) {
-        throw new Error("Invalid response");
-      }
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData) {
+          // Update all user data at once
+          globalUserData = userData;
+          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem("userid", userData.id);
 
-      const freshUserData = await response.json();
-      if (!freshUserData) {
-        clearSessionAndReload();
-        return;
-      }
+          if (userData.id && userData.avatar) {
+            const avatarUrl = await window.checkAndSetAvatar(userData);
+            if (avatarUrl) {
+              localStorage.setItem("avatar", avatarUrl);
 
-      // Update both global and storage
-      globalUserData = freshUserData;
-      localStorage.setItem("user", JSON.stringify(freshUserData));
-      localStorage.setItem("userid", freshUserData.id);
+              // Update profile pictures if they exist
+              const profilePicture = document.getElementById("profile-picture");
+              const mobileProfilePicture = document.getElementById(
+                "profile-picture-mobile"
+              );
+              if (profilePicture) profilePicture.src = avatarUrl;
+              if (mobileProfilePicture) mobileProfilePicture.src = avatarUrl;
+            }
+          }
 
-      // Only try to set avatar if we have valid user data
-      if (freshUserData.id && freshUserData.avatar) {
-        const avatarUrl = await window.checkAndSetAvatar(freshUserData);
-        if (avatarUrl) {
-          localStorage.setItem("avatar", avatarUrl);
-
-          const profilePicture = document.getElementById("profile-picture");
-          const mobileProfilePicture = document.getElementById(
-            "profile-picture-mobile"
-          );
-
-          if (profilePicture) profilePicture.src = avatarUrl;
-          if (mobileProfilePicture) mobileProfilePicture.src = avatarUrl;
+          // Handle welcome message
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
+            notyf.special(
+              `Hello, ${userData.global_name || userData.username}!`
+            );
+            window.history.replaceState({}, "", window.location.pathname);
+          }
         }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      clearSessionAndReload();
-    }
-  }
-
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
-
-  // Show welcome message for both freshlogin and report-issue params
-  if (urlParams.has("freshlogin") || urlParams.has("report-issue")) {
-    if (userData && userData.global_name) {
-      notyf.special(`Hello, ${userData.global_name}!`);
-    } else if (userData && userData.username) {
-      notyf.special(`Hello, ${userData.username}!`);
-    }
-
-    // Clean up the URL
-    const newUrl = window.location.pathname;
-    window.history.replaceState({}, "", newUrl);
-  }
-
-  const user = localStorage.getItem("user");
-
-  function clearSessionAndReload() {
-    console.log("[Debug] Clearing session and reloading...");
-    console.log("[Debug] Previous state:", {
-      globalUserData,
-      avatar: localStorage.getItem("avatar"),
-      user: localStorage.getItem("user"),
-      userid: localStorage.getItem("userid"),
-      token: getCookie("token"),
-    });
-
-    globalUserData = null;
-    localStorage.removeItem("avatar");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userid");
-    localStorage.removeItem("showWelcome");
-    deleteCookie("token");
-    console.log("[Debug] Session cleared, reloading page");
-    window.location.reload();
-  }
-
-  // Check and clear invalid session state
-  if (!token && (user || userid)) {
-    clearSessionAndReload();
-    return;
-  }
-
-  if (token) {
-    try {
-      const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
+      notyf.error(
+        "Failed to load user data. Some features may be unavailable."
       );
-      if (!response.ok) {
-        throw new Error("Invalid response");
-      }
-
-      const userData = await response.json();
-      if (!userData) {
-        clearSessionAndReload();
-        return;
-      }
-
-      // Check and set avatar
-      const avatarUrl = await window.checkAndSetAvatar(userData);
-      localStorage.setItem("avatar", avatarUrl);
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("userid", userData.id);
-
-      // Update profile pictures if they exist
-      const profilePicture = document.getElementById("profile-picture");
-      const mobileProfilePicture = document.getElementById(
-        "profile-picture-mobile"
-      );
-
-      if (profilePicture) {
-        profilePicture.src = avatarUrl;
-      }
-      if (mobileProfilePicture) {
-        mobileProfilePicture.src = avatarUrl;
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      // Clear all user data
-      localStorage.removeItem("avatar");
-      localStorage.removeItem("user");
-      localStorage.removeItem("userid");
-      window.location.reload();
     }
   }
-
-  // const profilepicture = document.getElementById("profile-picture");
-  // const mobileprofilepicture = document.getElementById(
-  //   "profile-picture-mobile"
-  // );
-
-  // if (!profilepicture && !mobileprofilepicture) {
-  //   return;
-  // }
-
-  // if (userid) {
-  //   profilepicture.src = avatarUrl;
-  //   mobileprofilepicture.src = avatarUrl;
-  // }
-  let escapePressCount = 0;
-  let escapePressTimeout;
 
   // secret modal shhhhhhhhhhhhhhhhhhhh
   function showModal() {
@@ -890,23 +809,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  window.logout = function () {
-    console.log("[Debug] User initiated logout");
-    console.log("[Debug] Previous state:", {
-      user: localStorage.getItem("user") ? "[REDACTED]" : null,
-      avatar: localStorage.getItem("avatar") ? "[REDACTED]" : null,
-      userid: localStorage.getItem("userid") ? "[REDACTED]" : null,
-      token: getCookie("token") ? "[REDACTED]" : null,
-    });
-
-    localStorage.removeItem("user");
-    localStorage.removeItem("avatar");
-    localStorage.removeItem("userid");
-    localStorage.removeItem("showWelcome");
-
-    deleteCookie("token");
-
-    console.log("[Debug] Logout complete, reloading page");
+  window.logout = function (reason = "user_initiated") {
+    SessionLogger.logEvent("logout", `Logout initiated: ${reason}`);
+    clearSessionWithReason(reason);
     window.location.reload();
   };
 });

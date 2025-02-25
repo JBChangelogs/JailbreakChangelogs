@@ -995,6 +995,19 @@ body {
   max-width: 1400px; /* Add a max-width to prevent stretching too wide */
   margin: 0 auto; /* Center the container */
 }
+
+/* Override container styles for footer */
+.jb-footer .container-fluid {
+  max-width: 100% !important; /* Force full width for footer */
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.items-section-container {
+  max-width: 1400px; /* Keep items section contained */
+  margin: 0 auto;
+}
+
 .badges-container {
   margin-top: -20px; /* Creates upward offset */
   margin-bottom: 10px;
@@ -1016,6 +1029,12 @@ body {
   .container-fluid {
     padding-left: 6px !important;
     padding-right: 6px !important;
+  }
+
+  /* Override container styles for footer on mobile */
+  .jb-footer .container-fluid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
 
   .col-12 {
@@ -1223,6 +1242,49 @@ body {
 
   #value-sort-dropdown option[value="separator"] {
     font-size: 12px;
+  }
+
+  .intro-content {
+    text-align: center;
+  }
+
+  .intro-content h1 {
+    text-align: center;
+  }
+
+  .intro-content .lead {
+    text-align: center;
+  }
+
+  .intro-buttons {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .row.g-3.mb-2 {
+    justify-content: center !important;
+  }
+
+  .row.g-3.mb-2 .col-auto {
+    display: flex;
+    justify-content: center;
+  }
+
+  .trader-notes ul {
+    display: inline-block;
+    text-align: left; /* Keep list items left-aligned for readability */
+  }
+
+  .trader-notes {
+    text-align: center;
+  }
+
+  .categories-section {
+    text-align: center;
+  }
+
+  .categories-section h2 {
+    text-align: center;
   }
 }
 

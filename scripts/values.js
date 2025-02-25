@@ -598,7 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
       categoryNameElement.style.display = "none";
       valuesBreadcrumb.classList.add("active");
       valuesBreadcrumb.setAttribute("aria-current", "page");
-      valuesBreadcrumb.innerHTML = "Values";
+      valuesBreadcrumb.innerHTML = "Value List";
     } else {
       let categoryName;
       if (currentSort === "hyperchromes") {
@@ -617,7 +617,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       valuesBreadcrumb.classList.remove("active");
       valuesBreadcrumb.removeAttribute("aria-current");
-      valuesBreadcrumb.innerHTML = '<a href="/values">Values</a>';
+      valuesBreadcrumb.innerHTML = '<a href="/values">Value List</a>';
     }
   };
 
@@ -1017,7 +1017,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createItemCard(item) {
-    console.log("Creating card for:", item.name, item.type);
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
 
@@ -1330,43 +1329,23 @@ document.addEventListener("DOMContentLoaded", () => {
       return cardDiv;
     }
 
-    // Debug click handling setup
-    console.log("Setting up click handler for:", item.name);
-
     card.addEventListener("click", (e) => {
-      console.log("Raw click event on card:", {
-        item: item.name,
-        type: item.type,
-        target: e.target.tagName,
-        targetClasses: e.target.className,
-        path: e.composedPath().map((el) => ({
-          tag: el.tagName,
-          class: el.className,
-        })),
-      });
-
       // Always ignore favorite icon clicks
       if (e.target.closest(".favorite-icon")) {
-        console.log("Favorite icon clicked - ignoring navigation");
         return;
       }
 
       // For horns, only navigate if clicking card-body
       if (item.type === "Horn") {
         const isCardBody = e.target.closest(".item-card-body");
-        console.log("Horn item clicked:", {
-          isCardBody,
-          shouldNavigate: isCardBody,
-        });
+
         if (!isCardBody) {
-          console.log("Horn media clicked - not navigating");
           return;
         }
       }
 
       // For drift items, check if clicking video/thumbnail
       if (item.type === "Drift" && e.target.closest(".media-container")) {
-        console.log("Drift media clicked - letting media handler work");
         return;
       }
 
@@ -1374,7 +1353,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const formattedType = item.type.toLowerCase();
       const formattedName = encodeURIComponent(item.name);
       const url = `/item/${formattedType}/${formattedName}`;
-      console.log("Navigating to:", url);
       window.location.href = url;
     });
 
@@ -1496,8 +1474,25 @@ document.addEventListener("DOMContentLoaded", () => {
     notyf.success("Filters have been reset", "Filters Reset");
   }, 500);
 
-  // Modify the value-sort-dropdown options in the HTML
-  // Modify the value-sort-dropdown options in the HTML
+  const sortDropdown = document.getElementById("sort-dropdown");
+  if (sortDropdown) {
+    sortDropdown.innerHTML = `
+    <option value="name-all-items">All Items</option>
+    <option value="name-limited-items">Limited Items</option>
+    <option value="name-vehicles">Vehicles</option>
+    <option value="name-spoilers">Spoilers</option>
+    <option value="name-rims">Rims</option>
+    <option value="name-body-colors">Body Colors</option>
+    <option value="name-hyperchromes">HyperChromes</option>
+    <option value="name-textures">Body Textures</option>
+    <option value="name-tire-stickers">Tire Stickers</option>
+    <option value="name-tire-styles">Tire Styles</option>
+    <option value="name-drifts">Drifts</option>
+    <option value="name-furnitures">Furniture</option>
+    <option value="name-horns">Horns</option>
+    `;
+  }
+
   const valueSortDropdown = document.getElementById("value-sort-dropdown");
   if (valueSortDropdown) {
     valueSortDropdown.innerHTML = `
@@ -1507,17 +1502,17 @@ document.addEventListener("DOMContentLoaded", () => {
     <option value="alpha-asc">Name (A to Z)</option>
     <option value="alpha-desc">Name (Z to A)</option>
     <option value="separator" disabled>───── Values ─────</option>
-    <option value="cash-asc">Cash Value (Low to High)</option>
     <option value="cash-desc">Cash Value (High to Low)</option>
-    <option value="duped-asc">Duped Value (Low to High)</option>
+    <option value="cash-asc">Cash Value (Low to High)</option>
     <option value="duped-desc">Duped Value (High to Low)</option>
+    <option value="duped-asc">Duped Value (Low to High)</option>
     <option value="separator" disabled>───── Demand ─────</option>
-    <option value="demand-asc">Demand (Low to High)</option>
     <option value="demand-desc">Demand (High to Low)</option>
+    <option value="demand-asc">Demand (Low to High)</option>
     <option value="separator" disabled>───── Last Updated ─────</option>
-    <option value="last-updated-asc">Last Updated (Oldest to Newest)</option>
     <option value="last-updated-desc">Last Updated (Newest to Oldest)</option>
-  `;
+    <option value="last-updated-asc">Last Updated (Oldest to Newest)</option>
+    `;
 
     // Check sessionStorage first, fallback to random
     const savedValueSort = sessionStorage.getItem("valueSortDropdown");
@@ -1577,7 +1572,7 @@ window.handleimage = function (element) {
   }
 
   element.src =
-    "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp";
+    "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
 };
 
 function clearSearch() {

@@ -126,11 +126,10 @@
           <!-- Profile picture icon with text and dropdown (visible on desktop) -->
           <li class="nav-item dropdown ms-2">
             <a
-              class="nav-link dropdown-toggle-no-caret d-flex align-items-center gap-2"
+              class="nav-link no-click-toggle d-flex align-items-center gap-2"
               href="#"
               id="navbarDropdown"
               role="button"
-              data-bs-toggle="dropdown"
               aria-expanded="false"
             >
               <img
@@ -441,23 +440,35 @@
       }
     }
 
-    function updateContent() {
-      if (isLoggedIn) {
-        const userData = JSON.parse(localStorage.getItem("user") || "{}");
-        if (!userData.id) {
-          setTimeout(updateContent, 100);
-          return;
+    async function updateContent() {
+      try {
+        if (isLoggedIn) {
+          console.log("[Nav] Updating content for logged in user");
+          const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+          if (!userData.id) {
+            console.log("[Nav] No user data found, retrying...");
+            setTimeout(updateContent, 100);
+            return;
+          }
         }
+
+        const dropdownContent = getDropdownContent(isLoggedIn);
+        const profileContent = getProfileContent(isLoggedIn);
+
+        if (userDropdown) userDropdown.innerHTML = dropdownContent;
+        if (mobileProfileSection)
+          mobileProfileSection.innerHTML = profileContent;
+
+        try {
+          await setProfilePictureSrc(profilePicture, avatarUrl);
+          await setProfilePictureSrc(mobileProfilePicture, avatarUrl);
+        } catch (error) {
+          console.error("[Nav] Error setting profile pictures:", error);
+        }
+      } catch (error) {
+        console.error("[Nav] Error updating content:", error);
       }
-
-      const dropdownContent = getDropdownContent(isLoggedIn);
-      const profileContent = getProfileContent(isLoggedIn);
-
-      if (userDropdown) userDropdown.innerHTML = dropdownContent;
-      if (mobileProfileSection) mobileProfileSection.innerHTML = profileContent;
-
-      setProfilePictureSrc(profilePicture, avatarUrl);
-      setProfilePictureSrc(mobileProfilePicture, avatarUrl);
     }
 
     // Add text next to avatars based on login status

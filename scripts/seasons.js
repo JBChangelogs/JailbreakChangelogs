@@ -436,8 +436,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (timeToEnd <= 0) {
         document.querySelector("#current-season-countdown").innerHTML = `
-          <div class="season-ended">
-            <i class="fas fa-clock"></i>Season ${currentSeason.season} has ended
+          <div class="season-countdown">
+            <h3 class="countdown-title">Season ${currentSeason.season} / ${
+          currentSeason.title
+        } has ended</h3>
+            <div class="countdown-timer justify-content-center">
+              <div class="countdown-item">
+                <span style="color: ${getCountdownColor(0)}">00</span>
+                <span class="countdown-label">Days</span>
+              </div>
+              <div class="countdown-item">
+                <span style="color: ${getCountdownColor(0)}">00</span>
+                <span class="countdown-label">Hours</span>
+              </div>
+              <div class="countdown-item">
+                <span style="color: ${getCountdownColor(0)}">00</span>
+                <span class="countdown-label">Minutes</span>
+              </div>
+              <div class="countdown-item">
+                <span style="color: ${getCountdownColor(0)}">00</span>
+                <span class="countdown-label">Seconds</span>
+              </div>
+            </div>
           </div>
         `;
       } else {
@@ -525,7 +545,12 @@ document.addEventListener("DOMContentLoaded", function () {
            target="_blank" 
            rel="noopener noreferrer" 
            class="btn btn-sm btn-outline-info">
-          <i class="fas fa-external-link-alt me-1"></i>Submit a Creation
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          Submit a Creation
         </a>
       </div>
     `

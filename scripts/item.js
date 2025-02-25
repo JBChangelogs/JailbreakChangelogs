@@ -221,7 +221,7 @@ async function loadSimilarItemsByName(searchName) {
                          class="card-img-top w-100 h-100"
                          style="object-fit: cover; transition: transform 0.3s ease;"
                          alt="${item.name}"
-                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'">`
+                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`
                 }
               </div>
               <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
@@ -2067,7 +2067,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; // Don't replace HyperShift video with placeholder
     }
     element.src =
-      "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp";
+      "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
   };
 
   await loadItemDetails();

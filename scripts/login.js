@@ -48,84 +48,117 @@ $(document).ready(function () {
   }
 
   const DiscordLoginButton = document.getElementById("login-button");
-  // Only store the path if it's not /login and not a Discord OAuth URL
-  const currentPath = window.location.pathname + window.location.search;
+
+  // Add OAuth flow logging
+  const LoginLogger = {
+    debug: true,
+    log(step, details) {
+      if (this.debug) {
+        console.log(`[Login:${step}]`, details);
+      }
+    },
+  };
+
+  // Store original path before OAuth redirect
   if (
-    currentPath !== "/login" &&
-    !currentPath.includes("/login") &&
+    !window.location.pathname.startsWith("/login") &&
     !window.location.href.includes("discord.com")
   ) {
-    if (window.location.search.includes("report-issue")) {
-      localStorage.setItem("reportIssueRedirect", "true");
-    }
-    localStorage.setItem("loginRedirect", currentPath);
+    LoginLogger.log(
+      "redirect",
+      "Storing current path: " + window.location.pathname
+    );
+    localStorage.setItem(
+      "loginRedirect",
+      window.location.pathname + window.location.search
+    );
   }
 
+  // Handle Discord OAuth redirect
   DiscordLoginButton.addEventListener("click", () => {
-    console.log("Redirecting to Discord OAuth...");
+    LoginLogger.log("oauth", "Initiating Discord OAuth...");
     window.location.href = OauthRedirect;
   });
 
+  // Process OAuth callback
   if (window.location.search.includes("code=")) {
-    const code = new URLSearchParams(window.location.search).get("code");
-    fetch("https://api3.jailbreakchangelogs.xyz/auth?code=" + code, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    })
-      .then((response) => {
+    (async () => {
+      const code = new URLSearchParams(window.location.search).get("code");
+      LoginLogger.log("auth", "Processing OAuth code");
+
+      try {
+        const response = await fetch(
+          "https://api3.jailbreakchangelogs.xyz/auth?code=" + code,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        // Handle response status
         if (response.status === 403) {
-          throw new Error("banned");
-        }
-        if (!response.ok) {
-          throw new Error("network");
-        }
-        return response.json();
-      })
-      .then((userData) => {
-        if (userData && userData.id && userData.avatar) {
-          const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          window.setCookie("token", userData.token, 7);
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("avatar", avatarURL);
-          localStorage.setItem("userid", userData.id);
-
-          // Check for report-issue first
-          if (localStorage.getItem("reportIssueRedirect")) {
-            localStorage.removeItem("reportIssueRedirect");
-            window.location.href = "/?report-issue&freshlogin=true";
-            return;
-          }
-
-          // Then check for regular redirect
-          const storedRedirect = localStorage.getItem("loginRedirect");
-          if (storedRedirect) {
-            window.location.href = `${storedRedirect}${
-              storedRedirect.includes("?") ? "&" : "?"
-            }freshlogin=true`;
-            localStorage.removeItem("loginRedirect");
-            return;
-          }
-
-          // Default to home with welcome message
-          window.location.href = "/?freshlogin=true";
-          return;
-        }
-      })
-      .catch((error) => {
-        if (error.message === "banned") {
+          LoginLogger.log("error", "User is banned");
           notyf.error(
             "Your account has been banned from Jailbreak Changelogs."
           );
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 3500);
-        } else {
-          console.error("Login error:", error);
-          window.location.href = "/";
+          setTimeout(() => (window.location.href = "/"), 3500);
+          return;
         }
-      });
+
+        if (!response.ok) {
+          throw new Error(`Auth failed: ${response.status}`);
+        }
+
+        const userData = await response.json();
+        LoginLogger.log("success", "Auth successful, setting up session");
+
+        if (!userData?.id || !userData?.token) {
+          throw new Error("Invalid user data");
+        }
+
+        // Set up session
+        window.setCookie("token", userData.token, 7);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("userid", userData.id);
+
+        if (userData.avatar) {
+          const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+          localStorage.setItem("avatar", avatarURL);
+        }
+
+        LoginLogger.log("redirect", "Handling post-login redirect");
+
+        // Handle redirects in order of priority
+        if (localStorage.getItem("reportIssueRedirect")) {
+          LoginLogger.log("redirect", "Redirecting to report issue");
+          localStorage.removeItem("reportIssueRedirect");
+          window.location.href = "/?report-issue&freshlogin=true";
+          return;
+        }
+
+        const storedRedirect = localStorage.getItem("loginRedirect");
+        if (storedRedirect) {
+          LoginLogger.log(
+            "redirect",
+            `Redirecting to stored path: ${storedRedirect}`
+          );
+          window.location.href = `${storedRedirect}${
+            storedRedirect.includes("?") ? "&" : "?"
+          }freshlogin=true`;
+          localStorage.removeItem("loginRedirect");
+          return;
+        }
+
+        LoginLogger.log("redirect", "Redirecting to homepage");
+        window.location.href = "/?freshlogin=true";
+      } catch (error) {
+        LoginLogger.log("error", `Auth error: ${error.message}`);
+        notyf.error("An error occurred during login. Please try again.");
+        setTimeout(() => (window.location.href = "/"), 3500);
+      }
+    })();
   }
 });
 

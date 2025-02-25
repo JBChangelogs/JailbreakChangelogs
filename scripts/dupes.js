@@ -199,7 +199,7 @@ async function calculateDupe() {
                   class="w-100 h-100"
                   style="object-fit: contain;"
                   alt="${dupe.item.name}"
-                  onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'"
+                  onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
                 >
               </div>
               <div class="item-info">
@@ -255,7 +255,7 @@ async function calculateDupe() {
                 class="w-100 h-100"
                 style="object-fit: contain;"
                 alt="${item.name}"
-                onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp'"
+                onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
               >
             </div>
             <div class="item-info">

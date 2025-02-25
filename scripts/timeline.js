@@ -129,7 +129,7 @@ $(document).ready(function () {
     const sideClass = index % 2 === 0 ? "left" : "right";
     const formattedTitle = formatTitle(changelog.title);
     const defaultImage =
-      "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat.webp";
+      "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
     const imageUrl = changelog.image_url || defaultImage;
 
     return `

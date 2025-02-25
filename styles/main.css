@@ -243,6 +243,16 @@
   color: var(--jb-footer-bg-primary) !important;
 }
 
+.jb-footer__button svg {
+  margin-right: 0.5rem !important;
+}
+
+.jb-footer__button[href*="ko-fi.com"]:hover {
+  background-color: #29abe0 !important;
+  border-color: #29abe0 !important;
+  color: #ffffff !important;
+}
+
 /* Info section styles */
 .jb-footer__info-section {
   border-top: 1px solid var(--jb-footer-text-muted) !important;
@@ -920,4 +930,44 @@ body.menu-open {
   .jbcl-announcement-text {
     font-size: 0.8125rem !important;
   }
+}
+
+/* Ko-fi button styling */
+.jb-footer__button[href*="ko-fi.com"] {
+  background: linear-gradient(135deg, #29abe0 0%, #2493c1 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(41, 171, 224, 0.2) !important;
+}
+
+.jb-footer__button[href*="ko-fi.com"]:hover {
+  background: linear-gradient(135deg, #2493c1 0%, #29abe0 100%) !important;
+  box-shadow: 0 6px 20px rgba(41, 171, 224, 0.3) !important;
+}
+
+.jb-footer__button[href*="ko-fi.com"]::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  ) !important;
+  transition: 0.5s !important;
+}
+
+.jb-footer__button[href*="ko-fi.com"]:hover::before {
+  left: 100% !important;
+}
+
+.jb-footer__button[href*="ko-fi.com"] svg {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2)) !important;
 }

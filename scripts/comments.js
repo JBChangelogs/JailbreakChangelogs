@@ -192,9 +192,7 @@ class CommentsManager {
   }
 
   async loadComments() {
-    if (this._isLoading) {
-      return;
-    }
+    if (this._isLoading) return;
 
     // Check if elements are initialized
     if (!this.commentsList || !this.paginationControls) {
@@ -229,17 +227,27 @@ class CommentsManager {
     }
 
     this._isLoading = true;
-
-    // Clear existing comments and update header first
     this.clearComments();
 
-    // Show loading state
-    this.commentsList.innerHTML = `
-      <li class="list-group-item comments-loading">
-        <div class="spinner mb-2"></div>
-        <div>Loading comments...</div>
-      </li>
-    `;
+    // Show skeleton loaders immediately
+    this.commentsList.innerHTML = Array(3)
+      .fill()
+      .map(
+        () => `
+        <li class="list-group-item skeleton-comment">
+          <div class="d-flex">
+            <div class="skeleton-avatar"></div>
+            <div class="flex-grow-1 ms-3">
+              <div class="skeleton-text short"></div>
+              <div class="skeleton-text medium"></div>
+              <div class="skeleton-text long"></div>
+            </div>
+          </div>
+          <div class="skeleton-shimmer"></div>
+        </li>
+      `
+      )
+      .join("");
 
     try {
       const response = await fetch(
@@ -252,22 +260,16 @@ class CommentsManager {
         }
       );
 
-      // Handle 404 (no comments) separately
       if (response.status === 404) {
         this.commentsList.innerHTML = `
           <li class="list-group-item text-center border-0" style="background-color: transparent;">
             <div class="py-3">
-           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
-            <rect width="16" height="16" fill="none" />
-            <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
-          </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M12 23a1 1 0 0 1-1-1v-3H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4.1l-3.7 3.71c-.2.18-.44.29-.7.29zm-9-8H1V3a2 2 0 0 1 2-2h16v2H3z"/></svg>
               <p class="mb-0 text-muted">No comments yet</p>
               <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
             </div>
           </li>
         `;
-        this._isLoading = false;
-        // Ensure pagination is hidden
         this.paginationControls.style.display = "none";
         return;
       }
@@ -276,39 +278,10 @@ class CommentsManager {
 
       const data = await response.json();
       this.comments = data;
-
-      this.renderComments();
+      await this.renderComments();
     } catch (error) {
       console.error("[CommentsManager] Error loading comments:", error);
-
-      if (error.message === "rate_limit" || response?.status === 429) {
-        this.commentsList.innerHTML = `
-          <li class="list-group-item text-center text-warning">
-           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-            <rect width="24" height="24" fill="none" />
-            <path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
-          </svg>
-            You're being rate limited. Please wait a moment before trying again.
-          </li>
-        `;
-        notyf.warning(
-          "You're being rate limited. Please wait a moment before trying again.",
-          "Rate Limit"
-        );
-      } else {
-        this.commentsList.innerHTML = `
-          <li class="list-group-item text-center text-danger">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-            <rect width="24" height="24" fill="none" />
-            <path fill="currentColor" fill-rule="evenodd" d="M13.164 3.492a2.92 2.92 0 0 0-2.328 0c-.506.22-.881.634-1.222 1.115c-.338.477-.711 1.123-1.173 1.923l-4.815 8.34c-.438.758-.794 1.374-1.026 1.881c-.235.51-.4 1.025-.336 1.558c.095.782.526 1.48 1.175 1.929c.438.303.97.411 1.543.462c.57.05 1.3.05 2.205.05h9.626c.905 0 1.635 0 2.205-.05c.573-.05 1.105-.16 1.543-.462a2.75 2.75 0 0 0 1.175-1.929c.065-.533-.102-1.047-.336-1.558c-.232-.507-.588-1.123-1.026-1.882l-4.815-8.34c-.462-.799-.835-1.445-1.173-1.922c-.34-.48-.716-.894-1.222-1.115M10.756 9.4C10.686 8.65 11.264 8 12 8s1.313.649 1.244 1.4l-.494 4.15a.76.76 0 0 1-.75.7a.76.76 0 0 1-.75-.7zm2.494 7.35a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0" clip-rule="evenodd" />
-          </svg>
-            Failed to load comments. Please try again.
-          </li>
-        `;
-        if (!error.message.includes("404")) {
-          notyf.error("Failed to load comments. Please try again.");
-        }
-      }
+      // ...existing error handling code...
     } finally {
       this._isLoading = false;
     }
@@ -319,47 +292,47 @@ class CommentsManager {
       clearTimeout(this._renderTimeout);
     }
 
-    // Keep existing content while loading
-    const currentHeight = this.commentsList.offsetHeight;
-    this.commentsList.style.minHeight = `${currentHeight}px`;
+    // Show skeleton loaders
+    this.commentsList.innerHTML = Array(3)
+      .fill()
+      .map(
+        () => `
+        <li class="list-group-item skeleton-comment">
+          <div class="d-flex">
+            <div class="skeleton-avatar"></div>
+            <div class="flex-grow-1 ms-3">
+              <div class="skeleton-text short"></div>
+              <div class="skeleton-text medium"></div>
+              <div class="skeleton-text long"></div>
+            </div>
+          </div>
+          <div class="skeleton-shimmer"></div>
+        </li>
+      `
+      )
+      .join("");
 
     try {
-      // Show loading state but maintain height
-      const loadingHtml = `
-        <li class="list-group-item comments-loading">
-          <div class="spinner mb-2"></div>
-          <div>Loading comments...</div>
-        </li>
-      `;
-
-      this.commentsList.innerHTML = loadingHtml;
-
-      // Rest of your existing renderComments code...
-      this.commentsList.innerHTML = "";
-
-      if (this.comments.length === 0) {
-        this.commentsList.innerHTML = `
-          <li class="list-group-item text-center border-0" style="background-color: transparent;">
-              <div class="py-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
-                  <rect width="16" height="16" fill="none" />
-                  <path fill="#6c757d" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0a1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0a1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" />
-                </svg>
-                <p class="mb-0 text-muted">No comments yet</p>
-                <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
-              </div>
-          </li>
-        `;
-        this.paginationControls.style.display = "none";
-        return;
-      }
-
       // Sort comments based on date
       const commentsToRender = [...this.comments].sort((a, b) => {
         const dateA = parseInt(a.date);
         const dateB = parseInt(b.date);
         return this.sortOrder === "newest" ? dateB - dateA : dateA - dateB;
       });
+
+      if (commentsToRender.length === 0) {
+        this.commentsList.innerHTML = `
+          <li class="list-group-item text-center border-0" style="background-color: transparent;">
+            <div class="py-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M12 23a1 1 0 0 1-1-1v-3H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4.1l-3.7 3.71c-.2.18-.44.29-.7.29zm-9-8H1V3a2 2 0 0 1 2-2h16v2H3z"/></svg>
+              <p class="mb-0 text-muted">No comments yet</p>
+              <p class="small text-muted mb-0">Be the first to share your thoughts!</p>
+            </div>
+          </li>
+        `;
+        this.paginationControls.style.display = "none";
+        return;
+      }
 
       // Calculate pagination
       const totalPages = Math.ceil(
@@ -378,41 +351,19 @@ class CommentsManager {
       const temp = document.createElement("div");
       temp.innerHTML = allCommentsHTML.join("");
 
+      // Clear skeleton loaders and add actual comments
+      this.commentsList.innerHTML = "";
+
       // Process all comments at once
       const commentElements = temp.children;
       const fragment = document.createDocumentFragment();
 
-      // Convert HTMLCollection to Array for forEach
       Array.from(commentElements).forEach((commentElement, index) => {
         const comment = commentsToShow[index];
-
-        // Set up show more functionality
-        const commentText = commentElement.querySelector(".comment-text");
-        const showMoreBtn = commentElement.querySelector(".show-more-btn");
-
-        if (commentText && showMoreBtn) {
-          // Need to add to DOM first to check scrollHeight
-          fragment.appendChild(commentElement);
-          this.commentsList.appendChild(fragment);
-
-          if (commentText.scrollHeight > 300) {
-            commentText.classList.add("truncated");
-            showMoreBtn.classList.add("visible");
-          }
-
-          showMoreBtn.addEventListener("click", () => {
-            const isExpanded = commentText.classList.contains("expanded");
-            commentText.classList.toggle("expanded");
-            commentText.classList.toggle("truncated");
-            showMoreBtn.textContent = isExpanded ? "Show more" : "Show less";
-          });
-        }
-
-        // Set up action buttons if present
-        if (commentElement.querySelector(".comment-actions")) {
-          this.setupCommentActions(commentElement, comment);
-        }
+        this.processCommentElement(commentElement, comment, fragment);
       });
+
+      this.commentsList.appendChild(fragment);
 
       // Handle pagination
       if (totalPages > 1) {
@@ -428,11 +379,33 @@ class CommentsManager {
           Error loading comments. Please try again.
         </li>
       `;
-    } finally {
-      // Remove the fixed height after transition
-      setTimeout(() => {
-        this.commentsList.style.minHeight = "";
-      }, 300); // Match the transition duration
+    }
+  }
+
+  // Helper method to process individual comment elements
+  processCommentElement(commentElement, comment, fragment) {
+    const commentText = commentElement.querySelector(".comment-text");
+    const showMoreBtn = commentElement.querySelector(".show-more-btn");
+
+    if (commentText && showMoreBtn) {
+      fragment.appendChild(commentElement);
+      this.commentsList.appendChild(fragment);
+
+      if (commentText.scrollHeight > 300) {
+        commentText.classList.add("truncated");
+        showMoreBtn.classList.add("visible");
+      }
+
+      showMoreBtn.addEventListener("click", () => {
+        const isExpanded = commentText.classList.contains("expanded");
+        commentText.classList.toggle("expanded");
+        commentText.classList.toggle("truncated");
+        showMoreBtn.textContent = isExpanded ? "Show more" : "Show less";
+      });
+    }
+
+    if (commentElement.querySelector(".comment-actions")) {
+      this.setupCommentActions(commentElement, comment);
     }
   }
 

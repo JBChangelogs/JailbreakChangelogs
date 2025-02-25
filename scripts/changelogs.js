@@ -1269,6 +1269,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  document.addEventListener("click", function (e) {
+    // Find the closest quick-nav-link ancestor or the element itself
+    const navLink = e.target.closest(".quick-nav-link");
+    if (navLink) {
+      e.preventDefault();
+      const changelogId = navLink.dataset.changelogId;
+      if (changelogId) {
+        const changelog = changelogsData.find((cl) => cl.id == changelogId);
+        if (changelog) {
+          // Clear comments first
+          if (window.commentsManagerInstance) {
+            window.commentsManagerInstance.clearComments();
+          }
+
+          // Update URL and display new content
+          const newUrl = `/changelogs/${changelogId}`;
+          history.pushState({}, "", newUrl);
+          displayChangelog(changelog);
+          updateChangelogBreadcrumb(changelogId);
+
+          // Update comments
+          if (window.commentsManagerInstance) {
+            window.commentsManagerInstance.type = "changelog";
+            window.commentsManagerInstance.itemId = changelogId;
+            window.commentsManagerInstance.loadComments();
+          }
+        }
+      }
+    }
+  });
+
+  function extractDate(title) {
+    // Extract just the date portion before the "/"
+    const parts = title.split("/");
+    return parts[0].trim();
+  }
+
   function createNavigationLinks(currentChangelog) {
     const currentIndex = changelogsData.findIndex(
       (cl) => cl.id === currentChangelog.id
@@ -1287,8 +1324,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   prevChangelog
                     ? `
                     <div class="nav-item">
-                        <a href="/changelogs/${prevChangelog.id}" 
-                           class="quick-nav-link" 
+                        <button class="btn btn-link quick-nav-link p-0" 
                            data-changelog-id="${prevChangelog.id}"
                            title="${prevChangelog.title}">
                             <div class="d-flex flex-column">
@@ -1306,7 +1342,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     )}</span>
                                 </div>
                             </div>
-                        </a>
+                        </button>
                     </div>
                 `
                     : ""
@@ -1316,8 +1352,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   nextChangelog
                     ? `
                     <div class="nav-item">
-                        <a href="/changelogs/${nextChangelog.id}" 
-                           class="quick-nav-link" 
+                        <button class="btn btn-link quick-nav-link p-0" 
                            data-changelog-id="${nextChangelog.id}"
                            title="${nextChangelog.title}">
                             <div class="d-flex flex-column">
@@ -1335,7 +1370,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                   </svg>
                                 </div>
                             </div>
-                        </a>
+                        </button>
                     </div>
                 `
                     : ""
@@ -1345,70 +1380,6 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
   }
 
-  document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("quick-nav-link")) {
-      e.preventDefault();
-      const changelogId = e.target.dataset.changelogId;
-      if (changelogId) {
-        const changelog = changelogsData.find((cl) => cl.id === changelogId);
-        if (changelog) {
-          // Immediately clear comments before any other operations
-          if (window.commentsManagerInstance) {
-            window.commentsManagerInstance.clearComments();
-          }
-
-          const newUrl = `/changelogs/${changelogId}`;
-          history.pushState({}, "", newUrl);
-
-          // Update content and breadcrumb
-          displayChangelog(changelog);
-          updateChangelogBreadcrumb(changelogId);
-
-          // handle comment loading
-          const loadComments = () => {
-            return new Promise((resolve) => {
-              if (window.commentsManagerInstance) {
-                window.commentsManagerInstance.type = "changelog";
-                window.commentsManagerInstance.itemId = changelogId;
-                // Ensure comments are completely cleared before loading new ones
-                setTimeout(() => {
-                  window.commentsManagerInstance.loadComments();
-                  resolve();
-                }, 100);
-              } else {
-                resolve();
-              }
-            });
-          };
-
-          // Execute the comment loading and scrolling in sequence
-          loadComments().then(() => {
-            const contentElement = document.getElementById("content-wrapper");
-            if (contentElement) {
-              const offset = 80;
-              const elementPosition =
-                contentElement.getBoundingClientRect().top;
-              const offsetPosition =
-                elementPosition + window.pageYOffset - offset;
-
-              window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth",
-              });
-            }
-          });
-        }
-      }
-    }
-  });
-
-  function extractDate(title) {
-    // Extract date portion from titles like "March 16th 2018 / Miscellaneous Update 12"
-    const dateMatch = title.match(/^([A-Za-z]+ \d+(?:st|nd|rd|th) \d{4})/);
-    return dateMatch ? dateMatch[1] : title;
-  }
-
-  // Add handler for navigation clicks
   function handleNavigationClick(event, changelogId) {
     event.preventDefault();
     const changelog = changelogsData.find((cl) => cl.id === changelogId);

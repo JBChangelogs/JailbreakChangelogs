@@ -3,6 +3,7 @@
   --border-color: rgba(116, 141, 146, 0.2);
   --overlay-dark: rgba(33, 42, 49, 0.8);
   --mention-bg: var(--background-dark);
+  --background-dark: var(--accent-color);
   --mention-color: var(--text-secondary);
   --mention-hover: var(--button-primary);
   --highlight-bg: rgba(18, 78, 102, 0.4);
@@ -335,7 +336,7 @@ body {
 
 /* Card Components */
 .card {
-  background-color: var(--background-dark) !important;
+  background-color: var(--bg-primary) !important;
   border: none !important;
   border-radius: 16px;
 }
@@ -534,16 +535,12 @@ body {
   padding-right: 10px;
 
   .list-group-item {
-    background-color: var(--background-dark);
+    background-color: transparent !important;
     border: 1px solid var(--border-color);
     border-radius: 15px;
     padding: 15px;
     margin-bottom: 15px;
     transition: transform 0.2s ease;
-
-    &:hover {
-      transform: translateY(-3px);
-    }
   }
 }
 
@@ -924,5 +921,55 @@ body {
   }
   .mobile-mb-2 {
     margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Tab Navigation Styles */
+.nav-tabs {
+  border-bottom: 1px solid var(--accent-color-light);
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link {
+  color: var(--text-muted);
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-color-light);
+  background-color: rgba(29, 125, 163, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border-color: var(--accent-color);
+  border-bottom: 2px solid var(--accent-color-light);
+}
+
+.tab-content {
+  background-color: var(--bg-primary);
+  border-radius: 0 0 8px 8px;
+  margin-top: -1px;
+}
+
+.tab-pane {
+  padding: 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .nav-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
   }
 }
