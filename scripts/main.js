@@ -53,6 +53,8 @@ window.notyf.special = (message) =>
 
 // Global variables
 let globalUserData = null;
+let escapePressCount = 0;
+let escapePressTimeout = null;
 
 // Cookie helper functions
 window.getCookie = function (name) {
@@ -91,6 +93,14 @@ const SessionLogger = {
   },
 };
 
+// Add retry configuration at the top with other globals
+const SESSION_VALIDATION = {
+  maxRetries: 3,
+  retryDelay: 2000, // Increased to 2 seconds for more visible retries
+  currentRetries: 0,
+  debugMode: true, // Add debug mode
+};
+
 async function validateUserSession(token) {
   if (!token) {
     SessionLogger.logEvent("validate", "No token found");
@@ -98,9 +108,29 @@ async function validateUserSession(token) {
   }
 
   try {
+    // Check if we've already hit max retries before attempting
+    if (SESSION_VALIDATION.currentRetries >= SESSION_VALIDATION.maxRetries) {
+      SessionLogger.logEvent("validate", "Max retries exceeded");
+      return false;
+    }
+
     SessionLogger.logEvent("validate", "Checking token validity...");
+
+    // Add debugging for network state
+    if (SESSION_VALIDATION.debugMode) {
+      SessionLogger.logEvent(
+        "debug",
+        `Attempt ${SESSION_VALIDATION.currentRetries + 1}/${
+          SESSION_VALIDATION.maxRetries
+        }`
+      );
+    }
+
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+      {
+        signal: AbortSignal.timeout(3000),
+      }
     );
 
     if (!response.ok) {
@@ -117,6 +147,7 @@ async function validateUserSession(token) {
       return false;
     }
 
+    SESSION_VALIDATION.currentRetries = 0; // Reset retries on success
     SessionLogger.logEvent("validate", "Token validated successfully");
     return true;
   } catch (error) {
@@ -124,6 +155,25 @@ async function validateUserSession(token) {
       "error",
       `Session validation error: ${error.message}`
     );
+
+    // If it's a network error or timeout, retry
+    if (
+      (error instanceof TypeError || error.name === "TimeoutError") &&
+      SESSION_VALIDATION.currentRetries < SESSION_VALIDATION.maxRetries
+    ) {
+      SESSION_VALIDATION.currentRetries++;
+      SessionLogger.logEvent(
+        "retry",
+        `Retrying validation in ${SESSION_VALIDATION.retryDelay}ms (${SESSION_VALIDATION.currentRetries}/${SESSION_VALIDATION.maxRetries})`
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, SESSION_VALIDATION.retryDelay)
+      );
+      return validateUserSession(token);
+    }
+
+    // If we get here, either it's not a network error or we're out of retries
     return false;
   }
 }
@@ -214,148 +264,153 @@ document.addEventListener("DOMContentLoaded", async function () {
     '[data-bs-target="#reportIssueModal"]'
   );
 
-  if (!token) {
-    // User is not authenticated
-    reportIssueBtn.classList.add("disabled");
-    reportIssueBtn.removeAttribute("data-bs-target");
-    reportIssueBtn.onclick = (e) => {
-      e.preventDefault();
-      notyf.error("Please sign in to report issues");
+  // Only proceed if reportIssueBtn exists (i.e., not on auth pages)
+  if (reportIssueBtn) {
+    if (!token) {
+      // User is not authenticated
+      reportIssueBtn.classList.add("disabled");
+      reportIssueBtn.removeAttribute("data-bs-target");
+      reportIssueBtn.onclick = (e) => {
+        e.preventDefault();
+        notyf.error("Please sign in to report issues");
 
-      // Redirect to login page after 3 seconds
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 3000);
-    };
-  } else {
-    // Remove disabled state if it was previously set
-    reportIssueBtn.classList.remove("disabled");
-    reportIssueBtn.removeAttribute("title");
-    reportIssueBtn.style.cursor = "pointer";
+        // Redirect to login page after 3 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
+      };
+    } else {
+      // Remove disabled state if it was previously set
+      reportIssueBtn.classList.remove("disabled");
+      reportIssueBtn.removeAttribute("title");
+      reportIssueBtn.style.cursor = "pointer";
 
-    // Get the actual user ID either from userId or globalUserData object
-    const actualUserId = userid || globalUserData.id;
+      // Get the actual user ID either from userId or globalUserData object
+      const actualUserId = userid || globalUserData.id;
 
-    // Reset form when opening modal
-    reportIssueBtn.addEventListener("click", () => {
-      document.getElementById("reportIssueForm").reset();
-      document.getElementById("successMessage").classList.add("d-none");
-      // Re-enable form elements if they were disabled
-      const form = document.getElementById("reportIssueForm");
-      form
-        .querySelectorAll("input, textarea")
-        .forEach((el) => (el.disabled = false));
-      document.getElementById("submitIssue").disabled = false;
-    });
-
-    document
-      .getElementById("submitIssue")
-      .addEventListener("click", function () {
-        const title = document.getElementById("issueTitle").value;
-        const description = document.getElementById("issueDescription").value;
-
-        // Clear previous validation styling
-        document
-          .querySelectorAll(".invalid-feedback")
-          .forEach((el) => el.remove());
-        document.getElementById("issueTitle").classList.remove("is-invalid");
-        document
-          .getElementById("issueDescription")
-          .classList.remove("is-invalid");
-
-        let hasError = false;
-        const MIN_TITLE_LENGTH = 10;
-        const MIN_DESCRIPTION_LENGTH = 25;
-
-        if (description.length < MIN_DESCRIPTION_LENGTH) {
-          const descriptionInput = document.getElementById("issueDescription");
-          descriptionInput.classList.add("is-invalid");
-          hasError = true;
-          notyf.error(
-            `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters long`
-          );
-        }
-
-        if (title.length < MIN_TITLE_LENGTH) {
-          const titleInput = document.getElementById("issueTitle");
-          titleInput.classList.add("is-invalid");
-          hasError = true;
-          notyf.error(
-            `Title must be at least ${MIN_TITLE_LENGTH} characters long`
-          );
-        }
-
-        if (hasError) {
-          return; // Stop submission if validation fails
-        }
-
-        // Disable form while submitting
+      // Reset form when opening modal
+      reportIssueBtn.addEventListener("click", () => {
+        document.getElementById("reportIssueForm").reset();
+        document.getElementById("successMessage").classList.add("d-none");
+        // Re-enable form elements if they were disabled
         const form = document.getElementById("reportIssueForm");
-        const submitBtn = document.getElementById("submitIssue");
         form
           .querySelectorAll("input, textarea")
-          .forEach((el) => (el.disabled = true));
-        submitBtn.disabled = true;
-
-        // Submit the issue
-        fetch("https://api3.jailbreakchangelogs.xyz/issues/add", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "jailbreakchangelogs.xyz",
-          },
-          body: JSON.stringify({
-            user: actualUserId,
-            title: title,
-            description: description,
-          }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            // Show success message
-            const successMessage = document.getElementById("successMessage");
-            successMessage.classList.remove("d-none");
-
-            // Clean up URL parameter
-            cleanupURL();
-
-            // Close modal after 2 seconds
-            setTimeout(() => {
-              const modal = bootstrap.Modal.getInstance(
-                document.getElementById("reportIssueModal")
-              );
-              modal.hide();
-
-              // Reset form and hide success message
-              setTimeout(() => {
-                form.reset();
-                successMessage.classList.add("d-none");
-                form
-                  .querySelectorAll("input, textarea")
-                  .forEach((el) => (el.disabled = false));
-                submitBtn.disabled = false;
-              }, 500);
-            }, 2000);
-          })
-          .catch((error) => {
-            console.error("Error submitting issue:", error);
-            notyf.error(
-              "There was an error submitting your issue. Please try again."
-            );
-
-            // Re-enable form on error
-            form
-              .querySelectorAll("input, textarea")
-              .forEach((el) => (el.disabled = false));
-            submitBtn.disabled = false;
-          });
+          .forEach((el) => (el.disabled = false));
+        document.getElementById("submitIssue").disabled = false;
       });
+
+      document
+        .getElementById("submitIssue")
+        .addEventListener("click", function () {
+          const title = document.getElementById("issueTitle").value;
+          const description = document.getElementById("issueDescription").value;
+
+          // Clear previous validation styling
+          document
+            .querySelectorAll(".invalid-feedback")
+            .forEach((el) => el.remove());
+          document.getElementById("issueTitle").classList.remove("is-invalid");
+          document
+            .getElementById("issueDescription")
+            .classList.remove("is-invalid");
+
+          let hasError = false;
+          const MIN_TITLE_LENGTH = 10;
+          const MIN_DESCRIPTION_LENGTH = 25;
+
+          if (description.length < MIN_DESCRIPTION_LENGTH) {
+            const descriptionInput =
+              document.getElementById("issueDescription");
+            descriptionInput.classList.add("is-invalid");
+            hasError = true;
+            notyf.error(
+              `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters long`
+            );
+          }
+
+          if (title.length < MIN_TITLE_LENGTH) {
+            const titleInput = document.getElementById("issueTitle");
+            titleInput.classList.add("is-invalid");
+            hasError = true;
+            notyf.error(
+              `Title must be at least ${MIN_TITLE_LENGTH} characters long`
+            );
+          }
+
+          if (hasError) {
+            return; // Stop submission if validation fails
+          }
+
+          // Disable form while submitting
+          const form = document.getElementById("reportIssueForm");
+          const submitBtn = document.getElementById("submitIssue");
+          form
+            .querySelectorAll("input, textarea")
+            .forEach((el) => (el.disabled = true));
+          submitBtn.disabled = true;
+
+          // Submit the issue
+          fetch("https://api3.jailbreakchangelogs.xyz/issues/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Origin: "jailbreakchangelogs.xyz",
+            },
+            body: JSON.stringify({
+              user: actualUserId,
+              title: title,
+              description: description,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              // Show success message
+              const successMessage = document.getElementById("successMessage");
+              successMessage.classList.remove("d-none");
+
+              // Clean up URL parameter
+              cleanupURL();
+
+              // Close modal after 2 seconds
+              setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(
+                  document.getElementById("reportIssueModal")
+                );
+                modal.hide();
+
+                // Reset form and hide success message
+                setTimeout(() => {
+                  form.reset();
+                  successMessage.classList.add("d-none");
+                  form
+                    .querySelectorAll("input, textarea")
+                    .forEach((el) => (el.disabled = false));
+                  submitBtn.disabled = false;
+                }, 500);
+              }, 2000);
+            })
+            .catch((error) => {
+              console.error("Error submitting issue:", error);
+              notyf.error(
+                "There was an error submitting your issue. Please try again."
+              );
+
+              // Re-enable form on error
+              form
+                .querySelectorAll("input, textarea")
+                .forEach((el) => (el.disabled = false));
+              submitBtn.disabled = false;
+            });
+        });
+    }
   }
 
   const sideMenu = document.getElementById("sideMenu");
   const mobileViewUpdates = document.getElementById("mobileViewUpdates");
+  const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
 
   window.checkAndSetAvatar = async function (userData) {
     const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
@@ -398,34 +453,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
   function toggleMenu() {
-    mobileAvatarToggle.classList.toggle("opened");
-    sideMenu.classList.toggle("show");
-    document.body.classList.toggle("menu-open");
+    // Only run these if mobileAvatarToggle exists
+    if (mobileAvatarToggle) {
+      mobileAvatarToggle.classList.toggle("opened");
+      const isExpanded = mobileAvatarToggle.classList.contains("opened");
+      mobileAvatarToggle.setAttribute("aria-expanded", isExpanded);
+    }
 
-    // Update aria-expanded attribute
-    const isExpanded = mobileAvatarToggle.classList.contains("opened");
-    mobileAvatarToggle.setAttribute("aria-expanded", isExpanded);
+    // These elements might exist on other pages
+    if (sideMenu) {
+      sideMenu.classList.toggle("show");
+      document.body.classList.toggle("menu-open");
+    }
   }
 
-  mobileAvatarToggle.addEventListener("click", toggleMenu);
+  // Only attach event listener if element exists
+  if (mobileAvatarToggle) {
+    mobileAvatarToggle.addEventListener("click", toggleMenu);
+  }
 
   // Conditional check for mobileViewUpdates
   if (mobileViewUpdates) {
     mobileViewUpdates.addEventListener("click", toggleMenu);
   }
 
-  // Close menu when a nav item is clicked
-  sideMenu.querySelectorAll(".nav-link, .btn").forEach((link) => {
-    link.addEventListener("click", toggleMenu);
-  });
+  // Only attach event listeners if sideMenu exists
+  if (sideMenu) {
+    sideMenu.querySelectorAll(".nav-link, .btn").forEach((link) => {
+      link.addEventListener("click", toggleMenu);
+    });
+  }
 
   try {
     if (token) {
       const isValid = await validateUserSession(token);
       if (!isValid) {
-        clearSessionWithReason("invalid_session");
-        window.location.reload();
-        return;
+        // Only clear session if we've exhausted all retries
+        if (
+          SESSION_VALIDATION.currentRetries >= SESSION_VALIDATION.maxRetries
+        ) {
+          clearSessionWithReason("invalid_session_after_retries");
+          window.location.reload();
+          return;
+        }
       }
     } else if (globalUserData || userid) {
       clearSessionWithReason("missing_token");
@@ -492,8 +562,13 @@ function updateVersionDisplay(data) {
 document.addEventListener("DOMContentLoaded", async () => {
   checkWebsiteVersion();
 
-  // Handle token validation and user data in one place
-  if (token) {
+  // Check if we're on an auth page (login or roblox)
+  const isAuthPage =
+    window.location.pathname === "/login" ||
+    window.location.pathname === "/roblox";
+
+  // Only proceed with user data and avatar handling if not on auth page
+  if (token && !isAuthPage) {
     try {
       const response = await fetch(
         "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
@@ -532,10 +607,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      notyf.error(
-        "Failed to load user data. Some features may be unavailable."
-      );
+      // Only show error if we're not on an auth page
+      if (!isAuthPage) {
+        console.error("Error fetching user data:", error);
+        notyf.error(
+          "Failed to load user data. Some features may be unavailable."
+        );
+      }
     }
   }
 
