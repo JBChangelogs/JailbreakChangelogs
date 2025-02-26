@@ -96,6 +96,20 @@ function getItemMediaElement(item, options = {}) {
       </span>`;
   }
 
+  // Special case for HyperShift - moved up before default case
+  if (item.name === "HyperShift" && item.type === "HyperChrome") {
+    return `
+      <div class="media-container position-relative ${containerClass}">
+        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+        <video class="${imageClass || "card-img-top"}"
+               style="width: 100%; height: 100%; object-fit: contain;"
+               autoplay loop muted playsinline>
+          <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+          <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+        </video>
+      </div>`;
+  }
+
   // Special case for horns
   if (item.type.toLowerCase() === "horn") {
     return `
@@ -136,20 +150,6 @@ function getItemMediaElement(item, options = {}) {
                loop>
         </video>
         ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
-      </div>`;
-  }
-
-  // Special case for HyperShift
-  if (item.name === "HyperShift" && item.type === "HyperChrome") {
-    return `
-      <div class="media-container position-relative ${containerClass}">
-        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
-        <video class="${imageClass || "card-img-top"}"
-               style="width: 100%; height: 100%; object-fit: contain;"
-               autoplay loop muted playsinline>
-          <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
-          <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
-        </video>
       </div>`;
   }
 
@@ -1378,7 +1378,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create a loading queue to prevent overwhelming the browser
     const imageQueue = allItems
-      .filter((item) => !["drift", "horn"].includes(item.type.toLowerCase()))
+      .filter(
+        (item) =>
+          // Exclude drifts, horns, and HyperShift
+          !["drift", "horn"].includes(item.type.toLowerCase()) &&
+          !(item.name === "HyperShift" && item.type === "HyperChrome")
+      )
       .map((item) => {
         const itemType = item.type.toLowerCase();
         // Get image path directly instead of parsing HTML
