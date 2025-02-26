@@ -8,7 +8,7 @@ let currentDuperName = null; // Add this line
 // Add these variables at the top with other globals
 let displayedItems = [];
 let currentPage = 0;
-const ITEMS_PER_PAGE = 18;
+const ITEMS_PER_PAGE = 32; // Increased from 18
 
 // Format timestamp to readable date
 function formatDate(timestamp) {
@@ -353,7 +353,6 @@ async function calculateDupe() {
 
     // Update onclick to pass both ID and name
     reportBtn.onclick = function () {
-      console.log("Report button clicked for item:", item.id, item.name);
       showReportModal(item.id);
     };
   }
@@ -361,10 +360,7 @@ async function calculateDupe() {
   modalInstance.show();
 }
 
-// Add this function before the DOMContentLoaded event listener
 async function showItemSelectionModal(ownerName = null) {
-  console.log("Opening item selection modal with owner:", ownerName);
-
   if (!Cookies.get("token")) {
     notyf.error("You must be logged in to report dupes");
     return;
@@ -382,8 +378,8 @@ async function showItemSelectionModal(ownerName = null) {
 
   // Reset pagination
   currentPage = 0;
-  // Shuffle all items once when opening modal
-  displayedItems = [...allItems].sort(() => Math.random() - 0.5);
+  // Sort items alphabetically by default
+  displayedItems = [...allItems].sort((a, b) => a.name.localeCompare(b.name));
 
   // Reset selection
   selectedItem = null;
@@ -401,6 +397,9 @@ async function showItemSelectionModal(ownerName = null) {
     document.getElementById("itemSelectionModal")
   );
   modal.show();
+
+  // Attach infinite scroll after modal is shown
+  setTimeout(attachInfiniteScroll, 100);
 }
 
 // Add new function to handle displaying items
@@ -411,54 +410,96 @@ function displayItemsInModal() {
     (currentPage + 1) * ITEMS_PER_PAGE
   );
 
-  resultsContainer.innerHTML = itemsToShow.length
-    ? `
-      <div class="item-grid">
-        ${itemsToShow
-          .map(
-            (item) => `
-          <div class="item-card" onclick="selectItem(${item.id}, this)">
-            ${getItemMediaElement(item, {
-              containerClass: "item-media-container",
-              imageClass: "item-image",
-              size: "480p",
-            })}
-            <h5>${item.name}</h5>
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-      ${
-        displayedItems.length > itemsToShow.length
-          ? `
-        <div class="text-center mt-3">
-          <button class="btn btn-primary load-more-btn" onclick="loadMoreItems()">
-            Load More (${displayedItems.length - itemsToShow.length} remaining)
-          </button>
+  // Only update content if it's the first page
+  if (currentPage === 0) {
+    resultsContainer.innerHTML = itemsToShow.length
+      ? `
+        <div class="item-grid">
+          ${itemsToShow
+            .map(
+              (item) => `
+            <div class="item-card" onclick="selectItem(${item.id}, this)">
+              <div class="item-media-container">
+                <img 
+                  src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                item.name
+              }.webp"
+                  class="item-image"
+                  alt="${item.name}"
+                  onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
+                >
+              </div>
+              <div class="card-body">
+                <h5 title="${item.name}">${item.name}</h5>
+              </div>
+            </div>
+          `
+            )
+            .join("")}
         </div>
       `
-          : ""
-      }
-    `
-    : '<p class="text-center mt-3">No items found</p>';
+      : '<p class="text-center mt-3">No items found</p>';
+  } else {
+    // Append new items when scrolling
+    const itemGrid = resultsContainer.querySelector(".item-grid");
+    if (itemGrid) {
+      const newItems = displayedItems
+        .slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)
+        .map(
+          (item) => `
+          <div class="item-card" onclick="selectItem(${item.id}, this)">
+            <div class="item-media-container">
+              <img 
+                src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+            item.name
+          }.webp"
+                class="item-image"
+                alt="${item.name}"
+                onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
+              >
+            </div>
+            <div class="card-body">
+              <h5 title="${item.name}">${item.name}</h5>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+      itemGrid.insertAdjacentHTML("beforeend", newItems);
+    }
+  }
 }
 
-// Add new function to handle loading more items
-function loadMoreItems() {
-  currentPage++;
-  displayItemsInModal();
+// Add scroll event listener when opening modal
+function attachInfiniteScroll() {
+  const modalBody = document
+    .getElementById("itemSelectionModal")
+    .querySelector(".modal-body");
+
+  const handleScroll = () => {
+    if (
+      modalBody.scrollHeight - modalBody.scrollTop <=
+        modalBody.clientHeight + 100 &&
+      displayedItems.length > (currentPage + 1) * ITEMS_PER_PAGE
+    ) {
+      currentPage++;
+      displayItemsInModal();
+    }
+  };
+
+  modalBody.addEventListener("scroll", handleScroll);
 }
 
 // Add this function to search and display items in the modal
 function searchAndDisplayItems(searchTerm) {
   if (!searchTerm) {
-    displayedItems = [...allItems];
+    // When no search term, show all items sorted alphabetically
+    displayedItems = [...allItems].sort((a, b) => a.name.localeCompare(b.name));
   } else {
     searchTerm = searchTerm.toLowerCase();
-    displayedItems = allItems.filter((item) =>
-      item.name.toLowerCase().includes(searchTerm)
-    );
+    displayedItems = allItems
+      .filter((item) => item.name.toLowerCase().startsWith(searchTerm))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   // Reset pagination when searching
@@ -525,10 +566,7 @@ function getItemMediaElement(item, options = {}) {
     </div>`;
 }
 
-// Add the selectItem function
 function selectItem(itemId, element) {
-  console.log("Selecting item:", itemId); // Debug log
-
   // Clear previous selection
   document.querySelectorAll(".item-card").forEach((card) => {
     card.classList.remove("selected");
@@ -884,17 +922,15 @@ async function loadAllItems() {
     );
     if (!response.ok) throw new Error("Failed to fetch items");
     allItems = await response.json();
-    console.log("Loaded items:", allItems.length); // Debug log
   } catch (error) {
     console.error("Error loading items:", error);
     notyf.error("Error loading items database");
   }
 }
 
-// Update submitDupeReport function
+// Update submitDupeReport function with validation
 async function submitDupeReport() {
   const dupeUser = document.getElementById("dupeUserInput").value.trim();
-  // Get URLs and join them with comma + space to match the working format
   const proofUrls = Array.from(document.getElementsByClassName("proof-url"))
     .map((input) => input.value.trim())
     .filter((url) => url && url.includes("imgur.com"));
@@ -920,15 +956,25 @@ async function submitDupeReport() {
     return;
   }
 
+  // Check if item is already reported as duped for this user
+  const existingDupe = dupesList.find(
+    (dupe) =>
+      dupe.owner.toLowerCase() === dupeUser.toLowerCase() &&
+      dupe.item_id === currentItemId
+  );
+
+  if (existingDupe) {
+    notyf.error("This item has already been reported as duped for this user");
+    return;
+  }
+
   try {
     const requestBody = {
       owner: token,
       dupe_user: dupeUser,
       item_id: currentItemId,
-      proof: proofUrls.join(", "), // Join with comma AND space to match working format
+      proof: proofUrls.join(", "),
     };
-
-    console.log("Submitting report with data:", requestBody);
 
     const response = await fetch(
       "https://api3.jailbreakchangelogs.xyz/dupes/report",
@@ -948,7 +994,6 @@ async function submitDupeReport() {
     }
 
     const result = await response.json();
-    console.log("Report submitted successfully:", result); // Debug log
 
     notyf.success("Dupe report submitted successfully");
     const reportModal = bootstrap.Modal.getInstance(

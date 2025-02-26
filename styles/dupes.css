@@ -1188,36 +1188,77 @@
   max-height: 70vh;
   overflow-y: auto;
   padding: 1.5rem;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain; /* Prevents scroll chaining */
 }
 
 .item-search-results {
+  display: block; /* Change from grid to block */
+  margin-top: 1rem;
+}
+
+.item-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(180px, 1fr)
+  ); /* Smaller minmax value */
   gap: 1rem;
   margin-top: 1rem;
 }
 
 .item-card {
-  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
   border: 1px solid var(--accent-color);
   border-radius: 8px;
-  padding: 1rem;
+  overflow: hidden;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.item-card .item-media-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  background: var(--bg-secondary);
+}
+
+.item-card .item-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.item-card .card-body {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+}
+
+.item-card h5 {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .item-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: var(--accent-color);
+  border-color: var(--accent-color-light);
 }
 
 .item-card.selected {
   border: 2px solid var(--accent-color-light);
-  background: var(--accent-color);
-  position: relative;
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(var(--accent-color-rgb), 0.1);
 }
 
 .item-card.selected::after {
@@ -1225,7 +1266,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: var(--accent-color-light);
+  background: var(--accent-color);
   color: var(--text-primary);
   width: 24px;
   height: 24px;
@@ -1311,16 +1352,39 @@
 /* Item Selection Modal Styles */
 .item-selection-modal .item-card {
   position: relative;
-  padding: 0;
+  padding: 0; /* Ensure no padding */
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  margin: 0; /* Ensure no margin */
 }
 
 .item-selection-modal .item-media-container {
   aspect-ratio: 16/9;
   position: relative;
-  background: var(--bg-primary);
+  background-color: var(--bg-secondary);
+  margin: 0; /* Remove any margin */
+  padding: 0; /* Remove any padding */
+  display: flex; /* Add flex to ensure proper sizing */
+  align-items: center; /* Center content vertically */
+  justify-content: center; /* Center content horizontally */
+}
+
+.item-selection-modal .item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  margin: 0; /* Remove any margin */
+  padding: 0; /* Remove any padding */
+}
+
+.item-selection-modal .item-media-container {
+  aspect-ratio: 16/9;
+  position: relative;
+  background-color: var (--bg-secondary);
 }
 
 .item-selection-modal .item-image {
@@ -1332,7 +1396,7 @@
 .item-selection-modal .item-card h5 {
   padding: 0.75rem;
   margin: 0;
-  background: var(--bg-primary);
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
 
@@ -1363,7 +1427,10 @@
 /* Item Selection Modal Grid */
 .item-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(180px, 1fr)
+  ); /* Smaller minmax value */
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -1384,6 +1451,8 @@
   max-height: 70vh;
   overflow-y: auto;
   padding: 1.5rem;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain; /* Prevents scroll chaining */
 }
 
 /* Improve scroll experience */
