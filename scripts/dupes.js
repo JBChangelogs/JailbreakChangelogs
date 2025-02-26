@@ -1,5 +1,8 @@
 let dupesList = [];
+let allItems = []; // Add this line
 let searchTimeouts = { duper: null, item: null };
+let currentItemId = null;
+let selectedItem = null;
 
 // Format timestamp to readable date
 function formatDate(timestamp) {
@@ -77,11 +80,26 @@ function displaySearchResults(containerId, results, inputId) {
     results.slice(0, 5).forEach((result) => {
       const item = document.createElement("div");
       item.className = "suggestion-item";
-      item.textContent = result;
-      item.onclick = () => {
-        document.getElementById(inputId).value = result;
-        container.style.display = "none";
-      };
+
+      if (typeof result === "object") {
+        // For items, show name and type
+        item.innerHTML = `
+          ${result.name}
+          <span class="text-muted ms-1">[${result.type}]</span>
+        `;
+        item.onclick = () => {
+          document.getElementById(inputId).value = result.name;
+          container.style.display = "none";
+        };
+      } else {
+        // For dupers, just show the name
+        item.textContent = result;
+        item.onclick = () => {
+          document.getElementById(inputId).value = result;
+          container.style.display = "none";
+        };
+      }
+
       list.appendChild(item);
     });
 
@@ -141,6 +159,16 @@ async function calculateDupe() {
     (dupe) => dupe.owner.toLowerCase() === duper.toLowerCase()
   );
 
+  // Get item details first if we have an item name
+  let selectedItemForReport = null;
+  if (itemName) {
+    selectedItemForReport = await getItemByName(itemName);
+    if (!selectedItemForReport) {
+      notyf.error("Item not found");
+      return;
+    }
+  }
+
   if (matchingDupes.length === 0) {
     resultsContent.innerHTML = `
       <div class="results-card not-dupe">
@@ -155,6 +183,24 @@ async function calculateDupe() {
         <p>This user has no recorded dupes in our database.</p>
       </div>
     `;
+
+    // Show report button and update text/functionality
+    const reportBtn = document.getElementById("reportDupeBtn");
+    reportBtn.style.display = "block";
+
+    if (selectedItemForReport) {
+      // If we have both username and item
+      reportBtn.textContent = `Report ${selectedItemForReport.name} as Duped`;
+      reportBtn.onclick = function () {
+        showReportModal(selectedItemForReport.id, duper);
+      };
+    } else {
+      // If we only have username
+      reportBtn.textContent = "Report a Dupe";
+      reportBtn.onclick = function () {
+        showItemSelectionModal(duper);
+      };
+    }
 
     modalInstance.show();
     return;
@@ -270,6 +316,9 @@ async function calculateDupe() {
         </div>
       </div>
     `;
+
+    // Hide report button since item is already duped
+    document.getElementById("reportDupeBtn").style.display = "none";
   } else {
     resultsContent.innerHTML = `
       <div class="results-card not-dupe">
@@ -283,14 +332,269 @@ async function calculateDupe() {
         <p class="text-muted">No dupe record found for ${item.name}</p>
       </div>
     `;
+
+    // Show and update report button text and functionality
+    const reportBtn = document.getElementById("reportDupeBtn");
+    reportBtn.style.display = "block";
+    reportBtn.textContent = `Report ${item.name} as Duped`;
+
+    // Store the item ID and name in data attributes
+    reportBtn.dataset.itemId = item.id;
+    reportBtn.dataset.itemName = item.name;
+
+    // Update onclick to pass both ID and name
+    reportBtn.onclick = function () {
+      console.log("Report button clicked for item:", item.id, item.name);
+      showReportModal(item.id);
+    };
   }
 
   modalInstance.show();
 }
 
+// Add this function before the DOMContentLoaded event listener
+async function showItemSelectionModal(ownerName = null) {
+  console.log("Opening item selection modal with owner:", ownerName);
+
+  if (!Cookies.get("token")) {
+    notyf.error("You must be logged in to report dupes");
+    return;
+  }
+
+  // Load items if not already loaded
+  if (allItems.length === 0) {
+    await loadAllItems();
+  }
+
+  // Store owner name if provided
+  if (ownerName) {
+    currentDuperName = ownerName;
+  }
+
+  // Reset selection
+  selectedItem = null;
+  document.getElementById("proceedBtn").disabled = true;
+
+  const searchInput = document.getElementById("itemSearchInput");
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  searchAndDisplayItems("");
+
+  const modal = new bootstrap.Modal(
+    document.getElementById("itemSelectionModal")
+  );
+  modal.show();
+}
+
+// Add this function to search and display items in the modal
+function searchAndDisplayItems(searchTerm) {
+  console.log("Searching items with term:", searchTerm); // Debug log
+
+  // Filter items based on search term
+  const filtered = allItems.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const resultsContainer = document.getElementById("itemSearchResults");
+  resultsContainer.innerHTML = filtered.length
+    ? filtered
+        .map(
+          (item) => `
+    <div class="item-card" onclick="selectItem(${item.id}, this)">
+      ${getItemMediaElement(item, {
+        containerClass: "item-media-container",
+        imageClass: "item-image",
+        size: "480p",
+      })}
+      <h5>${item.name}</h5>
+    </div>
+  `
+        )
+        .join("")
+    : '<p class="text-center mt-3">No items found</p>';
+}
+
+// Move showReportModal function definition before it's used
+async function showReportModal(existingItemId = null, ownerName = null) {
+  console.log("showReportModal called with:", { existingItemId, ownerName }); // Debug log
+
+  if (!Cookies.get("token")) {
+    notyf.error("You must be logged in to report dupes");
+    return;
+  }
+
+  // Get current values or use provided owner name
+  const dupeUser =
+    ownerName || document.getElementById("duperSearch").value.trim();
+
+  // If we have an existingItemId from dupe check, use it
+  if (existingItemId) {
+    currentItemId = existingItemId;
+  }
+
+  if (!currentItemId && !existingItemId) {
+    notyf.error("Please select an item before reporting");
+    return;
+  }
+
+  // Only check for existing dupe if the user exists in database
+  const existingDupe = dupesList.find(
+    (dupe) =>
+      dupe.owner.toLowerCase() === dupeUser.toLowerCase() &&
+      dupe.item_id === currentItemId
+  );
+
+  if (existingDupe) {
+    notyf.error("This dupe is already in our database!");
+    return;
+  }
+
+  // Pre-fill the report form
+  if (dupeUser) {
+    document.getElementById("dupeUserInput").value = dupeUser;
+  }
+
+  // Show the report modal
+  const reportModal = new bootstrap.Modal(
+    document.getElementById("reportDupeModal")
+  );
+  reportModal.show();
+
+  // If we're coming from dupe check results, fetch and display the item
+  if (existingItemId) {
+    try {
+      console.log("Fetching item details for:", existingItemId); // Debug log
+      const response = await fetch(
+        `https://api3.jailbreakchangelogs.xyz/items/get?id=${existingItemId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch item");
+      const item = await response.json();
+      console.log("Fetched item:", item); // Debug log
+
+      const modalBody = document.querySelector("#reportDupeModal .modal-body");
+      const itemDisplay = document.createElement("div");
+      itemDisplay.className = "selected-item-display";
+      itemDisplay.innerHTML = `
+        ${getItemMediaElement(item, {
+          containerClass: "mb-2",
+          imageClass: "w-100 h-100",
+          showLimitedBadge: false,
+          size: "480p",
+        })}
+        <h5>${item.name}</h5>
+      `;
+
+      // Remove any existing item display first
+      const existingDisplay = modalBody.querySelector(".selected-item-display");
+      if (existingDisplay) {
+        existingDisplay.remove();
+      }
+
+      // Insert the new item display before the form
+      const form = modalBody.querySelector("form");
+      modalBody.insertBefore(itemDisplay, form);
+    } catch (error) {
+      console.error("Error fetching item details:", error);
+    }
+  }
+}
+
+// Add this function near the top with other helper functions
+function getItemMediaElement(item, options = {}) {
+  const {
+    containerClass = "",
+    imageClass = "",
+    size = "original",
+    aspectRatio = "16/9",
+  } = options;
+
+  // Special case for horns
+  if (item.type.toLowerCase() === "horn") {
+    return `
+      <div class="media-container ${containerClass}" style="aspect-ratio: ${aspectRatio};">
+        <img src="/assets/audios/horn_thumbnail.webp"
+             class="${imageClass || "img-fluid rounded thumbnail"}"
+             alt="${item.name}"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
+             onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">
+      </div>`;
+  }
+
+  // Special case for HyperShift
+  if (item.name === "HyperShift" && item.type === "HyperChrome") {
+    return `
+      <div class="media-container ${containerClass}" style="aspect-ratio: ${aspectRatio};">
+        <img src="/assets/images/items/hyperchromes/HyperShift.gif"
+             class="${imageClass || "img-fluid rounded thumbnail"}"
+             alt="${item.name}"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
+             onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">
+      </div>`;
+  }
+
+  // Default case for regular items
+  const imagePath =
+    size === "480p"
+      ? `/assets/images/items/480p/${item.type.toLowerCase()}s/${
+          item.name
+        }.webp`
+      : `/assets/images/items/${item.type.toLowerCase()}s/${item.name}.webp`;
+
+  return `
+    <div class="media-container ${containerClass}" style="aspect-ratio: ${aspectRatio};">
+      <img src="${imagePath}"
+           class="${imageClass || "img-fluid rounded thumbnail"}"
+           alt="${item.name}"
+           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
+           onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">
+    </div>`;
+}
+
+// Add the selectItem function
+function selectItem(itemId, element) {
+  console.log("Selecting item:", itemId); // Debug log
+
+  // Clear previous selection
+  document.querySelectorAll(".item-card").forEach((card) => {
+    card.classList.remove("selected");
+  });
+
+  // Add selected class to current item
+  element.classList.add("selected");
+
+  // Store selected item
+  selectedItem = allItems.find((item) => item.id === itemId);
+  currentItemId = itemId;
+
+  // Enable proceed button
+  document.getElementById("proceedBtn").disabled = false;
+}
+
+// Add proceedToReport function
+function proceedToReport() {
+  if (!selectedItem) {
+    notyf.error("Please select an item first");
+    return;
+  }
+
+  // Hide item selection modal
+  const itemSelectionModal = bootstrap.Modal.getInstance(
+    document.getElementById("itemSelectionModal")
+  );
+  itemSelectionModal.hide();
+
+  // Show report modal with selected item and stored owner name
+  showReportModal(selectedItem.id, currentDuperName);
+
+  // Reset stored owner name
+  currentDuperName = null;
+}
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async function () {
-  await fetchDupesList();
+  await Promise.all([fetchDupesList(), loadAllItems()]); // Load both dupes and items
 
   const duperInput = document.getElementById("duperSearch");
   const itemInput = document.getElementById("itemSearch");
@@ -374,7 +678,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           displaySearchResults(
             `${type}Results`,
             type === "item"
-              ? filteredResults.map((item) => item.name)
+              ? filteredResults // Now passing the full item objects instead of just names
               : filteredResults,
             `${type}Search`
           );
@@ -505,5 +809,108 @@ async function fetchDupesList() {
   } catch (error) {
     console.error("Error fetching dupes:", error);
     notyf.error("Error loading dupes database");
+  }
+}
+
+// Add this function to load items
+async function loadAllItems() {
+  try {
+    const response = await fetch(
+      "https://api3.jailbreakchangelogs.xyz/items/list"
+    );
+    if (!response.ok) throw new Error("Failed to fetch items");
+    allItems = await response.json();
+    console.log("Loaded items:", allItems.length); // Debug log
+  } catch (error) {
+    console.error("Error loading items:", error);
+    notyf.error("Error loading items database");
+  }
+}
+
+// Update submitDupeReport function
+async function submitDupeReport() {
+  const dupeUser = document.getElementById("dupeUserInput").value.trim();
+  const proofUrls = Array.from(document.getElementsByClassName("proof-url"))
+    .map((input) => input.value.trim())
+    .filter((url) => url && url.includes("imgur.com"));
+
+  const token = Cookies.get("token");
+  if (!token) {
+    notyf.error("You must be logged in to report dupes");
+    return;
+  }
+
+  if (!dupeUser) {
+    notyf.error("Please enter the duper's username");
+    return;
+  }
+
+  if (proofUrls.length === 0) {
+    notyf.error("Please provide at least one valid Imgur proof URL");
+    return;
+  }
+
+  if (!currentItemId) {
+    notyf.error("No item selected");
+    return;
+  }
+
+  try {
+    const requestBody = {
+      owner: token, // Add token as owner field
+      dupe_user: dupeUser,
+      item_id: currentItemId,
+      proof_urls: proofUrls,
+    };
+
+    console.log("Submitting report with data:", requestBody);
+
+    const response = await fetch(
+      "https://api3.jailbreakchangelogs.xyz/dupes/report",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Server error response:", errorData); // Debug log
+      throw new Error(errorData.message || "Failed to submit report");
+    }
+
+    const result = await response.json();
+    console.log("Report submitted successfully:", result); // Debug log
+
+    notyf.success("Dupe report submitted successfully");
+    const reportModal = bootstrap.Modal.getInstance(
+      document.getElementById("reportDupeModal")
+    );
+    reportModal.hide();
+
+    // Clear form
+    document.getElementById("dupeUserInput").value = "";
+    document
+      .querySelectorAll(".proof-url")
+      .forEach((input) => (input.value = ""));
+
+    // Refresh dupes list
+    await fetchDupesList();
+
+    // Show confirmation and auto-close modal
+    setTimeout(() => {
+      const resultsModal = bootstrap.Modal.getInstance(
+        document.getElementById("resultsModal")
+      );
+      if (resultsModal) {
+        resultsModal.hide();
+      }
+    }, 1500);
+  } catch (error) {
+    console.error("Error submitting dupe report:", error);
+    notyf.error(error.message || "Failed to submit dupe report");
   }
 }
