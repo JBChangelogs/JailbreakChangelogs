@@ -2,11 +2,11 @@
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=300, must-revalidate"
         }
       ]
     },
@@ -20,11 +20,11 @@
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=300, must-revalidate"
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     }
