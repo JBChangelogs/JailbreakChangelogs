@@ -651,3 +651,17 @@
     transform: translateX(100%);
   }
 }
+
+.op-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.4rem;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #124e66;
+  border-radius: 0.25rem;
+  vertical-align: middle;
+  line-height: 1;
+}

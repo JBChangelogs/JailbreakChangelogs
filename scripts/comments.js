@@ -442,9 +442,15 @@ class CommentsManager {
         ? userDetails.username
         : comment.author;
 
+    // Check if commenter is trade owner
+    const isOwnerComment = await this.isTradeOwner(comment.user_id);
+    
     const userNameElement = userDetails?.isDeleted
       ? `<span class="comment-author text-muted">${displayName}</span>`
-      : `<a href="/users/${comment.user_id}" class="comment-author">${displayName}</a>`;
+      : `<a href="/users/${comment.user_id}" class="comment-author">
+          ${displayName}
+          ${isOwnerComment ? '<span class="op-badge">OP</span>' : ''}
+         </a>`;
 
     const formatDate = (timestamp) => {
       return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -1047,6 +1053,21 @@ class CommentsManager {
     } catch (error) {
       console.error("Error editing comment:", error);
       notyf.error("Failed to edit comment. Please try again.");
+    }
+  }
+
+  async isTradeOwner(userId) {
+    if (this.type !== 'trade') return false;
+    
+    try {
+      const tradeResponse = await fetch(`https://api3.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`);
+      if (!tradeResponse.ok) return false;
+      
+      const tradeData = await tradeResponse.json();
+      return tradeData.author === userId;
+    } catch (error) {
+      console.error('Error checking trade ownership:', error);
+      return false;
     }
   }
 }
