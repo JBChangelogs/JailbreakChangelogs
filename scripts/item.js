@@ -1688,7 +1688,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                   },
                 },
               });
-              // ...rest of chart data handling...
               // Add styles for the fullscreen button icon
               const style = document.createElement("style");
               style.textContent = `

@@ -12,6 +12,15 @@ const VALID_SORTS = [
   "limited-items",
   "horns",
 ];
+
+// Initialize allItems globally
+window.allItems = [];
+let filteredItems = [];
+let currentPage = 1;
+const itemsPerPage = 24;
+let isLoading = false;
+let sort = "";
+
 function formatTimeAgo(timestamp) {
   if (!timestamp) return null;
 
@@ -65,6 +74,187 @@ function hideLoadingOverlay() {
   document.querySelector("#loading-overlay").classList.remove("show");
 }
 
+// Add these helper functions at the top of the file
+function getItemMediaElement(item, options = {}) {
+  const {
+    containerClass = "",
+    imageClass = "",
+    showFavoriteIcon = true,
+    size = "original",
+    aspectRatio = "16/9",
+  } = options;
+
+  // Add limited badge HTML helper
+  function getLimitedBadgeHtml() {
+    return `
+      <span class="limited-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+          <rect width="24" height="24" fill="none" />
+          <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+        </svg>
+        Limited
+      </span>`;
+  }
+
+  // Special case for horns
+  if (item.type.toLowerCase() === "horn") {
+    return `
+      <div class="media-container position-relative" onclick="handleHornClick('${
+        item.name
+      }', event)">
+        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+        <div class="horn-player-wrapper" data-horn="${item.name}">
+          <img src="/assets/audios/horn_thumbnail.webp" 
+               class="${imageClass || "card-img-top"}" 
+               alt="Horn Thumbnail" 
+               style="opacity: 0.8;">
+          <audio class="horn-audio" preload="none">
+            <source src="/assets/audios/horns/${
+              item.name
+            }.mp3" type="audio/mp3">
+          </audio>
+        </div>
+      </div>`;
+  }
+
+  // Special case for drifts
+  if (item.type === "Drift") {
+    return `
+      <div class="media-container position-relative ${containerClass}">
+        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+        <img src="/assets/images/items/480p/drifts/${item.name}.webp"
+             width="854" 
+             height="480"
+             class="drift-thumbnail ${imageClass || "card-img-top"}" 
+             alt="${item.name}" 
+             onerror="handleimage(this)">
+        <video src="/assets/images/items/drifts/${item.name}.webm" 
+               class="${imageClass || "card-img-top video-player"}" 
+               style="opacity: 0;" 
+               playsinline 
+               muted 
+               loop>
+        </video>
+        ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
+      </div>`;
+  }
+
+  // Special case for HyperShift
+  if (item.name === "HyperShift" && item.type === "HyperChrome") {
+    return `
+      <div class="media-container position-relative ${containerClass}">
+        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+        <video class="${imageClass || "card-img-top"}"
+               style="width: 100%; height: 100%; object-fit: contain;"
+               autoplay loop muted playsinline>
+          <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+          <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+        </video>
+      </div>`;
+  }
+
+  // Default case for all other items
+  const itemType = item.type.toLowerCase();
+  const imagePath =
+    size === "480p"
+      ? `/assets/images/items/480p/${itemType}s/${item.name}.webp`
+      : `/assets/images/items/${itemType}s/${item.name}.webp`;
+
+  return `
+    <div class="media-container position-relative ${containerClass}">
+      ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+      <img src="${imagePath}"
+           id="${item.name}" 
+           width="854"
+           height="480" 
+           class="${imageClass || "card-img-top"}"
+           alt="${item.name}"
+           onerror="handleimage(this)">
+      ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
+    </div>`;
+}
+
+function getFavoriteIconHtml(item) {
+  return `
+    <div class="favorite-icon position-absolute top-0 start-0 p-2" 
+         style="z-index: 1000;"
+         onclick="handleFavorite(event, ${item.id})">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));">
+        <rect width="24" height="24" fill="none" />
+        <path fill="${item.is_favorite ? "#f8ff00" : "none"}" 
+              stroke="${item.is_favorite ? "none" : "#f8ff00"}"
+              stroke-width="1.5"
+              d="M12.954 1.7a1 1 0 0 0-1.908-.001l-2.184 6.92l-6.861-.005a1 1 0 0 0-.566 1.826l5.498 3.762l-2.067 6.545A1 1 0 0 0 6.4 21.86l5.6-4.006l5.594 4.007a1 1 0 0 0 1.536-1.114l-2.067-6.545l5.502-3.762a1 1 0 0 0-.566-1.826l-6.866.005z" />
+      </svg>
+    </div>`;
+}
+
+// Add handleFavorite function near the top with other helper functions
+window.handleFavorite = async function (event, itemId) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const token = getCookie("token");
+  if (!token) {
+    notyf.error("Please login to favorite items", {
+      position: "bottom-right",
+      duration: 2000,
+    });
+    return;
+  }
+
+  const svgPath = event.currentTarget.querySelector("path");
+  const isFavorited = svgPath.getAttribute("fill") === "#f8ff00";
+
+  try {
+    const response = await fetch(
+      `https://api3.jailbreakchangelogs.xyz/favorites/${
+        isFavorited ? "remove" : "add"
+      }`,
+      {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+        body: JSON.stringify({
+          item_id: itemId,
+          owner: token,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    // Update SVG appearance
+    svgPath.setAttribute("fill", isFavorited ? "none" : "#f8ff00");
+    svgPath.setAttribute("stroke", isFavorited ? "#f8ff00" : "none");
+
+    // Update item's favorite status in allItems array
+    const item = allItems.find((item) => item.id === itemId);
+    if (item) {
+      item.is_favorite = !isFavorited;
+    }
+
+    notyf.success(
+      isFavorited ? "Item removed from favorites" : "Item added to favorites",
+      {
+        position: "bottom-right",
+        duration: 2000,
+      }
+    );
+  } catch (error) {
+    console.error("Error updating favorite:", error);
+    notyf.error("Failed to update favorite status", {
+      position: "bottom-right",
+      duration: 2000,
+    });
+  }
+};
+
 // Global shareCurrentView function
 window.shareCurrentView = debounce(function () {
   const sortDropdown = document.getElementById("sort-dropdown");
@@ -112,6 +302,22 @@ const searchBar = document.getElementById("search-bar");
 const clearButton = document.getElementById("clear-search");
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Add CSS for favorite icon hover behavior
+  const style = document.createElement("style");
+  style.textContent = `
+    .media-container {
+      position: relative;
+    }
+    .favorite-icon {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .media-container:hover .favorite-icon {
+      opacity: 1;
+    }
+  `;
+  document.head.appendChild(style);
+
   const categoryItems = document.querySelectorAll(".category-item");
 
   categoryItems.forEach((item) => {
@@ -326,19 +532,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const itemsContainer = document.querySelector("#items-container");
   if (!itemsContainer) return;
 
-  let allItems = []; // Store all items
-  let currentPage = 1;
-  const itemsPerPage = 24;
-  let filteredItems = [];
-  let isLoading = false;
-  let sort = ""; // Track current sort state
-
-  // Define sortItems first before using it
   window.sortItems = function () {
     if (isLoading) {
       return;
     }
-    if (!allItems || allItems.length === 0) {
+    if (!window.allItems || window.allItems.length === 0) {
+      console.log("No items to sort");
       return;
     }
 
@@ -619,6 +818,8 @@ document.addEventListener("DOMContentLoaded", () => {
       valuesBreadcrumb.removeAttribute("aria-current");
       valuesBreadcrumb.innerHTML = '<a href="/values">Value List</a>';
     }
+
+    displayItems();
   };
 
   // Now check for saved sort and value sort
@@ -817,7 +1018,8 @@ document.addEventListener("DOMContentLoaded", () => {
           },
         }
       );
-      allItems = await response.json();
+
+      window.allItems = await response.json();
 
       // Add favorite status to items if user is logged in and we have user data
       const token = getCookie("token");
@@ -839,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Extract just the item_ids from the favorites array
             const favoriteIds = favorites.map((fav) => fav.item_id);
             // Mark items as favorite if their ID is in the favoriteIds array
-            allItems = allItems.map((item) => ({
+            window.allItems = window.allItems.map((item) => ({
               ...item,
               is_favorite: favoriteIds.includes(item.id),
             }));
@@ -850,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Initialize filteredItems
-      filteredItems = [...allItems];
+      filteredItems = [...window.allItems];
 
       // Check for saved preferences
       const savedSort = sessionStorage.getItem("sortDropdown");
@@ -874,7 +1076,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Start preloading images in background
       setTimeout(() => {
         preloadItemImages();
-        const driftItems = allItems.filter((item) => item.type === "Drift");
+        const driftItems = window.allItems.filter(
+          (item) => item.type === "Drift"
+        );
         preloadDriftThumbnails(driftItems);
       }, 0);
 
@@ -905,28 +1109,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function displayItems() {
     const itemsContainer = document.querySelector("#items-container");
     if (!itemsContainer) {
-      console.warn("Items container not found");
+      console.error("Items container not found");
       return;
     }
 
-    let itemsRow = itemsContainer.querySelector(".row");
-    const spinner = itemsContainer.querySelector(".loading-spinner");
-
-    if (!itemsRow || currentPage === 1) {
-      if (spinner) {
-        spinner.remove();
-      }
-
+    // Clear existing content if on first page
+    if (currentPage === 1) {
       itemsContainer.innerHTML = `
-            <div class="row g-3" id="items-list"></div>
+            <div class="row g-3"></div>
             <div class="loading-spinner">
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
         `;
+    }
 
-      itemsRow = itemsContainer.querySelector(".row");
+    const itemsRow = itemsContainer.querySelector(".row");
+    if (!itemsRow) {
+      console.error("Items row not found");
+      return;
     }
 
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -934,13 +1136,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const itemsToDisplay = filteredItems.slice(startIndex, endIndex);
 
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < itemsToDisplay.length; i++) {
-      const cardDiv = createItemCard(itemsToDisplay[i]);
+    itemsToDisplay.forEach((item) => {
+      const cardDiv = createItemCard(item);
       fragment.appendChild(cardDiv);
-    }
+    });
 
     itemsRow.appendChild(fragment);
 
+    // Update sentinel for infinite scroll
     const oldSentinel = itemsContainer.querySelector(".sentinel");
     if (oldSentinel) {
       oldSentinel.remove();
@@ -1020,21 +1223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
 
-    const favoriteIconHtml = `
-    <div class="favorite-icon position-absolute top-0 start-0 p-2" 
-         style="z-index: 1000; opacity: 1; transition: opacity 0.2s ease-in-out;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-           style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));">
-        <rect width="24" height="24" fill="none" />
-        <path fill="${item.is_favorite ? "#f8ff00" : "none"}" 
-              stroke="${item.is_favorite ? "none" : "#f8ff00"}"
-              stroke-width="1.5"
-              d="M12.954 1.7a1 1 0 0 0-1.908-.001l-2.184 6.92l-6.861-.005a1 1 0 0 0-.566 1.826l5.498 3.762l-2.067 6.545A1 1 0 0 0 6.4 21.86l5.6-4.006l5.594 4.007a1 1 0 0 0 1.536-1.114l-2.067-6.545l5.502-3.762a1 1 0 0 0-.566-1.826l-6.866.005z" />
-      </svg>
-    </div>
-  `;
-
-    // Determine color based on item type - FIX: Declare the color variable
+    // Get type color
     let color = "#124e66"; // Default color
     if (item.type === "Vehicle") color = "#c82c2c";
     if (item.type === "Spoiler") color = "#C18800";
@@ -1048,289 +1237,88 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Furniture") color = "#9C6644";
     if (item.type === "Horn") color = "#4A90E2";
 
-    // Modify the mediaElement template
-    let mediaElement;
-    if (item.type === "Horn") {
-      mediaElement = `
-        <div class="media-container position-relative" onclick="handleHornClick('${item.name}', event)">
-          ${favoriteIconHtml}
-          <div class="horn-player-wrapper" data-horn="${item.name}">
-            <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
-            <audio class="horn-audio" preload="none">
-              <source src="/assets/audios/horns/${item.name}.mp3" type="audio/mp3">
-            </audio>
-          </div>
-        </div>`;
-    } else if (item.type === "Drift") {
-      mediaElement = `
-        <div class="media-container position-relative">
-          ${favoriteIconHtml}
-          <img src="/assets/images/items/480p/drifts/${item.name}.webp"
-               width="854" 
-               height="480"
-               class="card-img-top thumbnail" 
-               alt="${item.name}" 
-               onerror="handleimage(this)">
-          <video src="/assets/images/items/drifts/${item.name}.webm" class="card-img-top video-player" style="opacity: 0;" playsinline muted loop></video>
-        </div>`;
-    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      mediaElement = `
-        <div class="media-container position-relative">
-            ${favoriteIconHtml}
-            <video src="/assets/images/items/hyperchromes/HyperShift.webm" class="card-img-top" playsinline muted loop autoplay id="hypershift-video" onerror="handleimage(this)"></video>
-        </div>`;
-    } else {
-      const itemType = item.type.toLowerCase();
-      mediaElement = `
-        <div class="media-container position-relative">
-            ${favoriteIconHtml}
-            <img id="${item.name}" 
-                 src="/assets/images/items/480p/${itemType}s/${item.name}.webp"
-                 width="854"
-                 height="480" 
-                 class="card-img-top"
-                 alt="${item.name}"
-                 onerror="handleimage(this)">
-        </div>`;
-    }
+    let typeBadgeHtml = `
+      <span class="badge item-type-badge" style="background-color: ${color};">
+        ${item.type}
+      </span>
+    `;
 
-    // Case for HyperShift inside createItemCard function
-    if (item.name === "HyperShift" && item.type === "HyperChrome") {
-      mediaElement = `
-        <div class="media-container position-relative">
-            ${favoriteIconHtml}
-            <img 
-                src="/assets/images/items/hyperchromes/HyperShift.gif"
-                class="card-img-top"
-                alt="${item.name}"
-                style="width: 100%; height: 100%; object-fit: contain;"
-            >
-        </div>`;
-    }
+    // Remove the duplicate limited badge since getItemMediaElement already adds it
+    const mediaElement = getItemMediaElement(item, {
+      containerClass: "",
+      imageClass: "card-img-top",
+      showFavoriteIcon: true,
+      size: "480p",
+    });
 
     // Format values
     const cashValue = formatValue(item.cash_value);
     const dupedValue = formatValue(item.duped_value);
-    window.handleFavorite = async function (event, itemId) {
-      event.preventDefault();
-      event.stopPropagation();
 
-      const token = getCookie("token");
-      if (!token) {
-        notyf.error("Please login to favorite items", {
-          position: "bottom-right",
-          duration: 2000,
-        });
-        return;
-      }
-
-      // Get the SVG path element
-      const svgPath = event.target
-        .closest(".favorite-icon")
-        .querySelector("path");
-      const isFavorited = svgPath.getAttribute("fill") === "#f8ff00";
-
-      try {
-        const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/favorites/${
-            isFavorited ? "remove" : "add"
-          }`,
-          {
-            method: isFavorited ? "DELETE" : "POST", // Use DELETE for remove, POST for add
-            headers: {
-              "Content-Type": "application/json",
-              Origin: "https://jailbreakchangelogs.xyz",
-            },
-            body: JSON.stringify({
-              item_id: itemId,
-              owner: token,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        // Update SVG appearance
-        if (isFavorited) {
-          svgPath.setAttribute("fill", "none");
-          svgPath.setAttribute("stroke", "#f8ff00");
-        } else {
-          svgPath.setAttribute("fill", "#f8ff00");
-          svgPath.setAttribute("stroke", "none");
-        }
-
-        // Update item's favorite status in allItems array
-        const item = allItems.find((item) => item.id === itemId);
-        if (item) {
-          item.is_favorite = !isFavorited;
-        }
-
-        // Show success message
-        notyf.success(
-          isFavorited
-            ? "Item removed from favorites"
-            : "Item added to favorites",
-          {
-            position: "bottom-right",
-            duration: 2000,
-          }
-        );
-      } catch (error) {
-        console.error("Error updating favorite:", error);
-        notyf.error("Failed to update favorite status", {
-          position: "bottom-right",
-          duration: 2000,
-        });
-      }
-    };
-
-    // Add this to your CSS or style tag
-    const style = document.createElement("style");
-    style.textContent = `
-  .favorite-icon {
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-  }
-  
-  .items-card:hover .favorite-icon {
-    opacity: 1;
-  }
-  
-  .favorite-icon i {
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-  }
-`;
-    document.head.appendChild(style);
-
-    let badgeHtml = "";
-    let typeBadgeHtml = "";
-
-    if (item.type === "HyperChrome") {
-      badgeHtml = `
-            <span class="hyperchrome-badge">
-              HyperChrome
-            </span>
-        `;
-      typeBadgeHtml = "";
-    } else {
-      // Only show type badge for non-HyperChrome items
-      typeBadgeHtml = `
-            <span class="badge item-type-badge" style="background-color: ${color};">${item.type}</span>
-        `;
-
-      // Show limited badge if item is limited
-      if (item.is_limited) {
-        badgeHtml = `
-                <span class="badge limited-badge">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-	<rect width="24" height="24" fill="none" />
-	<path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
-</svg>Limited
-                </span>
-            `;
-      }
-    }
-    const lastUpdatedHtml = `
-    <div class="mt-2 d-flex align-items-center">
-        <small class="text-muted" style="font-size: 0.8rem;">
-           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<g fill="#748d92">
-		<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
-		<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
-		<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
-	</g>
-</svg>
-            Last Updated: ${
-              item.last_updated ? formatTimeAgo(item.last_updated) : "N/A"
-            }
-        </small>
-    </div>
-    `;
-
-    // Create card with all elements
+    // Create card HTML
     const cardHtml = `
-        <div class="card items-card shadow-sm ${
-          item.is_limited ? "limited-item" : ""
-        }" 
-             style="cursor: pointer;">
-            <div class="position-relative">
-                ${mediaElement}
-                <div class="item-card-body text-center">
-                    <div class="badges-container d-flex justify-content-center gap-2">
-                        ${typeBadgeHtml}
-                        ${badgeHtml}
-                    </div>
-                    <h5 class="card-title">${item.name}</h5>
-                    <div class="value-container">
-                        <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                            <span>Cash Value:</span>
-                            <span class="cash-value" data-value="${
-                              cashValue.numeric
-                            }">${cashValue.display}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                            <span>Duped Value:</span>
-                            <span class="duped-value" data-value="${
-                              dupedValue.numeric
-                            }">${dupedValue.display}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center value-row">
-                            <span>Demand:</span>
-                            <span class="demand-value">${
-                              item.demand === "'N/A'" || item.demand === "N/A"
-                                ? "No Demand"
-                                : item.demand || "No Value"
-                            }</span>
-                        </div>
-                         ${lastUpdatedHtml}
-                    </div>
-                </div>
+      <div class="card items-card shadow-sm ${
+        item.is_limited ? "limited-item" : ""
+      }" 
+           style="cursor: pointer;">
+        <div class="position-relative">
+          ${mediaElement}
+          <div class="item-card-body text-center">
+            <div class="badges-container d-flex justify-content-center gap-2">
+              ${typeBadgeHtml}
             </div>
-        </div>`;
+            <h5 class="card-title">${item.name}</h5>
+            <div class="value-container">
+              <div class="d-flex justify-content-between align-items-center mb-2 value-row">
+                <span>Cash Value:</span>
+                <span class="cash-value" data-value="${cashValue.numeric}">${
+      cashValue.display
+    }</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2 value-row">
+                <span>Duped Value:</span>
+                <span class="duped-value" data-value="${dupedValue.numeric}">${
+      dupedValue.display
+    }</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center value-row">
+                <span>Demand:</span>
+                <span class="demand-value">${
+                  item.demand === "'N/A'" || item.demand === "N/A"
+                    ? "No Demand"
+                    : item.demand || "No Value"
+                }</span>
+              </div>
+              ${
+                item.last_updated
+                  ? `
+                <div class="mt-2 d-flex align-items-center">
+                  <small class="text-muted" style="font-size: 0.8rem;">
+                    Last Updated: ${formatTimeAgo(item.last_updated)}
+                  </small>
+                </div>
+              `
+                  : `
+              <div class="mt-2 d-flex align-items-center">
+                <small class="text-muted" style="font-size: 0.8rem;">
+                  Last Updated: Unknown
+                </small>
+              </div>
+            `
+              }
+            </div>
+          </div>
+        </div>
+      </div>`;
 
     cardDiv.innerHTML = cardHtml;
 
-    // Add event listener for the favorite icon
-    const favoriteIcon = cardDiv.querySelector(".favorite-icon");
-    if (favoriteIcon) {
-      favoriteIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-        window.handleFavorite(e, item.id);
-      });
-    }
-
-    // Add hover event listeners for drift videos
-    if (item.type === "Drift") {
-      const card = cardDiv.querySelector(".card");
-      const video = cardDiv.querySelector("video");
-      const thumbnail = cardDiv.querySelector(".thumbnail");
-
-      card.addEventListener("mouseenter", () => {
-        video.style.opacity = "1";
-        thumbnail.style.opacity = "0";
-        video.play();
-      });
-
-      card.addEventListener("mouseleave", () => {
-        video.style.opacity = "0";
-        thumbnail.style.opacity = "1";
-        video.pause();
-        video.currentTime = 0;
-      });
-    }
-
-    // New click handler logic - Update this part only
+    // Add event listeners
     const card = cardDiv.querySelector(".items-card");
-    if (!card) {
-      console.error("Could not find .items-card element for:", item.name);
-      return cardDiv;
-    }
 
+    // Handle card clicks
     card.addEventListener("click", (e) => {
-      // Always ignore favorite icon clicks
+      // Ignore favorite icon clicks
       if (e.target.closest(".favorite-icon")) {
         return;
       }
@@ -1338,7 +1326,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // For horns, only navigate if clicking card-body
       if (item.type === "Horn") {
         const isCardBody = e.target.closest(".item-card-body");
-
         if (!isCardBody) {
           return;
         }
@@ -1356,37 +1343,28 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = url;
     });
 
-    // Add click handlers for media containers
-    const mediaContainer = cardDiv.querySelector(".media-container");
-    if (mediaContainer) {
-      mediaContainer.addEventListener("click", (e) => {
-        // Only prevent default and stop propagation for Drift and Horn items
-        if (item.type === "Drift" || item.type === "Horn") {
-          e.preventDefault();
-          e.stopPropagation();
+    // Add hover handlers for drift videos - fix selector
+    if (item.type === "Drift") {
+      const video = cardDiv.querySelector("video");
+      const thumbnail = cardDiv.querySelector(".drift-thumbnail");
+      const mediaContainer = cardDiv.querySelector(".media-container");
 
-          if (item.type === "Drift") {
-            const video = mediaContainer.querySelector("video");
-            const thumbnail = mediaContainer.querySelector(".thumbnail");
+      if (video && thumbnail && mediaContainer) {
+        mediaContainer.addEventListener("mouseenter", () => {
+          video.style.opacity = "1";
+          thumbnail.style.opacity = "0";
+          video.play();
+        });
 
-            if (video.paused) {
-              video.style.opacity = "1";
-              thumbnail.style.opacity = "0";
-              video.play();
-            } else {
-              video.style.opacity = "0";
-              thumbnail.style.opacity = "1";
-              video.pause();
-              video.currentTime = 0;
-            }
-          }
-          // Horn clicks are handled by onclick attribute
-        }
-        // For other items, let the click propagate to the card
-      });
+        mediaContainer.addEventListener("mouseleave", () => {
+          video.style.opacity = "0";
+          thumbnail.style.opacity = "1";
+          video.pause();
+          video.currentTime = 0;
+        });
+      }
     }
 
-    // Return the created element
     return cardDiv;
   }
 
@@ -1628,14 +1606,14 @@ function updateSearchPlaceholder() {
     rims: "Search rims (e.g., Star, Spinner)...",
     "tire-stickers": "Search tire stickers (e.g., Badonuts, Blue 50)...",
     "tire-styles": "Search tire styles (e.g., Brickset, Glacier)...",
-    drifts: "Search drifts... (e.g., Cartoon, Melons)...",
-    "body-colors": "Search colors (e.g., Red, Blue)...",
-    textures: "Search textures (e.g., Aurora, Checkers)...",
-    hyperchromes: "Search HyperChromes (e.g., HyperBlue Level 2)...",
-    furniture: "Search furniture (e.g., Nukamo Fridge, Bloxy Lisa)...",
+    drifts: "Search drifts (e.g., Fire, Ice)...",
+    hyperchromes: "Search hyperchromes (e.g., HyperRed, HyperBlue)...",
+    furnitures: "Search furniture (e.g., Bed, Chair)...",
+    textures: "Search textures (e.g., Galaxy, Rainbow)...",
+    horns: "Search horns (e.g., Air Horn, Train Horn)...",
   };
 
-  // Set the placeholder text
+  // Set placeholder based on category
   searchBar.placeholder = placeholders[category] || "Search items...";
 }
 
