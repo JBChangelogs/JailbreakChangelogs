@@ -1400,3 +1400,33 @@
   background: var(--accent-color);
   border-radius: 4px;
 }
+
+.selected-item-display {
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.selected-item-display .media-container {
+  max-width: 300px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+}
+
+.selected-item-display .item-name {
+  margin: 0.75rem 0 0.5rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.selected-item-display .item-type {
+  background: var(--accent-color);
+  color: var(--text-primary);
+  font-weight: normal;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+}

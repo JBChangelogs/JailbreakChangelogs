@@ -603,6 +603,55 @@ function removeProofUrlField(button) {
   }
 }
 
+// Add this function before the DOMContentLoaded event listener
+async function showReportModal(itemId, ownerName = null) {
+  if (!Cookies.get("token")) {
+    notyf.error("You must be logged in to report dupes");
+    return;
+  }
+
+  // Clear previous inputs
+  document.getElementById("dupeUserInput").value = ownerName || "";
+  const proofUrlsContainer = document.getElementById("proofUrlsContainer");
+  proofUrlsContainer.innerHTML = `
+    <div class="input-group mb-2">
+      <input type="url" class="form-control proof-url" placeholder="Imgur URL">
+      <button type="button" class="btn btn-outline-danger" onclick="removeProofUrlField(this)">×</button>
+    </div>
+  `;
+
+  // Store the selected item ID
+  currentItemId = itemId;
+
+  // Get and display the selected item
+  try {
+    const item = await getItemByName(null, itemId);
+    if (item) {
+      const selectedItemDisplay = document.getElementById(
+        "selectedItemDisplay"
+      );
+      selectedItemDisplay.innerHTML = `
+        <h6 class="text-muted mb-3">Reporting dupe for:</h6>
+        ${getItemMediaElement(item, {
+          containerClass: "mb-3",
+          aspectRatio: "16/9",
+          size: "480p",
+        })}
+        <h5 class="item-name">${item.name}</h5>
+        <span class="item-type badge bg-secondary">${item.type}</span>
+      `;
+    }
+  } catch (error) {
+    console.error("Error loading item details:", error);
+  }
+
+  // Show the report modal
+  const reportModal = new bootstrap.Modal(
+    document.getElementById("reportDupeModal")
+  );
+  reportModal.show();
+}
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async function () {
   await Promise.all([fetchDupesList(), loadAllItems()]); // Load both dupes and items
@@ -665,7 +714,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         displaySearchResults(
           `${type}Results`,
           type === "item"
-            ? filteredResults.map((item) => item.name)
+            ? filteredResults // Pass full item objects instead of just names
             : filteredResults,
           `${type}Search`
         );
