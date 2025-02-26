@@ -10,6 +10,20 @@ let displayedItems = [];
 let currentPage = 0;
 const ITEMS_PER_PAGE = 32; // Increased from 18
 
+// Add this shuffle function near the top with other helper functions
+function shuffleArray(array) {
+  let currentIndex = array.length;
+  while (currentIndex > 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+}
+
 // Format timestamp to readable date
 function formatDate(timestamp) {
   const date = new Date(timestamp * 1000);
@@ -378,8 +392,8 @@ async function showItemSelectionModal(ownerName = null) {
 
   // Reset pagination
   currentPage = 0;
-  // Sort items alphabetically by default
-  displayedItems = [...allItems].sort((a, b) => a.name.localeCompare(b.name));
+  // Instead of sorting, shuffle the items
+  displayedItems = shuffleArray([...allItems]);
 
   // Reset selection
   selectedItem = null;
@@ -419,16 +433,11 @@ function displayItemsInModal() {
             .map(
               (item) => `
             <div class="item-card" onclick="selectItem(${item.id}, this)">
-              <div class="item-media-container">
-                <img 
-                  src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-                item.name
-              }.webp"
-                  class="item-image"
-                  alt="${item.name}"
-                  onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
-                >
-              </div>
+              ${getItemMediaElement(item, {
+                containerClass: "item-media-container",
+                imageClass: "item-image",
+                size: "480p",
+              })}
               <div class="card-body">
                 <h5 title="${item.name}">${item.name}</h5>
               </div>
@@ -448,16 +457,11 @@ function displayItemsInModal() {
         .map(
           (item) => `
           <div class="item-card" onclick="selectItem(${item.id}, this)">
-            <div class="item-media-container">
-              <img 
-                src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-            item.name
-          }.webp"
-                class="item-image"
-                alt="${item.name}"
-                onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
-              >
-            </div>
+            ${getItemMediaElement(item, {
+              containerClass: "item-media-container",
+              imageClass: "item-image",
+              size: "480p",
+            })}
             <div class="card-body">
               <h5 title="${item.name}">${item.name}</h5>
             </div>
@@ -493,13 +497,13 @@ function attachInfiniteScroll() {
 // Add this function to search and display items in the modal
 function searchAndDisplayItems(searchTerm) {
   if (!searchTerm) {
-    // When no search term, show all items sorted alphabetically
-    displayedItems = [...allItems].sort((a, b) => a.name.localeCompare(b.name));
+    // When no search term, show shuffled items instead of sorting
+    displayedItems = shuffleArray([...allItems]);
   } else {
     searchTerm = searchTerm.toLowerCase();
-    displayedItems = allItems
-      .filter((item) => item.name.toLowerCase().startsWith(searchTerm))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    displayedItems = allItems.filter((item) =>
+      item.name.toLowerCase().startsWith(searchTerm)
+    );
   }
 
   // Reset pagination when searching
@@ -676,7 +680,9 @@ async function showReportModal(itemId, ownerName = null) {
           size: "480p",
         })}
         <h5 class="item-name">${item.name}</h5>
-        <span class="item-type badge bg-secondary">${item.type}</span>
+        <span class="item-type badge bg-secondary" style="font-weight: 600;">${
+          item.type
+        }</span>
       `;
     }
   } catch (error) {

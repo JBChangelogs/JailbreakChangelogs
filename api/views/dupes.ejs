@@ -375,9 +375,9 @@
               </div>
               <form id="dupeReportForm">
                 <div class="mb-3">
-                  <label for="dupeUserInput" class="form-label"
-                    >Duper's Username</label
-                  >
+                  <label for="dupeUserInput" class="form-label">
+                    Duper's Username <span class="text-danger">*</span>
+                  </label>
                   <input
                     type="text"
                     class="form-control"
@@ -386,9 +386,10 @@
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="proofUrls" class="form-label"
-                    >Proof URLs (Imgur only, max 5)</label
-                  >
+                  <label for="proofUrls" class="form-label">
+                    Proof URLs (Imgur only, max 5)
+                    <span class="text-danger">*</span>
+                  </label>
                   <div id="proofUrlsContainer">
                     <div class="input-group mb-2">
                       <input

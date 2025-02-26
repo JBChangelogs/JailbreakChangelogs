@@ -1258,7 +1258,7 @@
 
 .item-card.selected {
   border: 2px solid var(--accent-color-light);
-  background: rgba(var(--accent-color-rgb), 0.1);
+  background: var(--accent-color-light);
 }
 
 .item-card.selected::after {
@@ -1433,6 +1433,18 @@
   ); /* Smaller minmax value */
   gap: 1rem;
   margin-top: 1rem;
+}
+
+/* Add mobile-specific grid layout */
+@media (max-width: 768px) {
+  .item-grid {
+    grid-template-columns: repeat(2, 1fr); /* Force 2 columns on mobile */
+    gap: 0.75rem; /* Slightly reduce gap on mobile */
+  }
+
+  .item-card h5 {
+    font-size: 0.8rem; /* Slightly smaller font on mobile */
+  }
 }
 
 .load-more-btn {
