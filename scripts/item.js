@@ -202,33 +202,16 @@ async function loadSimilarItemsByName(searchName) {
             item.name
           )}" 
              class="card h-100 text-decoration-none hover-effect">
-            <div class="card-img-wrapper position-relative h-100">
-              <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; height: 100%;">
-                ${
-                  item.name === "HyperShift" && item.type === "HyperChrome"
-                    ? `
-                    <img 
-                      src="/assets/images/items/hyperchromes/HyperShift.gif"
-                      class="card-img-top w-100 h-100"
-                      style="object-fit: cover; transition: transform 0.3s ease;"
-                      alt="${item.name}"
-                    >
-                  `
-                    : `
-                    <img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-                        item.name
-                      }.webp" 
-                         class="card-img-top w-100 h-100"
-                         style="object-fit: cover; transition: transform 0.3s ease;"
-                         alt="${item.name}"
-                         onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">`
-                }
-              </div>
-              <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
-                   style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-                <h6 class="card-title mb-1 text-white">${item.name}</h6>
-                <small class="text-light">${item.type}</small>
-              </div>
+            ${getItemMediaElement(item, {
+              containerClass: "card-img-wrapper position-relative h-100",
+              imageClass: "card-img-top w-100 h-100",
+              size: "480p",
+              showLimitedBadge: false,
+            })}
+            <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
+                 style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+              <h6 class="card-title mb-1 text-white">${item.name}</h6>
+              <small class="text-light">${item.type}</small>
             </div>
           </a>
         </div>
@@ -572,6 +555,102 @@ document.addEventListener("DOMContentLoaded", async () => {
     return score;
   }
 
+  function getItemMediaElement(item, options = {}) {
+    const {
+      containerClass = "",
+      imageClass = "",
+      showLimitedBadge = true,
+      size = "original", // 'original' or '480p'
+      aspectRatio = "16/9",
+    } = options;
+
+    // Special case for horns
+    if (item.type.toLowerCase() === "horn") {
+      return `
+        <div class="media-container" data-tooltip="Click to play horn sound">
+          <div class="horn-player-wrapper" onclick="playHornSound(this)">
+            <img src="/assets/audios/horn_thumbnail.webp" 
+                 class="${imageClass || "card-img-top"}" 
+                 alt="Horn Thumbnail" 
+                 style="opacity: 1;">
+            <audio class="horn-audio" preload="none">
+              <source src="/assets/audios/horns/${
+                item.name
+              }.mp3" type="audio/mp3">
+            </audio>
+          </div>
+        </div>`;
+    }
+
+    // Special case for HyperShift
+    if (item.name === "HyperShift" && item.type === "HyperChrome") {
+      return `
+        <div class="media-container ${containerClass} ${
+        item.is_limited && showLimitedBadge ? "limited-item" : ""
+      }">
+          <video class="${imageClass || "card-img-top"}"
+                 style="width: 100%; height: 100%; object-fit: contain;"
+                 autoplay loop muted playsinline
+                 onerror="this.onerror=null; this.style.display='none'; let img=document.createElement('img'); img.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; img.className=this.className; img.style=this.style; this.parentNode.appendChild(img);">
+            <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+            <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+          </video>
+          ${item.is_limited && showLimitedBadge ? getLimitedBadgeHtml() : ""}
+        </div>`;
+    }
+
+    // Special case for Drifts
+    if (item.type === "Drift") {
+      return `
+        <div class="media-container ${containerClass} ${
+        item.is_limited && showLimitedBadge ? "limited-item" : ""
+      }">
+          <video src="/assets/images/items/drifts/${item.name}.webm"
+                 class="${imageClass || "img-fluid rounded video-player"}"
+                 playsinline 
+                 muted 
+                 loop
+                 autoplay
+                 defaultMuted
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1;">
+          </video>
+          ${item.is_limited && showLimitedBadge ? getLimitedBadgeHtml() : ""}
+        </div>`;
+    }
+
+    // Default case for regular items
+    const imagePath =
+      size === "480p"
+        ? `/assets/images/items/480p/${item.type.toLowerCase()}s/${
+            item.name
+          }.webp`
+        : `/assets/images/items/${item.type.toLowerCase()}s/${item.name}.webp`;
+
+    return `
+      <div class="media-container ${containerClass} ${
+      item.is_limited && showLimitedBadge ? "limited-item" : ""
+    }" 
+           style="aspect-ratio: ${aspectRatio};">
+        <img src="${imagePath}"
+             class="${imageClass || "img-fluid rounded thumbnail"}"
+             alt="${item.name}"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
+             onerror="handleimage(this)">
+        ${item.is_limited && showLimitedBadge ? getLimitedBadgeHtml() : ""}
+      </div>`;
+  }
+
+  function getLimitedBadgeHtml() {
+    return `
+      <span class="badge limited-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+          <rect width="24" height="24" fill="none" />
+          <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
+        </svg>
+        Limited
+      </span>`;
+  }
+
   function displayItemDetails(item) {
     const image_type = item.type.toLowerCase();
 
@@ -629,63 +708,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const container = document.getElementById("item-container");
 
-    // Determine media element based on type
-    let element;
-    if (item.type.toLowerCase() === "horn") {
-      element = `
-        <div class="media-container" data-tooltip="Click to play horn sound">
-          <div class="horn-player-wrapper" onclick="playHornSound(this)">
-            <img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" alt="Horn Thumbnail" style="opacity: 0.8;">
-            <audio class="horn-audio" preload="none">
-              <source src="/assets/audios/horns/${item.name}.mp3" type="audio/mp3">
-            </audio>
-          </div>
-        </div>`;
-    } else if (item.type === "Drift") {
-      element = `
-    <div class="media-container ${item.is_limited ? "limited-item" : ""}">
-        <video 
-          src="/assets/images/items/drifts/${item.name}.webm"
-          class="img-fluid rounded video-player"
-          playsinline 
-          muted 
-          loop
-          autoplay
-          defaultMuted
-          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1;"
-        ></video>
-        ${item.is_limited ? specialBadgeHtml : ""}
-    </div>
-  `;
-    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      element = `
-      <div class="media-container ${item.is_limited ? "limited-item" : ""}">
-          <div class="skeleton-loader"></div>
-          <img 
-              src="/assets/images/items/hyperchromes/HyperShift.gif"
-              class="card-img-top"
-              onload="this.parentElement.querySelector('.skeleton-loader').style.display='none'; this.style.opacity='1'"
-              onerror="handleimage(this)"
-              style="width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease;"
-              alt="HyperShift"
-          />
-      </div>
-  `;
-    } else {
-      element = `
-        <div class="media-container ${item.is_limited ? "limited-item" : ""}">
-          <img 
-            src="/assets/images/items/${encodeURIComponent(image_type)}/${
-        item.name
-      }s.webp"
-            class="img-fluid rounded thumbnail"
-            alt="${item.name}"
-            onerror="handleimage(this)"
-          >
-          ${item.is_limited ? specialBadgeHtml : ""}
-        </div>
-      `;
-    }
+    // Replace the media element generation with getItemMediaElement call
+    const mediaElement = getItemMediaElement(item, {
+      containerClass: item.is_limited ? "limited-item" : "",
+      showLimitedBadge: true,
+    });
 
     const value = formatValue(item.cash_value);
     const duped_value = formatValue(item.duped_value);
@@ -820,80 +847,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             class="text-decoration-none similar-item-card">
             <div class="card h-100">
               <div class="card-img-wrapper position-relative" style="aspect-ratio: 16/9;">
-                ${
-                  item.type.toLowerCase() === "horn"
-                    ? `<img src="/assets/audios/horn_thumbnail.webp" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.name}">`
-                    : item.name === "HyperShift" && item.type === "HyperChrome"
-                    ? `<img src="/assets/images/items/hyperchromes/HyperShift.gif" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.name}">`
-                    : `<img src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
-                        item.name
-                      }.webp" class="card-img-top" style="width: 100%; height: 100%; object-fit: cover;" alt="${
-                        item.name
-                      }">`
-                }
-                  ${
-                    item.is_limited
-                      ? `<span class="badge limited-badge position-absolute top-0 end-0 m-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-                              <rect width="24" height="24" fill="none" />
-                              <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
-                            </svg>
-                            Limited
-                          </span>`
-                      : ""
-                  }
-                </div>
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title text-truncate mb-2">${item.name}</h5>
-                  <div class="value-display">
-                    <div class="mb-2">
-                      <small class="text-muted d-block">Cash Value:</small>
-                      <p class="card-text mb-1 desktop-value" style="color: var(--accent-color-light)">
-                        ${formatValueForDisplay(item.cash_value, false)}
-                      </p>
-                      <p class="card-text mb-1 mobile-value d-none" style="color: var(--accent-color-light)">
-                        ${formatValueForDisplay(item.cash_value, true)}
-                      </p>
-                    </div>
-                    <div class="mb-2">
-                      <small class="text-muted d-block">Duped Value:</small>
-                      <p class="card-text mb-1 desktop-value ${
-                        item.duped_value ? "text-warning" : ""
-                      }">
-                        ${formatValueForDisplay(item.duped_value, false)}
-                      </p>
-                      <p class="card-text mb-1 mobile-value d-none ${
-                        item.duped_value ? "text-warning" : ""
-                      }">
-                        ${formatValueForDisplay(item.duped_value, true)}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="mt-2">
-                    <small class="text-muted demand-tag">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                        <rect width="16" height="16" fill="none" />
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
-                      </svg>
-                      ${
-                        item.demand && item.demand !== "N/A"
-                          ? item.demand
-                          : "No Demand"
-                      } 
-                      <span class="demand-separator mx-2">|</span>
-                      <span class="last-updated">
-                        Last updated: ${
-                          item.last_updated
-                            ? formatTimeAgo(item.last_updated)
-                            : "N/A"
-                        }
-                      </span>
-                    </small>
-                  </div>
-                </div>
+                ${getItemMediaElement(item, {
+                  containerClass: "position-relative",
+                  imageClass: "card-img-top",
+                  showLimitedBadge: true,
+                  size: "480p",
+                  aspectRatio: "16/9",
+                })}
               </div>
-            </a>
-          `;
+              <div class="card-overlay position-absolute bottom-0 start-0 w-100 p-2"
+                   style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                <h6 class="card-title mb-1 text-white">${item.name}</h6>
+                <small class="text-light">${item.type}</small>
+              </div>
+            </div>
+          </a>
+        `;
           container.appendChild(card);
         });
       } catch (error) {
@@ -1274,7 +1243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
          <!-- Price Card (vehicles only) -->
       ${priceSection}
-
+  
       <!-- Health Card (vehicles only) -->
       ${healthSection}
       </div>
@@ -1324,35 +1293,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                      <!-- Left Side - Image and Health -->
                     <div class="col-md-5 p-3">
                       <div class="d-flex flex-column gap-3">
-                        ${
-                          item.type.toLowerCase() === "horn"
-                            ? element // For horns, just use the audio player element
-                            : item.type === "Drift"
-                            ? element
-                            : item.name === "HyperShift" &&
-                              item.type === "HyperChrome"
-                            ? element
-                            : `
-                          <div class="media-container ${
-                            item.is_limited ? "limited-item" : ""
-                          }">
-                              <img 
-                                  src="/assets/images/items/${encodeURIComponent(
-                                    image_type
-                                  )}s/${item.name}.webp"
-                                  class="img-fluid rounded thumbnail"
-                                  alt="${item.name}"
-                                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
-                                  onerror="handleimage(this)"
-                              >
-                              ${item.is_limited ? specialBadgeHtml : ""}
-                          </div>
-                        `
-                        }
-                      
+                        ${mediaElement}
                       </div>
                     </div>
-
+  
                       <!-- Right Side - Item Details -->
                       <div class="col-md-7 p-3">
                           <!-- Item Title and Badge Container -->
@@ -1388,13 +1332,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z"/></svg>Read More
                                   </button>`
                                : ""
                            }
                           <!-- Values Section -->
                           ${valuesSection}
-
+  
                           <div class="values-text d-flex flex-column align-items-start mt-3">
                             <strong class="mb-2">Want to make a value suggestion for ${
                               item.name
@@ -2148,8 +2092,8 @@ function initializeDescriptionToggle() {
       description.classList.toggle("collapsed");
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z"/></svg>Show Less'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More';
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59-4.58L18 14l-6-6l-6 6z"/></svg>Show Less'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6-6l-6 6z"/></svg>Read More';
     });
   }
 }
