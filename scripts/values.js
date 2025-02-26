@@ -1234,11 +1234,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Furniture") color = "#9C6644";
     if (item.type === "Horn") color = "#4A90E2";
 
-    let typeBadgeHtml = `
-      <span class="badge item-type-badge" style="background-color: ${color};">
-        ${item.type}
-      </span>
-    `;
+    // Only show HyperChrome badge for HyperChrome items, otherwise show regular type badge
+    const isHyperChrome = item.type === "HyperChrome";
+    const typeBadgeHtml = isHyperChrome
+      ? `<span class="badge hyperchrome-badge">HyperChrome</span>`
+      : `<span class="badge item-type-badge" style="background-color: ${color};">
+           ${item.type}
+         </span>`;
 
     // Remove the duplicate limited badge since getItemMediaElement already adds it
     const mediaElement = getItemMediaElement(item, {
