@@ -1,8 +1,14 @@
 let dupesList = [];
-let allItems = []; // Add this line
-let searchTimeouts = { duper: null, item: null };
+let allItems = [];
+let searchTimeouts = { duper: null, item: null, modalSearch: null }; // Add modalSearch
 let currentItemId = null;
 let selectedItem = null;
+let currentDuperName = null; // Add this line
+
+// Add these variables at the top with other globals
+let displayedItems = [];
+let currentPage = 0;
+const ITEMS_PER_PAGE = 18;
 
 // Format timestamp to readable date
 function formatDate(timestamp) {
@@ -264,6 +270,9 @@ async function calculateDupe() {
       </div>
     `;
 
+    // Hide report button since we're showing already duped items
+    document.getElementById("reportDupeBtn").style.display = "none";
+
     modalInstance.show();
     return;
   }
@@ -371,6 +380,11 @@ async function showItemSelectionModal(ownerName = null) {
     currentDuperName = ownerName;
   }
 
+  // Reset pagination
+  currentPage = 0;
+  // Shuffle all items once when opening modal
+  displayedItems = [...allItems].sort(() => Math.random() - 0.5);
+
   // Reset selection
   selectedItem = null;
   document.getElementById("proceedBtn").disabled = true;
@@ -380,7 +394,8 @@ async function showItemSelectionModal(ownerName = null) {
     searchInput.value = "";
   }
 
-  searchAndDisplayItems("");
+  // Show initial items
+  displayItemsInModal();
 
   const modal = new bootstrap.Modal(
     document.getElementById("itemSelectionModal")
@@ -388,118 +403,76 @@ async function showItemSelectionModal(ownerName = null) {
   modal.show();
 }
 
-// Add this function to search and display items in the modal
-function searchAndDisplayItems(searchTerm) {
-  console.log("Searching items with term:", searchTerm); // Debug log
-
-  // Filter items based on search term
-  const filtered = allItems.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+// Add new function to handle displaying items
+function displayItemsInModal() {
+  const resultsContainer = document.getElementById("itemSearchResults");
+  const itemsToShow = displayedItems.slice(
+    0,
+    (currentPage + 1) * ITEMS_PER_PAGE
   );
 
-  const resultsContainer = document.getElementById("itemSearchResults");
-  resultsContainer.innerHTML = filtered.length
-    ? filtered
-        .map(
-          (item) => `
-    <div class="item-card" onclick="selectItem(${item.id}, this)">
-      ${getItemMediaElement(item, {
-        containerClass: "item-media-container",
-        imageClass: "item-image",
-        size: "480p",
-      })}
-      <h5>${item.name}</h5>
-    </div>
-  `
-        )
-        .join("")
+  resultsContainer.innerHTML = itemsToShow.length
+    ? `
+      <div class="item-grid">
+        ${itemsToShow
+          .map(
+            (item) => `
+          <div class="item-card" onclick="selectItem(${item.id}, this)">
+            ${getItemMediaElement(item, {
+              containerClass: "item-media-container",
+              imageClass: "item-image",
+              size: "480p",
+            })}
+            <h5>${item.name}</h5>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+      ${
+        displayedItems.length > itemsToShow.length
+          ? `
+        <div class="text-center mt-3">
+          <button class="btn btn-primary load-more-btn" onclick="loadMoreItems()">
+            Load More (${displayedItems.length - itemsToShow.length} remaining)
+          </button>
+        </div>
+      `
+          : ""
+      }
+    `
     : '<p class="text-center mt-3">No items found</p>';
 }
 
-// Move showReportModal function definition before it's used
-async function showReportModal(existingItemId = null, ownerName = null) {
-  console.log("showReportModal called with:", { existingItemId, ownerName }); // Debug log
-
-  if (!Cookies.get("token")) {
-    notyf.error("You must be logged in to report dupes");
-    return;
-  }
-
-  // Get current values or use provided owner name
-  const dupeUser =
-    ownerName || document.getElementById("duperSearch").value.trim();
-
-  // If we have an existingItemId from dupe check, use it
-  if (existingItemId) {
-    currentItemId = existingItemId;
-  }
-
-  if (!currentItemId && !existingItemId) {
-    notyf.error("Please select an item before reporting");
-    return;
-  }
-
-  // Only check for existing dupe if the user exists in database
-  const existingDupe = dupesList.find(
-    (dupe) =>
-      dupe.owner.toLowerCase() === dupeUser.toLowerCase() &&
-      dupe.item_id === currentItemId
-  );
-
-  if (existingDupe) {
-    notyf.error("This dupe is already in our database!");
-    return;
-  }
-
-  // Pre-fill the report form
-  if (dupeUser) {
-    document.getElementById("dupeUserInput").value = dupeUser;
-  }
-
-  // Show the report modal
-  const reportModal = new bootstrap.Modal(
-    document.getElementById("reportDupeModal")
-  );
-  reportModal.show();
-
-  // If we're coming from dupe check results, fetch and display the item
-  if (existingItemId) {
-    try {
-      console.log("Fetching item details for:", existingItemId); // Debug log
-      const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/items/get?id=${existingItemId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch item");
-      const item = await response.json();
-      console.log("Fetched item:", item); // Debug log
-
-      const modalBody = document.querySelector("#reportDupeModal .modal-body");
-      const itemDisplay = document.createElement("div");
-      itemDisplay.className = "selected-item-display";
-      itemDisplay.innerHTML = `
-        ${getItemMediaElement(item, {
-          containerClass: "mb-2",
-          imageClass: "w-100 h-100",
-          showLimitedBadge: false,
-          size: "480p",
-        })}
-        <h5>${item.name}</h5>
-      `;
-
-      // Remove any existing item display first
-      const existingDisplay = modalBody.querySelector(".selected-item-display");
-      if (existingDisplay) {
-        existingDisplay.remove();
-      }
-
-      // Insert the new item display before the form
-      const form = modalBody.querySelector("form");
-      modalBody.insertBefore(itemDisplay, form);
-    } catch (error) {
-      console.error("Error fetching item details:", error);
-    }
-  }
+// Add new function to handle loading more items
+function loadMoreItems() {
+  currentPage++;
+  displayItemsInModal();
 }
+
+// Add this function to search and display items in the modal
+function searchAndDisplayItems(searchTerm) {
+  if (!searchTerm) {
+    displayedItems = [...allItems];
+  } else {
+    searchTerm = searchTerm.toLowerCase();
+    displayedItems = allItems.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Reset pagination when searching
+  currentPage = 0;
+  displayItemsInModal();
+}
+
+// Add search input handler for modal
+document.getElementById("itemSearchInput").addEventListener("input", (e) => {
+  clearTimeout(searchTimeouts.modalSearch);
+  searchTimeouts.modalSearch = setTimeout(() => {
+    searchAndDisplayItems(e.target.value);
+  }, 300);
+});
 
 // Add this function near the top with other helper functions
 function getItemMediaElement(item, options = {}) {
@@ -590,6 +563,44 @@ function proceedToReport() {
 
   // Reset stored owner name
   currentDuperName = null;
+}
+
+// Add these functions before the DOMContentLoaded event listener
+function addProofUrlField() {
+  const container = document.getElementById("proofUrlsContainer");
+  if (!container) {
+    console.error("proofUrlsContainer not found");
+    return;
+  }
+
+  // Get all proof URL fields
+  const fieldCount = container.querySelectorAll(".input-group").length;
+
+  if (fieldCount >= 5) {
+    notyf.error("Maximum of 5 proof URLs allowed");
+    return;
+  }
+
+  const newField = document.createElement("div");
+  newField.className = "input-group mb-2";
+  newField.innerHTML = `
+    <input type="url" class="form-control proof-url" placeholder="Imgur URL">
+    <button type="button" class="btn btn-outline-danger" onclick="removeProofUrlField(this)">×</button>
+  `;
+
+  container.appendChild(newField);
+}
+
+function removeProofUrlField(button) {
+  const container = document.getElementById("proofUrlsContainer");
+  const fields = container.querySelectorAll(".input-group");
+
+  // Only allow removal if we have more than 1 field
+  if (fields.length > 1) {
+    button.closest(".input-group").remove();
+  } else {
+    notyf.error("At least one proof URL field is required");
+  }
 }
 
 // Initialize on page load
@@ -795,7 +806,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Initialize modal
   const modalInstance = new bootstrap.Modal(modalEl);
 
-  // Remove the adjustModalSize function and resize event listener since we're using Bootstrap's classes
+  // Add event listener for add proof URL button - with null check
+  const addProofUrlBtn = document.getElementById("addProofUrlBtn");
+  if (addProofUrlBtn) {
+    addProofUrlBtn.addEventListener("click", addProofUrlField);
+  }
 });
 
 // Fetch all dupes list
@@ -830,6 +845,7 @@ async function loadAllItems() {
 // Update submitDupeReport function
 async function submitDupeReport() {
   const dupeUser = document.getElementById("dupeUserInput").value.trim();
+  // Get URLs and join them with comma + space to match the working format
   const proofUrls = Array.from(document.getElementsByClassName("proof-url"))
     .map((input) => input.value.trim())
     .filter((url) => url && url.includes("imgur.com"));
@@ -857,10 +873,10 @@ async function submitDupeReport() {
 
   try {
     const requestBody = {
-      owner: token, // Add token as owner field
+      owner: token,
       dupe_user: dupeUser,
       item_id: currentItemId,
-      proof_urls: proofUrls,
+      proof: proofUrls.join(", "), // Join with comma AND space to match working format
     };
 
     console.log("Submitting report with data:", requestBody);

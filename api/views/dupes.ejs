@@ -286,10 +286,25 @@
 
           <!-- Replace the button container div -->
           <div class="d-grid gap-2 d-flex">
-            <button id="calculateBtn" class="btn btn-lg flex-grow-1" style="background: var(--accent-color); color: var(--text-primary);">
+            <button
+              id="calculateBtn"
+              class="btn btn-lg flex-grow-1"
+              style="
+                background: var(--accent-color);
+                color: var(--text-primary);
+              "
+            >
               Is this a dupe?
             </button>
-            <button type="button" class="btn btn-lg" onclick="showItemSelectionModal()" style="background: var(--accent-color); color: var(--text-primary);">
+            <button
+              type="button"
+              class="btn btn-lg"
+              onclick="showItemSelectionModal()"
+              style="
+                background: var(--accent-color);
+                color: var(--text-primary);
+              "
+            >
               Report a dupe
             </button>
           </div>
@@ -368,7 +383,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="proofUrls" class="form-label"
-                    >Proof URLs (Imgur only, max 10)</label
+                    >Proof URLs (Imgur only, max 5)</label
                   >
                   <div id="proofUrlsContainer">
                     <div class="input-group mb-2">
@@ -388,8 +403,8 @@
                   </div>
                   <button
                     type="button"
-                    class="btn btn-sm btn-outline-primary"
-                    id="addProofUrl"
+                    class="btn btn-sm btn-primary"
+                    id="addProofUrlBtn"
                   >
                     Add Another URL
                   </button>
@@ -455,8 +470,8 @@
                 type="button"
                 class="btn btn-primary"
                 onclick="proceedToReport()"
-                disabled
                 id="proceedBtn"
+                disabled
               >
                 Continue to Report
               </button>

@@ -1187,6 +1187,7 @@
 .item-selection-modal .modal-body {
   max-height: 70vh;
   overflow-y: auto;
+  padding: 1.5rem;
 }
 
 .item-search-results {
@@ -1357,4 +1358,45 @@
   background: var(--accent-color-light) !important;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Item Selection Modal Grid */
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.load-more-btn {
+  padding: 0.5rem 1.5rem;
+  margin: 1rem 0;
+  transition: all 0.2s ease;
+}
+
+.load-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Adjust modal max height */
+.item-selection-modal .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Improve scroll experience */
+.item-selection-modal .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.item-selection-modal .modal-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.item-selection-modal .modal-body::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 4px;
 }
