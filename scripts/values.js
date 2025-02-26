@@ -155,10 +155,7 @@ function getItemMediaElement(item, options = {}) {
 
   // Default case for all other items
   const itemType = item.type.toLowerCase();
-  const imagePath =
-    size === "480p"
-      ? `/assets/images/items/480p/${itemType}s/${item.name}.webp`
-      : `/assets/images/items/${itemType}s/${item.name}.webp`;
+  const imagePath = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
 
   return `
     <div class="media-container position-relative ${containerClass}">
@@ -1381,19 +1378,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create a loading queue to prevent overwhelming the browser
     const imageQueue = allItems
+      .filter((item) => !["drift", "horn"].includes(item.type.toLowerCase()))
       .map((item) => {
-        // Skip drift items and horn items
-        if (
-          item.type.toLowerCase() === "drift" ||
-          item.type.toLowerCase() === "horn"
-        ) {
-          return null;
-        }
-
-        const image_type = item.type.toLowerCase();
-        return `/assets/images/items/480p/${image_type}s/${item.name}.webp`;
+        const itemType = item.type.toLowerCase();
+        // Get image path directly instead of parsing HTML
+        return `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
       })
-      .filter((url) => url !== null);
+      .filter(Boolean); // Remove any undefined/null values
 
     // Load images in batches of 10
     const batchSize = 10;
@@ -1410,11 +1401,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
       currentBatch += batchSize;
       if (currentBatch < imageQueue.length) {
-        setTimeout(loadBatch, 100); // Load next batch after 100ms
+        setTimeout(loadBatch, 100);
       }
     }
 
     loadBatch();
+  }
+
+  function preloadDriftThumbnails(driftItems) {
+    if (!driftItems || driftItems.length === 0) return;
+
+    driftItems.forEach((item) => {
+      // Use getItemMediaElement to get the HTML
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = getItemMediaElement(item, {
+        showFavoriteIcon: false,
+        size: "480p",
+      });
+
+      // Find the drift thumbnail image
+      const thumbnailImg = tempDiv.querySelector(".drift-thumbnail");
+      if (thumbnailImg && thumbnailImg.src) {
+        const img = new Image();
+        img.src = thumbnailImg.src;
+      }
+    });
   }
 
   // Update clearFilters function
@@ -1711,14 +1722,4 @@ function toggleContributors(header) {
       grid.classList.contains("expanded")
     );
   }
-}
-
-// Add preloading specifically for drift thumbnails
-function preloadDriftThumbnails(driftItems) {
-  if (!driftItems || driftItems.length === 0) return;
-
-  driftItems.forEach((item) => {
-    const img = new Image();
-    img.src = `/assets/images/items/480p/drifts/${item.name}.webp`;
-  });
 }
