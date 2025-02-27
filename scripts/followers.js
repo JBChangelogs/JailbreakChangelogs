@@ -127,30 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  const fetchAvatar = async (userId, avatarHash, format) => {
-    const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}`;
-    const response = await fetch(url, { method: "HEAD" });
-    return response.ok ? url : null;
-  };
-
-  const getAvatarUrl = async (user) => {
-    if (!user.avatar) {
-      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
-    }
-
-    try {
-      const gifUrl = await fetchAvatar(user.id, user.avatar, "gif");
-      if (gifUrl) return gifUrl;
-
-      const pngUrl = await fetchAvatar(user.id, user.avatar, "png");
-      if (pngUrl) return pngUrl;
-    } catch (error) {
-      console.error("Error fetching avatar:", error);
-    }
-
-    return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
-  };
-
   const followers = await fetchFollowers(userId);
 
   if (followers.length > 0) {
@@ -165,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (response.ok) {
           const userData = await response.json();
-          const avatarUrl = await getAvatarUrl(userData);
+          const avatarUrl = await window.checkAndSetAvatar(userData);
           processedUsers.push({
             ...userData,
             avatarUrl,

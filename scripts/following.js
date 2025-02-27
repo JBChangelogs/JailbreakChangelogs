@@ -115,37 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return; // Exit if the grid doesn't exist (means we're showing the private message)
   }
 
-  const fetchAvatar = async (userId, avatarHash, format) => {
-    const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}`;
-    const response = await fetch(url, { method: "HEAD" });
-    return response.ok ? url : null;
-  };
-
-  // Add getAvatarUrl helper function
-  const getAvatarUrl = async (user) => {
-    if (!user.avatar) {
-      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
-    }
-
-    try {
-      // Try GIF first
-      const gifUrl = await fetchAvatar(user.id, user.avatar, "gif");
-      if (gifUrl) {
-        return gifUrl;
-      }
-      // Fallback to PNG if GIF doesn't exist
-      const pngUrl = await fetchAvatar(user.id, user.avatar, "png");
-      if (pngUrl) {
-        return pngUrl;
-      }
-    } catch (error) {
-      console.error("Error fetching avatar:", error);
-    }
-
-    // Fallback to default avatar if everything fails
-    return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${user.username}&bold=true&format=svg`;
-  };
-
   // Always update page headings based on URL path rather than logged in status
   const titleElement = document.querySelector("h2");
   const subtitleElement = document.querySelector("h4");
@@ -209,7 +178,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           validUserCount++;
         } else if (response.ok) {
           const userData = await response.json();
-          const avatarUrl = await getAvatarUrl(userData);
+          const avatarUrl = await window.checkAndSetAvatar(userData);
           processedUsers.push({
             ...userData,
             avatarUrl,
