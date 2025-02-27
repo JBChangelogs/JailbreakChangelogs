@@ -453,8 +453,8 @@ app.get("/trading/ad/:tradeId", (req, res) => {
 });
 
 app.get("/bot", (req, res) => {
-  const randomNumber = Math.floor(Math.random() * 12) + 1;
-  const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
+  const randomNumber = Math.floor(Math.random() * 14) + 1;
+  const image = `/assets/backgrounds/background${randomNumber}.webp`;
   res.render("bot", {
     title: "Discord Bot - Changelogs",
     logoUrl:
@@ -1282,8 +1282,8 @@ app.get("/dupes/calculator", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  const randomNumber = Math.floor(Math.random() * 12) + 1;
-  const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
+  const randomNumber = Math.floor(Math.random() * 14) + 1;
+  const image = `/assets/backgrounds/background${randomNumber}.webp`;
   res.render("index", {
     title: "Home / Changelogs",
     logoUrl:

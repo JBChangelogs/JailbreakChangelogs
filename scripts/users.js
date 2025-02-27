@@ -356,8 +356,8 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   async function fetchBanner(userId, bannerHash) {
-    // Early return if no banner hash
-    if (!userId || !bannerHash) {
+    // Early return if no banner hash or if banner hash is "None"
+    if (!userId || !bannerHash || bannerHash === "None") {
       return null;
     }
 
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const response = await fetch(bannerUrl, {
         method: "HEAD",
-        cache: "no-store", // Prevent caching to allow backend updates
+        cache: "no-store",
       });
 
       if (response.ok) {
@@ -400,7 +400,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const userBanner = document.getElementById("banner");
 
     try {
-      const randomNumber = Math.floor(Math.random() * 12) + 1;
+      // Generate fallback banner URL once
+      const randomNumber = Math.floor(Math.random() * 14) + 1;
       const fallbackBanner = `/assets/backgrounds/background${randomNumber}.webp`;
 
       // Get user settings first
@@ -460,8 +461,8 @@ document.addEventListener("DOMContentLoaded", function () {
       img.src = bannerUrl;
     } catch (error) {
       console.error("Error fetching banner:", error);
-      const randomNumber = Math.floor(Math.random() * 12) + 1;
-      userBanner.src = `/assets/backgrounds/background${randomNumber}.webp`;
+      // Use the same fallback banner variable here instead of generating a new one
+      userBanner.src = fallbackBanner;
       bannerContainer.classList.remove("loading");
       userBanner.style.opacity = "1";
     }
@@ -1413,53 +1414,38 @@ document.addEventListener("DOMContentLoaded", function () {
       username
     )}&bold=true&format=svg`;
 
-    async function tryAvatarUrl(baseUrl, size = null) {
-      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
-      try {
-        const response = await fetch(url, { method: "HEAD" });
-        return response.ok ? url : null;
-      } catch {
-        return null;
-      }
+    // Early return if no avatar data
+    if (!udata.id || !udata.avatar || udata.avatar === "None") {
+      userAvatar.src = fallbackUrl;
+      return;
     }
 
     try {
-      // Get avatar hash from udata (assuming udata is available in scope)
-      if (!udata.avatar) {
-        userAvatar.src = fallbackUrl;
+      // Determine if avatar should be animated based on hash
+      const isAnimated = udata.avatar.startsWith("a_");
+      const baseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}`;
+
+      // Try primary format first (gif for animated, png for static)
+      const primaryFormat = isAnimated ? "gif" : "png";
+      const primaryUrl = `${baseUrl}.${primaryFormat}?size=4096`;
+
+      const response = await fetch(primaryUrl, { method: "HEAD" });
+      if (response.ok) {
+        userAvatar.src = primaryUrl;
         return;
       }
 
-      // Try GIF format with size
-      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}.gif`;
-      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
-      if (gifWithSize) {
-        userAvatar.src = gifWithSize;
-        return;
+      // If animated failed, try png as fallback
+      if (isAnimated) {
+        const pngUrl = `${baseUrl}.png?size=4096`;
+        const pngResponse = await fetch(pngUrl, { method: "HEAD" });
+        if (pngResponse.ok) {
+          userAvatar.src = pngUrl;
+          return;
+        }
       }
 
-      // Try GIF format without size
-      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
-      if (gifNoSize) {
-        userAvatar.src = gifNoSize;
-        return;
-      }
-
-      // Try WebP format with size
-      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}.webp`;
-      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
-      if (webpWithSize) {
-        userAvatar.src = webpWithSize;
-        return;
-      }
-
-      // Try WebP format without size
-      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
-      if (webpNoSize) {
-        userAvatar.src = webpNoSize;
-        return;
-      }
-
+      // If all attempts fail, use fallback
       userAvatar.src = fallbackUrl;
     } catch {
       userAvatar.src = fallbackUrl;
