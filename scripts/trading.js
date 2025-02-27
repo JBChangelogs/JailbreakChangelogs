@@ -1269,7 +1269,9 @@ async function deleteTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    notyf.success("Trade advertisement deleted successfully!");
+    notyf.success(
+      "Trade advertisement deleted successfully! Please note it may take 2-3 minutes for changes to be visible."
+    );
     await loadTradeAds(); // Refresh the trade ads list
   } catch (error) {
     console.error("Error deleting trade:", error);
@@ -2561,7 +2563,9 @@ async function createTradeAd() {
     }
 
     // On success
-    notyf.success("Trade advertisement created successfully!");
+    notyf.success(
+      "Trade advertisement created successfully! Please note it may take 2-3 minutes for your trade to appear."
+    );
     resetTrade();
 
     // Update trade ads list without modifying the preview button

@@ -75,7 +75,9 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         console.log(data);
-        notyf.success("Your Roblox account has been successfully connected!");
+        notyf.success(
+          "Your Roblox account has been successfully connected! Please note it may take 2-3 minutes for your details to be fully registered."
+        );
         setTimeout(() => {
           window.location.href = "/";
         }, 4500);
