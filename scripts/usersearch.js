@@ -4,16 +4,10 @@ const USERS_PER_PAGE = 15;
 let currentPage = 1;
 let allUsers = [];
 
-const decimalToHex = (decimal) => {
-  // Return default color if decimal is falsy OR specifically "None"
-  if (!decimal || decimal === "None") return "#124E66";
-
-  // Convert to hex and ensure exactly 6 digits
-  const hex = decimal.toString(16).padStart(6, "0").slice(-6);
-
-  // Return the hex color with a # prefix
-  return `#${hex}`;
-};
+const decimalToHex = (decimal) =>
+  !decimal || decimal === "None"
+    ? "#000000"
+    : `#${decimal.toString(16).substring(0, 6)}`;
 
 const elements = {
   searchInput: document.getElementById("searchInput"),

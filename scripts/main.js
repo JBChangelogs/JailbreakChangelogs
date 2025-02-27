@@ -431,43 +431,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
 
   window.checkAndSetAvatar = async function (userData) {
-    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      userData.username
-    )}&bold=true&format=svg`;
+    // Early return for users without avatars
+    if (!userData.id || !userData.avatar || userData.avatar === "None") {
+      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
+        userData.username
+      )}&bold=true`;
+    }
 
-    async function tryAvatarUrl(baseUrl, size = null) {
-      const url = size ? `${baseUrl}?size=${size}` : baseUrl;
-      try {
-        const response = await fetch(url, { method: "HEAD" });
-        return response.ok ? url : null;
-      } catch {
-        return null;
+    // Check if avatar is animated (starts with a_)
+    const format = userData.avatar.startsWith("a_") ? "gif" : "png";
+    const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.${format}`;
+
+    try {
+      const response = await fetch(avatarUrl, {
+        method: "HEAD",
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        return avatarUrl;
+      }
+    } catch {
+      // If GIF fails for animated avatar, try PNG as fallback
+      if (format === "gif") {
+        try {
+          const pngUrl = avatarUrl.replace(".gif", ".png");
+          const pngResponse = await fetch(pngUrl, {
+            method: "HEAD",
+            cache: "no-store",
+          });
+
+          if (pngResponse.ok) {
+            return pngUrl;
+          }
+        } catch {
+          // Silently fail to fallback
+        }
       }
     }
 
-    try {
-      // Try GIF format with size
-      const gifBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif`;
-      const gifWithSize = await tryAvatarUrl(gifBaseUrl, 4096);
-      if (gifWithSize) return gifWithSize;
-
-      // Try GIF format without size
-      const gifNoSize = await tryAvatarUrl(gifBaseUrl);
-      if (gifNoSize) return gifNoSize;
-
-      // Try WebP format with size
-      const webpBaseUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`;
-      const webpWithSize = await tryAvatarUrl(webpBaseUrl, 4096);
-      if (webpWithSize) return webpWithSize;
-
-      // Try WebP format without size
-      const webpNoSize = await tryAvatarUrl(webpBaseUrl);
-      if (webpNoSize) return webpNoSize;
-
-      return fallbackAvatar;
-    } catch {
-      return fallbackAvatar;
-    }
+    // Return fallback avatar if all attempts fail
+    return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
+      userData.username
+    )}&bold=true`;
   };
 
   function toggleMenu() {
