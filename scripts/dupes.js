@@ -56,6 +56,40 @@ function parseValue(value) {
 // Add this global variable at the top
 let hasSelectedSuggestion = false;
 
+// Modify extractSearchTerm function to handle partial type brackets
+function extractSearchTerm(input) {
+  // If input contains partial bracket, extract everything before it
+  const match = input.match(/^(.*?)(?:\s*\[.*)?$/);
+  return match ? match[1].trim() : input.trim();
+}
+
+// Add this helper function to normalize type case
+function normalizeType(type) {
+  if (!type) return null;
+  
+  // Map of common type variations to their correct form
+  const typeMap = {
+    'vehicle': 'Vehicle',
+    'vehicles': 'Vehicle',
+    'rim': 'Rim',
+    'rims': 'Rim',
+    'spoiler': 'Spoiler',
+    'spoilers': 'Spoiler',
+    'texture': 'Texture',
+    'textures': 'Texture',
+    'hyperchrome': 'HyperChrome',
+    'hyperchromes': 'HyperChrome',
+    'horn': 'Horn',
+    'horns': 'Horn',
+    'drift': 'Drift',
+    'drifts': 'Drift',
+    // Add other type variations as needed
+  };
+
+  const normalizedType = typeMap[type.toLowerCase()];
+  return normalizedType || type; // If no mapping found, return original
+}
+
 // Modify searchItems function to handle both types
 async function searchItems(searchTerm, type = "item") {
   if (type === "duper") {
@@ -77,10 +111,13 @@ async function searchItems(searchTerm, type = "item") {
       if (!response.ok) throw new Error("Failed to fetch items");
       const items = await response.json();
 
+      // Extract just the name part if input contains type brackets
+      const nameToSearch = extractSearchTerm(searchTerm);
+
       // Filter and sort by cash_value
       return items
         .filter((item) =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
+          item.name.toLowerCase().includes(nameToSearch.toLowerCase())
         )
         .sort((a, b) => parseValue(b.cash_value) - parseValue(a.cash_value));
     } catch (error) {
@@ -91,7 +128,7 @@ async function searchItems(searchTerm, type = "item") {
   }
 }
 
-// Modify displaySearchResults function
+// Modify displaySearchResults function to handle partial type input
 function displaySearchResults(containerId, results, inputId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -100,12 +137,23 @@ function displaySearchResults(containerId, results, inputId) {
     const list = document.createElement("div");
     list.className = "search-suggestions";
 
+    // Get current input value to check for partial type
+    const currentInput = document.getElementById(inputId).value;
+    const partialType = currentInput.match(/\[(.*?)(?:\])?$/);
+    
     results.slice(0, 5).forEach((result) => {
       const item = document.createElement("div");
       item.className = "suggestion-item";
 
       if (typeof result === "object") {
-        // For items, show name and type
+        // For items, filter by partial type if entered
+        if (partialType && partialType[1]) {
+          const searchType = partialType[1].trim().toLowerCase();
+          if (!result.type.toLowerCase().startsWith(searchType)) {
+            return; // Skip items that don't match partial type
+          }
+        }
+
         item.innerHTML = `
           ${result.name}
           <span class="text-muted ms-1">[${result.type}]</span>
@@ -130,8 +178,13 @@ function displaySearchResults(containerId, results, inputId) {
       list.appendChild(item);
     });
 
-    container.appendChild(list);
-    container.style.display = "block";
+    // Only show container if we have filtered results
+    if (list.children.length > 0) {
+      container.appendChild(list);
+      container.style.display = "block";
+    } else {
+      container.style.display = "none";
+    }
   } else {
     container.style.display = "none";
   }
@@ -188,7 +241,7 @@ async function calculateDupe() {
   // Parse item name and type from input value (e.g., "Arachnid [Vehicle]")
   const match = fullItemText.match(/^(.*?)\s*\[(.*?)\]$/);
   const itemName = match ? match[1].trim() : fullItemText.trim();
-  const itemType = match ? match[2].trim() : null;
+  const itemType = match ? normalizeType(match[2].trim()) : null;
 
   console.log("Search params:", { duper, itemName, itemType });
 
@@ -837,7 +890,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   ].forEach(({ el, type }) => {
     // Add focus event listener
     el.addEventListener("focus", async () => {
-      const searchTerm = el.value.trim();
+      const searchTerm = extractSearchTerm(el.value);
       if (searchTerm.length > 0) {
         const results = await searchItems(searchTerm, type);
         const filteredResults = results.filter((item) =>
@@ -858,7 +911,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Existing input event listener
     el.addEventListener("input", async (e) => {
       clearTimeout(searchTimeouts[type]);
-      const searchTerm = e.target.value.trim();
+      const searchTerm = extractSearchTerm(e.target.value);
+
+      // Reset hasSelectedSuggestion when typing
+      hasSelectedSuggestion = false;
 
       // Only show suggestions if we have at least 1 character
       if (searchTerm.length > 0) {
