@@ -32,16 +32,9 @@ async function canCreateTradeAd() {
     if (!userData) throw new Error("No user data found");
 
     // Check if user has Roblox data
-    if (!userData.roblox_id || !userData.roblox_username) {
-      notyf.error({
-        message: "Please link your Roblox account first",
-        duration: 5000,
-        dismissible: true,
-        ripple: true,
-        onClick: function () {
-          window.location.href = "/roblox";
-        },
-      });
+    if (!userData.roblox_id) {
+      // Just pass the message string instead of an object
+      notyf.error("Please link your Roblox account first");
       return false;
     }
 
