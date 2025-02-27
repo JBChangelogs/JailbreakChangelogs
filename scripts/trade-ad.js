@@ -241,8 +241,11 @@ async function loadTradeData() {
       return;
     }
 
-    // Process offering items
+    // Process offering items with correct counting
     const offeringIds = trade.offering.split(",").filter((id) => id);
+    const offeringItemsMap = new Map(); // Use Map to track unique items and their counts
+
+    // First fetch all items and count occurrences
     const offeringItems = await Promise.all(
       offeringIds.map((id) =>
         fetch(`https://api3.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
@@ -251,8 +254,23 @@ async function loadTradeData() {
       )
     );
 
-    // Process requesting items
+    // Count items and store unique items
+    const uniqueOfferingItems = [];
+    const offeringCounts = new Map();
+    offeringItems.forEach((item) => {
+      const itemKey = `${item.id}-${item.name}-${item.type}`;
+      if (!offeringCounts.has(itemKey)) {
+        uniqueOfferingItems.push(item);
+        offeringCounts.set(itemKey, 1);
+      } else {
+        offeringCounts.set(itemKey, offeringCounts.get(itemKey) + 1);
+      }
+    });
+
+    // Process requesting items with correct counting
     const requestingIds = trade.requesting.split(",").filter((id) => id);
+    const requestingItemsMap = new Map();
+
     const requestingItems = await Promise.all(
       requestingIds.map((id) =>
         fetch(`https://api3.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
@@ -261,7 +279,20 @@ async function loadTradeData() {
       )
     );
 
-    // Calculate values
+    // Count items and store unique items
+    const uniqueRequestingItems = [];
+    const requestingCounts = new Map();
+    requestingItems.forEach((item) => {
+      const itemKey = `${item.id}-${item.name}-${item.type}`;
+      if (!requestingCounts.has(itemKey)) {
+        uniqueRequestingItems.push(item);
+        requestingCounts.set(itemKey, 1);
+      } else {
+        requestingCounts.set(itemKey, requestingCounts.get(itemKey) + 1);
+      }
+    });
+
+    // Calculate values using total counts
     const offeringValues = {
       cash: offeringItems.reduce(
         (sum, item) => sum + parseValue(item.cash_value || 0),
@@ -329,28 +360,26 @@ async function loadTradeData() {
           </a>
         </div>`;
 
-    // Count duplicates
-    const itemCounts = {};
-    offeringIds.forEach((id) => {
-      itemCounts[id] = (itemCounts[id] || 0) + 1;
-    });
-    requestingIds.forEach((id) => {
-      itemCounts[id] = (itemCounts[id] || 0) + 1;
-    });
-
-    // Render offering items
+    // Render offering items with correct multipliers
     const offeringGrid = document.querySelector(".offering .trade-items-grid");
-    offeringGrid.innerHTML = offeringItems
-      .map((item) => createItemHTML(item, itemCounts[item.id]))
+    offeringGrid.innerHTML = uniqueOfferingItems
+      .map((item) => {
+        const itemKey = `${item.id}-${item.name}-${item.type}`;
+        const count = offeringCounts.get(itemKey);
+        return createItemHTML(item, count);
+      })
       .join("");
 
-    // Render requesting items
+    // Render requesting items with correct multipliers
     const requestingGrid = document.querySelector(
       ".requesting .trade-items-grid"
     );
-
-    requestingGrid.innerHTML = requestingItems
-      .map((item) => createItemHTML(item, itemCounts[item.id]))
+    requestingGrid.innerHTML = uniqueRequestingItems
+      .map((item) => {
+        const itemKey = `${item.id}-${item.name}-${item.type}`;
+        const count = requestingCounts.get(itemKey);
+        return createItemHTML(item, count);
+      })
       .join("");
 
     document.querySelector(".offering .side-total").innerHTML = `
@@ -385,9 +414,9 @@ async function loadTradeData() {
           <div class="card-body p-3">
               <h6 class="card-subtitle mb-2" style="color: #2196f3">
                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
-</svg> Side Totals
+	                <rect width="16" height="16" fill="none" />
+	                <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 9.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+                </svg> Side Totals
               </h6>
               <div class="d-flex flex-column gap-2">
                   <div class="d-flex justify-content-between align-items-center">
@@ -405,7 +434,7 @@ async function loadTradeData() {
               </div>
           </div>
       </div>
-  `;
+    `;
 
     // Update timestamp and status
     const timestampElement = document.querySelector(".timestamp");
@@ -417,10 +446,8 @@ async function loadTradeData() {
                 <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
                 <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
             </g>
-        </svg>
-        ${formatTimestamp(trade.created_at)}
+        </svg> ${formatTimestamp(trade.created_at)}
     `;
-
     const statusElement = document.querySelector(".trade-status");
     statusElement.className = `trade-status ${trade.status.toLowerCase()}`;
     statusElement.textContent = trade.status;
@@ -460,7 +487,6 @@ function showErrorState() {
   const container = document.querySelector(".container");
   const tradeContent = document.querySelector(".trade-content");
   tradeContent.style.display = "none";
-
   const errorHTML = `
       <div class="alert alert-danger" role="alert">
         <h4 class="alert-heading">Trade Not Found</h4>
@@ -471,6 +497,7 @@ function showErrorState() {
         </p>
       </div>
     `;
+  container.insertAdjacentHTML("afterend", errorHTML);
 
   // Update breadcrumbs for error state
   updateBreadcrumbs([
@@ -478,10 +505,6 @@ function showErrorState() {
     { name: "Trading", url: "/trading" },
     { name: "Trade Not Found", url: null },
   ]);
-
-  document
-    .querySelector(".breadcrumb")
-    .insertAdjacentHTML("afterend", errorHTML);
 }
 
 // Function to update breadcrumbs
@@ -498,13 +521,14 @@ function updateBreadcrumbs(items) {
     .join("");
 }
 
-// Initialize comments manager for this trade
-if (!window.commentsManagerInstance) {
-  document.addEventListener("DOMContentLoaded", () => {
-    window.commentsManagerInstance = new CommentsManager("trade", tradeId);
-    window.commentsManagerInstance.loadComments();
-  });
-}
-
 // Load trade data when page loads
 document.addEventListener("DOMContentLoaded", loadTradeData);
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.commentsManagerInstance) {
+    window.commentsManagerInstance = new CommentsManager("trade", tradeId);
+    window.commentsManagerInstance.loadComments();
+  } else {
+    window.commentsManagerInstance.loadComments();
+  }
+});
