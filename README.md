@@ -1,6 +1,6 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C71AYJI7)
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.gg/jailbreakchangelogs)
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C71AYJI7)
 [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1ofdv.svg)](https://status.jailbreakchangelogs.xyz/)
 
 > [!CAUTION]
