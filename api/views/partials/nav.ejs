@@ -34,9 +34,21 @@
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <rect width="24" height="24" fill="none"/>
-            <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <rect width="24" height="24" fill="none" />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 6h18M3 12h18M3 18h18"
+            />
           </svg>
         </button>
       </div>
@@ -204,23 +216,43 @@
 
         <!-- Move profile section here -->
         <div class="side-menu-profile">
-          <button
+          <div
             id="mobileAvatarToggle"
-            class="btn p-0 d-flex align-items-center gap-2 w-100 mb-3"
-            type="button"
+            class="d-flex align-items-center gap-2 w-100 mb-1 mobile-avatar-button"
+            role="button"
+            aria-expanded="false"
+            aria-controls="mobileProfileSection"
           >
-            <img
-              src=""
-              alt="Profile"
-              class="rounded-circle"
-              id="profile-picture-mobile"
-              width="34"
-              height="34"
-            />
-            <span class="login-text text-white"></span>
-          </button>
-          
-          <div class="mobile-profile-section" id="mobileProfileSection">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+              <img
+                src=""
+                alt="Profile"
+                class="rounded-circle"
+                id="profile-picture-mobile"
+                width="34"
+                height="34"
+              />
+              <span class="login-text text-white"></span>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              class="expand-icon"
+            >
+              <rect width="24" height="24" fill="none" />
+              <path
+                fill="currentColor"
+                d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"
+              />
+            </svg>
+          </div>
+
+          <div
+            class="mobile-profile-section collapsed"
+            id="mobileProfileSection"
+          >
             <!-- This section will be populated by JavaScript -->
           </div>
         </div>
@@ -508,13 +540,6 @@
       updateLoginText();
     };
 
-    // Toggle side menu with mobile avatar
-    mobileAvatarToggle.addEventListener("click", function () {
-      const isExpanded = this.getAttribute("aria-expanded") === "true";
-      this.setAttribute("aria-expanded", !isExpanded);
-      sideMenu.classList.toggle("active");
-    });
-
     updateContent();
 
     // Close menu when clicking backdrop
@@ -526,10 +551,44 @@
 
     // Replace mobileAvatarToggle with hamburgerMenu
     const hamburgerMenu = document.getElementById("hamburgerMenu");
-    
+
     // Update menu toggle handlers
-    hamburgerMenu.addEventListener("click", function() {
+    hamburgerMenu.addEventListener("click", function () {
       window.openSideMenu();
+    });
+
+    // Add click handler for mobile avatar toggle
+    if (mobileAvatarToggle) {
+      mobileAvatarToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const isExpanded = this.getAttribute("aria-expanded") === "true";
+        this.setAttribute("aria-expanded", !isExpanded);
+
+        const profileSection = document.getElementById("mobileProfileSection");
+        if (profileSection) {
+          if (isExpanded) {
+            profileSection.classList.remove("expanded");
+          } else {
+            profileSection.classList.add("expanded");
+          }
+        }
+      });
+    }
+
+    // Close profile section when clicking outside
+    document.addEventListener("click", function (e) {
+      const profileSection = document.getElementById("mobileProfileSection");
+      const avatarToggle = document.getElementById("mobileAvatarToggle");
+
+      if (profileSection && avatarToggle) {
+        if (
+          !profileSection.contains(e.target) &&
+          !avatarToggle.contains(e.target)
+        ) {
+          profileSection.classList.remove("expanded");
+          avatarToggle.setAttribute("aria-expanded", "false");
+        }
+      }
     });
   });
   if (sideMenuClose) {
@@ -989,14 +1048,42 @@
 
   .main-navigation .side-menu-profile #mobileAvatarToggle {
     background: var(--bg-secondary);
-    padding: 8px 16px !important;
+    padding: 8px 16px;
     border: 1px solid var(--accent-color);
     border-radius: 50px;
-    transition: all 0.2s ease;
+    cursor: default;
   }
 
   .main-navigation .side-menu-profile #mobileAvatarToggle:hover {
-    background: var(--accent-color-light);
-    color: var(--bg-primary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  /* Mobile profile section styling */
+  .main-navigation .mobile-profile-section {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    opacity: 0;
+  }
+
+  .main-navigation .mobile-profile-section.expanded {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: -8px;
+    margin-bottom: 8px;
+  }
+
+  .main-navigation .mobile-avatar-button {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .main-navigation .mobile-avatar-button .expand-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .main-navigation .mobile-avatar-button[aria-expanded="true"] .expand-icon {
+    transform: rotate(180deg);
   }
 </style>
