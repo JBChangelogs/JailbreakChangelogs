@@ -53,6 +53,9 @@ function parseValue(value) {
   return parseFloat(str) || 0;
 }
 
+// Add this global variable at the top
+let hasSelectedSuggestion = false;
+
 // Modify searchItems function to handle both types
 async function searchItems(searchTerm, type = "item") {
   if (type === "duper") {
@@ -88,7 +91,7 @@ async function searchItems(searchTerm, type = "item") {
   }
 }
 
-// Display search results
+// Modify displaySearchResults function
 function displaySearchResults(containerId, results, inputId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -108,7 +111,10 @@ function displaySearchResults(containerId, results, inputId) {
           <span class="text-muted ms-1">[${result.type}]</span>
         `;
         item.onclick = () => {
-          document.getElementById(inputId).value = result.name;
+          const input = document.getElementById(inputId);
+          input.value = `${result.name} [${result.type}]`;
+          input.dataset.itemId = result.id; // Store item ID
+          hasSelectedSuggestion = true;
           container.style.display = "none";
         };
       } else {
@@ -116,6 +122,7 @@ function displaySearchResults(containerId, results, inputId) {
         item.textContent = result;
         item.onclick = () => {
           document.getElementById(inputId).value = result;
+          hasSelectedSuggestion = true;
           container.style.display = "none";
         };
       }
@@ -131,7 +138,7 @@ function displaySearchResults(containerId, results, inputId) {
 }
 
 // Helper function to get item details by name
-async function getItemByName(itemName, itemId) {
+async function getItemByName(itemName, itemId, itemType = null) {
   try {
     // If we have itemId, prefer that for lookup
     if (itemId) {
@@ -150,6 +157,17 @@ async function getItemByName(itemName, itemId) {
     );
     if (!response.ok) throw new Error("Failed to fetch items");
     const items = await response.json();
+
+    // If type is provided, use it to filter results
+    if (itemType) {
+      return items.find(
+        (item) =>
+          item.name.toLowerCase() === itemName.toLowerCase() &&
+          item.type.toLowerCase() === itemType.toLowerCase()
+      );
+    }
+
+    // If no type provided, return first match
     return items.find(
       (item) => item.name.toLowerCase() === itemName.toLowerCase()
     );
@@ -161,9 +179,18 @@ async function getItemByName(itemName, itemId) {
 
 // Calculate if item is duped
 async function calculateDupe() {
+  console.log("Starting dupe calculation...");
   const resultsContent = document.getElementById("modalResultsContent");
   const duper = document.getElementById("duperSearch").value;
-  const itemName = document.getElementById("itemSearch").value;
+  const itemInput = document.getElementById("itemSearch");
+  const fullItemText = itemInput.value;
+
+  // Parse item name and type from input value (e.g., "Arachnid [Vehicle]")
+  const match = fullItemText.match(/^(.*?)\s*\[(.*?)\]$/);
+  const itemName = match ? match[1].trim() : fullItemText.trim();
+  const itemType = match ? match[2].trim() : null;
+
+  console.log("Search params:", { duper, itemName, itemType });
 
   // Get modal element and create instance if it doesn't exist
   const modalEl = document.getElementById("resultsModal");
@@ -175,6 +202,11 @@ async function calculateDupe() {
     return;
   }
 
+  if (!hasSelectedSuggestion) {
+    notyf.error("Please select an item from the suggestions");
+    return;
+  }
+
   const matchingDupes = dupesList.filter(
     (dupe) => dupe.owner.toLowerCase() === duper.toLowerCase()
   );
@@ -182,9 +214,67 @@ async function calculateDupe() {
   // Get item details first if we have an item name
   let selectedItemForReport = null;
   if (itemName) {
-    selectedItemForReport = await getItemByName(itemName);
-    if (!selectedItemForReport) {
-      notyf.error("Item not found");
+    console.log(
+      `Fetching item details for name: ${itemName}, type: ${itemType}`
+    );
+    try {
+      const searchUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+        itemName
+      )}${itemType ? `&type=${encodeURIComponent(itemType)}` : ""}`;
+      console.log("Fetching from URL:", searchUrl);
+
+      const itemResponse = await fetch(searchUrl);
+      console.log("Item API response status:", itemResponse.status);
+
+      if (!itemResponse.ok) {
+        console.error("Item fetch failed:", await itemResponse.text());
+        notyf.error("Item not found");
+        return;
+      }
+
+      const items = await itemResponse.json();
+      console.log("Received items:", items);
+
+      if (Array.isArray(items)) {
+        if (itemType) {
+          // If type is specified, find exact match
+          selectedItemForReport = items.find(
+            (item) => item.type.toLowerCase() === itemType.toLowerCase()
+          );
+          console.log("Selected item by type:", selectedItemForReport);
+        } else {
+          // If no type specified, take first item
+          selectedItemForReport = items[0];
+          console.log("Selected first item:", selectedItemForReport);
+        }
+      } else {
+        // Single item returned
+        selectedItemForReport = items;
+        console.log("Single item received:", selectedItemForReport);
+      }
+
+      if (!selectedItemForReport) {
+        console.error("No matching item found");
+        notyf.error("Item not found");
+        return;
+      }
+
+      // Now use the correct item ID for fetching dupes
+      if (selectedItemForReport.id) {
+        console.log(`Fetching dupes for item ID: ${selectedItemForReport.id}`);
+        const dupesResponse = await fetch(
+          `https://api3.jailbreakchangelogs.xyz/dupes/get?id=${selectedItemForReport.id}`
+        );
+        console.log("Dupes API response status:", dupesResponse.status);
+
+        if (dupesResponse.ok) {
+          const dupes = await dupesResponse.json();
+          console.log("Found dupes:", dupes);
+        }
+      }
+    } catch (error) {
+      console.error("Error in item lookup:", error);
+      notyf.error("Error looking up item");
       return;
     }
   }
@@ -291,7 +381,7 @@ async function calculateDupe() {
     return;
   }
 
-  const item = await getItemByName(itemName);
+  const item = await getItemByName(itemName, null, itemType);
   if (!item) {
     notyf.error("Item not found");
     return;
@@ -818,6 +908,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Fill in owner name
     document.getElementById("duperSearch").value = duper;
     document.querySelector('[data-input="duperSearch"]').style.display = "flex";
+    hasSelectedSuggestion = true; // Mark as selected since we have valid params
 
     try {
       // Fetch item details using the ID
@@ -828,10 +919,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       const item = await response.json();
 
       if (item && item.name) {
-        // Fill in item name
-        document.getElementById("itemSearch").value = item.name;
-        document.querySelector('[data-input="itemSearch"]').style.display =
-          "flex";
+        // Fill in item name with type
+        const itemInput = document.getElementById("itemSearch");
+        itemInput.value = `${item.name} [${item.type}]`;
+        itemInput.dataset.itemId = item.id;
 
         // Clean up URL before triggering calculation
         window.history.replaceState({}, "", "/dupes/calculator");
@@ -858,6 +949,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.error("Error fetching item details:", error);
     }
   }
+
+  // Add input event listener to reset hasSelectedSuggestion
+  document.getElementById("itemSearch").addEventListener("input", () => {
+    hasSelectedSuggestion = false;
+  });
+
+  document.getElementById("duperSearch").addEventListener("input", () => {
+    hasSelectedSuggestion = false;
+  });
 
   // Update labels with correct required field indicators
   const duperLabel = document.querySelector('label[for="duperSearch"]');
