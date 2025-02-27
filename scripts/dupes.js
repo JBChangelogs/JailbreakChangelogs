@@ -238,7 +238,7 @@ async function calculateDupe() {
   const itemInput = document.getElementById("itemSearch");
   const fullItemText = itemInput.value;
 
-  // Parse item name and type from input value (e.g., "Arachnid [Vehicle]")
+  // Parse item name and type from input value (if provided)
   const match = fullItemText.match(/^(.*?)\s*\[(.*?)\]$/);
   const itemName = match ? match[1].trim() : fullItemText.trim();
   const itemType = match ? normalizeType(match[2].trim()) : null;
@@ -255,7 +255,12 @@ async function calculateDupe() {
     return;
   }
 
-  if (!hasSelectedSuggestion && !matchesExistingItem(fullItemText)) {
+  // Only validate item selection if an item name was entered
+  if (
+    fullItemText &&
+    !hasSelectedSuggestion &&
+    !matchesExistingItem(fullItemText)
+  ) {
     notyf.error("Please select an item from the suggestions");
     return;
   }
