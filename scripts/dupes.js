@@ -66,23 +66,23 @@ function extractSearchTerm(input) {
 // Add this helper function to normalize type case
 function normalizeType(type) {
   if (!type) return null;
-  
+
   // Map of common type variations to their correct form
   const typeMap = {
-    'vehicle': 'Vehicle',
-    'vehicles': 'Vehicle',
-    'rim': 'Rim',
-    'rims': 'Rim',
-    'spoiler': 'Spoiler',
-    'spoilers': 'Spoiler',
-    'texture': 'Texture',
-    'textures': 'Texture',
-    'hyperchrome': 'HyperChrome',
-    'hyperchromes': 'HyperChrome',
-    'horn': 'Horn',
-    'horns': 'Horn',
-    'drift': 'Drift',
-    'drifts': 'Drift',
+    vehicle: "Vehicle",
+    vehicles: "Vehicle",
+    rim: "Rim",
+    rims: "Rim",
+    spoiler: "Spoiler",
+    spoilers: "Spoiler",
+    texture: "Texture",
+    textures: "Texture",
+    hyperchrome: "HyperChrome",
+    hyperchromes: "HyperChrome",
+    horn: "Horn",
+    horns: "Horn",
+    drift: "Drift",
+    drifts: "Drift",
     // Add other type variations as needed
   };
 
@@ -91,7 +91,7 @@ function normalizeType(type) {
 }
 
 // Modify searchItems function to handle both types
-async function searchItems(searchTerm, type = "item") {
+async function searchItems(searchTerm, type = "duper") {
   if (type === "duper") {
     const results = [
       ...new Set(
@@ -140,7 +140,7 @@ function displaySearchResults(containerId, results, inputId) {
     // Get current input value to check for partial type
     const currentInput = document.getElementById(inputId).value;
     const partialType = currentInput.match(/\[(.*?)(?:\])?$/);
-    
+
     results.slice(0, 5).forEach((result) => {
       const item = document.createElement("div");
       item.className = "suggestion-item";
@@ -255,7 +255,7 @@ async function calculateDupe() {
     return;
   }
 
-  if (!hasSelectedSuggestion) {
+  if (!hasSelectedSuggestion && !matchesExistingItem(fullItemText)) {
     notyf.error("Please select an item from the suggestions");
     return;
   }
@@ -353,7 +353,7 @@ async function calculateDupe() {
 
     if (selectedItemForReport) {
       // If we have both username and item
-      reportBtn.textContent = `Report ${selectedItemForReport.name} as Duped`;
+      reportBtn.textContent = `Report ${selectedItemForReport.name} [${selectedItemForReport.type}] as Duped`;
       reportBtn.onclick = function () {
         showReportModal(selectedItemForReport.id, duper);
       };
@@ -495,14 +495,14 @@ async function calculateDupe() {
           </svg>
         </div>
         <h4>No dupes found for ${duper}</h4>
-        <p class="text-muted">No dupe record found for ${item.name}</p>
+        <p class="text-muted">No dupe record found for ${item.name} [${item.type}]</p>
       </div>
     `;
 
     // Show and update report button text and functionality
     const reportBtn = document.getElementById("reportDupeBtn");
     reportBtn.style.display = "block";
-    reportBtn.textContent = `Report ${item.name} as Duped`;
+    reportBtn.textContent = `Report ${item.name} [${item.type}] as Duped`;
 
     // Store the item ID and name in data attributes
     reportBtn.dataset.itemId = item.id;
@@ -839,6 +839,92 @@ async function showReportModal(itemId, ownerName = null) {
   reportModal.show();
 }
 
+function matchesExistingItem(input, type = "item") {
+  if (!input) return false;
+
+  // Parse the input value
+  const match = input.match(/^(.*?)\s*\[(.*?)\]$/);
+  if (!match) return false;
+
+  const [_, itemName, itemType] = match;
+
+  // Find matching item in our loaded items
+  return allItems.some(
+    (item) =>
+      item.name.toLowerCase() === itemName.trim().toLowerCase() &&
+      item.type.toLowerCase() === itemType.trim().toLowerCase()
+  );
+}
+
+// Modify the displaySearchResults function to store last suggestions
+let lastSuggestions = [];
+
+function displaySearchResults(containerId, results, inputId) {
+  // Store results for later validation
+  if (containerId === "itemResults") {
+    lastSuggestions = results;
+  }
+
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  if (results.length > 0) {
+    const list = document.createElement("div");
+    list.className = "search-suggestions";
+
+    // Get current input value to check for partial type
+    const currentInput = document.getElementById(inputId).value;
+    const partialType = currentInput.match(/\[(.*?)(?:\])?$/);
+
+    results.slice(0, 5).forEach((result) => {
+      const item = document.createElement("div");
+      item.className = "suggestion-item";
+
+      if (typeof result === "object") {
+        // For items, filter by partial type if entered
+        if (partialType && partialType[1]) {
+          const searchType = partialType[1].trim().toLowerCase();
+          if (!result.type.toLowerCase().startsWith(searchType)) {
+            return; // Skip items that don't match partial type
+          }
+        }
+
+        item.innerHTML = `
+          ${result.name}
+          <span class="text-muted ms-1">[${result.type}]</span>
+        `;
+        item.onclick = () => {
+          const input = document.getElementById(inputId);
+          input.value = `${result.name} [${result.type}]`;
+          input.dataset.itemId = result.id; // Store item ID
+          hasSelectedSuggestion = true;
+          container.style.display = "none";
+        };
+      } else {
+        // For dupers, just show the name
+        item.textContent = result;
+        item.onclick = () => {
+          document.getElementById(inputId).value = result;
+          hasSelectedSuggestion = true;
+          container.style.display = "none";
+        };
+      }
+
+      list.appendChild(item);
+    });
+
+    // Only show container if we have filtered results
+    if (list.children.length > 0) {
+      container.appendChild(list);
+      container.style.display = "block";
+    } else {
+      container.style.display = "none";
+    }
+  } else {
+    container.style.display = "none";
+  }
+}
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async function () {
   await Promise.all([fetchDupesList(), loadAllItems()]); // Load both dupes and items
@@ -1060,6 +1146,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (addProofUrlBtn) {
     addProofUrlBtn.addEventListener("click", addProofUrlField);
   }
+
+  itemInput.addEventListener("input", (e) => {
+    const exactMatch = matchesExistingItem(e.target.value);
+    if (exactMatch) {
+      hasSelectedSuggestion = true;
+    }
+  });
 });
 
 // Fetch all dupes list
