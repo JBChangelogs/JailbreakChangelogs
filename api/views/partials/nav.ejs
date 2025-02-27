@@ -24,25 +24,20 @@
 
     <!-- Right side - Navigation and Profile -->
     <div class="navbar-content-right">
-      <!-- Mobile avatar toggle with text -->
+      <!-- Mobile hamburger menu -->
       <div class="d-flex d-lg-none align-items-center">
         <button
-          id="mobileAvatarToggle"
-          class="btn p-0 d-flex align-items-center gap-2"
+          id="hamburgerMenu"
+          class="btn hamburger-btn p-0 d-flex align-items-center"
           type="button"
           aria-controls="sideMenu"
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <img
-            src=""
-            alt="Profile"
-            class="rounded-circle"
-            id="profile-picture-mobile"
-            width="34"
-            height="34"
-          />
-          <span class="login-text text-white"></span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none"/>
+            <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
         </button>
       </div>
 
@@ -207,9 +202,27 @@
           </button>
         </div>
 
-        <!-- Profile Section -->
-        <div class="mobile-profile-section" id="mobileProfileSection">
-          <!-- This section will be populated by JavaScript -->
+        <!-- Move profile section here -->
+        <div class="side-menu-profile">
+          <button
+            id="mobileAvatarToggle"
+            class="btn p-0 d-flex align-items-center gap-2 w-100 mb-3"
+            type="button"
+          >
+            <img
+              src=""
+              alt="Profile"
+              class="rounded-circle"
+              id="profile-picture-mobile"
+              width="34"
+              height="34"
+            />
+            <span class="login-text text-white"></span>
+          </button>
+          
+          <div class="mobile-profile-section" id="mobileProfileSection">
+            <!-- This section will be populated by JavaScript -->
+          </div>
         </div>
 
         <!-- Navigation Menu -->
@@ -510,6 +523,14 @@
         window.closeSideMenu();
       });
     }
+
+    // Replace mobileAvatarToggle with hamburgerMenu
+    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    
+    // Update menu toggle handlers
+    hamburgerMenu.addEventListener("click", function() {
+      window.openSideMenu();
+    });
   });
   if (sideMenuClose) {
     sideMenuClose.addEventListener("click", function () {
@@ -885,5 +906,97 @@
     .main-navigation .no-click-toggle {
       cursor: default;
     }
+  }
+
+  /* Avatar and username styling - Using more specific selectors */
+  .main-navigation .nav-item.dropdown.ms-2 .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--accent-color);
+    border-radius: 50px;
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation .nav-item.dropdown.ms-2 .nav-link:hover {
+    background: var(--accent-color-light) !important;
+    color: var(--bg-primary) !important;
+    transform: translateY(-1px);
+  }
+
+  .main-navigation .nav-item.dropdown.ms-2 .nav-link::after {
+    display: none;
+  }
+
+  .main-navigation .nav-item.dropdown.ms-2 img.rounded-circle {
+    border: 2px solid var(--accent-color);
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation .nav-item.dropdown.ms-2 .nav-link:hover img.rounded-circle {
+    border-color: var(--bg-primary);
+  }
+
+  .main-navigation .login-text {
+    font-weight: 600;
+  }
+
+  /* Mobile avatar toggle styling */
+  .main-navigation #mobileAvatarToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--accent-color);
+    border-radius: 50px;
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation #mobileAvatarToggle:hover {
+    background: var(--accent-color-light);
+    color: var(--bg-primary);
+  }
+
+  .main-navigation #mobileAvatarToggle img.rounded-circle {
+    border: 2px solid var(--accent-color);
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation #mobileAvatarToggle:hover img.rounded-circle {
+    border-color: var(--bg-primary);
+  }
+
+  /* Hamburger button styles */
+  .main-navigation .hamburger-btn {
+    color: var(--text-primary);
+    padding: 8px !important;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation .hamburger-btn:hover {
+    background: var(--accent-color-light);
+    color: var(--bg-primary);
+  }
+
+  /* Side menu profile section */
+  .main-navigation .side-menu-profile {
+    padding: 1rem;
+    border-bottom: 1px solid var(--accent-color);
+  }
+
+  .main-navigation .side-menu-profile #mobileAvatarToggle {
+    background: var(--bg-secondary);
+    padding: 8px 16px !important;
+    border: 1px solid var(--accent-color);
+    border-radius: 50px;
+    transition: all 0.2s ease;
+  }
+
+  .main-navigation .side-menu-profile #mobileAvatarToggle:hover {
+    background: var(--accent-color-light);
+    color: var(--bg-primary);
   }
 </style>
