@@ -599,6 +599,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>`;
     }
 
+    // Special case for Gamer TV Set
+    if (item.name === "Gamer TV Set" && item.type === "Furniture") {
+      return `
+        <div class="media-container position-relative ${containerClass}">
+          <video class="${imageClass || "card-img-top"}"
+                 style="width: 100%; height: 100%; object-fit: contain;"
+                 autoplay loop muted playsinline>
+            <source src="/assets/images/items/furnitures/Gamer TV Set.webm" type="video/webm">
+            <source src="/assets/images/items/furnitures/Gamer TV Set.mp4" type="video/mp4">
+          </video>
+        </div>`;
+    }
+
     // Special case for Drifts
     if (item.type === "Drift") {
       return `
