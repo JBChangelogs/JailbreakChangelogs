@@ -158,7 +158,7 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 
 app.get("/changelogs", async (req, res) => {
   try {
-    const latestId = 351;
+    const latestId = 352;
     res.redirect(`/changelogs/${latestId}`);
   } catch (error) {
     console.error("Error fetching latest changelog:", error);
