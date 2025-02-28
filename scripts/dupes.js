@@ -1247,9 +1247,14 @@ async function submitDupeReport() {
       }
     );
 
+    if (response.status === 409) {
+      notyf.error("This item has already been reported as duped for this user");
+      return;
+    }
+
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Server error response:", errorData); // Debug log
+      console.error("Server error response:", errorData);
       throw new Error(errorData.message || "Failed to submit report");
     }
 
