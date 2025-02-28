@@ -737,12 +737,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hasValues = value !== "-" || duped_value !== "-";
 
     // Add this function to format duped owners
-    function formatDupedOwners(ownerString) {
-      if (!ownerString) return null;
-      const owners = ownerString
-        .split(",")
-        .filter((owner) => owner.trim())
-        .filter((owner) => owner.trim() !== "N/A"); // Filter out N/A values
+    function formatDupedOwners(ownersList) {
+      if (!ownersList || !Array.isArray(ownersList)) return null;
+      // Filter and map to get just the owner names and additional data
+      const owners = ownersList
+        .filter((entry) => entry && entry.owner && entry.owner.trim())
+        .map((entry) => ({
+          name: entry.owner.trim(),
+          proof: entry.proof,
+          userId: entry.user_id,
+          created: entry.created_at,
+        }));
+
       return owners.length
         ? {
             count: owners.length,
@@ -1174,7 +1180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   } Known Duped Owner${
                     dupedOwners.count !== 1 ? "s" : ""
                   }</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 12 12" class="toggle-icon ms-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 12 12" class="toggle-icon ms-2" style="transition: transform 0.2s ease">
                     <rect width="12" height="12" fill="none" />
                     <path fill="#748d92" d="M2.22 7.53a.75.75 0 0 0 1.06 0L6 4.81l2.72 2.72a.75.75 0 0 0 1.06-1.06L6.53 3.22a.75.75 0 0 0-1.06 0L2.22 6.47a.75.75 0 0 0 0 1.06" />
                   </svg>
@@ -1182,11 +1188,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div class="collapse mt-3" id="dupedOwnersList">
                   <div class="duped-owners-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px;">
                     ${dupedOwners.list
-                      .sort((a, b) => a.trim().localeCompare(b.trim())) // Sort alphabetically
+                      .sort((a, b) => a.name.localeCompare(b.name))
                       .map(
                         (owner) => `
                       <a href="/dupes/calculator?duper=${encodeURIComponent(
-                        owner.trim()
+                        owner.name
                       )}&itemId=${encodeURIComponent(item.id)}"
                          class="duped-owner-item p-2 rounded" 
                          style="
@@ -1200,9 +1206,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                            transition: background-color 0.2s ease, color 0.2s ease;
                          "
                          onmouseover="this.style.backgroundColor='rgba(18, 78, 102, 0.4)'; this.style.color='#ffffff';"
-                         onmouseout="this.style.backgroundColor='rgba(18, 78, 102, 0.2)'; this.style.color='#d3d9d4';"
-                      >
-                        ${owner.trim()}
+                         onmouseout="this.style.backgroundColor='rgba(18, 78, 102, 0.2)'; this.style.color='#d3d9d4';">
+                        ${owner.name}
                       </a>
                     `
                       )
@@ -1345,7 +1350,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg> Read More
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
                                   </button>`
                                : ""
                            }
