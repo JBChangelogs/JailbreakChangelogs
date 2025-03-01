@@ -1355,18 +1355,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                            ${
                              item.creator && item.creator !== "N/A"
                                ? `<div class="mt-0 mb-3">
-                                  <span style="color: var(--text-muted);">Modelled by </span>
-                                  <a href="https://www.roblox.com/users/${
-                                    item.creator.match(/\((\d+)\)/)?.[1] || ""
-                                  }/profile" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
-                                    onmouseover="this.style.color='var(--accent-color-light)'"
-                                    onmouseout="this.style.color='var(--text-primary)'">${
-                                      item.creator.split(" (")[0]
-                                    }</a>
-                                </div>`
+        <span style="color: var(--text-muted);">Created by </span>
+        ${
+          item.creator.match(/\((\d+)\)/)
+            ? `<a href="https://www.roblox.com/users/${
+                item.creator.match(/\((\d+)\)/)[1]
+              }/profile" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
+              onmouseover="this.style.color='var(--accent-color-light)'"
+              onmouseout="this.style.color='var(--text-primary)'">${
+                item.creator.split(" (")[0]
+              }</a>`
+            : `<a href="#" 
+              style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
+              onclick="return false;">${item.creator}</a>`
+        }
+      </div>`
                                : ""
                            }
                          
