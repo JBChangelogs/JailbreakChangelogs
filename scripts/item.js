@@ -1327,8 +1327,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                       <!-- Right Side - Item Details -->
                       <div class="col-md-7 p-3">
                           <!-- Item Title and Badge Container -->
-                          <div class="item-header d-flex align-items-center mb-4">
-                             <h1 class="mb-0 me-3 h2" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px;">${
+                          <div class="item-header d-flex align-items-center mb-2">
+                             <h1 class="mb-1 me-3 h2" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px;">${
                                item.name
                              }</h1>
                               <div class="badge-container d-flex align-items-center gap-2">
@@ -1353,13 +1353,31 @@ document.addEventListener("DOMContentLoaded", async () => {
                               </div>
                           </div>
                            ${
+                             item.creator && item.creator !== "N/A"
+                               ? `<div class="mt-0 mb-3">
+                                  <span style="color: var(--text-muted);">Modelled by </span>
+                                  <a href="https://www.roblox.com/users/${
+                                    item.creator.match(/\((\d+)\)/)?.[1] || ""
+                                  }/profile" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
+                                    onmouseover="this.style.color='var(--accent-color-light)'"
+                                    onmouseout="this.style.color='var(--text-primary)'">${
+                                      item.creator.split(" (")[0]
+                                    }</a>
+                                </div>`
+                               : ""
+                           }
+                         
+                           ${
                              item.description && item.description !== "N/A"
                                ? `<div class="item-description collapsed">
                                     ${item.description}
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
                                   </button>`
                                : ""
                            }
@@ -2093,7 +2111,6 @@ function handleinvalidImage() {
   }, 0);
 }
 
-// Add this function at the start of the file, after the constants
 function initializeDescriptionToggle() {
   const description = document.querySelector(".item-description");
   const readMoreBtn = document.querySelector(".read-more-btn");
@@ -2119,12 +2136,11 @@ function initializeDescriptionToggle() {
       description.classList.toggle("expanded");
       readMoreBtn.innerHTML = isCollapsed
         ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z"/></svg>Show Less'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg> Read More';
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More';
     });
   }
 }
 
-// Add this function to handle URL params
 function handleUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has("comments")) {

@@ -631,8 +631,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } catch (error) {
-      // Only show error if we're not on an auth page
-      if (!isAuthPage) {
+      // Only show error if we're not on an auth page and have exhausted retries
+      if (!isAuthPage && SESSION_VALIDATION.currentRetries >= SESSION_VALIDATION.maxRetries) {
         console.error("Error fetching user data:", error);
         notyf.error(
           "Failed to load user data. Some features may be unavailable."

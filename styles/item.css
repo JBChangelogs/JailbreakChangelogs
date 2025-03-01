@@ -1182,15 +1182,15 @@ body {
 }
 
 .item-header {
-  padding: 1rem 0;
-  margin-bottom: 2rem;
+  padding: 1rem 0 0.25rem 0;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
 .item-header h1 {
   color: var(--text-primary);
   font-size: 2.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 @media (max-width: 768px) {
