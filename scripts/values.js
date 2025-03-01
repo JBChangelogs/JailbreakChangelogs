@@ -157,12 +157,17 @@ function getItemMediaElement(item, options = {}) {
              class="drift-thumbnail ${imageClass || "card-img-top"}" 
              alt="${item.name}" 
              onerror="handleimage(this)">
-        <video src="/assets/images/items/drifts/${item.name}.webm" 
-               class="${imageClass || "card-img-top video-player"}" 
+        <video class="${imageClass || "card-img-top video-player"}" 
                style="opacity: 0;" 
                playsinline 
                muted 
                loop>
+          <source src="/assets/images/items/drifts/${
+            item.name
+          }.webm" type="video/webm">
+          <source src="/assets/images/items/drifts/${
+            item.name
+          }.mp4" type="video/mp4">
         </video>
         ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
       </div>`;

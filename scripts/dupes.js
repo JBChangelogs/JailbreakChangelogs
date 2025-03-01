@@ -232,7 +232,6 @@ async function getItemByName(itemName, itemId, itemType = null) {
 
 // Calculate if item is duped
 async function calculateDupe() {
-  console.log("Starting dupe calculation...");
   const resultsContent = document.getElementById("modalResultsContent");
   const duper = document.getElementById("duperSearch").value;
   const itemInput = document.getElementById("itemSearch");
@@ -243,7 +242,7 @@ async function calculateDupe() {
   const itemName = match ? match[1].trim() : fullItemText.trim();
   const itemType = match ? normalizeType(match[2].trim()) : null;
 
-  console.log("Search params:", { duper, itemName, itemType });
+
 
   // Get modal element and create instance if it doesn't exist
   const modalEl = document.getElementById("resultsModal");
@@ -272,17 +271,15 @@ async function calculateDupe() {
   // Get item details first if we have an item name
   let selectedItemForReport = null;
   if (itemName) {
-    console.log(
-      `Fetching item details for name: ${itemName}, type: ${itemType}`
-    );
+  
     try {
       const searchUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
         itemName
       )}${itemType ? `&type=${encodeURIComponent(itemType)}` : ""}`;
-      console.log("Fetching from URL:", searchUrl);
+     
 
       const itemResponse = await fetch(searchUrl);
-      console.log("Item API response status:", itemResponse.status);
+    
 
       if (!itemResponse.ok) {
         console.error("Item fetch failed:", await itemResponse.text());
@@ -291,7 +288,7 @@ async function calculateDupe() {
       }
 
       const items = await itemResponse.json();
-      console.log("Received items:", items);
+     
 
       if (Array.isArray(items)) {
         if (itemType) {
@@ -299,16 +296,16 @@ async function calculateDupe() {
           selectedItemForReport = items.find(
             (item) => item.type.toLowerCase() === itemType.toLowerCase()
           );
-          console.log("Selected item by type:", selectedItemForReport);
+       
         } else {
           // If no type specified, take first item
           selectedItemForReport = items[0];
-          console.log("Selected first item:", selectedItemForReport);
+       
         }
       } else {
         // Single item returned
         selectedItemForReport = items;
-        console.log("Single item received:", selectedItemForReport);
+      
       }
 
       if (!selectedItemForReport) {
@@ -319,15 +316,15 @@ async function calculateDupe() {
 
       // Now use the correct item ID for fetching dupes
       if (selectedItemForReport.id) {
-        console.log(`Fetching dupes for item ID: ${selectedItemForReport.id}`);
+        
         const dupesResponse = await fetch(
           `https://api3.jailbreakchangelogs.xyz/dupes/get?id=${selectedItemForReport.id}`
         );
-        console.log("Dupes API response status:", dupesResponse.status);
+       
 
         if (dupesResponse.ok) {
           const dupes = await dupesResponse.json();
-          console.log("Found dupes:", dupes);
+        
         }
       }
     } catch (error) {
