@@ -158,7 +158,17 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 
 app.get("/changelogs", async (req, res) => {
   try {
-    const latestId = 352;
+    const latestResponse = await fetch(
+      "https://api3.jailbreakchangelogs.xyz/changelogs/latest",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }
+    );
+    const latestData = await latestResponse.json();
+    const latestId = latestData.id;
     res.redirect(`/changelogs/${latestId}`);
   } catch (error) {
     console.error("Error fetching latest changelog:", error);
