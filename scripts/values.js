@@ -11,7 +11,7 @@ const VALID_SORTS = [
   "furnitures",
   "limited-items",
   "horns",
-  "weapon-skins", // Add this line
+  "weapon-skins",
 ];
 
 // Initialize allItems globally
@@ -1643,15 +1643,17 @@ function updateSearchPlaceholder() {
     "all-items": "Search items...",
     "limited-items": "Search limited items...",
     vehicles: "Search vehicles (e.g., Brulee, Torpedo)...",
-    spoilers: "Search spoilers (e.g., Rocket, Wing)...",
+    spoilers: "Search spoilers (e.g., Mecha Arm, Dual Flags)...",
     rims: "Search rims (e.g., Star, Spinner)...",
+    "body-colors": "Search body colors (e.g., Vantablack, Radiant Ice)...",
     "tire-stickers": "Search tire stickers (e.g., Badonuts, Blue 50)...",
     "tire-styles": "Search tire styles (e.g., Brickset, Glacier)...",
-    drifts: "Search drifts (e.g., Fire, Ice)...",
+    drifts: "Search drifts (e.g., OG Fuel, Cosmic)...",
     hyperchromes: "Search hyperchromes (e.g., HyperRed, HyperBlue)...",
-    furnitures: "Search furniture (e.g., Bed, Chair)...",
+    furnitures: "Search furniture (e.g., Sci-Fi Kitchen, Picnic Table)...",
     textures: "Search textures (e.g., Galaxy, Rainbow)...",
     horns: "Search horns (e.g., Air Horn, Train Horn)...",
+    "weapon-skins": "Search weapon skins (e.g., White Marble, Tiger)...",
   };
 
   // Set placeholder based on category

@@ -615,18 +615,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Special case for Drifts
     if (item.type === "Drift") {
       return `
-        <div class="media-container position-relative ${containerClass}">
-          ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
-          <img src="/assets/images/items/480p/drifts/${item.name}.webp"
-               width="854" 
-               height="480"
-               class="drift-thumbnail ${imageClass || "card-img-top"}" 
-               alt="${item.name}" 
-               onerror="handleimage(this)">
-          <video class="${imageClass || "card-img-top video-player"}" 
-                 style="opacity: 0;" 
+        <div class="media-container position-relative ${containerClass}" style="aspect-ratio: 16/9;">
+          <video class="${imageClass || "card-img-top"}" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;" 
                  playsinline 
                  muted 
+                 autoplay
                  loop>
             <source src="/assets/images/items/drifts/${
               item.name
@@ -635,7 +629,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               item.name
             }.mp4" type="video/mp4">
           </video>
-          ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
+          ${item.is_limited ? getLimitedBadgeHtml() : ""}
         </div>`;
     }
 
