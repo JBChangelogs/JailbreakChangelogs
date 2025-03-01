@@ -494,6 +494,7 @@ function sortModalItems() {
       drifts: "Drift",
       furnitures: "Furniture",
       horns: "Horn",
+      "weapon-skins": "Weapon Skin",
     };
 
     const targetType = typeMap[category];
@@ -784,6 +785,7 @@ function handleSearch(type) {
           "tire-styles": "Tire Style",
           drifts: "Drift",
           furnitures: "Furniture",
+          "weapon-skins": "Weapon Skin",
         };
 
         const targetType = typeMap[category];

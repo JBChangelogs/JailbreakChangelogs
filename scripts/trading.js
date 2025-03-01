@@ -836,7 +836,8 @@ function sortModalItems() {
       "tire-styles": "Tire Style",
       drifts: "Drift",
       furnitures: "Furniture",
-      horns: "Horn", // Add Horn type mapping
+      horns: "Horn",
+      "weapon-skins": "Weapon Skin",
     };
 
     const targetType = typeMap[category];
@@ -985,6 +986,8 @@ function handleSearch(type) {
           "tire-styles": "Tire Style",
           drifts: "Drift",
           furnitures: "Furniture",
+          horns: "Horn",
+          "weapon-skins": "Weapon Skin",
         };
 
         const targetType = typeMap[category];
@@ -1810,10 +1813,13 @@ async function createTradeAdHTML(trade) {
       if (!item) return "";
 
       const count = itemCounts[itemId];
-      const multiplierHTML = count > 1 ? `<div class="item-multiplier">×${count}</div>` : "";
+      const multiplierHTML =
+        count > 1 ? `<div class="item-multiplier">×${count}</div>` : "";
 
       return `
-        <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(item).replace(/"/g, "&quot;")})">
+        <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(
+          item
+        ).replace(/"/g, "&quot;")})">
           <div class="trade-ad-item-content">
             <div class="item-image-container">
               <img src="${getItemImagePath(item)}" 
@@ -1830,11 +1836,17 @@ async function createTradeAdHTML(trade) {
                 </div>
                 <div class="value-badge">
                   <span class="value-label">Cash Value:</span>
-                  <span class="value-amount">${formatValue(item.cash_value, true)}</span>
+                  <span class="value-amount">${formatValue(
+                    item.cash_value,
+                    true
+                  )}</span>
                 </div>
                 <div class="value-badge">
                   <span class="value-label">Duped Value:</span>
-                  <span class="value-amount">${formatValue(item.duped_value, true)}</span>
+                  <span class="value-amount">${formatValue(
+                    item.duped_value,
+                    true
+                  )}</span>
                 </div>
               </div>
             </div>
@@ -1844,8 +1856,16 @@ async function createTradeAdHTML(trade) {
 
     // Fetch and process items with deduplication
     const [offeringItemsHtml, requestingItemsHtml] = await Promise.all([
-      Promise.all([...new Set(trade.offering.split(","))].filter(id => id).map(createItemHTML)),
-      Promise.all([...new Set(trade.requesting.split(","))].filter(id => id).map(createItemHTML))
+      Promise.all(
+        [...new Set(trade.offering.split(","))]
+          .filter((id) => id)
+          .map(createItemHTML)
+      ),
+      Promise.all(
+        [...new Set(trade.requesting.split(","))]
+          .filter((id) => id)
+          .map(createItemHTML)
+      ),
     ]);
 
     function getFallbackAvatar(username) {

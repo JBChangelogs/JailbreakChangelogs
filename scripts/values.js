@@ -11,6 +11,7 @@ const VALID_SORTS = [
   "furnitures",
   "limited-items",
   "horns",
+  "weapon-skins", // Add this line
 ];
 
 // Initialize allItems globally
@@ -348,6 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "category-furnitures": "name-furnitures",
         "category-favorites": "name-all-items",
         "category-horns": "name-horns",
+        "category-weapon-skins": "name-weapon-skins",
       };
 
       // Find the matching category class
@@ -1247,6 +1249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "HyperChrome") color = "#E91E63";
     if (item.type === "Furniture") color = "#9C6644";
     if (item.type === "Horn") color = "#4A90E2";
+    if (item.type === "Weapon Skin") color = "#4a6741";
 
     // Only show HyperChrome badge for HyperChrome items, otherwise show regular type badge
     const isHyperChrome = item.type === "HyperChrome";
@@ -1500,6 +1503,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <option value="name-drifts">Drifts</option>
     <option value="name-furnitures">Furniture</option>
     <option value="name-horns">Horns</option>
+    <option value="name-weapon-skins">Weapon Skins</option>  <!-- Add this line -->
     `;
   }
 

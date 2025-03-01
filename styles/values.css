@@ -868,6 +868,14 @@ body {
   color: #4a90e2;
 }
 
+.category-weapon-skins {
+  background-color: rgba(74, 103, 65, 0.1);
+}
+
+.category-weapon-skins i {
+  color: #4a6741;
+}
+
 /* Intro Buttons */
 .intro-buttons {
   display: flex;
