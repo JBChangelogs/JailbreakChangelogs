@@ -931,13 +931,13 @@
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--bg-primary);
-}
-
-.suggestion-item:hover {
   background: var(--accent-color);
   color: var(--text-primary);
   font-weight: bold;
+}
+
+.suggestion-item:hover {
+  background: var(--accent-color-light);
 }
 
 /* Results Container */

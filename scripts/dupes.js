@@ -3,14 +3,83 @@ let allItems = [];
 let searchTimeouts = { duper: null, item: null, modalSearch: null }; // Add modalSearch
 let currentItemId = null;
 let selectedItem = null;
-let currentDuperName = null; // Add this line
+let currentDuperName = null;
 
-// Add these variables at the top with other globals
 let displayedItems = [];
 let currentPage = 0;
-const ITEMS_PER_PAGE = 32; // Increased from 18
+const ITEMS_PER_PAGE = 32;
 
-// Add this shuffle function near the top with other helper functions
+// Calculate Levenshtein distance between two strings
+function levenshteinDistance(str1, str2) {
+  const m = str1.length;
+  const n = str2.length;
+  const dp = Array(m + 1)
+    .fill()
+    .map(() => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost =
+        str1[i - 1].toLowerCase() !== str2[j - 1].toLowerCase() ? 1 : 0;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+// Calculate similarity percentage between two strings
+function stringSimilarity(str1, str2) {
+  const maxLength = Math.max(str1.length, str2.length);
+  const distance = levenshteinDistance(str1, str2);
+  return ((maxLength - distance) / maxLength) * 100;
+}
+
+// Find similar duper names
+function findSimilarDupers(searchName, threshold = 60) {
+  const similarDupers = new Map();
+
+  // Force lowercase comparison
+  const searchNameLower = searchName.toLowerCase();
+
+  dupesList.forEach((dupe) => {
+    const duperNameLower = dupe.owner.toLowerCase();
+
+    // First check if name contains the search term
+    if (duperNameLower.includes(searchNameLower)) {
+      similarDupers.set(duperNameLower, {
+        name: dupe.owner,
+        similarity: 95, // High similarity for contained matches
+      });
+      return;
+    }
+
+    // Then check Levenshtein distance for other potential matches
+    const similarity = stringSimilarity(searchNameLower, duperNameLower);
+
+    if (similarity >= threshold && similarity < 100) {
+      if (!similarDupers.has(duperNameLower)) {
+        similarDupers.set(duperNameLower, {
+          name: dupe.owner,
+          similarity: similarity,
+        });
+      }
+    }
+  });
+
+  const results = Array.from(similarDupers.values()).sort(
+    (a, b) => b.similarity - a.similarity
+  );
+
+  return results;
+}
+
 function shuffleArray(array) {
   let currentIndex = array.length;
   while (currentIndex > 0) {
@@ -93,16 +162,23 @@ function normalizeType(type) {
 // Modify searchItems function to handle both types
 async function searchItems(searchTerm, type = "duper") {
   if (type === "duper") {
-    const results = [
-      ...new Set(
-        dupesList
-          .filter((dupe) =>
-            dupe.owner.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((dupe) => dupe.owner)
-      ),
-    ];
-    return results;
+    // First get exact matches
+    const exactMatches = dupesList
+      .filter((dupe) =>
+        dupe.owner.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .map((dupe) => dupe.owner);
+
+    // If no exact matches and search term is long enough, find similar names
+    if (exactMatches.length === 0 && searchTerm.length >= 3) {
+      const similarDupers = findSimilarDupers(searchTerm, 70);
+
+      return [
+        ...new Set([...exactMatches, ...similarDupers.map((d) => d.name)]),
+      ];
+    }
+
+    return [...new Set(exactMatches)];
   } else {
     try {
       const response = await fetch(
@@ -242,8 +318,6 @@ async function calculateDupe() {
   const itemName = match ? match[1].trim() : fullItemText.trim();
   const itemType = match ? normalizeType(match[2].trim()) : null;
 
-
-
   // Get modal element and create instance if it doesn't exist
   const modalEl = document.getElementById("resultsModal");
   const modalInstance =
@@ -264,22 +338,59 @@ async function calculateDupe() {
     return;
   }
 
-  const matchingDupes = dupesList.filter(
+  let matchingDupes = dupesList.filter(
     (dupe) => dupe.owner.toLowerCase() === duper.toLowerCase()
   );
+
+  // If no exact matches and input is long enough, check for similar names
+  if (matchingDupes.length === 0 && duper.length >= 3) {
+    const similarDupers = findSimilarDupers(duper, 60); // Use same lower threshold
+
+    if (similarDupers.length > 0) {
+      // Get dupes for all similar names, sorted by similarity
+      matchingDupes = similarDupers.flatMap((similarDuper) => {
+        const dupes = dupesList.filter(
+          (dupe) => dupe.owner.toLowerCase() === similarDuper.name.toLowerCase()
+        );
+
+        return dupes;
+      });
+
+      if (matchingDupes.length > 0) {
+        const mostSimilar = similarDupers[0];
+        let content = `
+          <div class="results-card is-dupe" style="border-color: #ffa500;">
+            <div class="results-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+                <path fill="#ffa500" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+            </div>
+            <h4>Found dupes under a similar name!</h4>
+            <p class="text-warning">Did you mean: <strong>${
+              mostSimilar.name
+            }</strong>? (${mostSimilar.similarity.toFixed(1)}% match)</p>
+        `;
+
+        // Continue with existing dupe display logic...
+        // ...rest of the existing dupe display code...
+
+        resultsContent.innerHTML = content;
+        document.getElementById("reportDupeBtn").style.display = "none";
+        modalInstance.show();
+        return;
+      }
+    }
+  }
 
   // Get item details first if we have an item name
   let selectedItemForReport = null;
   if (itemName) {
-  
     try {
       const searchUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
         itemName
       )}${itemType ? `&type=${encodeURIComponent(itemType)}` : ""}`;
-     
 
       const itemResponse = await fetch(searchUrl);
-    
 
       if (!itemResponse.ok) {
         console.error("Item fetch failed:", await itemResponse.text());
@@ -288,7 +399,6 @@ async function calculateDupe() {
       }
 
       const items = await itemResponse.json();
-     
 
       if (Array.isArray(items)) {
         if (itemType) {
@@ -296,16 +406,13 @@ async function calculateDupe() {
           selectedItemForReport = items.find(
             (item) => item.type.toLowerCase() === itemType.toLowerCase()
           );
-       
         } else {
           // If no type specified, take first item
           selectedItemForReport = items[0];
-       
         }
       } else {
         // Single item returned
         selectedItemForReport = items;
-      
       }
 
       if (!selectedItemForReport) {
@@ -316,15 +423,12 @@ async function calculateDupe() {
 
       // Now use the correct item ID for fetching dupes
       if (selectedItemForReport.id) {
-        
         const dupesResponse = await fetch(
           `https://api3.jailbreakchangelogs.xyz/dupes/get?id=${selectedItemForReport.id}`
         );
-       
 
         if (dupesResponse.ok) {
           const dupes = await dupesResponse.json();
-        
         }
       }
     } catch (error) {
@@ -335,7 +439,83 @@ async function calculateDupe() {
   }
 
   if (matchingDupes.length === 0) {
-    resultsContent.innerHTML = `
+    // Check for similar names
+    const similarDupers = findSimilarDupers(duper);
+
+    if (similarDupers.length > 0) {
+      // Get dupes for the most similar name
+      const mostSimilar = similarDupers[0];
+      const similarDupes = dupesList.filter(
+        (dupe) => dupe.owner.toLowerCase() === mostSimilar.name.toLowerCase()
+      );
+
+      let content = `
+        <div class="results-card is-dupe" style="border-color: #ffa500;">
+          <div class="results-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+              <path fill="#ffa500" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
+          <h4>Potential matches found!</h4>
+          <p class="text-warning">We found similar usernames that have duped items:</p>
+          <div class="similar-names mt-3">
+            <p>Did you mean: <strong>${
+              mostSimilar.name
+            }</strong>? (${mostSimilar.similarity.toFixed(1)}% match)</p>
+      `;
+
+      if (selectedItemForReport || itemName) {
+        // If specific item was searched
+        const itemDupes = similarDupes.filter(
+          (d) => !itemName || d.item_id === selectedItemForReport?.id
+        );
+
+        if (itemDupes.length > 0) {
+          content += `<p class="text-warning">This item is duped by a similar username!</p>`;
+        }
+      } else {
+        // Show all duped items for similar name
+        content += `
+          <div class="duped-items-grid mt-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+            ${await Promise.all(
+              similarDupes.map(async (dupe) => {
+                const item = await getItemByName(null, dupe.item_id);
+                if (!item) return "";
+
+                return `
+                <div class="duped-item-card" style="background: rgba(255, 165, 0, 0.1); border-radius: 12px; border: 1px solid rgba(255, 165, 0, 0.3); padding: 1rem;">
+                  <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 1rem;">
+                    <img 
+                      src="/assets/images/items/480p/${item.type.toLowerCase()}s/${
+                  item.name
+                }.webp"
+                      class="w-100 h-100"
+                      style="object-fit: contain;"
+                      alt="${item.name}"
+                      onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'"
+                    >
+                  </div>
+                  <div class="item-info">
+                    <h5 class="mb-2 text-truncate" title="${item.name}">${
+                  item.name
+                }</h5>
+                    <small class="text-muted d-block">Recorded on: ${formatDate(
+                      dupe.created_at
+                    )}</small>
+                  </div>
+                </div>
+              `;
+              })
+            ).then((items) => items.join(""))}
+          </div>
+        `;
+      }
+
+      content += `</div></div>`;
+      resultsContent.innerHTML = content;
+    } else {
+      // No similar names found - show original "no dupes" message
+      resultsContent.innerHTML = `
       <div class="results-card not-dupe">
         <div class="results-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64">
@@ -349,26 +529,27 @@ async function calculateDupe() {
       </div>
     `;
 
-    // Show report button and update text/functionality
-    const reportBtn = document.getElementById("reportDupeBtn");
-    reportBtn.style.display = "block";
+      // Show report button and update text/functionality
+      const reportBtn = document.getElementById("reportDupeBtn");
+      reportBtn.style.display = "block";
 
-    if (selectedItemForReport) {
-      // If we have both username and item
-      reportBtn.textContent = `Report ${selectedItemForReport.name} [${selectedItemForReport.type}] as Duped`;
-      reportBtn.onclick = function () {
-        showReportModal(selectedItemForReport.id, duper);
-      };
-    } else {
-      // If we only have username
-      reportBtn.textContent = "Report a Dupe";
-      reportBtn.onclick = function () {
-        showItemSelectionModal(duper);
-      };
+      if (selectedItemForReport) {
+        // If we have both username and item
+        reportBtn.textContent = `Report ${selectedItemForReport.name} [${selectedItemForReport.type}] as Duped`;
+        reportBtn.onclick = function () {
+          showReportModal(selectedItemForReport.id, duper);
+        };
+      } else {
+        // If we only have username
+        reportBtn.textContent = "Report a Dupe";
+        reportBtn.onclick = function () {
+          showItemSelectionModal(duper);
+        };
+      }
+
+      modalInstance.show();
+      return;
     }
-
-    modalInstance.show();
-    return;
   }
 
   // If no item name provided, show all duped items for this duper
@@ -512,7 +693,7 @@ async function calculateDupe() {
 
     // Update onclick to pass both ID and name
     reportBtn.onclick = function () {
-      showReportModal(item.id);
+      showReportModal(item.id, duper);
     };
   }
 
@@ -520,7 +701,7 @@ async function calculateDupe() {
 }
 
 async function showItemSelectionModal(ownerName = null) {
-  if (!Cookies.get("token")) {
+  if (!getCookie("token")) {
     notyf.error("You must be logged in to report dupes");
     return;
   }
@@ -792,9 +973,15 @@ function removeProofUrlField(button) {
 
 // Add this function before the DOMContentLoaded event listener
 async function showReportModal(itemId, ownerName = null) {
-  if (!Cookies.get("token")) {
+  if (!getCookie("token")) {
     notyf.error("You must be logged in to report dupes");
     return;
+  }
+
+  // Always set the owner input value if provided
+  const dupeUserInput = document.getElementById("dupeUserInput");
+  if (ownerName) {
+    dupeUserInput.value = ownerName;
   }
 
   // Clear previous inputs
@@ -1192,7 +1379,7 @@ async function submitDupeReport() {
     .map((input) => input.value.trim())
     .filter((url) => url && url.includes("imgur.com"));
 
-  const token = Cookies.get("token");
+  const token = getCookie("token");
   if (!token) {
     notyf.error("You must be logged in to report dupes");
     return;
