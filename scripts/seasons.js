@@ -205,23 +205,27 @@ document.addEventListener("DOMContentLoaded", function () {
       const rewardsHTML = sortedRewards
         .map((reward, index) => {
           const isBonus = reward.bonus === "True";
+          const isExclusive = reward.exclusive === "True";
           const bonusBadge = isBonus
             ? `<span class="badge rounded-pill fs-6 fs-md-5" style="background-color: #748D92; color: #212A31">Bonus</span>`
             : "";
           const requirementBadge = `<span class="badge rounded-pill fs-6 fs-md-5" style="background-color: #124E66; color: #D3D9D4">${reward.requirement}</span>`;
 
+          const exclusiveStar = isExclusive
+            ? `<span class="exclusive-star" data-bs-toggle="tooltip" data-bs-custom-class="exclusive" title="Season Pass Exclusive">★</span>`
+            : "";
+
           return `
-              <div class="reward-item ${
-                isBonus ? "bonus-reward" : ""
-              }" style="--animation-order: ${index}">
-                <div class="reward-content">
-                  <h6 class="reward-title">${reward.item}</h6>
-                  <div class="reward-badges">
-                    ${bonusBadge}
-                    ${requirementBadge}
-                  </div>
+            <div class="reward-item ${isBonus ? "bonus-reward" : ""}" 
+                 style="--animation-order: ${index}">
+              <div class="reward-content">
+                <h6 class="reward-title">${reward.item}${exclusiveStar}</h6>
+                <div class="reward-badges">
+                  ${bonusBadge}
+                  ${requirementBadge}
                 </div>
-              </div>`;
+              </div>
+            </div>`;
         })
         .join("");
 
@@ -233,6 +237,14 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="rewards-list">${rewardsHTML}</div>
           </div>`
       );
+
+      // Initialize tooltips after content is added
+      const tooltips = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      tooltips.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     } else {
       seasonDetailsContainer.insertAdjacentHTML(
         "beforeend",

@@ -759,3 +759,18 @@ span {
   background-color: #8ecae6;
   color: #212a31;
 }
+
+/* Exclusive reward indicator */
+.exclusive-star {
+  color: #ffd700;
+  margin-left: 4px;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+  cursor: help;
+}
+
+/* Bootstrap tooltip override for exclusive items */
+.tooltip.exclusive .tooltip-inner {
+  background-color: #ffd700;
+  color: #000;
+  font-weight: 500;
+}
