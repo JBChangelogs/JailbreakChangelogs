@@ -76,6 +76,25 @@ function hideLoadingOverlay() {
 }
 
 // Add these helper functions at the top of the file
+function getBadgeHtml(item) {
+  if (item.is_seasonal) {
+    return `<div class="item-badge seasonal-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+        <rect width="128" height="128" fill="none"/>
+        <path fill="#40c0e7" d="M126.01 59.7h-13.46l10.57-10.57c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99L119 43.04a1.4 1.4 0 0 0-1.97 0L100.38 59.7H74.39l18.38-18.38h23.55c.77 0 1.39-.62 1.39-1.39V34.1c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-14.95l9.52-9.51c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99l-4.12-4.12a1.4 1.4 0 0 0-1.97 0l-9.52 9.53V11.68c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-5.82c-.77 0-1.39.62-1.39 1.39v23.55L68.3 53.61V27.62l16.66-16.65a1.4 1.4 0 0 0 0-1.97l-4.12-4.12c-.26-.26-.61-.41-.98-.41s-.73.15-.98.41L68.3 15.45V1.99c0-.77-.62-1.39-1.39-1.39h-5.82c-.77 0-1.39.62-1.39 1.39v13.46L49.13 4.88c-.52-.53-1.45-.53-1.97 0L43.04 9a1.4 1.4 0 0 0 0 1.97l16.65 16.65v25.99L41.32 35.23V11.68c0-.77-.62-1.39-1.39-1.39H34.1c-.37 0-.72.14-.98.41c-.26.26-.41.61-.41.98v14.94L23.2 17.1a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.4 1.4 0 0 0 0 1.97l9.52 9.51H11.68c-.77 0-1.39.62-1.39 1.39v5.83c0 .37.14.72.41.98c.26.27.62.41.98.41h23.55L53.61 59.7H27.62L10.97 43.04a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.39 1.39 0 0 0 0 1.97L15.45 59.7H1.99c-.77 0-1.39.63-1.39 1.39v5.82c0 .77.62 1.39 1.39 1.39h13.46L4.88 78.86c-.26.27-.41.61-.41.99c0 .36.14.72.41.98L9 84.95c.27.28.63.41.98.41s.71-.13.98-.41L27.62 68.3h25.99L35.23 86.68H11.68c-.77 0-1.39.62-1.39 1.39v5.82c0 .37.14.72.41.99s.61.4.98.4h14.95l-9.52 9.51a1.4 1.4 0 0 0 0 1.97l4.12 4.12a1.38 1.38 0 0 0 1.96 0l9.52-9.52v14.95c0 .37.14.72.41.98c.26.26.61.41.98.41l5.82-.01c.77 0 1.39-.62 1.39-1.39V92.77l18.37-18.38v25.99l-16.65 16.65a1.4 1.4 0 0 0 0 1.97l4.12 4.12c.26.26.61.4.98.4s.73-.14.98-.4l10.57-10.57v13.46c0 .77.62 1.39 1.39 1.39h5.82c.77 0 1.39-.63 1.39-1.39v-13.46l10.57 10.57c.26.26.61.4.98.4s.72-.14.98-.4l4.12-4.12a1.4 1.4 0 0 0 0-1.97L68.3 100.38v-26l18.38 18.38v23.55c0 .77.62 1.39 1.39 1.39h5.82c.37 0 .73-.14.98-.4c.26-.26.41-.61.41-.99v-14.94l9.52 9.52a1.38 1.38 0 0 0 1.96 0l4.11-4.12a1.385 1.385 0 0 0 0-1.97l-9.52-9.51h14.94c.77 0 1.39-.63 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39H92.77L74.39 68.3h25.99l16.65 16.65c.27.28.63.41.98.41s.71-.13.98-.41l4.12-4.12a1.385 1.385 0 0 0 0-1.97L112.55 68.3h13.46c.77 0 1.39-.62 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39"/>
+      </svg>
+    </div>`;
+  } else if (item.is_limited) {
+    return `<div class="item-badge limited-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <rect width="24" height="24" fill="none"/>
+        <path fill="#ffbb00" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12m11-5a1 1 0 1 0-2 0v3.764a3 3 0 0 0 1.658 2.683l2.895 1.447a1 1 0 1 0 .894-1.788l-2.894-1.448a1 1 0 0 1-.553-.894z" clip-rule="evenodd"/>
+      </svg>
+    </div>`;
+  }
+  return "";
+}
+
 function getItemMediaElement(item, options = {}) {
   const {
     containerClass = "",
@@ -97,6 +116,8 @@ function getItemMediaElement(item, options = {}) {
       </span>`;
   }
 
+  const mediaBadge = getBadgeHtml(item);
+
   // Special case for Gamer TV Set
   if (item.name === "Gamer TV Set" && item.type === "Furniture") {
     return `
@@ -108,6 +129,7 @@ function getItemMediaElement(item, options = {}) {
           <source src="/assets/images/items/furnitures/Gamer TV Set.webm" type="video/webm">
           <source src="/assets/images/items/furnitures/Gamer TV Set.mp4" type="video/mp4">
         </video>
+        ${mediaBadge}
       </div>`;
   }
 
@@ -187,7 +209,7 @@ function getItemMediaElement(item, options = {}) {
            class="${imageClass || "card-img-top"}"
            alt="${item.name}"
            onerror="handleimage(this)">
-      ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
+      ${mediaBadge}
     </div>`;
 }
 
@@ -1256,6 +1278,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Horn") color = "#4A90E2";
     if (item.type === "Weapon Skin") color = "#4a6741";
 
+    // Get the card classes based on limited and seasonal status
+    const cardClasses = ["card", "items-card", "shadow-sm"];
+    if (item.is_limited) cardClasses.push("limited-item");
+    if (item.is_seasonal) cardClasses.push("seasonal-item");
+
     // Only show HyperChrome badge for HyperChrome items, otherwise show regular type badge
     const isHyperChrome = item.type === "HyperChrome";
     const typeBadgeHtml = isHyperChrome
@@ -1278,10 +1305,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create card HTML
     const cardHtml = `
-      <div class="card items-card shadow-sm ${
-        item.is_limited ? "limited-item" : ""
-      }" 
-           style="cursor: pointer;">
+      <div class="${cardClasses.join(" ")}" style="cursor: pointer;">
         <div class="position-relative">
           ${mediaElement}
           <div class="item-card-body text-center">
