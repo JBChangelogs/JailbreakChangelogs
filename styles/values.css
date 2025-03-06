@@ -1751,3 +1751,62 @@ body.menu-open {
 .media-container:hover .media-tooltip {
   opacity: 1;
 }
+
+/* Trader Notes and Legend Section */
+.trader-notes h2 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.trader-notes ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.trader-notes li {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  line-height: 1.4;
+}
+
+.trader-notes li:last-child {
+  margin-bottom: 0;
+}
+
+.trader-notes li.d-flex {
+  padding-left: 0;
+}
+
+.trader-notes li:before {
+  content: "•";
+  position: absolute;
+  left: -1rem;
+  color: var(--accent-color-light);
+}
+
+.trader-notes li.d-flex:before {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .trader-notes {
+    margin-bottom: 1rem;
+  }
+  
+  .trader-notes:last-child {
+    margin-bottom: 0;
+  }
+  
+  .trader-notes h2 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .trader-notes li {
+    font-size: 0.8125rem;
+  }
+}
