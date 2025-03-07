@@ -440,10 +440,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("searchTerm");
     }
 
-    if (searchMessages) {
-      searchMessages.innerHTML = "";
-    }
-
     // First, apply category filter
     let categoryFilteredItems = [...allItems];
     if (sortValue !== "name-all-items") {
@@ -459,6 +455,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+     // Apply seasonal filter if seasonal sort is active
+    if (valueSortType === "seasonal") {
+      categoryFilteredItems = categoryFilteredItems.filter((item) => item.is_seasonal);
+    }
+
+
     // Apply search filter if search term exists
     if (searchTerm.length > 0) {
       filteredItems = categoryFilteredItems.filter((item) =>
@@ -471,6 +473,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply the current sort after filtering
     if (valueSortType === "random") {
       filteredItems = shuffleArray([...filteredItems]);
+    } else if (valueSortType === "seasonal") {
+      // Sort seasonal items by cash value descending
+      filteredItems.sort((a, b) => {
+        const valueA = formatValue(a.cash_value).numeric;
+        const valueB = formatValue(b.cash_value).numeric;
+        return valueB - valueA;
+      });
     } else if (valueSortType.startsWith("cash-")) {
       filteredItems.sort((a, b) => {
         const valueA = formatValue(a.cash_value).numeric;
@@ -619,8 +628,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (valueSortType === "random") {
       filteredItems = shuffleArray([...filteredItems]);
     } else if (valueSortType === "seasonal") {
-      // Filter seasonal items after category filter
+      // First filter for seasonal items
       filteredItems = filteredItems.filter((item) => item.is_seasonal);
+      
+      // Then sort by cash value descending as default order
+      filteredItems.sort((a, b) => {
+        const valueA = formatValue(a.cash_value).numeric;
+        const valueB = formatValue(b.cash_value).numeric;
+        return valueB - valueA;
+      });
     } else if (valueSortType === "favorites") {
       const token = getCookie("token");
       if (!token) {
@@ -1638,8 +1654,12 @@ function clearSearch() {
 
 function updateTotalItemsLabel(itemType) {
   const totalItemsLabel = document.getElementById("total-items-label");
+  const valueSortType = document.getElementById("value-sort-dropdown").value;
+  
   if (totalItemsLabel) {
-    if (itemType === "favorites") {
+    if (valueSortType === "seasonal") {
+      totalItemsLabel.textContent = "Total Seasonal Items: ";
+    } else if (itemType === "favorites") {
       totalItemsLabel.textContent = "Total Favorites: ";
     } else if (itemType === "all-items") {
       totalItemsLabel.textContent = "Total Items: ";
