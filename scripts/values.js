@@ -618,6 +618,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply value sorting
     if (valueSortType === "random") {
       filteredItems = shuffleArray([...filteredItems]);
+    } else if (valueSortType === "seasonal") {
+      // Filter seasonal items after category filter
+      filteredItems = filteredItems.filter((item) => item.is_seasonal);
     } else if (valueSortType === "favorites") {
       const token = getCookie("token");
       if (!token) {
@@ -1541,6 +1544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     valueSortDropdown.innerHTML = `
     <option value="random">Random</option>
     <option value="favorites">My Favorites</option>
+    <option value="seasonal">Seasonal Items</option>
     <option value="separator" disabled>───── Alphabetically ─────</option>
     <option value="alpha-asc">Name (A to Z)</option>
     <option value="alpha-desc">Name (Z to A)</option>
