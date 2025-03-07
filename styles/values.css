@@ -587,7 +587,7 @@ body {
     #cccc00
   );
   background-size: 1800% 1800%;
-  color: var(--text-primary);
+  color: #fff !important;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   animation: rainbow 18s ease infinite;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -1089,7 +1089,7 @@ body {
   font-size: 0.95rem; /* Increased from default size */
   padding: 0.35rem 0.7rem; /* Increased padding */
   border-radius: 20px;
-  color: var(--text-primary); /* Add this line */
+  color: #fff !important;
 }
 
 @media (max-width: 768px) {

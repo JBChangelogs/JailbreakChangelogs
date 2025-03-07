@@ -322,35 +322,6 @@ body {
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
 }
 
-.limited-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-  color: #000;
-  font-weight: 600;
-  font-size: 0.8rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  z-index: 3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-}
-
-.limited-badge i {
-  color: #000;
-  font-size: 0.75rem;
-}
-
-.limited-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 165, 0, 0.2);
-}
-
 /* HyperChrome badge styling */
 .hyperchrome-badge {
   padding: 0.4rem 0.8rem;
@@ -413,7 +384,7 @@ body {
   border-radius: 20px;
   white-space: nowrap;
   line-height: 1;
-  color: var(--text-primary) !important;
+  color: #fff !important;
   margin: 0;
 }
 

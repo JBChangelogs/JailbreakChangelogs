@@ -668,24 +668,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Modify how badges are generated to include limited and seasonal badges
     let specialBadgesHtml = "";
 
-    // Add seasonal badge if item is seasonal
-    if (item.is_seasonal) {
+    // Add limited badge if item is limited
+    if (item.is_limited === 1) {
       specialBadgesHtml += `
-        <span class="badge seasonal-badge" style="background: linear-gradient(135deg, #40c0e7 0%, #2170cc 100%);">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 128 128"><rect width="128" height="128" fill="none"/><path fill="#fff" d="M126.01 59.7h-13.46l10.57-10.57c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99L119 43.04a1.4 1.4 0 0 0-1.97 0L100.38 59.7H74.39l18.38-18.38h23.55c.77 0 1.39-.62 1.39-1.39V34.1c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-14.95l9.52-9.51c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99l-4.12-4.12a1.4 1.4 0 0 0-1.97 0l-9.52 9.53V11.68c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-5.82c-.77 0-1.39.62-1.39 1.39v23.55L68.3 53.61V27.62l16.66-16.65a1.4 1.4 0 0 0 0-1.97l-4.12-4.12c-.26-.26-.61-.41-.98-.41s-.73.15-.98.41L68.3 15.45V1.99c0-.77-.62-1.39-1.39-1.39h-5.82c-.77 0-1.39.62-1.39 1.39v13.46L49.13 4.88c-.52-.53-1.45-.53-1.97 0L43.04 9a1.4 1.4 0 0 0 0 1.97l16.65 16.65v25.99L41.32 35.23V11.68c0-.77-.62-1.39-1.39-1.39H34.1c-.37 0-.72.14-.98.41c-.26.26-.41.61-.41.98v14.94L23.2 17.1a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.4 1.4 0 0 0 0 1.97l9.52 9.51H11.68c-.77 0-1.39.62-1.39 1.39v5.83c0 .37.14.72.41.98c.26.27.62.41.98.41h23.55L53.61 59.7H27.62L10.97 43.04a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.39 1.39 0 0 0 0 1.97L15.45 59.7H1.99c-.77 0-1.39.63-1.39 1.39v5.82c0 .77.62 1.39 1.39 1.39h13.46L4.88 78.86c-.26.27-.41.61-.41.99c0 .36.14.72.41.98L9 84.95c.27.28.63.41.98.41s.71-.13.98-.41L27.62 68.3h25.99L35.23 86.68H11.68c-.77 0-1.39.62-1.39 1.39v5.82c0 .37.15.73.41.99s.61.4.98.4h14.95l-9.52 9.51a1.4 1.4 0 0 0 0 1.97l4.12 4.12a1.38 1.38 0 0 0 1.96 0l9.52-9.52v14.95c0 .37.14.72.41.98c.26.26.61.41.98.41l5.82-.01c.77 0 1.39-.62 1.39-1.39V92.77l18.37-18.38v25.99l-16.65 16.65a1.4 1.4 0 0 0 0 1.97l4.12 4.12c.26.26.61.4.98.4s.73-.14.98-.4l10.57-10.57v13.46c0 .77.62 1.39 1.39 1.39h5.82c.77 0 1.39-.63 1.39-1.39v-13.46l10.57 10.57c.26.26.61.4.98.4s.72-.14.98-.4l4.12-4.12a1.4 1.4 0 0 0 0-1.97L68.3 100.38v-26l18.38 18.38v23.55c0 .77.62 1.39 1.39 1.39h5.82c.37 0 .73-.14.98-.4c.26-.26.41-.61.41-.99v-14.94l9.52 9.52a1.38 1.38 0 0 0 1.96 0l4.11-4.12a1.385 1.385 0 0 0 0-1.97l-9.52-9.51h14.94c.77 0 1.39-.63 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39H92.77L74.39 68.3h25.99l16.65 16.65c.27.28.63.41.98.41s.71-.13.98-.41l4.12-4.12a1.385 1.385 0 0 0 0-1.97L112.55 68.3h13.46c.77 0 1.39-.62 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39"/></svg>
-          Seasonal
+        <span class="badge limited-badge" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);">
+          Limited
         </span>`;
     }
 
-    // Add limited badge if item is limited
-    if (item.is_limited) {
+    // Add seasonal badge if item is seasonal
+    if (item.is_seasonal === 1) {
       specialBadgesHtml += `
-        <span class="badge limited-badge" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-            <rect width="24" height="24" fill="none"/>
-            <path fill="#000" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
-          </svg>
-          Limited
+        <span class="badge seasonal-badge" style="background: linear-gradient(135deg, #40c0e7 0%, #2170cc 100%);">
+          Seasonal
         </span>`;
     }
 
