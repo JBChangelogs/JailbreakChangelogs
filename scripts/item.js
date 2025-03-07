@@ -585,17 +585,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Special case for HyperShift
     if (item.name === "HyperShift" && item.type === "HyperChrome") {
       return `
-        <div class="media-container ${containerClass} ${
-        item.is_limited && showLimitedBadge ? "limited-item" : ""
-      }">
-          <video class="${imageClass || "card-img-top"}"
-                 style="width: 100%; height: 100%; object-fit: contain;"
-                 autoplay loop muted playsinline
-                 onerror="this.onerror=null; this.style.display='none'; let img=document.createElement('img'); img.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; img.className=this.className; img.style=this.style; this.parentNode.appendChild(img);">
-            <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
-            <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
-          </video>
-          ${item.is_limited && showLimitedBadge ? getLimitedBadgeHtml() : ""}
+        <div class="media-container ${containerClass}">
+            <video class="${imageClass || "card-img-top"}"
+                   style="width: 100%; height: 100%; object-fit: contain;"
+                   autoplay loop muted playsinline
+                   onerror="this.onerror=null; this.style.display='none'; let img=document.createElement('img'); img.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; img.className=this.className; img.style=this.style; this.parentNode.appendChild(img);">
+              <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+              <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+            </video>
         </div>`;
     }
 
@@ -629,7 +626,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               item.name
             }.mp4" type="video/mp4">
           </video>
-          ${item.is_limited ? getLimitedBadgeHtml() : ""}
         </div>`;
     }
 
@@ -642,28 +638,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         : `/assets/images/items/${item.type.toLowerCase()}s/${item.name}.webp`;
 
     return `
-      <div class="media-container ${containerClass} ${
-      item.is_limited && showLimitedBadge ? "limited-item" : ""
-    }" 
-           style="aspect-ratio: ${aspectRatio};">
+      <div class="media-container ${containerClass}" style="aspect-ratio: ${aspectRatio};">
         <img src="${imagePath}"
              class="${imageClass || "img-fluid rounded thumbnail"}"
              alt="${item.name}"
              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
              onerror="handleimage(this)">
-        ${item.is_limited && showLimitedBadge ? getLimitedBadgeHtml() : ""}
       </div>`;
-  }
-
-  function getLimitedBadgeHtml() {
-    return `
-      <span class="badge limited-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-          <rect width="24" height="24" fill="none" />
-          <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
-        </svg>
-        Limited
-      </span>`;
   }
 
   function displayItemDetails(item) {
@@ -684,43 +665,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (item.type === "Horn") color = "#4A90E2";
     if (item.type === "Weapon Skin") color = "#4a6741";
 
-    // Modify the badge HTML generation
-    let specialBadgeHtml = "";
-    let typeBadgeHtml = "";
+    // Modify how badges are generated to include limited and seasonal badges
+    let specialBadgesHtml = "";
 
-    // Change how badges are generated for different types
-    if (item.type === "HyperChrome") {
-      typeBadgeHtml = `
-        <span class="hyperchrome-badge" style="position: static; color: black; margin-left: 12px;">
-         HyperChrome
-        </span>
-      `;
-    } else {
-      // Only show type badge for non-HyperChrome items
-      typeBadgeHtml = `
-        <span class="badge" 
-              style="background-color: ${color};
-                    font-weight: 600;
-                    padding: 8px 16px;
-                    font-size: 1rem;
-                    letter-spacing: 0.5px;
-                    border-radius: 20px;">
-            ${item.type}
-        </span>
-      `;
-
-      // Show limited badge if item is limited
-      if (item.is_limited) {
-        specialBadgeHtml = `
-          <span class="badge limited-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-           <rect width="24" height="24" fill="none" />
-           <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
-         </svg> Limited
-          </span>
-        `;
-      }
+    // Add seasonal badge if item is seasonal
+    if (item.is_seasonal) {
+      specialBadgesHtml += `
+        <span class="badge seasonal-badge" style="background: linear-gradient(135deg, #40c0e7 0%, #2170cc 100%);">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 128 128"><rect width="128" height="128" fill="none"/><path fill="#fff" d="M126.01 59.7h-13.46l10.57-10.57c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99L119 43.04a1.4 1.4 0 0 0-1.97 0L100.38 59.7H74.39l18.38-18.38h23.55c.77 0 1.39-.62 1.39-1.39V34.1c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-14.95l9.52-9.51c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99l-4.12-4.12a1.4 1.4 0 0 0-1.97 0l-9.52 9.53V11.68c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-5.82c-.77 0-1.39.62-1.39 1.39v23.55L68.3 53.61V27.62l16.66-16.65a1.4 1.4 0 0 0 0-1.97l-4.12-4.12c-.26-.26-.61-.41-.98-.41s-.73.15-.98.41L68.3 15.45V1.99c0-.77-.62-1.39-1.39-1.39h-5.82c-.77 0-1.39.62-1.39 1.39v13.46L49.13 4.88c-.52-.53-1.45-.53-1.97 0L43.04 9a1.4 1.4 0 0 0 0 1.97l16.65 16.65v25.99L41.32 35.23V11.68c0-.77-.62-1.39-1.39-1.39H34.1c-.37 0-.72.14-.98.41c-.26.26-.41.61-.41.98v14.94L23.2 17.1a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.4 1.4 0 0 0 0 1.97l9.52 9.51H11.68c-.77 0-1.39.62-1.39 1.39v5.83c0 .37.14.72.41.98c.26.27.62.41.98.41h23.55L53.61 59.7H27.62L10.97 43.04a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.39 1.39 0 0 0 0 1.97L15.45 59.7H1.99c-.77 0-1.39.63-1.39 1.39v5.82c0 .77.62 1.39 1.39 1.39h13.46L4.88 78.86c-.26.27-.41.61-.41.99c0 .36.14.72.41.98L9 84.95c.27.28.63.41.98.41s.71-.13.98-.41L27.62 68.3h25.99L35.23 86.68H11.68c-.77 0-1.39.62-1.39 1.39v5.82c0 .37.15.73.41.99s.61.4.98.4h14.95l-9.52 9.51a1.4 1.4 0 0 0 0 1.97l4.12 4.12a1.38 1.38 0 0 0 1.96 0l9.52-9.52v14.95c0 .37.14.72.41.98c.26.26.61.41.98.41l5.82-.01c.77 0 1.39-.62 1.39-1.39V92.77l18.37-18.38v25.99l-16.65 16.65a1.4 1.4 0 0 0 0 1.97l4.12 4.12c.26.26.61.4.98.4s.73-.14.98-.4l10.57-10.57v13.46c0 .77.62 1.39 1.39 1.39h5.82c.77 0 1.39-.63 1.39-1.39v-13.46l10.57 10.57c.26.26.61.4.98.4s.72-.14.98-.4l4.12-4.12a1.4 1.4 0 0 0 0-1.97L68.3 100.38v-26l18.38 18.38v23.55c0 .77.62 1.39 1.39 1.39h5.82c.37 0 .73-.14.98-.4c.26-.26.41-.61.41-.99v-14.94l9.52 9.52a1.38 1.38 0 0 0 1.96 0l4.11-4.12a1.385 1.385 0 0 0 0-1.97l-9.52-9.51h14.94c.77 0 1.39-.63 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39H92.77L74.39 68.3h25.99l16.65 16.65c.27.28.63.41.98.41s.71-.13.98-.41l4.12-4.12a1.385 1.385 0 0 0 0-1.97L112.55 68.3h13.46c.77 0 1.39-.62 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39"/></svg>
+          Seasonal
+        </span>`;
     }
+
+    // Add limited badge if item is limited
+    if (item.is_limited) {
+      specialBadgesHtml += `
+        <span class="badge limited-badge" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
+            <rect width="24" height="24" fill="none"/>
+            <path fill="#000" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+          Limited
+        </span>`;
+    }
+
+    // Update the badge container HTML to include all badges
+    const badgeContainerHtml = `
+      <div class="badge-container d-flex align-items-center gap-2">
+        ${
+          item.type === "HyperChrome"
+            ? `<span class="hyperchrome-badge">HyperChrome</span>`
+            : `<span class="badge" style="background-color: ${color};">${item.type}</span>`
+        }
+        ${specialBadgesHtml}
+        ${
+          item.tradable === 0
+            ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
+            : ""
+        }
+        <span class="badge favorites-badge" style="background-color: #ffea005f; display: flex; align-items: center; gap: 4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512">
+            <rect width="512" height="512" fill="none"/>
+            <path fill="#ffb636" d="m252.5 381l-128 49c-5.9 2.2-12.1-2.3-11.8-8.6l7-136.9c.1-2.1-.6-4.2-1.9-5.9L31.6 172c-4-4.9-1.6-12.2 4.5-13.9l132.4-35.6c2.1-.6 3.9-1.9 5-3.7L248.3 4c3.4-5.3 11.2-5.3 14.6 0l74.8 114.9c1.2 1.8 3 3.1 5 3.7l132.4 35.6c6.1 1.6 8.5 9 4.5 13.9l-86.1 106.6c-1.3 1.7-2 3.8-1.9 5.9l7 136.9c.3 6.3-5.9 10.8-11.8 8.6l-128-49c-2.1-.8-4.3-.8-6.3-.1"/>
+            <path fill="#ffd469" d="m456.1 51.7l-41-41c-1.2-1.2-2.8-1.7-4.4-1.5s-3.1 1.2-3.9 2.6l-42.3 83.3c-1.2 2.1-.8 4.6.9 6.3c1 1 2.4 1.5 3.7 1.5c.9 0 1.8-.2 2.6-.7L454.9 60c1.4-.8 2.4-2.2 2.6-3.9c.3-1.6-.3-3.2-1.4-4.4"/>
+          </svg>
+          <span id="favorites-count">0</span>
+        </span>
+      </div>`;
 
     const container = document.getElementById("item-container");
 
@@ -1325,26 +1316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                              <h1 class="mb-1 me-3 h2" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px;">${
                                item.name
                              }</h1>
-                              <div class="badge-container d-flex align-items-center gap-2">
-                                  ${
-                                    item.type === "HyperChrome"
-                                      ? `<span class="hyperchrome-badge">HyperChrome</span>`
-                                      : `<span class="badge" style="background-color: ${color};">${item.type}</span>`
-                                  }
-                                  ${
-                                    item.tradable === 0
-                                      ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
-                                      : ""
-                                  }
-                                  <span class="badge favorites-badge" style="background-color: #ffea005f; display: flex; align-items: center; gap: 4px;">
-                                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512">
-                                      <rect width="512" height="512" fill="none" />
-                                      <path fill="#ffb636" d="m252.5 381l-128 49c-5.9 2.2-12.1-2.3-11.8-8.6l7-136.9c.1-2.1-.6-4.2-1.9-5.9L31.6 172c-4-4.9-1.6-12.2 4.5-13.9l132.4-35.6c2.1-.6 3.9-1.9 5-3.7L248.3 4c3.4-5.3 11.2-5.3 14.6 0l74.8 114.9c1.2 1.8 3 3.1 5 3.7l132.4 35.6c6.1 1.6 8.5 9 4.5 13.9l-86.1 106.6c-1.3 1.7-2 3.8-1.9 5.9l7 136.9c.3 6.3-5.9 10.8-11.8 8.6l-128-49c-2.1-.8-4.3-.8-6.3-.1" />
-                                      <path fill="#ffd469" d="m456.1 51.7l-41-41c-1.2-1.2-2.8-1.7-4.4-1.5s-3.1 1.2-3.9 2.6l-42.3 83.3c-1.2 2.1-.8 4.6.9 6.3c1 1 2.4 1.5 3.7 1.5c.9 0 1.8-.2 2.6-.7L454.9 60c1.4-.8 2.4-2.2 2.6-3.9c.3-1.6-.3-3.2-1.4-4.4" />
-                                    </svg>
-                                    <span id="favorites-count">0</span>
-                                  </span>
-                              </div>
+                              ${badgeContainerHtml}
                           </div>
                            ${
                              item.creator && item.creator !== "N/A"
@@ -1377,7 +1349,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="read-more-fade"></div>
                                   </div>
                                   <button class="read-more-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z"/></svg>Show Less
                                   </button>`
                                : ""
                            }
@@ -1420,7 +1392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.commentsManagerInstance.loadComments();
       } else {
         // Hide comments section if item doesn't exist
-        const commentsSection = document.querySelector("comment-container");
+        const commentsSection = document.querySelector(".comment-container");
         if (commentsSection) {
           commentsSection.style.display = "none";
         }
@@ -1436,7 +1408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.commentsManagerInstance.loadComments();
       } else {
         // Hide comments section if item doesn't exist
-        const commentsSection = document.querySelector("comment-container");
+        const commentsSection = document.querySelector(".comment-container");
         if (commentsSection) {
           commentsSection.style.display = "none";
         }
