@@ -907,6 +907,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     function formatPriceValue(price) {
       if (!price || price === "N/A") return "No Price Data";
 
+      // For combined price/robux format with slash
+      if (price.includes("/")) {
+        const [firstPart, secondPart] = price.split("/").map(part => part.trim());
+
+        // Handle first part (can be "Free" or a value with suffix)
+        let formattedFirstPart = firstPart;
+        if (firstPart.toLowerCase() !== "free") {
+          const lowerFirst = firstPart.toLowerCase();
+          if (lowerFirst.endsWith("b")) {
+            const num = parseFloat(lowerFirst.replace("b", "")) * 1000000000;
+            formattedFirstPart = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+              <rect width="16" height="16" fill="none" />
+              <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+              <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+              <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+            </svg> ${num.toLocaleString()}`;
+          } else if (lowerFirst.endsWith("m")) {
+            const num = parseFloat(lowerFirst.replace("m", "")) * 1000000;
+            formattedFirstPart = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+              <rect width="16" height="16" fill="none" />
+              <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+              <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+              <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+            </svg> ${num.toLocaleString()}`;
+          } else if (lowerFirst.endsWith("k")) {
+            const num = parseFloat(lowerFirst.replace("k", "")) * 1000;
+            formattedFirstPart = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
+              <rect width="16" height="16" fill="none" />
+              <path fill="#76ABAE" d="M16 14H2v-1h13V6h1z" />
+              <path fill="#76ABAE" d="M13 4v7H1V4zm1-1H0v9h14z" />
+              <path fill="#76ABAE" d="M3 6H2v3h1v1h4a2.5 2.5 0 1 1 0-5H3zm8 0V5H7a2.5 2.5 0 1 1 0 5h4V9h1V6z" />
+            </svg> ${num.toLocaleString()}`;
+          }
+        }
+
+        // Handle second part (always Robux)
+        let formattedSecondPart = "";
+        if (secondPart.toLowerCase().includes("robux")) {
+          const numericValue = secondPart.replace(/[^0-9]/g, "");
+          formattedSecondPart = `<img src="/assets/Robux.png" alt="Robux" style="height: 1em; vertical-align: -0.1em; margin-left: 2px;"> ${numericValue}`;
+        }
+
+        return `${formattedFirstPart} / ${formattedSecondPart}`;
+      }
+
+      // Handle non-combined formats below
       // Check if price contains a range (e.g. "100k - 5m")
       if (price.includes("-")) {
         const cashIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" style="vertical-align: -0.1em; margin-left: 2px;">
