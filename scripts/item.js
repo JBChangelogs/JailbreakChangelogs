@@ -588,11 +588,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="media-container ${containerClass}">
             <video class="${imageClass || "card-img-top"}"
                    style="width: 100%; height: 100%; object-fit: contain;"
-                   autoplay loop muted playsinline
-                   onerror="this.onerror=null; this.style.display='none'; let img=document.createElement('img'); img.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; img.className=this.className; img.style=this.style; this.parentNode.appendChild(img);">
+                   autoplay loop muted playsinline>
               <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
               <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
             </video>
+        </div>`;
+    }
+
+    // Special case for Arcade Racer spoiler
+    if (item.name === "Arcade Racer" && item.type === "Spoiler") {
+      return `
+        <div class="media-container position-relative ${containerClass}">
+          <video class="${imageClass || "card-img-top"}"
+                 style="width: 100%; height: 100%; object-fit: contain;"
+                 autoplay loop muted playsinline>
+            <source src="/assets/images/items/spoilers/Arcade Racer.webm" type="video/webm">
+            <source src="/assets/images/items/spoilers/Arcade Racer.mp4" type="video/mp4">
+          </video>
         </div>`;
     }
 
@@ -909,7 +921,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // For combined price/robux format with slash
       if (price.includes("/")) {
-        const [firstPart, secondPart] = price.split("/").map(part => part.trim());
+        const [firstPart, secondPart] = price
+          .split("/")
+          .map((part) => part.trim());
 
         // Handle first part (can be "Free" or a value with suffix)
         let formattedFirstPart = firstPart;
@@ -1926,6 +1940,57 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       })
       .catch((error) => console.error("Error fetching favorites:", error));
+
+    // Add video observer after container is populated
+    const videoObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            requestAnimationFrame(() => {
+              video
+                .play()
+                .catch((err) => console.log("Video play failed:", err));
+            });
+          } else {
+            video.pause();
+            video.currentTime = 0;
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      }
+    );
+
+    // Observe main item video if it exists
+    const mainVideo = container.querySelector(".media-container video");
+    if (mainVideo) {
+      videoObserver.observe(mainVideo);
+    }
+
+    // Observe similar item videos
+    document.querySelectorAll(".similar-items video").forEach((video) => {
+      videoObserver.observe(video);
+    });
+
+    // Handle tab visibility
+    document.addEventListener("visibilitychange", () => {
+      const videos = document.querySelectorAll(
+        ".media-container video, .similar-items video"
+      );
+      if (document.hidden) {
+        videos.forEach((video) => video.pause());
+      } else {
+        videos.forEach((video) => {
+          const entry = video.getBoundingClientRect();
+          const isVisible = entry.top < window.innerHeight && entry.bottom > 0;
+          if (isVisible) {
+            video.play().catch((err) => console.log("Video play failed:", err));
+          }
+        });
+      }
+    });
   }
 
   function showErrorMessage(message) {

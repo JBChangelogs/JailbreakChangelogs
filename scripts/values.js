@@ -147,6 +147,21 @@ function getItemMediaElement(item, options = {}) {
       </div>`;
   }
 
+  // Special case for Arcade Racer spoiler
+  if (item.name === "Arcade Racer" && item.type === "Spoiler") {
+    return `
+      <div class="media-container position-relative ${containerClass}">
+        ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
+        <video class="${imageClass || "card-img-top"}"
+               style="width: 100%; height: 100%; object-fit: contain;"
+               autoplay loop muted playsinline>
+          <source src="/assets/images/items/spoilers/Arcade Racer.webm" type="video/webm">
+          <source src="/assets/images/items/spoilers/Arcade Racer.mp4" type="video/mp4">
+        </video>
+        ${mediaBadge}
+      </div>`;
+  }
+
   // Special case for horns
   if (item.type.toLowerCase() === "horn") {
     return `
@@ -1198,6 +1213,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateTotalItemsCount();
+    // Observe any new videos
+    observeCardVideos();
   }
 
   function loadimage(image_url) {
@@ -1209,7 +1226,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatValue(value) {
     // Return default object if value is null, undefined, or empty string
-    if (value === null || value === undefined || value === "" || value === "N/A") {
+    if (
+      value === null ||
+      value === undefined ||
+      value === "" ||
+      value === "N/A"
+    ) {
       return {
         display: "No Value", // Changed from "-" to "No Value"
         numeric: 0,
@@ -1783,3 +1805,51 @@ function toggleContributors(header) {
     );
   }
 }
+
+// Add video observer for managing video playback
+const videoObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      const video = entry.target;
+      if (entry.isIntersecting) {
+        // Wait a frame before playing to avoid potential race conditions
+        requestAnimationFrame(() => {
+          video.play().catch((err) => console.log("Video play failed:", err));
+        });
+      } else {
+        video.pause();
+        // Reset video to start
+        video.currentTime = 0;
+      }
+    });
+  },
+  {
+    threshold: 0.5, // Video will play when 50% visible
+  }
+);
+
+// Function to observe all videos in cards
+function observeCardVideos() {
+  document.querySelectorAll(".items-card video").forEach((video) => {
+    videoObserver.observe(video);
+  });
+}
+
+// Also handle tab/window visibility
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    // Pause all videos when tab is not visible
+    document.querySelectorAll(".items-card video").forEach((video) => {
+      video.pause();
+    });
+  } else {
+    // Check which videos are visible and should be playing
+    document.querySelectorAll(".items-card video").forEach((video) => {
+      const entry = video.getBoundingClientRect();
+      const isVisible = entry.top < window.innerHeight && entry.bottom > 0;
+      if (isVisible) {
+        video.play().catch((err) => console.log("Video play failed:", err));
+      }
+    });
+  }
+});
