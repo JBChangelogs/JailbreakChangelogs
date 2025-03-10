@@ -50,6 +50,19 @@
         width: 90%;
         height: auto;
       }
+      .roadmap-portrait {
+        display: none;
+      }
+      
+      /* Show portrait image on portrait orientation */
+      @media screen and (orientation: portrait) {
+        .roadmap-landscape {
+          display: none;
+        }
+        .roadmap-portrait {
+          display: block;
+        }
+      }
     </style>
   </head>
 
@@ -71,9 +84,14 @@
   <body>
     <div class="roadmap-container">
       <img
-        src="/assets/roadmap.webp"
+        src="/assets/roadmaps/Roadmap [desktop].webp"
         alt="Jailbreak Roadmap"
-        class="roadmap-image"
+        class="roadmap-image roadmap-landscape"
+      />
+      <img
+        src="/assets/roadmaps/Roadmap [mobile].webp"
+        alt="Jailbreak Roadmap"
+        class="roadmap-image roadmap-portrait"
       />
     </div>
   </body>
