@@ -5,6 +5,20 @@ let currentItemId = null;
 let selectedItem = null;
 let currentDuperName = null;
 
+// Function to escape HTML special characters
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, function (match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return escapeMap[match];
+  });
+}
+
 let displayedItems = [];
 let currentPage = 0;
 const ITEMS_PER_PAGE = 32;
@@ -574,7 +588,7 @@ async function calculateDupe() {
       <div class="results-card is-dupe">
         <h4>Found ${validDupeItems.length} duped item${
       validDupeItems.length !== 1 ? "s" : ""
-    } for ${duper}</h4>
+    } for ${escapeHTML(duper)}</h4>
         <p class="text-muted">Last recorded dupe: ${formatDate(
           latestDupeDate
         )}</p>
