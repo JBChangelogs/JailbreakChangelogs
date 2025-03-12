@@ -2,7 +2,7 @@ name: VirusTotal Domain Check
 
 on:
   schedule:
-    - cron: '0 20 * * *'  # Run daily at 12:00 PM PST (20:00 UTC)
+    - cron: '43 20 * * *'  # Run daily at 20:43 UTC
 
 jobs:
   check-domain:
