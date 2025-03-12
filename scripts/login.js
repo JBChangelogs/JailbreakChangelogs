@@ -188,6 +188,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
   ageCheck.addEventListener("change", updateLoginButton);
   tosCheck.addEventListener("change", updateLoginButton);
-
-  // ...rest of existing login code...
 });

@@ -228,6 +228,16 @@ function getItemMediaElement(item, options = {}) {
     </div>`;
 }
 
+// Make sure escapeHtml function exists at the top of the file
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function getFavoriteIconHtml(item) {
   return `
     <div class="favorite-icon position-absolute top-0 start-0 p-2" 
@@ -566,17 +576,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const categoryMessage =
         sortValue !== "name-all-items"
-          ? ` under category "${itemType.replace(/-/g, " ")}"`
+          ? ` under category "${escapeHtml(itemType.replace(/-/g, " "))}"`
           : "";
 
       itemsRow.innerHTML = `
-            <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 300px;">
-                <div class="no-results">
-                    <h4>No items found for "${searchTerm}"${categoryMessage}</h4>
-                    <p class="text-muted">Try different keywords or check the spelling</p>
-                </div>
-            </div>
-        `;
+      <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 300px;">
+        <div class="no-results">
+          <h4>No items found for "${escapeHtml(searchTerm)}"${categoryMessage}</h4>
+          <p class="text-muted">Try different keywords or check the spelling</p>
+        </div>
+      </div>
+    `;
       return;
     }
 
@@ -701,21 +711,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const categoryName =
           itemType === "all-items"
             ? ""
-            : ` in ${itemType
+            : ` in ${escapeHtml(itemType
                 .split("-")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")}`;
+                .join(" "))}`;
+
         itemsRow.innerHTML = `
           <div class="col-12">
             <div class="no-favorites-message">
              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
 	<path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
-</svg>  
-              <h4>No Favorites Yet${categoryName}</h4>
+</svg>
+              <h4>No Favorites Yet${escapeHtml(categoryName)}</h4>
               <p>You haven't added any ${
                 categoryName
-                  ? `favorite items${categoryName}`
+                  ? `favorite items${escapeHtml(categoryName)}`
                   : "items to your favorites"
               }</p>
             </div>
@@ -867,7 +878,10 @@ document.addEventListener("DOMContentLoaded", () => {
           .join(" ");
       }
 
-      categoryNameElement.innerHTML = `<a href="/values?sort=name-${currentSort}" onclick="handleCategoryClick(event, '${currentSort}')">${categoryName}</a>`;
+      const escapedCurrentSort = escapeHtml(currentSort);
+      const escapedCategoryName = escapeHtml(categoryName);
+      
+      categoryNameElement.innerHTML = `<a href="/values?sort=name-${escapedCurrentSort}" onclick="handleCategoryClick(event, '${escapedCurrentSort}')">${escapedCategoryName}</a>`;
       categoryNameElement.style.display = "list-item";
       categoryNameElement.classList.add("active");
       categoryNameElement.setAttribute("aria-current", "page");
@@ -1760,7 +1774,7 @@ window.handleCategoryClick = function (event, category) {
 // Add new function for horn playback
 function handleHornClick(hornName, event) {
   event.preventDefault();
-  event.stopPropagation();
+   event.stopPropagation();
 
   const audioElement = document.querySelector(
     `[data-horn="${hornName}"] audio`
