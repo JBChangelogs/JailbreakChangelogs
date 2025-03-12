@@ -2,8 +2,7 @@ name: VirusTotal Domain Check
 
 on:
   schedule:
-    - cron: '0 20 * * 1'  # Run every Monday at 12:00 PM PST (20:00 UTC)
-  workflow_dispatch:  # Keep manual trigger option
+    - cron: '0 20 * * *'  # Run daily at 12:00 PM PST (20:00 UTC)
 
 jobs:
   check-domain:

@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 21 * * *'  # 1 PM PST / 21:00 UTC
 
 jobs:
   update-version:
@@ -21,8 +23,15 @@ jobs:
       - name: Get commit info
         id: commit-info
         run: |
-          echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # For scheduled runs, use current timestamp and latest commit hash
+            echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+            echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
+          else
+            # For push events, use the pushed commit's info
+            echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+            echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Make API Request
         run: |
