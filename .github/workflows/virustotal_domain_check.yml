@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '43 20 * * *'  # Run daily at 20:43 UTC
 
+permissions:
+  contents: read
+
 jobs:
   check-domain:
     runs-on: ubuntu-latest

@@ -9,13 +9,32 @@ function checkAndStoreReportIssue() {
   }
 }
 
+function isValidRedirectUrl(url) {
+  try {
+    // Only allow relative paths or URLs to our domains
+    if (url.startsWith('/')) {
+      return true;
+    }
+
+    const allowedDomains = [
+      'jailbreakchangelogs.xyz',
+      'testing.jailbreakchangelogs.xyz'
+    ];
+    
+    const urlObj = new URL(url);
+    return allowedDomains.includes(urlObj.hostname);
+  } catch {
+    return false;
+  }
+}
+
 $(document).ready(function () {
   checkAndStoreReportIssue();
 
-  // Store redirect URL if present
+  // Store redirect URL if present and valid
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get("redirect");
-  if (redirectUrl) {
+  if (redirectUrl && isValidRedirectUrl(redirectUrl)) {
     localStorage.setItem("loginRedirect", redirectUrl);
   }
 
@@ -139,7 +158,7 @@ $(document).ready(function () {
         }
 
         const storedRedirect = localStorage.getItem("loginRedirect");
-        if (storedRedirect) {
+        if (storedRedirect && isValidRedirectUrl(storedRedirect)) {
           LoginLogger.log(
             "redirect",
             `Redirecting to stored path: ${storedRedirect}`
@@ -151,6 +170,7 @@ $(document).ready(function () {
           return;
         }
 
+        // Default redirect
         LoginLogger.log("redirect", "Redirecting to homepage");
         window.location.href = "/?freshlogin=true";
       } catch (error) {
