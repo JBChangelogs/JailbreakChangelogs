@@ -62,7 +62,7 @@ $(document).ready(function () {
   // Store original path before OAuth redirect
   if (
     !window.location.pathname.startsWith("/login") &&
-    !window.location.href.includes("discord.com")
+    !(new URL(window.location.href).host === "discord.com")
   ) {
     LoginLogger.log(
       "redirect",
