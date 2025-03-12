@@ -1391,7 +1391,14 @@ async function submitDupeReport() {
   const dupeUser = document.getElementById("dupeUserInput").value.trim();
   const proofUrls = Array.from(document.getElementsByClassName("proof-url"))
     .map((input) => input.value.trim())
-    .filter((url) => url && url.includes("imgur.com"));
+    .filter((url) => {
+      try {
+        const parsedUrl = new URL(url);
+        return parsedUrl.host === "imgur.com" || parsedUrl.host.endsWith(".imgur.com");
+      } catch (e) {
+        return false;
+      }
+    });
 
   const token = getCookie("token");
   if (!token) {
