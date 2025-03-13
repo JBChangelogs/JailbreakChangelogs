@@ -132,6 +132,14 @@ async function validateUserSession(token) {
       }
     );
 
+    // Explicitly handle 401 unauthorized responses
+    if (response.status === 401) {
+      SessionLogger.logEvent("validate", "Token unauthorized (401)");
+      clearSessionWithReason("invalid_token");
+      window.location.reload(); // Force page refresh to update UI
+      return false;
+    }
+
     // Handle 500 errors as retryable errors
     if (response.status === 500) {
       SESSION_VALIDATION.currentRetries++;
@@ -451,7 +459,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (response.ok) {
         return avatarUrl;
       }
-    } catch {
+    } catch (error) {
       // If GIF fails for animated avatar, try PNG as fallback
       if (format === "gif") {
         try {
@@ -464,9 +472,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           if (pngResponse.ok) {
             return pngUrl;
           }
-        } catch {
-          // Silently fail to fallback
-        }
+        } catch {}
       }
     }
 
