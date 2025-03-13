@@ -402,7 +402,7 @@ app.get("/trading", async (req, res) => {
     if (!tradesResponse.ok) {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
-        message: "Our service is temporarily unavailable. Please try again later.",
+        message: "Our trade ads service is temporarily unavailable. Please try again later.",
         logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,

@@ -21,8 +21,8 @@ function isValidRedirectUrl(url) {
       'testing.jailbreakchangelogs.xyz'
     ];
     
-    const urlObj = new URL(url);
-    return allowedDomains.includes(urlObj.hostname);
+    const urlObj = new URL(url, window.location.origin);
+    return allowedDomains.includes(urlObj.hostname) && urlObj.pathname.startsWith('/');
   } catch {
     return false;
   }
@@ -159,12 +159,13 @@ $(document).ready(function () {
 
         const storedRedirect = localStorage.getItem("loginRedirect");
         if (storedRedirect && isValidRedirectUrl(storedRedirect)) {
+          const validatedRedirectUrl = new URL(storedRedirect, window.location.origin);
           LoginLogger.log(
             "redirect",
-            `Redirecting to stored path: ${storedRedirect}`
+            `Redirecting to stored path: ${validatedRedirectUrl.pathname}`
           );
-          window.location.href = `${storedRedirect}${
-            storedRedirect.includes("?") ? "&" : "?"
+          window.location.href = `${validatedRedirectUrl.pathname}${
+            validatedRedirectUrl.search ? "&" : "?"
           }freshlogin=true`;
           localStorage.removeItem("loginRedirect");
           return;
