@@ -283,7 +283,7 @@ app.get("/seasons", async (req, res) => {
 });
 
 app.get("/seasons/:season", async (req, res) => {
-  let seasonId = req.params.season;
+  const seasonId = req.params.season;
   const apiUrl = `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const seasonsListUrl = 'https://api3.jailbreakchangelogs.xyz/seasons/list';
   const latestSeason = 25;
@@ -338,9 +338,26 @@ app.get("/seasons/:season", async (req, res) => {
       return res.redirect(`/seasons/${latestSeason}`);
     }
 
+    // Generate reward image URLs and filter out nulls
+    const imageUrls = seasonData.rewards ? seasonData.rewards.map(reward => {
+      // Use absolute URLs for image paths
+      if (reward.link && reward.link.startsWith('/assets')) {
+        return `https://jailbreakchangelogs.xyz${reward.link}`;
+      }
+      return null;
+    }).filter(url => url !== null) : [];
+
+    // If no image URLs are found, use a default image
+    if (imageUrls.length === 0) {
+      imageUrls.push('https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp');
+    }
+
     // Render the season page
     res.render("seasons", {
-      title: `Season ${seasonId} - ${seasonData.title}`,
+      title: seasonData.title,
+      season: seasonId,
+      seasonId: seasonId, // Add this for comments
+      image_urls: imageUrls,
       metaDescription: `View Season ${seasonId} reward information including level rewards, exclusive items, and more for Roblox Jailbreak.`,
       logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Seasons Page Logo",
@@ -385,7 +402,7 @@ app.get("/trading", async (req, res) => {
     if (!tradesResponse.ok) {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
-        message: "Our trade ads service is temporarily unavailable. Please try again later.",
+        message: "Our service is temporarily unavailable. Please try again later.",
         logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
@@ -404,7 +421,7 @@ app.get("/trading", async (req, res) => {
     console.error("Error checking trades API:", error);
     return res.status(503).render("error", {
       title: "503 - Service Unavailable", 
-      message: "Our trade ads service is temporarily unavailable. Please try again later.",
+      message: "Our trade adsservice is temporarily unavailable. Please try again later.",
       logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
