@@ -39,7 +39,9 @@ jobs:
       - name: Make API Request
         run: |
           response=$(curl -s -X POST \
-            "${{ secrets.UPDATE_VERSION_ENDPOINT }}?type=website&version=${{ steps.commit-info.outputs.hash }}&last_updated=${{ steps.commit-info.outputs.timestamp }}" \
+            "${{ secrets.UPDATE_VERSION_ENDPOINT }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"type\":\"website\",\"version\":\"${{ steps.commit-info.outputs.hash }}\",\"last_updated\":${{ steps.commit-info.outputs.timestamp }}}" \
             -w "\n%{http_code}")
 
           status_code=$(echo "$response" | tail -n1)
