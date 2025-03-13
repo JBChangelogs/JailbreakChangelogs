@@ -836,12 +836,13 @@ document.addEventListener("DOMContentLoaded", function () {
     hideLoadingOverlay();
   }
 
-  // Make the function globally accessible
+  // Function to fetch data from API with better error handling
   window.fetchDataFromAPI = function () {
     showLoadingOverlay();
     return fetch(apiUrl)
       .then((response) => {
         if (!response.ok) {
+          // Extract status code for different error messages
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
@@ -851,26 +852,26 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("Error fetching changelogs:", error);
-
-        const errorMessage = getErrorMessage(error.status || 0);
+        const status = parseInt(error.message.match(/\d+/) || [500][0]);
+        const errorMessage = getErrorMessage(status);
 
         // Update main content using native DOM methods
         const contentElement = document.getElementById("content");
         contentElement.innerHTML = `
           <div class="api-error-container">
             <div class="api-error-icon">
-         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
-	<rect width="64" height="64" fill="none" />
-	<path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3z" />
-	<g fill="#231f20">
-		<path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0" />
-		<circle cx="32" cy="49.6" r="4.2" />
-	</g>
-</svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
+                <rect width="64" height="64" fill="none" />
+                <path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3z" />
+                <g fill="#231f20">
+                  <path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0" />
+                  <circle cx="32" cy="49.6" r="4.2" />
+                </g>
+              </svg>
             </div>
-            <h2 class="api-error-title">Unable to Load Data</h2>
+            <h2 class="api-error-title">${status === 503 ? 'Service Temporarily Unavailable' : 'Unable to Load Data'}</h2>
             <p class="api-error-message">
-              We're having trouble loading the changelog information. This might be due to a temporary connection issue or server maintenance.
+              ${errorMessage}
             </p>
             <button class="api-retry-button" id="retryButton">Try Again</button>
             <p class="api-error-details">
@@ -880,29 +881,26 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         `;
 
-        // Update sidebar image
         document.getElementById("sidebarImage").innerHTML = `
           <div class="api-error-container">
             <div class="api-error-icon">
-             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
-	<rect width="64" height="64" fill="none" />
-	<path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3z" />
-	<g fill="#231f20">
-		<path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0" />
-		<circle cx="32" cy="49.6" r="4.2" />
-	</g>
-</svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64">
+                <rect width="64" height="64" fill="none" />
+                <path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3z" />
+                <g fill="#231f20">
+                  <path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0" />
+                  <circle cx="32" cy="49.6" r="4.2" />
+                </g>
+              </svg>
             </div>
-            <h2 class="api-error-title">Unable to Load Changelog Image</h2>
+            <h2 class="api-error-title">${status === 503 ? 'Service Temporarily Unavailable' : 'Unable to Load Data'}</h2>
           </div>
         `;
 
         // Add event listener after inserting the button
-        document
-          .getElementById("retryButton")
-          ?.addEventListener("click", () => {
-            fetchDataFromAPI();
-          });
+        document.getElementById("retryButton")?.addEventListener("click", () => {
+          fetchDataFromAPI();
+        });
 
         hideLoadingOverlay();
       });
@@ -911,6 +909,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initial data fetch
   fetchDataFromAPI();
 
+  // Updated error message function
   function getErrorMessage(statusCode) {
     switch (statusCode) {
       case 404:
@@ -918,7 +917,8 @@ document.addEventListener("DOMContentLoaded", function () {
       case 403:
         return "You don't have permission to access this information. Please check your credentials.";
       case 500:
-        return "We're experiencing server issues. Our team has been notified and is working on it.";
+      case 503:
+        return "Our changelog service is temporarily unavailable. Please try again in a few minutes.";
       case 0:
         return "Unable to connect to the server. Please check your internet connection.";
       default:

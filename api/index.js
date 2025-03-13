@@ -164,48 +164,52 @@ app.get("/owner/check/:user", (req, res) => {
 });
 
 app.get("/changelogs/:changelog", async (req, res) => {
-  let changelogId = req.params.changelog || 1;
+  const changelogId = req.params.changelog;
 
   try {
-    // Use Promise.race with timeout for parallel requests
+    // Use Promise.race with timeout for parallel requests 
     const [latestResponse, requestedResponse] = await Promise.all([
-      fetchWithTimeout(
-        "https://api3.jailbreakchangelogs.xyz/changelogs/latest",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-        }
-      ),
-      fetchWithTimeout(
-        `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-        }
-      ),
+      fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/changelogs/latest", {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }),
+      fetchWithTimeout(`https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`, {
+        headers: {
+          "Content-Type": "application/json", 
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      }),
     ]);
 
-    // Check if the requested changelog exists
-    if (!requestedResponse.ok) {
-      // If changelog not found, render 404 page
-      return res.status(404).render("error", {
-        title: "404 - Changelog Not Found",
-        logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-        logoAlt: "404 Page Logo",
+    // Check if any response is not ok (including 500 errors)
+    if (!latestResponse.ok || !requestedResponse.ok) {
+      let status = 404;
+      let title = "404 - Changelog Not Found";
+      let message = "The changelog you requested could not be found.";
+
+      // If server error, show different message
+      if (latestResponse.status === 500 || requestedResponse.status === 500) {
+        status = 503;
+        title = "503 - Service Temporarily Unavailable";
+        message = "Our changelog service is temporarily unavailable. Please try again later.";
+      }
+
+      return res.status(status).render("error", {
+        title,
+        message,
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
       });
     }
 
-    // Continue with existing logic if changelog exists
+    // Continue with existing logic if both responses are ok
     const [latestData, requestedData] = await Promise.all([
       latestResponse.json(),
-      requestedResponse.json(),
+      requestedResponse.json(), 
     ]);
 
     const latestId = latestData.id;
