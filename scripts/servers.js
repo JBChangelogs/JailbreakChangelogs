@@ -116,7 +116,7 @@ function fallbackCopy(text) {
 async function fetchServers() {
   try {
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/servers/list"
+      "https://api3.jailbreakchangelogs.xyz/servers/list?nocache=true"
     );
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -367,6 +367,102 @@ async function editServer(serverId) {
     showToast(error.message || "Failed to load server details", "error");
   }
 }
+
+async function handleAddServer(event) {
+  event.preventDefault();
+
+  const token = getCookie("token");
+  if (!token) {
+    showToast("Authentication required", "error");
+    return;
+  }
+
+  const form = event.target;
+  const neverExpires = document.getElementById("neverExpires").checked;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const spinner = submitBtn.querySelector(".spinner-border");
+
+  const serverLink = form.serverLink.value;
+  if (!serverLink.startsWith("https://www.roblox.com/share?code=")) {
+    showToast(
+      "Invalid server link format. Please use a valid Roblox private server link.",
+      "error"
+    );
+    return;
+  }
+
+  submitBtn.disabled = true;
+  if (spinner) spinner.classList.remove("d-none");
+
+  try {
+    const formData = {
+      link: serverLink,
+      rules: form.serverRules.value || "N/A",
+      expires: neverExpires
+        ? "Never"
+        : Math.floor(
+            new Date(form.expiresAt.value).getTime() / 1000
+          ).toString(),
+      token: token,
+    };
+
+    // Only validate expiration if not "Never Expires"
+    if (!neverExpires) {
+      const expirationDate = new Date(form.expiresAt.value);
+      const now = new Date();
+      const daysDifference = Math.ceil(
+        (expirationDate - now) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysDifference < 5) {
+        showToast(
+          "Server expiration must be at least 5 days from now",
+          "error"
+        );
+        return;
+      }
+    }
+
+    const response = await fetch(
+      "https://api3.jailbreakchangelogs.xyz/servers/add",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.status === 409) {
+      throw new Error("This server link already exists. Please submit a different link.");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to add server");
+    }
+
+    // Handle success
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("addServerModal")
+    );
+    modal.hide();
+    form.reset();
+    await fetchServers();
+    showToast("Server added successfully!", "success");
+  } catch (error) {
+    console.error("Error adding server:", error);
+    showToast(
+      error.message || "Failed to add server. Please try again.",
+      "error"
+    );
+  } finally {
+    submitBtn.disabled = false;
+    if (spinner) spinner.classList.add("d-none");
+  }
+}
 async function handleEditServer(event, serverId) {
   event.preventDefault();
 
@@ -385,23 +481,6 @@ async function handleEditServer(event, serverId) {
 
   try {
     const serverLink = form.serverLink.value.trim();
-
-    // Get current server details to compare link
-    const currentServerResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/servers/get?id=${serverId}`
-    );
-    const currentServer = await currentServerResponse.json();
-
-    // Only check for duplicate if the link is being changed
-    if (serverLink !== currentServer.link) {
-      const isDuplicate = await isDuplicateLink(serverLink, serverId);
-      if (isDuplicate) {
-        throw new Error(
-          "This server link already exists. Please submit a different link."
-        );
-      }
-    }
-
     const expirationDate = new Date(form.expiresAt.value);
     const neverExpires = document.getElementById("neverExpires").checked;
     const formData = {
@@ -426,6 +505,10 @@ async function handleEditServer(event, serverId) {
 
     const data = await response.json();
 
+    if (response.status === 409) {
+      throw new Error("This server link already exists. Please submit a different link.");
+    }
+
     if (!response.ok) {
       throw new Error(
         data.message ||
@@ -433,26 +516,18 @@ async function handleEditServer(event, serverId) {
       );
     }
 
-    // In handleEditServer function, after the success toast:
-    if (response.ok) {
-      const modal = bootstrap.Modal.getInstance(
-        document.getElementById("addServerModal")
-      );
-      modal.hide();
-      resetModalToAddMode(form);
-      await fetchServers();
-      showToast("Server updated successfully!", "success");
-      showToast(
-        "Updated server URL is being validated and will be available shortly.",
-        "info"
-      );
-    }
+    // Handle success
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("addServerModal")
+    );
+    modal.hide();
+    resetModalToAddMode(form);
+    await fetchServers();
+    showToast("Server updated successfully!", "success");
+
   } catch (error) {
     console.error("Error updating server:", error);
-    showToast(
-      `Failed to update server: ${error.message || "Unknown error"}`,
-      "error"
-    );
+    showToast(error.message || "Failed to update server", "error");
   } finally {
     submitBtn.disabled = false;
     if (spinner) spinner.classList.add("d-none");
@@ -521,7 +596,6 @@ async function deleteServer(serverId) {
     if (response.ok) {
       await fetchServers();
       showToast("Server deleted successfully!", "success");
-      showToast("Server list is being updated and validated.", "info");
     }
   } catch (error) {
     console.error("Error deleting server:", error);
@@ -540,131 +614,4 @@ function checkAuthAndShowModal() {
 
   const modal = new bootstrap.Modal(document.getElementById("addServerModal"));
   modal.show();
-}
-
-// handle duplicates
-async function isDuplicateLink(link, excludeId = null) {
-  try {
-    const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/servers/list"
-    );
-    if (!response.ok) throw new Error("Failed to fetch servers");
-
-    const servers = await response.json();
-    return servers.some(
-      (server) =>
-        server.link === link && (excludeId === null || server.id !== excludeId)
-    );
-  } catch (error) {
-    console.error("Error checking duplicate link:", error);
-    return false;
-  }
-}
-
-// Handle server addition
-async function handleAddServer(event) {
-  event.preventDefault();
-
-  const token = getCookie("token");
-  if (!token) {
-    showToast("Authentication required", "error");
-    return;
-  }
-
-  const form = event.target;
-  const neverExpires = document.getElementById("neverExpires").checked;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const spinner = submitBtn.querySelector(".spinner-border");
-
-  const serverLink = form.serverLink.value;
-  if (!serverLink.startsWith("https://www.roblox.com/share?code=")) {
-    showToast(
-      "Invalid server link format. Please use a valid Roblox private server link.",
-      "error"
-    );
-    return;
-  }
-
-  // Check for duplicate link
-  const isDuplicate = await isDuplicateLink(serverLink);
-  if (isDuplicate) {
-    showToast(
-      "This server link already exists. Please submit a different link.",
-      "error"
-    );
-    return;
-  }
-
-  submitBtn.disabled = true;
-  if (spinner) spinner.classList.remove("d-none");
-
-  try {
-    const formData = {
-      link: serverLink,
-      rules: form.serverRules.value || "N/A",
-      expires: neverExpires
-        ? "Never"
-        : Math.floor(
-            new Date(form.expiresAt.value).getTime() / 1000
-          ).toString(),
-      token: token,
-    };
-
-    // Only validate expiration if not "Never Expires"
-    if (!neverExpires) {
-      const expirationDate = new Date(form.expiresAt.value);
-      const now = new Date();
-      const daysDifference = Math.ceil(
-        (expirationDate - now) / (1000 * 60 * 60 * 24)
-      );
-
-      if (daysDifference < 5) {
-        showToast(
-          "Server expiration must be at least 5 days from now",
-          "error"
-        );
-        return;
-      }
-    }
-
-    const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/servers/add",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to add server");
-    }
-
-    if (response.ok) {
-      const modal = bootstrap.Modal.getInstance(
-        document.getElementById("addServerModal")
-      );
-      modal.hide();
-      form.reset();
-      await fetchServers();
-      showToast("Server added successfully!", "success");
-      showToast(
-        "Server URL is being validated and will be available shortly.",
-        "info"
-      );
-    }
-  } catch (error) {
-    console.error("Error adding server:", error);
-    showToast(
-      error.message || "Failed to add server. Please try again.",
-      "error"
-    );
-  } finally {
-    submitBtn.disabled = false;
-    if (spinner) spinner.classList.add("d-none");
-  }
 }

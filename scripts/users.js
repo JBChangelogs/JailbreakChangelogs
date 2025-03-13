@@ -829,7 +829,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
               ),
               fetch(
-                `https://api3.jailbreakchangelogs.xyz/rewards/get?season=${comment.item_id}`,
+                `https://api3.jailbreakchangelogs.xyz/seasons/rewards/get?season=${comment.item_id}`,
                 {
                   signal: controller.signal,
                   headers: {
@@ -1101,7 +1101,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
+        `https://api3.jailbreakchangelogs.xyz/users/comments/get?author=${userId}`
       );
 
       if (!response.ok) {
