@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // First get user data for member since date
       const userResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}`
+        `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}&nocache=true`
       );
 
       // Handle 404 - user not found

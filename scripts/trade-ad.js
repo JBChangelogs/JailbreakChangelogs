@@ -57,7 +57,7 @@ async function deleteTradeAd(tradeId) {
     }
 
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}`,
+      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
       {
         method: "DELETE",
       }
@@ -213,7 +213,7 @@ async function loadTradeData() {
   try {
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
+      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
 
     if (!tradeResponse.ok) {

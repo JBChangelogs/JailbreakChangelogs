@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   showLoading();
   try {
-    const response = await fetch(`${API_BASE_URL}/users/list`);
+    const response = await fetch(`${API_BASE_URL}/users/list?nocache=true`);
     if (response.status === 404) {
       showMessage(messages.error);
       elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">

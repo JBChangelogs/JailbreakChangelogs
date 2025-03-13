@@ -24,7 +24,7 @@ async function canCreateTradeAd() {
 
   try {
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
     );
     if (!response.ok) throw new Error("Failed to fetch user data");
 
@@ -1260,7 +1260,7 @@ async function deleteTradeAd(tradeId) {
     }
 
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}`,
+      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
       {
         method: "DELETE", // Changed from implicit GET to explicit DELETE
       }
@@ -1273,7 +1273,7 @@ async function deleteTradeAd(tradeId) {
     }
 
     notyf.success(
-      "Trade advertisement deleted successfully! Please note it may take 2-3 minutes for changes to be visible."
+      "Trade advertisement deleted successfully!"
     );
     await loadTradeAds(); // Refresh the trade ads list
   } catch (error) {
@@ -1300,7 +1300,7 @@ async function editTradeAd(tradeId) {
 
     // Get user data from token
     const userResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
     );
     if (!userResponse.ok) {
       console.error("Failed to fetch user data:", userResponse.status);
@@ -1310,7 +1310,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
+      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1478,7 +1478,7 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    const apiUrl = `https://api3.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}`;
+    const apiUrl = `https://api3.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}&nocache=true`;
 
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
@@ -1565,7 +1565,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/trades/list"
+      "https://api3.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
@@ -2530,7 +2530,7 @@ async function createTradeAd() {
 
     // On success
     notyf.success(
-      "Trade advertisement created successfully! Please note it may take 2-3 minutes for your trade to appear."
+      "Trade advertisement created successfully!"
     );
     resetTrade();
 
