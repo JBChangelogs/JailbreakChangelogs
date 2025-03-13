@@ -167,7 +167,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
   const changelogId = req.params.changelog;
 
   try {
-    // Use Promise.race with timeout for parallel requests 
+    // Use Promise.race with timeout for parallel requests
     const [latestResponse, requestedResponse] = await Promise.all([
       fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/changelogs/latest", {
         headers: {
@@ -177,7 +177,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       }),
       fetchWithTimeout(`https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`, {
         headers: {
-          "Content-Type": "application/json", 
+          "Content-Type": "application/json",
           Origin: "https://jailbreakchangelogs.xyz",
         },
       }),
@@ -209,7 +209,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
     // Continue with existing logic if both responses are ok
     const [latestData, requestedData] = await Promise.all([
       latestResponse.json(),
-      requestedResponse.json(), 
+      requestedResponse.json(),
     ]);
 
     const latestId = latestData.id;
@@ -285,10 +285,12 @@ app.get("/seasons", async (req, res) => {
 app.get("/seasons/:season", async (req, res) => {
   let seasonId = req.params.season;
   const apiUrl = `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
-  const rewardsUrl = `https://api3.jailbreakchangelogs.xyz/rewards/get?season=${seasonId}`;
+  const seasonsListUrl = 'https://api3.jailbreakchangelogs.xyz/seasons/list';
   const latestSeason = 25;
+
   try {
-    const [response, rewardsResponse] = await Promise.all([
+    // Make both API calls in parallel
+    const [seasonResponse, seasonsListResponse] = await Promise.all([
       fetchWithTimeout(apiUrl, {
         method: "GET",
         headers: {
@@ -296,7 +298,7 @@ app.get("/seasons/:season", async (req, res) => {
           Origin: "https://jailbreakchangelogs.xyz",
         },
       }),
-      fetchWithTimeout(rewardsUrl, {
+      fetchWithTimeout(seasonsListUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -305,99 +307,54 @@ app.get("/seasons/:season", async (req, res) => {
       }),
     ]);
 
-    if (response.status === 404) {
-      return res.status(404).render("error", {
-        title: "404 - Season Not Found",
-        logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-        logoAlt: "404 Page Logo",
+    // Check if any response is not ok (including 500 errors)
+    if (!seasonResponse.ok || !seasonsListResponse.ok) {
+      let status = 404;
+      let title = "404 - Season Not Found";
+      let message = "The season you requested could not be found.";
+
+      // If server error from either endpoint, show service unavailable
+      if (seasonResponse.status === 500 || seasonsListResponse.status === 500) {
+        status = 503;
+        title = "503 - Service Temporarily Unavailable";
+        message = "Our season service is temporarily unavailable. Please try again later.";
+      }
+
+      return res.status(status).render("error", {
+        title,
+        message,
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
       });
     }
 
-    if (!response.ok) {
-      // Redirect to latest season if requested one doesn't exist
+    // Continue with normal flow if both responses are ok
+    const seasonData = await seasonResponse.json();
+
+    if (seasonData.error || seasonData.rewards === "No rewards found") {
+      // Redirect to latest season if current one is invalid
       return res.redirect(`/seasons/${latestSeason}`);
     }
 
-    if (rewardsResponse.status === 404) {
-      return res.status(404).render("error", {
-        title: "404 - Season Not Found",
-        logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-        logoAlt: "404 Page Logo",
-        MIN_TITLE_LENGTH,
-        MIN_DESCRIPTION_LENGTH,
-      });
-    }
-
-    if (!rewardsResponse.ok) {
-      return res.render("seasons", {
-        season: "???",
-        title: "Season not found",
-        image_url:
-          "https://jailbreakchangelogs.xyz/assets/images/changelogs/346.webp",
-        logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-        logoAlt: "Jailbreak Seasons Logo",
-        seasonId,
-        MIN_TITLE_LENGTH,
-        MIN_DESCRIPTION_LENGTH,
-        type: "season",
-        itemId: seasonId,
-      });
-    }
-
-    const data = await response.json();
-    const rewardsData = await rewardsResponse.json();
-
-    // Generate image URLs for embedding
-    const baseImageUrl =
-      "https://jailbreakchangelogs.xyz/assets/images/seasons";
-
-    // Get level 10 reward
-    const level10Image = `${baseImageUrl}/${seasonId}/10.webp`;
-
-    // Generate array of available level numbers (2-9)
-    const availableLevels = Array.from({ length: 8 }, (_, i) => i + 2);
-
-    // Randomly select 3 unique levels
-    const selectedLevels = [];
-    while (selectedLevels.length < 3 && availableLevels.length > 0) {
-      const randomIndex = Math.floor(Math.random() * availableLevels.length);
-      selectedLevels.push(availableLevels.splice(randomIndex, 1)[0]);
-    }
-
-    // Create array of image URLs including level 10 and random selections
-    const imageUrls = [
-      level10Image,
-      ...selectedLevels.map(
-        (level) => `${baseImageUrl}/${seasonId}/${level}.webp`
-      ),
-    ];
-
-    const { season, title } = data;
+    // Render the season page
     res.render("seasons", {
-      season,
-      title,
-      image_urls: imageUrls, // Pass array of image URLs to template
-      logoUrl:
-        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-      logoAlt: "Jailbreak Seasons Logo",
-      seasonId,
+      title: `Season ${seasonId} - ${seasonData.title}`,
+      metaDescription: `View Season ${seasonId} reward information including level rewards, exclusive items, and more for Roblox Jailbreak.`,
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Seasons Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
     });
+
   } catch (error) {
     console.error("Error fetching season data:", error);
     if (error.message === "Request timed out") {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
-        message:
-          "The server is taking too long to respond. Please try again later.",
-        logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        message: "The server is taking too long to respond. Please try again later.",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -406,8 +363,7 @@ app.get("/seasons/:season", async (req, res) => {
     return res.status(500).render("error", {
       title: "500 - Server Error",
       message: "The server encountered an error while processing your request.",
-      logoUrl:
-        "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -415,15 +371,46 @@ app.get("/seasons/:season", async (req, res) => {
   }
 });
 
-app.get("/trading", (req, res) => {
-  res.render("trading", {
-    title: "Trading - Changelogs",
-    logoUrl:
-      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
-    logoAlt: "Trading Page Logo",
-    MIN_TITLE_LENGTH,
-    MIN_DESCRIPTION_LENGTH,
-  });
+app.get("/trading", async (req, res) => {
+  try {
+    // Check if trades API is available before rendering the page
+    const tradesResponse = await fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/trades/list", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
+    });
+
+    if (!tradesResponse.ok) {
+      return res.status(503).render("error", {
+        title: "503 - Service Unavailable",
+        message: "Our trade ads service is temporarily unavailable. Please try again later.",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+        logoAlt: "Error Page Logo",
+        MIN_TITLE_LENGTH,
+        MIN_DESCRIPTION_LENGTH,
+      });
+    }
+
+    res.render("trading", {
+      title: "Trading - Changelogs",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+      logoAlt: "Trading Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
+  } catch (error) {
+    console.error("Error checking trades API:", error);
+    return res.status(503).render("error", {
+      title: "503 - Service Unavailable", 
+      message: "Our trade ads service is temporarily unavailable. Please try again later.",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
+      logoAlt: "Error Page Logo",
+      MIN_TITLE_LENGTH,
+      MIN_DESCRIPTION_LENGTH,
+    });
+  }
 });
 
 // In index.js

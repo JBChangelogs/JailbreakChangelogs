@@ -42,16 +42,40 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function fetchAllSeasons() {
-    return fetch("https://api3.jailbreakchangelogs.xyz/seasons/list")
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error fetching seasons:", error);
-        throw error;
-      });
+    return fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/seasons/list", {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://jailbreakchangelogs.xyz",
+      },
+    })
+    .then((response) => {
+      if (!response.ok) {
+        // Let the server handle API errors by reloading the page
+        window.location.reload();
+        throw new Error(`API error: ${response.status}`);
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("Error fetching seasons:", error);
+      throw error;
+    });
+  }
+
+  // Add fetchWithTimeout utility function
+  function fetchWithTimeout(url, options = {}, timeout = 10000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    return fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+    .finally(() => clearTimeout(timeoutId));
   }
 
   function loadAllData() {
-    showLoadingOverlay(); // Show loading when starting to fetch data
+    showLoadingOverlay();
     return fetchAllSeasons()
       .then((seasons) => {
         populateSeasonDropdown(seasons);
@@ -60,9 +84,46 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("Error loading data:", error);
-        hideLoadingOverlay(); // Hide loading on error
-        throw error;
+        hideLoadingOverlay();
+        // Remove custom error UI - let the server handle errors
+        window.location.reload();
       });
+  }
+
+  function displayErrorState(title, message) {
+    const container = document.getElementById("content");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="alert alert-danger" role="alert">
+        <div class="d-flex align-items-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64" class="me-3">
+            <rect width="64" height="64" fill="none" />
+            <path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3z" />
+            <g fill="#231f20">
+              <path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0" />
+              <circle cx="32" cy="49.6" r="4.2" />
+            </g>
+          </svg>
+          <h4 class="alert-heading mb-0">${title}</h4>
+        </div>
+        <p class="mb-3">${message}</p>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-outline-danger me-3" onclick="window.location.reload()">
+            Try Again
+          </button>
+          <a href="https://status.jailbreakchangelogs.xyz" target="_blank" class="text-danger">
+            Check Service Status
+          </a>
+        </div>
+      </div>
+    `;
+
+    // Also update the season list dropdown
+    const seasonList = document.querySelector("#seasonList");
+    if (seasonList) {
+      seasonList.innerHTML = '<li class="w-100"><span class="dropdown-item">No seasons available</span></li>';
+    }
   }
 
   // Function to populate the season dropdown menu
