@@ -2,2719 +2,2737 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://jailbreakchangelogs.xyz/</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/exploiters</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/servers</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/dupes/calculator</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/values</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/bot</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/trading</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://status.jailbreakchangelogs.xyz/</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/redeem</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/users</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/roadmap</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://docs.jailbreakchangelogs.xyz/</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/privacy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/faq</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/tos</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Halo</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://status.jailbreakchangelogs.xyz/</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/faq</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/roadmap</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/privacy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/users</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/redeem</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/JDM</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Snake</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Ogre%202017</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Jailbreak%20Hills</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Nemesis</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Boomerang</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Classic</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Trail%20Blazer</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Halo</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Leap%20Year</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Wagon%20Wheel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/After%20Burner</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Bubble%20Wand</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Teddy%20Bear</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Japanese%20Lantern</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Concept</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Blade</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Flaming</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Frost%20Burn</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dual%20Rockets</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Shogun</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Live%202024</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/tradetracker</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Jailbreak</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/ATV</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Blade</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Flaming</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Frost%20Burn</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Live%202024</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dual%20Rockets</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/tradetracker</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Shogun</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/5%20Star</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Earthquake</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Live%202020</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Aquatic</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/ATV</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Blue%20Eyes</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Earthquake</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Trion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Frost</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Aquatic</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Brick%20Set</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Road%20Hazard</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Blue%20Eyes</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Block%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Brick%20Set</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Nuclear%20Waste</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Frost</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Flame%20Thrower</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Road%20Hazard</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Turbine</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Mark%205</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Tall%20Arch</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Unknown%20Signal</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Peach</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Ship%20Wheel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Jeep</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Fore</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Peach</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Aurora</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Ship%20Wheel</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/SUV</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Fore</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Tesla</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Aurora</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Blue%20Chute</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Police%20That%20Way</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Monster</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Police%20That%20Way</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Orange%20Pixel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Rubber%20Ducky</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Lightning</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Red%20S3</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Berlin%20Graffiti</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Beach Ball</loc>
-    <lastmod>2025-02-15</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Celsior</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Lightning</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Watermelon</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Arch</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Camaro</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Lia</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Tank%20Wing</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Pixel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Celsior</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Lia</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Camaro</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Sloop</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Endurance%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Lines</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Pixel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Lines</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Dino</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Brickset</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Bloxy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Venom</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Stance</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Jackrabbit</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Road%20Warrior</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/7%20billion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Bloxy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Stance</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Venom</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Retro%20Racer</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Ski%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/7%20billion</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Banana%20Car</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/JB8</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Mighty</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Ski%20Wing</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Red%2050</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Mighty</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/LeClair</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/SawBlade</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Glider</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/SawBlade</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Bull</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Hotdog</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Bandit</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/3%20Billion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Bandit</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Carbon%20Fire</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Death%20Ray</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dragster</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Aperture</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Aerial%20Support</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Scorch</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dragon%20Breath</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Crown</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Steed</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Crown</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Money</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Circuits</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Star%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Bonded</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Overdrive</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Belgian%20Waffle</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Radar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Energized</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Revolver</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Spark</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Radar</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Criminal</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/2%20Billion</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Arachnid</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Posh</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Armor</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Snowstorm</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo%20Shark</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Volt%204x4</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/T%20Rex%20Bone</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Arachnid</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/2%20Billion</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Spark</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Armor</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Snowstorm</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Speed</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/values/calculator</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Marshmallow</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/T%20Rex%20Bone</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Vault%20Door</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Police</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo%20Shark</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Marshmallow</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Snow%20Log</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/values/calculator</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Police</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Manga</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Flags%20Of%20Europe</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Roulette</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Cobweb</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Road%20Warrior</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Cobweb</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Diamond%20Engrave</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/3%20Billion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Carbonara</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Candy%20Cane</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Eclaire</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Void</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Hypno</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Void</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Ionize</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Tank</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Bacon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Spare</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ambulance</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Spike</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Bacon</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Evil%20Eye</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Bloxy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Flat%20Black</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Black%20Ice</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Leaning%20Wing%20Of%20Pisa</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Daytona</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Spare</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Carbonara</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Spike</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Evil%20Eye</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Flat%20Black</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Bloxy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Black%20Ice</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Blue%20Fire</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Cosmic</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Daytona</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Parisian</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Leaning%20Wing%20Of%20Pisa</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Wooden%20Toy</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Cosmic</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Paint</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Parisian</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Dirt%20Bike</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Police%20Chase</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Challenger</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Police%20Chase</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Frost%20Crawler</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Bull</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Raptor</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Euro%20Clover%20Leaf</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Striker</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Zebra</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Diamond</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Hold%20E</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Zebra</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/MyUsernamesThis</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Raptor</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Striker</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Deep%20Purple%20Flame</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/MyUsernamesThis</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Hold%20E</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/NapkinNate</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Tracer</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Cassette</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/VFX</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Cassette</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Tracer</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Shutter%20Shade</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Poseidon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Handcuff</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Comic%20Convict</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Nascar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Classic%20Var%201</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Handcuff</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Comic%20Convict</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Park%20Bench</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Beam%20Hybrid</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Classic%20Var%203</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dual%20Flags</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/RC%20Antenna</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Classic%20Var%201</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Classic%20Var%202</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Classic%20Var%203</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Beam%20Hybrid</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/RC%20Antenna</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Dual%20Flags</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Power%201</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Laviolette</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Line</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Classic</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/5B%20Flags</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Blue%20Pixel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Icicle</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Racer</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/KraoESP</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Synth</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/KraoESP</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Racer</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Jailbreak%20Army</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Gradient%20Pixel</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Wedge</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Catch%20Me</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Gradient%20Pixel</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Nascar%2075th</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Wedge</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Swirl</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Javelin</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/SawBlade</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Patchy%20Jeans</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/DatBrian</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Superstar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Compass</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Saw%20Blade</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Superstar</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/DatBrian</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Boxer</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Molten%20M12</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Electrostatic</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Glider%20Shop</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Construction</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Badger</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Construction</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Harpoon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Cartoon</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Performance</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Slashers</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Cartoon</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Laser%20Wire</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Tiny%20Toy</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Slashers</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Nascar%20Free</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Terminator</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Tiny%20Toy</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ray%209</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Cyclone</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Lightning</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Cyclone</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Brulee</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Baller</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Snow%20Cannon</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Model%203</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Airtail</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Snow%20Cannon</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Star</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Maverick</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Spinner</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Star%20Badge</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/RX-1</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Earth</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Star%20Badge</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Spinner</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Quarter%20Dollar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Earth</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Spyglass</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Beach%20Ball</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/DenisDaily</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Arachnid</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo%20Radar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Prison%20Bus</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Arachnid</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo%20Radar</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Mystic</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Money</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Roll-X</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Vecchio</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Snow%20Shovel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/EXP%201</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Money</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Deja</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Roll-X</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Rainbow</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Tow%20Truck</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Vecchio</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Buoy</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Piggy</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Deja</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/EXP%201</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Rainbow</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Tow%20Truck</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Radar</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Piggy</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Patrol%20Bike</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Digital%20Confetti</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Speed</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/XRK</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Digital%20Confetti</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Space-R</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Desert%20Crawler</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/XRK</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Retrowave</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Rocket</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Desert%20Crawler</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Fire%20Truck</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Iron%20Rock</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shogun</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/VolleyBall</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Tumble%20Weed</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Star%20Spangled</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Camper</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Flower</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shogun</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Checker</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Flower</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Camper</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/drift/Aurora</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shell%20Classic</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Bio%20Hazard</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Blue%20S3</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Hammer%20Head</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Sakura</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Bio%20Hazard</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/UK%20Heritage</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Blue%20S3</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shell%20Classic</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/HelloItsVG</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/UK%20Heritage</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Red%20Eyes</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Sakura</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Abstracts</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Taxi</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Death%20Trap</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Sentinel</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Orange%20Chute</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Death%20Trap</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Native</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Taxi</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Orange%20Chute</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Ball</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Field</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Volcano</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Tiger</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Volt</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Spares</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Phindr</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Scope</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/OG%20Fuel</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Forged</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Colors%20Of%20Italy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Drip</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Desert%20Camo</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Fire</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Electronic</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/RFX</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Track%20Toy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Ice</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Jetpack</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/MCL36</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Racer</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Shell%20Speaker</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Soccer</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Robo%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Agent</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Booming%20Speaker</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/4%20Billion</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Retro%20Wave</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Megalodon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Lightning</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/OG%20Monster</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Badonuts</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Nascar%2075th</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Old%20Town%20Road</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Winter%20Camo</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Scorpion</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ray</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Bandana</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Blue%2050</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Galactic%20Carbon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Sparkler</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Glowing%20Yellow</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Rattler</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/OG%20Rocket%20Thrusters</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Skull</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Rally</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Torero</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Racing%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Japanese</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Laser%20Cannon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Flame%20Thrower</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Torpedo</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/JBMS</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Creator</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shell%20Mark%205</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Landmine</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Planetary</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Galaxy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/NoobFreak</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Thin</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Guitar%20Riff</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Eight%20Leg</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Crash%20Nation</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Skater%20Wing</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ice%20Breaker</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Snow%20Face</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Do%20You%20Lift</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Melons</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Donut</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Cash%20Spitter</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Unified</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/White%20Marble</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Dragon%20Chaser</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Semi%20Truck</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Roadster</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Campout</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/OG%20La%20Matador</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Parisian</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Jet</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Nitro%20Tank</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/Ladybug</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Center%20Lock</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Scythes</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Dune%20Buggy</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Meteor%20Magnet</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/GTR</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Gun%20Fire</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Magic%20Purple</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Kanagawa</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Heli%20Prop</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Champion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Kanagawa</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Heli%20Prop</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/SRT</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/La%20Matador</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Beadlock</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Eternal%20Flame</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/PGHLFilms</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/La%20Matador</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/LongHorn</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/PGHLFilms</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/KreekCraft</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Falcon%20S</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/CyberTruck</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Tesseract</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Stallion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Brickset</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Goliath</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/CyberTruck</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Proto%2008</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Stallion</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Doubloon</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Goliath</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Dragon%20Scales</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Flame%20Spitter</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Proto%2008</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Crimson%20Racer</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Speed%20Yacht</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Flame%20Spitter</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Manta</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Tokyo</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Subcarbon</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Interrogator</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Police</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Jack%20Rabbit</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Interrogator</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Cruiser</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/TailFin</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Galaxy%20Wave</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/TailFin</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Box%20O%20Cash</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Cow</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Reactor</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Clickbait</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Volt</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/80s%20Style</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Pickup</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Clickbait</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/80s%20Style</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Volt</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/BatWings</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Delorean</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Swat%20Van</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/drift/Shooting%20Star</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Billion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Shooting%20Star</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Surus</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Surfboard%20Rack</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Wavy</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Celestial</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/King</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Two%20Sided</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Nascar</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Propeller</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Touchdown</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Propeller</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Nascar</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Spider%20Leg</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Distorted</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/6%20Billion</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Gulf</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Crew%20Capsule</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Macaron</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/texture/WireFrame</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Lava</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/WireFrame</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/texture/Frit</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/RTX</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/vehicle/Successor</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/USA</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Fiasco</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Macaron</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Mecha%20Arm</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Peppermint</loc>
-    <lastmod>2025-02-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Beignet</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Fiasco</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/spoiler/Live%20Glider</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/rim/Snow%20Flake</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Peppermint</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Bicycle%20Rack</loc>
-    <lastmod>2025-02-14</lastmod>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Beignet</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jailbreakchangelogs.xyz/item/rim/Radioactive</loc>
-    <lastmod>2025-02-14</lastmod>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/USA</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Snow%20Flake</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Bicycle%20Rack</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Gun%20Fire</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Magic%20Purple</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/GTR</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Scythes</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Center%20Lock</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Meteor%20Magnet</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Dune%20Buggy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Parisian</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Ladybug</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Jet</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Nitro%20Tank</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Semi%20Truck</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Roadster</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/OG%20La%20Matador</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Dragon%20Chaser</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Campout</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Donut</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/White%20Marble</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Cash%20Spitter</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Unified</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Melons</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ice%20Breaker</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Do%20You%20Lift</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Skater%20Wing</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Crash%20Nation</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Snow%20Face</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Guitar%20Riff</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Eight%20Leg</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Thin</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Camo</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/NoobFreak</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Galaxy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Planetary</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Landmine</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Shell%20Mark%205</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Creator</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Torpedo</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/JBMS</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Laser%20Cannon</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Flame%20Thrower</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Japanese</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Torero</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Racing%20Wing</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Skull</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Rally</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Rattler</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Glowing%20Yellow</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/OG%20Rocket%20Thrusters</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Scorpion</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Galactic%20Carbon</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Sparkler</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Blue%2050</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Bandana</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Old%20Town%20Road</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Ray</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Nascar%2075th</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Winter%20Camo</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/OG%20Monster</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Badonuts</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Megalodon</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/Agent</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/Lightning</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Retro%20Wave</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Robo%20Wing</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/4%20Billion</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Soccer</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Booming%20Speaker</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Shell%20Speaker</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/vehicle/MCL36</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Jetpack</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Racer</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Ice</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Track%20Toy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Electronic</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/RFX</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Fire</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Drip</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Desert%20Camo</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Colors%20Of%20Italy</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Forged</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/drift/OG%20Fuel</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/rim/Scope</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/tire%20sticker/Phindr</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/spoiler/Spares</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Volcano</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Volt</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Tiger</loc>
+    <lastmod>2025-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jailbreakchangelogs.xyz/item/texture/Field</loc>
+    <lastmod>2025-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
