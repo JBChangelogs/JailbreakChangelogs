@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   update-version:
+    if: github.repository == 'JBChangelogs/JailbreakChangelogs'
     runs-on: ubuntu-latest
 
     steps:

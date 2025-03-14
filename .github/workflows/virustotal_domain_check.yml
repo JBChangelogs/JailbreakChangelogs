@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   check-domain:
+    if: github.repository == 'JBChangelogs/JailbreakChangelogs'
     runs-on: ubuntu-latest
     
     steps:
