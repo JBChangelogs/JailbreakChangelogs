@@ -656,18 +656,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Rest of the existing code...
       const userData = await userResponse.json();
-
       showLoginRecommendationBanner(userData);
-
-      // early adopter badge check - THIS CONTROLS BADGE VISIBILITY
-      if (earlyBadge) {
-        // Check if usernumber is 100 or less
-        if (userData.usernumber > 100) {
-          earlyBadge.style.display = "none";
-        } else {
-          earlyBadge.style.display = "inline-block";
-        }
-      }
 
       const usernameContainer = document.querySelector(".username-link");
       const memberSince = new Date(
@@ -709,19 +698,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Process bio data for successful response
       const bioData = await bioResponse.json();
-
-      // Set description text
       const description = bioData.description || "No description provided";
       userBio.innerHTML = linkifyText(description.replace(/\n/g, "<br>"));
 
       // Format and set date
-      // Only use last_updated if it's different from created_at
       const createdTimestamp = parseInt(userData.created_at) * 1000;
       const lastUpdatedTimestamp = bioData.last_updated
         ? bioData.last_updated * 1000
         : null;
-
-      // If last_updated is null or equals created_at, show "Never"
       const date =
         !lastUpdatedTimestamp || lastUpdatedTimestamp === createdTimestamp
           ? "Never"
@@ -744,9 +728,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         `;
 
-      // Update presence status
       updateUserPresence(userData);
-
       await fetchUserBanner(userId);
     } catch (error) {
       console.error("Error in fetchUserBio:", error);
@@ -774,13 +756,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function formatDate(unixTimestamp) {
-    // Check if timestamp is in seconds or milliseconds
     const isMilliseconds = unixTimestamp.toString().length > 10;
     const timestamp = isMilliseconds ? unixTimestamp : unixTimestamp * 1000;
 
     const date = new Date(timestamp);
-
-    // Format the date in the desired format "8 Jan 2025 at 09:27 AM"
     const day = date.getDate();
     const month = date.toLocaleString("en-GB", { month: "short" });
     const year = date.getFullYear();
@@ -791,131 +770,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     return `${day} ${month} ${year} at ${time}`;
-  }
-
-  async function fetchCommentItem(comment) {
-    try {
-      let url;
-      let item;
-      let rewards;
-
-      // Check if comment and item_type exist before accessing
-      if (!comment || !comment.item_type) {
-        console.error("Invalid comment data:", comment);
-        return null;
-      }
-
-      // Add timeout controller
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-      try {
-        // Set the URL and fetch data based on item type
-        switch (comment.item_type) {
-          case "changelog":
-            url = `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${comment.item_id}`;
-            break;
-          case "season":
-            // Handle season case separately due to rewards
-            const [seasonResponse, rewardsResponse] = await Promise.all([
-              fetch(
-                `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${comment.item_id}`,
-                {
-                  signal: controller.signal,
-                  headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                  },
-                }
-              ),
-              fetch(
-                `https://api3.jailbreakchangelogs.xyz/seasons/rewards/get?season=${comment.item_id}`,
-                {
-                  signal: controller.signal,
-                  headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                  },
-                }
-              ),
-            ]);
-
-            if (!seasonResponse.ok || !rewardsResponse.ok) {
-              throw new Error(
-                `HTTP error! status: ${
-                  seasonResponse.status || rewardsResponse.status
-                }`
-              );
-            }
-
-            item = await seasonResponse.json();
-            rewards = await rewardsResponse.json();
-            item.rewards = rewards;
-            return item;
-
-          case "trade":
-            url = `https://api3.jailbreakchangelogs.xyz/trades/get?id=${comment.item_id}`;
-            break;
-
-          // Existing item types
-          case "vehicle":
-          case "spoiler":
-          case "rim":
-          case "body-color":
-          case "texture":
-          case "tire-sticker":
-          case "tire-style":
-          case "drift":
-          case "hyperchrome":
-          case "furniture":
-          case "limited-item":
-          case "horn":
-            url = `https://api3.jailbreakchangelogs.xyz/items/get?type=${comment.item_type}&id=${comment.item_id}`;
-            break;
-
-          default:
-            console.error("Unknown item type:", comment.item_type);
-            return null;
-        }
-
-        // For non-season items, fetch the data
-        if (comment.item_type !== "season") {
-          const response = await fetch(url, {
-            signal: controller.signal,
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          item = await response.json();
-        }
-
-        // For trade comments, modify the item object
-        if (comment.item_type === "trade") {
-          item = {
-            ...item,
-            title: `Trade #${comment.item_id}`,
-            type: "Trade",
-          };
-        }
-
-        return item;
-      } finally {
-        clearTimeout(timeoutId);
-      }
-    } catch (error) {
-      if (error.name === "AbortError") {
-        console.error("Request timed out");
-      } else {
-        console.error("Error fetching comment item:", error);
-      }
-      return null;
-    }
   }
 
   function capitalizeFirstLetter(string) {
@@ -1063,7 +917,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchUserComments(userId) {
     const recentComments = document.getElementById("comments-list");
-    card_pagination.style.display = "flex"; // Always show pagination
+    card_pagination.style.display = "flex";
 
     // Show loading spinner in card body
     recentComments.innerHTML = `
@@ -1096,12 +950,12 @@ document.addEventListener("DOMContentLoaded", function () {
               <p>This user has chosen to keep their comments private</p>
             </div>
           </div>`;
-        renderPaginationControls(1); // Show single page pagination
+        renderPaginationControls(1);
         return;
       }
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/comments/get?author=${userId}`
+        `https://api3.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
 
       if (!response.ok) {
@@ -1109,6 +963,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const comments = await response.json();
+      
+      // Sort cmments by newest
+      comments.sort((a, b) => b.date - a.date);
 
       // Handle no comments case
       if (!Array.isArray(comments) || comments.length === 0) {
@@ -1126,7 +983,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <p>This user hasn't made any comments yet</p>
             </div>
           </div>`;
-        renderPaginationControls(1); // Show single page pagination
+        renderPaginationControls(1);
         return;
       }
 
@@ -1148,117 +1005,112 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Clear existing content
       recentComments.innerHTML = "";
-      const comments_to_add = [];
 
       // Process each comment
       for (const comment of paginatedComments) {
-        const item = await fetchCommentItem(comment);
-
-        if (!item) {
-          continue; // Skip this comment if we couldn't fetch its details
-        }
-
         const formattedDate = formatDate(comment.date);
         const commentElement = document.createElement("div");
+        commentElement.className = "list-group-item";
 
-        // Get the correct image URL
+        // Handle image URL and display values based on item type
         let imageUrl;
-        let displayTitle = item.title; // Default for changelogs/seasons
+        let displayTitle = comment.item_type;
         let displayType = comment.item_type;
-        let displayId = comment.item_id;
-        let viewPath = `/${comment.item_type}s/${comment.item_id}`; // Default path
+        let viewPath = `/${comment.item_type.toLowerCase()}s/${comment.item_id}`;
 
-        // Handle different item types
-        if (comment.item_type === "season") {
-          const level10Reward = item.rewards?.find?.(
-            (reward) => reward.requirement === "Level 10"
-          );
-          imageUrl = level10Reward?.link || "assets/images/changelogs/347.webp";
-        } else if (comment.item_type === "trade") {
-          // Handle trade comments
-          imageUrl = "/assets/logos/Banner_Background_480.webp";
-          displayTitle = `Trade #${comment.item_id}`;
-          displayType = "Trade";
-          viewPath = `/trading/ad/${comment.item_id}`; // Correct path for trade pages
-        } else if (
-          [
-            "vehicle",
-            "spoiler",
-            "rim",
-            "body-color",
-            "texture",
-            "tire-sticker",
-            "tire-style",
-            "drift",
-            "hyperchrome",
-            "furniture",
-            "limited-item",
-            "horn",
-          ].includes(comment.item_type.toLowerCase())
-        ) {
-          // Updated image URL structure to match the correct path
-          const itemType = comment.item_type.toLowerCase() + "s"; // Add 's' to pluralize
-          if (comment.item_type === "horn") {
-            imageUrl = "/assets/audios/horn_thumbnail.webp";
+        // Special cases that don't use /480p path
+        const specialTypes = ["changelog", "season", "trade"];
+        
+        try {
+          if (specialTypes.includes(comment.item_type.toLowerCase())) {
+            switch (comment.item_type.toLowerCase()) {
+              case "season":
+                imageUrl = `/assets/images/seasons/${comment.item_id}/10.webp`;
+                const seasonResponse = await fetch(
+                  `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${comment.item_id}`
+                );
+                if (seasonResponse.ok) {
+                  const seasonData = await seasonResponse.json();
+                  displayTitle = `Season ${seasonData.season}`;
+                  displayType = seasonData.title;
+                }
+                break;
+        
+              case "changelog":
+                imageUrl = `/assets/images/changelogs/${comment.item_id}.webp`;
+                const changelogResponse = await fetch(
+                  `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${comment.item_id}`
+                );
+                if (changelogResponse.ok) {
+                  const changelogData = await changelogResponse.json();
+                  displayTitle = `Changelog ${comment.item_id}`;
+                  displayType = changelogData.title;
+                }
+                break;
+        
+              case "trade":
+                imageUrl = "/assets/logos/Banner_Background_480.webp";
+                displayTitle = `Trade #${comment.item_id}`;
+                displayType = "Trade";
+                viewPath = `/trading/ad/${comment.item_id}`;
+                break;
+            }
           } else {
-            imageUrl = item.name
-              ? `/assets/images/items/480p/${itemType}/${item.name}.webp`
-              : "assets/images/changelogs/347.webp";
+            // Handle regular items
+            const itemResponse = await fetch(
+              `https://api3.jailbreakchangelogs.xyz/items/get?type=${comment.item_type.toLowerCase()}&id=${comment.item_id}`
+            );
+        
+            if (itemResponse.ok) {
+              const itemData = await itemResponse.json();
+              if (comment.item_type.toLowerCase() === "horn") {
+                imageUrl = "/assets/audios/horn_thumbnail.webp";
+              } else {
+                imageUrl = `/assets/images/items/480p/${comment.item_type.toLowerCase()}s/${itemData.name}.webp`;
+              }
+              displayTitle = itemData.name;
+              displayType = itemData.type;
+            } else {
+              imageUrl = "/assets/logos/Banner_Background_480.webp";
+            }
           }
-          displayTitle = item.name || "Unknown Item";
-          displayType = item.type || comment.item_type;
-          viewPath = `/item/${comment.item_type.toLowerCase()}/${encodeURIComponent(
-            displayTitle.toLowerCase()
-          )}`;
-        } else {
-          imageUrl = "assets/images/changelogs/347.webp";
+        } catch (error) {
+          console.error("Error fetching item details:", error);
+          imageUrl = "/assets/logos/Banner_Background_480.webp";
         }
 
-        commentElement.className = "list-group-item";
-        // Create the comment card with the updated display values
+        // Create the comment card
         commentElement.innerHTML = `
-    <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
-      <div class="card-body">
-        <div class="row">
-          <!-- Image Section -->
-          <div class="col-md-4 d-none d-md-block">
-            <img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
-          </div>
-          
-          <!-- Content Section -->
-          <div class="col-md-8">
-            <div class="comment-header mb-2">
-              <h6 class="card-title" style="color: #748D92;">
-                ${displayTitle} [${capitalizeFirstLetter(displayType)}]
-              </h6>
-              <small class="text-muted" style="color: #748D92;">${formattedDate}</small>
+          <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
+            <div class="card-body">
+              <div class="row">
+                <!-- Image Section -->
+                <div class="col-md-4 d-none d-md-block">
+                  <img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                </div>
+                
+                <!-- Content Section -->
+                <div class="col-md-8">
+                  <div class="comment-header mb-2">
+                    <h6 class="card-title" style="color: #748D92;">
+                      ${displayTitle} [${capitalizeFirstLetter(displayType)}]
+                    </h6>
+                    <small class="text-muted" style="color: #748D92;">
+                      ${formattedDate}
+                      ${comment.edited_at ? ' (edited)' : ''}
+                    </small>
+                  </div>
+                  <p class="card-text" style="color: #D3D9D4;">${comment.content}</p>
+                  <a href="${viewPath}" class="btn btn-sm mt-3 view-item-btn">
+                    View Comment}
+                  </a>
+                </div>
+              </div>
             </div>
-            <h5 class="card-subtitle mb-2" style="color: #748D92;">
-              ${displayTitle}
-            </h5>
-            <p class="card-text" style="color: #D3D9D4;">${comment.content}</p>
-            <a href="${viewPath}" class="btn btn-sm mt-3 view-item-btn">
-              View ${capitalizeFirstLetter(displayType)}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>`;
+          </div>`;
 
-        comments_to_add.push(commentElement);
+        recentComments.appendChild(commentElement);
       }
-
-      // Add all comments to the DOM
-      recentComments.innerHTML = "";
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = card_pagination.innerHTML;
-      const spans = tempDiv.getElementsByTagName("span");
-      while (spans.length > 0) {
-        spans[0].parentNode.removeChild(spans[0]);
-      }
-      card_pagination.innerHTML = tempDiv.innerHTML; // Clear existing pagination controls
-      renderPaginationControls(totalPages);
-      recentComments.append(...comments_to_add);
     } catch (error) {
       console.error("Error fetching comments:", error);
 
@@ -1648,7 +1500,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   follow_button.addEventListener("click", function () {
     if (follow_button.disabled) return;
-    follow_button.disabled = true;
+    follow_button.disabled =false;
 
     const user = getCookie("token");
     if (!user) {
@@ -1711,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function fetchUserFavorites(userId) {
     const favoritesContainer = document.getElementById("favorites-grid");
-    card_pagination.style.display = "flex"; // Always show pagination
+    card_pagination.style.display = "flex";
 
     // Show loading spinner in favorites grid
     favoritesContainer.innerHTML = `
@@ -1754,7 +1606,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <p>This user has chosen to keep their favorites private</p>
             </div>
           </div>`;
-        renderPaginationControls(1); // Show single page pagination
+        renderPaginationControls(1);
         return;
       }
 
@@ -1867,36 +1719,36 @@ document.addEventListener("DOMContentLoaded", function () {
           if (itemType === "horn") {
             imageUrl = "/assets/audios/horn_thumbnail.webp";
           } else if (itemType === "drift") {
-            imageUrl = `/assets/images/items/480p/drifts/${item.name}.webp`;
+            imageUrl = `/assets/images/items/480p/drifts/${item.name}s.webp`;
           } else {
             imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
           }
 
           return `
-          <div class="col-6 col-md-4 col-lg-3">
-            <a href="/item/${itemType}/${encodeURIComponent(
+            <div class="col-6 col-md-4 col-lg-3">
+              <a href="/item/${itemType}/${encodeURIComponent(
             item.name
           )}" class="text-decoration-none">
-              <div class="card items-card">
-                <div class="position-relative">
-                  <div class="media-container">
-                    <img src="${imageUrl}" class="card-img-top" alt="${
+                <div class="card items-card">
+                  <div class="position-relative">
+                    <div class="media-container">
+                      <img src="${imageUrl}" class="card-img-top" alt="${
             item.name
           }">
-                  </div>
-                  <div class="item-card-body text-center">
-                    <div class="badges-container d-flex justify-content-center gap-2">
-                      <span class="badge item-type-badge" style="background-color: ${getTypeColor(
-                        itemType
-                      )}">${item.type}</span>
                     </div>
-                    <h5 class="card-title">${item.name}</h5>
+                    <div class="item-card-body text-center">
+                      <div class="badges-container d-flex justify-content-center gap-2">
+                        <span class="badge item-type-badge" style="background-color: ${getTypeColor(
+                          itemType
+                        )}">${item.type}</span>
+                      </div>
+                      <h5 class="card-title">${item.name}</h5>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </a>
-          </div>
-        `;
+              </a>
+            </div>
+          `;
         })
         .join("");
 
