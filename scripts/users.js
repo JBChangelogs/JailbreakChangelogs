@@ -1016,16 +1016,18 @@ document.addEventListener("DOMContentLoaded", function () {
         let imageUrl;
         let displayTitle = comment.item_type;
         let displayType = comment.item_type;
-        let viewPath = `/${comment.item_type.toLowerCase()}s/${comment.item_id}`;
+        let viewPath;
 
         // Special cases that don't use /480p path
         const specialTypes = ["changelog", "season", "trade"];
         
         try {
           if (specialTypes.includes(comment.item_type.toLowerCase())) {
+            // Keep special types using ID in path
             switch (comment.item_type.toLowerCase()) {
               case "season":
                 imageUrl = `/assets/images/seasons/${comment.item_id}/10.webp`;
+                viewPath = `/seasons/${comment.item_id}`;
                 const seasonResponse = await fetch(
                   `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${comment.item_id}`
                 );
@@ -1038,6 +1040,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
               case "changelog":
                 imageUrl = `/assets/images/changelogs/${comment.item_id}.webp`;
+                viewPath = `/changelogs/${comment.item_id}`;
                 const changelogResponse = await fetch(
                   `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${comment.item_id}`
                 );
@@ -1051,7 +1054,7 @@ document.addEventListener("DOMContentLoaded", function () {
               case "trade":
                 imageUrl = "/assets/logos/Banner_Background_480.webp";
                 displayTitle = `Trade #${comment.item_id}`;
-                displayType = "Trade";
+                displayType = "Trade Ad";
                 viewPath = `/trading/ad/${comment.item_id}`;
                 break;
             }
@@ -1070,46 +1073,50 @@ document.addEventListener("DOMContentLoaded", function () {
               }
               displayTitle = itemData.name;
               displayType = itemData.type;
+              // Use item name in URL for regular items
+              viewPath = `/item/${comment.item_type.toLowerCase()}/${encodeURIComponent(itemData.name)}`;
             } else {
               imageUrl = "/assets/logos/Banner_Background_480.webp";
+              // Fallback to ID if item fetch fails
+              viewPath = `/${comment.item_type.toLowerCase()}s/${comment.item_id}`;
             }
           }
+
+          // Create the comment card
+          commentElement.innerHTML = `
+            <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
+              <div class="card-body">
+                <div class="row">
+                  <!-- Image Section -->
+                  <div class="col-md-4 d-none d-md-block">
+                    <img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                  </div>
+                  
+                  <!-- Content Section -->
+                  <div class="col-md-8">
+                    <div class="comment-header mb-2">
+                      <h6 class="card-title" style="color: #748D92;">
+                        ${displayTitle} [${capitalizeFirstLetter(displayType)}]
+                      </h6>
+                      <small class="text-muted" style="color: #748D92;">
+                        ${formattedDate}
+                        ${comment.edited_at ? ' (edited)' : ''}
+                      </small>
+                    </div>
+                    <p class="card-text" style="color: #D3D9D4;">${comment.content}</p>
+                    <a href="${viewPath}" class="btn btn-sm mt-3 view-item-btn">
+                      View Comment
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+
+          recentComments.appendChild(commentElement);
         } catch (error) {
           console.error("Error fetching item details:", error);
           imageUrl = "/assets/logos/Banner_Background_480.webp";
         }
-
-        // Create the comment card
-        commentElement.innerHTML = `
-          <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
-            <div class="card-body">
-              <div class="row">
-                <!-- Image Section -->
-                <div class="col-md-4 d-none d-md-block">
-                  <img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
-                </div>
-                
-                <!-- Content Section -->
-                <div class="col-md-8">
-                  <div class="comment-header mb-2">
-                    <h6 class="card-title" style="color: #748D92;">
-                      ${displayTitle} [${capitalizeFirstLetter(displayType)}]
-                    </h6>
-                    <small class="text-muted" style="color: #748D92;">
-                      ${formattedDate}
-                      ${comment.edited_at ? ' (edited)' : ''}
-                    </small>
-                  </div>
-                  <p class="card-text" style="color: #D3D9D4;">${comment.content}</p>
-                  <a href="${viewPath}" class="btn btn-sm mt-3 view-item-btn">
-                    View Comment}
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>`;
-
-        recentComments.appendChild(commentElement);
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
