@@ -1726,7 +1726,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (itemType === "horn") {
             imageUrl = "/assets/audios/horn_thumbnail.webp";
           } else if (itemType === "drift") {
-            imageUrl = `/assets/images/items/480p/drifts/${item.name}s.webp`;
+            imageUrl = `/assets/images/items/480p/drifts/${item.name}.webp`;
           } else {
             imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
           }
