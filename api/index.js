@@ -535,22 +535,33 @@ app.get("/item/:type/:item", async (req, res) => {
   let itemName = decodeURIComponent(req.params.item)
     .trim()
     .replace(/\s+/g, " ");
-  let itemType = decodeURIComponent(req.params.type).trim().toLowerCase();
-  const formattedUrlType = itemType.charAt(0).toUpperCase() + itemType.slice(1);
+  
+  // Convert URL format (tire-sticker) to original format (tire sticker)
+  let itemType = decodeURIComponent(req.params.type)
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, " "); // Convert hyphens to spaces
+
+  const formattedUrlType = itemType
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   // Check if URL uses spaces instead of hyphens and redirect if needed
-  const hasSpaces = itemName.includes(" ");
-  if (hasSpaces) {
+  const nameHasSpaces = itemName.includes(" ");
+  const typeHasSpaces = req.params.type.includes(" ");
+
+  if (nameHasSpaces || typeHasSpaces) {
     const hyphenatedName = itemName.replace(/\s+/g, "-");
-    return res.redirect(301, `/item/${itemType}/${hyphenatedName}`);
+    const hyphenatedType = req.params.type.replace(/\s+/g, "-");
+    return res.redirect(301, `/item/${hyphenatedType}/${hyphenatedName}`);
   }
 
-  // Convert hyphens back to spaces BEFORE making the API request
+  // Convert hyphens back to spaces for item name BEFORE making the API request
   itemName = itemName.replace(/-/g, " ");
 
-  const apiUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
-    itemName
-  )}&type=${itemType}`;
+  // Use original itemType (with spaces) for API request
+  const apiUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -591,7 +602,7 @@ app.get("/item/:type/:item", async (req, res) => {
       });
     }
 
-    // Generate embed image URL - use absolute URLs for embeds
+    // Use original type with spaces for image paths
     let embedImageUrl;
     if (item.type === "Drift") {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
@@ -604,6 +615,9 @@ app.get("/item/:type/:item", async (req, res) => {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
     }
 
+    // Use hyphenated type for URLs
+    const hyphenatedType = itemType.replace(/\s+/g, "-");
+
     // Enhanced SEO data
     const seoData = {
       pageTitle: `${itemName} - Roblox Jailbreak`,
@@ -611,8 +625,8 @@ app.get("/item/:type/:item", async (req, res) => {
         item.description && item.description !== "N/A"
           ? item.description
           : `Get the latest value and details for ${itemName} in Roblox Jailbreak. View current price, trading history, rarity status, and market trends.`,
-      canonicalUrl: `https://jailbreakchangelogs.xyz/item/${formattedUrlType.toLowerCase()}/${encodeURIComponent(
-        itemName
+      canonicalUrl: `https://jailbreakchangelogs.xyz/item/${hyphenatedType}/${encodeURIComponent(
+        itemName.replace(/\s+/g, "-")
       )}`,
       embedImageUrl: embedImageUrl,
       breadcrumbs: [
@@ -620,12 +634,12 @@ app.get("/item/:type/:item", async (req, res) => {
         { name: "Values", url: "/values" },
         {
           name: `${formattedUrlType}s`,
-          url: `/values?sort=${formattedUrlType.toLowerCase()}s`,
+          url: `/values?sort=${itemType.toLowerCase()}s`,
         },
         {
           name: itemName,
-          url: `/item/${formattedUrlType.toLowerCase()}/${encodeURIComponent(
-            itemName
+          url: `/item/${hyphenatedType}/${encodeURIComponent(
+            itemName.replace(/\s+/g, "-")
           )}`,
         },
       ],

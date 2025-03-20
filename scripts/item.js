@@ -340,11 +340,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlPath = window.location.pathname.split("/");
       const urlType = urlPath[2];
       const rawItemName = urlPath.pop();
-      // Convert hyphens to spaces before any other processing
+      
+      // Convert hyphens to spaces for both type and name before API request
       const itemName = decodeURIComponent(rawItemName)
         .trim()
-        .replace(/-/g, " ")  // Convert hyphens to spaces first
-        .replace(/\s+/g, " "); // Then normalize any resulting multiple spaces
+        .replace(/-/g, " ") // Convert hyphens to spaces
+        .replace(/\s+/g, " "); // Normalize spaces
+
+      // Convert URL format (tire-sticker) to original format (tire sticker)
+      const itemType = decodeURIComponent(urlType)
+        .trim()
+        .toLowerCase()
+        .replace(/-/g, " "); // Convert hyphens to spaces
 
       if (!urlType || !itemName) {
         throw new Error("Invalid URL format");
@@ -353,7 +360,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(
         `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
           itemName
-        )}&type=${urlType}`,
+        )}&type=${encodeURIComponent(itemType)}`,
         {
           headers: {
             "Content-Type": "application/json",
