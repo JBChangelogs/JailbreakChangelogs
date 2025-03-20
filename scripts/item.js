@@ -2124,12 +2124,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Update handleimage function to skip HyperShift Lvl5
   window.handleimage = function (element) {
-    const isHyperShift Lvl5 =
+    const isHyperShiftLvl5 =
       element.id === "hypershift-video" ||
       (element.alt === "HyperShift Lvl5" &&
         element.closest(".media-container").querySelector("video"));
 
-    if (isHyperShift Lvl5) {
+    if (isHyperShiftLvl5) {
       return; // Don't replace HyperShift Lvl5 video with placeholder
     }
     element.src =
