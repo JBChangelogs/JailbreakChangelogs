@@ -1685,8 +1685,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .map((item) => {
           const itemType = item.type.toLowerCase();
 
-          // Check specifically for HyperShift by favorite_id
-          if (item.favorite_id === 587 && item.name === "HyperShift") {
+          // Check specifically for HyperShift Lvl5 by favorite_id
+          if (item.favorite_id === 587 && item.name === "HyperShift Lvl5") {
             const card = `
               <div class="col-6 col-md-4 col-lg-3">
                 <a href="/item/${itemType}/${encodeURIComponent(
@@ -1696,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="position-relative">
                       <div class="media-container">
                         <video 
-                          src="/assets/images/items/hyperchromes/HyperShift.webm" 
+                          src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" 
                           class="card-img-top" 
                           playsinline 
                           muted 
@@ -1764,8 +1764,8 @@ document.addEventListener("DOMContentLoaded", function () {
       driftCards.forEach((card) => {
         const video = card.querySelector("video");
         const thumbnail = card.querySelector(".thumbnail");
-        // Only remove videos that aren't HyperShift
-        if (video && !video.src.includes("HyperShift")) {
+        // Only remove videos that aren't HyperShift Lvl5
+        if (video && !video.src.includes("HyperShift Lvl5")) {
           video.remove();
         }
         if (thumbnail) {

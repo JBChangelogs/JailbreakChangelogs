@@ -585,8 +585,8 @@ app.get("/item/:type/:item", async (req, res) => {
     let embedImageUrl;
     if (item.type === "Drift") {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
-    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.gif`;
+    } else if (item.type === "HyperChrome" && item.name === "HyperShift Lvl5") {
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift Lvl5.gif`;
     } else if (item.type === "Horn") {
       embedImageUrl = `https://jailbreakchangelogs.xyz/assets/audios/horn_thumbnail.webp`;
     } else {
@@ -651,8 +651,8 @@ app.get("/item/:type/:item", async (req, res) => {
     let image_url;
     if (item.type === "Drift") {
       image_url = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
-    } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm`;
+    } else if (item.type === "HyperChrome" && item.name === "HyperShift Lvl5") {
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift Lvl5.webm`;
     } else {
       const pluralType = `${item.type.toLowerCase()}s`;
       image_url = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;

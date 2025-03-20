@@ -282,8 +282,8 @@ function getItemImagePath(item) {
   if (!item)
     return "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
 
-  if (item.name === "HyperShift") {
-    return "/assets/images/items/hyperchromes/HyperShift.gif";
+  if (item.name === "HyperShift Lvl5") {
+    return "/assets/images/items/hyperchromes/HyperShift Lvl5.gif";
   }
 
   if (item.type === "Horn") {

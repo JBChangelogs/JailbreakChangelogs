@@ -880,11 +880,11 @@ function getItemMediaElement(item, options = {}) {
       </div>`;
   }
 
-  // Special case for HyperShift
-  if (item.name === "HyperShift" && item.type === "HyperChrome") {
+  // Special case for HyperShift Lvl5
+  if (item.name === "HyperShift Lvl5" && item.type === "HyperChrome") {
     return `
       <div class="media-container ${containerClass}" style="aspect-ratio: ${aspectRatio};">
-        <img src="/assets/images/items/hyperchromes/HyperShift.gif"
+        <img src="/assets/images/items/hyperchromes/HyperShift Lvl5.gif"
              class="${imageClass || "img-fluid rounded thumbnail"}"
              alt="${item.name}"
              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"

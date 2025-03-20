@@ -24,7 +24,7 @@ function isValidHyperChrome(name) {
     "HyperPurple",
     "HyperRed",
     "HyperYellow",
-    "HyperShift",
+    "HyperShift Lvl5",
   ];
 
   // Remove "Level X" and normalize case for comparison
@@ -100,8 +100,8 @@ async function loadSimilarItemsByName(searchName) {
 
     let similarItems = [];
 
-    // Add HyperShift suggestion for HyperChromes
-    if (isHyperChrome && searchName !== "HyperShift") {
+    // Add HyperShift Lvl5 suggestion for HyperChromes
+    if (isHyperChrome && searchName !== "HyperShift Lvl5") {
       // Extract level number if present
       const levelMatch = searchName.match(/Level\s+(\d+)$/);
       const level = levelMatch ? parseInt(levelMatch[1]) : 0;
@@ -114,7 +114,7 @@ async function loadSimilarItemsByName(searchName) {
       if (isHighLevel || showForLowerLevel) {
         const hyperShift = items.find(
           (item) =>
-            item.name === "HyperShift" &&
+            item.name === "HyperShift Lvl5" &&
             item.type.toLowerCase() === "hyperchrome"
         );
         if (hyperShift) {
@@ -132,10 +132,10 @@ async function loadSimilarItemsByName(searchName) {
           }
         }
 
-        // Skip HyperShift if already added
+        // Skip HyperShift Lvl5 if already added
         if (
-          item.name === "HyperShift" &&
-          similarItems.some((i) => i.name === "HyperShift")
+          item.name === "HyperShift Lvl5" &&
+          similarItems.some((i) => i.name === "HyperShift Lvl5")
         ) {
           return false;
         }
@@ -179,7 +179,7 @@ async function loadSimilarItemsByName(searchName) {
         return simB - simA;
       });
 
-    // Combine HyperShift (if added) with other similar items
+    // Combine HyperShift Lvl5 (if added) with other similar items
     similarItems = [...similarItems, ...otherSimilarItems].slice(0, 4);
 
     const similarItemsContainer = document.getElementById("similar-items");
@@ -475,12 +475,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (currentItem.type.toLowerCase() === "hyperchrome") {
         score += weights.hyperchrome;
 
-        // Even more points if one is HyperShift
+        // Even more points if one is HyperShift Lvl5
         if (
-          currentItem.name === "HyperShift" ||
-          comparisonItem.name === "HyperShift"
+          currentItem.name === "HyperShift Lvl5" ||
+          comparisonItem.name === "HyperShift Lvl5"
         ) {
-          score += weights.hyperchrome * 0.5; // Additional bonus for HyperShift
+          score += weights.hyperchrome * 0.5; // Additional bonus for HyperShift Lvl5
         }
       }
     }
@@ -582,15 +582,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>`;
     }
 
-    // Special case for HyperShift
-    if (item.name === "HyperShift" && item.type === "HyperChrome") {
+    // Special case for HyperShift Lvl5
+    if (item.name === "HyperShift Lvl5" && item.type === "HyperChrome") {
       return `
         <div class="media-container ${containerClass}">
             <video class="${imageClass || "card-img-top"}"
                    style="width: 100%; height: 100%; object-fit: contain;"
                    autoplay loop muted playsinline>
-              <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
-              <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+              <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" type="video/webm">
+              <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.mp4" type="video/mp4">
             </video>
         </div>`;
     }
@@ -810,11 +810,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         const items = await response.json();
 
-        // For HyperChrome items, check if we should show HyperShift
+        // For HyperChrome items, check if we should show HyperShift Lvl5
         let scoredItems = [];
         if (
           currentItem.type.toLowerCase() === "hyperchrome" &&
-          currentItem.name !== "HyperShift"
+          currentItem.name !== "HyperShift Lvl5"
         ) {
           // Check if it's Level 4 or 5
           const isHighLevel = currentItem.name.match(/Level [45]$/);
@@ -824,7 +824,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (isHighLevel || showForLowerLevel) {
             const hyperShift = items.find(
               (item) =>
-                item.name === "HyperShift" &&
+                item.name === "HyperShift Lvl5" &&
                 item.type.toLowerCase() === "hyperchrome"
             );
             if (hyperShift) {
@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             (item) =>
               item.id !== currentItem.id &&
               !(
-                item.name === "HyperShift" &&
+                item.name === "HyperShift Lvl5" &&
                 item.type.toLowerCase() === "hyperchrome"
               )
           )
@@ -852,7 +852,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }))
           .sort((a, b) => b.similarityScore - a.similarityScore);
 
-        // Combine HyperShift (if added) with top items
+        // Combine HyperShift Lvl5 (if added) with top items
         scoredItems = [...scoredItems, ...otherItems].slice(0, 4);
 
         // Display the similar items
@@ -2122,15 +2122,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Update handleimage function to skip HyperShift
+  // Update handleimage function to skip HyperShift Lvl5
   window.handleimage = function (element) {
-    const isHyperShift =
+    const isHyperShift Lvl5 =
       element.id === "hypershift-video" ||
-      (element.alt === "HyperShift" &&
+      (element.alt === "HyperShift Lvl5" &&
         element.closest(".media-container").querySelector("video"));
 
-    if (isHyperShift) {
-      return; // Don't replace HyperShift video with placeholder
+    if (isHyperShift Lvl5) {
+      return; // Don't replace HyperShift Lvl5 video with placeholder
     }
     element.src =
       "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";

@@ -11,9 +11,9 @@ const tradeId = window.location.pathname.split("/").pop();
 
 // Function to get item image element
 function getItemImageElement(item) {
-  // Special handling for HyperShift
-  if (item.name === "HyperShift") {
-    return `<img src="/assets/images/items/hyperchromes/HyperShift.gif" 
+  // Special handling for HyperShift Lvl5
+  if (item.name === "HyperShift Lvl5") {
+    return `<img src="/assets/images/items/hyperchromes/HyperShift Lvl5.gif" 
                    class="card-img-top" 
                    alt="${item.name}">`;
   }

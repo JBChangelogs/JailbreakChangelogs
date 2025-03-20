@@ -133,16 +133,16 @@ function getItemMediaElement(item, options = {}) {
       </div>`;
   }
 
-  // Special case for HyperShift - moved up before default case
-  if (item.name === "HyperShift" && item.type === "HyperChrome") {
+  // Special case for HyperShift Lvl5 - moved up before default case
+  if (item.name === "HyperShift Lvl5" && item.type === "HyperChrome") {
     return `
       <div class="media-container position-relative ${containerClass}">
         ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
         <video class="${imageClass || "card-img-top"}"
                style="width: 100%; height: 100%; object-fit: contain;"
                autoplay loop muted playsinline>
-          <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
-          <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+          <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" type="video/webm">
+          <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.mp4" type="video/mp4">
         </video>
       </div>`;
   }
@@ -1467,9 +1467,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const imageQueue = allItems
       .filter(
         (item) =>
-          // Exclude drifts, horns, and HyperShift
+          // Exclude drifts, horns, and HyperShift Lvl5
           !["drift", "horn"].includes(item.type.toLowerCase()) &&
-          !(item.name === "HyperShift" && item.type === "HyperChrome")
+          !(item.name === "HyperShift Lvl5" && item.type === "HyperChrome")
       )
       .map((item) => {
         const itemType = item.type.toLowerCase();
@@ -1645,12 +1645,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Default Image
 window.handleimage = function (element) {
-  const isHyperShift =
+  const isHyperShift Lvl5 =
     element.id === "hypershift-video" ||
-    (element.alt === "HyperShift" &&
+    (element.alt === "HyperShift Lvl5" &&
       element.closest(".media-container")?.querySelector("video"));
 
-  if (isHyperShift) {
+  if (isHyperShift Lvl5) {
     return;
   }
 
