@@ -340,9 +340,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlPath = window.location.pathname.split("/");
       const urlType = urlPath[2];
       const rawItemName = urlPath.pop();
+      // Convert hyphens to spaces before any other processing
       const itemName = decodeURIComponent(rawItemName)
         .trim()
-        .replace(/\s+/g, " ");
+        .replace(/-/g, " ")  // Convert hyphens to spaces first
+        .replace(/\s+/g, " "); // Then normalize any resulting multiple spaces
 
       if (!urlType || !itemName) {
         throw new Error("Invalid URL format");

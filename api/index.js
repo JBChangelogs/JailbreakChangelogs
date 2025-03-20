@@ -538,6 +538,16 @@ app.get("/item/:type/:item", async (req, res) => {
   let itemType = decodeURIComponent(req.params.type).trim().toLowerCase();
   const formattedUrlType = itemType.charAt(0).toUpperCase() + itemType.slice(1);
 
+  // Check if URL uses spaces instead of hyphens and redirect if needed
+  const hasSpaces = itemName.includes(" ");
+  if (hasSpaces) {
+    const hyphenatedName = itemName.replace(/\s+/g, "-");
+    return res.redirect(301, `/item/${itemType}/${hyphenatedName}`);
+  }
+
+  // Convert hyphens back to spaces BEFORE making the API request
+  itemName = itemName.replace(/-/g, " ");
+
   const apiUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
     itemName
   )}&type=${itemType}`;
