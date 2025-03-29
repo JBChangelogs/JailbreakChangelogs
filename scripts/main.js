@@ -545,8 +545,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-function formatStamp(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000);
+function formatStamp(timestamp) {
+  const date = new Date(timestamp);
   return date.toLocaleString(undefined, {
     weekday: "long",
     year: "numeric",
@@ -560,12 +560,12 @@ function formatStamp(unixTimestamp) {
 
 // Function to check version
 function checkWebsiteVersion() {
-  fetch("https://api3.jailbreakchangelogs.xyz/version/website")
+  fetch("https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/main")
     .then((response) => response.json())
     .then((data) => {
       const transformedData = {
-        version: data.version,
-        date: formatStamp(data.last_updated),
+        version: data.sha.substring(0, 7), // Get first 7 characters of commit hash
+        date: formatStamp(new Date(data.commit.committer.date).getTime())
       };
       updateVersionDisplay(transformedData);
     })
