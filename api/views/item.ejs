@@ -380,6 +380,11 @@
         <div class="tab-pane fade show active" id="details" role="tabpanel">
           <div id="item-container">
             <!-- Item details will be loaded here -->
+            <div class="item-header d-flex align-items-center mb-2">
+              <h1 class="mb-1 me-3" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; font-size: 2rem;">
+                <%= item.name %> - <%= item.type %>
+              </h1>
+            </div>
           </div>
         </div>
 
@@ -429,7 +434,7 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.54/scripts/item.min.js"></script>
+    <script src="/scripts/item.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.29/scripts/comments.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.50/scripts/main.min.js"></script>
   </body>

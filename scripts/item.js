@@ -1377,9 +1377,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                       <div class="col-md-7 p-3">
                           <!-- Item Title and Badge Container -->
                           <div class="item-header d-flex align-items-center mb-2">
-                             <h1 class="mb-1 me-3 h2" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px;">${
-                               item.name
-                             }</h1>
+                            <h1 class="mb-1 me-3" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; font-size: 2rem;">${
+                              item.name
+                            }</h1>
                               ${badgeContainerHtml}
                           </div>
                            ${
