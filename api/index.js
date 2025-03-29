@@ -1266,17 +1266,6 @@ app.get("/tradetracker", (req, res) => {
   });
 });
 
-app.get("/roadmap", (req, res) => {
-  res.render("roadmap", {
-    title: "Roadmap - Changelogs",
-    logoUrl:
-      "https://jailbreakchangelogs.xyz/assets/logos/Banner_Background.webp",
-    logoAlt: "Roadmap Page Logo",
-    MIN_TITLE_LENGTH,
-    MIN_DESCRIPTION_LENGTH,
-  });
-});
-
 app.get("/redeem", (req, res) => {
   res.render("redeem", {
     title: "Reedem A Code - Changelogs",
