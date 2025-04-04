@@ -140,16 +140,34 @@ body {
   overflow: hidden;
 }
 .items-card {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: auto; /* Change from 100% to auto */
-  position: relative;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transform: translateY(0);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
 }
+
+/* Ensure items list uses grid with equal height rows */
+#items-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+#items-list > div {
+  height: 100%;
+}
+
+/* Make sure card body takes up remaining space */
+.items-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* If there's a card footer, ensure it stays at bottom */
+.items-card .card-footer {
+  margin-top: auto;
+}
+
 .items-card::before {
   content: "";
   position: absolute;

@@ -1,5 +1,5 @@
 // Constants
-const API_BASE_URL = "https://api3.jailbreakchangelogs.xyz";
+const API_BASE_URL = "https://api.jailbreakchangelogs.xyz";
 const USERS_PER_PAGE = 15;
 let currentPage = 1;
 let allUsers = [];

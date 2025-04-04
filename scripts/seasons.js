@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function fetchAllSeasons() {
-    return fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/seasons/list", {
+    return fetchWithTimeout("https://api.jailbreakchangelogs.xyz/seasons/list", {
       headers: {
         "Content-Type": "application/json",
         Origin: "https://jailbreakchangelogs.xyz",

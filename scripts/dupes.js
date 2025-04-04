@@ -196,7 +196,7 @@ async function searchItems(searchTerm, type = "duper") {
   } else {
     try {
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/items/list"
+        "https://api.jailbreakchangelogs.xyz/items/list"
       );
       if (!response.ok) throw new Error("Failed to fetch items");
       const items = await response.json();
@@ -286,7 +286,7 @@ async function getItemByName(itemName, itemId, itemType = null) {
     // If we have itemId, prefer that for lookup
     if (itemId) {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/items/get?id=${itemId}`
+        `https://api.jailbreakchangelogs.xyz/items/get?id=${itemId}`
       );
       if (!response.ok) throw new Error("Failed to fetch item");
       return await response.json();
@@ -296,7 +296,7 @@ async function getItemByName(itemName, itemId, itemType = null) {
     if (!itemName) return null;
 
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/items/list"
+      "https://api.jailbreakchangelogs.xyz/items/list"
     );
     if (!response.ok) throw new Error("Failed to fetch items");
     const items = await response.json();
@@ -400,7 +400,7 @@ async function calculateDupe() {
   let selectedItemForReport = null;
   if (itemName) {
     try {
-      const searchUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+      const searchUrl = `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
         itemName
       )}${itemType ? `&type=${encodeURIComponent(itemType)}` : ""}`;
 
@@ -438,7 +438,7 @@ async function calculateDupe() {
       // Now use the correct item ID for fetching dupes
       if (selectedItemForReport.id) {
         const dupesResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/dupes/get?id=${selectedItemForReport.id}`
+          `https://api.jailbreakchangelogs.xyz/dupes/get?id=${selectedItemForReport.id}`
         );
 
         if (dupesResponse.ok) {
@@ -1258,7 +1258,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
       // Fetch item details using the ID
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/items/get?id=${itemId}`
+        `https://api.jailbreakchangelogs.xyz/items/get?id=${itemId}`
       );
       if (!response.ok) throw new Error("Failed to fetch item");
       const item = await response.json();
@@ -1362,7 +1362,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 async function fetchDupesList() {
   try {
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/dupes/list"
+      "https://api.jailbreakchangelogs.xyz/dupes/list"
     );
     if (!response.ok) throw new Error("Failed to fetch dupes list");
     dupesList = await response.json();
@@ -1376,7 +1376,7 @@ async function fetchDupesList() {
 async function loadAllItems() {
   try {
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/items/list"
+      "https://api.jailbreakchangelogs.xyz/items/list"
     );
     if (!response.ok) throw new Error("Failed to fetch items");
     allItems = await response.json();
@@ -1442,7 +1442,7 @@ async function submitDupeReport() {
     };
 
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/dupes/report",
+      "https://api.jailbreakchangelogs.xyz/dupes/report",
       {
         method: "POST",
         headers: {

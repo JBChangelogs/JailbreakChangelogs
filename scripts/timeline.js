@@ -3,7 +3,7 @@ $(document).ready(function () {
   const loadingOverlay = document.getElementById("loading-overlay");
 
   // API endpoint for fetching changelogs
-  const apiUrl = "https://api3.jailbreakchangelogs.xyz/changelogs/list";
+  const apiUrl = "https://api.jailbreakchangelogs.xyz/changelogs/list";
 
   // jQuery selectors for important elements
   const $timeline = $("#timeline");

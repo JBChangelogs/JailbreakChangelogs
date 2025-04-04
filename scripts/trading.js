@@ -24,7 +24,7 @@ async function canCreateTradeAd() {
 
   try {
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
     );
     if (!response.ok) throw new Error("Failed to fetch user data");
 
@@ -378,7 +378,7 @@ let filteredItems = [];
 async function loadItems() {
   try {
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/items/list"
+      "https://api.jailbreakchangelogs.xyz/items/list"
     );
     allItems = await response.json();
 
@@ -1260,7 +1260,7 @@ async function deleteTradeAd(tradeId) {
     }
 
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
+      `https://api.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
       {
         method: "DELETE", // Changed from implicit GET to explicit DELETE
       }
@@ -1300,7 +1300,7 @@ async function editTradeAd(tradeId) {
 
     // Get user data from token
     const userResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
     );
     if (!userResponse.ok) {
       console.error("Failed to fetch user data:", userResponse.status);
@@ -1310,7 +1310,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1478,7 +1478,7 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    const apiUrl = `https://api3.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}&nocache=true`;
+    const apiUrl = `https://api.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}&nocache=true`;
 
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
@@ -1565,7 +1565,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/trades/list?nocache=true"
+      "https://api.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
@@ -1749,7 +1749,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function fetchItemDetails(id) {
   try {
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/items/get?id=${id}`
+      `https://api.jailbreakchangelogs.xyz/items/get?id=${id}`
     );
     return await response.json();
   } catch (error) {
@@ -1761,7 +1761,7 @@ async function fetchItemDetails(id) {
 async function fetchUserDetails(userId) {
   try {
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}`
+      `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}`
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -2514,7 +2514,7 @@ async function createTradeAd() {
 
     // Make API call to create trade
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/trades/add",
+      "https://api.jailbreakchangelogs.xyz/trades/add",
       {
         method: "POST",
         headers: {

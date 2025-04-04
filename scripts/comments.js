@@ -207,7 +207,7 @@ class CommentsManager {
     if (this.type !== "changelog" && this.itemName) {
       try {
         const itemResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+          `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
             this.itemName
           )}&type=${this.type}`
         );
@@ -251,7 +251,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}`,
+        `https://api.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -423,7 +423,7 @@ class CommentsManager {
       // Check ownership
       if (token) {
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
         );
         if (response.ok) {
           const userData = await response.json();
@@ -566,7 +566,7 @@ class CommentsManager {
     if (token) {
       try {
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
         );
         if (response.ok) {
           const userData = await response.json();
@@ -691,7 +691,7 @@ class CommentsManager {
   async fetchUserDetails(userId) {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}`
       );
 
       // If user is not found (404), return default deleted user data
@@ -894,7 +894,7 @@ class CommentsManager {
 
     try {
       const userResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
       );
 
       if (!userResponse.ok) {
@@ -913,7 +913,7 @@ class CommentsManager {
       };
 
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/comments/add",
+        "https://api.jailbreakchangelogs.xyz/comments/add",
         {
           method: "POST",
           headers: {
@@ -957,7 +957,7 @@ class CommentsManager {
     try {
       // First get user data to get the author
       const userResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
       );
 
       if (!userResponse.ok) {
@@ -968,7 +968,7 @@ class CommentsManager {
 
       // Now send delete request with correct field names
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/comments/delete",
+        "https://api.jailbreakchangelogs.xyz/comments/delete",
         {
           method: "DELETE",
           headers: {
@@ -1030,7 +1030,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/comments/edit",
+        "https://api.jailbreakchangelogs.xyz/comments/edit",
         {
           method: "POST",
           headers: {
@@ -1061,7 +1061,7 @@ class CommentsManager {
 
     try {
       const tradeResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
+        `https://api.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
       );
       if (!tradeResponse.ok) return false;
 

@@ -57,7 +57,7 @@ async function deleteTradeAd(tradeId) {
     }
 
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
+      `https://api.jailbreakchangelogs.xyz/trades/delete?id=${tradeId}&token=${token}&nocache=true`,
       {
         method: "DELETE",
       }
@@ -213,7 +213,7 @@ async function loadTradeData() {
   try {
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
 
     if (!tradeResponse.ok) {
@@ -224,7 +224,7 @@ async function loadTradeData() {
 
     // Fetch author details
     const authorResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get?id=${trade.author}`
+      `https://api.jailbreakchangelogs.xyz/users/get?id=${trade.author}`
     );
     const author = await authorResponse.json();
 
@@ -248,7 +248,7 @@ async function loadTradeData() {
     // First fetch all items and count occurrences
     const offeringItems = await Promise.all(
       offeringIds.map((id) =>
-        fetch(`https://api3.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
+        fetch(`https://api.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
           (res) => res.json()
         )
       )
@@ -273,7 +273,7 @@ async function loadTradeData() {
 
     const requestingItems = await Promise.all(
       requestingIds.map((id) =>
-        fetch(`https://api3.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
+        fetch(`https://api.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
           (res) => res.json()
         )
       )

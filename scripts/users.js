@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const response = await fetch(
-          "https://api3.jailbreakchangelogs.xyz/users/description/update",
+          "https://api.jailbreakchangelogs.xyz/users/description/update",
           {
             method: "POST",
             headers: {
@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Get user settings first
       const settingsResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       } else {
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${userId}`
+          `https://api.jailbreakchangelogs.xyz/users/background/get?user=${userId}`
         );
 
         if (response.ok) {
@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // First get user data for member since date
       const userResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/get/?id=${userId}&nocache=true`
+        `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}&nocache=true`
       );
 
       // Handle 404 - user not found
@@ -669,7 +669,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Then get bio data
       const bioResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -955,7 +955,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
+        `https://api.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
 
       if (!response.ok) {
@@ -1029,7 +1029,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 imageUrl = `/assets/images/seasons/${comment.item_id}/10.webp`;
                 viewPath = `/seasons/${comment.item_id}`;
                 const seasonResponse = await fetch(
-                  `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${comment.item_id}`
+                  `https://api.jailbreakchangelogs.xyz/seasons/get?season=${comment.item_id}`
                 );
                 if (seasonResponse.ok) {
                   const seasonData = await seasonResponse.json();
@@ -1042,7 +1042,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 imageUrl = `/assets/images/changelogs/${comment.item_id}.webp`;
                 viewPath = `/changelogs/${comment.item_id}`;
                 const changelogResponse = await fetch(
-                  `https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${comment.item_id}`
+                  `https://api.jailbreakchangelogs.xyz/changelogs/get?id=${comment.item_id}`
                 );
                 if (changelogResponse.ok) {
                   const changelogData = await changelogResponse.json();
@@ -1061,7 +1061,7 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             // Handle regular items
             const itemResponse = await fetch(
-              `https://api3.jailbreakchangelogs.xyz/items/get?type=${comment.item_type.toLowerCase()}&id=${comment.item_id}`
+              `https://api.jailbreakchangelogs.xyz/items/get?type=${comment.item_type.toLowerCase()}&id=${comment.item_id}`
             );
         
             if (itemResponse.ok) {
@@ -1330,7 +1330,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserFollowers(userId) {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
       );
 
       if (response.status === 404) {
@@ -1347,7 +1347,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Check each follower to see if they still exist
       for (const user of followers) {
         const userCheckResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.follower_id}`
+          `https://api.jailbreakchangelogs.xyz/users/get/?id=${user.follower_id}`
         );
         if (userCheckResponse.ok) {
           validUsers.push(user);
@@ -1364,7 +1364,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserFollowing(userId) {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/following/get?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/following/get?user=${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1388,7 +1388,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Check each user to see if they still exist
       for (const user of following) {
         const userCheckResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/?id=${user.following_id}`
+          `https://api.jailbreakchangelogs.xyz/users/get/?id=${user.following_id}`
         );
         if (userCheckResponse.ok) {
           validUsers.push(user);
@@ -1410,7 +1410,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const targetUserId = pathSegments[2]; // This gets the ID from /users/{id}
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/followers/add`,
+        `https://api.jailbreakchangelogs.xyz/users/followers/add`,
         {
           method: "POST",
           headers: {
@@ -1461,7 +1461,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const user = getCookie("token");
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/followers/remove`,
+        `https://api.jailbreakchangelogs.xyz/users/followers/remove`,
         {
           method: "DELETE",
           headers: {
@@ -1589,7 +1589,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // First check user settings
       const settingsResponse = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}`
       );
       if (!settingsResponse.ok) {
         throw new Error("Failed to fetch user settings");
@@ -1618,7 +1618,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
       );
 
       if (response.status === 404) {
@@ -1641,7 +1641,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Fetch full item details for each favorite
       const itemPromises = favorites.map(async (fav) => {
         const itemResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/items/get?id=${fav.item_id}`
+          `https://api.jailbreakchangelogs.xyz/items/get?id=${fav.item_id}`
         );
         if (!itemResponse.ok) return null;
         const item = await itemResponse.json();
@@ -1847,7 +1847,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/favorites/${
+        `https://api.jailbreakchangelogs.xyz/favorites/${
           isFavorited ? "remove" : "add"
         }`,
         {

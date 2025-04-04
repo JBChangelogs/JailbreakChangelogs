@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function fetchFollowing(userId) {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/following/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/following/get?user=${userId}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const followedUser of following) {
       try {
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get?id=${followedUser.following_id}`
+          `https://api.jailbreakchangelogs.xyz/users/get?id=${followedUser.following_id}`
         );
 
         if (response.status === 403) {

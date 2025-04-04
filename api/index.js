@@ -135,7 +135,7 @@ app.set("views", path.join(__dirname, "views")); // Set the directory for your E
 app.get("/changelogs", async (req, res) => {
   try {
     const latestResponse = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/changelogs/latest",
+      "https://api.jailbreakchangelogs.xyz/changelogs/latest",
       {
         headers: {
           "Content-Type": "application/json",
@@ -169,13 +169,13 @@ app.get("/changelogs/:changelog", async (req, res) => {
   try {
     // Use Promise.race with timeout for parallel requests
     const [latestResponse, requestedResponse] = await Promise.all([
-      fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/changelogs/latest", {
+      fetchWithTimeout("https://api.jailbreakchangelogs.xyz/changelogs/latest", {
         headers: {
           "Content-Type": "application/json",
           Origin: "https://jailbreakchangelogs.xyz",
         },
       }),
-      fetchWithTimeout(`https://api3.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`, {
+      fetchWithTimeout(`https://api.jailbreakchangelogs.xyz/changelogs/get?id=${changelogId}`, {
         headers: {
           "Content-Type": "application/json",
           Origin: "https://jailbreakchangelogs.xyz",
@@ -284,8 +284,8 @@ app.get("/seasons", async (req, res) => {
 
 app.get("/seasons/:season", async (req, res) => {
   const seasonId = req.params.season;
-  const apiUrl = `https://api3.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
-  const seasonsListUrl = 'https://api3.jailbreakchangelogs.xyz/seasons/list';
+  const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
+  const seasonsListUrl = 'https://api.jailbreakchangelogs.xyz/seasons/list';
   const latestSeason = 25;
 
   try {
@@ -391,7 +391,7 @@ app.get("/seasons/:season", async (req, res) => {
 app.get("/trading", async (req, res) => {
   try {
     // Check if trades API is available before rendering the page
-    const tradesResponse = await fetchWithTimeout("https://api3.jailbreakchangelogs.xyz/trades/list", {
+    const tradesResponse = await fetchWithTimeout("https://api.jailbreakchangelogs.xyz/trades/list", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -463,7 +463,7 @@ app.get("/bot", (req, res) => {
 app.get("/values", async (req, res) => {
   try {
     const response = await fetchWithTimeout(
-      "https://api3.jailbreakchangelogs.xyz/items/list",
+      "https://api.jailbreakchangelogs.xyz/items/list",
       {
         method: "GET",
         headers: {
@@ -561,7 +561,7 @@ app.get("/item/:type/:item", async (req, res) => {
   itemName = itemName.replace(/-/g, " ");
 
   // Use original itemType (with spaces) for API request
-  const apiUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`;
+  const apiUrl = `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -731,7 +731,7 @@ app.get("/item/:item", async (req, res) => {
   const itemName = decodeURIComponent(req.params.item);
 
   // First, fetch the item without type to maintain backward compatibility
-  const apiUrl = `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+  const apiUrl = `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
     itemName
   )}`;
 
@@ -841,7 +841,7 @@ app.get("/users/:user/followers", async (req, res) => {
     if (token) {
       try {
         const userDataResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -861,7 +861,7 @@ app.get("/users/:user/followers", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -901,7 +901,7 @@ app.get("/users/:user/followers", async (req, res) => {
 
     // Step 4: Fetch user data
     const userResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get?id=${requestedUser}`,
+      `https://api.jailbreakchangelogs.xyz/users/get?id=${requestedUser}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -958,7 +958,7 @@ app.get("/users/:user/following", async (req, res) => {
     if (token) {
       try {
         const userDataResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -978,7 +978,7 @@ app.get("/users/:user/following", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -1018,7 +1018,7 @@ app.get("/users/:user/following", async (req, res) => {
 
     // Step 4: Fetch user data
     const userResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get?id=${requestedUser}`,
+      `https://api.jailbreakchangelogs.xyz/users/get?id=${requestedUser}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -1099,7 +1099,7 @@ app.get("/users/:user", async (req, res) => {
   try {
     // Step 1: Get user data from API
     const userResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get?id=${user}`,
+      `https://api.jailbreakchangelogs.xyz/users/get?id=${user}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -1133,7 +1133,7 @@ app.get("/users/:user", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/settings?user=${user}`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${user}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -1160,7 +1160,7 @@ app.get("/users/:user", async (req, res) => {
     if (token) {
       try {
         const tokenResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
           {
             headers: {
               "Content-Type": "application/json",

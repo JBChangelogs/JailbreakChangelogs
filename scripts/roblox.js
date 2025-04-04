@@ -57,16 +57,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const token = getCookie("token");
     let url;
     if (token) {
-      url = `https://api3.jailbreakchangelogs.xyz/auth/roblox?code=${code}&owner=${token}`;
-    } else {
-      window.location.href = "/";
-    }
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+      url = 'https://api.jailbreakchangelogs.xyz/auth/roblox';
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: code,
+          origin: "https://jailbreakchangelogs.xyz",
+          owner: token
+        })
+      })
       .then((response) => {
         if (!response.ok) {
           throw new Error("network");
@@ -90,5 +92,8 @@ document.addEventListener("DOMContentLoaded", function () {
           window.location.href = "/";
         }, 4500);
       });
+    } else {
+      window.location.href = "/";
+    }
   }
 });

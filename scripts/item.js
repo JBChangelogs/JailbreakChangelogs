@@ -71,7 +71,7 @@ function calculateNameSimilarity(str1, str2) {
 async function loadSimilarItemsByName(searchName) {
   try {
     const response = await fetch(
-      "https://api3.jailbreakchangelogs.xyz/items/list"
+      "https://api.jailbreakchangelogs.xyz/items/list"
     );
     if (!response.ok) throw new Error("Failed to fetch items");
 
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
+        `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
           itemName
         )}&type=${encodeURIComponent(itemType)}`,
         {
@@ -815,7 +815,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadSimilarItems(currentItem) {
       try {
         const response = await fetch(
-          "https://api3.jailbreakchangelogs.xyz/items/list"
+          "https://api.jailbreakchangelogs.xyz/items/list"
         );
         const items = await response.json();
 
@@ -1485,7 +1485,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Initialize chart container first
         const chartContainer = document.querySelector(".chart-container");
 
-        fetch(`https://api3.jailbreakchangelogs.xyz/item/history?id=${item.id}`)
+        fetch(`https://api.jailbreakchangelogs.xyz/item/history?id=${item.id}`)
           .then((response) => {
             if (!response.ok) {
               throw new Error("No history found");
@@ -1834,7 +1834,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
               // Fetch data
               fetch(
-                `https://api3.jailbreakchangelogs.xyz/item/history?id=${item.id}`
+                `https://api.jailbreakchangelogs.xyz/item/history?id=${item.id}`
               )
                 .then((response) => response.json())
                 .then((data) => {
@@ -1940,7 +1940,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Fetch favorites count
-    fetch(`https://api3.jailbreakchangelogs.xyz/item/favorites?id=${item.id}`)
+    fetch(`https://api.jailbreakchangelogs.xyz/item/favorites?id=${item.id}`)
       .then((response) => response.json())
       .then((count) => {
         const favoritesCount = document.getElementById("favorites-count");

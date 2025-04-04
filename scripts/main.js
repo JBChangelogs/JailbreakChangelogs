@@ -126,7 +126,7 @@ async function validateUserSession(token) {
     }
 
     const response = await fetch(
-      `https://api3.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
       {
         signal: AbortSignal.timeout(1000),
       }
@@ -377,7 +377,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           submitBtn.disabled = true;
 
           // Submit the issue
-          fetch("https://api3.jailbreakchangelogs.xyz/issues/add", {
+          fetch("https://api.jailbreakchangelogs.xyz/issues/add", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -601,7 +601,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (token && !isAuthPage) {
     try {
       const response = await fetch(
-        "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
+        "https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token
       );
       if (response.ok) {
         const userData = await response.json();
@@ -783,7 +783,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         '<span class="spinner-border spinner-border-sm"></span> Logging in...';
 
       fetch(
-        "https://api3.jailbreakchangelogs.xyz/users/get/token?token=" + token
+        "https://api.jailbreakchangelogs.xyz/users/get/token?token=" + token
       )
         .then((response) => {
           if (!response.ok) {
@@ -895,7 +895,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const token = getCookie("token");
     if (token) {
       fetch(
-        "https://api3.jailbreakchangelogs.xyz/campaigns/count?campaign=" +
+        "https://api.jailbreakchangelogs.xyz/campaigns/count?campaign=" +
           campaign +
           "&token=" +
           token,
@@ -924,7 +924,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (token) {
       try {
         await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/token/invalidate?session_token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/token/invalidate?session_token=${token}`,
           {
             method: "POST",
             headers: {

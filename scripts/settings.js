@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadSettings() {
     try {
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
         {
           headers: {
             "Cache-Control": "no-cache",
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Load custom banner URL if discord banner is disabled
       if (settings.banner_discord === 0) {
         const bannerResponse = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/background/get?user=${userId}`
+          `https://api.jailbreakchangelogs.xyz/users/background/get?user=${userId}`
         );
         if (bannerResponse.ok) {
           const bannerData = await bannerResponse.json();
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         const token = getCookie("token");
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
           {
             method: "POST",
             headers: {
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
           };
 
           const response = await fetch(
-            `https://api3.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+            `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
             {
               method: "POST",
               headers: {
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       try {
         const response = await fetch(
-          `https://api3.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
+          `https://api.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
             imageUrl || "NONE"
           )}`,
           {
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
       cancelDeleteButton.style.display = "none";
 
       const response = await fetch(
-        `https://api3.jailbreakchangelogs.xyz/users/delete?token=${encodeURIComponent(
+        `https://api.jailbreakchangelogs.xyz/users/delete?token=${encodeURIComponent(
           token
         )}`,
         {
