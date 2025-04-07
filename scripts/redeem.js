@@ -2,6 +2,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const redeemButton = document.getElementById("redeem-button");
   const codeInput = document.getElementById("code-input");
 
+  // Check for code parameter in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const codeParam = urlParams.get('code');
+  
+  if (codeParam) {
+    // Auto-fill the code input
+    codeInput.value = codeParam;
+  }
+
   redeemButton.addEventListener("click", async function () {
     const code = codeInput.value.trim();
 
@@ -42,7 +51,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (response.ok) {
         notyf.success("Code redeemed successfully!");
-        codeInput.value = ""; // Clear input
+        if (!codeParam) {
+          codeInput.value = ""; // Only clear input if it wasn't from URL parameter
+        }
+      } else if (response.status === 404) {
+        notyf.error("Invalid Code");
       } else {
         notyf.error(data.message || "Failed to redeem code");
       }
