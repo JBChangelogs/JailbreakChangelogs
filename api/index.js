@@ -412,7 +412,7 @@ app.get("/trading", async (req, res) => {
 
     res.render("trading", {
       title: "Trading - Changelogs",
-      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Trading Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -438,7 +438,7 @@ app.get("/trading/ad/:tradeId", (req, res) => {
     metaDescription: `View trade details for Trade #${tradeId}. Check item values and trade status.`,
     canonicalUrl: `https://jailbreakchangelogs.xyz/trading/ad/${tradeId}`,
     logoUrl:
-      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
     logoAlt: "Trading Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -486,7 +486,7 @@ app.get("/values", async (req, res) => {
     res.render("values", {
       title: "Roblox Jailbreak Values - Changelogs",
       logoUrl:
-        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Values Page Logo",
       allItems,
       MIN_TITLE_LENGTH,
@@ -513,7 +513,7 @@ app.get("/values/calculator", (req, res) => {
   res.render("calculator", {
     title: "Value Calculator - Changelogs",
     logoUrl:
-      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
     logoAlt: "Values Calculator Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -582,20 +582,20 @@ app.get("/item/:type/:item", async (req, res) => {
           "This item does not exist. Check our values page for a complete list of available items.",
         canonicalUrl: "https://jailbreakchangelogs.xyz/values",
         logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         logoAlt: "Item Page Logo",
         itemName: "Item Not Found",
         itemType,
         formattedUrlType,
         error: true,
         embedImageUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         image_url:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         item: {
           name: "Item Not Found",
           image:
-            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         },
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -651,20 +651,20 @@ app.get("/item/:type/:item", async (req, res) => {
         ...seoData,
         title: seoData.pageTitle,
         logoUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         logoAlt: "Item Page Logo",
         itemName,
         itemType,
         formattedUrlType,
         error: true,
         embedImageUrl:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         image_url:
-          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         item: {
           name: itemName,
           image:
-            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         },
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -688,7 +688,7 @@ app.get("/item/:type/:item", async (req, res) => {
       ...seoData,
       title: seoData.pageTitle,
       logoUrl:
-        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Collab_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Item Page Logo",
       itemName: item.name,
       itemType,
