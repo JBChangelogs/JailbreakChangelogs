@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   loginButton.addEventListener("click", () => {
     console.log("Redirecting to Roblox OAuth...");
-    window.location.href = redirect;
+    window.location.href = test_redirect;
   });
 
   if (window.location.search.includes("code=")) {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const token = getCookie("token");
     let url;
     if (token) {
-      url = 'https://api.jailbreakchangelogs.xyz/auth/roblox';
+      url = 'https://api.testing.jailbreakchangelogs.xyz/auth/roblox';
       fetch(url, {
         method: "POST",
         headers: {
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         body: JSON.stringify({
           code: code,
-          origin: "https://jailbreakchangelogs.xyz",
+          origin: "https://testing.jailbreakchangelogs.xyz",
           owner: token
         })
       })

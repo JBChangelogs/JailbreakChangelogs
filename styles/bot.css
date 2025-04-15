@@ -92,10 +92,6 @@ body.menu-open {
     margin-bottom: 1.25rem;
   }
 
-  .hero-content .bi-discord {
-    font-size: 1.75rem !important; /* Adjust discord icon size */
-  }
-
   .btn-custom {
     width: 100%; /* Full width button */
     max-width: 300px; /* Maximum width */
@@ -108,19 +104,12 @@ body.menu-open {
   .alert {
     font-size: 0.9rem;
   }
-  .bi-exclamation-triangle-fill {
-    font-size: 1rem;
-  }
   .hero {
     padding: 40px 15px; /* Further reduce padding */
   }
 
   .hero-content h1 {
     font-size: 1.5rem; /* Even smaller heading */
-  }
-
-  .hero-content .bi-discord {
-    font-size: 1.5rem !important; /* Smaller discord icon */
   }
 
   .hero-content .lead {

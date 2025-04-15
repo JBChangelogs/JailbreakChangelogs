@@ -20,7 +20,7 @@
     />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="profile" />
     <meta
       property="og:url"
       content="https://jailbreakchangelogs.xyz/users/<%= userData.id %>/followers"
@@ -122,7 +122,6 @@
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
 
-
     <div class="container">
       <nav aria-label="breadcrumb" class="my-3">
         <ol class="breadcrumb">
@@ -159,7 +158,7 @@
 
       <% if (isPrivate && (!user || userData.id !== user.id)) { %>
       <div class="alert alert-info text-center">
-        <i class="bi bi-lock-fill me-2"></i>
+        <!-- <i class="bi bi-lock-fill me-2"></i> -->
         This user has set their followers list to private
       </div>
       <% } else { %>
@@ -178,19 +177,15 @@
     </div>
 
     <%- include('partials/footer') %>
-    <script defer src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/followers.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/main.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.20/scripts/followers.min.js"></script>
+    <script defer src="/scripts/main.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
     <!-- jQuery -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
     <script
       src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"

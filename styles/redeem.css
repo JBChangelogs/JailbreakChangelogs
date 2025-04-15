@@ -165,3 +165,16 @@
     font-size: 0.9rem;
   }
 }
+
+.perks-info {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--accent-color);
+}
+
+.perks-info a {
+  color: var(--accent-color-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}

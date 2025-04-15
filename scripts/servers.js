@@ -116,7 +116,7 @@ function fallbackCopy(text) {
 async function fetchServers() {
   try {
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/servers/list?nocache=true"
+      "https://api.testing.jailbreakchangelogs.xyz/servers/list"
     );
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -403,7 +403,7 @@ async function handleAddServer(event) {
         : Math.floor(
             new Date(form.expiresAt.value).getTime() / 1000
           ).toString(),
-      token: token,
+      owner: token,
     };
 
     // Only validate expiration if not "Never Expires"
@@ -424,7 +424,7 @@ async function handleAddServer(event) {
     }
 
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/servers/add",
+      "https://api.testing.jailbreakchangelogs.xyz/servers/add",
       {
         method: "POST",
         headers: {
@@ -577,14 +577,16 @@ async function deleteServer(serverId) {
 
   try {
     const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/servers/delete?id=${serverId}&token=${encodeURIComponent(
-        token
-      )}`,
+      "https://api.testing.jailbreakchangelogs.xyz/servers/delete",
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          link: serverId,
+          owner: token
+        })
       }
     );
 
@@ -607,8 +609,9 @@ async function deleteServer(serverId) {
 function checkAuthAndShowModal() {
   const token = getCookie("token");
   if (!token) {
-    sessionStorage.setItem("redirectUrl", window.location.href);
-    window.location.href = "/login";
+    // Show login modal instead of redirecting
+    const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+    loginModal.show();
     return;
   }
 

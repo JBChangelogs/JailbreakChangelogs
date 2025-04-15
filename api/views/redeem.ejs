@@ -38,7 +38,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/redeem.min.css"
+      href="/styles/redeem.css"
     />
     <link
       rel="stylesheet"
@@ -82,7 +82,6 @@
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
 
-
     <!-- Main Content -->
     <div class="container-fluid mt-3">
       <nav aria-label="breadcrumb">
@@ -112,17 +111,23 @@
           <h2 class="help-title">How to Get a Code</h2>
           <div class="help-steps">
             <p>
-              1. Visit our Roblox game:
+              1. Join the game
               <a
-                href="https://www.roblox.com/games/104188650191561/Supporter-One"
+                href="https://www.roblox.com/games/104188650191561/Support-Us"
                 target="_blank"
                 rel="noopener noreferrer"
-                >Supporter One</a
+                >here</a
               >
             </p>
             <p>2. Complete the required actions in-game</p>
             <p>3. Copy your unique code</p>
-            <p>4. Paste it here to redeem your rewards</p>
+            <p>4. Paste it here and click Redeem to get your benefits</p>
+            <small>Thank you for supporting us!</small>
+          </div>
+          <div class="perks-info mt-4">
+            <p class="mb-0">Want to see what perks you'll get? 
+              <br><a href="/supporting" class="text-accent">View our supporter tiers</a></br>
+            </p>
           </div>
         </div>
       </div>
@@ -131,11 +136,7 @@
     <%- include('partials/footer') %>
 
     <!-- Scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
       integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE="
@@ -147,7 +148,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/redeem.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/main.min.js"></script>
+    <script src="/scripts/redeem.js"></script>
+    <script src="/scripts/main.js"></script>
   </body>
 </html>

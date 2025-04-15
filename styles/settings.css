@@ -54,7 +54,7 @@
 /* Save Button */
 .save-settings-btn {
   background-color: var(--accent-color);
-  border-color: var(--accent-color);
+  border-color: var (--accent-color);
   color: var(--text-primary);
   padding: 0.75rem 2rem;
   font-weight: 500;
@@ -182,4 +182,43 @@
 .card h3,
 .card h5 {
   color: var(--text-primary);
+}
+
+/* Image Upload Help Styles */
+.image-upload-help {
+  padding: 0.5rem;
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+}
+
+.image-upload-help .text-warning {
+  font-weight: 500;
+}
+
+.upload-sites {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.upload-sites .btn-outline-info {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.upload-sites .btn-outline-info:hover {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+.btn-primary {
+  background-color: var(--button-primary) !important;
+  border-color: var(--button-primary) !important;
+  color: var(--text-body) !important;
+
+  &:hover {
+    background-color: var(--accent-color-light) !important;
+    border-color: var(--button-primary) !important;
+    font-weight: bold;
+  }
 }

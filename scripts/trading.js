@@ -282,8 +282,8 @@ function getItemImagePath(item) {
   if (!item)
     return "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
 
-  if (item.name === "HyperShift Lvl5") {
-    return "/assets/images/items/hyperchromes/HyperShift Lvl5.gif";
+  if (item.name === "HyperShift") {
+    return "/assets/images/items/hyperchromes/HyperShift.gif";
   }
 
   if (item.type === "Horn") {
@@ -879,6 +879,33 @@ function sortModalItems() {
   displayAvailableItems(currentTradeType);
 }
 
+async function updateExpirationOptions() {
+  try {
+    const token = getCookie("token");
+    if (!token) return;
+
+    const response = await fetch(
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+    );
+    const userData = await response.json();
+    const premiumTier = userData.premiumtype || 0;
+    
+    const expirationSelect = document.getElementById("trade-expiration");
+    if (!expirationSelect) return;
+
+    // Default to 6 hours
+    expirationSelect.value = '6';
+    
+    // Enable options based on premium tier
+    Array.from(expirationSelect.options).forEach(option => {
+      const requiredTier = parseInt(option.dataset.premium || 0);
+      option.disabled = requiredTier > premiumTier;
+    });
+  } catch (err) {
+    console.error('Failed to fetch user premium status:', err);
+  }
+}
+
 function parseValue(value) {
   if (typeof value === "number") return value;
   if (!value || value === "N/A") return 0;
@@ -1126,13 +1153,14 @@ function renderTradeItems(tradeType) {
   const itemPositions = new Map();
   const itemCounts = new Map();
 
-  // First pass: count items and record first position
+  // First pass: count items and record first position for this side only
   Object.entries(items).forEach(([index, item]) => {
     if (!item) return;
     const itemKey = `${item.name}-${item.type}`;
     if (!itemPositions.has(itemKey)) {
       itemPositions.set(itemKey, parseInt(index));
     }
+    // Only count items on this side
     itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
   });
 
@@ -1275,10 +1303,67 @@ async function deleteTradeAd(tradeId) {
     notyf.success(
       "Trade advertisement deleted successfully!"
     );
+    cleanupTradePreview();
     await loadTradeAds(); // Refresh the trade ads list
   } catch (error) {
     console.error("Error deleting trade:", error);
     notyf.error("Failed to delete trade advertisement");
+  }
+}
+
+async function makeTradeOffer(tradeId) {
+  try {
+    const token = getCookie("token");
+    if (!token) {
+      notyf.error("Please login to make offers");
+      return;
+    }
+
+    // Get user data to get the user ID
+    const userResponse = await fetch(
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+    );
+    if (!userResponse.ok) {
+      throw new Error("Failed to fetch user data");
+    }
+    const userData = await userResponse.json();
+
+    // Prepare the request body
+    const offerData = {
+      id: parseInt(tradeId),
+      owner: token
+    };
+
+    // Make the offer
+    const response = await fetch(
+      "https://api.testing.jailbreakchangelogs.xyz/trades/offer",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(offerData),
+      }
+    );
+
+    if (response.status === 409) {
+      notyf.warning("You have already made an offer for this trade");
+      return;
+    }
+
+    if (response.status === 403) {
+      notyf.error("Cannot send offer - this user's settings does not allow direct messages");
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    notyf.success("Offer sent successfully!");
+  } catch (error) {
+    console.error("Error making offer:", error);
+    notyf.error("Failed to send offer");
   }
 }
 
@@ -1310,7 +1395,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1351,18 +1436,14 @@ async function editTradeAd(tradeId) {
       previewSection.style.display = "block";
 
       // Load offering items
-      const offeringIds = trade.offering.split(",").filter((id) => id);
-      for (const id of offeringIds) {
-        const item = await fetchItemDetails(id);
+      for (const item of trade.offering) {
         if (item) {
           addItemToTrade(item, "Offer");
         }
       }
 
       // Load requesting items
-      const requestingIds = trade.requesting.split(",").filter((id) => id);
-      for (const id of requestingIds) {
-        const item = await fetchItemDetails(id);
+      for (const item of trade.requesting) {
         if (item) {
           addItemToTrade(item, "Request");
         }
@@ -1400,14 +1481,17 @@ async function editTradeAd(tradeId) {
           <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="#fff" d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-9 11q1.25 0 2.125-.875T15 15t-.875-2.125T12 12t-2.125.875T9 15t.875 2.125T12 18m-6-8h9V6H6z" />
-</svg>Update Trade
+	<path fill="currentColor" d="M5 18.08V19h.92l9.06-9.06l-.92-.92z" opacity="0.3" />
+	<path fill="currentColor" d="M20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83l3.75 3.75zM3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM5.92 19H5v-.92l9.06-9.06l.92.92z" />
+</svg>
           </button>
-          <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
-	<rect width="32" height="32" fill="none" />
-	<path fill="#fff" d="m8.4 17l3.6-3.6l3.6 3.6l1.4-1.4l-3.6-3.6L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4l3.6 3.6L7 15.6zm3.6 5q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
-</svg> Cancel
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteTradeAd('${String(
+            trade.id
+          )}')">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+	<rect width="24" height="24" fill="none" />
+	<path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+</svg>
           </button>
         `;
       }
@@ -1478,18 +1562,19 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    const apiUrl = `https://api.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&token=${token}&nocache=true`;
+    const apiUrl = `https://api.testing.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&nocache=true`;
 
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
       requesting: requestingList.map((item) => item.id).join(","),
       status: selectedStatus,
+      owner: token
     };
 
     const response = await fetch(apiUrl, {
-      method: "POST",
+      method: "POST", 
       headers: {
-        "Content-Type": "application/json",
+      "Content-Type": "application/json",
       },
       body: JSON.stringify(tradeData),
     });
@@ -1500,14 +1585,12 @@ async function updateTradeAd(tradeId) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // Show success toast with a callback for page reload
-    notyf.success("Your trade ad will be updated shortly!", "", {
-      timeOut: 1500,
-      onHidden: function () {
-        // Use window.location.replace instead of modifying URL and using href
-        window.location.replace("/trading");
-      },
-    });
+    // Clean up and refresh
+    cleanupTradePreview();
+    await loadTradeAds();
+    
+    // Show success message
+    notyf.success("Trade advertisement updated successfully!");
   } catch (error) {
     console.error("Error updating trade:", error);
     notyf.error("Failed to update trade advertisement");
@@ -1565,7 +1648,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/trades/list?nocache=true"
+      "https://api.testing.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
@@ -1697,6 +1780,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (availableItemsModal) {
     availableItemsModal.addEventListener("hidden.bs.modal", handleModalClose);
   }
+
+  // Check login status immediately
+  const token = getCookie("token");
+  if (!token) {
+    notyf.error("Please login to create trade advertisements");
+    // Save current URL to redirect back after login
+    localStorage.setItem("redirectAfterLogin", window.location.href);
+  }
+
   // Load items first
   await loadItems();
 
@@ -1711,18 +1803,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Then load trade ads
   await loadTradeAds();
 
-  // Rest of the initialization code...
+  // Check if returning from auth
   const isReturnFromAuth = document.referrer.includes("/roblox");
 
+  // Restore pending trade if it exists
   const pendingTrade = localStorage.getItem("pendingTrade");
   if (pendingTrade) {
     try {
-      const { side1, side2 } = JSON.parse(pendingTrade);
-      side1.forEach((item) => addItemToTrade(item, "Offer"));
-      side2.forEach((item) => addItemToTrade(item, "Request"));
+      const { offering, requesting } = JSON.parse(pendingTrade);
+      offering.forEach(item => addItemToTrade(item, "Offer"));
+      requesting.forEach(item => addItemToTrade(item, "Request"));
       localStorage.removeItem("pendingTrade");
+      
       if (isReturnFromAuth) {
-        previewTrade();
+        notyf.success("Your trade items have been restored");
       }
     } catch (err) {
       console.error("Error restoring pending trade:", err);
@@ -1799,20 +1893,22 @@ async function createTradeAdHTML(trade) {
     }
 
     // Process item counts for multipliers
-    const itemCounts = {};
+    const offeringCounts = {};
+    const requestingCounts = {};
+    
     trade.offering.split(",").forEach((id) => {
-      itemCounts[id] = (itemCounts[id] || 0) + 1;
+      offeringCounts[id] = (offeringCounts[id] || 0) + 1;
     });
     trade.requesting.split(",").forEach((id) => {
-      itemCounts[id] = (itemCounts[id] || 0) + 1;
+      requestingCounts[id] = (requestingCounts[id] || 0) + 1;
     });
 
     // Create item HTML helper function
-    const createItemHTML = async (itemId) => {
+    const createItemHTML = async (itemId, isOffering) => {
       const item = await fetchItemDetails(itemId);
       if (!item) return "";
 
-      const count = itemCounts[itemId];
+      const count = isOffering ? offeringCounts[itemId] : requestingCounts[itemId];
       const multiplierHTML =
         count > 1 ? `<div class="item-multiplier">×${count}</div>` : "";
 
@@ -1859,19 +1955,17 @@ async function createTradeAdHTML(trade) {
       Promise.all(
         [...new Set(trade.offering.split(","))]
           .filter((id) => id)
-          .map(createItemHTML)
+          .map(id => createItemHTML(id, true))
       ),
       Promise.all(
         [...new Set(trade.requesting.split(","))]
           .filter((id) => id)
-          .map(createItemHTML)
+          .map(id => createItemHTML(id, false))
       ),
     ]);
 
     function getFallbackAvatar(username) {
-      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-        username || "Unknown"
-      )}&bold=true&format=svg`;
+      return "assets/default-avatar.png";
     }
 
     tradeAdElement.innerHTML = `
@@ -1955,6 +2049,18 @@ async function createTradeAdHTML(trade) {
 	</g>
 </svg> View Details
           </a>
+           ${
+            authorDetails?.id !== currentUserId 
+            ? `<button class="btn btn-sm btn-success" onclick="makeTradeOffer('${String(trade.id)}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none" />
+                  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                    <path d="M3 12h4l3 8l4-16l3 8h4" />
+                  </g>
+                </svg> Make Offer
+              </button>`
+            : ''
+          }
           ${
             authorDetails?.id === currentUserId
               ? `
@@ -1972,7 +2078,7 @@ async function createTradeAdHTML(trade) {
             )}')">
              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+	<path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
 </svg>
             </button>
           `
@@ -2080,9 +2186,7 @@ async function previewTrade() {
 
   // Get elements and check URL parameters
   const previewSection = document.getElementById("trade-preview");
-  const availableContainer = document.getElementById(
-    "available-items-container"
-  );
+  const availableContainer = document.getElementById("available-items-container");
   const confirmButton = document.getElementById("confirm-trade-btn");
   const urlParams = new URLSearchParams(window.location.search);
   const isEditing = urlParams.has("edit");
@@ -2111,6 +2215,9 @@ async function previewTrade() {
   previewSection.style.display = "block";
   availableContainer.style.display = "none";
   confirmButton.style.display = "none";
+
+  // Update expiration options based on premium tier
+  await updateExpirationOptions();
 
   // Render preview items
   renderPreviewItems("preview-offering-items", offeringItems);
@@ -2155,13 +2262,13 @@ async function previewTrade() {
       <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3m3-10H5V3h10z" />
-</svg> Update Trade
+	<path fill="#fff" d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-9 11q1.25 0 2.125-.875T15 15t-.875-2.125T12 12t-2.125.875T9 15t.875 2.125T12 18m-6-8h9V6H6z" />
+</svg>Update Trade
       </button>
       <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
+       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
 	<rect width="32" height="32" fill="none" />
-	<path fill="currentColor" d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m5.4 21L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z" />
+	<path fill="#fff" d="m8.4 17l3.6-3.6l3.6 3.6l1.4-1.4l-3.6-3.6L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4l3.6 3.6L7 15.6zm3.6 5q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
 </svg>Cancel
       </button>
     `;
@@ -2257,16 +2364,16 @@ function renderPreviewItems(containerId, items) {
                 <rect width="512" height="512" fill="none" />
                 <defs>
                     <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#fcd966" />
-                        <stop offset=".5" stop-color="#fcd966" />
-                        <stop offset="1" stop-color="#fccd34" />
+                      <stop offset="0" stop-color="#fcd966" />
+                      <stop offset=".5" stop-color="#fcd966" />
+                      <stop offset="1" stop-color="#fccd34" />
                     </linearGradient>
                 </defs>
                 <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
-                    <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
-                    <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
-                </path>
-            </svg>`
+                            <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                            <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                          </path>
+                        </svg>`
           : ""
       }
     
@@ -2295,7 +2402,7 @@ function renderPreviewItems(containerId, items) {
                           <rect width="20" height="20" fill="none" />
                           <path
                             fill="currentColor"
-                            d="M15 2H5c-.6 0-1 .4-1 1v14c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1M6.5 16.8c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.4c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m3.5 7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.4c-.7 0-1.2-.6-1.2-1.2s.5-1.4 1.2-1.4s1.2.6 1.2 1.2s-.5 1.4-1.2 1.4m4.8 5.7c0 .7-.6 1.2-1.2 1.2s-1.2-.6-1.2-1.2V12c0-.7.6-1.2 1.2-1.2s1.2.6 1.2 1.2zm-1.3-5.7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2M15 6.4H5V3h10z"
+                            d="M15 2H5c-.6 0-1 .4-1 1v14c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1M6.5 16.8c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m3.5 7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.6c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2m0-3.4c-.7 0-1.2-.6-1.2-1.2s.5-1.4 1.2-1.4s1.2.6 1.2 1.2s-.5 1.4-1.2 1.4m4.8 5.7c0 .7-.6 1.2-1.2 1.2s-1.2-.6-1.2-1.2V12c0-.7.6-1.2 1.2-1.2s1.2.6 1.2 1.2zm-1.3-5.7c-.7 0-1.2-.6-1.2-1.2s.6-1.2 1.2-1.2s1.2.6 1.2 1.2s-.5 1.2-1.2 1.2M15 6.4H5V3h10z"
                           />
                         </svg>
         ${
@@ -2316,7 +2423,6 @@ function renderPreviewItems(containerId, items) {
       </div>
     </div>
   `;
-
   container.innerHTML = `
     <div class="preview-items-grid">
       ${itemsHtml}
@@ -2478,6 +2584,7 @@ async function createTradeAd() {
   if (!(await canCreateTradeAd())) {
     return;
   }
+
   try {
     // Check for authentication token first
     const token = getCookie("token");
@@ -2486,12 +2593,15 @@ async function createTradeAd() {
       return;
     }
 
-    // Get user ID from session storage
-    const userId = localStorage.getItem("userid");
-    if (!userId) {
-      notyf.error("User session not found. Please login again");
-      return;
+    // Get user data to check premium tier
+    const userResponse = await fetch(
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+    );
+    if (!userResponse.ok) {
+      throw new Error("Failed to fetch user data");
     }
+    const userData = await userResponse.json();
+    const premiumTier = userData.premiumtype || 0;
 
     // Get items from both sides
     const offeringList = Object.values(offeringItems).filter((item) => item);
@@ -2505,16 +2615,30 @@ async function createTradeAd() {
       return;
     }
 
+    // Get selected expiration time and validate against premium tier
+    const expirationSelect = document.getElementById("trade-expiration");
+    const selectedOption = expirationSelect.options[expirationSelect.selectedIndex];
+    const requiredTier = parseInt(selectedOption.dataset.premium || 0);
+    
+    if (requiredTier > premiumTier) {
+      notyf.error(`Your premium tier doesn't allow ${selectedOption.text} expiration time`);
+      expirationSelect.classList.add('is-invalid');
+      return;
+    }
+
+    const expires = parseInt(expirationSelect.value);
+
     // Prepare trade data
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
       requesting: requestingList.map((item) => item.id).join(","),
       owner: token,
+      expires: expires
     };
 
     // Make API call to create trade
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/trades/add",
+      "https://api.testing.jailbreakchangelogs.xyz/trades/add",
       {
         method: "POST",
         headers: {
@@ -2523,6 +2647,11 @@ async function createTradeAd() {
         body: JSON.stringify(tradeData),
       }
     );
+
+    if (response.status === 409) {
+      notyf.warning("You already have an active trade advertisement with the selected items");
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -2571,4 +2700,26 @@ async function createTradeAd() {
       // Display items with current filters
       displayAvailableItems(currentTradeType);
     });
+}
+
+function cleanupTradePreview() {
+  // Hide trade preview
+  const previewSection = document.getElementById("trade-preview");
+  if (previewSection) {
+    previewSection.style.display = "none";
+  }
+
+  // Reset trade items
+  resetTrade();
+
+  // Clean URL by removing edit parameter
+  const url = new URL(window.location);
+  url.searchParams.delete("edit");
+  window.history.replaceState({}, "", url);
+
+  // Show confirm trade button
+  const confirmTradeBtn = document.getElementById("confirm-trade-btn");
+  if (confirmTradeBtn) {
+    confirmTradeBtn.style.display = "block";
+  }
 }

@@ -1,5 +1,44 @@
+// Storage utility with fallback
+const storageUtil = {
+  memoryStorage: new Map(),
+  
+  isLocalStorageAvailable() {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  getItem(key) {
+    if (this.isLocalStorageAvailable()) {
+      return localStorage.getItem(key);
+    }
+    return this.memoryStorage.get(key);
+  },
+
+  setItem(key, value) {
+    if (this.isLocalStorageAvailable()) {
+      localStorage.setItem(key, value);
+    } else {
+      this.memoryStorage.set(key, value);
+    }
+  },
+
+  removeItem(key) {
+    if (this.isLocalStorageAvailable()) {
+      localStorage.removeItem(key);
+    } else {
+      this.memoryStorage.delete(key);
+    }
+  }
+};
+
 window.notyf = new Notyf({
-  duration: 4500,
+  duration: 5000,
   position: {
     x: "right",
     y: "bottom",
@@ -81,7 +120,7 @@ window.deleteCookie = function (name) {
 };
 
 const token = getCookie("token");
-const userid = localStorage.getItem("userid"); // Single declaration
+const userid = storageUtil.getItem("userid"); // Single declaration
 
 // session utilities
 const SessionLogger = {
@@ -209,21 +248,21 @@ function clearSessionWithReason(reason) {
     reason,
     previousState: {
       hadToken: !!getCookie("token"),
-      hadUserData: !!localStorage.getItem("user"),
-      hadUserId: !!localStorage.getItem("userid"),
+      hadUserData: !!storageUtil.getItem("user"),
+      hadUserId: !!storageUtil.getItem("userid"),
     },
   });
 
-  localStorage.removeItem("user");
-  localStorage.removeItem("avatar");
-  localStorage.removeItem("userid");
-  localStorage.removeItem("showWelcome");
+  storageUtil.removeItem("user");
+  storageUtil.removeItem("avatar");
+  storageUtil.removeItem("userid");
+  storageUtil.removeItem("showWelcome");
   deleteCookie("token");
 }
 
 function parseUserData() {
   try {
-    const stored = localStorage.getItem("user");
+    const stored = storageUtil.getItem("user");
     return stored ? JSON.parse(stored) : null;
   } catch (e) {
     console.error("Failed to parse user data:", e);
@@ -265,12 +304,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (urlParams.has("report-issue")) {
     if (!token) {
       notyf.error("Please sign in to report issues");
-      localStorage.setItem("reportIssueRedirect", "true");
-      setTimeout(() => {
-        window.location.href =
-          "/login?redirect=" +
-          encodeURIComponent(window.location.pathname + window.location.search);
-      }, 3000);
+      const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+      loginModal.show();
       return;
     } else {
       document.querySelector('[data-bs-target="#reportIssueModal"]')?.click();
@@ -279,8 +314,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   // Check for stored redirect first
-  if (token && localStorage.getItem("reportIssueRedirect")) {
-    localStorage.removeItem("reportIssueRedirect");
+  if (token && storageUtil.getItem("reportIssueRedirect")) {
+    storageUtil.removeItem("reportIssueRedirect");
     window.location.href = "/?report-issue";
     return; // Stop execution here since we're redirecting
   }
@@ -299,11 +334,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       reportIssueBtn.onclick = (e) => {
         e.preventDefault();
         notyf.error("Please sign in to report issues");
-
-        // Redirect to login page after 3 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 3000);
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
       };
     } else {
       // Remove disabled state if it was previously set
@@ -381,7 +413,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Origin: "jailbreakchangelogs.xyz",
+              Origin: "https://jailbreakchangelogs.xyz",
             },
             body: JSON.stringify({
               user: actualUserId,
@@ -438,48 +470,97 @@ document.addEventListener("DOMContentLoaded", async function () {
   const mobileViewUpdates = document.getElementById("mobileViewUpdates");
   const mobileAvatarToggle = document.getElementById("mobileAvatarToggle");
 
+  // Global cache for users list
+  let globalUsersList = null;
+  let fetchingUsersList = false;
+  let usersListPromise = null;
+
+  async function fetchUsersList() {
+    // Return cached data if available
+    if (globalUsersList) {
+      return globalUsersList;
+    }
+
+    // Return existing promise if already fetching
+    if (usersListPromise) {
+      return usersListPromise;
+    }
+
+    // Start new fetch if needed
+    fetchingUsersList = true;
+    usersListPromise = (async () => {
+      try {
+        const response = await fetch('https://api.testing.jailbreakchangelogs.xyz/users/list');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        globalUsersList = await response.json();
+        return globalUsersList;
+      } catch (error) {
+        console.error('Error fetching users list:', error);
+        throw error;
+      } finally {
+        fetchingUsersList = false;
+      }
+    })();
+
+    return usersListPromise;
+  }
+
   window.checkAndSetAvatar = async function (userData) {
-    // Early return for users without avatars
-    if (!userData.id || !userData.avatar || userData.avatar === "None") {
-      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-        userData.username
-      )}&bold=true`;
-    }
-
-    // Check if avatar is animated (starts with a_)
-    const format = userData.avatar.startsWith("a_") ? "gif" : "png";
-    const avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.${format}`;
-
     try {
-      const response = await fetch(avatarUrl, {
-        method: "HEAD",
-        cache: "no-store",
-      });
-
-      if (response.ok) {
-        return avatarUrl;
-      }
-    } catch (error) {
-      // If GIF fails for animated avatar, try PNG as fallback
-      if (format === "gif") {
+      // Only fetch users list if we don't have it cached
+      let completeUserData = null;
+      if (!globalUsersList) {
         try {
-          const pngUrl = avatarUrl.replace(".gif", ".png");
-          const pngResponse = await fetch(pngUrl, {
-            method: "HEAD",
-            cache: "no-store",
-          });
-
-          if (pngResponse.ok) {
-            return pngUrl;
-          }
-        } catch {}
+          const usersList = await fetchUsersList();
+          completeUserData = usersList.find(user => user.id === userData.id);
+        } catch (error) {
+          console.error('Failed to fetch users list:', error);
+          // Continue with provided userData if fetch fails
+        }
+      } else {
+        completeUserData = globalUsersList.find(user => user.id === userData.id);
       }
-    }
+      
+      // If we couldn't find the user in our list, use provided userData
+      if (!completeUserData) {
+        if (!userData.id || !userData.avatar || userData.avatar === "None") {
+          return "assets/default-avatar.png";
+        }
+      }
 
-    // Return fallback avatar if all attempts fail
-    return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      userData.username
-    )}&bold=true`;
+      const finalUserData = completeUserData || userData;
+      const settings = completeUserData?.settings;
+
+      // If using Discord avatar (default or explicitly set)
+      if (!settings || settings.avatar_discord === 1) {
+        if (!finalUserData.id || !finalUserData.avatar || finalUserData.avatar === "None") {
+          return "assets/default-avatar.png";
+        }
+
+        const isAnimated = finalUserData.avatar.startsWith("a_");
+        const hasAnimatedAccess = finalUserData.premiumtype === 3;
+        const format = isAnimated && hasAnimatedAccess ? "gif" : "png";
+        const avatarUrl = `https://cdn.discordapp.com/avatars/${finalUserData.id}/${finalUserData.avatar}.${format}`;
+
+        try {
+          const response = await fetch(avatarUrl, { method: "HEAD" });
+          if (response.ok) {
+            return avatarUrl;
+          }
+        } catch (error) {
+          console.error("Error checking Discord avatar:", error);
+        }
+      } else if (completeUserData && completeUserData.custom_avatar) {
+        return completeUserData.custom_avatar;
+      }
+
+      return "assets/default-avatar.png";
+    } catch (error) {
+      console.error("Error in checkAndSetAvatar:", error);
+      return "assets/default-avatar.png";
+    }
   };
 
   function toggleMenu() {
@@ -608,13 +689,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (userData) {
           // Update all user data at once
           globalUserData = userData;
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("userid", userData.id);
+          storageUtil.setItem("user", JSON.stringify(userData));
+          storageUtil.setItem("userid", userData.id);
 
           if (userData.id && userData.avatar) {
             const avatarUrl = await window.checkAndSetAvatar(userData);
             if (avatarUrl) {
-              localStorage.setItem("avatar", avatarUrl);
+              storageUtil.setItem("avatar", avatarUrl);
 
               // Update profile pictures if they exist
               const profilePicture = document.getElementById("profile-picture");
@@ -798,9 +879,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           deleteCookie("token");
           setCookie("token", token, 7);
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("avatar", avatarURL);
-          localStorage.setItem("userid", userData.id);
+          storageUtil.setItem("user", JSON.stringify(userData));
+          storageUtil.setItem("avatar", avatarURL);
+          storageUtil.setItem("userid", userData.id);
           closeModal();
           window.location.reload(); // Just reload the current page instead of redirecting
         })
@@ -908,10 +989,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       sessionStorage.removeItem("campaign");
     } else {
-      notyf.info(
-        "We noticed you're visiting from a campaign. Please log in to count your visit!",
-        "Campaign Visit"
-      );
+      // Check if we've shown this message recently
+      const lastShown = storageUtil.getItem("campaign_notice_shown");
+      const currentTime = Date.now();
+      const COOLDOWN = 1000 * 60 * 5; // 5 minutes cooldown
+
+      if (!lastShown || currentTime - parseInt(lastShown) > COOLDOWN) {
+        notyf.info(
+          "We noticed you're visiting from a campaign. Please log in to count your visit!",
+          "Campaign Visit"
+        );
+        storageUtil.setItem("campaign_notice_shown", currentTime.toString());
+        
+        // Show login modal
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+      }
 
       sessionStorage.setItem("campaign", campaign);
     }
@@ -919,6 +1012,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.logout = async function (reason = "user_initiated") {
     SessionLogger.logEvent("logout", `Logout initiated: ${reason}`);
+
+    // Show persistent notification
+    const notification = notyf.open({
+      type: "info",
+      message: "Logging out...",
+      duration: 0, // Make it persistent
+      dismissible: false
+    });
 
     const token = getCookie("token");
     if (token) {
@@ -940,4 +1041,138 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearSessionWithReason(reason);
     window.location.reload();
   };
+
+  // Survey handling
+  let currentSurvey = null;
+  const surveyModal = new bootstrap.Modal(document.getElementById('surveyModal'));
+
+  async function checkForSurvey() {
+    const token = getCookie("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(`https://api.testing.jailbreakchangelogs.xyz/surveys/request?user=${token}`);
+      if (!response.ok) return;
+      
+      const surveyData = await response.json();
+      if (!surveyData || !surveyData.id) return;
+      
+      currentSurvey = surveyData;
+      displaySurvey(surveyData);
+    } catch (error) {
+      console.error("Error fetching survey:", error);
+    }
+  }
+
+  function displaySurvey(survey) {
+    const questionLabel = document.querySelector('.survey-question');
+    const inputContainer = document.querySelector('.survey-input-container');
+    const expirationSpan = document.querySelector('.survey-expiration');
+
+    // Set question
+    questionLabel.textContent = survey.question;
+
+    // Clear previous input
+    inputContainer.innerHTML = '';
+
+    // Create input based on answer_type
+    let input;
+    if (survey.answer_type === 'text') {
+      input = document.createElement('textarea');
+      input.className = 'form-control bg-dark text-light';
+      input.rows = 3;
+    } else {
+      input = document.createElement('input');
+      input.type = survey.answer_type;
+      input.className = 'form-control bg-dark text-light';
+    }
+    input.id = 'surveyAnswer';
+    inputContainer.appendChild(input);
+
+    // Set expiration date
+    const expirationDate = new Date(survey.expires * 1000);
+    expirationSpan.textContent = expirationDate.toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Show modal
+    surveyModal.show();
+  }
+
+  document.getElementById('surveySubmit').addEventListener('click', async () => {
+    if (!currentSurvey) return;
+
+    const answer = document.getElementById('surveyAnswer').value.trim();
+    if (!answer) {
+      notyf.error('Please provide an answer before submitting.');
+      return;
+    }
+
+    try {
+      const token = getCookie("token");
+      const response = await fetch('https://api.testing.jailbreakchangelogs.xyz/surveys/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: currentSurvey.id,
+          answer: answer,
+          owner: token
+        })
+      });
+
+      if (response.ok) {
+        notyf.success('Thank you for your feedback!');
+        surveyModal.hide();
+      } else {
+        throw new Error('Failed to submit survey');
+      }
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      notyf.error('Failed to submit survey. Please try again.');
+    }
+  });
+
+  // Check for survey on page load
+  await checkForSurvey();
+
+  // Also check for survey after login redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('freshlogin')) {
+    await checkForSurvey();
+  }
+});
+
+// Add this function after the existing functions
+function handleReportIssue() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const showReportModal = urlParams.get('report-issue');
+  
+  if (showReportModal) {
+    const modal = new bootstrap.Modal(document.getElementById('reportIssueModal'));
+    modal.show();
+    
+    // Clean up URL without refreshing
+    const newUrl = window.location.pathname + window.location.search.replace(/[?&]report-issue=[^&]+(&|$)/, '');
+    window.history.replaceState({}, '', newUrl);
+  }
+}
+
+// Add event listener for report issue button
+document.addEventListener('DOMContentLoaded', function() {
+  const reportIssueBtn = document.querySelector('[data-bs-target="#reportIssueModal"]');
+  if (reportIssueBtn) {
+    reportIssueBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById('reportIssueModal'));
+      modal.show();
+    });
+  }
+  
+  // Handle URL parameter
+  handleReportIssue();
 });

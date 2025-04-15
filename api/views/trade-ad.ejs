@@ -56,7 +56,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/comments.min.css"
+      href="/styles/comments.css"
     />
     <link rel="stylesheet" href="/styles/comments.css" />
 
@@ -97,7 +97,6 @@
   <body>
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
-
     <%- include('partials/loading') %>
     <div class="container mt-4">
       <!-- Breadcrumbs -->
@@ -145,7 +144,7 @@
             <!-- Trade Footer -->
             <div class="trade-ad-footer">
               <div class="trade-timestamp">
-                <i class="bi bi-clock"></i>
+                <!-- <i class="bi bi-clock"></i> -->
                 <span class="timestamp">
                   <!-- Will be populated by JavaScript -->
                 </span>
@@ -169,11 +168,7 @@
     <%- include('partials/footer') %>
 
     <!-- Scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <!-- Toastr (For Notifications) -->
     <script
       src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
@@ -181,8 +176,8 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/trade-ad.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/comments.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/main.min.js"></script>
+    <script src="/scripts/trade-ad.js"></script>
+    <script src="/scripts/comments.js"></script>
+    <script src="/scripts/main.js"></script>
   </body>
 </html>

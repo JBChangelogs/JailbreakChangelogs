@@ -37,9 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                       class="user-avatar rounded-circle" 
                       alt="${user.username}"
                       style="border-color: ${decimalToHex(user.accent_color)};"
-                      onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
-                        user.username
-                      }&bold=true&format=svg'"
+                      onerror="this.src="assets/default-avatar.png""
                     >
                     <div class="user-info">
                       <h5 class="user-name text-truncate">${

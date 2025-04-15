@@ -3,6 +3,8 @@ const API_BASE_URL = "https://api.jailbreakchangelogs.xyz";
 const USERS_PER_PAGE = 15;
 let currentPage = 1;
 let allUsers = [];
+let isLoadingUsers = false;
+let usersListPromise = null;
 
 const decimalToHex = (decimal) =>
   !decimal || decimal === "None"
@@ -282,11 +284,21 @@ const displayUsers = async (users, page = 1) => {
   // Load avatars for current page if not already cached
   const avatarPromises = usersToDisplay.map(async (user) => {
     if (!avatarCache.has(user.id)) {
-      const avatarUrl = await window.checkAndSetAvatar(user);
-      avatarCache.set(user.id, avatarUrl);
+      try {
+        const avatarUrl = await window.checkAndSetAvatar(user);
+        avatarCache.set(user.id, avatarUrl);
+      } catch (error) {
+        console.error(`Failed to load avatar for user ${user.id}:`, error);
+        avatarCache.set(user.id, 'assets/default-avatar.png');
+      }
     }
   });
-  await Promise.all(avatarPromises);
+  
+  try {
+    await Promise.all(avatarPromises);
+  } catch (error) {
+    console.error('Error loading avatars:', error);
+  }
 
   // Generate HTML for user cards
   const userCardsHTML = usersToDisplay
@@ -406,6 +418,46 @@ const searchUsers = (searchTerm) => {
   );
 };
 
+async function fetchUsersList() {
+  // If we're already loading or have users, don't fetch again
+  if (isLoadingUsers || allUsers.length > 0) {
+    return allUsers;
+  }
+
+  // If we have an existing promise, return it
+  if (usersListPromise) {
+    return usersListPromise;
+  }
+
+  isLoadingUsers = true;
+  
+  // Create new promise
+  usersListPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/list?nocache=true`);
+      
+      if (response.status === 404) {
+        throw new Error('Service unavailable');
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const users = await response.json();
+      allUsers = users.sort((a, b) => a.usernumber - b.usernumber);
+      return allUsers;
+    } catch (error) {
+      console.error('Error fetching users list:', error);
+      throw error;
+    } finally {
+      isLoadingUsers = false;
+    }
+  })();
+
+  return usersListPromise;
+}
+
 // Event Handlers
 const handleSearch = async () => {
   const searchTerm = elements.searchInput.value.trim();
@@ -435,18 +487,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   showLoading();
   try {
-    const response = await fetch(`${API_BASE_URL}/users/list?nocache=true`);
-    if (response.status === 404) {
-      showMessage(messages.error);
-      elements.totalUsersCount.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M12 16a1 1 0 1 0 1 1a1 1 0 0 0-1-1m10.67 1.47l-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53m-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51a1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1" />
-</svg> Service unavailable`;
-      return;
-    }
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await fetchUsersList();
 
-    allUsers = await response.json();
     // Sort all users by usernumber
     allUsers.sort((a, b) => a.usernumber - b.usernumber);
 

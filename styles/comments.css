@@ -87,6 +87,19 @@
   position: relative !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   transition: transform 0.2s, box-shadow 0.2s !important;
+
+  /* Premium tier styling */
+  &[data-premium="1"] {
+    border-left: 4px solid #4CAF50 !important;
+  }
+
+  &[data-premium="2"] {
+    border-left: 4px solid #2196F3 !important;
+  }
+
+  &[data-premium="3"] {
+    border-left: 4px solid #FFC107 !important;
+  }
 }
 
 .comment-item:hover {
@@ -198,10 +211,10 @@
   width: 100% !important;
   padding: 0.5rem 1rem !important;
   border: none !important;
-  background: none !important;
   color: var(--text-primary) !important;
   text-align: left !important;
   cursor: pointer !important;
+  background-color: var(--bg-primary) !important;
 }
 
 .comment-action-item:hover {
@@ -664,4 +677,65 @@
   border-radius: 0.25rem;
   vertical-align: middle;
   line-height: 1;
+}
+#char-counter {
+  color: var(--text-muted) !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.5rem !important;
+  display: block !important;
+}
+
+#char-counter.over-limit {
+  color: #dc3545 !important;
+}
+
+.char-limit-warning {
+  margin-top: 0.5rem !important;
+  color: #dc3545 !important;
+  font-size: 0.85rem !important;
+  animation: fadeIn 0.3s ease-in-out !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.15rem 0.4rem !important;
+  margin-left: 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  border-radius: 0.25rem !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  transition: transform 0.2s, filter 0.2s !important;
+}
+
+.premium-badge:hover {
+  transform: scale(1.05) !important;
+  text-decoration: none !important;
+}
+
+.premium-badge.tier-1 {
+  background: linear-gradient(135deg, #4CAF50, #81C784) !important;
+}
+
+.premium-badge.tier-2 {
+  background: linear-gradient(135deg, #2196F3, #64B5F6) !important;
+}
+
+.premium-badge.tier-3 {
+  background: linear-gradient(135deg, #FFC107, #FFD54F) !important;
 }

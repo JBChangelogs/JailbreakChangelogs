@@ -24,7 +24,7 @@ function isValidHyperChrome(name) {
     "HyperPurple",
     "HyperRed",
     "HyperYellow",
-    "HyperShift Lvl5",
+    "HyperShift",
   ];
 
   // Remove "Level X" and normalize case for comparison
@@ -42,6 +42,16 @@ function isValidHyperChrome(name) {
     return similarity > similarityThreshold;
   });
 }
+
+function formatFavoritesCount(count) {
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + "M";
+  } else if (count >= 1000) {
+    return (count / 1000).toFixed(1) + "K";
+  }
+  return count.toString();
+}
+
 
 function calculateNameSimilarity(str1, str2) {
   const len1 = str1.length;
@@ -100,8 +110,8 @@ async function loadSimilarItemsByName(searchName) {
 
     let similarItems = [];
 
-    // Add HyperShift Lvl5 suggestion for HyperChromes
-    if (isHyperChrome && searchName !== "HyperShift Lvl5") {
+    // Add HyperShift suggestion for HyperChromes
+    if (isHyperChrome && searchName !== "HyperShift") {
       // Extract level number if present
       const levelMatch = searchName.match(/Level\s+(\d+)$/);
       const level = levelMatch ? parseInt(levelMatch[1]) : 0;
@@ -112,13 +122,13 @@ async function loadSimilarItemsByName(searchName) {
       const showForLowerLevel = level < 4 && Math.random() < 0.3;
 
       if (isHighLevel || showForLowerLevel) {
-        const hyperShift = items.find(
+        const HyperShiftLvl5 = items.find(
           (item) =>
-            item.name === "HyperShift Lvl5" &&
+            item.name === "HyperShift" &&
             item.type.toLowerCase() === "hyperchrome"
         );
-        if (hyperShift) {
-          similarItems.push(hyperShift);
+        if (HyperShiftLvl5) {
+          similarItems.push(HyperShiftLvl5);
         }
       }
     }
@@ -132,10 +142,10 @@ async function loadSimilarItemsByName(searchName) {
           }
         }
 
-        // Skip HyperShift Lvl5 if already added
+        // Skip HyperShift if already added
         if (
-          item.name === "HyperShift Lvl5" &&
-          similarItems.some((i) => i.name === "HyperShift Lvl5")
+          item.name === "HyperShift" &&
+          similarItems.some((i) => i.name === "HyperShift")
         ) {
           return false;
         }
@@ -179,7 +189,7 @@ async function loadSimilarItemsByName(searchName) {
         return simB - simA;
       });
 
-    // Combine HyperShift Lvl5 (if added) with other similar items
+    // Combine HyperShift (if added) with other similar items
     similarItems = [...similarItems, ...otherSimilarItems].slice(0, 4);
 
     const similarItemsContainer = document.getElementById("similar-items");
@@ -261,6 +271,10 @@ async function loadSimilarItemsByName(searchName) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize tooltips
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
   function showLoadingOverlay() {
     $("#loading-overlay").addClass("show");
   }
@@ -341,11 +355,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlType = urlPath[2];
       const rawItemName = urlPath.pop();
       
-      // Convert hyphens to spaces for both type and name before API request
+      // Keep hyphens in item name, only normalize spaces
       const itemName = decodeURIComponent(rawItemName)
         .trim()
-        .replace(/-/g, " ") // Convert hyphens to spaces
-        .replace(/\s+/g, " "); // Normalize spaces
+        .replace(/\s+/g, " "); // Normalize spaces only
 
       // Convert URL format (tire-sticker) to original format (tire sticker)
       const itemType = decodeURIComponent(urlType)
@@ -353,21 +366,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         .toLowerCase()
         .replace(/-/g, " "); // Convert hyphens to spaces
 
+      // Convert hyphens to spaces in item name BEFORE making the API request
+      const apiItemName = itemName.replace(/-/g, " ");
+
+      // Store the API response globally for other components to use
+      window.itemApiResponse = fetch(`https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(apiItemName)}&type=${itemType}`);
+
       if (!urlType || !itemName) {
         throw new Error("Invalid URL format");
       }
 
-      const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
-          itemName
-        )}&type=${encodeURIComponent(itemType)}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
+      // First check if user is logged in and get their favorites
+      const token = getCookie("token");
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      let userFavorites = [];
+
+      if (token && userData.id) {
+        try {
+          const favoritesResponse = await fetch(
+            `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Origin: "https://jailbreakchangelogs.xyz",
+              },
+            }
+          );
+          if (favoritesResponse.ok) {
+            userFavorites = await favoritesResponse.json();
+          }
+        } catch (error) {
+          console.error("Error fetching favorites:", error);
         }
-      );
+      }
+
+      const response = await window.itemApiResponse;
 
       if (!response.ok) {
         throw new Error("Item not found");
@@ -376,6 +409,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const item = await response.json();
 
       if (item && !item.error && item.type) {
+        // Add is_favorite property based on user's favorites
+        if (userFavorites.length > 0) {
+          item.is_favorite = userFavorites.some(fav => fav.item_id === item.id);
+        } else {
+          item.is_favorite = false;
+        }
         displayItemDetails(item);
       } else {
         throw new Error("Invalid item data received");
@@ -484,12 +523,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (currentItem.type.toLowerCase() === "hyperchrome") {
         score += weights.hyperchrome;
 
-        // Even more points if one is HyperShift Lvl5
+        // Even more points if one is HyperShift
         if (
-          currentItem.name === "HyperShift Lvl5" ||
-          comparisonItem.name === "HyperShift Lvl5"
+          currentItem.name === "HyperShift" ||
+          comparisonItem.name === "HyperShift"
         ) {
-          score += weights.hyperchrome * 0.5; // Additional bonus for HyperShift Lvl5
+          score += weights.hyperchrome * 0.5; // Additional bonus for HyperShift
         }
       }
     }
@@ -591,15 +630,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>`;
     }
 
-    // Special case for HyperShift Lvl5
-    if (item.name === "HyperShift Lvl5" && item.type === "HyperChrome") {
+    // Special case for HyperShift
+    if (item.name === "HyperShift" && item.type === "HyperChrome") {
       return `
         <div class="media-container ${containerClass}">
             <video class="${imageClass || "card-img-top"}"
                    style="width: 100%; height: 100%; object-fit: contain;"
                    autoplay loop muted playsinline>
-              <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" type="video/webm">
-              <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.mp4" type="video/mp4">
+              <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+              <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
             </video>
         </div>`;
     }
@@ -705,7 +744,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </span>`;
     }
 
-    // Update the badge container HTML to include all badges
+    // Update the badge container HTML to include item ID and click handler
     const badgeContainerHtml = `
       <div class="badge-container d-flex align-items-center gap-2">
         ${
@@ -719,12 +758,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
             : ""
         }
-        <span class="badge favorites-badge" style="background-color: #ffea005f; display: flex; align-items: center; gap: 4px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512">
-            <rect width="512" height="512" fill="none"/>
-            <path fill="#ffb636" d="m252.5 381l-128 49c-5.9 2.2-12.1-2.3-11.8-8.6l7-136.9c.1-2.1-.6-4.2-1.9-5.9L31.6 172c-4-4.9-1.6-12.2 4.5-13.9l132.4-35.6c2.1-.6 3.9-1.9 5-3.7L248.3 4c3.4-5.3 11.2-5.3 14.6 0l74.8 114.9c1.2 1.8 3 3.1 5 3.7l132.4 35.6c6.1 1.6 8.5 9 4.5 13.9l-86.1 106.6c-1.3 1.7-2 3.8-1.9 5.9l7 136.9c.3 6.3-5.9 10.8-11.8 8.6l-128-49c-2.1-.8-4.3-.8-6.3-.1"/>
-            <path fill="#ffd469" d="m456.1 51.7l-41-41c-1.2-1.2-2.8-1.7-4.4-1.5s-3.1 1.2-3.9 2.6l-42.3 83.3c-1.2 2.1-.8 4.6.9 6.3c1 1 2.4 1.5 3.7 1.5c.9 0 1.8-.2 2.6-.7L454.9 60c1.4-.8 2.4-2.2 2.6-3.9c.3-1.6-.3-3.2-1.4-4.4"/>
-          </svg>
+        <span class="badge favorites-badge" 
+              style="background-color: #ffea005f; display: flex; align-items: center; gap: 4px; cursor: pointer;"
+              data-item-id="${item.id}"
+              onclick="toggleFavorite(event)">
+          ${getFavoriteStarHtml(item.is_favorite)}
           <span id="favorites-count">0</span>
         </span>
       </div>`;
@@ -819,11 +857,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         const items = await response.json();
 
-        // For HyperChrome items, check if we should show HyperShift Lvl5
+        // For HyperChrome items, check if we should show HyperShift
         let scoredItems = [];
         if (
           currentItem.type.toLowerCase() === "hyperchrome" &&
-          currentItem.name !== "HyperShift Lvl5"
+          currentItem.name !== "HyperShift"
         ) {
           // Check if it's Level 4 or 5
           const isHighLevel = currentItem.name.match(/Level [45]$/);
@@ -831,14 +869,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           const showForLowerLevel = Math.random() < 0.3;
 
           if (isHighLevel || showForLowerLevel) {
-            const hyperShift = items.find(
+            const HyperShiftLvl5 = items.find(
               (item) =>
-                item.name === "HyperShift Lvl5" &&
+                item.name === "HyperShift" &&
                 item.type.toLowerCase() === "hyperchrome"
             );
-            if (hyperShift) {
+            if (HyperShiftLvl5) {
               scoredItems.push({
-                ...hyperShift,
+                ...HyperShiftLvl5,
                 similarityScore: 999, // Ensure it appears first
               });
             }
@@ -851,7 +889,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             (item) =>
               item.id !== currentItem.id &&
               !(
-                item.name === "HyperShift Lvl5" &&
+                item.name === "HyperShift" &&
                 item.type.toLowerCase() === "hyperchrome"
               )
           )
@@ -861,7 +899,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }))
           .sort((a, b) => b.similarityScore - a.similarityScore);
 
-        // Combine HyperShift Lvl5 (if added) with top items
+        // Combine HyperShift (if added) with top items
         scoredItems = [...scoredItems, ...otherItems].slice(0, 4);
 
         // Display the similar items
@@ -1377,9 +1415,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                       <div class="col-md-7 p-3">
                           <!-- Item Title and Badge Container -->
                           <div class="item-header d-flex align-items-center mb-2">
-                            <h1 class="mb-1 me-3" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; font-size: 2rem;">${
-                              item.name
-                            }</h1>
+                             <h1 class="mb-1 me-3" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; font-size: 2rem;">${
+                               item.name
+                             }</h1>
                               ${badgeContainerHtml}
                           </div>
                            ${
@@ -1930,14 +1968,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     loadSimilarItems(item);
 
-    function formatFavoritesCount(count) {
-      if (count >= 1000000) {
-        return (count / 1000000).toFixed(1) + "M";
-      } else if (count >= 1000) {
-        return (count / 1000).toFixed(1) + "K";
-      }
-      return count.toString();
-    }
+    // Initialize tooltips for the newly added favorites badge
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
 
     // Fetch favorites count
     fetch(`https://api.jailbreakchangelogs.xyz/item/favorites?id=${item.id}`)
@@ -2131,15 +2164,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Update handleimage function to skip HyperShift Lvl5
+  // Update handleimage function to skip HyperShift
   window.handleimage = function (element) {
     const isHyperShiftLvl5 =
-      element.id === "hypershift-video" ||
-      (element.alt === "HyperShift Lvl5" &&
+      element.id === "HyperShift-video" ||
+      (element.alt === "HyperShift" &&
         element.closest(".media-container").querySelector("video"));
 
     if (isHyperShiftLvl5) {
-      return; // Don't replace HyperShift Lvl5 video with placeholder
+      return; // Don't replace HyperShift video with placeholder
     }
     element.src =
       "https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat";
@@ -2192,9 +2225,7 @@ function handleinvalidImage() {
   setTimeout(() => {
     const userId = this.id.replace("avatar-", "");
     const username = this.closest("li").querySelector("a").textContent;
-    this.src = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      username
-    )}&bold=true&format=svg`;
+    this.src = "assets/default-avatar.png";
   }, 0);
 }
 
@@ -2239,5 +2270,88 @@ function handleUrlParams() {
     // Clean up URL
     const url = window.location.pathname;
     window.history.replaceState({}, "", url);
+  }
+}
+
+// Add getFavoriteStarHtml helper function
+function getFavoriteStarHtml(isFavorited) {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512"
+         data-bs-toggle="tooltip" 
+         data-bs-placement="top" 
+         title="${isFavorited ? 'Unfavorite Item' : 'Favorite Item'}">
+      <rect width="512" height="512" fill="none"/>
+      <path fill="${isFavorited ? "#f8ff00" : "none"}"
+            stroke="${isFavorited ? "none" : "#f8ff00"}"
+            stroke-width="20"
+            d="m252.5 381l-128 49c-5.9 2.2-12.1-2.3-11.8-8.6l7-136.9c.1-2.1-.6-4.2-1.9-5.9L31.6 172c-4-4.9-1.6-12.2 4.5-13.9l132.4-35.6c2.1-.6 3.9-1.9 5-3.7L248.3 4c3.4-5.3 11.2-5.3 14.6 0l74.8 114.9c1.2 1.8 3 3.1 5 3.7l132.4 35.6c6.1 1.6 8.5 9 4.5 13.9l-86.1 106.6c-1.3 1.7-2 3.8-1.9 5.9l7 136.9c.3 6.3-5.9 10.8-11.8 8.6l-128-49c-2.1-.8-4.3-.8-6.3-.1"/>
+      <path fill="${isFavorited ? "#ffd469" : "none"}"
+            d="m456.1 51.7l-41-41c-1.2-1.2-2.8-1.7-4.4-1.5s-3.1 1.2-3.9 2.6l-42.3 83.3c-1.2 2.1-.8 4.6.9 6.3c1 1 2.4 1.5 3.7 1.5c.9 0 1.8-.2 2.6-.7L454.9 60c1.4-.8 2.4-2.2 2.6-3.9c.3-1.6-.3-3.2-1.4-4.4"/>
+    </svg>`;
+}
+
+// Add favorite toggle handler
+async function toggleFavorite(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const token = getCookie("token");
+  if (!token) {
+    notyf.error("Please login to favorite items", {
+      position: "bottom-right",
+      duration: 2000,
+    });
+    return;
+  }
+
+  const favoritesBtn = e.currentTarget;
+  const favoritesPath = favoritesBtn.querySelector("path");
+  const favoritesCount = favoritesBtn.querySelector("#favorites-count");
+  
+  const isFavorited = favoritesPath.getAttribute("fill") === "#f8ff00";
+  const itemId = favoritesBtn.dataset.itemId;
+
+  try {
+    const response = await fetch(
+      `https://api.jailbreakchangelogs.xyz/favorites/${isFavorited ? "remove" : "add"}`,
+      {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+        body: JSON.stringify({
+          item_id: itemId,
+          owner: token,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    // Update star appearance
+    favoritesPath.setAttribute("fill", isFavorited ? "none" : "#f8ff00");
+    favoritesPath.setAttribute("stroke", isFavorited ? "#f8ff00" : "none");
+
+    // Update count
+    const currentCount = parseInt(favoritesCount.textContent.replace(/[KM]/g, ""));
+    const newCount = isFavorited ? currentCount - 1 : currentCount + 1;
+    favoritesCount.textContent = formatFavoritesCount(newCount);
+
+    notyf.success(
+      isFavorited ? "Item removed from favorites" : "Item added to favorites",
+      {
+        position: "bottom-right",
+        duration: 2000,
+      }
+    );
+  } catch (error) {
+    console.error("Error updating favorite:", error);
+    notyf.error("Failed to update favorite status", {
+      position: "bottom-right",
+      duration: 2000,
+    });
   }
 }

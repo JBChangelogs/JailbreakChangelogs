@@ -78,118 +78,6 @@ body {
   bottom: calc(100% + 5px);
 }
 
-.item-card-body {
-  padding: 0.5rem 0.5rem 1rem; /* Reduce side padding */
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  margin-top: 0;
-  background-color: var(--bg-primary);
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.item-card-body:hover {
-  background-color: transparent; /* Remove background change */
-}
-
-.item-card-body:hover .card-title {
-  color: var(--accent-color-light);
-  transform: translateX(4px); /* Slide right instead of up */
-}
-
-.item-card-body:hover .value-row {
-  transform: none; /* Remove vertical movement */
-  border-left: 2px solid var(--accent-color-light); /* Add subtle left border */
-  padding-left: 10px; /* Add padding to accommodate border */
-}
-
-.value-row {
-  padding: 4px 8px;
-  border-radius: 4px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin: 0;
-  transition: all 0.2s ease;
-  border-left: 2px solid transparent;
-}
-
-.value-row:first-child {
-  background: rgba(24, 101, 131, 0.1); /* Cash value background */
-}
-
-.value-row:nth-child(2) {
-  background: rgba(116, 141, 146, 0.1); /* Duped value background */
-}
-
-.value-row:nth-child(3) {
-  background: rgba(0, 213, 255, 0.1); /* Demand background */
-}
-
-.value-row:hover {
-  background-color: rgba(29, 125, 163, 0.05); /* Very subtle highlight */
-}
-
-.card {
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.items-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Ensure items list uses grid with equal height rows */
-#items-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-#items-list > div {
-  height: 100%;
-}
-
-/* Make sure card body takes up remaining space */
-.items-card .card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* If there's a card footer, ensure it stays at bottom */
-.items-card .card-footer {
-  margin-top: auto;
-}
-
-.items-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  z-index: 1;
-  display: none; /* Remove the bright overlay */
-}
-
-.items-card:hover {
-  transform: none;
-}
-
-.items-card:hover::before {
-  opacity: 1;
-}
 
 .loading-spinner {
   display: none;
@@ -230,25 +118,6 @@ body {
   background-color: #212529;
 }
 
-.card-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 10px 0;
-  color: var(--text-primary);
-}
-
-.card-body {
-  position: relative; /* Change from static */
-  padding: 1rem;
-  height: auto; /* Change from fixed height */
-  overflow: visible; /* Change from hidden */
-}
-
-.card-text {
-  font-size: 1rem;
-  color: #555;
-  margin-bottom: 8px;
-}
 
 .input-group {
   position: relative;
@@ -308,6 +177,21 @@ body {
 .page-input:focus {
   outline: none;
   border-color: #0d6efd;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(--accent-color-light) !important;
+  border-color: 5px var(--accent-color) !important;
 }
 
 .btn-calculator {
@@ -421,56 +305,6 @@ body {
 .contributor-link:hover {
   color: var(--text-primary) !important;
 }
-/* HyperChrome item styling */
-.items-card .card-title:has(+ .value-container):has(~ .hyperchrome-badge) {
-  position: static;
-  border: 2px solid transparent;
-  background: linear-gradient(var(--bg-secondary), var(--bg-secondary))
-      padding-box,
-    linear-gradient(
-        124deg,
-        #2170cc,
-        #7acccc,
-        #5cc809,
-        #cccc49,
-        #cc10cc,
-        #c855cc,
-        #c93009,
-        #cccc00
-      )
-      border-box;
-  background-size: 1800% 1800%;
-  animation: rainbow 18s ease infinite;
-  transition: all 0.3s ease;
-}
-
-/* Target the entire card for HyperChromes */
-.card.items-card:has(.hyperchrome-badge) {
-  position: relative;
-  border: 2px solid transparent;
-  background: linear-gradient(var(--bg-secondary), var(--bg-secondary))
-      padding-box,
-    linear-gradient(
-        124deg,
-        #2170cc,
-        #7acccc,
-        #5cc809,
-        #cccc49,
-        #cc10cc,
-        #c855cc,
-        #c93009,
-        #cccc00
-      )
-      border-box;
-  background-size: 1800% 1800%;
-  animation: rainbow 18s ease infinite;
-  transition: all 0.3s ease;
-}
-
-.card.items-card:has(.hyperchrome-badge):hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 20px rgba(66, 143, 254, 0.5), 0 0 35px rgba(254, 19, 255, 0.3);
-}
 
 /* Update limited item styling */
 .limited-item {
@@ -492,19 +326,9 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Both limited and seasonal */
-.limited-item.seasonal-item {
-  position: relative;
-  border: 2px solid transparent;
-  background: linear-gradient(var(--bg-secondary), var(--bg-secondary))
-      padding-box,
-    linear-gradient(45deg, #40c0e7, #00a2e8) border-box;
-  transition: all 0.3s ease;
-}
-
-.item-badge {
+.seasonal-badge {
   position: absolute;
-  top: 10px;
+  top: 5px;
   right: 10px;
   z-index: 3;
   width: 32px;
@@ -518,28 +342,22 @@ body {
   backdrop-filter: blur(2px);
 }
 
-.seasonal-badge svg {
-  width: 24px;
-  height: 24px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-}
-
+.seasonal-badge svg,
 .limited-badge svg {
   width: 20px;
   height: 20px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
-.seasonal-badge svg,
+/* Add specific sizing for limited badge SVG */
 .limited-badge svg {
-  width: 24px;
+  width: 24px; /* Slightly larger to compensate for smaller viewBox */
   height: 24px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .item-badge {
+  .seasonal-badge {
     width: 24px;
     height: 24px;
     top: 8px;
@@ -548,23 +366,23 @@ body {
 
   .seasonal-badge svg,
   .limited-badge svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (max-width: 576px) {
-  .item-badge {
-    width: 20px;
-    height: 20px;
+  .seasonal-badge {
+    width: 14px;
+    height: 14px;
     top: 6px;
     right: 6px;
   }
 
   .seasonal-badge svg,
   .limited-badge svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -611,6 +429,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  white-space: nowrap;
 }
 
 @keyframes rainbow {
@@ -649,10 +468,6 @@ body {
   width: 100%;
 }
 
-.contributor-header i.bi-people-fill {
-  margin-right: 0.5rem; /* Adjust icon spacing */
-}
-
 .contributor-header h5 {
   margin: 0;
 }
@@ -669,9 +484,6 @@ body {
   color: var(--text-muted);
 }
 
-.contributor-header .bi-people-fill {
-  color: var(--text-muted);
-}
 
 .toggle-icon {
   display: none; /* Hide by default */
@@ -757,12 +569,6 @@ body {
   color: var(--text-muted);
   font-size: 0.85rem;
   margin-top: 0.25rem;
-}
-
-.value-container {
-  width: 100%;
-  padding: 0;
-  margin: 0 auto;
 }
 
 /* Intro Content Section */
@@ -1097,17 +903,22 @@ body {
   margin: 0 auto;
 }
 
-.badges-container {
-  margin-top: -20px; /* Creates upward offset */
-  margin-bottom: 10px;
-  z-index: 2;
-}
-
 .item-type-badge {
-  font-size: 0.95rem; /* Increased from default size */
-  padding: 0.35rem 0.7rem; /* Increased padding */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.4rem;
   border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-size: 1800% 1800%;
   color: #fff !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  animation: rainbow 18s ease infinite;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -1135,10 +946,6 @@ body {
   .media-container {
     aspect-ratio: 16/9;
     margin-bottom: 0;
-  }
-
-  .badges-container {
-    margin-top: -15px;
   }
 
   /* Badge positioning for mobile */
@@ -1421,10 +1228,6 @@ body {
     justify-content: center;
   }
 
-  .badges-container {
-    margin-top: -18px;
-  }
-
   .item-type-badge {
     font-size: 0.69rem;
     padding: 0.15rem 0.35rem;
@@ -1435,20 +1238,6 @@ body {
     padding: 0.15rem 0.3rem;
   }
 
-  .card-title {
-    font-size: 0.925rem; /* Reduced from 1.2rem */
-    margin: 8px 0;
-  }
-
-  .card-text {
-    font-size: 0.8rem; /* Reduced from 1rem */
-    margin-bottom: 6px;
-  }
-
-  .value-row {
-    font-size: 0.8rem;
-    padding: 2px 5px;
-  }
   .category-item {
     padding: 0.75rem !important;
   }
@@ -1457,31 +1246,12 @@ body {
     font-size: 0.85rem;
   }
 }
-/* Add this new media query for extra small screens */
+
 @media (max-width: 400px) {
   .text-muted {
     font-size: 0.65rem !important; /* Even smaller for very small screens */
   }
-  .card-title {
-    font-size: 0.875rem; /* Even smaller than before */
-    margin: 6px 0;
-  }
 
-  .card-text {
-    font-size: 0.75rem; /* Reduced further */
-    margin-bottom: 4px;
-  }
-
-  .value-row {
-    font-size: 0.75rem; /* Smaller text */
-    padding: 2px 4px; /* Minimal padding */
-  }
-
-  .badges-container {
-    margin-top: -12px;
-  }
-
-  /* Adjust badge sizes further */
   .item-type-badge {
     font-size: 0.65rem;
     padding: 0.15rem 0.35rem;
@@ -1498,53 +1268,39 @@ body {
     font-size: 0.55rem;
     padding: 0.1rem 0.3rem;
   }
-
-  /* Reduce card body padding */
-  .item-card-body {
-    padding: 0.25rem 0.25rem 0.75rem;
-  }
 }
 
 @media (max-width: 375px) {
+  .badges-container {
+    margin-top: -15px !important;
+  }
   .container-fluid {
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
-
   .limited-badge {
     top: 4px;
     right: 4px;
     font-size: 0.6rem;
     padding: 0.15rem 0.35rem;
   }
-  .badges-container {
-    margin-top: -12px;
-  }
   .intro-container {
     padding: 4px !important;
   }
-
   .intro-content {
     padding: 16px !important; /* Maintain padding even on smallest screens */
   }
-
-  .card-text {
-    font-size: 0.8125rem;
+  .items-card .badge {
+    font-size: 0.6rem !important;
+    padding: 0.15rem 0.35rem !important;
+    max-width: 90px !important;
   }
-
-  .value-row {
-    font-size: 0.8125rem;
-    padding: 2px 5px;
+  .items-card .text-body-secondary {
+    font-size: 0.65rem !important;
   }
 }
 
 @media (min-width: 428px) and (max-width: 768px) {
-  /* Adjust value row text */
-  .value-row {
-    font-size: 0.875rem; /* Reduced size */
-    padding: 3px 6px; /* Slightly reduced padding */
-  }
-
   .item-type-badge {
     font-size: 0.8rem;
   }
@@ -1578,6 +1334,32 @@ body {
   transform: scale(0.8);
   visibility: hidden;
 }
+
+.items-card .card-body {
+  background-color: var(--bg-primary) !important;
+}
+
+.card-footer {
+  background-color: var(--bg-primary) !important;
+}
+
+.bg-dark-subtle {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.bg-primary
+{
+  background-color: var(--accent-color-light) !important;
+}
+
+.bg-gray-500 { background-color: #6b7280 !important; } /* Neutral gray */
+.bg-red-500 { background-color: #ef4444 !important; } /* Critical */
+.bg-orange-500 { background-color: #f97316 !important; } /* Warning */
+.bg-yellow-500 { background-color: #eab308 !important; } /* Moderate */
+.bg-green-500 { background-color: #22c55e !important; } /* Good */
+.bg-blue-500 { background-color: #3b82f6 !important; } /* Strong */
+.bg-purple-500 { background-color: #a855f7 !important; } /* Premium */
+
 
 .items-card:hover .favorite-icon,
 .media-container:hover .favorite-icon,
@@ -1667,14 +1449,19 @@ body.menu-open {
   overflow: hidden;
 }
 
-.items-card:active {
-  transform: translateY(-2px);
+.items-card {
+  position: relative;
 }
 
-.items-card .card-title,
-.items-card .value-container {
-  cursor: pointer;
+.badges-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  margin-top: -25px; /* Creates upward offset */
+  margin-bottom: 10px;
 }
+
 
 @media (hover: none) {
   .media-container:hover {
@@ -1684,25 +1471,6 @@ body.menu-open {
   .media-container:hover img,
   .media-container:hover video {
     transform: none;
-  }
-
-  .item-card-body:hover {
-    background-color: var(--bg-primary);
-  }
-
-  .item-card-body:hover .card-title {
-    transform: none;
-    color: var(--text-primary);
-  }
-
-  .item-card-body:hover .value-row {
-    transform: none;
-    border-left: none;
-    padding-left: 8px;
-  }
-
-  .value-row:hover {
-    background-color: transparent;
   }
 
   .favorite-icon {
@@ -1810,6 +1578,71 @@ body.menu-open {
   .horn-play-btn .pause-icon {
     width: 32px; /* Reduced from 40px */
     height: 32px;
+  }
+}
+
+/* Add/modify these mobile-specific styles */
+@media (max-width: 576px) {
+  /* Adjust card body padding */
+  .items-card .card-body {
+    padding: 0.75rem !important;
+  }
+
+  /* Reduce card title size */
+  .items-card .card-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Adjust list group spacing */
+  .items-card .list-group-item {
+    padding: 0.35rem 0.5rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  /* Make value badges more compact */
+  .items-card .badge {
+    font-size: 0.65rem !important;
+    padding: 0.2rem 0.4rem !important;
+    max-width: 110px !important; /* Limit maximum width */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Reduce text size for labels */
+  .items-card .text-body-secondary {
+    font-size: 0.7rem !important;
+  }
+
+  /* Adjust card footer */
+  .items-card .card-footer {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .items-card .card-footer small {
+    font-size: 0.65rem;
+  }
+
+  /* Ensure media container maintains aspect ratio */
+  .media-container {
+    aspect-ratio: 16/9;
+  }
+
+  /* Maintain 2 cards per row with proper gutters */
+  .col-6 {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .row {
+    margin-left: -4px;
+    margin-right: -4px;
+  }
+
+  /* Add some bottom margin between rows */
+  .col-6 {
+    margin-bottom: 8px;
   }
 }
 

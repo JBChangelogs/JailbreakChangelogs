@@ -14,6 +14,33 @@ const VALID_SORTS = [
   "weapon-skins",
 ];
 
+function showLoginModal() {
+  const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+  loginModal.show();
+}
+
+function getDemandBadgeClass(demand) {
+  switch(demand) {
+    case 'Close to none':
+      return 'bg-gray-500'; // Gray for almost no demand
+    case 'Very Low':
+      return 'bg-red-500'; // Red for very low demand (critical)
+    case 'Low':
+      return 'bg-orange-500'; // Orange for low demand (warning)
+    case 'Medium':
+      return 'bg-yellow-500'; // Yellow for moderate demand
+    case 'Decent':
+      return 'bg-green-500'; // Green for decent demand (good)
+    case 'High':
+      return 'bg-blue-500'; // Blue for high demand (strong)
+    case 'Very High':
+      return 'bg-purple-500'; // Purple for very high demand (premium)
+    default:
+      return 'bg-gray-500'; // Default to gray for undefined cases
+  }
+}
+
+
 // Initialize allItems globally
 window.allItems = [];
 let filteredItems = [];
@@ -78,14 +105,14 @@ function hideLoadingOverlay() {
 // Add these helper functions at the top of the file
 function getBadgeHtml(item) {
   if (item.is_seasonal) {
-    return `<div class="item-badge seasonal-badge">
+    return `<div class="seasonal-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
         <rect width="128" height="128" fill="none"/>
         <path fill="#40c0e7" d="M126.01 59.7h-13.46l10.57-10.57c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99L119 43.04a1.4 1.4 0 0 0-1.97 0L100.38 59.7H74.39l18.38-18.38h23.55c.77 0 1.39-.62 1.39-1.39V34.1c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-14.95l9.52-9.51c.26-.26.41-.62.41-.98c0-.37-.15-.73-.41-.99l-4.12-4.12a1.4 1.4 0 0 0-1.97 0l-9.52 9.53V11.68c0-.36-.14-.72-.41-.98c-.26-.27-.61-.41-.98-.41h-5.82c-.77 0-1.39.62-1.39 1.39v23.55L68.3 53.61V27.62l16.66-16.65a1.4 1.4 0 0 0 0-1.97l-4.12-4.12c-.26-.26-.61-.41-.98-.41s-.73.15-.98.41L68.3 15.45V1.99c0-.77-.62-1.39-1.39-1.39h-5.82c-.77 0-1.39.62-1.39 1.39v13.46L49.13 4.88c-.52-.53-1.45-.53-1.97 0L43.04 9a1.4 1.4 0 0 0 0 1.97l16.65 16.65v25.99L41.32 35.23V11.68c0-.77-.62-1.39-1.39-1.39H34.1c-.37 0-.72.14-.98.41c-.26.26-.41.61-.41.98v14.94L23.2 17.1a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.4 1.4 0 0 0 0 1.97l9.52 9.51H11.68c-.77 0-1.39.62-1.39 1.39v5.83c0 .37.14.72.41.98c.26.27.62.41.98.41h23.55L53.61 59.7H27.62L10.97 43.04a1.4 1.4 0 0 0-1.97 0l-4.12 4.12a1.39 1.39 0 0 0 0 1.97L15.45 59.7H1.99c-.77 0-1.39.63-1.39 1.39v5.82c0 .77.62 1.39 1.39 1.39h13.46L4.88 78.86c-.26.27-.41.61-.41.99c0 .36.14.72.41.98L9 84.95c.27.28.63.41.98.41s.71-.13.98-.41L27.62 68.3h25.99L35.23 86.68H11.68c-.77 0-1.39.62-1.39 1.39v5.82c0 .37.14.72.41.99s.61.4.98.4h14.95l-9.52 9.51a1.4 1.4 0 0 0 0 1.97l4.12 4.12a1.38 1.38 0 0 0 1.96 0l9.52-9.52v14.95c0 .37.14.72.41.98c.26.26.61.41.98.41l5.82-.01c.77 0 1.39-.62 1.39-1.39V92.77l18.37-18.38v25.99l-16.65 16.65a1.4 1.4 0 0 0 0 1.97l4.12 4.12c.26.26.61.4.98.4s.73-.14.98-.4l10.57-10.57v13.46c0 .77.62 1.39 1.39 1.39h5.82c.77 0 1.39-.63 1.39-1.39v-13.46l10.57 10.57c.26.26.61.4.98.4s.72-.14.98-.4l4.12-4.12a1.4 1.4 0 0 0 0-1.97L68.3 100.38v-26l18.38 18.38v23.55c0 .77.62 1.39 1.39 1.39h5.82c.37 0 .73-.14.98-.4c.26-.26.41-.61.41-.99v-14.94l9.52 9.52a1.38 1.38 0 0 0 1.96 0l4.11-4.12a1.385 1.385 0 0 0 0-1.97l-9.52-9.51h14.94c.77 0 1.39-.63 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39H92.77L74.39 68.3h25.99l16.65 16.65c.27.28.63.41.98.41s.71-.13.98-.41l4.12-4.12a1.385 1.385 0 0 0 0-1.97L112.55 68.3h13.46c.77 0 1.39-.62 1.39-1.39v-5.82c0-.77-.62-1.39-1.39-1.39"/>
       </svg>
     </div>`;
   } else if (item.is_limited) {
-    return `<div class="item-badge limited-badge">
+    return `<div class="seasonal-badge limited-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <rect width="24" height="24" fill="none"/>
         <path fill="#ffbb00" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12m11-5a1 1 0 1 0-2 0v3.764a3 3 0 0 0 1.658 2.683l2.895 1.447a1 1 0 1 0 .894-1.788l-2.894-1.448a1 1 0 0 1-.553-.894z" clip-rule="evenodd"/>
@@ -104,18 +131,7 @@ function getItemMediaElement(item, options = {}) {
     aspectRatio = "16/9",
   } = options;
 
-  // Add limited badge HTML helper
-  function getLimitedBadgeHtml() {
-    return `
-      <span class="limited-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 4px">
-          <rect width="24" height="24" fill="none" />
-          <path fill="#000" d="M12 20a8 8 0 0 0 8-8a8 8 0 0 0-8-8a8 8 0 0 0-8 8a8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10a10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67l-.75 1.23L11 13V7z" />
-        </svg>
-        Limited
-      </span>`;
-  }
-
+  
   const mediaBadge = getBadgeHtml(item);
 
   // Special case for Gamer TV Set
@@ -133,16 +149,16 @@ function getItemMediaElement(item, options = {}) {
       </div>`;
   }
 
-  // Special case for HyperShift Lvl5 - moved up before default case
-  if (item.name === "HyperShift Lvl5" && item.type === "HyperChrome") {
+  // Special case for HyperShift - moved up before default case
+  if (item.name === "HyperShift" && item.type === "HyperChrome") {
     return `
       <div class="media-container position-relative ${containerClass}">
         ${showFavoriteIcon ? getFavoriteIconHtml(item) : ""}
         <video class="${imageClass || "card-img-top"}"
                style="width: 100%; height: 100%; object-fit: contain;"
                autoplay loop muted playsinline>
-          <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" type="video/webm">
-          <source src="/assets/images/items/hyperchromes/HyperShift Lvl5.mp4" type="video/mp4">
+          <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+          <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
         </video>
       </div>`;
   }
@@ -206,7 +222,7 @@ function getItemMediaElement(item, options = {}) {
             item.name
           }.mp4" type="video/mp4">
         </video>
-        ${item.is_limited && showFavoriteIcon ? getLimitedBadgeHtml() : ""}
+        ${mediaBadge}
       </div>`;
   }
 
@@ -580,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
           : "";
 
       itemsRow.innerHTML = `
-      <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 300px;">
+      <div class="col-12 d-flex justify-content-center" style="min-height: 300px;">
         <div class="no-results">
           <h4>No items found for "${escapeHtml(searchTerm)}"${categoryMessage}</h4>
           <p class="text-muted">Try different keywords or check the spelling</p>
@@ -667,7 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <h4>Login Required</h4>
               <p>You need to be logged in to view your favorite items</p>
               <div class="login-prompt">
-                <a href="/login" class="login-link">Login now</a>
+                <button class="btn btn-primary" onclick="showLoginModal()">Login now</button>
               </div>
             </div>
           </div>
@@ -1080,29 +1096,29 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadItems() {
     showLoadingOverlay();
     try {
-        // Fetch values version last updated
-        const versionResponse = await fetch("https://api.jailbreakchangelogs.xyz/version/values", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Origin: "https://jailbreakchangelogs.xyz",
-            },
-        });
-        
-        if (versionResponse.ok) {
-            const versionData = await versionResponse.json();
-            updateLastUpdatedTimestamp(versionData.last_updated);
-        }
-
-        const response = await fetch("https://api.jailbreakchangelogs.xyz/items/list", {
+      // Fetch values version last updated
+      const versionResponse = await fetch("https://api.jailbreakchangelogs.xyz/version/values", {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
+              "Content-Type": "application/json",
+              Origin: "https://jailbreakchangelogs.xyz",
           },
-        });
+      });
+      
+      if (versionResponse.ok) {
+          const versionData = await versionResponse.json();
+          updateLastUpdatedTimestamp(versionData.last_updated);
+      }
 
-      window.allItems = await response.json();
+      const response = await fetch("https://api.jailbreakchangelogs.xyz/items/list", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://jailbreakchangelogs.xyz",
+        },
+      });
+
+    window.allItems = await response.json();
 
       // Add favorite status to items if user is logged in and we have user data
       const token = getCookie("token");
@@ -1282,7 +1298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       value === "N/A"
     ) {
       return {
-        display: "No Value", // Changed from "-" to "No Value"
+        display: "No Value",
         numeric: 0,
       };
     }
@@ -1309,22 +1325,14 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
-    // Format display value based on screen size
+    // Format display value in shorthand (K/M)
     let displayValue;
-    if (window.innerWidth <= 768) {
-      // Mobile devices - use 2 decimal places for better precision
-      if (numericValue >= 1000000) {
-        displayValue =
-          (numericValue / 1000000).toFixed(2).replace(/\.?0+$/, "") + "M";
-      } else if (numericValue >= 1000) {
-        displayValue =
-          (numericValue / 1000).toFixed(2).replace(/\.?0+$/, "") + "K";
-      } else {
-        displayValue = numericValue.toString();
-      }
+    if (numericValue >= 1000000) {
+      displayValue = (numericValue / 1000000).toFixed(2).replace(/\.?0+$/, "") + "M";
+    } else if (numericValue >= 1000) {
+      displayValue = (numericValue / 1000).toFixed(2).replace(/\.?0+$/, "") + "K";
     } else {
-      // Desktop - use comma formatting
-      displayValue = numericValue.toLocaleString("en-US");
+      displayValue = numericValue.toString();
     }
 
     return {
@@ -1335,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createItemCard(item) {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
+    cardDiv.classList.add("col-12", "col-md-4", "col-lg-3");
 
     // Get type color
     let color = "#124e66"; // Default color
@@ -1352,10 +1360,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.type === "Horn") color = "#4A90E2";
     if (item.type === "Weapon Skin") color = "#4a6741";
 
+    let borderClasses = "border";
+    if (item.is_seasonal) {
+      borderClasses = "border-3 border-info"; // Blue border for seasonal items
+    } else if (item.is_limited) {
+      borderClasses = "border-3 border-warning"; // Gold/Yellow border for limited items
+    }
+
     // Get the card classes based on limited and seasonal status
-    const cardClasses = ["card", "items-card", "shadow-sm"];
-    if (item.is_limited) cardClasses.push("limited-item");
-    if (item.is_seasonal) cardClasses.push("seasonal-item");
+    const cardClasses = ["card", "items-card", "shadow-sm", borderClasses];
+    // if (item.is_limited) cardClasses.push("limited-item");
+    // if (item.is_seasonal) cardClasses.push("seasonal-item");
 
     // Only show HyperChrome badge for HyperChrome items, otherwise show regular type badge
     const isHyperChrome = item.type === "HyperChrome";
@@ -1378,62 +1393,72 @@ document.addEventListener("DOMContentLoaded", () => {
     const dupedValue = formatValue(item.duped_value);
 
     // Create card HTML
-    const cardHtml = `
-      <div class="${cardClasses.join(" ")}" style="cursor: pointer;">
-        <div class="position-relative">
-          ${mediaElement}
-          <div class="item-card-body text-center">
-            <div class="badges-container d-flex justify-content-center gap-2">
-              ${typeBadgeHtml}
+   
+const cardHtml = `
+<div class="${cardClasses.join(' ')}">
+  <div class="position-relative">
+    ${mediaElement}
+    <div class="card-body text-center">
+    <div class="badges-container">
+      ${typeBadgeHtml}
+    </div>
+      <h5 class="card-title">${item.name}</h5>
+      <div class="card-text">
+        <div class="list-group list-group-flush">
+          <!-- Cash Value Card -->
+          <div class="list-group-item bg-dark-subtle rounded mb-2 p-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-body-secondary">Cash Value</small>
+              <span class="badge bg-primary rounded-pill" data-value="${cashValue.numeric}">
+                ${cashValue.display}
+              </span>
             </div>
-            <h5 class="card-title">${item.name}</h5>
-            <div class="value-container">
-              <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                <span>Cash Value:</span>
-                <span class="cash-value" data-value="${cashValue.numeric}">${
-      cashValue.display
-    }</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-2 value-row">
-                <span>Duped Value:</span>
-                <span class="duped-value" data-value="${dupedValue.numeric}">${
-      dupedValue.display
-    }</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center value-row">
-                <span>Demand:</span>
-                <span class="demand-value">${
-                  item.demand === "'N/A'" || item.demand === "N/A"
-                    ? "No Demand"
-                    : item.demand || "No Value"
-                }</span>
-              </div>
-              ${
-                item.last_updated
-                  ? `
-                <div class="mt-2 d-flex align-items-center">
-                  <small class="text-muted" style="font-size: 0.8rem;">
-                    Last Updated: ${formatTimeAgo(item.last_updated)}
-                  </small>
-                </div>
-              `
-                  : `
-              <div class="mt-2 d-flex align-items-center">
-                <small class="text-muted" style="font-size: 0.8rem;">
-                  Last Updated: Unknown
-                </small>
-              </div>
-            `
-              }
+          </div>
+          
+          <!-- Duped Value Card -->
+          <div class="list-group-item bg-dark-subtle rounded mb-2 p-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-body-secondary">Duped Value</small>
+              <span class="badge rounded-pill" style="background-color: var(--text-muted);" data-value="${dupedValue.numeric}">
+                ${dupedValue.display}
+              </span>
+            </div>
+          </div>
+        
+          <!-- Demand Card -->
+          <div class="list-group-item bg-dark-subtle rounded p-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-body-secondary">Demand</small>
+              <span class="badge ${getDemandBadgeClass(item.demand)} rounded-pill">
+                ${item.demand === "'N/A'" || item.demand === "N/A" ? "No Demand" : item.demand || "No Value"}
+              </span>
             </div>
           </div>
         </div>
-      </div>`;
+      </div>
+    </div>
+    ${item.last_updated ? `
+      <div class="card-footer">
+        <div class="d-flex align-items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path fill="#748d92" d="M128 20a108 108 0 1 0 108 108A108.12 108.12 0 0 0 128 20m0 192a84 84 0 1 1 84-84a84.09 84.09 0 0 1-84 84m68-84a12 12 0 0 1-12 12h-56a12 12 0 0 1-12-12V72a12 12 0 0 1 24 0v44h44a12 12 0 0 1 12 12"/></svg>
+          <small class="text-body-secondary fw-bold">Last updated ${formatTimeAgo(item.last_updated)}</small>
+        </div>
+      </div>`
+      :`
+      <div class="card-footer">
+        <div class="d-flex align-items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path fill="#748d92" d="M128 20a108 108 0 1 0 108 108A108.12 108.12 0 0 0 128 20m0 192a84 84 0 1 1 84-84a84.09 84.09 0 0 1-84 84m68-84a12 12 0 0 1-12 12h-56a12 12 0 0 1-12-12V72a12 12 0 0 1 24 0v44h44a12 12 0 0 1 12 12"/></svg>
+          <small class="text-body-secondary fw-bold">Last updated Unknown</small>
+        </div>
+      </div>
+    `}
+  </div>
+</div>`;
 
     cardDiv.innerHTML = cardHtml;
 
     // Add event listeners
-    const card = cardDiv.querySelector(".items-card");
+    const card = cardDiv.querySelector(".card");
 
     // Handle card clicks
     card.addEventListener("click", (e) => {
@@ -1502,9 +1527,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const imageQueue = allItems
       .filter(
         (item) =>
-          // Exclude drifts, horns, and HyperShift Lvl5
+          // Exclude drifts, horns, and HyperShift
           !["drift", "horn"].includes(item.type.toLowerCase()) &&
-          !(item.name === "HyperShift Lvl5" && item.type === "HyperChrome")
+          !(item.name === "HyperShift" && item.type === "HyperChrome")
       )
       .map((item) => {
         const itemType = item.type.toLowerCase();
@@ -1681,8 +1706,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // Default Image
 window.handleimage = function (element) {
   const isHyperShiftLvl5 =
-    element.id === "hypershift-video" ||
-    (element.alt === "HyperShift Lvl5" &&
+    element.id === "HyperShift-video" ||
+    (element.alt === "HyperShift" &&
       element.closest(".media-container")?.querySelector("video"));
 
   if (isHyperShiftLvl5) {
@@ -1755,7 +1780,7 @@ function updateSearchPlaceholder() {
     "weapon-skins": "Search weapon skins (e.g., White Marble, Tiger)...",
   };
 
-  // Set placeholder// Set placeholder based on category
+  // Set placeholder based on category
   searchBar.placeholder = placeholders[category] || "Search items...";
 }
 
@@ -1879,21 +1904,21 @@ const videoObserver = new IntersectionObserver(
 
 // Function to observe all videos in cards
 function observeCardVideos() {
-  document.querySelectorAll(".items-card video").forEach((video) => {
-    videoObserver.observe(video);
-  });
+  // document.querySelectorAll(".items-card video").forEach((video) => {
+  //   videoObserver.observe(video);
+  // });
 }
 
 // Also handle tab/window visibility
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     // Pause all videos when tab is not visible
-    document.querySelectorAll(".items-card video").forEach((video) => {
-      video.pause();
-    });
+    // document.querySelectorAll(".items-card video").forEach((video) => {
+    //   video.pause();
+    // });
   } else {
     // Check which videos are visible and should be playing
-    document.querySelectorAll(".items-card video").forEach((video) => {
+    document.querySelectorAll(".card video").forEach((video) => {
       const entry = video.getBoundingClientRect();
       const isVisible = entry.top < window.innerHeight && entry.bottom > 0;
       if (isVisible) {

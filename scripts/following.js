@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="card-body">
                       <div class="user-info-container">
                         <img 
-                          src="https://ui-avatars.com/api/?background=212a31&color=fff&size=128&rounded=true&name=?&bold=true&format=svg"
+                          src="assets/default-avatar.png"
                           class="user-avatar rounded-circle" 
                           alt="Banned User"
                           style="border-color: #124E66;"
@@ -67,9 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                           style="border-color: ${decimalToHex(
                             user.accent_color
                           )};"
-                          onerror="this.src='https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${
-                            user.username
-                          }&bold=true&format=svg'"
+                          onerror="this.src="assets/default-avatar.png""
                         >
                         <div class="user-info">
                           <h5 class="user-name text-truncate">${
@@ -235,6 +233,6 @@ function handleinvalidImage(imgElement) {
     const username = userCard
       .querySelector(".user-username")
       .textContent.substring(1); // Remove @ symbol
-    imgElement.src = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${username}&bold=true&format=svg`;
+    imgElement.src = "assets/default-avatar.png";
   }, 0);
 }

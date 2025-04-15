@@ -14,6 +14,13 @@ class CommentsManager {
     this.currentEditingComment = null;
     this._isLoading = false;
     this._renderTimeout = null;
+    this.currentUserPremiumType = 0; // Default to free tier
+    this.characterLimits = {
+      0: 200,  // Free tier
+      1: 400,  // Supporter tier 1
+      2: 800,  // Supporter tier 2
+      3: Infinity // Supporter tier 3 (unlimited)
+    };
 
     // Wait for DOM to be ready
     if (document.readyState === "loading") {
@@ -35,7 +42,7 @@ class CommentsManager {
   checkLoginStatus() {
     const token = getCookie("token");
 
-    if (!this.input || !this.submitBtn) {
+    if (!this.input || !this.submitBtn || !this.charCounter) {
       console.error("[Debug] Elements not found in checkLoginStatus");
       return false;
     }
@@ -46,10 +53,24 @@ class CommentsManager {
       this.submitBtn.textContent = "Login";
       this.submitBtn.classList.add("btn-secondary");
       this.submitBtn.classList.remove("btn-primary");
-      // Don't disable the button when not logged in, so it can be clicked to redirect to login
+      this.charCounter.style.display = "none";
       this.submitBtn.disabled = false;
       return false;
     }
+
+    // Get user's premium type when logged in
+    fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`)
+      .then(response => response.json())
+      .then(userData => {
+        this.currentUserPremiumType = userData.premiumtype || 0;
+        const charLimit = this.characterLimits[this.currentUserPremiumType];
+        document.getElementById('char-limit').textContent = charLimit === Infinity ? 'Unlimited' : charLimit;
+        this.charCounter.style.display = "block";
+      })
+      .catch(error => {
+        console.error("Error fetching user premium status:", error);
+        this.currentUserPremiumType = 0;
+      });
 
     this.input.disabled = false;
     this.input.placeholder = "Write a comment...";
@@ -80,15 +101,12 @@ class CommentsManager {
 
     const editModalElement = document.getElementById("editCommentModal");
 
-    if (
-      !this.form ||
-      !this.input ||
-      !this.submitBtn ||
-      !this.commentsList ||
-      !this.paginationControls ||
-      !this.commentsHeader ||
-      !editModalElement
-    ) {
+    this.charCounter = document.getElementById("char-counter");
+    const valid = this.form && this.input && this.submitBtn && this.commentsList && 
+                 this.paginationControls && this.commentsHeader && editModalElement && 
+                 this.charCounter;
+    
+    if (!valid) {
       console.error("[Debug] Required comment elements not found!");
       return false;
     }
@@ -100,6 +118,38 @@ class CommentsManager {
     this.input.placeholder = this.checkLoginStatus()
       ? "Write a comment..."
       : "Login to comment";
+
+    // Initialize char counter with current input value if any
+    if (this.input && this.charCounter) {
+      const currentLength = this.input.value.length;
+      const charCount = document.getElementById('char-count');
+      if (charCount) {
+        charCount.textContent = currentLength;
+        
+        // Check if over limit
+        const charLimit = this.characterLimits[this.currentUserPremiumType];
+        if (currentLength > charLimit && charLimit !== Infinity) {
+          charCount.style.color = '#dc3545';
+          this.submitBtn.disabled = true;
+          this.charCounter.classList.add('over-limit');
+          
+          let warning = document.querySelector('.char-limit-warning');
+          if (!warning) {
+            warning = document.createElement('div');
+            warning.className = 'char-limit-warning text-danger small mt-1';
+            warning.innerHTML = `You've exceeded the ${charLimit} character limit for your current Supporter tier. <a href="/supporting" class="text-primary">Upgrade your tier</a> for a higher limit!`;
+            this.charCounter.after(warning);
+          }
+        } else {
+          charCount.style.color = '';
+          this.submitBtn.disabled = false;
+          this.charCounter.classList.remove('over-limit');
+          
+          const warning = document.querySelector('.char-limit-warning');
+          if (warning) warning.remove();
+        }
+      }
+    }
 
     if (this.sortSelect) {
       this.sortSelect.value = this.sortOrder;
@@ -128,7 +178,8 @@ class CommentsManager {
       const content = this.input.value.trim();
 
       if (!this.checkLoginStatus()) {
-        window.location.href = "/login";
+        const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+        loginModal.show();
         return;
       }
 
@@ -143,6 +194,43 @@ class CommentsManager {
     const saveEditBtn = document.getElementById("saveCommentEdit");
     if (saveEditBtn) {
       saveEditBtn.addEventListener("click", () => this.saveEditedComment());
+    }
+
+    // Add input event listener for character counter
+    if (this.input) {
+      this.input.addEventListener('input', () => {
+        const currentLength = this.input.value.length;
+        const charLimit = this.characterLimits[this.currentUserPremiumType];
+        const charCount = document.getElementById('char-count');
+        
+        if (charCount) {
+          charCount.textContent = currentLength;
+          const charCounter = document.getElementById('char-counter');
+          
+          if (currentLength > charLimit && charLimit !== Infinity) {
+            charCount.style.color = '#dc3545'; // Bootstrap danger color
+            this.submitBtn.disabled = true;
+            charCounter.classList.add('over-limit');
+            
+            // Show warning if over limit
+            let warning = document.querySelector('.char-limit-warning');
+            if (!warning) {
+              warning = document.createElement('div');
+              warning.className = 'char-limit-warning text-danger small mt-1';
+              warning.innerHTML = `You've exceeded the ${charLimit} character limit for your current Supporter tier. <a href="/supporting" class="text-primary">Upgrade your tier</a> for a higher limit!`;
+              charCounter.after(warning);
+            }
+          } else {
+            charCount.style.color = ''; // Reset to default
+            this.submitBtn.disabled = false;
+            charCounter.classList.remove('over-limit');
+            
+            // Remove warning if under limit
+            const warning = document.querySelector('.char-limit-warning');
+            if (warning) warning.remove();
+          }
+        }
+      });
     }
 
     // Initial login status check
@@ -206,12 +294,9 @@ class CommentsManager {
     // Only verify item existence for item types, not changelogs
     if (this.type !== "changelog" && this.itemName) {
       try {
-        const itemResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(
-            this.itemName
-          )}&type=${this.type}`
-        );
-
+        // Use the existing API response from item.js
+        const itemResponse = await window.itemApiResponse;
+        
         if (!itemResponse.ok) {
           const commentsSection = document.querySelector(".comment-container");
           if (commentsSection) {
@@ -251,7 +336,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}`,
+        `https://api.testing.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -415,12 +500,10 @@ class CommentsManager {
     let userDetails = null;
 
     try {
-      // Fetch user details
       if (comment.user_id) {
         userDetails = await this.fetchUserDetails(comment.user_id);
       }
 
-      // Check ownership
       if (token) {
         const response = await fetch(
           `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
@@ -434,21 +517,25 @@ class CommentsManager {
       console.error("Error generating comment HTML:", error);
     }
 
-    // Determine display name from user details
-    const displayName =
-      userDetails && userDetails.global_name !== "None"
-        ? userDetails.global_name
-        : userDetails
-        ? userDetails.username
-        : comment.author;
-
-    // Check if commenter is trade owner
     const isOwnerComment = await this.isTradeOwner(comment.user_id);
+    const premiumType = userDetails?.premiumtype || 0;
+
+    const displayName = userDetails && userDetails.global_name !== "None"
+      ? userDetails.global_name
+      : userDetails
+      ? userDetails.username
+      : comment.author;
+
+    let premiumBadge = '';
+    if (premiumType > 0) {
+      premiumBadge = `<a href="/supporting" class="premium-badge tier-${premiumType}">Tier ${premiumType}</a>`;
+    }
 
     const userNameElement = userDetails?.isDeleted
       ? `<span class="comment-author text-muted">${displayName}</span>`
       : `<a href="/users/${comment.user_id}" class="comment-author">
           ${displayName}
+          ${premiumBadge}
           ${isOwnerComment ? '<span class="op-badge">OP</span>' : ""}
          </a>`;
 
@@ -467,14 +554,14 @@ class CommentsManager {
       ? `Last edited ${formatDate(comment.edited_at)}`
       : formatDate(comment.date);
 
-    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      displayName
-    )}&bold=true&format=svg`;
+    const fallbackAvatar = "assets/default-avatar.png";
+    const avatarUrl = userDetails?.isDeleted 
+      ? fallbackAvatar 
+      : await window.checkAndSetAvatar(userDetails);
 
-    // Handle deleted user avatar differently
     const avatarElement = userDetails?.isDeleted
       ? `<div class="rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #134d64;">${userDetails.avatar}</div>`
-      : `<img src="${await window.checkAndSetAvatar(userDetails)}" 
+      : `<img src="${avatarUrl}" 
           class="rounded-circle me-2" 
           width="40" 
           height="40"
@@ -482,7 +569,7 @@ class CommentsManager {
           alt="${displayName}'s avatar">`;
 
     return `
-      <li class="list-group-item comment-item" data-comment-id="${comment.id}">
+      <li class="list-group-item comment-item" data-comment-id="${comment.id}" data-premium="${premiumType}">
         <div class="d-flex align-items-start">
           ${avatarElement}
           <div class="flex-grow-1">
@@ -495,12 +582,34 @@ class CommentsManager {
                   ${displayDate}
                 </small>
               </div>
-              ${isOwner ? this.generateActionButtons() : ""}
+              ${isOwner
+                ? `<div class="comment-actions">
+                    <button class="comment-actions-toggle" aria-label="Comment actions">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                        <rect width="16" height="16" fill="none" />
+                        <path fill="currentColor" d="M9.5 13a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0" />
+                      </svg>
+                    </button>
+                    <div class="comment-actions-menu d-none">
+                      <button class="comment-action-item edit-comment">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                          <rect width="24" height="24" fill="none" />
+                          <path fill="currentColor" d="m14.06 9.02l.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83l3.75 3.75l1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z" />
+                        </svg>Edit
+                      </button>
+                      <button class="comment-action-item delete-comment delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                          <rect width="24" height="24" fill="none" />
+                          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+                        </svg>Delete
+                      </button>
+                    </div>
+                  </div>`
+                : ""
+              }
             </div>
             <div class="comment-content">
-              <p class="comment-text mb-0">${this.escapeHtml(
-                comment.content
-              )}</p>
+              <p class="comment-text mb-0">${this.escapeHtml(comment.content)}</p>
               <button class="show-more-btn">Show more</button>
             </div>
           </div>
@@ -593,9 +702,7 @@ class CommentsManager {
       : formatDate(comment.date);
 
     // Use displayName for the fallback avatar
-    const fallbackAvatar = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      displayName
-    )}&bold=true&format=svg`;
+    const fallbackAvatar = "assets/default-avatar.png";
 
     const li = document.createElement("li");
     li.className = "list-group-item comment-item";
@@ -703,7 +810,7 @@ class CommentsManager {
           avatar: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 32 32">
 	<rect width="32" height="32" fill="none" />
 	<path fill="none" d="M8.007 24.93A4.996 4.996 0 0 1 13 20h6a4.996 4.996 0 0 1 4.993 4.93a11.94 11.94 0 0 1-15.986 0M20.5 12.5A4.5 4.5 0 1 1 16 8a4.5 4.5 0 0 1 4.5 4.5" />
-	<path fill="currentColor" d="M26.749 24.93A13.99 13.99 0 1 0 2 16a13.9 13.9 0 0 0 3.251 8.93l-.02.017c.07.084.15.156.222.239c.09.103.187.2.28.3q.418.457.87.87q.14.124.28.242q.48.415.99.782c.044.03.084.069.128.1v-.012a13.9 13.9 0 0 0 16 0v.012c.044-.031.083-.07.128-.1q.51-.368.99-.782q.14-.119.28-.242q.451-.413.87-.87c.093-.1.189-.197.28-.3c.071-.083.152-.155.222-.24ZM16 8a4.5 4.5 0 1 1-4.5 4.5A4.5 4.5 0 0 1 16 8M8.007 24.93A4.996 4.996 0 0 1 13 20h6a4.996 4.996 0 0 1 4.993 4.93a11.94 11.94 0 0 1-15.986 0" />
+	<path fill="currentColor" d="M26.749 24.93A13.99 13.99 0 1 0 2 16a13.9 13.9 0 0 0 3.251 8.93l-.02.017c.07.084.15.156.222.239c.09.103.187.2.28.3q.418.457.87.87q.14.124.28.242q.48.415.99.782c.044.03.084.069.128.1v-.012a13.9 13.9 0 0 0 16 0v.012c.044-.031.083-.07.128-.1q.51-.368.99-.782q.14-.119.28-.242q.451-.413.87-.87c.093-.1.189-.197.28-.3c.071-.083.152-.155.222-.239l-.02-.017zM8.007 24.93A4.996 4.996 0 0 1 13 20h6a4.996 4.996 0 0 1 4.993 4.93a11.94 11.94 0 0 1-15.986 0M20.5 12.5A4.5 4.5 0 1 1 16 8a4.5 4.5 0 0 1 4.5 4.5" />
 </svg>`,
           isDeleted: true,
         };
@@ -881,8 +988,10 @@ class CommentsManager {
     }
 
     const content = this.input.value.trim();
-
-    if (!content) {
+    const charLimit = this.characterLimits[this.currentUserPremiumType];
+    
+    if (content.length > charLimit && charLimit !== Infinity) {
+      notyf.error(`Your comment exceeds the ${charLimit} character limit for your current Supporter tier. Visit /supporting to upgrade your tier!`);
       return;
     }
 
@@ -913,7 +1022,7 @@ class CommentsManager {
       };
 
       const response = await fetch(
-        "https://api.jailbreakchangelogs.xyz/comments/add",
+        "https://api.testing.jailbreakchangelogs.xyz/comments/add",
         {
           method: "POST",
           headers: {
@@ -932,6 +1041,15 @@ class CommentsManager {
       }
 
       this.input.value = "";
+      // Reset character counter
+      const charCount = document.getElementById('char-count');
+      if (charCount) {
+        charCount.textContent = "0";
+        charCount.style.color = ''; // Reset color
+        this.charCounter.classList.remove('over-limit');
+        const warning = document.querySelector('.char-limit-warning');
+        if (warning) warning.remove();
+      }
       await this.loadComments();
       notyf.success("Comment added successfully");
     } catch (error) {
@@ -968,7 +1086,7 @@ class CommentsManager {
 
       // Now send delete request with correct field names
       const response = await fetch(
-        "https://api.jailbreakchangelogs.xyz/comments/delete",
+        "https://api.testing.jailbreakchangelogs.xyz/comments/delete",
         {
           method: "DELETE",
           headers: {
@@ -977,7 +1095,7 @@ class CommentsManager {
           },
           body: JSON.stringify({
             id: String(commentId),
-            author: token,
+            owner: token,
           }),
         }
       );
@@ -1030,7 +1148,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        "https://api.jailbreakchangelogs.xyz/comments/edit",
+        "https://api.testing.jailbreakchangelogs.xyz/comments/edit",
         {
           method: "POST",
           headers: {
@@ -1061,7 +1179,7 @@ class CommentsManager {
 
     try {
       const tradeResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
+        `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
       );
       if (!tradeResponse.ok) return false;
 

@@ -1,3 +1,5 @@
+<%- include('surveys') %>
+<%- include('login-modal') %>
 <nav
   class="navbar navbar-expand-lg custom-navbar-color sticky-top main-navigation"
 >
@@ -82,7 +84,7 @@
               <li><a class="dropdown-item" href="/values">Value List</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item" href="/trading">Create Trade Ad</a>
+                <a class="dropdown-item" href="/trading">Trade Ads</a>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -117,12 +119,6 @@
               <li><a class="dropdown-item" href="/bot">Our Discord Bot</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item" href="/exploiters"
-                  >Report Exploiters</a
-                >
-              </li>
-              <li><hr class="dropdown-divider" /></li>
-              <li>
                 <a class="dropdown-item" href="/faq"
                   >Frequently Asked Questions</a
                 >
@@ -133,7 +129,7 @@
           <!-- Profile picture icon with text and dropdown (visible on desktop) -->
           <li class="nav-item dropdown ms-2">
             <a
-              class="nav-link no-click-toggle d-flex align-items-center gap-2"
+              class="nav-link d-flex align-items-center gap-2"
               href="#"
               id="navbarDropdown"
               role="button"
@@ -268,7 +264,7 @@
           <div class="side-menu-section">
             <div class="side-menu-section-title">Values</div>
             <a class="side-menu-item" href="/values">Value List</a>
-            <a class="side-menu-item" href="/trading">Create Trade Ad</a>
+            <a class="side-menu-item" href="/trading">Trade Ads</a>
             <a class="side-menu-item" href="/dupes/calculator"
               >Dupe Calculator</a
             >
@@ -279,7 +275,6 @@
             <a class="side-menu-item" href="/users">Users</a>
             <a class="side-menu-item" href="/servers">Private Servers</a>
             <a class="side-menu-item" href="/bot">Our Discord Bot</a>
-            <a class="side-menu-item" href="/exploiters">Report Exploiters</a>
           </div>
 
           <div class="side-menu-section">
@@ -293,6 +288,25 @@
 </nav>
 
 <script>
+  // Add this function to show login modal with Roblox tab
+  function showRobloxLoginModal() {
+    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    loginModal.show();
+    
+    // Switch to Roblox tab
+    const tabButtons = document.querySelectorAll('.auth-toggle-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // Remove active class from all buttons and contents
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.add('d-none'));
+    
+    // Add active class to Roblox button and show Roblox content
+    const robloxButton = document.querySelector('.auth-toggle-btn[data-tab="roblox"]');
+    robloxButton.classList.add('active');
+    document.getElementById('roblox-tab').classList.remove('d-none');
+  }
+
   window.openSideMenu = function () {
     const sideMenu = document.getElementById("sideMenu");
     const backdrop = document.getElementById("sideMenuBackdrop");
@@ -394,10 +408,17 @@
 </svg>
              View Profile
             </a>
+            <a class="nav-link" href="/settings">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94c0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6s-1.62 3.6-3.6 3.6z" />
+              </svg>
+              Settings
+            </a>
             ${
               !hasRoblox
                 ? `
-            <a class="nav-link" href="/roblox">
+            <a class="nav-link" href="#" onclick="event.preventDefault(); showRobloxLoginModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
 	<path fill="currentColor" d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z" />
@@ -417,13 +438,11 @@
         `;
       } else {
         return `
-          <a class="nav-link" href="/login?redirect=${encodeURIComponent(
-            window.location.pathname + window.location.search
-          )}">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
-	<rect width="256" height="199" fill="none" />
-	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
-</svg></i> Authenticate with Discord
+          <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
+              <rect width="256" height="199" fill="none" />
+              <path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
+            </svg> Login
           </a>
         `;
       }
@@ -445,11 +464,20 @@
                View Profile
             </a>
           </li>
+          <li>
+            <a class="dropdown-item" href="/settings">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94c0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6s-1.62 3.6-3.6 3.6z" />
+              </svg>
+              Settings
+            </a>
+          </li>
           ${
             !hasRoblox
               ? `
           <li>
-            <a class="dropdown-item" href="/roblox">
+            <a class="dropdown-item" href="#" onclick="event.preventDefault(); showRobloxLoginModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
 	<path fill="currentColor" d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z" />
@@ -472,13 +500,11 @@
       } else {
         return `
           <li>
-            <a class="dropdown-item" href="/login?redirect=${encodeURIComponent(
-              window.location.pathname + window.location.search
-            )}">
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
               <svg xmlns="http://www.w3.org/2000/svg" width="20.59" height="16" viewBox="0 0 256 199">
-	<rect width="256" height="199" fill="none" />
-	<path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
-</svg></i> Authenticate with Discord
+                <rect width="256" height="199" fill="none" />
+                <path fill="#5865f2" d="M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18" />
+              </svg> Login
             </a>
           </li>
         `;
@@ -501,7 +527,22 @@
         const dropdownContent = getDropdownContent(isLoggedIn);
         const profileContent = getProfileContent(isLoggedIn);
 
-        if (userDropdown) userDropdown.innerHTML = dropdownContent;
+        if (userDropdown) {
+          userDropdown.innerHTML = dropdownContent;
+          const navbarDropdown = document.getElementById('navbarDropdown');
+          const profileListItem = navbarDropdown.closest('li');
+          
+          if (isLoggedIn) {
+            navbarDropdown.classList.add('dropdown-toggle');
+            navbarDropdown.setAttribute('data-bs-toggle', 'dropdown');
+            profileListItem.classList.add('dropdown');
+          } else {
+            profileListItem.classList.remove('dropdown');
+            navbarDropdown.removeAttribute('data-bs-toggle');
+            navbarDropdown.setAttribute('data-bs-toggle', 'modal');
+            navbarDropdown.setAttribute('data-bs-target', '#loginModal');
+          }
+        }
         if (mobileProfileSection)
           mobileProfileSection.innerHTML = profileContent;
 
@@ -818,8 +859,8 @@
 
   .main-navigation .dropdown-item:hover {
     background: var(--bg-secondary) !important;
-    padding-left: 1.5rem;
     color: var(--accent-color-light) !important;
+    font-weight: bold !important;
   }
 
   .main-navigation .dropdown-item::before {
@@ -967,19 +1008,19 @@
     }
   }
 
-  /* Avatar and username styling - Using more specific selectors */
-  .main-navigation .nav-item.dropdown.ms-2 .nav-link {
+    /* Avatar and username styling - Using more specific selectors */
+    .main-navigation .nav-item.dropdown.ms-2 .nav-link {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    border: 1px solid var(--accent-color);
+    border: 3px solid var(--accent-color-light);
     border-radius: 50px;
     transition: all 0.2s ease;
+    color: var(--bg-primary) !important;
   }
 
   .main-navigation .nav-item.dropdown.ms-2 .nav-link:hover {
-    background: var(--accent-color-light) !important;
     color: var(--bg-primary) !important;
     transform: translateY(-1px);
   }
@@ -1085,5 +1126,17 @@
 
   .main-navigation .mobile-avatar-button[aria-expanded="true"] .expand-icon {
     transform: rotate(180deg);
+  }
+
+  /* Button styles */
+  .btn.btn-primary.btn-lg {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    transition: all 0.2s ease;
+  }
+
+  .btn.btn-primary.btn-lg:hover {
+    background-color: var(--accent-color-light) !important;
+    border-color: var(--accent-color-light) !important;
   }
 </style>

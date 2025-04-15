@@ -1,0 +1,142 @@
+<!-- Survey Modal -->
+<div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="surveyModalLabel">Quick Survey</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="surveyForm">
+          <div class="mb-3">
+            <label for="surveyQuestion" class="form-label survey-question"></label>
+            <div class="survey-input-container">
+              <!-- Dynamic input will be inserted here -->
+            </div>
+          </div>
+          <small class="text-muted d-block mt-2">Expires: <span class="survey-expiration"></span></small>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="surveySubmit">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Survey Modal Styles */
+  #surveyModal .modal-content {
+    background-color: var(--bg-primary) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  #surveyModal .modal-header {
+    background-color: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--accent-color) !important;
+    padding: 1rem !important;
+  }
+
+  #surveyModal .modal-title {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+  }
+
+  #surveyModal .btn-close {
+    background-color: transparent !important;
+    filter: invert(1) grayscale(100%) brightness(200%) !important;
+    opacity: 0.75 !important;
+    transition: opacity 0.2s ease !important;
+  }
+
+  #surveyModal .btn-close:hover {
+    opacity: 1 !important;
+  }
+
+  #surveyModal .modal-body {
+    background-color: var(--bg-primary) !important;
+    padding: 1.5rem 1rem !important;
+  }
+
+  #surveyModal .form-label {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  #surveyModal .form-control {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--text-primary) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  #surveyModal .form-control:focus {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--accent-color-light) !important;
+    box-shadow: 0 0 0 0.25rem rgba(29, 125, 163, 0.25) !important;
+    color: var(--text-primary) !important;
+  }
+
+  #surveyModal textarea.form-control {
+    min-height: 100px !important;
+    resize: vertical !important;
+  }
+
+  #surveyModal .text-muted {
+    color: var(--text-muted) !important;
+  }
+
+  #surveyModal .modal-footer {
+    background-color: var(--bg-secondary) !important;
+    border-top: 1px solid var(--accent-color) !important;
+    padding: 1rem !important;
+  }
+
+  #surveyModal .btn-secondary {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  #surveyModal .btn-secondary:hover {
+    background-color: var(--bg-primary) !important;
+    border-color: var(--accent-color-light) !important;
+  }
+
+  #surveyModal .btn-primary {
+    background-color: var(--accent-color) !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  #surveyModal .btn-primary:hover {
+    background-color: var(--accent-color-light) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  #surveyModal .btn-primary:active {
+    transform: translateY(0) !important;
+  }
+
+  /* Modal Backdrop */
+  .modal-backdrop.show {
+    opacity: 0.75 !important;
+    backdrop-filter: blur(3px) !important;
+  }
+
+  /* Fade Animation */
+  .modal.fade .modal-dialog {
+    transform: scale(0.95) !important;
+    transition: transform 0.2s ease-out !important;
+  }
+
+  .modal.show .modal-dialog {
+    transform: scale(1) !important;
+  }
+</style>

@@ -11,9 +11,9 @@ const tradeId = window.location.pathname.split("/").pop();
 
 // Function to get item image element
 function getItemImageElement(item) {
-  // Special handling for HyperShift Lvl5
-  if (item.name === "HyperShift Lvl5") {
-    return `<img src="/assets/images/items/hyperchromes/HyperShift Lvl5.gif" 
+  // Special handling for HyperShift
+  if (item.name === "HyperShift") {
+    return `<img src="/assets/images/items/hyperchromes/HyperShift.gif" 
                    class="card-img-top" 
                    alt="${item.name}">`;
   }
@@ -213,7 +213,7 @@ async function loadTradeData() {
   try {
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
 
     if (!tradeResponse.ok) {
@@ -242,21 +242,11 @@ async function loadTradeData() {
     }
 
     // Process offering items with correct counting
-    const offeringIds = trade.offering.split(",").filter((id) => id);
-    const offeringItemsMap = new Map(); // Use Map to track unique items and their counts
-
-    // First fetch all items and count occurrences
-    const offeringItems = await Promise.all(
-      offeringIds.map((id) =>
-        fetch(`https://api.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
-          (res) => res.json()
-        )
-      )
-    );
-
-    // Count items and store unique items
+    const offeringItems = trade.offering;
     const uniqueOfferingItems = [];
     const offeringCounts = new Map();
+
+    // Count items and store unique items
     offeringItems.forEach((item) => {
       const itemKey = `${item.id}-${item.name}-${item.type}`;
       if (!offeringCounts.has(itemKey)) {
@@ -268,20 +258,11 @@ async function loadTradeData() {
     });
 
     // Process requesting items with correct counting
-    const requestingIds = trade.requesting.split(",").filter((id) => id);
-    const requestingItemsMap = new Map();
-
-    const requestingItems = await Promise.all(
-      requestingIds.map((id) =>
-        fetch(`https://api.jailbreakchangelogs.xyz/items/get?id=${id}`).then(
-          (res) => res.json()
-        )
-      )
-    );
-
-    // Count items and store unique items
+    const requestingItems = trade.requesting;
     const uniqueRequestingItems = [];
     const requestingCounts = new Map();
+
+    // Count items and store unique items
     requestingItems.forEach((item) => {
       const itemKey = `${item.id}-${item.name}-${item.type}`;
       if (!requestingCounts.has(itemKey)) {
@@ -324,9 +305,7 @@ async function loadTradeData() {
 
     // Get fallback avatar function
     function getFallbackAvatar(username) {
-      return `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-        username || "Unknown"
-      )}&bold=true&format=svg`;
+      return "assets/default-avatar.png";
     }
 
     hideLoadingOverlay();
@@ -488,13 +467,15 @@ function showErrorState() {
   const tradeContent = document.querySelector(".trade-content");
   tradeContent.style.display = "none";
   const errorHTML = `
-      <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Trade Not Found</h4>
-        <p>This trade advertisement could not be found or has been deleted.</p>
-        <hr>
-        <p class="mb-0">
-          <a href="/trading" class="alert-link">Return to Trading Hub</a>
-        </p>
+      <div class="container">
+        <div class="alert alert-danger" role="alert">
+          <h4 class="alert-heading">Trade Not Found</h4>
+          <p>This trade advertisement could not be found or has been deleted.</p>
+          <hr>
+          <p class="mb-0">
+            <a href="/trading" class="alert-link">View other Trade Ads</a>
+          </p>
+        </div>
       </div>
     `;
   container.insertAdjacentHTML("afterend", errorHTML);

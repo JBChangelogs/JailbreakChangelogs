@@ -38,12 +38,27 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/settings.min.css"
+      href="/styles/settings.css"
     />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/main.min.css"
     />
+
+    <style>
+      .setting-highlight {
+        animation: highlight-pulse 6s ease-in-out;
+        background-color: rgba(18, 78, 102, 0.2);
+      }
+
+      @keyframes highlight-pulse {
+        0% { background-color: rgba(18, 78, 102, 0.2); }
+        25% { background-color: rgba(18, 78, 102, 0.4); }
+        50% { background-color: rgba(18, 78, 102, 0.2); }
+        75% { background-color: rgba(18, 78, 102, 0.4); }
+        100% { background-color: rgba(18, 78, 102, 0.2); }
+      }
+    </style>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/assets/logos/apple-touch-icon.png" />
@@ -81,7 +96,7 @@
   <body data-scroll-container>
     <!-- prettier-ignore -->
     <%- include('partials/nav') %>
-
+    <%- include('partials/loading') %>
 
     <!-- Main Content -->
     <div class="container-fluid mt-3">
@@ -105,6 +120,7 @@
               <div class="mb-4">
                 <h5>Profile Settings</h5>
                 <div class="list-group">
+                  <!-- Core Privacy Settings -->
                   <div class="list-group-item">
                     <div class="form-check form-switch">
                       <input
@@ -115,89 +131,7 @@
                       />
                       <label class="form-check-label" for="profile_public">
                         <h6 class="mb-1">Public Profile</h6>
-                        <small class="text-muted"
-                          >Allow others to view your profile</small
-                        >
-                      </label>
-                    </div>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="show_comments"
-                        data-setting="show_recent_comments"
-                      />
-                      <label class="form-check-label" for="show_comments">
-                        <h6 class="mb-1">Show Recent Comments</h6>
-                        <small class="text-muted"
-                          >Display your recent comments on your profile</small
-                        >
-                      </label>
-                    </div>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="hide_following"
-                        data-setting="hide_following"
-                      />
-                      <label class="form-check-label" for="hide_following">
-                        <h6 class="mb-1">Hide Following</h6>
-                        <small class="text-muted"
-                          >Hide your following list from others</small
-                        >
-                      </label>
-                    </div>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="hide_followers"
-                        data-setting="hide_followers"
-                      />
-                      <label class="form-check-label" for="hide_followers">
-                        <h6 class="mb-1">Hide Followers</h6>
-                        <small class="text-muted"
-                          >Hide your followers list from others</small
-                        >
-                      </label>
-                    </div>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="hide_favorites"
-                        data-setting="hide_favorites"
-                      />
-                      <label class="form-check-label" for="hide_favorites">
-                        <h6 class="mb-1">Hide Favorites</h6>
-                        <small class="text-muted"
-                          >Hide your favorites from others</small
-                        >
-                      </label>
-                    </div>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="hide_connections"
-                        data-setting="hide_connections"
-                      />
-                      <label class="form-check-label" for="hide_connections">
-                        <h6 class="mb-1">Hide Connections</h6>
-                        <small class="text-muted"
-                          >Hide your linked accounts from others</small
-                        >
+                        <small class="text-muted">Allow others to view your profile</small>
                       </label>
                     </div>
                   </div>
@@ -211,9 +145,97 @@
                       />
                       <label class="form-check-label" for="hide_presence">
                         <h6 class="mb-1">Hide Presence</h6>
-                        <small class="text-muted"
-                          >Hide your online status from others</small
-                        >
+                        <small class="text-muted">Hide your online status from others</small>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Content Visibility -->
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="show_comments"
+                        data-setting="show_recent_comments"
+                      />
+                      <label class="form-check-label" for="show_comments">
+                        <h6 class="mb-1">Show Recent Comments</h6>
+                        <small class="text-muted">Display your recent comments on your profile</small>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="hide_favorites"
+                        data-setting="hide_favorites"
+                      />
+                      <label class="form-check-label" for="hide_favorites">
+                        <h6 class="mb-1">Hide Favorites</h6>
+                        <small class="text-muted">Hide your favorites from others</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Social Connections -->
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="hide_following"
+                        data-setting="hide_following"
+                      />
+                      <label class="form-check-label" for="hide_following">
+                        <h6 class="mb-1">Hide Following</h6>
+                        <small class="text-muted">Hide your following list from others</small>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="hide_followers"
+                        data-setting="hide_followers"
+                      />
+                      <label class="form-check-label" for="hide_followers">
+                        <h6 class="mb-1">Hide Followers</h6>
+                        <small class="text-muted">Hide your followers list from others</small>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="hide_connections"
+                        data-setting="hide_connections"
+                      />
+                      <label class="form-check-label" for="hide_connections">
+                        <h6 class="mb-1">Hide Connections</h6>
+                        <small class="text-muted">Hide your linked accounts from others</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Communication Settings -->
+                  <div class="list-group-item">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="dms_allowed"
+                        data-setting="dms_allowed"
+                      />
+                      <label class="form-check-label" for="dms_allowed">
+                        <h6 class="mb-1">Allow DMs from Bot</h6>
+                        <small class="text-muted">Allow our Discord bot to send you direct messages</small>
                       </label>
                     </div>
                   </div>
@@ -231,14 +253,14 @@
                         type="checkbox"
                         id="banner_discord"
                         data-setting="banner_discord"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <label class="form-check-label" for="banner_discord">
                         <h6 class="mb-1">Use Discord Banner</h6>
-                        <small class="text-muted"
-                          >Use your Discord banner as profile background</small
-                        >
+                        <small class="text-muted">Use your Discord banner as profile background</small>
                       </label>
                     </div>
+                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
                   </div>
 
                   <!-- Custom Banner Input -->
@@ -251,18 +273,28 @@
                         class="form-control"
                         placeholder="Enter image URL"
                         aria-label="Custom banner URL"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <button
                         class="btn btn-primary"
                         type="button"
                         id="updateBannerBtn"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       >
                         Update Banner
                       </button>
                     </div>
-                    <small class="text-muted d-block mt-1"
-                      >Enter a direct link to your custom banner image</small
-                    >
+                    <small class="text-muted d-block mt-1">Enter a direct link to your custom banner image</small>
+                    <div class="image-upload-help mt-2">
+                      <small class="text-warning d-block">Important: Use the direct image link, not the sharing link!</small>
+                      <small class="d-block mt-1">Upload your image using one of these sites:</small>
+                      <div class="upload-sites mt-1">
+                        <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">ImgBB</a>
+                        <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">PostImages</a>
+                        <a href="https://tenor.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">Tenor</a>
+                      </div>
+                    </div>
+                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
                   </div>
 
                   <div class="list-group-item">
@@ -272,14 +304,47 @@
                         type="checkbox"
                         id="avatar_discord"
                         data-setting="avatar_discord"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <label class="form-check-label" for="avatar_discord">
                         <h6 class="mb-1">Use Discord Avatar</h6>
-                        <small class="text-muted"
-                          >Use your Discord avatar as profile picture</small
-                        >
+                        <small class="text-muted">Use your Discord avatar as profile picture</small>
                       </label>
                     </div>
+                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
+                  </div>
+                  <!-- Custom Avatar Input -->
+                  <div class="list-group-item" id="custom_avatar_input">
+                    <h6 class="mb-2">Custom Avatar URL</h6>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        id="avatarInput"
+                        class="form-control"
+                        placeholder="Enter image URL"
+                        aria-label="Custom avatar URL"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
+                      />
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        id="updateAvatarBtn"
+                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
+                      >
+                        Update Avatar
+                      </button>
+                    </div>
+                    <small class="text-muted d-block mt-1">Enter a direct link to your custom avatar image</small>
+                    <div class="image-upload-help mt-2">
+                      <small class="text-warning d-block">Important: Use the direct image link, not the sharing link!</small>
+                      <small class="d-block mt-1">Upload your image using one of these sites:</small>
+                      <div class="upload-sites mt-1">
+                        <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">ImgBB</a>
+                        <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">PostImages</a>
+                        <a href="https://tenor.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">Tenor</a>
+                      </div>
+                    </div>
+                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to use this setting.</small>' : '' %>
                   </div>
                 </div>
               </div>
@@ -288,6 +353,30 @@
               <div class="mb-4">
                 <h5>Account Management</h5>
                 <div class="list-group">
+                  <% if (user.roblox_username) { %>
+                  <div class="list-group-item" style="background-color: #2e3944">
+                    <h6 class="mb-3">Connected Roblox Account</h6>
+                    <div class="alert alert-info mb-3">
+                      <p class="mb-0">Currently connected to Roblox account: <strong><a href="https://www.roblox.com/users/<%= user.roblox_id %>/profile" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><%= user.roblox_username %></a></strong></p>
+                    </div>
+                    <div id="disconnect-confirmation" class="alert alert-warning mb-3" style="display: none;">
+                      <h6 class="alert-heading">Are you sure?</h6>
+                      <p class="mb-2">Disconnecting your Roblox account will:</p>
+                      <ul class="mb-0">
+                        <li>Remove your Roblox profile from your account</li>
+                        <li>Disable trading features</li>
+                        <li>Require re-authentication to use Roblox features again</li>
+                      </ul>
+                      <div class="mt-3">
+                        <button id="confirm-disconnect" class="btn btn-danger me-2">Yes, Disconnect</button>
+                        <button id="cancel-disconnect" class="btn btn-secondary">No, Keep Connected</button>
+                      </div>
+                    </div>
+                    <button id="disconnect-roblox-button" class="btn btn-warning">
+                      Disconnect Roblox Account
+                    </button>
+                  </div>
+                  <% } %>
                   <div
                     class="list-group-item"
                     style="background-color: #2e3944"
@@ -362,11 +451,7 @@
     <%- include('partials/footer') %>
 
     <!-- Scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"
       integrity="sha256-UnlpkMLasaTx2ZqovxBXUcQ5jq3oKXaZZ1aWENNFETE="
@@ -377,7 +462,7 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/settings.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/main.min.js"></script>
+    <script src="/scripts/main.js"></script>
+    <script src="/scripts/settings.js"></script>
   </body>
 </html>

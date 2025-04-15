@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialize badge elements once at the top
+  const crown = document.getElementById("crown");
+  const earlyBadge = document.getElementById("early-badge");
+  const premiumBadge = document.getElementById("premium-badge");
+  const badgesContainer = document.querySelector(".badges-container");
+
   // Initialize all tooltips
   const tooltipTriggerList = document.querySelectorAll(
     '[data-bs-toggle="tooltip"]'
@@ -38,7 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const follow_button = document.getElementById("follow-button");
   const settings_button = document.getElementById("settings-button");
   const pathSegments = window.location.pathname.split("/");
-  const earlyBadge = document.getElementById("early-badge");
   const loggedinuserId = localStorage.getItem("userid");
   const userId = pathSegments[pathSegments.length - 1];
   const card_pagination = document.getElementById("card-pagination");
@@ -276,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const response = await fetch(
-          "https://api.jailbreakchangelogs.xyz/users/description/update",
+          "https://api.testing.jailbreakchangelogs.xyz/users/description/update",
           {
             method: "POST",
             headers: {
@@ -356,40 +361,34 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   async function fetchBanner(userId, bannerHash) {
-    // Early return if no banner hash or if banner hash is "None"
-    if (!userId || !bannerHash || bannerHash === "None") {
-      return null;
-    }
-
-    const isAnimated = bannerHash.startsWith("a_");
-    const format = isAnimated ? "gif" : "png";
-    const bannerUrl = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}?size=4096`;
+    if (!bannerHash || bannerHash === "None") return null;
 
     try {
-      const response = await fetch(bannerUrl, {
-        method: "HEAD",
-        cache: "no-store",
-      });
-
-      if (response.ok) {
-        return bannerUrl;
+      // Fetch user data to check premium type
+      const userResponse = await fetch(
+        `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}`
+      );
+      
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user data");
       }
 
-      // Only try PNG as fallback if original request was for GIF
-      if (isAnimated) {
-        const pngUrl = bannerUrl.replace(".gif", ".png");
-        const pngResponse = await fetch(pngUrl, {
-          method: "HEAD",
-          cache: "no-store",
-        });
+      const userData = await userResponse.json();
+      
+      // Check if banner is animated (starts with a_)
+      const isAnimated = bannerHash.startsWith("a_");
+      
+      // Check if user has premium access for animated banners (type 2 or 3)
+      const hasAnimatedAccess = userData.premiumtype === 2 || userData.premiumtype === 3;
+      
+      // Determine format based on premium status and whether banner is animated
+      const format = isAnimated && hasAnimatedAccess ? "gif" : "png";
+      const bannerUrl = `https://cdn.discordapp.com/banners/${userId}/${bannerHash}.${format}?size=4096`;
 
-        if (pngResponse.ok) {
-          return pngUrl;
-        }
-      }
-
-      return null;
-    } catch {
+      const response = await fetch(bannerUrl, { method: "HEAD" });
+      return response.ok ? bannerUrl : null;
+    } catch (error) {
+      console.error("Error fetching banner:", error);
       return null;
     }
   }
@@ -406,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Get user settings first
       const settingsResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}`,
+        `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -643,7 +642,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const userAvatar = document.getElementById("user-avatar");
         if (userAvatar) {
           userAvatar.src =
-            "https://ui-avatars.com/api/?background=144a61&color=fff&size=128&rounded=true&name=?&bold=true&format=svg";
+            "/assets/default-avatar.png";
           userAvatar.style.border = "4px solid #495057"; // Keep the gray border
         }
 
@@ -669,7 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Then get bio data
       const bioResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
+        `https://api.testing.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -955,7 +954,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
+        `https://api.testing.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
 
       if (!response.ok) {
@@ -1066,7 +1065,14 @@ document.addEventListener("DOMContentLoaded", function () {
         
             if (itemResponse.ok) {
               const itemData = await itemResponse.json();
-              if (comment.item_type.toLowerCase() === "horn") {
+              if (comment.item_type.toLowerCase() === "hyperchrome" && itemData.name === "HyperShift") {
+                // Special handling for HyperShift with video sources
+                imageUrl = `
+                  <video class="card-img-top" playsinline muted loop autoplay>
+                    <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+                    <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+                  </video>`;
+              } else if (comment.item_type.toLowerCase() === "horn") {
                 imageUrl = "/assets/audios/horn_thumbnail.webp";
               } else {
                 imageUrl = `/assets/images/items/480p/${comment.item_type.toLowerCase()}s/${itemData.name}.webp`;
@@ -1074,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", function () {
               displayTitle = itemData.name;
               displayType = itemData.type;
               // Use item name in URL for regular items
-              viewPath = `/item/${comment.item_type.toLowerCase()}/${encodeURIComponent(itemData.name)}`;
+              viewPath = `/item/${comment.item_type.toLowerCase()}/${encodeURIComponent(itemData.name)}?comments`;
             } else {
               imageUrl = "/assets/logos/Banner_Background_480.webp";
               // Fallback to ID if item fetch fails
@@ -1087,9 +1093,9 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card mb-3 comment-card shadow-lg" style="background-color: #212A31; color: #D3D9D4;">
               <div class="card-body">
                 <div class="row">
-                  <!-- Image Section -->
+                  <!-- Image/Video Section -->
                   <div class="col-md-4 d-none d-md-block">
-                    <img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                    ${imageUrl.includes('<video') ? imageUrl : `<img src="${imageUrl}" alt="Comment Image" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">`}
                   </div>
                   
                   <!-- Content Section -->
@@ -1269,46 +1275,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function setAvatarWithFallback(username) {
     const userAvatar = document.getElementById("user-avatar");
-    const fallbackUrl = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      username
-    )}&bold=true&format=svg`;
-
-    // Early return if no avatar data
-    if (!udata.id || !udata.avatar || udata.avatar === "None") {
-      userAvatar.src = fallbackUrl;
-      return;
-    }
+    const fallbackUrl = "assets/default-avatar.png";
 
     try {
-      // Determine if avatar should be animated based on hash
-      const isAnimated = udata.avatar.startsWith("a_");
-      const baseUrl = `https://cdn.discordapp.com/avatars/${udata.id}/${udata.avatar}`;
-
-      // Try primary format first (gif for animated, png for static)
-      const primaryFormat = isAnimated ? "gif" : "png";
-      const primaryUrl = `${baseUrl}.${primaryFormat}?size=4096`;
-
-      const response = await fetch(primaryUrl, { method: "HEAD" });
-      if (response.ok) {
-        userAvatar.src = primaryUrl;
+      const avatarUrl = await window.checkAndSetAvatar(udata);
+      if (avatarUrl) {
+        userAvatar.src = avatarUrl;
         return;
       }
-
-      // If animated failed, try png as fallback
-      if (isAnimated) {
-        const pngUrl = `${baseUrl}.png?size=4096`;
-        const pngResponse = await fetch(pngUrl, { method: "HEAD" });
-        if (pngResponse.ok) {
-          userAvatar.src = pngUrl;
-          return;
-        }
-      }
-
-      // If all attempts fail, use fallback
-      userAvatar.src = fallbackUrl;
-    } catch {
-      userAvatar.src = fallbackUrl;
+    } catch (error) {
+      console.error("Error setting avatar:", error);
     }
+
+    // Fallback if everything fails
+    userAvatar.src = fallbackUrl;
   }
 
   userAvatar = document.getElementById("user-avatar");
@@ -1330,7 +1310,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserFollowers(userId) {
     try {
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/followers/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/followers/get?user=${userId}&nocache=true`
       );
 
       if (response.status === 404) {
@@ -1364,7 +1344,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserFollowing(userId) {
     try {
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/following/get?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/following/get?user=${userId}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1410,15 +1390,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const targetUserId = pathSegments[2]; // This gets the ID from /users/{id}
 
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/followers/add`,
+        `https://api.testing.jailbreakchangelogs.xyz/users/followers/add`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
           body: JSON.stringify({
             follower: user, // The logged-in user's token
             following: targetUserId, // The ID from the URL
@@ -1461,7 +1435,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const user = getCookie("token");
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/followers/remove`,
+        `https://api.testing.jailbreakchangelogs.xyz/users/followers/remove`,
         {
           method: "DELETE",
           headers: {
@@ -1589,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // First check user settings
       const settingsResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}`
+        `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`
       );
       if (!settingsResponse.ok) {
         throw new Error("Failed to fetch user settings");
@@ -1618,7 +1592,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userId}&nocache=true`
       );
 
       if (response.status === 404) {
@@ -1631,13 +1605,15 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const favorites = await response.json();
-
       // Now check favorites length after we have the data
       if (!favorites || favorites.length === 0) {
         showNoFavoritesMessage();
         return;
       }
 
+      // Sort favorites by created_at timestamp (latest first)
+      favorites.sort((a, b) => b.created_at - a.created_at);
+      
       // Fetch full item details for each favorite
       const itemPromises = favorites.map(async (fav) => {
         const itemResponse = await fetch(
@@ -1682,96 +1658,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Clear and populate the favorites container
       favoritesContainer.innerHTML = paginatedItems
-        .map((item) => {
-          const itemType = item.type.toLowerCase();
-
-          // Check specifically for HyperShift Lvl5 by favorite_id
-          if (item.favorite_id === 587 && item.name === "HyperShift Lvl5") {
-            const card = `
-              <div class="col-6 col-md-4 col-lg-3">
-                <a href="/item/${itemType}/${encodeURIComponent(
-              item.name
-            )}" class="text-decoration-none">
-                  <div class="card items-card">
-                    <div class="position-relative">
-                      <div class="media-container">
-                        <video 
-                          src="/assets/images/items/hyperchromes/HyperShift Lvl5.webm" 
-                          class="card-img-top" 
-                          playsinline 
-                          muted 
-                          loop 
-                          autoplay
-                          style="width: 100%; height: auto;"
-                        >
-                        </video>
-                      </div>
-                      <div class="item-card-body text-center">
-                        <div class="badges-container d-flex justify-content-center gap-2">
-                          <span class="badge item-type-badge" style="background-color: ${getTypeColor(
-                            itemType
-                          )}">${item.type}</span>
-                        </div>
-                        <h5 class="card-title">${item.name}</h5>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>`;
-            return card;
-          }
-
-          // Normal items handling (existing code)
-          let imageUrl;
-          if (itemType === "horn") {
-            imageUrl = "/assets/audios/horn_thumbnail.webp";
-          } else if (itemType === "drift") {
-            imageUrl = `/assets/images/items/480p/drifts/${item.name}.webp`;
-          } else {
-            imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
-          }
-
-          return `
-            <div class="col-6 col-md-4 col-lg-3">
-              <a href="/item/${itemType}/${encodeURIComponent(
-            item.name
-          )}" class="text-decoration-none">
-                <div class="card items-card">
-                  <div class="position-relative">
-                    <div class="media-container">
-                      <img src="${imageUrl}" class="card-img-top" alt="${
-            item.name
-          }">
-                    </div>
-                    <div class="item-card-body text-center">
-                      <div class="badges-container d-flex justify-content-center gap-2">
-                        <span class="badge item-type-badge" style="background-color: ${getTypeColor(
-                          itemType
-                        )}">${item.type}</span>
-                      </div>
-                      <h5 class="card-title">${item.name}</h5>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          `;
-        })
+        .map((item) => createItemCard(item))
         .join("");
 
       // Remove drift video hover effects since we're not using videos anymore
-      const driftCards = document.querySelectorAll(".items-card");
-      driftCards.forEach((card) => {
-        const video = card.querySelector("video");
-        const thumbnail = card.querySelector(".thumbnail");
-        // Only remove videos that aren't HyperShift Lvl5
-        if (video && !video.src.includes("HyperShift Lvl5")) {
-          video.remove();
-        }
-        if (thumbnail) {
-          thumbnail.style.opacity = "1";
-        }
-      });
+      // const driftCards = document.querySelectorAll(".items-card");
+      // driftCards.forEach((card) => {
+      //   const video = card.querySelector("video");
+      //   const thumbnail = card.querySelector(".thumbnail");
+      //   // Only remove videos that aren't HyperShift
+      //   if (video && !video.src.includes("HyperShift")) {
+      //     video.remove();
+      //   }
+      //   if (thumbnail) {
+      //     thumbnail.style.opacity = "1";
+      //   }
+      // });
     } catch (error) {
       console.error("Error fetching favorites:", error);
       favoritesContainer.innerHTML = `
@@ -1809,106 +1711,131 @@ document.addEventListener("DOMContentLoaded", function () {
       vehicle: "#c82c2c",
       spoiler: "#C18800",
       rim: "#6335B1",
-      "tire-sticker": "#1CA1BD",
-      "tire-style": "#4CAF50",
+      "tire sticker": "#1CA1BD",
+      "tire style": "#4CAF50",
       drift: "#FF4500",
-      "body-color": "#8A2BE2",
+      "body color": "#8A2BE2",
       texture: "#708090",
       hyperchrome: "#E91E63",
       furniture: "#9C6644",
       horn: "#4A90E2",
+      "weapon skin": "#4a6741"
     };
-    return colors[type] || "#748D92";
+    return colors[type.toLowerCase()] || "#748D92";
   }
 
-  // Add loading spinner to favorite action
-  window.handleFavorite = async function (event, itemId) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const token = getCookie("token");
-    if (!token) {
-      notyf.error("Please login to favorite items", {
-        position: "bottom-right",
-        duration: 2000,
-      });
-      return;
+  // Create item card function without favorite functionality
+  function createItemCard(item) {
+    const itemType = item.type.toLowerCase();
+    
+    // Special handling for HyperShift
+    if (item.favorite_id === 587) {
+      return `
+        <div class="col-6 col-md-4 col-lg-3">
+          <a href="/item/${itemType}/${encodeURIComponent(item.name)}" class="text-decoration-none">
+            <div class="card items-card">
+              <div class="position-relative">
+                <div class="media-container">
+                  <video class="card-img-top" playsinline muted loop autoplay>
+                    <source src="/assets/images/items/hyperchromes/HyperShift.webm" type="video/webm">
+                    <source src="/assets/images/items/hyperchromes/HyperShift.mp4" type="video/mp4">
+                  </video>
+                </div>
+                <div class="item-card-body text-center">
+                  <div class="badges-container d-flex justify-content-center gap-2">
+                    <span class="badge item-type-badge" style="background-color: ${getTypeColor(itemType)};">${item.type}</span>
+                  </div>
+                  <h5 class="card-title">${item.name}</h5>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>`;
     }
 
-    const favoriteIcon = event.target.closest(".favorite-icon");
-    const svgPath = favoriteIcon.querySelector("path");
-    const isFavorited = svgPath.getAttribute("fill") === "#f8ff00";
-
-    // Add loading spinner
-    const originalHTML = favoriteIcon.innerHTML;
-    favoriteIcon.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-    favoriteIcon.style.pointerEvents = "none";
-
-    try {
-      const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/favorites/${
-          isFavorited ? "remove" : "add"
-        }`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-          body: JSON.stringify({
-            item_id: itemId,
-            owner: token,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      // Restore original icon with updated state
-      favoriteIcon.innerHTML = originalHTML;
-      if (isFavorited) {
-        svgPath.setAttribute("fill", "none");
-        svgPath.setAttribute("stroke", "#f8ff00");
-      } else {
-        svgPath.setAttribute("fill", "#f8ff00");
-        svgPath.setAttribute("stroke", "none");
-      }
-
-      const item = allItems.find((item) => item.id === itemId);
-      if (item) {
-        item.is_favorite = !isFavorited;
-      }
-
-      notyf.success(
-        isFavorited ? "Item removed from favorites" : "Item added to favorites",
-        {
-          position: "bottom-right",
-          duration: 2000,
-        }
-      );
-    } catch (error) {
-      console.error("Error updating favorite:", error);
-      notyf.error("Failed to update favorite status", {
-        position: "bottom-right",
-        duration: 2000,
-      });
-      // Restore original icon on error
-      favoriteIcon.innerHTML = originalHTML;
-    } finally {
-      favoriteIcon.style.pointerEvents = "auto";
+    // Handle regular items
+    let imageUrl;
+    if (itemType === "horn") {
+      imageUrl = "/assets/audios/horn_thumbnail.webp";
+    } else {
+      imageUrl = `/assets/images/items/480p/${itemType}s/${item.name}.webp`;
     }
-  };
 
-  // Initialize badge elements once at the top
-  const crown = document.getElementById("crown");
-  const badgesContainer = document.querySelector(".badges-container");
+    return `
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="/item/${itemType}/${encodeURIComponent(item.name)}" class="text-decoration-none">
+          <div class="card items-card">
+            <div class="position-relative">
+              <div class="media-container">
+                <img src="${imageUrl}" class="card-img-top" alt="${item.name}">
+              </div>
+              <div class="item-card-body text-center">
+                <div class="badges-container d-flex justify-content-center gap-2">
+                  <span class="badge item-type-badge" style="background-color: ${getTypeColor(itemType)};">${item.type}</span>
+                </div>
+                <h5 class="card-title">${item.name}</h5>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>`;
+  }
 
-  // Hide badges container by default
-  if (badgesContainer) {
-    badgesContainer.style.display = "none";
+  function updatePremiumBadge(premiumType) {
+    if (!premiumBadge) return;
+
+    let badgeSvg = '';
+    let badgeTitle = '';
+
+    if (premiumType === 1) {
+      badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#81C784;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="45" fill="url(#grad1)" />
+        <text x="50" y="60" font-size="40" fill="#FFFFFF" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">1</text>
+        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#FFFFFF" stroke-width="3" />
+      </svg>`;
+      badgeTitle = 'Supporter Level 1';
+    } else if (premiumType === 2) {
+      badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#64B5F6;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="45" fill="url(#grad2)" />
+        <text x="50" y="60" font-size="40" fill="#FFFFFF" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">2</text>
+        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#FFFFFF" stroke-width="3" />
+      </svg>`;
+      badgeTitle = 'Supporter Level 2';
+    } else if (premiumType === 3) {
+      badgeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FFC107;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#FFD54F;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="45" fill="url(#grad3)" />
+        <text x="50" y="60" font-size="40" fill="#FFFFFF" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">3</text>
+        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#FFFFFF" stroke-width="3" />
+      </svg>`;
+      badgeTitle = 'Supporter Level 3';
+    }
+
+    if (badgeSvg) {
+      premiumBadge.innerHTML = badgeSvg;
+      premiumBadge.setAttribute('data-bs-original-title', badgeTitle);
+      premiumBadge.style.display = 'inline-block';
+    } else {
+      premiumBadge.style.display = 'none';
+    }
+    updateBadgesVisibility();
   }
 
   function updateBadgesVisibility() {
@@ -1916,8 +1843,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const hasCrown = crown?.style?.display === "inline-block";
     const hasEarlyBadge = earlyBadge?.style?.display === "inline-block";
+    const hasPremiumBadge = premiumBadge?.style?.display === "inline-block";
 
-    if (hasCrown || hasEarlyBadge) {
+    if (hasCrown || hasEarlyBadge || hasPremiumBadge) {
       badgesContainer.classList.add("visible");
     } else {
       badgesContainer.classList.remove("visible");
@@ -1941,6 +1869,9 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     crown.style.display = "none";
   }
+
+  // Initialize premium badge based on user's premium type
+  updatePremiumBadge(udata.premiumtype);
 
   // Update visibility after setting states
   updateBadgesVisibility();

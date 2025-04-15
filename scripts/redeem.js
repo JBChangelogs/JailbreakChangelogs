@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Check for code parameter in URL
   const urlParams = new URLSearchParams(window.location.search);
   const codeParam = urlParams.get('code');
-  
+
   if (codeParam) {
     // Auto-fill the code input
     codeInput.value = codeParam;
@@ -34,14 +34,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const response = await fetch(
-        "https://api.jailbreakchangelogs.xyz/codes/redeem",
+        "https://api.testing.jailbreakchangelogs.xyz/codes/redeem",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            token: token,
+            owner: token,
             code: code,
           }),
         }
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (response.status === 404) {
         notyf.error("Invalid Code");
       } else {
-        notyf.error(data.message || "Failed to redeem code");
+        notyf.error(response.status === 409 ? "The code has already been redeemed" : (data.message || "An error occurred redeeming the code"));
       }
     } catch (error) {
       notyf.error("An error occurred while redeeming the code");

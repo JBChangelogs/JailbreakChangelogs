@@ -85,7 +85,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/trading.min.css"
+      href="/styles/trading.css"
     />
 
     <!-- Favicon -->
@@ -124,7 +124,6 @@
 
   <body data-scroll-container>
     <%- include('partials/nav') %>
-
 
     <!-- Main Trading Section -->
     <div id="main-container" class="container-fluid">
@@ -343,6 +342,17 @@
               </div>
             </div>
             <div id="value-differences"></div>
+            <!-- Add expiration dropdown -->
+            <div class="form-group mt-3">
+              <label for="trade-expiration" class="form-label">Trade Expires In:</label>
+              <select id="trade-expiration" class="form-select">
+                <option value="6">6 Hours (Free)</option>
+                <option value="12" disabled data-premium="1">12 Hours (Supporter 1)</option>
+                <option value="24" disabled data-premium="2">24 Hours (Supporter 2)</option>
+                <option value="48" disabled data-premium="3">48 Hours (Supporter 3)</option>
+              </select>
+              <div class="invalid-feedback">Your premium tier does not allow this expiration time.</div>
+            </div>
             <div class="preview-actions mt-4 text-center"></div>
           </div>
         </div>
@@ -497,8 +507,8 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/trading.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.59/scripts/main.min.js"></script>
+    <script src="/scripts/trading.js"></script>
+    <script src="/scripts/main.js"></script>
   </body>
   <style>
     .intro-container.hero-style {

@@ -1577,8 +1577,6 @@ function handleinvalidImage() {
   setTimeout(() => {
     const userId = this.id.replace("avatar-", "");
     const username = this.closest("li").querySelector("a").textContent;
-    this.src = `https://ui-avatars.com/api/?background=134d64&color=fff&size=128&rounded=true&name=${encodeURIComponent(
-      username
-    )}&bold=true&format=svg`;
+    this.src = "assets/default-avatar.png";
   }, 0);
 }

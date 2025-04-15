@@ -234,10 +234,6 @@ html[data-bs-theme="dark"] .changelog-dropdown-item:hover {
   font-size: 1.2rem;
   pointer-events: none;
 }
-.btn-clear-search .bi-x {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
 
 .btn-clear-search {
   position: absolute;
@@ -721,15 +717,6 @@ h1 {
 /* Paragraph Styles within Content */
 #content p {
   color: var(--content-paragraph); /* Color for paragraph text */
-}
-
-/* Icon Colors */
-.bi-arrow-return-right {
-  color: var(--content-sub-bullet); /* Color for return arrow icon */
-}
-
-.bi-arrow-right {
-  color: var(--content-bullet); /* Color for right arrow icon */
 }
 
 /* Media Tag Styles */
