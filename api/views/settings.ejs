@@ -253,14 +253,13 @@
                         type="checkbox"
                         id="banner_discord"
                         data-setting="banner_discord"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <label class="form-check-label" for="banner_discord">
                         <h6 class="mb-1">Use Discord Banner</h6>
                         <small class="text-muted">Use your Discord banner as profile background</small>
                       </label>
                     </div>
-                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
+                    <small class="text-warning premium-requirement" style="display: none;">Supporter 2+ is required to change this setting.</small>
                   </div>
 
                   <!-- Custom Banner Input -->
@@ -273,13 +272,11 @@
                         class="form-control"
                         placeholder="Enter image URL"
                         aria-label="Custom banner URL"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <button
                         class="btn btn-primary"
                         type="button"
                         id="updateBannerBtn"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       >
                         Update Banner
                       </button>
@@ -294,7 +291,7 @@
                         <a href="https://tenor.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">Tenor</a>
                       </div>
                     </div>
-                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
+                    <small class="text-warning premium-requirement" style="display: none;">Supporter 2+ is required to change this setting.</small>
                   </div>
 
                   <div class="list-group-item">
@@ -304,14 +301,13 @@
                         type="checkbox"
                         id="avatar_discord"
                         data-setting="avatar_discord"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <label class="form-check-label" for="avatar_discord">
                         <h6 class="mb-1">Use Discord Avatar</h6>
                         <small class="text-muted">Use your Discord avatar as profile picture</small>
                       </label>
                     </div>
-                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to change this setting.</small>' : '' %>
+                    <small class="text-warning premium-requirement" style="display: none;">Supporter 2+ is required to change this setting.</small>
                   </div>
                   <!-- Custom Avatar Input -->
                   <div class="list-group-item" id="custom_avatar_input">
@@ -323,13 +319,11 @@
                         class="form-control"
                         placeholder="Enter image URL"
                         aria-label="Custom avatar URL"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       />
                       <button
                         class="btn btn-primary"
                         type="button"
                         id="updateAvatarBtn"
-                        <%- user.premiumtype < 2 ? 'disabled' : '' %>
                       >
                         Update Avatar
                       </button>
@@ -344,7 +338,7 @@
                         <a href="https://tenor.com/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">Tenor</a>
                       </div>
                     </div>
-                    <%- user.premiumtype < 2 ? '<small class="text-warning">Supporter 2+ is required to use this setting.</small>' : '' %>
+                    <small class="text-warning premium-requirement" style="display: none;">Supporter 2+ is required to use this setting.</small>
                   </div>
                 </div>
               </div>
@@ -353,11 +347,10 @@
               <div class="mb-4">
                 <h5>Account Management</h5>
                 <div class="list-group">
-                  <% if (user.roblox_username) { %>
-                  <div class="list-group-item" style="background-color: #2e3944">
+                  <div id="roblox-account-section" class="list-group-item" style="background-color: #2e3944; display: none;">
                     <h6 class="mb-3">Connected Roblox Account</h6>
                     <div class="alert alert-info mb-3">
-                      <p class="mb-0">Currently connected to Roblox account: <strong><a href="https://www.roblox.com/users/<%= user.roblox_id %>/profile" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><%= user.roblox_username %></a></strong></p>
+                      <p class="mb-0">Currently connected to Roblox account: <strong><a id="roblox-profile-link" href="#" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"></a></strong></p>
                     </div>
                     <div id="disconnect-confirmation" class="alert alert-warning mb-3" style="display: none;">
                       <h6 class="alert-heading">Are you sure?</h6>
@@ -376,7 +369,6 @@
                       Disconnect Roblox Account
                     </button>
                   </div>
-                  <% } %>
                   <div
                     class="list-group-item"
                     style="background-color: #2e3944"
@@ -463,6 +455,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.1/scripts/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.0/scripts/settings.min.js"></script>
+    <script src="/scripts/settings.js"></script>
   </body>
 </html>

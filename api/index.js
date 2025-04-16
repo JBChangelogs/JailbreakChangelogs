@@ -1316,61 +1316,25 @@ app.get("/api", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/settings", async (req, res) => {
-  const token = req.cookies?.token;
-  const isLoggingOut = req.query.logout === 'true';
-
-  // If user is logging out, just redirect to home
-  if (isLoggingOut) {
-    res.redirect('/');
-    return;
-  }
-
+app.get("/settings", (req, res) => {
+  const token = req.cookies.token;
   if (!token) {
-    // Construct the full URL including protocol and host
-    const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-    // Double encode the URL to ensure ? in the redirect URL is treated as part of the parameter value
-    const encodedUrl = encodeURIComponent(encodeURIComponent(fullUrl));
-    const oauthUrl = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${encodedUrl}`;
-    res.redirect(oauthUrl);
-    return;
-  }
-
-  try {
-    // Fetch user data from token
-    const userResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://jailbreakchangelogs.xyz",
-        },
-      }
-    );
-
-    if (!userResponse.ok) {
-      throw new Error("Failed to fetch user data");
-    }
-
-    const user = await userResponse.json();
-
-    res.render("settings", {
-      title: "Settings - Changelogs",
-      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
-      logoAlt: "Settings Page Logo",
+    return res.render("settings", {
+      title: "Settings - Jailbreak Changelogs",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/logo.png",
+      logoAlt: "Jailbreak Changelogs Logo",
       MIN_TITLE_LENGTH,
-      MIN_DESCRIPTION_LENGTH,
-      user
+      MIN_DESCRIPTION_LENGTH
     });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    // If there's an error with the token, redirect to OAuth with the full URL
-    const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-    // Double encode the URL to ensure ? in the redirect URL is treated as part of the parameter value
-    const encodedUrl = encodeURIComponent(encodeURIComponent(fullUrl));
-    const oauthUrl = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${encodedUrl}`;
-    res.redirect(oauthUrl);
   }
+
+  res.render("settings", {
+    title: "Settings - Jailbreak Changelogs",
+    logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/logo.png",
+    logoAlt: "Jailbreak Changelogs Logo",
+    MIN_TITLE_LENGTH,
+    MIN_DESCRIPTION_LENGTH
+  });
 });
 
 // Handle unknown routes by serving 404 page
