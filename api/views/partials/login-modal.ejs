@@ -139,16 +139,6 @@
     const showLoginModal = urlParams.get('showLoginModal');
     const redirectUrl = urlParams.get('redirect');
     
-    if (showLoginModal === 'true') {
-      const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-      loginModal.show();
-      
-      // Store the redirect URL if present
-      if (redirectUrl) {
-        localStorage.setItem('redirectAfterLogin', redirectUrl);
-      }
-    }
-
     if (token) {
       // Set cookie with 7 day expiration
       const date = new Date();
@@ -178,11 +168,21 @@
       }
       
       // If no redirect URL is stored, just remove token and showLoginModal from URL
-      const newUrl = window.location.pathname + window.location.search
-        .replace(/[?&]token=[^&]+(&|$)/, '')
-        .replace(/[?&]showLoginModal=true(&|$)/, '')
-        .replace(/[?&]redirect=[^&]+(&|$)/, '');
+      urlParams.delete('token');
+      urlParams.delete('showLoginModal');
+      const newUrl = window.location.pathname + (urlParams.toString() ? `?${urlParams.toString()}` : '');
       window.location.href = newUrl;
+    }
+
+    // Only show login modal if explicitly requested and no token
+    if (showLoginModal === 'true' && !getCookie('token')) {
+      const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+      loginModal.show();
+      
+      // Store the redirect URL if present
+      if (redirectUrl) {
+        localStorage.setItem('redirectAfterLogin', redirectUrl);
+      }
     }
 
     // Tab switching functionality

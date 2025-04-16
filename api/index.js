@@ -1318,11 +1318,21 @@ app.get("/api", (req, res) => {
 
 app.get("/settings", async (req, res) => {
   const token = req.cookies?.token;
+  const isLoggingOut = req.query.logout === 'true';
+
+  // If user is logging out, just redirect to home
+  if (isLoggingOut) {
+    res.redirect('/');
+    return;
+  }
+
   if (!token) {
-    // Preserve the original URL parameters
-    const originalUrl = req.originalUrl;
-    const redirectUrl = `/?showLoginModal=true&redirect=${encodeURIComponent(originalUrl)}`;
-    res.redirect(redirectUrl);
+    // Construct the full URL including protocol and host
+    const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+    // Double encode the URL to ensure ? in the redirect URL is treated as part of the parameter value
+    const encodedUrl = encodeURIComponent(encodeURIComponent(fullUrl));
+    const oauthUrl = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${encodedUrl}`;
+    res.redirect(oauthUrl);
     return;
   }
 
@@ -1354,10 +1364,12 @@ app.get("/settings", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching user data:", error);
-    // Preserve the original URL parameters on error too
-    const originalUrl = req.originalUrl;
-    const redirectUrl = `/?showLoginModal=true&redirect=${encodeURIComponent(originalUrl)}`;
-    res.redirect(redirectUrl);
+    // If there's an error with the token, redirect to OAuth with the full URL
+    const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+    // Double encode the URL to ensure ? in the redirect URL is treated as part of the parameter value
+    const encodedUrl = encodeURIComponent(encodeURIComponent(fullUrl));
+    const oauthUrl = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${encodedUrl}`;
+    res.redirect(oauthUrl);
   }
 });
 

@@ -1039,7 +1039,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     clearSessionWithReason(reason);
-    window.location.reload();
+    
+    // If we're on the settings page, redirect to home with logout parameter
+    if (window.location.pathname === '/settings') {
+      window.location.href = '/settings?logout=true';
+    } else {
+      window.location.href = '/';
+    }
   };
 
   // Survey handling
