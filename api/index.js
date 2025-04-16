@@ -70,7 +70,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("https://cdn-2.jailbreakchangelogs.xyz/assets", (req, res, next) => {
+app.use("https://jailbreakchangelogs.xyz/assets", (req, res, next) => {
   // 1 year cache for assets
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
 
@@ -81,7 +81,7 @@ app.use("https://cdn-2.jailbreakchangelogs.xyz/assets", (req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  if (req.path.startsWith("https://cdn-2.jailbreakchangelogs.xyz/assets/")) {
+  if (req.path.startsWith("https://jailbreakchangelogs.xyz/assets/")) {
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     const oneYearFromNow = new Date();
     oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
@@ -199,7 +199,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       return res.status(status).render("error", {
         title,
         message,
-        logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -225,7 +225,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       title: requestedData.title,
       image_url: requestedData.image_url,
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Changelogs Page Logo",
       embed_color: 0x134d64,
       isLatest: changelogId === latestId,
@@ -254,7 +254,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
         message:
           "The server is taking too long to respond. Please try again later.",
         logoUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -264,7 +264,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
       title: "500 - Server Error",
       message: "The server encountered an error while processing your request.",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -323,7 +323,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.status(status).render("error", {
         title,
         message,
-        logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -341,7 +341,7 @@ app.get("/seasons/:season", async (req, res) => {
     // Generate reward image URLs and filter out nulls
     const imageUrls = seasonData.rewards ? seasonData.rewards.map(reward => {
       // Use absolute URLs for image paths
-      if (reward.link && reward.link.startsWith('https://cdn-2.jailbreakchangelogs.xyz/assets')) {
+      if (reward.link && reward.link.startsWith('https://jailbreakchangelogs.xyz/assets')) {
         return `https://jailbreakchangelogs.xyz${reward.link}`;
       }
       return null;
@@ -349,7 +349,7 @@ app.get("/seasons/:season", async (req, res) => {
 
     // If no image URLs are found, use a default image
     if (imageUrls.length === 0) {
-      imageUrls.push('https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp');
+      imageUrls.push('https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp');
     }
 
     // Render the season page
@@ -359,7 +359,7 @@ app.get("/seasons/:season", async (req, res) => {
       seasonId: seasonId, // Add this for comments
       image_urls: imageUrls,
       metaDescription: `View Season ${seasonId} reward information including level rewards, exclusive items, and more for Roblox Jailbreak.`,
-      logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Seasons Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -371,7 +371,7 @@ app.get("/seasons/:season", async (req, res) => {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
         message: "The server is taking too long to respond. Please try again later.",
-        logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -380,7 +380,7 @@ app.get("/seasons/:season", async (req, res) => {
     return res.status(500).render("error", {
       title: "500 - Server Error",
       message: "The server encountered an error while processing your request.",
-      logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -403,7 +403,7 @@ app.get("/trading", async (req, res) => {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
         message: "Our trade ads service is temporarily unavailable. Please try again later.",
-        logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "Error Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -412,7 +412,7 @@ app.get("/trading", async (req, res) => {
 
     res.render("trading", {
       title: "Trading - Changelogs",
-      logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Trading Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -422,7 +422,7 @@ app.get("/trading", async (req, res) => {
     return res.status(503).render("error", {
       title: "503 - Service Unavailable", 
       message: "Our trade adsservice is temporarily unavailable. Please try again later.",
-      logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -438,7 +438,7 @@ app.get("/trading/ad/:tradeId", (req, res) => {
     metaDescription: `View trade details for Trade #${tradeId}. Check item values and trade status.`,
     canonicalUrl: `https://jailbreakchangelogs.xyz/trading/ad/${tradeId}`,
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
     logoAlt: "Trading Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -448,11 +448,11 @@ app.get("/trading/ad/:tradeId", (req, res) => {
 
 app.get("/bot", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 14) + 1;
-  const image = `https://cdn-2.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
+  const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
   res.render("bot", {
     title: "Discord Bot - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Bot Page Logo",
     image,
     MIN_TITLE_LENGTH,
@@ -486,7 +486,7 @@ app.get("/values", async (req, res) => {
     res.render("values", {
       title: "Roblox Jailbreak Values - Changelogs",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Values Page Logo",
       allItems,
       MIN_TITLE_LENGTH,
@@ -501,7 +501,7 @@ app.get("/values", async (req, res) => {
           ? "The server is taking too long to respond. Please try again later."
           : "Unable to load items at this time. Please try again later.",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -513,7 +513,7 @@ app.get("/values/calculator", (req, res) => {
   res.render("calculator", {
     title: "Value Calculator - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
     logoAlt: "Values Calculator Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -524,7 +524,7 @@ app.get("/servers", (req, res) => {
   res.render("servers", {
     title: "Private Servers - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Servers Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -582,20 +582,20 @@ app.get("/item/:type/:item", async (req, res) => {
           "This item does not exist. Check our values page for a complete list of available items.",
         canonicalUrl: "https://jailbreakchangelogs.xyz/values",
         logoUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         logoAlt: "Item Page Logo",
         itemName: "Item Not Found",
         itemType,
         formattedUrlType,
         error: true,
         embedImageUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         image_url:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         item: {
           name: "Item Not Found",
           image:
-            "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         },
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -605,14 +605,14 @@ app.get("/item/:type/:item", async (req, res) => {
     // Use original type with spaces for image paths
     let embedImageUrl;
     if (item.type === "Drift") {
-      embedImageUrl = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
     } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      embedImageUrl = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.gif`;
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.gif`;
     } else if (item.type === "Horn") {
-      embedImageUrl = `https://cdn-2.jailbreakchangelogs.xyz/assets/audios/horn_thumbnail.webp`;
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/audios/horn_thumbnail.webp`;
     } else {
       const pluralType = `${item.type.toLowerCase()}s`;
-      embedImageUrl = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
+      embedImageUrl = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
     }
 
     // Use hyphenated type for URLs
@@ -651,20 +651,20 @@ app.get("/item/:type/:item", async (req, res) => {
         ...seoData,
         title: seoData.pageTitle,
         logoUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         logoAlt: "Item Page Logo",
         itemName,
         itemType,
         formattedUrlType,
         error: true,
         embedImageUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         image_url:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         item: {
           name: itemName,
           image:
-            "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+            "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
         },
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -674,12 +674,12 @@ app.get("/item/:type/:item", async (req, res) => {
     // Generate relative image URL for page display
     let image_url;
     if (item.type === "Drift") {
-      image_url = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${item.name}.webp`;
     } else if (item.type === "HyperChrome" && item.name === "HyperShift") {
-      image_url = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm`;
     } else {
       const pluralType = `${item.type.toLowerCase()}s`;
-      image_url = `https://cdn-2.jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
+      image_url = `https://jailbreakchangelogs.xyz/assets/images/items/${pluralType}/${item.name}.webp`;
     }
     item.image = image_url;
 
@@ -688,7 +688,7 @@ app.get("/item/:type/:item", async (req, res) => {
       ...seoData,
       title: seoData.pageTitle,
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background_Collab.webp",
       logoAlt: "Item Page Logo",
       itemName: item.name,
       itemType,
@@ -704,7 +704,7 @@ app.get("/item/:type/:item", async (req, res) => {
     res.render("item", {
       title: `${itemName} - Error - Changelogs`,
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Item Page Logo",
       itemName,
       itemType,
@@ -712,13 +712,13 @@ app.get("/item/:type/:item", async (req, res) => {
       error: true,
       errorMessage: "Internal Server Error",
       image_url:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       embedImageUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       item: {
         name: itemName,
         image:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       },
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -761,7 +761,7 @@ app.get("/faq", (req, res) => {
   res.render("faq", {
     title: "User FAQ",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "FAQ Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -772,7 +772,7 @@ app.get("/privacy", (req, res) => {
   res.render("privacy", {
     title: "Privacy Policy / Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Privacy Policy Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -783,7 +783,7 @@ app.get("/tos", (req, res) => {
   res.render("tos", {
     title: "Terms Of Service / Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "TOS Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -798,7 +798,7 @@ app.get("/roblox", (req, res) => {
   res.render("roblox", {
     title: "Roblox Authentication - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Roblox Auth Page Logo",
   });
 });
@@ -807,13 +807,13 @@ app.get("/login", (req, res) => {
   res.render("login", {
     title: "Discord Authentication - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Login Page Logo",
   });
 });
 
 const getAvatar = async (userId, avatarHash, username) => {
-  const defaultAvatarUrl = "https://cdn-2.jailbreakchangelogs.xyz/assets/default-avatar.png";
+  const defaultAvatarUrl = "https://jailbreakchangelogs.xyz/assets/default-avatar.png";
   const proxyUrl = "https://euphonious-melomakarona-a257cd.netlify.app/?destination=";
 
   if (!avatarHash) {
@@ -932,7 +932,7 @@ app.get("/users/:user/followers", async (req, res) => {
       path: req.path,
       title: "Followers - Changelogs",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Users Page Logo",
       user: req.user || null,
       settings,
@@ -1049,7 +1049,7 @@ app.get("/users/:user/following", async (req, res) => {
       path: req.path,
       title: "Following / Changelogs",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Users Page Logo",
       user: req.user || null,
       settings,
@@ -1070,7 +1070,7 @@ app.get("/users", (req, res) => {
   res.render("usersearch", {
     title: "Users - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Users Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1088,7 +1088,7 @@ app.get("/users/:user", async (req, res) => {
       title: "404 - User Not Found",
       message: "The requested user profile could not be found.",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "404 Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -1113,7 +1113,7 @@ app.get("/users/:user", async (req, res) => {
         title: "404 - User Not Found",
         message: "The requested user profile could not be found.",
         logoUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "404 Page Logo",
         MIN_TITLE_LENGTH,
         MIN_DESCRIPTION_LENGTH,
@@ -1203,7 +1203,7 @@ app.get("/users/:user", async (req, res) => {
         settings,
         title: "Private Profile - Changelogs",
         logoUrl:
-          "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+          "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
         logoAlt: "User Profile Logo",
         isPrivateProfile: true,
         isProfileOwner: false,
@@ -1221,7 +1221,7 @@ app.get("/users/:user", async (req, res) => {
       settings,
       title: "User Profile - Changelogs",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "User Profile Logo",
       isPrivateProfile: false,
       isProfileOwner,
@@ -1235,7 +1235,7 @@ app.get("/users/:user", async (req, res) => {
       message:
         "An error occurred while loading the user profile. Please try again later.",
       logoUrl:
-        "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+        "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Error Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -1247,7 +1247,7 @@ app.get("/timeline", (req, res) => {
   res.render("timeline", {
     title: "Timeline - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Timeline Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1258,7 +1258,7 @@ app.get("/tradetracker", (req, res) => {
   res.render("tradetracker", {
     title: "Trade Tracker - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Trade Tracker Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1269,7 +1269,7 @@ app.get("/redeem", (req, res) => {
   res.render("redeem", {
     title: "Reedem A Code - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Redeem Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1280,7 +1280,7 @@ app.get("/supporting", (req, res) => {
   res.render("supporting", {
     title: "Support Us - Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Supporting Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1291,7 +1291,7 @@ app.get("/dupes/calculator", (req, res) => {
   res.render("dupes", {
     title: "Find Duped Items / Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Dupes Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
@@ -1300,11 +1300,11 @@ app.get("/dupes/calculator", (req, res) => {
 
 app.get("/", (req, res) => {
   const randomNumber = Math.floor(Math.random() * 14) + 1;
-  const image = `https://cdn-2.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
+  const image = `https://jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`;
   res.render("index", {
     title: "Home / Changelogs",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "Home Page Logo",
     image,
     MIN_TITLE_LENGTH,
@@ -1346,7 +1346,7 @@ app.get("/settings", async (req, res) => {
 
     res.render("settings", {
       title: "Settings - Changelogs",
-      logoUrl: "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      logoUrl: "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
       logoAlt: "Settings Page Logo",
       MIN_TITLE_LENGTH,
       MIN_DESCRIPTION_LENGTH,
@@ -1368,7 +1368,7 @@ app.get("*", (req, res) => {
     message:
       "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
     logoUrl:
-      "https://cdn-2.jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
+      "https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp",
     logoAlt: "404 Page Logo",
     MIN_TITLE_LENGTH,
     MIN_DESCRIPTION_LENGTH,
