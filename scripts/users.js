@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       } else {
         const response = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/background/get?user=${userId}`
+          `https://api.jailbreakchangelogs.xyz/users/banner/get?user=${userId}`
         );
 
         if (response.ok) {

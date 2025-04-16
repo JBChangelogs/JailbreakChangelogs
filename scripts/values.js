@@ -1343,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createItemCard(item) {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add("col-12", "col-md-4", "col-lg-3");
+    cardDiv.classList.add("col-6", "col-md-4", "col-lg-3");
 
     // Get type color
     let color = "#124e66"; // Default color

@@ -963,7 +963,6 @@ body {
     top: 6px;
     right: 6px;
     font-size: 0.65rem;
-    padding: 0.2rem 0.4rem;
   }
 
   .intro-container {
@@ -1261,13 +1260,6 @@ body {
     font-size: 0.6rem;
     padding: 0.15rem 0.3rem;
   }
-
-  .limited-badge {
-    top: 4px;
-    right: 4px;
-    font-size: 0.55rem;
-    padding: 0.1rem 0.3rem;
-  }
 }
 
 @media (max-width: 375px) {
@@ -1277,12 +1269,6 @@ body {
   .container-fluid {
     padding-left: 4px !important;
     padding-right: 4px !important;
-  }
-  .limited-badge {
-    top: 4px;
-    right: 4px;
-    font-size: 0.6rem;
-    padding: 0.15rem 0.35rem;
   }
   .intro-container {
     padding: 4px !important;
@@ -1307,10 +1293,6 @@ body {
 
   .hyperchrome-badge {
     font-size: 0.75rem;
-  }
-
-  .limited-badge {
-    font-size: 0.7rem;
   }
 }
 
@@ -1622,6 +1604,11 @@ body.menu-open {
   
   .items-card .card-footer small {
     font-size: 0.65rem;
+  }
+
+  /* Reduce font size of last updated text in card footer */
+  .items-card .card-footer .text-body-secondary {
+    font-size: 0.6rem !important;
   }
 
   /* Ensure media container maintains aspect ratio */

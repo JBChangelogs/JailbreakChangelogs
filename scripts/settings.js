@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Load custom banner and avatar URLs
       const [bannerResponse] = await Promise.all([
-        fetch(`https://api.jailbreakchangelogs.xyz/users/background/get?user=${userId}`)
+        fetch(`https://api.jailbreakchangelogs.xyz/users/banner/get?user=${userId}`)
       ]);
 
       let customBannerUrl = '';
@@ -357,14 +357,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // First update the banner URL
       const bannerResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/background/update?user=${token}&image=${encodeURIComponent(
-          imageUrl || "NONE"
-        )}`,
+        "https://api.jailbreakchangelogs.xyz/users/banner/update",
         {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             "Cache-Control": "no-cache",
           },
+          body: JSON.stringify({
+            owner: token,
+            url: imageUrl || "NONE"
+          })
         }
       );
       if (!bannerResponse.ok) throw new Error("Failed to update banner URL");
