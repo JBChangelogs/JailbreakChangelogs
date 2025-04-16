@@ -196,6 +196,7 @@ function getItemMediaElement(item, options = {}) {
             }.mp3" type="audio/mp3">
           </audio>
         </div>
+        ${mediaBadge}
       </div>`;
   }
 
@@ -1402,7 +1403,13 @@ const cardHtml = `
     <div class="badges-container">
       ${typeBadgeHtml}
     </div>
-      <h5 class="card-title">${item.name}</h5>
+      <h5 class="card-title">
+        <a href="/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name)}" 
+           class="text-decoration-none item-name-link" 
+           style="color: var(--text-primary);">
+          ${item.name}
+        </a>
+      </h5>
       <div class="card-text">
         <div class="list-group list-group-flush">
           <!-- Cash Value Card -->
@@ -1833,8 +1840,9 @@ window.handleCategoryClick = function (event, category) {
 
 // Add new function for horn playback
 function handleHornClick(hornName, event) {
-  event.preventDefault();
-   event.stopPropagation();
+  // Don't prevent default or stop propagation to allow navigation
+  // event.preventDefault();
+  // event.stopPropagation();
 
   const audioElement = document.querySelector(
     `[data-horn="${hornName}"] audio`

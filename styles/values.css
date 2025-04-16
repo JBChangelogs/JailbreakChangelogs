@@ -1711,3 +1711,12 @@ body.menu-open {
     font-size: 0.8125rem;
   }
 }
+
+.item-name-link {
+  transition: color 0.2s ease;
+}
+
+.item-name-link:hover {
+  color: var(--accent-color-light) !important;
+  text-decoration: none;
+}
