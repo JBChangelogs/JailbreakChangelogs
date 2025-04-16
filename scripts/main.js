@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     fetchingUsersList = true;
     usersListPromise = (async () => {
       try {
-        const response = await fetch('https://api.testing.jailbreakchangelogs.xyz/users/list');
+        const response = await fetch('https://api.jailbreakchangelogs.xyz/users/list');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -1057,7 +1057,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://api.testing.jailbreakchangelogs.xyz/surveys/request?user=${token}`);
+      const response = await fetch(`https://api.jailbreakchangelogs.xyz/surveys/request?user=${token}`);
       if (!response.ok) return;
       
       const surveyData = await response.json();
@@ -1119,7 +1119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const token = getCookie("token");
-      const response = await fetch('https://api.testing.jailbreakchangelogs.xyz/surveys/submit', {
+      const response = await fetch('https://api.jailbreakchangelogs.xyz/surveys/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

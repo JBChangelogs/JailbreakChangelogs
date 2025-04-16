@@ -336,7 +336,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}&nocache=true`,
+        `https://api.jailbreakchangelogs.xyz/comments/get?type=${this.type}&id=${this.itemId}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1022,7 +1022,7 @@ class CommentsManager {
       };
 
       const response = await fetch(
-        "https://api.testing.jailbreakchangelogs.xyz/comments/add",
+        "https://api.jailbreakchangelogs.xyz/comments/add",
         {
           method: "POST",
           headers: {
@@ -1086,7 +1086,7 @@ class CommentsManager {
 
       // Now send delete request with correct field names
       const response = await fetch(
-        "https://api.testing.jailbreakchangelogs.xyz/comments/delete",
+        "https://api.jailbreakchangelogs.xyz/comments/delete",
         {
           method: "DELETE",
           headers: {
@@ -1148,7 +1148,7 @@ class CommentsManager {
 
     try {
       const response = await fetch(
-        "https://api.testing.jailbreakchangelogs.xyz/comments/edit",
+        "https://api.jailbreakchangelogs.xyz/comments/edit",
         {
           method: "POST",
           headers: {
@@ -1179,7 +1179,7 @@ class CommentsManager {
 
     try {
       const tradeResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
+        `https://api.jailbreakchangelogs.xyz/trades/get?id=${this.itemId}`
       );
       if (!tradeResponse.ok) return false;
 

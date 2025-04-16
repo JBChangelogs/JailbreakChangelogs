@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const response = await fetch(
-        "https://api.testing.jailbreakchangelogs.xyz/codes/redeem",
+        "https://api.jailbreakchangelogs.xyz/codes/redeem",
         {
           method: "POST",
           headers: {

@@ -116,7 +116,7 @@ function fallbackCopy(text) {
 async function fetchServers() {
   try {
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/servers/list"
+      "https://api.jailbreakchangelogs.xyz/servers/list"
     );
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -424,7 +424,7 @@ async function handleAddServer(event) {
     }
 
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/servers/add",
+      "https://api.jailbreakchangelogs.xyz/servers/add",
       {
         method: "POST",
         headers: {
@@ -577,7 +577,7 @@ async function deleteServer(serverId) {
 
   try {
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/servers/delete",
+      "https://api.jailbreakchangelogs.xyz/servers/delete",
       {
         method: "DELETE",
         headers: {

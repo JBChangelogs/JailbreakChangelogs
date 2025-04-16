@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const token = getCookie("token");
     let url;
     if (token) {
-      url = 'https://api.testing.jailbreakchangelogs.xyz/auth/roblox';
+      url = 'https://api.jailbreakchangelogs.xyz/auth/roblox';
       fetch(url, {
         method: "POST",
         headers: {

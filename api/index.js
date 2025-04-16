@@ -391,7 +391,7 @@ app.get("/seasons/:season", async (req, res) => {
 app.get("/trading", async (req, res) => {
   try {
     // Check if trades API is available before rendering the page
-    const tradesResponse = await fetchWithTimeout("https://api.testing.jailbreakchangelogs.xyz/trades/list", {
+    const tradesResponse = await fetchWithTimeout("https://api.jailbreakchangelogs.xyz/trades/list", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -860,7 +860,7 @@ app.get("/users/:user/followers", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}&nocache=true`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}&nocache=true`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -977,7 +977,7 @@ app.get("/users/:user/following", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}&nocache=true`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${requestedUser}&nocache=true`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -1132,7 +1132,7 @@ app.get("/users/:user", async (req, res) => {
 
     // Step 2: Get user settings
     const settingsResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${user}&nocache=true`,
+      `https://api.jailbreakchangelogs.xyz/users/settings?user=${user}&nocache=true`,
       {
         headers: {
           "Content-Type": "application/json",

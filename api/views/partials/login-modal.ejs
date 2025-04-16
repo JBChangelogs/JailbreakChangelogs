@@ -211,7 +211,7 @@
         const currentURL = window.location.pathname + window.location.search;
         localStorage.setItem('redirectAfterLogin', currentURL);
         
-        const oauthRedirect = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${encodeURIComponent(window.location.origin + currentURL)}`;
+        const oauthRedirect = `https://api.jailbreakchangelogs.xyz/oauth?redirect=${encodeURIComponent(window.location.origin + currentURL)}`;
         window.location.href = oauthRedirect;
       });
     }
@@ -232,7 +232,7 @@
         localStorage.setItem('redirectAfterLogin', currentURL);
         
         const userToken = getCookie('token');
-        const oauthRedirect = `https://api.testing.jailbreakchangelogs.xyz/oauth/roblox?redirect=${encodeURIComponent(window.location.origin + currentURL)}&owner=${userToken}`;
+        const oauthRedirect = `https://api.jailbreakchangelogs.xyz/oauth/roblox?redirect=${encodeURIComponent(window.location.origin + currentURL)}&owner=${userToken}`;
         window.location.href = oauthRedirect;
       });
     }

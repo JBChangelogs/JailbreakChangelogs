@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Handle OAuth redirect on client side
       const currentUrl = window.location.href;
       const redirectUrl = encodeURIComponent(currentUrl);
-      window.location.href = `https://api.testing.jailbreakchangelogs.xyz/oauth?redirect=${redirectUrl}`;
+      window.location.href = `https://api.jailbreakchangelogs.xyz/oauth?redirect=${redirectUrl}`;
       return;
     }
 
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Load settings
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`,
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`,
         {
           headers: {
             "Cache-Control": "no-cache",
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function () {
               };
 
               const response = await fetch(
-                `https://api.testing.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+                `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
                 {
                   method: "POST",
                   headers: {
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
           };
 
           const response = await fetch(
-            `https://api.testing.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+            `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
             {
               method: "POST",
               headers: {
@@ -387,7 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       const settingsResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+        `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
         {
           method: "POST",
           headers: {
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       const settingsResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
+        `https://api.jailbreakchangelogs.xyz/users/settings/update?user=${token}`,
         {
           method: "POST",
           headers: {
@@ -525,7 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
         const response = await fetch(
-          "https://api.testing.jailbreakchangelogs.xyz/oauth/roblox/disconnect",
+          "https://api.jailbreakchangelogs.xyz/oauth/roblox/disconnect",
           {
             method: "DELETE",
             headers: {

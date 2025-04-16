@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const response = await fetch(
-          "https://api.testing.jailbreakchangelogs.xyz/users/description/update",
+          "https://api.jailbreakchangelogs.xyz/users/description/update",
           {
             method: "POST",
             headers: {
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Get user settings first
       const settingsResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`,
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -668,7 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Then get bio data
       const bioResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
+        `https://api.jailbreakchangelogs.xyz/users/description/get?user=${userId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -954,7 +954,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
+        `https://api.jailbreakchangelogs.xyz/comments/get/user?author=${userId}`
       );
 
       if (!response.ok) {
@@ -1390,7 +1390,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const targetUserId = pathSegments[2]; // This gets the ID from /users/{id}
 
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/followers/add`,
+        `https://api.jailbreakchangelogs.xyz/users/followers/add`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -1435,7 +1435,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const user = getCookie("token");
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/followers/remove`,
+        `https://api.jailbreakchangelogs.xyz/users/followers/remove`,
         {
           method: "DELETE",
           headers: {
@@ -1563,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // First check user settings
       const settingsResponse = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`
+        `https://api.jailbreakchangelogs.xyz/users/settings?user=${userId}&nocache=true`
       );
       if (!settingsResponse.ok) {
         throw new Error("Failed to fetch user settings");

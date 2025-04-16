@@ -1336,7 +1336,7 @@ async function makeTradeOffer(tradeId) {
 
     // Make the offer
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/trades/offer",
+      "https://api.jailbreakchangelogs.xyz/trades/offer",
       {
         method: "POST",
         headers: {
@@ -1395,7 +1395,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1562,7 +1562,7 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    const apiUrl = `https://api.testing.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&nocache=true`;
+    const apiUrl = `https://api.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&nocache=true`;
 
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
@@ -1648,7 +1648,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/trades/list?nocache=true"
+      "https://api.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
@@ -2638,7 +2638,7 @@ async function createTradeAd() {
 
     // Make API call to create trade
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/trades/add",
+      "https://api.jailbreakchangelogs.xyz/trades/add",
       {
         method: "POST",
         headers: {

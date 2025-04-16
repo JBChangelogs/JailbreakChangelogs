@@ -167,7 +167,7 @@ $(document).ready(function() {
 
       try {
         const response = await fetch(
-          "https://api.testing.jailbreakchangelogs.xyz/auth",
+          "https://api.jailbreakchangelogs.xyz/auth",
           {
             method: "POST",
             headers: {
