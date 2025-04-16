@@ -106,7 +106,7 @@
         "@context": "https://schema.org",
         "@type": "Game Item",
         "name": "<%= item.name %>",
-        "description": "<%- (item.description && item.description !== 'N/A') ? item.description : `${item.name} is a ${itemType.toLowerCase()} item in Roblox Jailbreak.` %>",
+        "description": "<%- JSON.stringify((item.description && item.description !== 'N/A') ? item.description : `${item.name} is a ${itemType.toLowerCase()} item in Roblox Jailbreak.`) %>",
         "image": "<%= item.image || logoUrl %>",
         "additionalType": "VideoGameItem",
         "additionalProperty": [

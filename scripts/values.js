@@ -1447,15 +1447,13 @@ const cardHtml = `
     ${item.last_updated ? `
       <div class="card-footer">
         <div class="d-flex align-items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path fill="#748d92" d="M128 20a108 108 0 1 0 108 108A108.12 108.12 0 0 0 128 20m0 192a84 84 0 1 1 84-84a84.09 84.09 0 0 1-84 84m68-84a12 12 0 0 1-12 12h-56a12 12 0 0 1-12-12V72a12 12 0 0 1 24 0v44h44a12 12 0 0 1 12 12"/></svg>
-          <small class="text-body-secondary fw-bold">Last updated ${formatTimeAgo(item.last_updated)}</small>
+          <small class="text-body-secondary">Last updated ${formatTimeAgo(item.last_updated)}</small>
         </div>
       </div>`
       :`
       <div class="card-footer">
         <div class="d-flex align-items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path fill="#748d92" d="M128 20a108 108 0 1 0 108 108A108.12 108.12 0 0 0 128 20m0 192a84 84 0 1 1 84-84a84.09 84.09 0 0 1-84 84m68-84a12 12 0 0 1-12 12h-56a12 12 0 0 1-12-12V72a12 12 0 0 1 24 0v44h44a12 12 0 0 1 12 12"/></svg>
-          <small class="text-body-secondary fw-bold">Last updated Unknown</small>
+          <small class="text-body-secondary">Last updated Unknown</small>
         </div>
       </div>
     `}
