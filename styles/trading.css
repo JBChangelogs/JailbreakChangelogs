@@ -2750,7 +2750,7 @@ video.card-img-top {
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif;
   font-weight: 500;
   margin-bottom: 0.75rem;
-  display: block;
+  display: flex;
   font-size: 1.5rem;
   text-align: center;
 }
@@ -3031,4 +3031,139 @@ body.bottom-sheet-open {
 .trade-ad-footer .btn-outline-danger:hover {
   color: #fff;
   background-color: #dc3545;
+}
+
+/* Banner notification styles */
+.jbcl-announcement-banner {
+  background: linear-gradient(90deg, #212a31, #124e66) !important;
+  padding: 0.5rem 0 !important; /* Reduced from 0.75rem to 0.5rem */
+  position: sticky !important;
+  top: 64px !important; /* Position right below the nav bar */
+  overflow: hidden !important;
+  width: 100% !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: height 0.3s ease-out !important;
+  display: flex !important; /* Visible by default */
+  z-index: 999 !important; /* Slightly lower than the nav bar's z-index */
+}
+
+.jbcl-announcement-banner.hidden {
+  display: none !important;
+}
+
+.jbcl-announcement-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  padding: 0 1rem !important;
+}
+
+.jbcl-announcement-close {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: pointer !important;
+  padding: 0.25rem !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  transition: color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.jbcl-announcement-close:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.jbcl-announcement-text {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  text-align: center !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+
+.jbcl-announcement-icon {
+  color: #ffd700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  animation: pulse 2s infinite !important;
+}
+
+.jbcl-announcement-highlight {
+  font-weight: 600 !important;
+  color: #ffd700 !important;
+}
+
+.jbcl-announcement-message {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.jbcl-announcement-link {
+  color: #5ea2ff !important;
+  text-decoration: none !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  margin: 0 0.25rem !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 4px !important;
+}
+
+.jbcl-announcement-link:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #7ab4ff !important;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive styles for the banner */
+@media (max-width: 768px) {
+  .jbcl-announcement-banner {
+    padding: 0.75rem !important;
+  }
+
+  .jbcl-announcement-content {
+    flex-direction: row !important;
+    padding: 0 1rem !important;
+  }
+
+  .jbcl-announcement-text {
+    font-size: 0.875rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .jbcl-announcement-close {
+    position: relative !important;
+    padding: 0.5rem !important;
+    margin-left: auto !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .jbcl-announcement-text {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .jbcl-announcement-link {
+    margin-top: 0.5rem !important;
+  }
 }

@@ -1303,8 +1303,9 @@ async function deleteTradeAd(tradeId) {
     notyf.success(
       "Trade advertisement deleted successfully!"
     );
-    cleanupTradePreview();
-    await loadTradeAds(); // Refresh the trade ads list
+    
+    // Reload the page after successful deletion
+    window.location.reload();
   } catch (error) {
     console.error("Error deleting trade:", error);
     notyf.error("Failed to delete trade advertisement");
@@ -2573,6 +2574,12 @@ function resetTrade() {
     if (confirmWrapper) {
       confirmWrapper.remove();
     }
+    
+    // Ensure the confirm trade button is visible without affecting its positioning
+    const confirmTradeBtn = document.getElementById("confirm-trade-btn");
+    if (confirmTradeBtn) {
+      confirmTradeBtn.style.removeProperty("display");
+    }
   } catch (error) {
     console.error("Error in resetTrade:", error);
     notyf.error("An error occurred while resetting the trade");
@@ -2661,6 +2668,10 @@ async function createTradeAd() {
     notyf.success(
       "Trade advertisement created successfully!"
     );
+    
+    // Show the bot DMs banner notification
+    showBotDMsBanner();
+    
     resetTrade();
 
     // Update trade ads list without modifying the preview button
@@ -2700,6 +2711,50 @@ async function createTradeAd() {
       // Display items with current filters
       displayAvailableItems(currentTradeType);
     });
+}
+
+// Function to show the bot DMs banner notification
+function showBotDMsBanner() {
+  // Create banner element
+  const banner = document.createElement('div');
+  banner.className = 'jbcl-announcement-banner';
+  banner.id = 'bot-dms-banner';
+  
+  // Create banner content
+  banner.innerHTML = `
+    <div class="jbcl-announcement-content">
+      <div class="jbcl-announcement-text">
+        <span class="jbcl-announcement-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <path fill="#ffd700" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+          </svg>
+        </span>
+        <span class="jbcl-announcement-message">
+          Want to know when someone wants to trade with you? Turn on bot DMs to get notifications on Discord.
+        </span>
+        <a href="/settings?highlight=dms_allowed" class="jbcl-announcement-link">
+          Enable Bot DMs
+        </a>
+      </div>
+      <button class="jbcl-announcement-close" onclick="document.getElementById('bot-dms-banner').remove()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+          <rect width="24" height="24" fill="none" />
+          <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+        </svg>
+      </button>
+    </div>
+  `;
+  
+  // Insert banner at the top of the page
+  document.body.insertBefore(banner, document.body.firstChild);
+  
+  // Auto-hide after 30 seconds
+  setTimeout(() => {
+    if (banner && banner.parentNode) {
+      banner.remove();
+    }
+  }, 30000);
 }
 
 function cleanupTradePreview() {
