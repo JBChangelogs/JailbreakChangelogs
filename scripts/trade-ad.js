@@ -109,7 +109,7 @@ function formatTimestamp(timestamp) {
 
 // Function to format value
 function formatValue(value, useSuffix = false) {
-  if (!value || value === "N/A") return "No Value";
+  if (!value || value === "N/A") return "None";
   const parsedValue = parseValue(value);
 
   // Use suffixes for mobile if enabled

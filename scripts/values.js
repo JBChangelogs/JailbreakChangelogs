@@ -1299,7 +1299,7 @@ document.addEventListener("DOMContentLoaded", () => {
       value === "N/A"
     ) {
       return {
-        display: "No Value",
+        display: "None",
         numeric: 0,
       };
     }
@@ -1437,7 +1437,7 @@ const cardHtml = `
             <div class="d-flex justify-content-between align-items-center">
               <small class="text-body-secondary">Demand</small>
               <span class="badge ${getDemandBadgeClass(item.demand)} rounded-pill">
-                ${item.demand === "'N/A'" || item.demand === "N/A" ? "No Demand" : item.demand || "No Value"}
+                ${item.demand === "'N/A'" || item.demand === "N/A" ? "No Demand" : item.demand || "None"}
               </span>
             </div>
           </div>

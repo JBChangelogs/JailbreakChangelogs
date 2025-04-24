@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function formatValueForDisplay(value, isMobile = false) {
-    if (!value || value === "N/A") return "No Value";
+    if (!value || value === "N/A") return "None";
 
     const numericValue = parseNumericValue(value);
 
