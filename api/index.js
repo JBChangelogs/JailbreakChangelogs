@@ -337,18 +337,27 @@ app.get("/seasons/:season", async (req, res) => {
     }
 
     // Generate reward image URLs and filter out nulls
-    const imageUrls = seasonData.rewards ? seasonData.rewards.map(reward => {
-      // Use absolute URLs for image paths
-      if (reward.link && reward.link.startsWith('https://jailbreakchangelogs.xyz/assets')) {
-        return `https://jailbreakchangelogs.xyz${reward.link}`;
+    const allImageUrls = seasonData.rewards ? seasonData.rewards.map(reward => {
+      // Handle both relative and absolute paths
+      if (reward.link && reward.link !== 'N/A') {
+        if (reward.link.startsWith('https://jailbreakchangelogs.xyz/assets')) {
+          return reward.link;
+        } else if (reward.link.startsWith('/assets')) {
+          return `https://jailbreakchangelogs.xyz${reward.link}`;
+        }
       }
       return null;
     }).filter(url => url !== null) : [];
 
     // If no image URLs are found, use a default image
-    if (imageUrls.length === 0) {
-      imageUrls.push('https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp');
+    if (allImageUrls.length === 0) {
+      allImageUrls.push('https://jailbreakchangelogs.xyz/assets/logos/Logo_Background.webp');
     }
+
+    // Randomly select 4 images (or all if less than 4)
+    const imageUrls = allImageUrls
+      .sort(() => Math.random() - 0.5) // Shuffle array
+      .slice(0, 4); // Take first 4 elements
 
     // Render the season page
     res.render("seasons", {
