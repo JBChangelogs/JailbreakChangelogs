@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@vercel/speed-insights": "^1.0.12",
-    "axios": "^1.8.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "cross-spawn": "^7.0.6",
