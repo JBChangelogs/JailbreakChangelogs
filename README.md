@@ -36,10 +36,6 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 - [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
 - [Jakobiis](https://github.com/v3kmmw/) - Co-founder, Lead Back-end Developer & API Architect
 
-## API Reference
-
-Find the docs to our public API's here: https://docs.jailbreakchangelogs.xyz/
-
 ## Contributing
 
 Contributions are always welcome!
