@@ -378,7 +378,7 @@ let filteredItems = [];
 async function loadItems() {
   try {
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/items/list"
+      "https://api.testing.jailbreakchangelogs.xyz/items/list"
     );
     allItems = await response.json();
 
@@ -472,14 +472,48 @@ function addItemToTrade(item, tradeType) {
 }
 
 // Function to quickly add item from available items
-function quickAddItem(itemName, itemType) {
-  const item = allItems.find((i) => i.name === itemName && i.type === itemType);
+function quickAddItem(itemName, itemType, itemId, selectedVariant) {
+  console.log('quickAddItem called with:', { itemName, itemType, itemId, selectedVariant });
+  
+  let item = allItems.find((i) => i.id === itemId);
   if (!item) return;
+  
+  console.log('Original item found:', { ...item });
+
+  // If we have a variant selected that's not the current year, use the variant data
+  const currentYear = new Date().getFullYear().toString();
+  if (selectedVariant && selectedVariant !== currentYear && item.children) {
+    const variant = item.children.find(child => child.sub_name === selectedVariant);
+    console.log('Found variant:', variant);
+    
+    if (variant) {
+      // Create a new item object with variant data
+      item = {
+        ...item,
+        ...variant.data,
+        id: `${item.id}-${variant.id}`, // Create unique ID string for variant
+        name: item.name, // Keep parent name
+        type: item.type, // Keep parent type
+        creator: item.creator, // Keep parent creator
+        description: item.description, // Keep parent description
+        children: item.children, // Keep children array
+        last_updated: variant.data.last_updated // Use variant's last_updated
+      };
+      console.log('Created variant item:', { ...item });
+    }
+  } else {
+    // Ensure parent item ID is also a string
+    item = {
+      ...item,
+      id: item.id.toString()
+    };
+    console.log('Created parent item:', { ...item });
+  }
 
   // Use the global selection state
   if (selectedPlaceholderIndex !== -1 && selectedTradeType) {
-    const items =
-      selectedTradeType === "Offer" ? offeringItems : requestingItems;
+    const items = selectedTradeType === "Offer" ? offeringItems : requestingItems;
+    console.log('Current items array before adding:', [...items]);
 
     // Only check if the specific slot is empty
     if (items[selectedPlaceholderIndex]) {
@@ -487,9 +521,10 @@ function quickAddItem(itemName, itemType) {
       const nextEmptyIndex = findNextEmptySlot(items);
       if (nextEmptyIndex !== -1) {
         items[nextEmptyIndex] = item;
+        console.log('Added item to next empty slot:', { index: nextEmptyIndex, item: { ...item } });
         renderTradeItems(selectedTradeType);
         updateTradeSummary();
-        updatePreviewIfVisible(); // Add this line
+        updatePreviewIfVisible();
       } else {
         notyf.error("No empty slots available");
       }
@@ -498,6 +533,7 @@ function quickAddItem(itemName, itemType) {
 
     // Insert at the exact selected position
     items[selectedPlaceholderIndex] = item;
+    console.log('Added item to selected slot:', { index: selectedPlaceholderIndex, item: { ...item } });
 
     // Store type before clearing selection
     const currentType = selectedTradeType;
@@ -508,24 +544,22 @@ function quickAddItem(itemName, itemType) {
     // Update UI
     renderTradeItems(currentType);
     updateTradeSummary();
-    updatePreviewIfVisible(); // Add this line
+    updatePreviewIfVisible();
   } else {
     // No placeholder selected, find first empty slot
-    const items =
-      currentTradeType === "offering" ? offeringItems : requestingItems;
+    const items = currentTradeType === "offering" ? offeringItems : requestingItems;
+    console.log('Current items array before adding (no placeholder):', [...items]);
+    
     const emptyIndex = findNextEmptySlot(items);
 
     if (emptyIndex !== -1) {
       items[emptyIndex] = item;
+      console.log('Added item to first empty slot:', { index: emptyIndex, item: { ...item } });
       renderTradeItems(currentTradeType === "offering" ? "Offer" : "Request");
       updateTradeSummary();
-      updatePreviewIfVisible(); // Add this line
+      updatePreviewIfVisible();
     } else {
-      notyf.error(
-        `No empty slots available in ${
-          currentTradeType === "offering" ? "Offer" : "Request"
-        }`
-      );
+      notyf.error(`No empty slots available in ${currentTradeType === "offering" ? "Offer" : "Request"}`);
     }
   }
 }
@@ -714,17 +748,32 @@ function displayAvailableItems(type) {
     countDisplay +
     itemsToDisplay
       .map((item) => {
+        const currentYear = new Date().getFullYear().toString();
+        const hasVariants = item.children && item.children.length > 0;
+        
+        // Create variant dropdown HTML if item has variants
+        const variantDropdown = hasVariants ? `
+          <div class="sub-items-dropdown position-absolute top-0 end-0">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-selected-variant="${currentYear}">
+                ${currentYear}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item active" href="#" data-item-id="${item.id}" data-variant="${currentYear}">${currentYear}</a></li>
+                ${item.children.map(child => `
+                  <li><a class="dropdown-item" href="#" data-item-id="${child.id}" data-variant="${child.sub_name}">${child.sub_name}</a></li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        ` : '';
+
         return `
         <div class="col-custom-5">
           <div class="card available-item-card ${
             item.tradable === 0 ? "not-tradable" : ""
           }" 
-               onclick="${
-                 item.tradable === 0
-                   ? ""
-                   : `quickAddItem('${item.name}', '${item.type}')`
-               }"
-               ${item.tradable === 0 ? "" : 'data-bs-dismiss="modal"'}>
+               ${item.tradable === 0 ? "" : `data-item-name="${item.name}" data-item-type="${item.type}" data-item-id="${item.id}"`}>
             <div class="card-header">
               ${item.name}
             </div>
@@ -734,6 +783,7 @@ function displayAvailableItems(type) {
                    alt=""
                    onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; this.style.display='block'; this.previousElementSibling.style.display='none'"
               >
+              ${variantDropdown}
             </div>
            <div class="card-body">
             ${
@@ -795,6 +845,166 @@ function displayAvailableItems(type) {
       `;
       })
       .join("");
+
+  // Add event listeners for variant dropdowns
+  container.querySelectorAll('.sub-items-dropdown .dropdown').forEach(dropdown => {
+    const card = dropdown.closest('.available-item-card');
+    const itemId = parseInt(dropdown.querySelector('.dropdown-item').dataset.itemId);
+    const item = itemsToDisplay.find(i => i.id === itemId);
+    
+    if (!item) return;
+
+    // Prevent card click when clicking dropdown
+    dropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+      card.onclick = null; // Temporarily disable card click
+    });
+
+    // Handle variant selection
+    dropdown.querySelectorAll('.dropdown-item').forEach(dropdownItem => {
+      dropdownItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Update active state
+        dropdown.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+        dropdownItem.classList.add('active');
+        
+        // Update button text
+        const selectedVariant = dropdownItem.dataset.variant;
+        dropdown.querySelector('.dropdown-toggle').textContent = selectedVariant;
+        
+        // Update card values based on variant
+        const variantId = parseInt(dropdownItem.dataset.itemId);
+        if (variantId === item.id) {
+          // Current year variant - use parent item data
+          updateCardValues(card, item);
+        } else {
+          // Find variant data
+          const variant = item.children.find(child => child.id === variantId);
+          if (variant) {
+            updateCardValues(card, variant.data);
+          }
+        }
+
+        // Re-enable card click with new variant data
+        card.onclick = () => quickAddItem(item.name, item.type, item.id, selectedVariant);
+      });
+    });
+  });
+
+  // Add event listeners for variant dropdowns and card clicks
+  container.querySelectorAll('.available-item-card').forEach(card => {
+    if (card.classList.contains('not-tradable')) return;
+
+    const itemName = card.dataset.itemName;
+    const itemType = card.dataset.itemType;
+    const itemId = parseInt(card.dataset.itemId);
+    let selectedVariant = null;
+
+    // Handle variant selection
+    const dropdown = card.querySelector('.sub-items-dropdown');
+    if (dropdown) {
+      // Prevent any click events on the dropdown from bubbling up
+      dropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        card.removeEventListener('click', cardClickHandler);
+      });
+
+      dropdown.querySelectorAll('.dropdown-item').forEach(dropdownItem => {
+        dropdownItem.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Update active state
+          dropdown.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+          dropdownItem.classList.add('active');
+
+          // Update button text
+          selectedVariant = dropdownItem.dataset.variant;
+          dropdown.querySelector('.dropdown-toggle').textContent = selectedVariant;
+
+          // Find the item in the filtered items
+          const item = itemsToDisplay.find(i => i.id === itemId);
+          if (!item) return;
+
+          // Update card values based on variant
+          const variantId = parseInt(dropdownItem.dataset.itemId);
+          if (variantId === item.id) {
+            // Current year variant - use parent item data
+            updateCardValues(card, item);
+          } else {
+            // Find variant data
+            const variant = item.children.find(child => child.id === variantId);
+            if (variant) {
+              updateCardValues(card, variant.data);
+            }
+          }
+
+          // Add item immediately when variant is selected
+          quickAddItem(itemName, itemType, itemId, selectedVariant);
+          const modal = bootstrap.Modal.getInstance(document.getElementById('availableItemsModal'));
+          if (modal) {
+            modal.hide();
+          }
+
+          // Re-add the card click handler after a short delay
+          setTimeout(() => {
+            card.addEventListener('click', cardClickHandler);
+          }, 100);
+        });
+      });
+    }
+
+    // Define card click handler
+    const cardClickHandler = (e) => {
+      // Don't trigger if clicking the dropdown
+      if (e.target.closest('.sub-items-dropdown')) {
+        return;
+      }
+
+      // Get the current selected variant from the dropdown if it exists
+      const dropdownToggle = card.querySelector('.sub-items-dropdown .dropdown-toggle');
+      if (dropdownToggle) {
+        const currentYear = new Date().getFullYear().toString();
+        const currentVariant = dropdownToggle.textContent.trim();
+        // Only use variant if it's not the current year
+        selectedVariant = currentVariant === currentYear ? null : currentVariant;
+      }
+
+      // Add item and close modal
+      quickAddItem(itemName, itemType, itemId, selectedVariant);
+      const modal = bootstrap.Modal.getInstance(document.getElementById('availableItemsModal'));
+      if (modal) {
+        modal.hide();
+      }
+    };
+
+    // Add click handler to card
+    card.addEventListener('click', cardClickHandler);
+  });
+}
+
+// Helper function to update card values
+function updateCardValues(card, itemData) {
+  // Update cash value
+  const cashValueSpan = card.querySelector('.info-row:nth-child(2) .info-value');
+  if (cashValueSpan) {
+    cashValueSpan.textContent = formatValue(itemData.cash_value);
+  }
+  
+  // Update duped value
+  const dupedValueSpan = card.querySelector('.info-row:nth-child(3) .info-value');
+  if (dupedValueSpan) {
+    dupedValueSpan.textContent = formatValue(itemData.duped_value || 0);
+  }
+  
+  // Update demand
+  const demandSpan = card.querySelector('.info-row:last-child .info-value');
+  if (demandSpan) {
+    demandSpan.className = `info-value demand-${(itemData.demand || "0").toLowerCase()}`;
+    demandSpan.textContent = itemData.demand || "N/A";
+  }
 }
 
 // Helper function to get the correct image URL based on item type
@@ -984,9 +1194,9 @@ function handleSearch(type) {
         const itemType = item.type.toLowerCase();
         // Only return true if name or type starts with the search term
         return (
-          itemName.startsWith(searchTerm) ||
+          itemName.includes(searchTerm) ||
           // Only search by type if search term is longer than 1 character
-          (searchTerm.length > 1 && itemType.startsWith(searchTerm))
+          (searchTerm.length > 1 && itemType.includes(searchTerm))
         );
       });
     } else {
@@ -1139,9 +1349,12 @@ function renderEmptySlots(containerId, count) {
 }
 
 function renderTradeItems(tradeType) {
+  console.log('\nrenderTradeItems called for type:', tradeType);
+  
   const items = tradeType === "Offer" ? offeringItems : requestingItems;
-  const containerId =
-    tradeType.toLowerCase() === "offer" ? "offering-list" : "requesting-list";
+  console.log('Items array:', items.map(item => item ? { id: item.id, name: item.name } : null));
+  
+  const containerId = tradeType.toLowerCase() === "offer" ? "offering-list" : "requesting-list";
   const container = document.getElementById(containerId);
 
   if (!container) return;
@@ -1156,20 +1369,35 @@ function renderTradeItems(tradeType) {
   // First pass: count items and record first position for this side only
   Object.entries(items).forEach(([index, item]) => {
     if (!item) return;
-    const itemKey = `${item.name}-${item.type}`;
+    const itemKey = item.id.toString();
+    console.log('Processing item for counting:', { 
+      index, 
+      itemKey,
+      name: item.name,
+      currentCount: itemCounts.get(itemKey) || 0
+    });
+    
     if (!itemPositions.has(itemKey)) {
       itemPositions.set(itemKey, parseInt(index));
     }
-    // Only count items on this side
     itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
   });
+
+  console.log('Final item counts:', Object.fromEntries(itemCounts));
+  console.log('Item positions:', Object.fromEntries(itemPositions));
 
   // Second pass: only keep items in their first position
   Object.entries(items).forEach(([index, item]) => {
     if (!item) return;
-    const itemKey = `${item.name}-${item.type}`;
+    const itemKey = item.id.toString();
     if (parseInt(index) === itemPositions.get(itemKey)) {
       slots[parseInt(index)] = item;
+      console.log('Keeping item in slot:', {
+        index,
+        itemKey,
+        name: item.name,
+        count: itemCounts.get(itemKey)
+      });
     }
   });
 
@@ -1177,27 +1405,27 @@ function renderTradeItems(tradeType) {
   let html = slots
     .map((item, index) => {
       if (item) {
-        const itemKey = `${item.name}-${item.type}`;
+        const itemKey = item.id.toString();
         const count = itemCounts.get(itemKey);
         return `
         <div class="col-md-3 col-6 mb-3">
-      <div class="trade-card">
-        <div class="card-img-container">
-          ${getItemImageElement(item)}
-          ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
-          <div class="remove-icon" onclick="event.stopPropagation(); removeItem(${index}, '${tradeType}')">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
-</svg>
+          <div class="trade-card">
+            <div class="card-img-container">
+              ${getItemImageElement(item)}
+              ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
+              <div class="remove-icon" onclick="event.stopPropagation(); removeItem(${index}, '${tradeType}')">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                <rect width="24" height="24" fill="none" />
+                <path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+              </svg>
+              </div>
+            </div>
+            <div class="trade-card-info">
+              <div class="item-name">${item.name}</div>
+              <div class="item-type">${item.type}</div>
+            </div>
           </div>
-        </div>
-        <div class="trade-card-info">
-          <div class="item-name ">${item.name}</div>
-          <div class="item-type">${item.type}</div>
-        </div>
-      </div>
-    </div>`;
+        </div>`;
       } else {
         return createPlaceholderCard(index, tradeType);
       }
@@ -1649,7 +1877,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/trades/list?nocache=true"
+      "https://api.testing.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];
@@ -1897,51 +2125,66 @@ async function createTradeAdHTML(trade) {
     const offeringCounts = {};
     const requestingCounts = {};
     
-    trade.offering.split(",").forEach((id) => {
-      offeringCounts[id] = (offeringCounts[id] || 0) + 1;
+    // For sub-items, use parent-subId as the key, otherwise use id
+    trade.offering.forEach((item) => {
+      const itemKey = item.is_sub ? `${item.parent}-${item.id}` : item.id.toString();
+      offeringCounts[itemKey] = (offeringCounts[itemKey] || 0) + 1;
     });
-    trade.requesting.split(",").forEach((id) => {
-      requestingCounts[id] = (requestingCounts[id] || 0) + 1;
+    trade.requesting.forEach((item) => {
+      const itemKey = item.is_sub ? `${item.parent}-${item.id}` : item.id.toString();
+      requestingCounts[itemKey] = (requestingCounts[itemKey] || 0) + 1;
     });
 
     // Create item HTML helper function
-    const createItemHTML = async (itemId, isOffering) => {
-      const item = await fetchItemDetails(itemId);
+    const createItemHTML = async (item, isOffering) => {
       if (!item) return "";
 
-      const count = isOffering ? offeringCounts[itemId] : requestingCounts[itemId];
-      const multiplierHTML =
-        count > 1 ? `<div class="item-multiplier">×${count}</div>` : "";
+      // For sub-items, use the data object and construct proper ID
+      const itemData = item.is_sub ? {
+        ...item.data,
+        id: `${item.parent}-${item.id}`,
+        sub_name: item.sub_name
+      } : item;
+
+      const itemKey = item.is_sub ? `${item.parent}-${item.id}` : item.id.toString();
+      const count = isOffering ? offeringCounts[itemKey] : requestingCounts[itemKey];
+      const multiplierHTML = count > 1 ? `<div class="item-multiplier">×${count}</div>` : "";
+
+      // Add sub-item indicator if it's a variant
+      const subItemHTML = item.is_sub ? `
+        <div class="sub-item-indicator">
+          <span class="sub-item-year">${item.sub_name}</span>
+        </div>
+      ` : "";
 
       return `
-        <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(
-          item
-        ).replace(/"/g, "&quot;")})">
+        <div class="trade-ad-item" onclick="showBottomSheet(${JSON.stringify(itemData).replace(/"/g, "&quot;")})">
           <div class="trade-ad-item-content">
             <div class="item-image-container">
-              <img src="${getItemImagePath(item)}" 
-                   alt="${item.name}"
+              <img src="${getItemImagePath(itemData)}" 
+                   alt="${itemData.name}"
                    onerror="this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'">
               ${multiplierHTML}
+              ${subItemHTML}
             </div>
             <div class="item-details">
-              <div class="item-name">${item.name}</div>
+              <div class="item-name">${itemData.name}</div>
               <div class="item-values">
                 <div class="value-badge">
                   <span class="value-label">Type:</span>
-                  <span class="value-amount">${item.type}</span>
+                  <span class="value-amount">${itemData.type}</span>
                 </div>
                 <div class="value-badge">
                   <span class="value-label">Cash Value:</span>
                   <span class="value-amount">${formatValue(
-                    item.cash_value,
+                    itemData.cash_value,
                     true
                   )}</span>
                 </div>
                 <div class="value-badge">
                   <span class="value-label">Duped Value:</span>
                   <span class="value-amount">${formatValue(
-                    item.duped_value,
+                    itemData.duped_value,
                     true
                   )}</span>
                 </div>
@@ -1954,14 +2197,26 @@ async function createTradeAdHTML(trade) {
     // Fetch and process items with deduplication
     const [offeringItemsHtml, requestingItemsHtml] = await Promise.all([
       Promise.all(
-        [...new Set(trade.offering.split(","))]
-          .filter((id) => id)
-          .map(id => createItemHTML(id, true))
+        [...new Set(trade.offering.map(item => 
+          item.is_sub ? `${item.parent}-${item.id}` : item.id.toString()
+        ))]
+        .map(id => {
+          const item = trade.offering.find(i => 
+            i.is_sub ? `${i.parent}-${i.id}` === id : i.id.toString() === id
+          );
+          return createItemHTML(item, true);
+        })
       ),
       Promise.all(
-        [...new Set(trade.requesting.split(","))]
-          .filter((id) => id)
-          .map(id => createItemHTML(id, false))
+        [...new Set(trade.requesting.map(item => 
+          item.is_sub ? `${item.parent}-${item.id}` : item.id.toString()
+        ))]
+        .map(id => {
+          const item = trade.requesting.find(i => 
+            i.is_sub ? `${i.parent}-${i.id}` === id : i.id.toString() === id
+          );
+          return createItemHTML(item, false);
+        })
       ),
     ]);
 
@@ -2318,12 +2573,13 @@ function renderPreviewItems(containerId, items) {
   const container = document.getElementById(containerId);
   const values = calculateSideValues(items);
 
-  // Count duplicates
+  // Count duplicates - Modified to account for variants
   const itemCounts = new Map();
   Object.values(items)
     .filter((item) => item)
     .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
+      // Ensure proper string ID format for both parent and sub-items
+      const itemKey = item.id.toString();
       itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
     });
 
@@ -2334,7 +2590,7 @@ function renderPreviewItems(containerId, items) {
   Object.values(items)
     .filter((item) => item)
     .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
+      const itemKey = item.id.toString();
       if (!processedKeys.has(itemKey)) {
         processedKeys.add(itemKey);
         uniqueItems.push({

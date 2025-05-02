@@ -1060,7 +1060,13 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             // Handle regular items
             const itemResponse = await fetch(
-              `https://api.jailbreakchangelogs.xyz/items/get?type=${comment.item_type.toLowerCase()}&id=${comment.item_id}`
+              `https://api.jailbreakchangelogs.xyz/items/get?type=${comment.item_type.toLowerCase()}&id=${comment.item_id}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  "Origin": "https://jailbreakchangelogs.xyz"
+                }
+              }
             );
         
             if (itemResponse.ok) {
@@ -1592,7 +1598,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userId}&nocache=true`
+        `https://api.testing.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
       );
 
       if (response.status === 404) {
@@ -1605,6 +1611,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const favorites = await response.json();
+      
       // Now check favorites length after we have the data
       if (!favorites || favorites.length === 0) {
         showNoFavoritesMessage();
@@ -1613,42 +1620,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Sort favorites by created_at timestamp (latest first)
       favorites.sort((a, b) => b.created_at - a.created_at);
-      
-      // Fetch full item details for each favorite
-      const itemPromises = favorites.map(async (fav) => {
-        const itemResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/items/get?id=${fav.item_id}`
-        );
-        if (!itemResponse.ok) return null;
-        const item = await itemResponse.json();
-        // Add the favorite id to the item object
-        item.favorite_id = fav.item_id;
-        return item;
-      });
 
-      const items = (await Promise.all(itemPromises)).filter(
-        (item) => item !== null
-      );
+      // Process items directly from the response
+      const items = favorites.map(fav => {
+        // For sub-items, we need both the parent item and the sub-item data
+        if (fav.item_id.includes('-')) {
+          const [parentId, subId] = fav.item_id.split('-');
+          // Find the parent item in favorites
+          const parentFav = favorites.find(f => f.item_id === parentId);
+          if (parentFav && parentFav.item) {
+            // Find the matching sub-item in children
+            const subItem = parentFav.item.children.find(child => child.id.toString() === subId);
+            if (subItem) {
+              return {
+                ...parentFav.item,
+                favorite_id: fav.item_id,
+                sub_item: subItem,
+                created_at: fav.created_at
+              };
+            }
+          }
+        }
+        // For regular items
+        return {
+          ...fav.item,
+          favorite_id: fav.item_id,
+          created_at: fav.created_at
+        };
+      }).filter(item => item !== null);
 
       if (items.length === 0) {
-        card_pagination.style.display = "none";
-        favoritesContainer.innerHTML = `
-          <div class="col-12 text-center p-4">
-            <div class="no-favorites-message">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
-                <rect width="24" height="24" fill="none" />
-                <path fill="#f8ff00" d="m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zM5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275zM12 12.25" />
-              </svg>
-              <h4>No Favorites Yet</h4>
-              <p>This user hasn't added any items to their favorites</p>
-            </div>
-          </div>`;
+        showNoFavoritesMessage();
         return;
       }
 
       // Pagination logic
       const itemsPerPage = 12;
-      const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage)); // Always at least 1 page
+      const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
       const startIndex = (currentPage - 1) * itemsPerPage;
       const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
@@ -1661,19 +1669,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .map((item) => createItemCard(item))
         .join("");
 
-      // Remove drift video hover effects since we're not using videos anymore
-      // const driftCards = document.querySelectorAll(".items-card");
-      // driftCards.forEach((card) => {
-      //   const video = card.querySelector("video");
-      //   const thumbnail = card.querySelector(".thumbnail");
-      //   // Only remove videos that aren't HyperShift
-      //   if (video && !video.src.includes("HyperShift")) {
-      //     video.remove();
-      //   }
-      //   if (thumbnail) {
-      //     thumbnail.style.opacity = "1";
-      //   }
-      // });
     } catch (error) {
       console.error("Error fetching favorites:", error);
       favoritesContainer.innerHTML = `
@@ -1683,7 +1678,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <p>There was an error loading favorite items</p>
           </div>
         </div>`;
-      renderPaginationControls(1); // Show single page pagination
+      renderPaginationControls(1);
     }
   }
 
@@ -1729,10 +1724,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const itemType = item.type.toLowerCase();
     
     // Special handling for HyperShift
-    if (item.favorite_id === 587) {
+    if (item.name === "HyperShift") {
       return `
         <div class="col-6 col-md-4 col-lg-3">
-          <a href="/item/${itemType}/${encodeURIComponent(item.name)}" class="text-decoration-none">
+          <a href="/item/${itemType}/${encodeURIComponent(item.name.replace(/\s+/g, "-"))}${item.sub_item ? `?variant=${encodeURIComponent(item.sub_item.sub_name)}` : ''}" class="text-decoration-none">
             <div class="card items-card">
               <div class="position-relative">
                 <div class="media-container">
@@ -1744,6 +1739,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="item-card-body text-center">
                   <div class="badges-container d-flex justify-content-center gap-2">
                     <span class="badge item-type-badge" style="background-color: ${getTypeColor(itemType)};">${item.type}</span>
+                    ${item.sub_item ? `<span class="badge variant-badge" style="background-color: #1d7da3;">${item.sub_item.sub_name}</span>` : ''}
                   </div>
                   <h5 class="card-title">${item.name}</h5>
                 </div>
@@ -1763,7 +1759,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     return `
       <div class="col-6 col-md-4 col-lg-3">
-        <a href="/item/${itemType}/${encodeURIComponent(item.name)}" class="text-decoration-none">
+        <a href="/item/${itemType}/${encodeURIComponent(item.name.replace(/\s+/g, "-"))}${item.sub_item ? `?variant=${encodeURIComponent(item.sub_item.sub_name)}` : ''}" class="text-decoration-none">
           <div class="card items-card">
             <div class="position-relative">
               <div class="media-container">
@@ -1772,6 +1768,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="item-card-body text-center">
                 <div class="badges-container d-flex justify-content-center gap-2">
                   <span class="badge item-type-badge" style="background-color: ${getTypeColor(itemType)};">${item.type}</span>
+                  ${item.sub_item ? `<span class="badge variant-badge" style="background-color: #1d7da3;">${item.sub_item.sub_name}</span>` : ''}
                 </div>
                 <h5 class="card-title">${item.name}</h5>
               </div>

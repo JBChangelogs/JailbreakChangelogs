@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const apiItemName = itemName.replace(/-/g, " ");
 
       // Store the API response globally for other components to use
-      window.itemApiResponse = fetch(`https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(apiItemName)}&type=${itemType}`);
+      window.itemApiResponse = fetch(`https://api.testing.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(apiItemName)}&type=${itemType}`);
 
       if (!urlType || !itemName) {
         throw new Error("Invalid URL format");
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (token && userData.id) {
         try {
           const favoritesResponse = await fetch(
-            `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
+            `https://api.testing.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -400,18 +400,54 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
+      // Fetch item details
       const response = await window.itemApiResponse;
-
       if (!response.ok) {
         throw new Error("Item not found");
       }
 
-      const item = await response.json();
+      let item = await response.json();
+
+      // Get the variant parameter from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const variant = decodeURIComponent(urlParams.get('variant') || '');
+
+      // If variant is specified and item has children, find the matching variant
+      if (variant && item.children && item.children.length > 0) {
+        const variantData = item.children.find(child => child.sub_name === variant);
+        if (variantData && variantData.data) {
+          // Merge the variant data with the parent item, preserving parent properties that aren't overridden
+          item = {
+            ...item,
+            ...variantData.data,
+            id: item.id, // Preserve the parent ID
+            name: item.name, // Preserve the parent name
+            type: item.type, // Preserve the parent type
+            creator: item.creator, // Preserve the parent creator
+            description: item.description, // Preserve the parent description
+            children: item.children, // Preserve the children array
+            last_updated: variantData.data.last_updated // Use variant's last_updated
+          };
+        } else {
+          // If variant doesn't exist, redirect to the base URL without variant parameter
+          const baseUrl = `/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name)}`;
+          window.history.replaceState({}, '', baseUrl);
+        }
+      }
 
       if (item && !item.error && item.type) {
         // Add is_favorite property based on user's favorites
         if (userFavorites.length > 0) {
-          item.is_favorite = userFavorites.some(fav => fav.item_id === item.id);
+          // Get current variant if any
+          const urlParams = new URLSearchParams(window.location.search);
+          const variant = urlParams.get('variant');
+          
+          // Determine the correct item ID format
+          const currentItemId = variant && item.children && item.children.length > 0
+            ? `${item.id}-${item.children.find(child => child.sub_name === variant)?.id || ''}`
+            : item.id.toString();
+            
+          item.is_favorite = userFavorites.some(fav => fav.item_id === currentItemId);
         } else {
           item.is_favorite = false;
         }
@@ -754,7 +790,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         ${specialBadgesHtml}
         ${
-          item.tradable === 0
+          item.tradable === 0 || item.tradable === false
             ? `<span class="badge" style="background-color: #dc3545;">Not Tradable</span>`
             : ""
         }
@@ -1419,6 +1455,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                                item.name
                              }</h1>
                               ${badgeContainerHtml}
+                              ${item.children && item.children.length > 0 ? `
+                                <div class="ms-3">
+                                  <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                      ${new URLSearchParams(window.location.search).get('variant') || new Date().getFullYear()}
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                      <li><a class="dropdown-item ${!new URLSearchParams(window.location.search).get('variant') ? 'active' : ''}" 
+                                            href="/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name.replace(/\s+/g, "-"))}">${new Date().getFullYear()}</a></li>
+                                      ${item.children.map(child => `
+                                        <li><a class="dropdown-item ${new URLSearchParams(window.location.search).get('variant') === child.sub_name ? 'active' : ''}" 
+                                              href="/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name.replace(/\s+/g, "-"))}?variant=${child.sub_name}">
+                                              ${child.sub_name}
+                                            </a></li>
+                                      `).join('')}
+                                    </ul>
+                                  </div>
+                                </div>
+                              ` : ''}
                           </div>
                            ${
                              item.creator && item.creator !== "N/A"
@@ -1871,8 +1926,16 @@ document.addEventListener("DOMContentLoaded", async () => {
               });
 
               // Fetch data
+              const urlParams = new URLSearchParams(window.location.search);
+              const variant = urlParams.get('variant');
+              
+              // Determine the correct item ID format for history
+              const historyItemId = variant && item.children && item.children.length > 0
+                ? `${item.id}-${item.children.find(child => child.sub_name === variant)?.id || ''}`
+                : item.id.toString();
+
               fetch(
-                `https://api.jailbreakchangelogs.xyz/item/history?id=${item.id}`
+                `https://api.testing.jailbreakchangelogs.xyz/item/history?id=${historyItemId}`
               )
                 .then((response) => response.json())
                 .then((data) => {
@@ -1973,7 +2036,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     tooltips.forEach(el => new bootstrap.Tooltip(el));
 
     // Fetch favorites count
-    fetch(`https://api.jailbreakchangelogs.xyz/item/favorites?id=${item.id}`)
+    const urlParams = new URLSearchParams(window.location.search);
+    const variant = urlParams.get('variant');
+    
+    // If we're viewing a variant, use parentId-childId format
+    // If we're viewing the current year, use just the parent ID
+    const currentItemId = variant && item.children && item.children.length > 0
+      ? `${item.id}-${item.children.find(child => child.sub_name === variant)?.id || ''}`
+      : item.id.toString();
+
+    // Store the current item globally for reference
+    window.currentItem = item;
+
+    // Fetch favorites count using the appropriate ID format
+    fetch(`https://api.testing.jailbreakchangelogs.xyz/item/favorites?id=${currentItemId}`)
       .then((response) => response.json())
       .then((count) => {
         const favoritesCount = document.getElementById("favorites-count");
@@ -2309,11 +2385,20 @@ async function toggleFavorite(e) {
   const favoritesCount = favoritesBtn.querySelector("#favorites-count");
   
   const isFavorited = favoritesPath.getAttribute("fill") === "#f8ff00";
-  const itemId = favoritesBtn.dataset.itemId;
+  const baseItemId = favoritesBtn.dataset.itemId;
+
+  // Get current variant if any
+  const urlParams = new URLSearchParams(window.location.search);
+  const variant = urlParams.get('variant');
+  
+  // Determine the correct item ID format
+  const currentItemId = variant && window.currentItem && window.currentItem.children && window.currentItem.children.length > 0
+    ? `${baseItemId}-${window.currentItem.children.find(child => child.sub_name === variant)?.id || ''}`
+    : baseItemId.toString();
 
   try {
     const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/favorites/${isFavorited ? "remove" : "add"}`,
+      `https://api.testing.jailbreakchangelogs.xyz/favorites/${isFavorited ? "remove" : "add"}`,
       {
         method: isFavorited ? "DELETE" : "POST",
         headers: {
@@ -2321,7 +2406,7 @@ async function toggleFavorite(e) {
           Origin: "https://jailbreakchangelogs.xyz",
         },
         body: JSON.stringify({
-          item_id: itemId,
+          item_id: currentItemId,
           owner: token,
         }),
       }

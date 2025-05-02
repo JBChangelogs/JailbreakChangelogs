@@ -144,18 +144,30 @@ function parseValue(value) {
 
 // Function to create item HTML
 function createItemHTML(item, count) {
+  // For sub-items/variants, use the data object
+  const itemData = item.data ? {
+    ...item.data,
+    id: `${item.parent}-${item.id}`, // Create unique ID string for variant
+    sub_name: item.sub_name
+  } : item;
+
   return `
     <div class="trade-ad-item">
       <div class="trade-ad-item-content">
         <div class="item-image-container">
-          ${getItemImageElement(item)}
+          ${getItemImageElement(itemData)}
           ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
+          ${item.sub_name ? `
+            <div class="sub-item-indicator">
+              <span class="sub-item-year">${item.sub_name}</span>
+            </div>
+          ` : ""}
         </div>
         <div class="item-details">
           <div class="item-name">
-            ${item.name}
+            ${itemData.name}
             ${
-              item.is_limited
+              itemData.is_limited
                 ? `
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
                           <rect width="512" height="512" fill="none" />
@@ -174,32 +186,31 @@ function createItemHTML(item, count) {
                   `
                 : ""
             }
-          
           </div>
           <div class="item-values">
             <div class="value-badge">
               <span class="value-label">Cash Value:</span>
               <span class="value-amount">${formatValue(
-                item.cash_value,
+                itemData.cash_value,
                 true
               )}</span>
             </div>
             <div class="value-badge">
               <span class="value-label">Duped Value:</span>
               <span class="value-amount">${formatValue(
-                item.duped_value,
+                itemData.duped_value,
                 true
               )}</span>
             </div>
             <div class="value-badge">
               <span class="value-label">Type:</span>
-              <span class="value-amount">${item.type}</span>
+              <span class="value-amount">${itemData.type}</span>
             </div>
             <div class="value-badge demand-badge">
               <span class="value-label">Demand:</span>
               <span class="value-amount demand-${(
-                item.demand || "0"
-              ).toLowerCase()}">${item.demand || "N/A"}</span>
+                itemData.demand || "0"
+              ).toLowerCase()}">${itemData.demand || "N/A"}</span>
             </div>
           </div>
         </div>
@@ -213,7 +224,7 @@ async function loadTradeData() {
   try {
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
     );
 
     if (!tradeResponse.ok) {
@@ -248,7 +259,9 @@ async function loadTradeData() {
 
     // Count items and store unique items
     offeringItems.forEach((item) => {
-      const itemKey = `${item.id}-${item.name}-${item.type}`;
+      // Create a unique key that includes variant information if it exists
+      const itemKey = item.parent ? `${item.parent}-${item.id}` : item.id.toString();
+      
       if (!offeringCounts.has(itemKey)) {
         uniqueOfferingItems.push(item);
         offeringCounts.set(itemKey, 1);
@@ -264,7 +277,9 @@ async function loadTradeData() {
 
     // Count items and store unique items
     requestingItems.forEach((item) => {
-      const itemKey = `${item.id}-${item.name}-${item.type}`;
+      // Create a unique key that includes variant information if it exists
+      const itemKey = item.parent ? `${item.parent}-${item.id}` : item.id.toString();
+      
       if (!requestingCounts.has(itemKey)) {
         uniqueRequestingItems.push(item);
         requestingCounts.set(itemKey, 1);

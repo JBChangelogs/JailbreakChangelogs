@@ -1264,3 +1264,7 @@ body {
     height: 12px;
   }
 }
+.dropdown-item.active {
+  background-color: var(--accent-color-light) !important;
+  color: white !important;
+}

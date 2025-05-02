@@ -1244,6 +1244,26 @@ body {
   .category-item span {
     font-size: 0.85rem;
   }
+
+  .dropdown-toggle {
+    font-size: 0.7rem !important;
+    padding: 0.15rem 0.35rem !important;
+    min-width: 60px !important;
+    position: absolute !important;
+    top: 4px !important;
+    right: 4px !important;
+    z-index: 2 !important;
+  }
+
+  .dropdown-menu {
+    font-size: 0.7rem !important;
+    min-width: 60px !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .dropdown-item {
+    padding: 0.15rem 0.35rem !important;
+  }
 }
 
 @media (max-width: 400px) {
@@ -1719,4 +1739,13 @@ body.menu-open {
 .item-name-link:hover {
   color: var(--accent-color-light) !important;
   text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item.active {
+  background-color: var(--accent-color-light) !important;
+  color: white !important;
 }
