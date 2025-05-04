@@ -447,7 +447,7 @@ button {
   width: 100%;
   object-fit: cover;
   background: var(--common-bg-color);
-  aspect-ratio: 1/1; /* Force square aspect ratio */
+  aspect-ratio: 16/9;
 }
 
 .available-item-card .card-body {

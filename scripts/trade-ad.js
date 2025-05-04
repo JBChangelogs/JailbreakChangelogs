@@ -224,7 +224,7 @@ async function loadTradeData() {
   try {
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
     );
 
     if (!tradeResponse.ok) {
@@ -358,7 +358,7 @@ async function loadTradeData() {
     const offeringGrid = document.querySelector(".offering .trade-items-grid");
     offeringGrid.innerHTML = uniqueOfferingItems
       .map((item) => {
-        const itemKey = `${item.id}-${item.name}-${item.type}`;
+        const itemKey = item.parent ? `${item.parent}-${item.id}` : item.id.toString();
         const count = offeringCounts.get(itemKey);
         return createItemHTML(item, count);
       })
@@ -370,7 +370,7 @@ async function loadTradeData() {
     );
     requestingGrid.innerHTML = uniqueRequestingItems
       .map((item) => {
-        const itemKey = `${item.id}-${item.name}-${item.type}`;
+        const itemKey = item.parent ? `${item.parent}-${item.id}` : item.id.toString();
         const count = requestingCounts.get(itemKey);
         return createItemHTML(item, count);
       })

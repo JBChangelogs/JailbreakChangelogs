@@ -416,9 +416,23 @@ async function loadItems() {
 function addItemToTrade(item, tradeType) {
   const items = tradeType === "Offer" ? offeringItems : requestingItems;
 
+  // Handle sub-items with nested data
+  let processedItem;
+  if (item.parent && item.data) {
+    processedItem = {
+      ...item.data,
+      id: `${item.parent}-${item.id}`,
+      parent: item.parent,
+      sub_name: item.sub_name,
+      is_sub: true
+    };
+  } else {
+    processedItem = item;
+  }
+
   // Check if item is tradable
-  if (item.tradable === 0) {
-    notyf.error(`${item.name} is not tradable and cannot be added to trades`);
+  if (processedItem.tradable === 0) {
+    notyf.error(`${processedItem.name} is not tradable and cannot be added to trades`);
     return;
   }
 
@@ -431,17 +445,17 @@ function addItemToTrade(item, tradeType) {
   const existingIndex = items.findIndex(
     (existingItem) =>
       existingItem &&
-      existingItem.name === item.name &&
-      existingItem.type === item.type
+      existingItem.name === processedItem.name &&
+      existingItem.type === processedItem.type
   );
 
   if (existingIndex !== -1) {
     const nextEmptyIndex = findNextEmptySlot(items);
     if (nextEmptyIndex !== -1) {
-      items[nextEmptyIndex] = item;
+      items[nextEmptyIndex] = processedItem;
     }
   } else {
-    items.push(item);
+    items.push(processedItem);
   }
 
   // Always render trade items first
@@ -1624,7 +1638,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}&nocache=true`
+      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1666,14 +1680,36 @@ async function editTradeAd(tradeId) {
 
       // Load offering items
       for (const item of trade.offering) {
-        if (item) {
+        // Handle sub-items/variants
+        if (item.parent && item.data) {
+          // Create a merged item object that combines parent and variant data
+          const mergedItem = {
+            ...item.data,
+            id: `${item.parent}-${item.id}`, // Create unique ID string for variant
+            parent: item.parent,
+            sub_name: item.sub_name,
+            is_sub: true
+          };
+          addItemToTrade(mergedItem, "Offer");
+        } else {
           addItemToTrade(item, "Offer");
         }
       }
 
       // Load requesting items
       for (const item of trade.requesting) {
-        if (item) {
+        // Handle sub-items/variants
+        if (item.parent && item.data) {
+          // Create a merged item object that combines parent and variant data
+          const mergedItem = {
+            ...item.data,
+            id: `${item.parent}-${item.id}`, // Create unique ID string for variant
+            parent: item.parent,
+            sub_name: item.sub_name,
+            is_sub: true
+          };
+          addItemToTrade(mergedItem, "Request");
+        } else {
           addItemToTrade(item, "Request");
         }
       }
@@ -1710,17 +1746,14 @@ async function editTradeAd(tradeId) {
           <button class="btn btn-primary" onclick="updateTradeAd('${tradeId}')">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M5 18.08V19h.92l9.06-9.06l-.92-.92z" opacity="0.3" />
-	<path fill="currentColor" d="M20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83l3.75 3.75zM3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM5.92 19H5v-.92l9.06-9.06l.92.92z" />
-</svg>
+	<path fill="#fff" d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-9 11q1.25 0 2.125-.875T15 15t-.875-2.125T12 12t-2.125.875T9 15t.875 2.125T12 18m-6-8h9V6H6z" />
+</svg>Update Trade
           </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteTradeAd('${String(
-            trade.id
-          )}')">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
-</svg>
+          <button class="btn btn-secondary ms-2" onclick="cancelEdit()">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32">
+	<rect width="32" height="32" fill="none" />
+	<path fill="#fff" d="m8.4 17l3.6-3.6l3.6 3.6l1.4-1.4l-3.6-3.6L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4l3.6 3.6L7 15.6zm3.6 5q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
+</svg>Cancel
           </button>
         `;
       }
@@ -1791,7 +1824,7 @@ async function updateTradeAd(tradeId) {
       return;
     }
 
-    const apiUrl = `https://api.jailbreakchangelogs.xyz/trades/update?id=${tradeId}&nocache=true`;
+    const apiUrl = `https://api.jailbreakchangelogs.xyz/trades/update?id=${tradeId}`;
 
     const tradeData = {
       offering: offeringList.map((item) => item.id).join(","),
