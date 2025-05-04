@@ -707,6 +707,7 @@ h1 {
   color: var(--content-h2); /* Color for h2 headings */
   font-family: "Luckiest Guy", Arial, Helvetica, sans-serif; /* Font family for h2 */
   letter-spacing: 1px;
+  overflow-wrap: break-word; /* Break long words */
 }
 
 #content h3 {
