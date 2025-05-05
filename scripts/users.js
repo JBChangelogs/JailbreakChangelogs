@@ -1399,6 +1399,9 @@ document.addEventListener("DOMContentLoaded", function () {
         `https://api.jailbreakchangelogs.xyz/users/followers/add`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
             follower: user, // The logged-in user's token
             following: targetUserId, // The ID from the URL
