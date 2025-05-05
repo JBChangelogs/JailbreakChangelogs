@@ -670,6 +670,13 @@ body {
   color: #ffd700;
 }
 
+.category-seasonal-items {
+  background-color: rgba(64, 192, 231, 0.1);
+}
+.category-seasonal-items i {
+  color: #40c0e7;
+}
+
 .category-vehicles {
   background-color: rgba(200, 44, 44, 0.1);
 }

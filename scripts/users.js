@@ -1601,7 +1601,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const response = await fetch(
-        `https://api.testing.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
+        `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userId}`
       );
 
       if (response.status === 404) {

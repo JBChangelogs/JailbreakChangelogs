@@ -350,7 +350,7 @@ window.handleFavorite = async function (event, itemId) {
 
   try {
     const response = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/favorites/${
+      `https://api.jailbreakchangelogs.xyz/favorites/${
         isFavorited ? "remove" : "add"
       }`,
       {
@@ -464,6 +464,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Map directly to sort dropdown values
       const categoryClasses = {
         "category-limited-items": "name-limited-items",
+        "category-seasonal-items": "name-seasonal-items",
         "category-vehicles": "name-vehicles",
         "category-rims": "name-rims",
         "category-spoilers": "name-spoilers",
@@ -550,6 +551,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       categoryFilteredItems = allItems.filter((item) => {
         if (itemType === "limited-items") {
           return item.is_limited;
+        } else if (itemType === "seasonal-items") {
+          return item.is_seasonal === 1;
+        } else if (sortType === "name" && itemType === "hyperchromes") {
+          return item.type === "HyperChrome";
         }
         const normalizedItemType = item.type.toLowerCase().replace(" ", "-");
         const normalizedFilterType = itemType.slice(0, -1);
@@ -703,6 +708,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.removeItem("lastSort");
     } else if (itemType === "limited-items") {
       filteredItems = allItems.filter((item) => item.is_limited);
+    } else if (itemType === "seasonal-items") {
+      filteredItems = allItems.filter((item) => item.is_seasonal === 1);
     } else if (sortType === "name" && itemType === "hyperchromes") {
       filteredItems = allItems.filter((item) => item.type === "HyperChrome");
     } else {
@@ -719,7 +726,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       filteredItems = shuffleArray([...filteredItems]);
     } else if (valueSortType === "seasonal") {
       // Filter seasonal items after category filter
-      filteredItems = filteredItems.filter((item) => item.is_seasonal);
+      filteredItems = filteredItems.filter((item) => item.is_seasonal === 1);
     } else if (valueSortType === "favorites") {
       const token = getCookie("token");
       if (!token) {
@@ -1169,7 +1176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           updateLastUpdatedTimestamp(versionData.last_updated);
       }
 
-      const response = await fetch("https://api.testing.jailbreakchangelogs.xyz/items/list", {
+      const response = await fetch("https://api.jailbreakchangelogs.xyz/items/list", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -1186,7 +1193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (token && userData.id) {
         try {
           const favoritesResponse = await fetch(
-            `https://api.testing.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
+            `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -1822,6 +1829,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     sortDropdown.innerHTML = `
     <option value="name-all-items">All Items</option>
     <option value="name-limited-items">Limited Items</option>
+    <option value="name-seasonal-items">Seasonal Items</option>
     <option value="name-vehicles">Vehicles</option>
     <option value="name-spoilers">Spoilers</option>
     <option value="name-rims">Rims</option>
@@ -1968,6 +1976,7 @@ function updateSearchPlaceholder() {
   const placeholders = {
     "all-items": "Search items...",
     "limited-items": "Search limited items...",
+    "seasonal-items": "Search seasonal items...",
     vehicles: "Search vehicles (e.g., Brulee, Torpedo)...",
     spoilers: "Search spoilers (e.g., Mecha Arm, Dual Flags)...",
     rims: "Search rims (e.g., Star, Spinner)...",

@@ -378,7 +378,7 @@ let filteredItems = [];
 async function loadItems() {
   try {
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/items/list"
+      "https://api.jailbreakchangelogs.xyz/items/list"
     );
     allItems = await response.json();
 
@@ -1638,7 +1638,7 @@ async function editTradeAd(tradeId) {
 
     // Fetch trade details
     const tradeResponse = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
+      `https://api.jailbreakchangelogs.xyz/trades/get?id=${tradeId}`
     );
     if (!tradeResponse.ok) {
       console.error("Trade not found:", tradeResponse.status);
@@ -1910,7 +1910,7 @@ async function loadTradeAds() {
 
     // Fetch and process data
     const response = await fetch(
-      "https://api.testing.jailbreakchangelogs.xyz/trades/list?nocache=true"
+      "https://api.jailbreakchangelogs.xyz/trades/list?nocache=true"
     );
     const data = await response.json();
     allTradeAds = Array.isArray(data) ? data : [];

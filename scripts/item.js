@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const apiItemName = itemName.replace(/-/g, " ");
 
       // Store the API response globally for other components to use
-      window.itemApiResponse = fetch(`https://api.testing.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(apiItemName)}&type=${itemType}`);
+      window.itemApiResponse = fetch(`https://api.jailbreakchangelogs.xyz/items/get?name=${encodeURIComponent(apiItemName)}&type=${itemType}`);
 
       if (!urlType || !itemName) {
         throw new Error("Invalid URL format");
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (token && userData.id) {
         try {
           const favoritesResponse = await fetch(
-            `https://api.testing.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
+            `https://api.jailbreakchangelogs.xyz/favorites/get?user=${userData.id}`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -1935,7 +1935,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : item.id.toString();
 
               fetch(
-                `https://api.testing.jailbreakchangelogs.xyz/item/history?id=${historyItemId}`
+                `https://api.jailbreakchangelogs.xyz/item/history?id=${historyItemId}`
               )
                 .then((response) => response.json())
                 .then((data) => {
@@ -2049,7 +2049,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.currentItem = item;
 
     // Fetch favorites count using the appropriate ID format
-    fetch(`https://api.testing.jailbreakchangelogs.xyz/item/favorites?id=${currentItemId}`)
+    fetch(`https://api.jailbreakchangelogs.xyz/item/favorites?id=${currentItemId}`)
       .then((response) => response.json())
       .then((count) => {
         const favoritesCount = document.getElementById("favorites-count");
@@ -2398,7 +2398,7 @@ async function toggleFavorite(e) {
 
   try {
     const response = await fetch(
-      `https://api.testing.jailbreakchangelogs.xyz/favorites/${isFavorited ? "remove" : "add"}`,
+      `https://api.jailbreakchangelogs.xyz/favorites/${isFavorited ? "remove" : "add"}`,
       {
         method: isFavorited ? "DELETE" : "POST",
         headers: {
