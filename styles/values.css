@@ -1354,13 +1354,13 @@ body {
   background-color: var(--accent-color-light) !important;
 }
 
-.bg-gray-500 { background-color: #6b7280 !important; } /* Neutral gray */
-.bg-red-500 { background-color: #ef4444 !important; } /* Critical */
-.bg-orange-500 { background-color: #f97316 !important; } /* Warning */
-.bg-yellow-500 { background-color: #eab308 !important; } /* Moderate */
-.bg-green-500 { background-color: #22c55e !important; } /* Good */
-.bg-blue-500 { background-color: #3b82f6 !important; } /* Strong */
-.bg-purple-500 { background-color: #a855f7 !important; } /* Premium */
+.bg-gray-500 { background-color: #6b7280 !important; }
+.bg-red-500 { background-color: #ef4444 !important; }
+.bg-orange-500 { background-color: #f97316 !important; }
+.bg-green-500 { background-color: #22c55e !important; } 
+.bg-blue-500 { background-color: #3b82f6 !important; }
+.bg-purple-500 { background-color: #a855f7 !important; }
+.bg-pink-500 { background-color: #ec4899 !important; }
 
 
 .items-card:hover .favorite-icon,

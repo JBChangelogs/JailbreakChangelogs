@@ -35,6 +35,8 @@ function getDemandBadgeClass(demand) {
       return 'bg-blue-500'; // Blue for high demand (strong)
     case 'Very High':
       return 'bg-purple-500'; // Purple for very high demand (premium)
+    case 'Extremely High':
+      return 'bg-pink-500'; // Pink for extremely high demand
     default:
       return 'bg-gray-500'; // Default to gray for undefined cases
   }
@@ -521,9 +523,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   window.filterItems = debounce(function () {
-    const searchTerm = document
-      .getElementById("search-bar")
-      .value.toLowerCase();
+    const searchTerm = document.getElementById("search-bar").value.toLowerCase();
     const searchBar = document.getElementById("search-bar");
     const sortValue = document.getElementById("sort-dropdown").value;
     const valueSortType = document.getElementById("value-sort-dropdown").value;
@@ -557,26 +557,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    // Apply search filter if search term exists
-    if (searchTerm.length > 0) {
-      filteredItems = categoryFilteredItems.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm)
-      );
-    } else {
-      filteredItems = categoryFilteredItems;
-    }
-
-    // Apply the current sort after filtering
+    // Apply the current sort before search filtering
     if (valueSortType === "random") {
-      filteredItems = shuffleArray([...filteredItems]);
+      categoryFilteredItems = shuffleArray([...categoryFilteredItems]);
     } else if (valueSortType.startsWith("cash-")) {
-      filteredItems.sort((a, b) => {
+      categoryFilteredItems.sort((a, b) => {
         const valueA = formatValue(a.cash_value).numeric;
         const valueB = formatValue(b.cash_value).numeric;
         return valueSortType === "cash-asc" ? valueA - valueB : valueB - valueA;
       });
     } else if (valueSortType.startsWith("duped-")) {
-      filteredItems.sort((a, b) => {
+      categoryFilteredItems.sort((a, b) => {
         const valueA = formatValue(a.duped_value).numeric;
         const valueB = formatValue(b.duped_value).numeric;
         return valueSortType === "duped-asc"
@@ -584,7 +575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           : valueB - valueA;
       });
     } else if (valueSortType.startsWith("alpha-")) {
-      filteredItems.sort((a, b) => {
+      categoryFilteredItems.sort((a, b) => {
         return valueSortType === "alpha-asc"
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
@@ -598,8 +589,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Decent",
         "High",
         "Very High",
+        "Extremely High"
       ];
-      filteredItems.sort((a, b) => {
+      categoryFilteredItems.sort((a, b) => {
         let demandA = a.demand === "N/A" ? "-" : a.demand || "-";
         let demandB = b.demand === "N/A" ? "-" : b.demand || "-";
 
@@ -622,7 +614,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           : indexB - indexA;
       });
     } else if (valueSortType.startsWith("last-updated-")) {
-      filteredItems.sort((a, b) => {
+      categoryFilteredItems.sort((a, b) => {
         if (!a.last_updated && !b.last_updated) return 0;
         if (!a.last_updated) return 1;
         if (!b.last_updated) return -1;
@@ -631,6 +623,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? a.last_updated - b.last_updated
           : b.last_updated - a.last_updated;
       });
+    }
+
+    // Apply search filter after sorting
+    if (searchTerm.length > 0) {
+      filteredItems = categoryFilteredItems.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm)
+      );
+    } else {
+      filteredItems = categoryFilteredItems;
     }
 
     // Update UI
@@ -865,6 +866,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Decent",
         "High",
         "Very High",
+        "Extremely High",
       ];
 
       filteredItems.sort((a, b) => {
