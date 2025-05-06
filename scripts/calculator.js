@@ -135,12 +135,13 @@ function renderPreviewItems(containerId, items) {
   const container = document.getElementById(containerId);
   const values = calculateSideValues(items);
 
-  // Count duplicates
+  // Count duplicates - Modified to account for variants
   const itemCounts = new Map();
   Object.values(items)
     .filter((item) => item)
     .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
+      // Use item ID for sub-items, otherwise use name-type combination
+      const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
       itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
     });
 
@@ -151,7 +152,7 @@ function renderPreviewItems(containerId, items) {
   Object.values(items)
     .filter((item) => item)
     .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
+      const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
       if (!processedKeys.has(itemKey)) {
         processedKeys.add(itemKey);
         uniqueItems.push({
@@ -161,46 +162,66 @@ function renderPreviewItems(containerId, items) {
       }
     });
 
-  // const itemsHtml = uniqueItems
-  //   .map(
-  //     ({ item, count }) => `
-  //   <div class="preview-item"
-  //        data-bs-toggle="tooltip"
-  //        data-bs-placement="top"
-  //        title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
-  //       item.demand || "N/A"
-  //     }">
-  //     <div class="preview-item-image-container">
-  //       ${getItemImageElement(item)}
-  //       ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
-  //     </div>
-  //     <div class="item-name">
-  //       ${item.name}
-  //       ${
-  //         item.is_limited
-  //           ? '<i class="bi bi-star-fill text-warning ms-1"></i>'
-  //           : ""
-  //       }
-  //     </div>
-  //     <div class="item-details">
-  //       <div class="demand-indicator demand-${(
-  //         item.demand || "0"
-  //       ).toLowerCase()}">
-  //         Demand: ${item.demand || "N/A"}
-  //       </div>
-  //     </div>
-  //   </div>
-  // `
-  //   )
-  //   .join("");
+  const itemsHtml = uniqueItems
+    .map(
+      ({ item, count }) => `
+    <div class="preview-item"
+         data-bs-toggle="tooltip"
+         data-bs-placement="top"
+         title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
+        item.demand || "N/A"
+      }">
+      <div class="preview-item-image-container">
+        ${getItemImageElement(item)}
+        ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
+        ${
+          item.is_sub
+            ? `<div class="sub-item-indicator">
+                 <span class="sub-item-year">${item.sub_name}</span>
+               </div>`
+            : ""
+        }
+      </div>
+      <div class="item-name">
+        ${item.name}
+        ${
+          item.is_limited
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="none" />
+                <defs>
+                  <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#fcd966" />
+                    <stop offset=".5" stop-color="#fcd966" />
+                    <stop offset="1" stop-color="#fccd34" />
+                  </linearGradient>
+                </defs>
+                <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                  <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                  <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                </path>
+              </svg>`
+            : ""
+        }
+      </div>
+      <div class="item-details">
+        <div class="demand-indicator demand-${(
+          item.demand || "0"
+        ).toLowerCase()}">
+          Demand: ${item.demand || "N/A"}
+        </div>
+      </div>
+    </div>
+  `
+    )
+    .join("");
 
   const valuesHtml = `
     <div class="side-values-summary">
       <h6>
        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
-</svg>
+        <rect width="16" height="16" fill="none" />
+        <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+      </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
         } Totals
@@ -315,6 +336,21 @@ function renderValueDifferences() {
 // Add item to trade
 function addItemToTrade(item, tradeType) {
   const items = tradeType === "Offer" ? offeringItems : requestingItems;
+
+  // Handle sub-items with nested data
+  let processedItem;
+  if (item.parent && item.data) {
+    processedItem = {
+      ...item.data,
+      id: `${item.parent}-${item.id}`,
+      parent: item.parent,
+      sub_name: item.sub_name,
+      is_sub: true
+    };
+  } else {
+    processedItem = item;
+  }
+
   if (items.length >= 8) {
     notyf.error(`You can only add up to 8 items to ${tradeType}`);
     return;
@@ -336,17 +372,17 @@ function addItemToTrade(item, tradeType) {
   const existingIndex = items.findIndex(
     (existingItem) =>
       existingItem &&
-      existingItem.name === item.name &&
-      existingItem.type === item.type
+      existingItem.name === processedItem.name &&
+      existingItem.type === processedItem.type
   );
 
   if (existingIndex !== -1) {
     const nextEmptyIndex = findNextEmptySlot(items);
     if (nextEmptyIndex !== -1) {
-      items[nextEmptyIndex] = item;
+      items[nextEmptyIndex] = processedItem;
     }
   } else {
-    items.push(item);
+    items.push(processedItem);
   }
 
   // Always render trade items first
@@ -376,14 +412,40 @@ function updatePreview() {
 }
 
 // Function to quickly add item from available items
-function quickAddItem(itemName, itemType) {
-  const item = allItems.find((i) => i.name === itemName && i.type === itemType);
+function quickAddItem(itemName, itemType, itemId, selectedVariant) {
+  let item = allItems.find((i) => i.id === itemId);
   if (!item) return;
+
+  // If we have a variant selected that's not the current year, use the variant data
+  const currentYear = new Date().getFullYear().toString();
+  if (selectedVariant && selectedVariant !== currentYear && item.children) {
+    const variant = item.children.find(child => child.sub_name === selectedVariant);
+    
+    if (variant) {
+      // Create a new item object with variant data
+      item = {
+        ...item,
+        ...variant.data,
+        id: `${item.id}-${variant.id}`, // Create unique ID string for variant
+        name: item.name, // Keep parent name
+        type: item.type, // Keep parent type
+        creator: item.creator, // Keep parent creator
+        description: item.description, // Keep parent description
+        children: item.children, // Keep children array
+        last_updated: variant.data.last_updated // Use variant's last_updated
+      };
+    }
+  } else {
+    // Ensure parent item ID is also a string
+    item = {
+      ...item,
+      id: item.id.toString()
+    };
+  }
 
   // Use the global selection state
   if (selectedPlaceholderIndex !== -1 && selectedTradeType) {
-    const items =
-      selectedTradeType === "Offer" ? offeringItems : requestingItems;
+    const items = selectedTradeType === "Offer" ? offeringItems : requestingItems;
 
     // Only check if the specific slot is empty
     if (items[selectedPlaceholderIndex]) {
@@ -392,8 +454,7 @@ function quickAddItem(itemName, itemType) {
       if (nextEmptyIndex !== -1) {
         items[nextEmptyIndex] = item;
         renderTradeItems(selectedTradeType);
-
-        updatePreview(); // Add this line
+        updatePreview();
       } else {
         notyf.error("No empty slots available");
       }
@@ -411,25 +472,18 @@ function quickAddItem(itemName, itemType) {
 
     // Update UI
     renderTradeItems(currentType);
-
-    updatePreview(); // Add this line
+    updatePreview();
   } else {
     // No placeholder selected, find first empty slot
-    const items =
-      currentTradeType === "offering" ? offeringItems : requestingItems;
+    const items = currentTradeType === "offering" ? offeringItems : requestingItems;
     const emptyIndex = findNextEmptySlot(items);
 
     if (emptyIndex !== -1) {
       items[emptyIndex] = item;
       renderTradeItems(currentTradeType === "offering" ? "Offer" : "Request");
-
-      updatePreview(); // Add this line
+      updatePreview();
     } else {
-      notyf.error(
-        `No empty slots available in ${
-          currentTradeType === "offering" ? "Offer" : "Request"
-        }`
-      );
+      notyf.error(`No empty slots available in ${currentTradeType === "offering" ? "Offer" : "Request"}`);
     }
   }
 }
@@ -583,12 +637,12 @@ function displayAvailableItems(type) {
       <div class="col-12 text-center py-4">
         <div class="no-results">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
-	<rect width="48" height="48" fill="none" />
-	<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
-		<path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
-		<path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
-	</g>
-</svg>
+            <rect width="48" height="48" fill="none" />
+            <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+              <path d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z" />
+              <path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485" />
+            </g>
+          </svg>
           <p class="mb-0">No ${selectedOption} found</p>
         </div>
       </div>
@@ -616,82 +670,182 @@ function displayAvailableItems(type) {
   container.innerHTML =
     countDisplay +
     itemsToDisplay
-      .map(
-        (item) => `
-  <div class="col-custom-5">
-    <div class="card available-item-card ${
-      item.tradable === 0 ? "not-tradable" : ""
-    }" 
-         onclick="${
-           item.tradable === 0
-             ? ""
-             : `quickAddItem('${item.name}', '${item.type}')`
-         }"
-         ${item.tradable === 0 ? "" : 'data-bs-dismiss="modal"'}>
-      <div class="card-header">
-        ${item.name}
-      </div>
-      <div class="position-relative" style="aspect-ratio: 16/9; overflow: hidden;">
-        <div class="item-image-wrapper" style="width: 100%; height: 100%;">
-          ${getItemImageElement(item)}
-        </div>
-      </div>
-     <div class="card-body">
-        ${
-          item.tradable === 0
-            ? '<div class="not-tradable-label">Not Tradable</div>'
-            : `
-              <div class="info-row">
-                <span class="info-label">Type:</span>
-                <span class="info-value">${item.type}</span>
+      .map((item) => {
+        const currentYear = new Date().getFullYear().toString();
+        const hasVariants = item.children && item.children.length > 0;
+        
+        // Create variant dropdown HTML if item has variants
+        const variantDropdown = hasVariants ? `
+          <div class="sub-items-dropdown position-absolute top-0 end-0">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-selected-variant="${currentYear}">
+                ${currentYear}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item active" href="#" data-item-id="${item.id}" data-variant="${currentYear}">${currentYear}</a></li>
+                ${item.children.map(child => `
+                  <li><a class="dropdown-item" href="#" data-item-id="${child.id}" data-variant="${child.sub_name}">${child.sub_name}</a></li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        ` : '';
+
+        return `
+          <div class="col-custom-5">
+            <div class="card available-item-card ${
+              item.tradable === 0 ? "not-tradable" : ""
+            }" 
+                 ${item.tradable === 0 ? "" : `data-item-name="${item.name}" data-item-type="${item.type}" data-item-id="${item.id}"`}>
+              <div class="card-header">
+                ${item.name}
               </div>
-              <div class="info-row">
-                <span class="info-label">Cash Value:</span>
-                <span class="info-value">${formatValue(item.cash_value)}</span>
+              <div class="position-relative" style="aspect-ratio: 16/9;">
+                <img class="card-img w-100 h-100 object-fit-cover"
+                     src="${getItemImageUrl(item)}"
+                     alt=""
+                     onerror="this.onerror=null; this.src='https://placehold.co/2560x1440/212A31/D3D9D4?text=No+Image+Available&font=Montserrat'; this.style.display='block'; this.previousElementSibling.style.display='none'"
+                >
+                ${variantDropdown}
               </div>
-              <div class="info-row">
-                <span class="info-label">Duped Value:</span>
-                <span class="info-value">${formatValue(
-                  item.duped_value || 0
-                )}</span>
+             <div class="card-body">
+                ${
+                  item.tradable === 0
+                    ? '<div class="not-tradable-label">Not Tradable</div>'
+                    : `
+                      <div class="info-row">
+                        <span class="info-label">Type:</span>
+                        <span class="info-value">${item.type}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Cash Value:</span>
+                        <span class="info-value">${formatValue(item.cash_value)}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Duped Value:</span>
+                        <span class="info-value">${formatValue(
+                          item.duped_value || 0
+                        )}</span>
+                      </div>
+                      <div class="info-row ${item.is_limited ? "limited-item" : ""}">
+                        <span class="info-label">Limited:</span>
+                        <span class="info-value">
+                          ${
+                            item.is_limited
+                              ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                                  <rect width="512" height="512" fill="none" />
+                                  <defs>
+                                    <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
+                                      <stop offset="0" stop-color="#fcd966" />
+                                      <stop offset=".5" stop-color="#fcd966" />
+                                      <stop offset="1" stop-color="#fccd34" />
+                                    </linearGradient>
+                                  </defs>
+                                  <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
+                                    <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
+                                    <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
+                                  </path>
+                                </svg>Yes`
+                              : "No"
+                          }
+                        </span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">Demand:</span>
+                        <span class="info-value demand-${(
+                          item.demand || "0"
+                        ).toLowerCase()}">${item.demand || "N/A"}</span>
+                      </div>
+                    `
+                }
               </div>
-              <div class="info-row ${item.is_limited ? "limited-item" : ""}">
-                <span class="info-label">Limited:</span>
-                <span class="info-value">
-                  ${
-                    item.is_limited
-                      ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
-                          <rect width="512" height="512" fill="none" />
-                          <defs>
-                            <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
-                              <stop offset="0" stop-color="#fcd966" />
-                              <stop offset=".5" stop-color="#fcd966" />
-                              <stop offset="1" stop-color="#fccd34" />
-                            </linearGradient>
-                          </defs>
-                          <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
-                            <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
-                            <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
-                          </path>
-                        </svg>Yes`
-                      : "No"
-                  }
-                </span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Demand:</span>
-                <span class="info-value demand-${(
-                  item.demand || "0"
-                ).toLowerCase()}">${item.demand || "N/A"}</span>
-              </div>
-            `
-        }
-      </div>
-    </div>
-  </div>
-`
-      )
+            </div>
+          </div>
+        `;
+      })
       .join("");
+
+  // Add event listeners for variant dropdowns
+  container.querySelectorAll('.sub-items-dropdown .dropdown').forEach(dropdown => {
+    const card = dropdown.closest('.available-item-card');
+    const itemId = parseInt(card.dataset.itemId);
+    const item = itemsToDisplay.find(i => i.id === itemId);
+    
+    if (!item) return;
+
+    // Prevent card click when clicking dropdown
+    dropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+      card.onclick = null; // Temporarily disable card click
+    });
+
+    // Handle variant selection
+    dropdown.querySelectorAll('.dropdown-item').forEach(dropdownItem => {
+      dropdownItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Update active state
+        dropdown.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+        dropdownItem.classList.add('active');
+        
+        // Update button text
+        const selectedVariant = dropdownItem.dataset.variant;
+        dropdown.querySelector('.dropdown-toggle').textContent = selectedVariant;
+        
+        // Get the item ID and variant
+        const variantId = parseInt(dropdownItem.dataset.itemId);
+        const variant = dropdownItem.textContent;
+        
+        // If it's the original item, use the parent item data
+        if (variantId === item.id) {
+          // For current year variant, use the parent item's data
+          updateCardValues(card, item);
+        } else {
+          // Find the sub-item
+          const variant = item.children.find(child => child.id === variantId);
+          if (variant) {
+            // For other variants, use the variant's data
+            updateCardValues(card, variant.data);
+          }
+        }
+
+        // Add item immediately when variant is selected
+        quickAddItem(item.name, item.type, item.id, selectedVariant);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('availableItemsModal'));
+        if (modal) {
+          modal.hide();
+        }
+      });
+    });
+  });
+
+  // Add click handlers for cards
+  container.querySelectorAll('.available-item-card').forEach(card => {
+    if (card.classList.contains('not-tradable')) return;
+
+    const itemName = card.dataset.itemName;
+    const itemType = card.dataset.itemType;
+    const itemId = parseInt(card.dataset.itemId);
+
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking the dropdown
+      if (e.target.closest('.sub-items-dropdown')) {
+        return;
+      }
+
+      // Get the current selected variant from the dropdown if it exists
+      const dropdownToggle = card.querySelector('.sub-items-dropdown .dropdown-toggle');
+      const selectedVariant = dropdownToggle ? dropdownToggle.textContent.trim() : null;
+
+      // Add item and close modal
+      quickAddItem(itemName, itemType, itemId, selectedVariant);
+      const modal = bootstrap.Modal.getInstance(document.getElementById('availableItemsModal'));
+      if (modal) {
+        modal.hide();
+      }
+    });
+  });
 }
 
 // Update renderPagination function to use modal elements
@@ -924,7 +1078,8 @@ function renderTradeItems(tradeType) {
   // First pass: count items and record first position
   Object.entries(items).forEach(([index, item]) => {
     if (!item) return;
-    const itemKey = `${item.name}-${item.type}`;
+    // Use item ID for sub-items, otherwise use name-type combination
+    const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
     if (!itemPositions.has(itemKey)) {
       itemPositions.set(itemKey, parseInt(index));
     }
@@ -934,7 +1089,7 @@ function renderTradeItems(tradeType) {
   // Second pass: only keep items in their first position
   Object.entries(items).forEach(([index, item]) => {
     if (!item) return;
-    const itemKey = `${item.name}-${item.type}`;
+    const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
     if (parseInt(index) === itemPositions.get(itemKey)) {
       slots[parseInt(index)] = item;
     }
@@ -944,7 +1099,7 @@ function renderTradeItems(tradeType) {
   let html = slots
     .map((item, index) => {
       if (item) {
-        const itemKey = `${item.name}-${item.type}`;
+        const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
         const count = itemCounts.get(itemKey);
         return `
           <div class="col-md-3 col-6 mb-3">
@@ -956,11 +1111,18 @@ function renderTradeItems(tradeType) {
                     ? `<div class="item-multiplier">×${count}</div>`
                     : ""
                 }
+                ${
+                  item.is_sub
+                    ? `<div class="sub-item-indicator">
+                         <span class="sub-item-year">${item.sub_name}</span>
+                       </div>`
+                    : ""
+                }
                 <div class="remove-icon" onclick="event.stopPropagation(); removeItem(${index}, '${tradeType}')">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
-</svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <rect width="24" height="24" fill="none" />
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+                  </svg>
                 </div>
               </div>
               <div class="trade-card-info">
@@ -1158,117 +1320,6 @@ function previewTrade() {
   valueDifferencesContainer.innerHTML = renderValueDifferences();
 }
 
-function renderPreviewItems(containerId, items) {
-  const container = document.getElementById(containerId);
-  const values = calculateSideValues(items);
-
-  // Count duplicates
-  const itemCounts = new Map();
-  Object.values(items)
-    .filter((item) => item)
-    .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
-      itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
-    });
-
-  // Create unique items array with counts
-  const uniqueItems = [];
-  const processedKeys = new Set();
-
-  Object.values(items)
-    .filter((item) => item)
-    .forEach((item) => {
-      const itemKey = `${item.name}-${item.type}`;
-      if (!processedKeys.has(itemKey)) {
-        processedKeys.add(itemKey);
-        uniqueItems.push({
-          item,
-          count: itemCounts.get(itemKey),
-        });
-      }
-    });
-
-  const itemsHtml = uniqueItems
-    .map(
-      ({ item, count }) => `
-  <div class="preview-item" 
-       data-bs-toggle="tooltip" 
-       data-bs-placement="top" 
-       title="Limited: ${item.is_limited ? "Yes" : "No"} | Demand: ${
-        item.demand || "N/A"
-      }">
-    <div class="preview-item-image-container">
-      ${getItemImageElement(item)}
-      ${count > 1 ? `<div class="item-multiplier">×${count}</div>` : ""}
-    </div>
-    <div class="item-name">
-      ${item.name}
-      ${
-        item.is_limited
-          ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
-                <rect width="512" height="512" fill="none" />
-                <defs>
-                    <linearGradient id="meteoconsStarFill0" x1="187.9" x2="324.1" y1="138.1" y2="373.9" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#fcd966" />
-                        <stop offset=".5" stop-color="#fcd966" />
-                        <stop offset="1" stop-color="#fccd34" />
-                    </linearGradient>
-                </defs>
-                <path fill="url(#meteoconsStarFill0)" stroke="#fcd34d" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="m105.7 263.5l107.5 29.9a7.9 7.9 0 0 1 5.4 5.4l29.9 107.5a7.8 7.8 0 0 0 15 0l29.9-107.5a7.9 7.9 0 0 1 5.4-5.4l107.5-29.9a7.8 7.8 0 0 0 0-15l-107.5-29.9a7.9 7.9 0 0 1-5.4-5.4l-29.9-107.5a7.8 7.8 0 0 0-15 0l-29.9 107.5a7.9 7.9 0 0 1-5.4 5.4l-107.5 29.9a7.8 7.8 0 0 0 0 15Z">
-                    <animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="rotate" values="-15 256 256; 15 256 256; -15 256 256" />
-                    <animate attributeName="opacity" dur="6s" values="1; .75; 1; .75; 1; .75; 1" />
-                </path>
-            </svg>`
-          : ""
-      }
-    
-    </div>
-    <div class="item-details">
-      <div class="demand-indicator demand-${(
-        item.demand || "0"
-      ).toLowerCase()}">
-        Demand: ${item.demand || "N/A"}
-      </div>
-    </div>
-  </div>
-`
-    )
-    .join("");
-
-  const valuesHtml = `
-    <div class="side-values-summary">
-      <h6>
-       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-	<rect width="16" height="16" fill="none" />
-	<path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
-</svg>
-        ${
-          containerId === "preview-offering-items" ? "Offering" : "Requesting"
-        } Totals
-      </h6>
-      <div class="side-value-row">
-        <span class="text-muted">Cash Value:</span>
-        <span class="badge" style="background-color: ${
-          containerId === "preview-offering-items" ? "#00c853" : "#2196f3"
-        }">${formatValue(values.cashValue, true)}</span>
-      </div>
-      <div class="side-value-row">
-        <span class="text-muted">Duped Value:</span>
-        <span class="badge" style="background-color: ${
-          containerId === "preview-offering-items" ? "#00c853" : "#2196f3"
-        }">${formatValue(values.dupedValue, true)}</span>
-      </div>
-    </div>
-  `;
-
-  container.innerHTML = `
-    <div class="trade-items-grid">
-      ${itemsHtml}
-    </div>
-    ${valuesHtml}
-  `;
-}
-
 function editTrade() {
   // Show available items container and hide preview
   document.getElementById("available-items-list").style.display = "block";
@@ -1325,3 +1376,25 @@ document.addEventListener("DOMContentLoaded", () => {
     sortDropdown.addEventListener("change", sortModalItems);
   }
 });
+
+// Function to update card values based on item data
+function updateCardValues(card, itemData) {
+  // Update cash value
+  const cashValueElement = card.querySelector('.info-value:nth-of-type(2)');
+  if (cashValueElement) {
+    cashValueElement.textContent = formatValue(itemData.cash_value || 0);
+  }
+
+  // Update duped value
+  const dupedValueElement = card.querySelector('.info-value:nth-of-type(3)');
+  if (dupedValueElement) {
+    dupedValueElement.textContent = formatValue(itemData.duped_value || 0);
+  }
+
+  // Update demand
+  const demandElement = card.querySelector('.info-value:last-child');
+  if (demandElement) {
+    demandElement.className = `info-value demand-${(itemData.demand || "0").toLowerCase()}`;
+    demandElement.textContent = itemData.demand || "N/A";
+  }
+}
