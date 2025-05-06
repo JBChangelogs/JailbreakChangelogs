@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Return default color if decimal is falsy OR specifically "None"
     if (!decimal || decimal === "None") return "#124E66";
 
-    // Convert to hex and ensure exactly 6 digits
-    const hex = decimal.toString(16).padStart(6, "0").slice(-6);
+    // Convert to hex and ensure exactly 6 digits by taking first 6 characters
+    const hex = decimal.toString(16).padStart(6, "0").substring(0, 6);
 
     // Return the hex color with a # prefix
     return `#${hex}`;
