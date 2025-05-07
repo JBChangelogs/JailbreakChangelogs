@@ -366,8 +366,6 @@
 }
 
 .trade-card.empty-slot::before {
-  content: "";
-  background-image: url("/assets/bi--plus-circle.png");
   background-size: 2rem;
   background-position: center;
   background-repeat: no-repeat;
@@ -430,10 +428,7 @@
   font-size: 0.875rem;
 }
 
-/* Hero and Background Styles */
-.intro-container.hero-style {
-  background: url("/assets/backgrounds/background11.webp") center/cover no-repeat;
-}
+ka
 
 /* Sub-items dropdown styles */
 .sub-items-dropdown {
