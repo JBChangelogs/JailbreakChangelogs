@@ -4,11 +4,100 @@ const offeringItems = [];
 const requestingItems = [];
 let currentTradeType = "offering"; // Set default to "offering"
 
-const ITEMS_PER_PAGE = 100;
+const ITEMS_PER_PAGE = 30;
 let currentPage = 1;
 let filteredItems = [];
 
-// Fetch all items on load
+// Function to save current trade state to localStorage
+function saveTradeState() {
+  const tradeState = {
+    offering: Object.values(offeringItems).filter(item => item),
+    requesting: Object.values(requestingItems).filter(item => item)
+  };
+  localStorage.setItem('savedTradeState', JSON.stringify(tradeState));
+  
+  // Show preview if there are any items
+  const hasItems = tradeState.offering.length > 0 || tradeState.requesting.length > 0;
+  const previewSection = document.getElementById('trade-preview');
+  if (previewSection) {
+    previewSection.style.display = hasItems ? 'block' : 'none';
+  }
+}
+
+// Function to check if there's a saved trade
+function hasSavedTrade() {
+  const savedTrade = localStorage.getItem('savedTradeState');
+  if (!savedTrade) return false;
+  
+  try {
+    const { offering, requesting } = JSON.parse(savedTrade);
+    return offering.length > 0 || requesting.length > 0;
+  } catch (err) {
+    console.error('Error parsing saved trade:', err);
+    return false;
+  }
+}
+
+// Function to restore previous trade
+function restorePreviousTrade() {
+  try {
+    const savedTrade = localStorage.getItem('savedTradeState');
+    if (!savedTrade) return;
+
+    const { offering, requesting } = JSON.parse(savedTrade);
+    
+    // Clear current items
+    offeringItems.length = 0;
+    requestingItems.length = 0;
+    
+    // Restore items
+    offering.forEach(item => addItemToTrade(item, 'Offer'));
+    requesting.forEach(item => addItemToTrade(item, 'Request'));
+    
+    // Don't clear saved state anymore
+    // localStorage.removeItem('savedTradeState');
+    
+    // Show success message
+    notyf.success('Previous trade restored successfully');
+    
+    // Update preview
+    updatePreview();
+  } catch (err) {
+    console.error('Error restoring trade:', err);
+    notyf.error('Failed to restore previous trade');
+  }
+}
+
+// Function to start fresh trade
+function startFreshTrade() {
+  // Clear saved state
+  localStorage.removeItem('savedTradeState');
+  
+  // Clear current items
+  offeringItems.length = 0;
+  requestingItems.length = 0;
+  
+  // Reset UI
+  renderTradeItems('Offer');
+  renderTradeItems('Request');
+  
+  // Reset preview with empty state but keep it visible
+  const previewSection = document.getElementById('trade-preview');
+  if (previewSection) {
+    // Update preview items to show empty state
+    renderPreviewItems('preview-offering-items', []);
+    renderPreviewItems('preview-requesting-items', []);
+    // Update value differences to show zeros
+    const valueDifferencesContainer = document.getElementById('value-differences');
+    if (valueDifferencesContainer) {
+      valueDifferencesContainer.innerHTML = renderValueDifferences();
+    }
+  }
+  
+  // Show success message
+  notyf.success('Trade cleared successfully');
+}
+
 // Fetch all items on load
 async function loadItems() {
   try {
@@ -26,6 +115,13 @@ async function loadItems() {
     document.querySelectorAll(".available-items-toggle").forEach((button) => {
       button.dataset.active = (button.dataset.type === "offering").toString();
     });
+
+    // Check for saved trade after loading items
+    if (hasSavedTrade()) {
+      // Show restore modal
+      const restoreModal = new bootstrap.Modal(document.getElementById('restoreTradeModal'));
+      restoreModal.show();
+    }
 
     // Sort items initially by name-all-items
     const sortDropdown = document.getElementById("modal-value-sort-dropdown");
@@ -117,54 +213,109 @@ function getItemImageUrl(item) {
   return getItemImagePath(item);
 }
 
-// Calculate values for each side
-function calculateSideValues(items) {
-  const cashValue = Object.values(items)
-    .filter((item) => item)
-    .reduce((sum, item) => sum + parseValue(item.cash_value || 0), 0);
+// Add a map to store value preferences for items
+const itemValuePreferences = new Map(); // key: itemId, value: 'cash' or 'duped'
 
-  const dupedValue = Object.values(items)
-    .filter((item) => item)
-    .reduce((sum, item) => sum + parseValue(item.duped_value || 0), 0);
-
-  return { cashValue, dupedValue };
+// Function to toggle item value type
+function toggleItemValueType(itemId, currentType) {
+  // If clicking the same type that's already active, clear preference (show both)
+  if (itemValuePreferences.get(itemId) === currentType) {
+    itemValuePreferences.delete(itemId);
+  } else {
+    // Otherwise set to the new type
+    itemValuePreferences.set(itemId, currentType);
+  }
+  updatePreview();
 }
 
-// Render the preview items
+// Update calculateSideValues to respect value preferences
+function calculateSideValues(items) {
+  return Object.values(items)
+    .filter((item) => item)
+    .reduce((totals, item) => {
+      const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
+      const preferredType = itemValuePreferences.get(itemKey);
+      
+      // Add to both totals if no preference, otherwise add to the preferred type only
+      if (!preferredType) {
+        totals.cashValue += parseValue(item.cash_value || 0);
+        totals.dupedValue += parseValue(item.duped_value || 0);
+      } else if (preferredType === 'cash') {
+        totals.cashValue += parseValue(item.cash_value || 0);
+      } else {
+        totals.dupedValue += parseValue(item.duped_value || 0);
+      }
+      
+      return totals;
+    }, { cashValue: 0, dupedValue: 0 });
+}
+
+// Update renderPreviewItems to include value type toggle
 function renderPreviewItems(containerId, items) {
   const container = document.getElementById(containerId);
   const values = calculateSideValues(items);
 
-  // Count duplicates - Modified to account for variants
+  // Check if we're on mobile (screen width less than 768px)
+  const isMobile = window.innerWidth < 768;
+
+  // Count duplicates and track first position
+  const itemPositions = new Map();
   const itemCounts = new Map();
+
+  // First pass: count items and record first position
   Object.values(items)
     .filter((item) => item)
     .forEach((item) => {
-      // Use item ID for sub-items, otherwise use name-type combination
       const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
+      if (!itemPositions.has(itemKey)) {
+        itemPositions.set(itemKey, item);
+      }
       itemCounts.set(itemKey, (itemCounts.get(itemKey) || 0) + 1);
     });
 
   // Create unique items array with counts
   const uniqueItems = [];
-  const processedKeys = new Set();
-
-  Object.values(items)
-    .filter((item) => item)
-    .forEach((item) => {
-      const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
-      if (!processedKeys.has(itemKey)) {
-        processedKeys.add(itemKey);
-        uniqueItems.push({
-          item,
-          count: itemCounts.get(itemKey),
-        });
-      }
+  itemPositions.forEach((item, itemKey) => {
+    uniqueItems.push({
+      item,
+      count: itemCounts.get(itemKey)
     });
+  });
 
   const itemsHtml = uniqueItems
-    .map(
-      ({ item, count }) => `
+    .map(({ item, count }) => {
+      const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
+      const currentValueType = itemValuePreferences.get(itemKey);
+      const hasBothValues = Boolean(item.cash_value) && Boolean(item.duped_value);
+      const hasDupedValue = Boolean(item.duped_value) && item.duped_value !== "N/A";
+
+      // Determine what value to display, with mobile-specific formatting
+      let valueDisplay;
+      if (!currentValueType && hasBothValues) {
+        // If no preference and has both values, show both
+        valueDisplay = `
+          <div class="item-value">
+            <div style="color: #00c853">Cash: ${isMobile ? formatValueShorthand(item.cash_value || 0) : formatValue(item.cash_value || 0)}</div>
+            <div class="text-info">Duped: ${isMobile ? formatValueShorthand(item.duped_value || 0) : formatValue(item.duped_value || 0)}</div>
+          </div>
+        `;
+      } else if (currentValueType === 'cash' || !currentValueType) {
+        // If cash preference or no preference but only one value, show cash
+        valueDisplay = `
+          <div class="item-value">
+            <div style="color: #00c853">Cash: ${isMobile ? formatValueShorthand(item.cash_value || 0) : formatValue(item.cash_value || 0)}</div>
+          </div>
+        `;
+      } else {
+        // If duped preference, show duped
+        valueDisplay = `
+          <div class="item-value">
+            <div class="text-info">Duped: ${isMobile ? formatValueShorthand(item.duped_value || 0) : formatValue(item.duped_value || 0)}</div>
+          </div>
+        `;
+      }
+
+      return `
     <div class="preview-item"
          data-bs-toggle="tooltip"
          data-bs-placement="top"
@@ -203,16 +354,23 @@ function renderPreviewItems(containerId, items) {
             : ""
         }
       </div>
-      <div class="item-details">
-        <div class="demand-indicator demand-${(
-          item.demand || "0"
-        ).toLowerCase()}">
-          Demand: ${item.demand || "N/A"}
+      ${hasBothValues ? `
+        <div class="value-type-toggle">
+          <button class="btn btn-sm ${currentValueType === 'cash' ? 'btn-outline-success' : 'btn-success'}"
+                  onclick="event.stopPropagation(); toggleItemValueType('${itemKey}', 'cash')">
+            Cash
+          </button>
+          <button class="btn btn-sm ${currentValueType === 'duped' ? 'btn-outline-info' : 'btn-info'} ${!hasDupedValue ? 'disabled opacity-50' : ''}"
+                  onclick="event.stopPropagation(); ${hasDupedValue ? `toggleItemValueType('${itemKey}', 'duped')` : ''}"
+                  ${!hasDupedValue ? 'disabled' : ''}>
+            Duped
+          </button>
         </div>
-      </div>
+      ` : ''}
+      ${valueDisplay}
     </div>
-  `
-    )
+  `;
+    })
     .join("");
 
   const valuesHtml = `
@@ -220,7 +378,7 @@ function renderPreviewItems(containerId, items) {
       <h6>
        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
         <rect width="16" height="16" fill="none" />
-        <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+        <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
       </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"
@@ -230,13 +388,13 @@ function renderPreviewItems(containerId, items) {
         <span class="text-muted">Cash Value:</span>
         <span class="badge" style="background-color: ${
           containerId === "preview-offering-items" ? "#00c853" : "#2196f3"
-        }">${formatValue(values.cashValue, true)}</span>
+        }">${isMobile ? formatValueShorthand(values.cashValue) : formatValue(values.cashValue, true)}</span>
       </div>
       <div class="side-value-row">
         <span class="text-muted">Duped Value:</span>
         <span class="badge" style="background-color: ${
           containerId === "preview-offering-items" ? "#00c853" : "#2196f3"
-        }">${formatValue(values.dupedValue, true)}</span>
+        }">${isMobile ? formatValueShorthand(values.dupedValue) : formatValue(values.dupedValue, true)}</span>
       </div>
     </div>
   `;
@@ -256,6 +414,9 @@ function renderValueDifferences() {
 
   const cashDiff = requestValues.cashValue - offerValues.cashValue;
   const dupedDiff = requestValues.dupedValue - offerValues.dupedValue;
+  
+  // Check if we're on mobile
+  const isMobile = window.innerWidth < 768;
 
   return `
     <div class="value-differences">
@@ -272,7 +433,7 @@ function renderValueDifferences() {
             <span class="difference-value ${
               cashDiff >= 0 ? "positive" : "negative"
             }">
-              ${cashDiff >= 0 ? "+" : ""}${formatValue(cashDiff, true)}
+              ${cashDiff >= 0 ? "+" : ""}${isMobile ? formatValueShorthand(cashDiff) : formatValue(cashDiff, true)}
             </span>
           </div>
            <div class="difference-indicator">
@@ -303,7 +464,7 @@ function renderValueDifferences() {
             <span class="difference-value ${
               dupedDiff >= 0 ? "positive" : "negative"
             }">
-              ${dupedDiff >= 0 ? "+" : ""}${formatValue(dupedDiff, true)}
+              ${dupedDiff >= 0 ? "+" : ""}${isMobile ? formatValueShorthand(dupedDiff) : formatValue(dupedDiff, true)}
             </span>
           </div>
           <div class="difference-indicator">
@@ -388,8 +549,15 @@ function addItemToTrade(item, tradeType) {
   // Always render trade items first
   renderTradeItems(tradeType);
 
-  // Automatically update preview
+  // Show and update preview
+  const previewSection = document.getElementById('trade-preview');
+  if (previewSection) {
+    previewSection.style.display = 'block';
+  }
   updatePreview();
+
+  // Save trade state
+  saveTradeState();
 }
 
 function updatePreview() {
@@ -455,6 +623,7 @@ function quickAddItem(itemName, itemType, itemId, selectedVariant) {
         items[nextEmptyIndex] = item;
         renderTradeItems(selectedTradeType);
         updatePreview();
+        saveTradeState(); // Save state after adding item
       } else {
         notyf.error("No empty slots available");
       }
@@ -473,6 +642,7 @@ function quickAddItem(itemName, itemType, itemId, selectedVariant) {
     // Update UI
     renderTradeItems(currentType);
     updatePreview();
+    saveTradeState(); // Save state after adding item
   } else {
     // No placeholder selected, find first empty slot
     const items = currentTradeType === "offering" ? offeringItems : requestingItems;
@@ -482,6 +652,7 @@ function quickAddItem(itemName, itemType, itemId, selectedVariant) {
       items[emptyIndex] = item;
       renderTradeItems(currentTradeType === "offering" ? "Offer" : "Request");
       updatePreview();
+      saveTradeState(); // Save state after adding item
     } else {
       notyf.error(`No empty slots available in ${currentTradeType === "offering" ? "Offer" : "Request"}`);
     }
@@ -576,8 +747,23 @@ function removeItem(index, tradeType) {
 
   renderTradeItems(tradeType);
 
-  // Automatically update preview
-  updatePreview();
+  // Check if there are any items left
+  const hasItems = Object.values(offeringItems).some(item => item) || 
+                  Object.values(requestingItems).some(item => item);
+  
+  // Show/hide preview based on whether there are items
+  const previewSection = document.getElementById('trade-preview');
+  if (previewSection) {
+    previewSection.style.display = hasItems ? 'block' : 'none';
+  }
+
+  // Update preview if visible
+  if (hasItems) {
+    updatePreview();
+  }
+
+  // Save trade state
+  saveTradeState();
 }
 
 // Function to toggle available items display
@@ -987,30 +1173,48 @@ function formatValue(value) {
   return formatLargeNumber(parsedValue);
 }
 
+// Add a new function to format values in shorthand (K, M, B)
+function formatValueShorthand(value) {
+  if (!value) return "0";
+  const parsedValue = parseValue(value);
+  
+  if (parsedValue >= 1_000_000_000) {
+    return (parsedValue / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+  if (parsedValue >= 1_000_000) {
+    return (parsedValue / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (parsedValue >= 1_000) {
+    return (parsedValue / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  
+  return parsedValue.toString();
+}
+
+// Update the formatLargeNumber function to show full numbers
+function formatLargeNumber(num) {
+  return num.toLocaleString("fullwide", { useGrouping: true });
+}
+
 let selectedPlaceholderIndex = -1;
 let selectedTradeType = null;
 
 // Function to create empty placeholder cards
 function createPlaceholderCard(index, tradeType) {
   return `
-    <div class="col-md-3 col-6 mb-3">
-      <div class="trade-card-wrapper">
-        <div class="trade-card empty-slot" 
-             onclick="handlePlaceholderClick(${index}, '${tradeType}')">
-          <div class="empty-slot-content">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-	<rect width="24" height="24" fill="none" />
-	<path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m1 5h-2v4H7v2h4v4h2v-4h4v-2h-4z" />
-</svg>
-            <span>Empty Slot</span>
-          </div>
-        </div>
+    <div class="trade-card empty-slot" onclick="handlePlaceholderClick(${index}, '${tradeType}')">
+      <div class="empty-slot-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <rect width="24" height="24" fill="none" />
+          <path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m1 5h-2v4H7v2h4v4h2v-4h4v-2h-4z" />
+        </svg>
+        <span>Empty Slot</span>
       </div>
     </div>
   `;
 }
 
-// Update handlePlaceholderClick function
+// Function to handle placeholder click
 function handlePlaceholderClick(index, tradeType) {
   // Remove selected state from all slots
   document.querySelectorAll(".trade-card.empty-slot").forEach((slot) => {
@@ -1163,11 +1367,6 @@ function parseValue(value) {
     return parseFloat(value) * 1000000000;
   }
   return parseFloat(value) || 0;
-}
-
-// Update the formatLargeNumber function to show full numbers
-function formatLargeNumber(num) {
-  return num.toLocaleString("fullwide", { useGrouping: true });
 }
 
 // Update trade summary
@@ -1398,3 +1597,84 @@ function updateCardValues(card, itemData) {
     demandElement.textContent = itemData.demand || "N/A";
   }
 }
+
+// Function to swap offering and requesting sides
+function swapSides() {
+  // Check if both sides are empty
+  const hasOfferingItems = offeringItems.some(item => item);
+  const hasRequestingItems = requestingItems.some(item => item);
+  
+  if (!hasOfferingItems && !hasRequestingItems) {
+    notyf.error('Nothing to swap - both sides are empty');
+    return;
+  }
+
+  // Store current items
+  const tempOffering = [...offeringItems];
+  const tempRequesting = [...requestingItems];
+  
+  // Clear current arrays
+  offeringItems.length = 0;
+  requestingItems.length = 0;
+  
+  // Swap items
+  tempRequesting.forEach(item => {
+    if (item) offeringItems.push(item);
+  });
+  tempOffering.forEach(item => {
+    if (item) requestingItems.push(item);
+  });
+  
+  // Update UI
+  renderTradeItems('Offer');
+  renderTradeItems('Request');
+  updatePreview();
+  saveTradeState();
+  
+  // Show success message
+  notyf.success('Trade sides swapped successfully');
+}
+
+// Function to clear all items (reuse startFreshTrade but with confirmation)
+function clearTrade() {
+  if (confirm('Are you sure you want to clear all items?')) {
+    startFreshTrade();
+  }
+}
+
+// Function to mirror items from one side to the other
+function mirrorItems(targetSide) {
+  // Determine source and target arrays
+  const sourceSide = targetSide === 'Offer' ? requestingItems : offeringItems;
+  const targetArray = targetSide === 'Offer' ? offeringItems : requestingItems;
+  
+  // Check if source side has items
+  if (!sourceSide.some(item => item)) {
+    notyf.error(`No items to mirror from ${targetSide === 'Offer' ? 'requesting' : 'offering'} side`);
+    return;
+  }
+  
+  // Clear target array
+  targetArray.length = 0;
+  
+  // Copy items from source to target
+  sourceSide.forEach(item => {
+    if (item) targetArray.push({...item});
+  });
+  
+  // Update UI
+  renderTradeItems(targetSide);
+  updatePreview();
+  saveTradeState();
+  
+  // Show success message
+  notyf.success(`Items mirrored to ${targetSide.toLowerCase()}ing side`);
+}
+
+// Add window resize event listener to update the display when screen size changes
+window.addEventListener('resize', function() {
+  // Update the preview if it's visible
+  if (document.getElementById('trade-preview').style.display === 'block') {
+    updatePreview();
+  }
+});

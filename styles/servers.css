@@ -108,6 +108,7 @@
 .auth-notice {
   background-color: rgba(18, 78, 102, 0.8);
   border-left: 4px solid var(--accent-color);
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   color: #ffffff;
   font-size: 0.95rem;

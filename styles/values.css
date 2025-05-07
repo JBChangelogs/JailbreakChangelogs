@@ -339,6 +339,7 @@ body {
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 
@@ -427,8 +428,8 @@ body {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   animation: rainbow 18s ease infinite;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   white-space: nowrap;
 }
 
@@ -923,8 +924,8 @@ body {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   animation: rainbow 18s ease infinite;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   white-space: nowrap;
 }
 
@@ -1339,6 +1340,7 @@ body {
   transition: opacity 0.2s ease-in-out, transform 0.2s ease;
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   border-radius: 50%; /* Make it circular */
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   transform: scale(0.8);
   visibility: hidden;

@@ -1324,11 +1324,11 @@ document.addEventListener("DOMContentLoaded", function () {
                   prevChangelog
                     ? `
                     <div class="nav-item">
-                        <button class="btn btn-link quick-nav-link p-0" 
+                        <button class="btn btn-link quick-nav-link" 
                            data-changelog-id="${prevChangelog.id}"
                            title="${prevChangelog.title}">
                             <div class="d-flex flex-column">
-                                <small class="text-muted mb-1">Previous Changelog</small>
+                               
                                 <div class="d-flex align-items-center gap-2">
                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
                                       <rect width="24" height="24" fill="none" />
@@ -1337,9 +1337,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         <path fill="currentColor" d="M3.283 10.94a1.5 1.5 0 0 0 0 2.12l5.656 5.658a1.5 1.5 0 1 0 2.122-2.122L7.965 13.5H19.5a1.5 1.5 0 0 0 0-3H7.965l3.096-3.096a1.5 1.5 0 1 0-2.122-2.121z" />
                                       </g>
                                     </svg>
-                                    <span>${extractDate(
-                                      prevChangelog.title
-                                    )}</span>
+                                    <span>Previous Changelog</span>
                                 </div>
                             </div>
                         </button>
@@ -1352,15 +1350,12 @@ document.addEventListener("DOMContentLoaded", function () {
                   nextChangelog
                     ? `
                     <div class="nav-item">
-                        <button class="btn btn-link quick-nav-link p-0" 
+                        <button class="btn btn-link quick-nav-link" 
                            data-changelog-id="${nextChangelog.id}"
                            title="${nextChangelog.title}">
                             <div class="d-flex flex-column">
-                                <small class="text-muted mb-1">Next Changelog</small>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span>${extractDate(
-                                      nextChangelog.title
-                                    )}</span>
+                                    <span>Next Changelog</span>
                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
                                     <rect width="24" height="24" fill="none" />
                                     <g fill="none">

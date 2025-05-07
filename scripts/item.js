@@ -1444,17 +1444,61 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="col-md-5 p-3">
                       <div class="d-flex flex-column gap-3">
                         ${mediaElement}
+                        <div class="suggestion-box p-3 rounded" style="background: rgba(18, 78, 102, 0.1); border: 1px solid var(--accent-color);">
+                          <h5 class="mb-2" style="color: var(--accent-color-light);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px; vertical-align: -3px;">
+                              <rect width="24" height="24" fill="none"/>
+                              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2zm0-4h-2V7h2z"/>
+                            </svg>
+                            Don't agree with the value?
+                          </h5>
+                          <p class="mb-3" style="color: var(--text-muted);">Help us keep our values accurate by suggesting a new value for ${item.name}.</p>
+                          <button
+                            onclick="window.open('https://discord.gg/baHCsb8N5A', '_blank', 'noopener,noreferrer')"
+                            class="discord-button"
+                            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                              <rect width="24" height="24" fill="none"/>
+                              <path fill="currentColor" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03M8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418m7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418"/>
+                            </svg>
+                            Join Jailbreak Trading Core
+                          </button>
+                        </div>
                       </div>
                     </div>
   
                       <!-- Right Side - Item Details -->
-                      <div class="col-md-7 p-3">
+                      <div class="col-md-7">
                           <!-- Item Title and Badge Container -->
                           <div class="item-header d-flex align-items-center mb-2">
                              <h1 class="mb-1 me-3" style="font-weight: 600; font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; font-size: 2rem;">${
                                item.name
                              }</h1>
                               ${badgeContainerHtml}
+                              ${
+                                item.creator && item.creator !== "N/A"
+                                  ? `<div class="mt-0 mb-3">
+                                    <span style="color: var(--text-muted);">Created by </span>
+                                    ${
+                                      item.creator.match(/\((\d+)\)/)
+                                        ? `<a href="https://www.roblox.com/users/${
+                                            item.creator.match(/\((\d+)\)/)[1]
+                                          }/profile" 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
+                                          onmouseover="this.style.color='var(--accent-color-light)'"
+                                          onmouseout="this.style.color='var(--text-primary)'">${
+                                            item.creator.split(" (")[0]
+                                          }</a>`
+                                        : `<a href="#" 
+                                          style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
+                                          onclick="return false;">${item.creator}</a>`
+                                    }
+                                  </div>`
+                                                            : ""
+                              }
                               ${item.children && item.children.length > 0 ? `
                                 <div class="ms-3">
                                   <div class="dropdown">
@@ -1475,29 +1519,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 </div>
                               ` : ''}
                           </div>
-                           ${
-                             item.creator && item.creator !== "N/A"
-                               ? `<div class="mt-0 mb-3">
-        <span style="color: var(--text-muted);">Created by </span>
-        ${
-          item.creator.match(/\((\d+)\)/)
-            ? `<a href="https://www.roblox.com/users/${
-                item.creator.match(/\((\d+)\)/)[1]
-              }/profile" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
-              onmouseover="this.style.color='var(--accent-color-light)'"
-              onmouseout="this.style.color='var(--text-primary)'">${
-                item.creator.split(" (")[0]
-              }</a>`
-            : `<a href="#" 
-              style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dotted var(--text-primary);"
-              onclick="return false;">${item.creator}</a>`
-        }
-      </div>`
-                               : ""
-                           }
                          
                            ${
                              item.description && item.description !== "N/A"
@@ -1513,17 +1534,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                           <!-- Values Section -->
                           ${valuesSection}
   
-                          <div class="values-text d-flex flex-column align-items-start mt-3">
-                            <strong class="mb-2">Want to make a value suggestion for ${
-                              item.name
-                            }?</strong>
-                            <button
-                              onclick="window.open('https://discord.com/invite/jailbreaktrading', '_blank', 'noopener,noreferrer')"
-                              class="discord-button"
-                            >
-                              Visit Jailbreak Trading Core!
-                            </button>
-                          </div>
+                  
                       </div>
                   </div>
               </div>
@@ -2324,6 +2335,7 @@ function initializeDescriptionToggle() {
     readMoreBtn.style.display = "flex";
     description.classList.add("collapsed");
     description.classList.remove("expanded");
+    readMoreBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" fill="none"/><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>Read More';
     readMoreBtn.addEventListener("click", () => {
       const isCollapsed = description.classList.contains("collapsed");
       description.classList.toggle("collapsed");

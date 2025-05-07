@@ -84,13 +84,19 @@
               <li><a class="dropdown-item" href="/values">Value List</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item" href="/trading">Trade Ads</a>
+                <a class="dropdown-item" href="/values/calculator"
+                  >Value Calculator</a
+                >
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="/dupes/calculator"
                   >Dupe Calculator</a
                 >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="/trading">Trade Ads</a>
               </li>
             </ul>
           </li>
@@ -264,10 +270,13 @@
           <div class="side-menu-section">
             <div class="side-menu-section-title">Values</div>
             <a class="side-menu-item" href="/values">Value List</a>
-            <a class="side-menu-item" href="/trading">Trade Ads</a>
+            <a class="side-menu-item" href="/values/calculator"
+              >Value Calculator</a
+            >
             <a class="side-menu-item" href="/dupes/calculator"
               >Dupe Calculator</a
             >
+            <a class="side-menu-item" href="/trading">Trade Ads</a>
           </div>
 
           <div class="side-menu-section">
@@ -845,6 +854,7 @@
     border: 1px solid var(--accent-color) !important;
     border-radius: 6px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -1117,6 +1127,7 @@
 
   .main-navigation .mobile-avatar-button {
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
   }
 

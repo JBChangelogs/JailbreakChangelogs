@@ -676,7 +676,6 @@ button {
 
 #offering-list .trade-card:hover {
   box-shadow: 0 4px 12px rgba(0, 200, 83, 0.2);
-  transform: translateY(-2px);
 }
 
 /* Add distinct styles for requesting cards */
@@ -687,7 +686,6 @@ button {
 
 #requesting-list .trade-card:hover {
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
-  transform: translateY(-2px);
 }
 /* Update empty slot styles for both sides */
 #offering-list .trade-card.empty-slot {
@@ -932,8 +930,7 @@ video.card-img-top {
 
 .remove-icon:hover {
   color: #fff;
-  background: rgba(255, 0, 0, 0.5);
-  transform: translate(-50%, -50%) scale(1.1);
+  background: rgba(255, 0, 0, 0.721);
 }
 
 /* Remove tooltip styles */
@@ -1299,6 +1296,7 @@ video.card-img-top {
 .hero-style .quick-tip {
   background-color: rgba(18, 78, 102, 0.8);
   border-left: 4px solid var(--accent-color);
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   color: #ffffff;
 }
@@ -1354,8 +1352,8 @@ video.card-img-top {
   color: white;
   padding: 1rem 2rem;
   font-weight: 600;
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1589,6 +1587,7 @@ video.card-img-top {
   align-items: center;
   gap: 4px;
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 
@@ -2581,6 +2580,7 @@ video.card-img-top {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.85);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.2s ease;

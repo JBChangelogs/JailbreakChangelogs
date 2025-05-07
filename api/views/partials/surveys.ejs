@@ -1,5 +1,5 @@
 <!-- Survey Modal -->
-<div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-hidden="true">
+<div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-modal="true" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -127,6 +127,7 @@
   /* Modal Backdrop */
   .modal-backdrop.show {
     opacity: 0.75 !important;
+    -webkit-backdrop-filter: blur(3px) !important;
     backdrop-filter: blur(3px) !important;
   }
 

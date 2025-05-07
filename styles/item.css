@@ -255,9 +255,9 @@ body {
 .chart-wrapper {
   position: relative;
   width: 100%;
-  height: 600px; /* Change from aspect-ratio to fixed height */
-  min-height: 400px; /* Increased minimum height */
-  max-height: 600px; /* Increased maximum height */
+  height: 800px; /* Increased from 600px */
+  min-height: 600px; /* Increased from 400px */
+  max-height: 800px; /* Increased from 600px */
 }
 
 .highcharts-container {
@@ -347,8 +347,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
 }
 
 @keyframes rainbow {
@@ -367,8 +367,10 @@ body {
 .badge-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 38px; /* Consistent height for all badges */
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px; /* Reduced margin */
+  min-height: 38px;
 }
 
 .badge-container .badge,
@@ -376,7 +378,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px; /* Fixed height for all badges */
+  height: 36px;
   padding: 0 16px;
   font-size: 1rem;
   font-weight: 600;
@@ -391,38 +393,14 @@ body {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .badge-container {
-    height: 30px;
-    gap: 8px;
-  }
-
-  .badge-container .badge,
-  .badge-container .hyperchrome-badge {
-    height: 28px;
-    padding: 0 12px;
-    font-size: 0.85rem;
-    letter-spacing: 0.3px;
-    border-radius: 15px;
-  }
-
-  /* Move badge container below title on mobile */
-  .item-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .item-header h1 {
+    height: auto; /* Allow height to grow with content */
+    gap: 6px;
     margin-bottom: 8px;
   }
 
-  .badge-container {
-    height: 28px;
-    margin-left: 0;
-  }
-
   .badge-container .badge,
   .badge-container .hyperchrome-badge {
-    height: 26px;
+    height: 28px;
     padding: 0 12px;
     font-size: 0.85rem;
     letter-spacing: 0.3px;
@@ -430,21 +408,22 @@ body {
   }
 
   .chart-wrapper {
-    height: 400px; /* Adjusted height for mobile */
-    aspect-ratio: 16/12; /* Slightly taller on mobile */
-    min-height: 350px;
+    height: 600px; /* Increased from 400px */
+    min-height: 500px; /* Increased from 350px */
+    max-height: 600px; /* Increased from 400px */
   }
 
   .chart-container {
-    padding: 8px; /* Even less padding on mobile */
+    padding: 10px;
+    margin-bottom: 20px;
   }
 }
 
-/* Extra small devices */
 @media (max-width: 576px) {
   .badge-container {
-    height: 26px;
-    gap: 6px;
+    height: auto;
+    gap: 4px;
+    margin-bottom: 6px;
   }
 
   .badge-container .badge,
@@ -456,24 +435,46 @@ body {
     border-radius: 12px;
   }
 
-  /* Further reduce title size */
-  .badge-container h1.h2 {
-    font-size: 1.25rem;
+  .chart-wrapper {
+    height: 500px; /* Increased from 350px */
+    min-height: 400px; /* Increased from 300px */
+    max-height: 500px; /* Increased from 350px */
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .badge-container {
-    height: 32px;
-    gap: 8px;
-  }
+/* Move badge container below title on mobile */
+.item-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
 
-  .badge-container .badge,
-  .badge-container .hyperchrome-badge {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
+.item-header h1 {
+  margin-bottom: 8px;
+}
+
+.badge-container {
+  height: 28px;
+  margin-left: 0;
+}
+
+.badge-container .badge,
+.badge-container .hyperchrome-badge {
+  height: 26px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  border-radius: 15px;
+}
+
+.chart-wrapper {
+  height: 400px; /* Adjusted height for mobile */
+  aspect-ratio: 16/12; /* Slightly taller on mobile */
+  min-height: 350px;
+}
+
+.chart-container {
+  padding: 8px; /* Even less padding on mobile */
 }
 
 /* Similar Items Section Styling */
@@ -625,24 +626,6 @@ body {
 
   .media-container {
     width: 100%; /* Changed from 90% to 100% */
-  }
-
-  .chart-container {
-    padding: 10px;
-    margin-bottom: 20px;
-  }
-
-  .chart-wrapper {
-    aspect-ratio: 3/4; /* More vertical space on mobile */
-    min-height: 350px;
-  }
-
-  .image-container {
-    height: 300px; /* Reduced height for mobile */
-  }
-
-  #item-container {
-    padding: 10px; /* Reduced padding */
   }
 
   .card {
@@ -1082,7 +1065,7 @@ body {
 
 [data-tooltip] {
   position: relative;
-}
+} 
 
 [data-tooltip]::before {
   content: attr(data-tooltip);
@@ -1267,4 +1250,22 @@ body {
 .dropdown-item.active {
   background-color: var(--accent-color-light) !important;
   color: white !important;
+}
+
+/* Add new styles for creator text */
+.creator-text {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+}
+
+.creator-text a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.creator-text a:hover {
+  color: var(--accent-color-light);
 }

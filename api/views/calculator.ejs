@@ -33,8 +33,10 @@
 
     <!-- Stylesheets -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+      crossorigin="anonymous"
     />
     <link
       rel="stylesheet"
@@ -42,7 +44,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@1.1.26/styles/calculator.min.css"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.13/styles/calculator.min.css"
     />
     <link
       rel="stylesheet"
@@ -50,7 +52,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.9/styles/trading.min.css"
+      href="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.13/styles/trading.min.css"
     />
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/assets/logos/apple-touch-icon.png" />
@@ -256,15 +258,60 @@
       </div>
 
       <!-- Main Trading Section -->
-      <div class="row mt-3 trade-sides-wrapper">
-        <div class="col-lg-6">
-          <h3 class="text-center">Offering</h3>
-          <div class="row" id="offering-list"></div>
-        </div>
+      <div class="container-fluid px-4">
+        <div class="row justify-content-center">
+          <!-- Trade Sides Wrapper -->
+          <div class="col-12 col-lg-7">
+            <div class="row mt-2 trade-sides-wrapper">
+              <div class="col-12 mb-3">
+                <h3 class="text-center mb-2">Offering</h3>
+                <div class="row" id="offering-list"></div>
+                <div class="text-center mt-2">
+                  <button class="btn btn-lg mirror-btn" style="background-color: #00c853; color: white;" onclick="mirrorItems('Offer')">
+                    Mirror
+                  </button>
+                </div>
+              </div>
 
-        <div class="col-lg-6">
-          <h3 class="text-center">Requesting</h3>
-          <div class="row" id="requesting-list"></div>
+              <div class="col-12 mb-3">
+                <h3 class="text-center mb-2">Requesting</h3>
+                <div class="row" id="requesting-list"></div>
+                <div class="text-center mt-2">
+                  <button class="btn btn-lg mirror-btn" style="background-color: #2196f3; color: white;" onclick="mirrorItems('Request')">
+                    Mirror
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-12 text-center mb-3">
+                <div class="btn-group">
+                  <button class="btn btn-outline-primary btn-sm" onclick="swapSides()">
+                    Swap Sides
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="clearTrade()">
+                    Clear All
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trade Preview Section -->
+          <div class="col-12 col-lg-5">
+            <div class="trade-preview mt-2" id="trade-preview" style="display: none">
+              <h3 class="text-center mb-4">Trade Preview</h3>
+              <div class="preview-side-offering mb-4">
+                <h4 class="text-center">Offering</h4>
+                <div id="preview-offering-items"></div>
+              </div>
+              <div class="preview-side-requesting mb-4">
+                <h4 class="text-center">Requesting</h4>
+                <div id="preview-requesting-items"></div>
+              </div>
+              <div id="value-differences"></div>
+              <div class="preview-actions mt-4 text-center"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -272,31 +319,6 @@
       <div class="available-items mt-4" id="available-items-container">
         <div id="available-items-list">
           <!-- Available items will be rendered here -->
-        </div>
-      </div>
-
-      <!-- Trade Preview Section -->
-      <div class="container-fluid mt-4">
-        <div class="trade-preview" id="trade-preview" style="display: none">
-          <div class="container">
-            <h3 class="text-center mb-4">Trade Preview</h3>
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="preview-side-offering">
-                  <h4 class="text-center">Offering</h4>
-                  <div id="preview-offering-items"></div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="preview-side-requesting">
-                  <h4 class="text-center">Requesting</h4>
-                  <div id="preview-requesting-items"></div>
-                </div>
-              </div>
-            </div>
-            <div id="value-differences"></div>
-            <div class="preview-actions mt-4 text-center"></div>
-          </div>
         </div>
       </div>
 
@@ -437,6 +459,25 @@
       </div>
     </div>
 
+    <!-- Modal for Restoring Trade -->
+    <div class="modal fade" id="restoreTradeModal" tabindex="-1" aria-labelledby="restoreTradeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="restoreTradeModalLabel">Restore Previous Trade?</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>You have a previous trade that was not completed. Would you like to restore it or start fresh?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="startFreshTrade()">Start Fresh</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="restorePreviousTrade()">Restore Trade</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <%- include('partials/footer') %>
 
     <!-- Scripts -->
@@ -447,92 +488,11 @@
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
       crossorigin="anonymous"
     ></script>
-    <script src="/scripts/calculator.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.13/scripts/calculator.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/JBChangelogs/JailbreakChangelogs@2.0.4/scripts/main.min.js"></script>
   </body>
-  <style>
-    .intro-container.hero-style {
-      background: url("/assets/backgrounds/background11.webp") center/cover
-        no-repeat;
-    }
-    .trade-card.empty-slot::before {
-      background-image: url("/assets/bi--plus-circle.png");
-    }
-
-    /* Sub-items dropdown styles */
-    .sub-items-dropdown {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 10;
-    }
-
-    .sub-items-dropdown .dropdown-toggle {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-size: 0.8rem;
-      padding: 2px 8px;
-    }
-
-    .sub-items-dropdown .dropdown-toggle:hover,
-    .sub-items-dropdown .dropdown-toggle:focus {
-      background: rgba(0, 0, 0, 0.7);
-      border-color: rgba(255, 255, 255, 0.3);
-      color: #fff;
-    }
-
-    .sub-items-dropdown .dropdown-menu {
-      min-width: 100px;
-      padding: 0.25rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .sub-items-dropdown .dropdown-item {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.75rem;
-      color: var(--text-primary);
-    }
-
-    .sub-items-dropdown .dropdown-item:hover,
-    .sub-items-dropdown .dropdown-item:focus {
-      background: var(--bg-secondary);
-    }
-
-    .sub-items-dropdown .dropdown-item.active {
-      background: var(--accent-color);
-      color: #fff;
-    }
-
-    /* Make sure dropdown is visible over card hover effects */
-    .available-item-card {
-      overflow: visible !important;
-    }
-
-    .available-item-card .position-relative {
-      overflow: visible !important;
-    }
-
-    /* Sub-item indicator styles */
-    .sub-item-indicator {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 2px 6px;
-      border-top-left-radius: 4px;
-      font-size: 12px;
-      color: #fff;
-    }
-
-    .sub-item-year {
-      font-weight: 500;
-    }
-  </style>
 </html>

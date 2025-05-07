@@ -364,6 +364,16 @@
       </svg>
         ${currentYear} Jailbreak Changelogs. All rights reserved.`;
     }
+
+    // event listener for modal hidden event
+    const reportIssueModal = document.getElementById('reportIssueModal');
+    reportIssueModal.addEventListener('hidden.bs.modal', function () {
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+      document.body.classList.remove('modal-open');
+    });
   });
 </script>
 

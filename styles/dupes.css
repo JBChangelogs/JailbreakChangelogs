@@ -512,6 +512,7 @@
   width: 60px;
   color: var(--text-muted);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   position: relative;
   transition: all 0.2s ease;

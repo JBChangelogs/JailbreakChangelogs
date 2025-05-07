@@ -370,7 +370,7 @@ const offeringItems = [];
 const requestingItems = [];
 let currentTradeType = "offering"; // Set default to "offering"
 
-const ITEMS_PER_PAGE = 100;
+const ITEMS_PER_PAGE = 30;
 let currentPage = 1;
 let filteredItems = [];
 
