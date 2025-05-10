@@ -406,7 +406,7 @@ app.get("/trading", async (req, res) => {
       },
     });
 
-    if (!tradesResponse.ok) {
+    if (!tradesResponse.ok && tradesResponse.status !== 404) {
       return res.status(503).render("error", {
         title: "503 - Service Unavailable",
         message: "Our trade ads service is temporarily unavailable. Please try again later.",
