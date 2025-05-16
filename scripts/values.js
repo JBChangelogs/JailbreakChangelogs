@@ -1482,16 +1482,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Check if item has sub-items
     const hasSubItems = item.children && item.children.length > 0;
     const currentYear = new Date().getFullYear();
+
+    // Find the most recent variant with both cash and duped values
+    let defaultVariant = currentYear.toString();
+    let defaultVariantId = item.id;
+    if (hasSubItems) {
+      // Sort children by year in descending order
+      const sortedChildren = [...item.children].sort((a, b) => 
+        parseInt(b.sub_name) - parseInt(a.sub_name)
+      );
+      
+      // Find the first variant that has both cash and duped values
+      const variantWithValues = sortedChildren.find(child => 
+        child.data.cash_value && 
+        child.data.cash_value !== "N/A" && 
+        child.data.duped_value && 
+        child.data.duped_value !== "N/A"
+      );
+
+      if (variantWithValues) {
+        defaultVariant = variantWithValues.sub_name;
+        defaultVariantId = variantWithValues.id;
+      }
+    }
+
     const subItemsDropdown = hasSubItems ? `
       <div class="sub-items-dropdown position-absolute top-0 end-0">
         <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-selected-variant="${currentYear}">
-            ${currentYear}
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-selected-variant="${defaultVariant}">
+            ${defaultVariant}
           </button>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item active" href="#" data-item-id="${item.id}" data-variant="${currentYear}">${currentYear}</a></li>
+            <li><a class="dropdown-item ${defaultVariant === currentYear.toString() ? 'active' : ''}" href="#" data-item-id="${item.id}" data-variant="${currentYear}">${currentYear}</a></li>
             ${item.children.map(child => `
-              <li><a class="dropdown-item" href="#" data-item-id="${child.id}" data-variant="${child.sub_name}">${child.sub_name}</a></li>
+              <li><a class="dropdown-item ${child.sub_name === defaultVariant ? 'active' : ''}" href="#" data-item-id="${child.id}" data-variant="${child.sub_name}">${child.sub_name}</a></li>
             `).join('')}
           </ul>
         </div>
@@ -1512,7 +1536,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <a href="/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name.replace(/\s+/g, "-"))}" 
                  class="text-decoration-none item-name-link" 
                  style="color: var(--text-primary);"
-                 data-variant="${currentYear}">
+                 data-variant="${defaultVariant}">
                 ${item.name}
               </a>
             </h5>
@@ -1609,6 +1633,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       const dropdownButton = dropdown.querySelector('.dropdown-toggle');
       const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
       const itemLink = cardDiv.querySelector('.item-name-link');
+      
+      // Update card values with default variant data if not current year
+      if (defaultVariant !== currentYear.toString()) {
+        const defaultVariantData = item.children.find(child => child.sub_name === defaultVariant);
+        if (defaultVariantData) {
+          const variantData = {
+            ...defaultVariantData.data,
+            is_favorite: defaultVariantData.is_favorite
+          };
+          updateCardValues(cardDiv, variantData);
+        }
+      }
       
       dropdownItems.forEach(dropdownItem => {
         dropdownItem.addEventListener('click', (e) => {

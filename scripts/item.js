@@ -2364,7 +2364,7 @@ function handleUrlParams() {
 // Add getFavoriteStarHtml helper function
 function getFavoriteStarHtml(isFavorited) {
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512"
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"
          data-bs-toggle="tooltip" 
          data-bs-placement="top" 
          title="${isFavorited ? 'Unfavorite Item' : 'Favorite Item'}">
