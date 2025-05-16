@@ -862,7 +862,6 @@ body {
 
 .category-item span {
   font-size: 0.9rem;
-  font-weight: 500;
 }
 
 .media-container .video-player {
@@ -1660,6 +1659,29 @@ body.menu-open {
   /* Add some bottom margin between rows */
   .col-6 {
     margin-bottom: 8px;
+  }
+}
+
+/* Custom CSS for 320px devices */
+@media (max-width: 320px) {
+   /* Reduce card title size */
+   .items-card .card-title {
+    font-size: 0.63rem;
+  }
+   /* Reduce text size for labels */
+   .items-card .text-body-secondary {
+    font-size: 0.63rem !important;
+  }
+  .items-card .badge {
+    font-size: 0.5rem !important;
+    padding: 0.15rem 0.35rem !important;
+    max-width: 90px !important;
+  }
+  .items-card .card-footer .text-body-secondary {
+    font-size: 0.5rem !important;
+  }
+  .category-item span {
+    font-size: 0.6rem;
   }
 }
 

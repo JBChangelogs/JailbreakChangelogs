@@ -214,27 +214,29 @@ function getItemImageUrl(item) {
 }
 
 // Add a map to store value preferences for items
-const itemValuePreferences = new Map(); // key: itemId, value: 'cash' or 'duped'
+const itemValuePreferences = new Map(); // key: `${side}-${itemId}`, value: 'cash' or 'duped'
 
 // Function to toggle item value type
-function toggleItemValueType(itemId, currentType) {
+function toggleItemValueType(itemId, currentType, side) {
+  const key = `${side}-${itemId}`;
   // If clicking the same type that's already active, clear preference (show both)
-  if (itemValuePreferences.get(itemId) === currentType) {
-    itemValuePreferences.delete(itemId);
+  if (itemValuePreferences.get(key) === currentType) {
+    itemValuePreferences.delete(key);
   } else {
     // Otherwise set to the new type
-    itemValuePreferences.set(itemId, currentType);
+    itemValuePreferences.set(key, currentType);
   }
   updatePreview();
 }
 
 // Update calculateSideValues to respect value preferences
-function calculateSideValues(items) {
+function calculateSideValues(items, side) {
   return Object.values(items)
     .filter((item) => item)
     .reduce((totals, item) => {
       const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
-      const preferredType = itemValuePreferences.get(itemKey);
+      const key = `${side}-${itemKey}`;
+      const preferredType = itemValuePreferences.get(key);
       
       // Add to both totals if no preference, otherwise add to the preferred type only
       if (!preferredType) {
@@ -253,7 +255,8 @@ function calculateSideValues(items) {
 // Update renderPreviewItems to include value type toggle
 function renderPreviewItems(containerId, items) {
   const container = document.getElementById(containerId);
-  const values = calculateSideValues(items);
+  const side = containerId === "preview-offering-items" ? "offering" : "requesting";
+  const values = calculateSideValues(items, side);
 
   // Check if we're on mobile (screen width less than 768px)
   const isMobile = window.innerWidth < 768;
@@ -285,7 +288,8 @@ function renderPreviewItems(containerId, items) {
   const itemsHtml = uniqueItems
     .map(({ item, count }) => {
       const itemKey = item.is_sub ? item.id : `${item.name}-${item.type}`;
-      const currentValueType = itemValuePreferences.get(itemKey);
+      const key = `${side}-${itemKey}`;
+      const currentValueType = itemValuePreferences.get(key);
       const hasBothValues = Boolean(item.cash_value) && Boolean(item.duped_value);
       const hasDupedValue = Boolean(item.duped_value) && item.duped_value !== "N/A";
 
@@ -357,11 +361,11 @@ function renderPreviewItems(containerId, items) {
       ${hasBothValues ? `
         <div class="value-type-toggle">
           <button class="btn btn-sm ${currentValueType === 'cash' ? 'btn-outline-success' : 'btn-success'}"
-                  onclick="event.stopPropagation(); toggleItemValueType('${itemKey}', 'cash')">
+                  onclick="event.stopPropagation(); toggleItemValueType('${itemKey}', 'cash', '${side}')">
             Cash
           </button>
           <button class="btn btn-sm ${currentValueType === 'duped' ? 'btn-outline-info' : 'btn-info'} ${!hasDupedValue ? 'disabled opacity-50' : ''}"
-                  onclick="event.stopPropagation(); ${hasDupedValue ? `toggleItemValueType('${itemKey}', 'duped')` : ''}"
+                  onclick="event.stopPropagation(); ${hasDupedValue ? `toggleItemValueType('${itemKey}', 'duped', '${side}')` : ''}"
                   ${!hasDupedValue ? 'disabled' : ''}>
             Duped
           </button>
@@ -378,7 +382,7 @@ function renderPreviewItems(containerId, items) {
       <h6>
        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
         <rect width="16" height="16" fill="none" />
-        <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
+        <path fill="currentColor" d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM10 6.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5m.5 2.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5z" />
       </svg>
         ${
           containerId === "preview-offering-items" ? "Offering" : "Requesting"

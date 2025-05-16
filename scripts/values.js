@@ -547,6 +547,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let categoryFilteredItems = [...allItems];
     if (sortValue !== "name-all-items") {
       const parts = sortValue.split("-");
+      const sortType = parts[0]; // Extract sort type from first part
       const itemType = parts.slice(1).join("-");
       categoryFilteredItems = allItems.filter((item) => {
         if (itemType === "limited-items") {
@@ -1285,24 +1286,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     const lastUpdatedElement = document.getElementById("values-last-updated");
     if (!lastUpdatedElement || !timestamp) return;
 
-    const now = Date.now();
-    const diff = now - (timestamp * 1000); // Convert to milliseconds
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    // Convert timestamp to milliseconds if it's in seconds
+    const timestampInMs = timestamp.toString().length <= 10 ? timestamp * 1000 : timestamp;
+    
+    // Create a Date object
+    const date = new Date(timestampInMs);
+    
+    // Format the date as "Month Day, Year at HH:MM AM/PM"
+    const formattedDate = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    });
 
-    let timeAgoText;
-    if (days > 0) {
-        timeAgoText = `${days} ${days === 1 ? 'day' : 'days'} ago`;
-    } else if (hours > 0) {
-        timeAgoText = `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
-    } else if (minutes > 0) {
-        timeAgoText = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
-    } else {
-        timeAgoText = 'Just now';
-    }
-
-    lastUpdatedElement.textContent = timeAgoText;
+    lastUpdatedElement.textContent = formattedDate;
   }
 
   function updateTotalItemsCount() {
