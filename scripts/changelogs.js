@@ -1232,11 +1232,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Click event for changelog dropdown items
-  // In changelogs.js - Update the dropdown click handler
   document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("changelog-dropdown-item")) {
+    const dropdownItem = e.target.closest(".changelog-dropdown-item");
+    if (dropdownItem) {
       e.preventDefault();
-      const changelogId = e.target.dataset.changelogId;
+      const changelogId = dropdownItem.dataset.changelogId;
       const selectedChangelog = changelogsData.find(
         (cl) => cl.id == changelogId
       );
@@ -1246,7 +1246,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const newUrl = `/changelogs/${changelogId}`;
         history.pushState({}, "", newUrl);
 
-        // Display the changelog
+        // Display the changelog and update breadcrumb
         displayChangelog(selectedChangelog);
         updateChangelogBreadcrumb(changelogId);
 
@@ -1256,11 +1256,14 @@ document.addEventListener("DOMContentLoaded", function () {
           window.commentsManagerInstance.type = "changelog";
           window.commentsManagerInstance.itemId = changelogId;
           window.commentsManagerInstance.loadComments();
+        } else {
+          window.commentsManagerInstance = new CommentsManager("changelog", changelogId);
+          window.commentsManagerInstance.loadComments();
         }
 
         // Close the dropdown
         const dropdown = bootstrap.Dropdown.getInstance(
-          e.target.closest(".dropdown-menu").previousElementSibling
+          dropdownItem.closest(".dropdown-menu").previousElementSibling
         );
         if (dropdown) {
           dropdown.hide();
