@@ -116,6 +116,7 @@ body {
   object-fit: contain;
   object-position: center center;
   background-color: #212529;
+  border-radius: 0 !important; /* Remove border radius */
 }
 
 

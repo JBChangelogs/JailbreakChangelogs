@@ -3237,3 +3237,22 @@ body.bottom-sheet-open {
 .sub-item-year {
   font-weight: 500;
 }
+
+.no-trades-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  background-color: var(--bg-primary) !important;
+  border-radius: 8px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.no-trades-message::before {
+  content: "🔍";
+  font-size: 1.5rem;
+}
