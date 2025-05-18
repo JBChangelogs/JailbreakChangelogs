@@ -1054,53 +1054,41 @@ button {
   font-size: 1.1rem;
 }
 @media (max-width: 768px) {
-  /* Changelog intro adjustments */
   .changelog-intro {
     padding: 1rem;
-    margin-bottom: 1rem;
   }
 
   .changelog-intro .display-4 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 1rem;
-    text-align: left;
   }
 
   .changelog-intro .lead {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    margin-bottom: 1rem;
-    text-align: left;
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
-  /* Feature grid adjustments */
   .feature-grid {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
-    margin-top: 1rem;
+    gap: 1rem;
   }
 
   .feature-item {
     padding: 1rem;
-    text-align: left;
   }
 
   .feature-item i {
     font-size: 1.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .feature-item h5 {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
   }
 
   .feature-item p {
-    font-size: 0.85rem;
-    line-height: 1.4;
+    font-size: 0.9rem;
   }
 
-  /* Quick stats and links adjustments */
   .quick-stats,
   .quick-links {
     margin-top: 1rem;
@@ -1108,51 +1096,44 @@ button {
 
   .quick-stats h5,
   .quick-links .card-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   .quick-stats ul li,
   .quick-links ul li {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
   }
 
-  /* Adjust container padding */
   .container-fluid {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
-  /* Make content take full width */
   #main-container .col-12 {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
-  /* Adjust content wrapper */
   #content-wrapper {
-    margin-left: 0;
-    margin-right: 0;
+    flex-direction: column;
   }
 
-  /* Make sidebar image container full width */
+  #content-wrapper > div {
+    width: 100%;
+    max-width: 100%;
+  }
+
   #sidebar-image-wrapper {
-    margin-left: 0;
-    margin-right: 0;
+    margin-top: 1rem;
   }
 
-  /* Adjust quick links for mobile */
   .quick-nav-link {
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 
-  /* Ensure content section uses full width */
   #content {
-    width: 100%;
-    padding-left: 0;
-    padding-right: 0;
+    margin-bottom: 1rem;
   }
 }
 /* For even smaller screens (576px and below) */
