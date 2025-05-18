@@ -751,6 +751,9 @@ function removeItem(index, tradeType) {
 
   renderTradeItems(tradeType);
 
+  // Always update preview when removing items
+  updatePreview();
+
   // Check if there are any items left
   const hasItems = Object.values(offeringItems).some(item => item) || 
                   Object.values(requestingItems).some(item => item);
@@ -759,11 +762,6 @@ function removeItem(index, tradeType) {
   const previewSection = document.getElementById('trade-preview');
   if (previewSection) {
     previewSection.style.display = hasItems ? 'block' : 'none';
-  }
-
-  // Update preview if visible
-  if (hasItems) {
-    updatePreview();
   }
 
   // Save trade state
@@ -864,8 +862,8 @@ function displayAvailableItems(type) {
         const currentYear = new Date().getFullYear().toString();
         const hasVariants = item.children && item.children.length > 0;
         
-        // Create variant dropdown HTML if item has variants
-        const variantDropdown = hasVariants ? `
+        // Create variant dropdown HTML if item has variants and is tradable
+        const variantDropdown = (hasVariants && item.tradable !== 0) ? `
           <div class="sub-items-dropdown position-absolute top-0 end-0">
             <div class="dropdown">
               <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-selected-variant="${currentYear}">
