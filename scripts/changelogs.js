@@ -63,49 +63,49 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   document
-    .querySelector("#latestChangelogBtn, #latestChangelogMobileBtn")
-    .addEventListener("click", function () {
-      const btn = this;
-
-      // Check if button is already disabled
-      if (btn.disabled) {
-        return;
-      }
-
-      debounceLatestChangelog(() => {
-        if (changelogsData && changelogsData.length > 0) {
-          const latestChangelog = changelogsData[0];
-          const currentChangelogId = parseInt(
-            window.location.pathname.split("/").pop()
-          );
-
-          // Only proceed if we're not already on the latest changelog
-          if (currentChangelogId !== latestChangelog.id) {
-            const newUrl = `/changelogs/${latestChangelog.id}`;
-            history.pushState({}, "", newUrl);
-            displayChangelog(latestChangelog);
-            updateChangelogBreadcrumb(latestChangelog.id);
-
-            if (window.commentsManagerInstance) {
-              window.commentsManagerInstance.clearComments();
-              window.commentsManagerInstance.type = "changelog";
-              window.commentsManagerInstance.itemId = latestChangelog.id;
-              window.commentsManagerInstance.loadComments();
-            }
-
-            changelogToast("Showing latest changelog");
-          }
+    .querySelectorAll("#latestChangelogBtn, #latestChangelogMobileBtn")
+    .forEach(btn => {
+      btn.addEventListener("click", function () {
+        // Check if button is already disabled
+        if (this.disabled) {
+          return;
         }
-      });
-      // Add visual feedback by disabling the button temporarily
-      btn.disabled = true;
-      btn.classList.add("disabled");
 
-      // Re-enable the button after the delay
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.classList.remove("disabled");
-      }, 4700);
+        debounceLatestChangelog(() => {
+          if (changelogsData && changelogsData.length > 0) {
+            const latestChangelog = changelogsData[0];
+            const currentChangelogId = parseInt(
+              window.location.pathname.split("/").pop()
+            );
+
+            // Only proceed if we're not already on the latest changelog
+            if (currentChangelogId !== latestChangelog.id) {
+              const newUrl = `/changelogs/${latestChangelog.id}`;
+              history.pushState({}, "", newUrl);
+              displayChangelog(latestChangelog);
+              updateChangelogBreadcrumb(latestChangelog.id);
+
+              if (window.commentsManagerInstance) {
+                window.commentsManagerInstance.clearComments();
+                window.commentsManagerInstance.type = "changelog";
+                window.commentsManagerInstance.itemId = latestChangelog.id;
+                window.commentsManagerInstance.loadComments();
+              }
+
+              changelogToast("Showing latest changelog");
+            }
+          }
+        });
+        // Add visual feedback by disabling the button temporarily
+        this.disabled = true;
+        this.classList.add("disabled");
+
+        // Re-enable the button after the delay
+        setTimeout(() => {
+          this.disabled = false;
+          this.classList.remove("disabled");
+        }, 4700);
+      });
     });
 
   // Function to show the loading overlay

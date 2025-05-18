@@ -478,7 +478,14 @@ body.menu-open {
 }
 
 .mobile-menu-container {
-  margin: 0 auto;
+  background-color: #212a31;
+  padding: 8px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .btn-primary {
   background-color: var(
@@ -636,17 +643,6 @@ body.menu-open {
 /* Mobile Menu Toggle Button */
 #mobileMenuToggle {
   width: 220px;
-}
-
-/* Mobile Menu Container */
-.mobile-menu-container {
-  background-color: #212a31;
-  padding: 10px;
-  border-radius: 8px;
-  width: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 /* Sidebar Image */
@@ -1198,6 +1194,20 @@ button {
   .container {
     padding-left: 5px;
     padding-right: 5px; /* Ensure no edge space on very small screens */
+  }
+  .mobile-menu-container {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .mobile-menu-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .mobile-menu-btn svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
