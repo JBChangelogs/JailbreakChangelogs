@@ -357,36 +357,7 @@ body {
   height: 24px;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .seasonal-badge {
-    width: 24px;
-    height: 24px;
-    top: 8px;
-    right: 8px;
-  }
 
-  .seasonal-badge svg,
-  .limited-badge svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-@media (max-width: 576px) {
-  .seasonal-badge {
-    width: 14px;
-    height: 14px;
-    top: 6px;
-    right: 6px;
-  }
-
-  .seasonal-badge svg,
-  .limited-badge svg {
-    width: 18px;
-    height: 18px;
-  }
-}
 
 .intro-container {
   max-width: 100%;
@@ -538,17 +509,6 @@ body {
   border-radius: 50%;
 }
 
-@media (max-width: 768px) {
-  .contributor-avatar {
-    width: 35px;
-    height: 35px;
-  }
-
-  .avatar-img {
-    width: 35px;
-    height: 35px;
-  }
-}
 
 .contributor-info {
   display: flex;
@@ -929,400 +889,8 @@ body {
   white-space: nowrap;
 }
 
-@media (max-width: 768px) {
-  .text-muted {
-    font-size: 0.7rem !important; /* Reduced from 0.8rem */
-  }
-  /* Container adjustments */
-  .container-fluid {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-  }
 
-  /* Override container styles for footer on mobile */
-  .jb-footer .container-fluid {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
 
-  .col-12 {
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-
-  /* Media container mobile optimization */
-  .media-container {
-    aspect-ratio: 16/9;
-    margin-bottom: 0;
-  }
-
-  /* Badge positioning for mobile */
-  .item-type-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
-
-  .hyperchrome-badge {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.4rem;
-  }
-
-  .limited-badge {
-    top: 6px;
-    right: 6px;
-    font-size: 0.65rem;
-  }
-
-  .intro-container {
-    padding: 16px !important;
-  }
-
-  .contributor-header .d-flex {
-    padding: 0 1.5rem; /* Add padding to prevent overlap with toggle icon */
-  }
-
-  .intro-content {
-    padding: 16px !important; /* Increased padding */
-    margin: 0; /* Reset any margins */
-    border-radius: 8px;
-  }
-
-  .intro-content h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .intro-content .lead {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  /* Categories section */
-  .categories-section {
-    margin: 0 -4px;
-    padding-top: 1rem;
-  }
-
-  .category-item {
-    padding: 8px !important;
-    margin: 0 2px;
-  }
-
-  .category-item i {
-    font-size: 0.8rem;
-  }
-
-  .category-item span {
-    font-size: 0.8rem; /* Smaller text size */
-  }
-
-  /* Contributors section */
-  .contributors-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-top: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-  }
-
-  .contributors-grid.expanded {
-    max-height: 1000px;
-    transition: max-height 0.5s ease-in;
-  }
-
-  .contributor-card {
-    margin-top: 1rem;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .contributor-header {
-    position: relative;
-    cursor: pointer;
-    padding: 1rem;
-    margin-bottom: 0;
-    border-bottom: none;
-    transition: background-color 0.2s ease;
-  }
-
-  .contributor-header:hover {
-    background-color: rgba(18, 78, 102, 0.1);
-  }
-
-  .contributor-header .toggle-icon {
-    margin-left: auto;
-    transition: transform 0.3s ease;
-    display: inline-block;
-  }
-
-  .contributor-header .toggle-icon.collapsed {
-    transform: rotate(180deg);
-  }
-
-  .contributor-item {
-    padding: 0.75rem;
-  }
-
-  .contributor-avatar {
-    width: 35px;
-    height: 35px;
-  }
-
-  .avatar-img {
-    width: 35px;
-    height: 35px;
-  }
-
-  /* Buttons and controls */
-  .btn-calculator {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-
-  .btn-calculator i {
-    font-size: 1rem;
-  }
-
-  .intro-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-
-  /* Pagination and loading */
-  .pagination-container {
-    margin-top: 20px;
-  }
-
-  .pagination {
-    margin: 0;
-  }
-
-  .page-link {
-    min-width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .spinner-border {
-    width: 35px;
-    height: 35px;
-    border-width: 2px;
-  }
-
-  .loading-spinner {
-    padding: 15px 0;
-  }
-
-  /* Back to top button */
-  .back-to-top-btn {
-    bottom: 15px;
-    right: 15px;
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
-  }
-
-  /* Form controls */
-  #search-bar,
-  #sort-dropdown,
-  #value-sort-dropdown,
-  .form-control,
-  .form-select {
-    font-size: 12px;
-  }
-
-  .input-group-text {
-    font-size: 14px;
-    padding: 0.375rem 0.5rem;
-  }
-
-  .form-select option {
-    font-size: 12px;
-  }
-
-  #value-sort-dropdown option[value="separator"] {
-    font-size: 12px;
-  }
-
-  .intro-content {
-    text-align: center;
-  }
-
-  .intro-content h1 {
-    text-align: center;
-  }
-
-  .intro-content .lead {
-    text-align: center;
-  }
-
-  .intro-buttons {
-    justify-content: center;
-    align-items: center;
-  }
-
-  .row.g-3.mb-2 {
-    justify-content: center !important;
-  }
-
-  .row.g-3.mb-2 .col-auto {
-    display: flex;
-    justify-content: center;
-  }
-
-  .trader-notes ul {
-    display: inline-block;
-    text-align: left; /* Keep list items left-aligned for readability */
-  }
-
-  .trader-notes {
-    text-align: center;
-  }
-
-  .categories-section {
-    text-align: center;
-  }
-
-  .categories-section h2 {
-    text-align: center;
-  }
-}
-
-@media (max-width: 576px) {
-  .card-spinner {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; /* Match parent height */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #212a31;
-    border-radius: 8px 8px 0 0;
-  }
-
-  /* Adjust spinner size for mobile */
-  .custom-spinner {
-    width: 20px;
-    height: 20px;
-    border-width: 2px;
-  }
-
-  .intro-container {
-    padding: 0px !important;
-    margin: 0 auto;
-  }
-
-  .intro-content {
-    padding: 16px !important;
-  }
-
-  .custom-spinner {
-    width: 30px;
-    height: 30px;
-  }
-
-  .intro-buttons {
-    flex-direction: column;
-  }
-
-  .intro-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .item-type-badge {
-    font-size: 0.69rem;
-    padding: 0.15rem 0.35rem;
-  }
-
-  .hyperchrome-badge {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.3rem;
-  }
-
-  .category-item {
-    padding: 0.75rem !important;
-  }
-
-  .category-item span {
-    font-size: 0.85rem;
-  }
-
-  .dropdown-toggle {
-    font-size: 0.7rem !important;
-    padding: 0.15rem 0.35rem !important;
-    min-width: 60px !important;
-    position: absolute !important;
-    top: 4px !important;
-    right: 4px !important;
-    z-index: 2 !important;
-  }
-
-  .dropdown-menu {
-    font-size: 0.7rem !important;
-    min-width: 60px !important;
-    margin-top: 0.25rem !important;
-  }
-
-  .dropdown-item {
-    padding: 0.15rem 0.35rem !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .text-muted {
-    font-size: 0.65rem !important; /* Even smaller for very small screens */
-  }
-
-  .item-type-badge {
-    font-size: 0.65rem;
-    padding: 0.15rem 0.35rem;
-  }
-
-  .hyperchrome-badge {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.3rem;
-  }
-}
-
-@media (max-width: 375px) {
-  .badges-container {
-    margin-top: -15px !important;
-  }
-  .container-fluid {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-  }
-  .intro-container {
-    padding: 4px !important;
-  }
-  .intro-content {
-    padding: 16px !important; /* Maintain padding even on smallest screens */
-  }
-  .items-card .badge {
-    font-size: 0.6rem !important;
-    padding: 0.15rem 0.35rem !important;
-    max-width: 90px !important;
-  }
-  .items-card .text-body-secondary {
-    font-size: 0.65rem !important;
-  }
-}
-
-@media (min-width: 428px) and (max-width: 768px) {
-  .item-type-badge {
-    font-size: 0.8rem;
-  }
-
-  .hyperchrome-badge {
-    font-size: 0.75rem;
-  }
-}
 
 .favorite-icon {
   position: absolute !important;
@@ -1387,19 +955,7 @@ body {
   color: #ffd700;
 }
 
-/* Add responsive adjustments for mobile */
-@media (max-width: 576px) {
-  .favorite-icon {
-    width: 28px;
-    height: 28px;
-    top: 6px !important;
-    left: 6px !important;
-  }
 
-  .favorite-icon i {
-    font-size: 0.9rem !important;
-  }
-}
 
 /* Add after the other value-sort-dropdown styles */
 #value-sort-dropdown option[value="favorites"] {
@@ -1577,114 +1133,6 @@ body.menu-open {
   height: 48px; /* Reduced from 64px */
 }
 
-@media (max-width: 768px) {
-  .horn-play-btn .play-icon,
-  .horn-play-btn .pause-icon {
-    width: 40px; /* Reduced from 48px */
-    height: 40px;
-  }
-}
-
-@media (max-width: 576px) {
-  .horn-play-btn .play-icon,
-  .horn-play-btn .pause-icon {
-    width: 32px; /* Reduced from 40px */
-    height: 32px;
-  }
-}
-
-/* Add/modify these mobile-specific styles */
-@media (max-width: 576px) {
-  /* Adjust card body padding */
-  .items-card .card-body {
-    padding: 0.75rem !important;
-  }
-
-  /* Reduce card title size */
-  .items-card .card-title {
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Adjust list group spacing */
-  .items-card .list-group-item {
-    padding: 0.35rem 0.5rem !important;
-    margin-bottom: 0.35rem !important;
-  }
-
-  /* Make value badges more compact */
-  .items-card .badge {
-    font-size: 0.65rem !important;
-    padding: 0.2rem 0.4rem !important;
-    max-width: 110px !important; /* Limit maximum width */
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  /* Reduce text size for labels */
-  .items-card .text-body-secondary {
-    font-size: 0.7rem !important;
-  }
-
-  /* Adjust card footer */
-  .items-card .card-footer {
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .items-card .card-footer small {
-    font-size: 0.65rem;
-  }
-
-  /* Reduce font size of last updated text in card footer */
-  .items-card .card-footer .text-body-secondary {
-    font-size: 0.6rem !important;
-  }
-
-  /* Ensure media container maintains aspect ratio */
-  .media-container {
-    aspect-ratio: 16/9;
-  }
-
-  /* Maintain 2 cards per row with proper gutters */
-  .col-6 {
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-
-  .row {
-    margin-left: -4px;
-    margin-right: -4px;
-  }
-
-  /* Add some bottom margin between rows */
-  .col-6 {
-    margin-bottom: 8px;
-  }
-}
-
-/* Custom CSS for 320px devices */
-@media (max-width: 320px) {
-   /* Reduce card title size */
-   .items-card .card-title {
-    font-size: 0.63rem;
-  }
-   /* Reduce text size for labels */
-   .items-card .text-body-secondary {
-    font-size: 0.63rem !important;
-  }
-  .items-card .badge {
-    font-size: 0.5rem !important;
-    padding: 0.15rem 0.35rem !important;
-    max-width: 90px !important;
-  }
-  .items-card .card-footer .text-body-secondary {
-    font-size: 0.5rem !important;
-  }
-  .category-item span {
-    font-size: 0.6rem;
-  }
-}
 
 .media-tooltip {
   position: absolute;
@@ -1746,24 +1194,7 @@ body.menu-open {
   display: none;
 }
 
-@media (max-width: 767px) {
-  .trader-notes {
-    margin-bottom: 1rem;
-  }
 
-  .trader-notes:last-child {
-    margin-bottom: 0;
-  }
-
-  .trader-notes h2 {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .trader-notes li {
-    font-size: 0.8125rem;
-  }
-}
 
 .item-name-link {
   transition: color 0.2s ease;
@@ -1781,4 +1212,519 @@ body.menu-open {
 .dropdown-item.active {
   background-color: var(--accent-color-light) !important;
   color: white !important;
+}
+
+@media (max-width: 1024px) {
+  .items-card .card-title {
+    font-size: 1rem !important;
+  }
+  .items-card .text-body-secondary {
+    font-size: 0.75rem !important;
+  }
+}
+/* Media Queries */
+@media (max-width: 768px) {
+  .horn-play-btn .play-icon,
+  .horn-play-btn .pause-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .text-muted {
+    font-size: 0.7rem !important;
+  }
+
+  .container-fluid {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .jb-footer .container-fluid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .col-12 {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .media-container {
+    aspect-ratio: 16/9;
+    margin-bottom: 0;
+  }
+
+  .item-type-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .hyperchrome-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .limited-badge {
+    top: 6px;
+    right: 6px;
+    font-size: 0.65rem;
+  }
+
+  .intro-container {
+    padding: 16px !important;
+  }
+
+  .contributor-header .d-flex {
+    padding: 0 1.5rem;
+  }
+
+  .intro-content {
+    padding: 16px !important;
+    margin: 0;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .intro-content h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .intro-content .lead {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .categories-section {
+    margin: 0 -4px;
+    padding-top: 1rem;
+    text-align: center;
+  }
+
+  .categories-section h2 {
+    text-align: center;
+  }
+
+  .category-item {
+    padding: 8px !important;
+    margin: 0 2px;
+  }
+
+  .category-item i {
+    font-size: 0.8rem;
+  }
+
+  .category-item span {
+    font-size: 0.8rem;
+  }
+
+  .contributors-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .contributors-grid.expanded {
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
+  }
+
+  .contributor-card {
+    margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .contributor-header {
+    position: relative;
+    cursor: pointer;
+    padding: 1rem;
+    margin-bottom: 0;
+    border-bottom: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .contributor-header:hover {
+    background-color: rgba(18, 78, 102, 0.1);
+  }
+
+  .contributor-header .toggle-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .contributor-header .toggle-icon.collapsed {
+    transform: rotate(180deg);
+  }
+
+  .contributor-item {
+    padding: 0.75rem;
+  }
+
+  .contributor-avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .avatar-img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .btn-calculator {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-calculator i {
+    font-size: 1rem;
+  }
+
+  .intro-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .pagination-container {
+    margin-top: 20px;
+  }
+
+  .pagination {
+    margin: 0;
+  }
+
+  .page-link {
+    min-width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner-border {
+    width: 35px;
+    height: 35px;
+    border-width: 2px;
+  }
+
+  .loading-spinner {
+    padding: 15px 0;
+  }
+
+  .back-to-top-btn {
+    bottom: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+
+  #search-bar,
+  #sort-dropdown,
+  #value-sort-dropdown,
+  .form-control,
+  .form-select {
+    font-size: 12px;
+  }
+
+  .input-group-text {
+    font-size: 14px;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .form-select option {
+    font-size: 12px;
+  }
+
+  #value-sort-dropdown option[value="separator"] {
+    font-size: 12px;
+  }
+
+  .intro-buttons {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .row.g-3.mb-2 {
+    justify-content: center !important;
+  }
+
+  .row.g-3.mb-2 .col-auto {
+    display: flex;
+    justify-content: center;
+  }
+
+  .trader-notes {
+    text-align: center;
+  }
+
+  .trader-notes ul {
+    display: inline-block;
+    text-align: left;
+  }
+
+  .seasonal-badge {
+    width: 24px;
+    height: 24px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .seasonal-badge svg,
+  .limited-badge svg {
+    width: 20px;
+    height: 20px;
+  }
+  .items-card .card-title {
+    font-size: 1rem !important;
+  }
+  .items-card .text-body-secondary {
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .horn-play-btn .play-icon,
+  .horn-play-btn .pause-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .favorite-icon {
+    width: 28px;
+    height: 28px;
+    top: 6px !important;
+    left: 6px !important;
+  }
+
+  .favorite-icon i {
+    font-size: 0.9rem !important;
+  }
+
+  .seasonal-badge {
+    width: 14px;
+    height: 14px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .seasonal-badge svg,
+  .limited-badge svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .items-card .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .items-card .card-title {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .items-card .list-group-item {
+    padding: 0.35rem 0.5rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .items-card .badge {
+    font-size: 0.65rem !important;
+    padding: 0.2rem 0.4rem !important;
+    max-width: 110px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .items-card .text-body-secondary {
+    font-size: 0.7rem !important;
+  }
+
+  .items-card .card-footer {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .items-card .card-footer small {
+    font-size: 0.65rem;
+  }
+
+  .items-card .card-footer .text-body-secondary {
+    font-size: 0.6rem !important;
+  }
+
+  .col-6 {
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-bottom: 8px;
+  }
+
+  .row {
+    margin-left: -4px;
+    margin-right: -4px;
+  }
+
+  .card-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #212a31;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .custom-spinner {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+  }
+
+  .intro-container {
+    padding: 0px !important;
+    margin: 0 auto;
+  }
+
+  .intro-content {
+    padding: 16px !important;
+  }
+
+  .intro-buttons {
+    flex-direction: column;
+  }
+
+  .intro-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .item-type-badge {
+    font-size: 0.69rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .hyperchrome-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+  }
+
+  .category-item {
+    padding: 0.75rem !important;
+  }
+
+  .category-item span {
+    font-size: 0.85rem;
+  }
+
+  .dropdown-toggle {
+    font-size: 0.7rem !important;
+    padding: 0.15rem 0.35rem !important;
+    min-width: 60px !important;
+    position: absolute !important;
+    top: 4px !important;
+    right: 4px !important;
+    z-index: 2 !important;
+  }
+
+  .dropdown-menu {
+    font-size: 0.7rem !important;
+    min-width: 60px !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .dropdown-item {
+    padding: 0.15rem 0.35rem !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .text-muted {
+    font-size: 0.65rem !important;
+  }
+
+  .item-type-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .hyperchrome-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .badges-container {
+    margin-top: -15px !important;
+  }
+
+  .container-fluid {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .intro-container {
+    padding: 4px !important;
+  }
+
+  .intro-content {
+    padding: 16px !important;
+  }
+
+  .items-card .badge {
+    font-size: 0.6rem !important;
+    padding: 0.15rem 0.35rem !important;
+    max-width: 90px !important;
+  }
+
+  .items-card .text-body-secondary {
+    font-size: 0.65rem !important;
+  }
+
+  .items-card .card-title {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (min-width: 428px) and (max-width: 768px) {
+  .item-type-badge {
+    font-size: 0.8rem;
+  }
+
+  .hyperchrome-badge {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .items-card .card-title {
+    font-size: 0.63rem !important;
+  }
+
+  .items-card .text-body-secondary {
+    font-size: 0.63rem !important;
+  }
+
+  .items-card .badge {
+    font-size: 0.5rem !important;
+    padding: 0.15rem 0.35rem !important;
+    max-width: 90px !important;
+  }
+
+  .items-card .card-footer .text-body-secondary {
+    font-size: 0.5rem !important;
+  }
+
+  .category-item span {
+    font-size: 0.6rem;
+  }
 }
