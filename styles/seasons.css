@@ -774,3 +774,184 @@ span {
   color: #000;
   font-weight: 500;
 }
+
+@media (max-width: 1024px) {
+  #content-wrapper {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  #content-wrapper > div {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #sidebar-image-wrapper {
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .seasons-intro {
+    padding: 1.5rem;
+  }
+
+  .seasons-intro .display-4 {
+    font-size: 2.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .seasons-intro .lead {
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .feature-item {
+    padding: 1.25rem;
+  }
+
+  .feature-item i {
+    font-size: 1.75rem;
+  }
+
+  .feature-item h5 {
+    font-size: 1.15rem;
+  }
+
+  .feature-item p {
+    font-size: 0.95rem;
+  }
+
+  .quick-stats,
+  .quick-links {
+    margin-top: 1.25rem;
+  }
+
+  .quick-stats h5,
+  .quick-links .card-title {
+    font-size: 1.15rem;
+  }
+
+  .quick-stats ul li,
+  .quick-links ul li {
+    font-size: 0.95rem;
+  }
+
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  #main-container .col-12 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .quick-nav-link {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  #content {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 728px) {
+  #content-wrapper {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  #content-wrapper > div {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #sidebar-image-wrapper {
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+
+  .seasons-intro {
+    padding: 1rem;
+  }
+
+  .seasons-intro .display-4 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .seasons-intro .lead {
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feature-item {
+    padding: 1rem;
+  }
+
+  .feature-item i {
+    font-size: 1.5rem;
+  }
+
+  .feature-item h5 {
+    font-size: 1.1rem;
+  }
+
+  .feature-item p {
+    font-size: 0.9rem;
+  }
+
+  .quick-stats,
+  .quick-links {
+    margin-top: 1rem;
+  }
+
+  .quick-stats h5,
+  .quick-links .card-title {
+    font-size: 1.1rem;
+  }
+
+  .quick-stats ul li,
+  .quick-links ul li {
+    font-size: 0.9rem;
+  }
+
+  .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  #main-container .col-12 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .quick-nav-link {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+
+  #content {
+    margin-bottom: 1rem;
+  }
+
+  .countdowns-container {
+    flex-direction: column;
+  }
+
+  .countdown-wrapper {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}

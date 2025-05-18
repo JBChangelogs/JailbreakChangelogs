@@ -710,7 +710,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <div class="media-container position-relative ${containerClass}" style="aspect-ratio: 16/9;">
           <video class="${imageClass || "card-img-top"}" 
-                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" 
                  playsinline 
                  muted 
                  autoplay
