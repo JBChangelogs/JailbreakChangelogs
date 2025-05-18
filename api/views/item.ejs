@@ -10,7 +10,7 @@
     <meta name="title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       name="description"
-      content="<%- (item.description && item.description !== 'N/A') ? item.description.replace(/"/g, '\\"') : `Get the latest value and details for ${item.name} in Roblox Jailbreak. View current price, trading history, rarity status, and market trends.` %>"
+      content="<%- (item.description && item.description !== 'N/A') ? item.description.substring(0, 150).replace(/"/g, '\\"') : `Get the latest value and details for ${item.name} in Roblox Jailbreak. View current price, trading history, rarity status, and market trends.` %>"
     />
     <meta
       name="keywords"
@@ -52,7 +52,7 @@
     <meta property="og:title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       property="og:description"
-      content="<%- (item.description && item.description !== 'N/A') ? item.description.replace(/"/g, '\\"') : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
+      content="<%- (item.description && item.description !== 'N/A') ? item.description.substring(0, 150).replace(/"/g, '\\"') : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
     />
     <meta property="og:image" content="<%= embedImageUrl %>" />
 
@@ -65,7 +65,7 @@
     <meta name="twitter:title" content="<%= item.name %> - Roblox Jailbreak" />
     <meta
       name="twitter:description"
-      content="<%- (item.description && item.description !== 'N/A') ? item.description.replace(/"/g, '\\"') : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
+      content="<%- (item.description && item.description !== 'N/A') ? item.description.substring(0, 150).replace(/"/g, '\\"') : `Get the latest trading value and details for ${item.name} in Roblox Jailbreak. Updated ${itemType.toLowerCase()} values, rarity info, and market trends.` %>"
     />
     <meta property="twitter:image" content="<%= embedImageUrl %>" />
 
@@ -106,7 +106,7 @@
         "@context": "https://schema.org",
         "@type": "Game Item",
         "name": "<%= item.name %>",
-        "description": "<%- (item.description && item.description !== 'N/A') ? item.description.replace(/"/g, '\\"') : `${item.name} is a ${itemType.toLowerCase()} item in Roblox Jailbreak.` %>",
+        "description": "<%- (item.description && item.description !== 'N/A') ? item.description.substring(0, 150).replace(/"/g, '\\"') : `${item.name} is a ${itemType.toLowerCase()} item in Roblox Jailbreak.` %>",
         "image": "<%= item.image || logoUrl %>",
         "additionalType": "VideoGameItem",
         "additionalProperty": [
