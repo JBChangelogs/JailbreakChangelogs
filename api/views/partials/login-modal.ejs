@@ -147,7 +147,7 @@
       
       // Fetch user data before refreshing
       try {
-        const response = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`);
+        const response = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`);
         if (response.ok) {
           const userData = await response.json();
           if (userData) {

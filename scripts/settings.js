@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   if (token) {
     // If token is in URL, fetch user data and store it
-    fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`, {
+    fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`, {
       headers: {
         "Content-Type": "application/json",
         Origin: "https://jailbreakchangelogs.xyz",
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Fetch user data first to get premium type
       const userResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       // Get user's premium type first
-      const userResponse = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`);
+      const userResponse = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`);
       if (!userResponse.ok) throw new Error("Failed to get user data");
       const userData = await userResponse.json();
 
@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       // Get user's premium type first
-      const userResponse = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`);
+      const userResponse = await fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`);
       if (!userResponse.ok) throw new Error("Failed to get user data");
       const userData = await userResponse.json();
 
@@ -547,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Fetch fresh user data
         const userResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
         );
         if (userResponse.ok) {
           const userData = await userResponse.json();
@@ -558,9 +558,8 @@ document.addEventListener("DOMContentLoaded", function () {
           const profileContent = document.querySelector('.profile-actions');
           const dropdownContent = document.querySelector('.dropdown-menu');
           if (profileContent && dropdownContent) {
-            // Re-render navigation content
-            profileContent.innerHTML = getProfileContent(true);
-            dropdownContent.innerHTML = getDropdownContent(true);
+            // Re-render navigation content by triggering a page reload
+            window.location.href = `/users/${userData.id}`;
           }
         }
         

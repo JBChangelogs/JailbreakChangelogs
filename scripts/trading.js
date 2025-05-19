@@ -24,7 +24,7 @@ async function canCreateTradeAd() {
 
   try {
     const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
     );
     if (!response.ok) throw new Error("Failed to fetch user data");
 
@@ -1109,7 +1109,7 @@ async function updateExpirationOptions() {
     if (!token) return;
 
     const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
     );
     const userData = await response.json();
     const premiumTier = userData.premiumtype || 0;
@@ -1564,7 +1564,7 @@ async function makeTradeOffer(tradeId) {
 
     // Get user data to get the user ID
     const userResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
     );
     if (!userResponse.ok) {
       throw new Error("Failed to fetch user data");
@@ -1628,7 +1628,7 @@ async function editTradeAd(tradeId) {
 
     // Get user data from token
     const userResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
     );
     if (!userResponse.ok) {
       console.error("Failed to fetch user data:", userResponse.status);
@@ -2868,7 +2868,7 @@ async function createTradeAd() {
 
     // Get user data to check premium tier
     const userResponse = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true&nocache=true`
     );
     if (!userResponse.ok) {
       throw new Error("Failed to fetch user data");

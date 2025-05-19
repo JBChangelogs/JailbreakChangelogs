@@ -847,7 +847,7 @@ app.get("/users/:user/followers", async (req, res) => {
     if (token) {
       try {
         const userDataResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -964,7 +964,7 @@ app.get("/users/:user/following", async (req, res) => {
     if (token) {
       try {
         const userDataResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -1166,7 +1166,7 @@ app.get("/users/:user", async (req, res) => {
     if (token) {
       try {
         const tokenResponse = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`,
           {
             headers: {
               "Content-Type": "application/json",

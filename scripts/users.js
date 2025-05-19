@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // Fetch user data to check premium type
       const userResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}`
+        `https://api.jailbreakchangelogs.xyz/users/get/?id=${userId}&nocache=true`
       );
       
       if (!userResponse.ok) {

@@ -59,7 +59,7 @@ class CommentsManager {
     }
 
     // Get user's premium type when logged in
-    fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`)
+    fetch(`https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`)
       .then(response => response.json())
       .then(userData => {
         this.currentUserPremiumType = userData.premiumtype || 0;
@@ -506,7 +506,7 @@ class CommentsManager {
 
       if (token) {
         const response = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
         );
         if (response.ok) {
           const userData = await response.json();
@@ -675,7 +675,7 @@ class CommentsManager {
     if (token) {
       try {
         const response = await fetch(
-          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+          `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
         );
         if (response.ok) {
           const userData = await response.json();
@@ -1003,7 +1003,7 @@ class CommentsManager {
 
     try {
       const userResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
       );
 
       if (!userResponse.ok) {
@@ -1075,7 +1075,7 @@ class CommentsManager {
     try {
       // First get user data to get the author
       const userResponse = await fetch(
-        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`
+        `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`
       );
 
       if (!userResponse.ok) {

@@ -165,7 +165,7 @@ async function validateUserSession(token) {
     }
 
     const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}`,
+      `https://api.jailbreakchangelogs.xyz/users/get/token?token=${token}&nocache=true`,
       {
         signal: AbortSignal.timeout(1000),
       }
