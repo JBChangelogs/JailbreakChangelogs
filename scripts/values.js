@@ -2175,3 +2175,36 @@ document.addEventListener("visibilitychange", () => {
     });
   }
 });
+
+async function getRandomItem(event) {
+  event.preventDefault();
+  
+  // Idk whether I should show the loading overlay here or not
+  // showLoadingOverlay();
+  
+  try {
+    // Fetch random item
+    const response = await fetch('https://api.jailbreakchangelogs.xyz/items/random');
+    const item = await response.json();
+    
+    if (!item) {
+      throw new Error('No item returned');
+    }
+    
+    // Construct URL for the item
+    const itemUrl = `/item/${item.type.toLowerCase()}/${encodeURIComponent(item.name)}`;
+    
+    // Show success notification
+    notyf.success(`Found ${item.name} ${item.type}! Redirecting...`);
+    
+    // Wait 2 seconds before redirecting
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Redirect to the item page
+    window.location.href = itemUrl;
+    
+  } catch (error) {
+    console.error('Error fetching random item:', error);
+    notyf.error('Failed to get random item. Please try again.');
+  }
+}
