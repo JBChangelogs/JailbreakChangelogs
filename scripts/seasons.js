@@ -614,7 +614,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="season-countdown">
               <h3 class="countdown-title">Season ${nextSeason.season} / ${nextSeason.title} submissions have closed</h3>
               <div class="submission-notice" style="padding-top: 0;">
-                <a href="https://www.reddit.com/r/JailbreakCreations/comments/1jptlh2/season_26_entries_jungle_adventure/?sort=new" 
+                <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ky03km/season_27_entries_pirates_life/?sort=new" 
                    target="_blank" 
                    rel="noopener noreferrer" 
                    class="btn btn-sm btn-outline-info">
@@ -636,7 +636,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="season-countdown">
             <h3 class="countdown-title">Season ${nextSeason.season} / ${nextSeason.title} submissions have closed</h3>
             <div class="submission-notice" style="padding-top: 0;">
-              <a href="https://www.reddit.com/r/JailbreakCreations/comments/1jptlh2/season_26_entries_jungle_adventure/?sort=new" 
+              <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ky03km/season_27_entries_pirates_life/?sort=new" 
                  target="_blank" 
                  rel="noopener noreferrer" 
                  class="btn btn-sm btn-outline-info">
@@ -670,7 +670,7 @@ document.addEventListener("DOMContentLoaded", function () {
       isNextSeasonCountdown && isSubmissionsOpen
         ? `
       <div class="submission-notice">
-        <a href="https://www.reddit.com/r/JailbreakCreations/comments/1jptlh2/season_26_entries_jungle_adventure/?sort=new" 
+        <a href="https://www.reddit.com/r/JailbreakCreations/comments/1ky03km/season_27_entries_pirates_life/?sort=new" 
            target="_blank" 
            rel="noopener noreferrer" 
            class="btn btn-sm btn-outline-info">
