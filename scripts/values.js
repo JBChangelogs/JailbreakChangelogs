@@ -1163,20 +1163,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadItems() {
     showLoadingOverlay();
     try {
-      // Fetch values version last updated
-      const versionResponse = await fetch("https://api.jailbreakchangelogs.xyz/version/values", {
-          method: "GET",
-          headers: {
-              "Content-Type": "application/json",
-              Origin: "https://jailbreakchangelogs.xyz",
-          },
-      });
-      
-      if (versionResponse.ok) {
-          const versionData = await versionResponse.json();
-          updateLastUpdatedTimestamp(versionData.last_updated);
-      }
-
       const response = await fetch("https://api.jailbreakchangelogs.xyz/items/list", {
         method: "GET",
         headers: {
@@ -1186,6 +1172,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       window.allItems = await response.json();
+
+      // Find the item with the highest last_updated timestamp
+      const mostRecentItem = window.allItems.reduce((latest, current) => {
+        return (current.last_updated > latest.last_updated) ? current : latest;
+      });
+
+      if (mostRecentItem.last_updated) {
+        updateLastUpdatedTimestamp(mostRecentItem.last_updated);
+      }
 
       // Add favorite status to items if user is logged in and we have user data
       const token = getCookie("token");
