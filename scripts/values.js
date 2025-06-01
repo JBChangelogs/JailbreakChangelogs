@@ -1173,13 +1173,49 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       window.allItems = await response.json();
 
-      // Find the item with the highest last_updated timestamp
+      // Helper function to normalize timestamp to milliseconds
+      const normalizeTimestamp = (timestamp) => {
+        if (!timestamp) return 0;
+        // If timestamp is in seconds (10 digits), convert to milliseconds
+        return timestamp.toString().length <= 10 ? timestamp * 1000 : timestamp;
+      };
+
+      // Find the item with the highest last_updated timestamp, including sub-items
       const mostRecentItem = window.allItems.reduce((latest, current) => {
-        return (current.last_updated > latest.last_updated) ? current : latest;
+        // Get the latest timestamp from the main item and all its variants
+        const mainTimestamp = normalizeTimestamp(current.last_updated);
+        const variantTimestamps = current.children?.map(child => normalizeTimestamp(child.data?.last_updated)) || [];
+        const latestVariantTimestamp = Math.max(...variantTimestamps, 0);
+        
+        // Compare with the current latest item's timestamps
+        const latestMainTimestamp = normalizeTimestamp(latest.last_updated);
+        const latestVariantTimestamps = latest.children?.map(child => normalizeTimestamp(child.data?.last_updated)) || [];
+        const latestItemVariantTimestamp = Math.max(...latestVariantTimestamps, 0);
+        
+        // Get the highest timestamp for both items
+        const currentHighest = Math.max(mainTimestamp, latestVariantTimestamp);
+        const latestHighest = Math.max(latestMainTimestamp, latestItemVariantTimestamp);
+        
+        // For debugging
+        console.log('Current item:', current.name, 'Highest timestamp:', currentHighest);
+        console.log('Latest item:', latest.name, 'Highest timestamp:', latestHighest);
+        
+        return currentHighest > latestHighest ? current : latest;
       });
 
-      if (mostRecentItem.last_updated) {
-        updateLastUpdatedTimestamp(mostRecentItem.last_updated);
+      // Get the actual highest timestamp from the most recent item
+      const mainTimestamp = normalizeTimestamp(mostRecentItem.last_updated);
+      const variantTimestamps = mostRecentItem.children?.map(child => normalizeTimestamp(child.data?.last_updated)) || [];
+      const highestTimestamp = Math.max(mainTimestamp, ...variantTimestamps);
+
+      // For debugging
+      console.log('Most recent item:', mostRecentItem.name);
+      console.log('Main timestamp:', mainTimestamp);
+      console.log('Variant timestamps:', variantTimestamps);
+      console.log('Highest timestamp:', highestTimestamp);
+
+      if (highestTimestamp) {
+        updateLastUpdatedTimestamp(highestTimestamp);
       }
 
       // Add favorite status to items if user is logged in and we have user data
@@ -1287,14 +1323,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Create a Date object
     const date = new Date(timestampInMs);
     
-    // Format the date as "Month Day, Year at HH:MM AM/PM"
+    // Format the date as "Month Day, Year at HH:MM AM/PM (Timezone)"
     const formattedDate = date.toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: 'numeric',
         minute: 'numeric',
-        hour12: true
+        hour12: true,
+        timeZoneName: 'short'
     });
 
     lastUpdatedElement.textContent = formattedDate;
