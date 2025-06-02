@@ -116,7 +116,7 @@ function fallbackCopy(text) {
 async function fetchServers() {
   try {
     const response = await fetch(
-      "https://api.jailbreakchangelogs.xyz/servers/list"
+      "https://api.jailbreakchangelogs.xyz/servers/list?nocache=true"
     );
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -247,7 +247,7 @@ async function createServerCard(server, number) {
 	<path fill="currentColor" d="m14.06 9l.94.94L5.92 19H5v-.92zm3.6-6c-.25 0-.51.1-.7.29l-1.83 1.83l3.75 3.75l1.83-1.83c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z" />
 </svg>
   </button>
-  <button class="btn btn-outline-danger btn-sm" onclick="deleteServer('${server.id}')"
+  <button class="btn btn-outline-danger btn-sm" onclick="deleteServer('${server.link}')"
     data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Server">
  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
 	<rect width="24" height="24" fill="none" />
@@ -258,7 +258,7 @@ async function createServerCard(server, number) {
     : "";
 
   col.innerHTML = `
-    <div class="card server-card h-100">
+    <div class="card server-card h-100" data-server-id="${server.id}">
       <div class="card-body">
         <div class="d-flex flex-column gap-2">
           <div class="d-flex justify-content-between align-items-center">
@@ -317,16 +317,6 @@ async function createServerCard(server, number) {
 // edit and delete server functions
 async function editServer(serverId) {
   try {
-    // Fetch server details first
-    const response = await fetch(
-      `https://api.jailbreakchangelogs.xyz/servers/get?id=${serverId}`
-    );
-    const server = await response.json();
-
-    if (!response.ok) {
-      throw new Error(server.message || "Failed to fetch server details");
-    }
-
     // Get the modal and form
     const modal = new bootstrap.Modal(
       document.getElementById("addServerModal")
@@ -336,22 +326,39 @@ async function editServer(serverId) {
     // Update modal title
     document.getElementById("addServerModalLabel").textContent = "Edit Server";
 
-    // Pre-fill the form with server details
-    form.serverLink.value = server.link;
-    form.serverRules.value = server.rules === "N/A" ? "" : server.rules;
+    // Find the server card that contains this server ID
+    const serverCard = document.querySelector(`[data-server-id="${serverId}"]`);
+    if (!serverCard) {
+      throw new Error("Server not found");
+    }
 
-    // Convert Unix timestamp to datetime-local format
+    // Get server data from the card
+    const serverLink = serverCard.querySelector('.copy-btn').dataset.link;
+    const serverRules = serverCard.querySelector('.server-info').textContent.includes('Rules:') 
+      ? serverCard.querySelector('.server-info').textContent.split('Rules:')[1].trim()
+      : 'N/A';
+    const expiresText = serverCard.querySelector('.server-info').textContent.split('Expires in:')[1].split('Owner:')[0].trim();
+
+    // Pre-fill the form with server details
+    form.serverLink.value = serverLink;
+    form.serverRules.value = serverRules === "N/A" ? "" : serverRules;
+
+    // Handle expiration
     const neverExpiresCheckbox = document.getElementById("neverExpires");
-    if (server.expires === "Never") {
+    if (expiresText === "Never") {
       neverExpiresCheckbox.checked = true;
       form.expiresAt.disabled = true;
       form.expiresAt.value = "";
     } else {
       neverExpiresCheckbox.checked = false;
       form.expiresAt.disabled = false;
-      const expirationDate = new Date(parseInt(server.expires) * 1000);
-      const formattedDate = expirationDate.toISOString().slice(0, 16);
-      form.expiresAt.value = formattedDate;
+      // Extract date from the text (format: "X days (MMM DD, YYYY, HH:MM AM/PM)")
+      const dateMatch = expiresText.match(/\(([^)]+)\)/);
+      if (dateMatch) {
+        const expirationDate = new Date(dateMatch[1]);
+        const formattedDate = expirationDate.toISOString().slice(0, 16);
+        form.expiresAt.value = formattedDate;
+      }
     }
 
     // Change form submission handler
@@ -363,8 +370,8 @@ async function editServer(serverId) {
 
     modal.show();
   } catch (error) {
-    console.error("Error fetching server details:", error);
-    showToast(error.message || "Failed to load server details", "error");
+    console.error("Error preparing edit form:", error);
+    showToast(error.message || "Failed to prepare edit form", "error");
   }
 }
 
@@ -481,12 +488,12 @@ async function handleEditServer(event, serverId) {
 
   try {
     const serverLink = form.serverLink.value.trim();
-    const expirationDate = new Date(form.expiresAt.value);
     const neverExpires = document.getElementById("neverExpires").checked;
     const formData = {
       link: serverLink,
       rules: form.serverRules.value || "N/A",
-      expires: Math.floor(expirationDate.getTime() / 1000).toString(),
+      expires: neverExpires ? "Never" : Math.floor(new Date(form.expiresAt.value).getTime() / 1000).toString(),
+      owner: token,
     };
 
     const response = await fetch(
@@ -564,7 +571,7 @@ document
     resetModalToAddMode(form);
   });
 
-async function deleteServer(serverId) {
+async function deleteServer(serverLink) {
   const token = getCookie("token");
   if (!token) {
     showToast("Authentication required", "error");
@@ -584,7 +591,7 @@ async function deleteServer(serverId) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          link: serverId,
+          link: serverLink,
           owner: token
         })
       }
