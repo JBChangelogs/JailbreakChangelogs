@@ -221,7 +221,7 @@ class CommentsManager {
               charCounter.after(warning);
             }
           } else {
-            charCount.style.color = ''; // Reset to default
+            charCount.style.color = '';
             this.submitBtn.disabled = false;
             charCounter.classList.remove('over-limit');
             
@@ -1124,6 +1124,78 @@ class CommentsManager {
 
     this.currentEditingComment = comment;
     editCommentText.value = comment.content;
+
+    // Add character counter display to modal
+    const charLimit = this.characterLimits[this.currentUserPremiumType];
+    let charCounter = document.getElementById('edit-char-counter');
+    if (!charCounter) {
+      charCounter = document.createElement('div');
+      charCounter.id = 'edit-char-counter';
+      charCounter.className = 'char-counter mt-2';
+      charCounter.innerHTML = `
+        <small class="text-muted">
+          <span id="edit-char-count">0</span> / <span id="edit-char-limit">${charLimit === Infinity ? 'Unlimited' : charLimit}</span> characters
+        </small>
+      `;
+      editCommentText.parentNode.appendChild(charCounter);
+    }
+
+    const charCount = document.getElementById('edit-char-count');
+    if (charCount) {
+      charCount.textContent = comment.content.length;
+      if (comment.content.length > charLimit && charLimit !== Infinity) {
+        charCount.style.color = '#dc3545';
+        const saveBtn = document.getElementById('saveCommentEdit');
+        if (saveBtn) saveBtn.disabled = true;
+        
+        // Add warning message if it doesn't exist
+        if (!document.querySelector('.edit-char-limit-warning')) {
+          const warning = document.createElement('div');
+          warning.className = 'edit-char-limit-warning text-danger small mt-1';
+          warning.innerHTML = `You've exceeded the ${charLimit} character limit for your current Supporter tier. <a href="/supporting" class="text-primary">Upgrade your tier</a> for a higher limit!`;
+          charCounter.after(warning);
+        }
+      }
+    }
+
+    // Remove any existing event listeners to prevent duplicates
+    const newEditCommentText = editCommentText.cloneNode(true);
+    editCommentText.parentNode.replaceChild(newEditCommentText, editCommentText);
+
+    // Add input event listener for real-time character counting
+    newEditCommentText.addEventListener('input', () => {
+      const currentLength = newEditCommentText.value.length;
+      if (charCount) {
+        charCount.textContent = currentLength;
+        
+        // Get or create warning element
+        let warning = document.querySelector('.edit-char-limit-warning');
+        
+        if (currentLength > charLimit && charLimit !== Infinity) {
+          charCount.style.color = '#dc3545';
+          const saveBtn = document.getElementById('saveCommentEdit');
+          if (saveBtn) saveBtn.disabled = true;
+          
+          // Only create warning if it doesn't exist
+          if (!warning) {
+            warning = document.createElement('div');
+            warning.className = 'edit-char-limit-warning text-danger small mt-1';
+            warning.innerHTML = `You've exceeded the ${charLimit} character limit for your current Supporter tier. <a href="/supporting" class="text-primary">Upgrade your tier</a> for a higher limit!`;
+            charCounter.after(warning);
+          }
+        } else {
+          charCount.style.color = '';
+          const saveBtn = document.getElementById('saveCommentEdit');
+          if (saveBtn) saveBtn.disabled = false;
+          
+          // Remove warning if it exists
+          if (warning) {
+            warning.remove();
+          }
+        }
+      }
+    });
+
     this.editModal.show();
   }
 
@@ -1145,6 +1217,13 @@ class CommentsManager {
 
     const newContent = document.getElementById("editCommentText").value.trim();
     if (!newContent) return;
+
+    // Add character limit check
+    const charLimit = this.characterLimits[this.currentUserPremiumType];
+    if (newContent.length > charLimit && charLimit !== Infinity) {
+        notyf.error(`Your comment exceeds the ${charLimit} character limit for your current Supporter tier. Visit /supporting to upgrade your tier!`);
+        return;
+    }
 
     try {
       const response = await fetch(
