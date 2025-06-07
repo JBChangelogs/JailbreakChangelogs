@@ -821,7 +821,7 @@ app.get("/login", (req, res) => {
 
 const getAvatar = async (userId, avatarHash, username) => {
   const defaultAvatarUrl = "https://jailbreakchangelogs.xyz/assets/default-avatar.png";
-  const proxyUrl = "https://euphonious-melomakarona-a257cd.netlify.app/?destination=";
+  const proxyUrl = "https://proxy.jailbreakchangelogs.xyz/?destination=";
 
   if (!avatarHash) {
     return defaultAvatarUrl;
