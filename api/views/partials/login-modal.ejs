@@ -148,9 +148,9 @@
     const redirectUrl = urlParams.get('redirect');
     
     if (token) {
-      // Set cookie with 7 day expiration
+      // Set cookie with 30 day expiration
       const date = new Date();
-      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+      date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
       document.cookie = `token=${token}; expires=${date.toUTCString()}; path=/`;
       
       // Fetch user data before refreshing

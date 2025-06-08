@@ -877,7 +877,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             throw new Error("Invalid token");
           }
           deleteCookie("token");
-          setCookie("token", token, 7);
+          setCookie("token", token, 30);
           const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
           storageUtil.setItem("user", JSON.stringify(userData));
           storageUtil.setItem("avatar", avatarURL);

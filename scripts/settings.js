@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
       localStorage.setItem("user", JSON.stringify(userData));
       
       // Set cookie
-      document.cookie = `token=${token}; path=/; max-age=604800; secure; samesite=Strict`;
+      document.cookie = `token=${token}; path=/; max-age=2592000; secure; samesite=Strict`;
       
       // Clean up URL and reload
       window.history.replaceState({}, '', '/settings');
