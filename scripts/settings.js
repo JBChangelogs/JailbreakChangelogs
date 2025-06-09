@@ -265,7 +265,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 hide_favorites: document.querySelector('[data-setting="hide_favorites"]').checked ? 1 : 0,
                 banner_discord: document.querySelector('[data-setting="banner_discord"]').checked ? 1 : 0,
                 avatar_discord: document.querySelector('[data-setting="avatar_discord"]').checked ? 1 : 0,
-                hide_connections: document.querySelector('[data-setting="hide_connections"]').checked ? 1 : 0,
                 hide_presence: document.querySelector('[data-setting="hide_presence"]').checked ? 1 : 0,
                 dms_allowed: document.querySelector('[data-setting="dms_allowed"]').checked ? 1 : 0
               };
@@ -304,7 +303,6 @@ document.addEventListener("DOMContentLoaded", function () {
             hide_favorites: document.querySelector('[data-setting="hide_favorites"]').checked ? 1 : 0,
             banner_discord: document.querySelector('[data-setting="banner_discord"]').checked ? 1 : 0,
             avatar_discord: document.querySelector('[data-setting="avatar_discord"]').checked ? 1 : 0,
-            hide_connections: document.querySelector('[data-setting="hide_connections"]').checked ? 1 : 0,
             hide_presence: document.querySelector('[data-setting="hide_presence"]').checked ? 1 : 0,
             dms_allowed: document.querySelector('[data-setting="dms_allowed"]').checked ? 1 : 0
           };
@@ -381,7 +379,6 @@ document.addEventListener("DOMContentLoaded", function () {
         hide_favorites: document.querySelector('[data-setting="hide_favorites"]').checked ? 1 : 0,
         banner_discord: 0, // Force to use custom banner
         avatar_discord: document.querySelector('[data-setting="avatar_discord"]').checked ? 1 : 0,
-        hide_connections: document.querySelector('[data-setting="hide_connections"]').checked ? 1 : 0,
         hide_presence: document.querySelector('[data-setting="hide_presence"]').checked ? 1 : 0,
         dms_allowed: document.querySelector('[data-setting="dms_allowed"]').checked ? 1 : 0
       };
@@ -461,7 +458,6 @@ document.addEventListener("DOMContentLoaded", function () {
         hide_favorites: document.querySelector('[data-setting="hide_favorites"]').checked ? 1 : 0,
         banner_discord: document.querySelector('[data-setting="banner_discord"]').checked ? 1 : 0,
         avatar_discord: 0, // Force to use custom avatar
-        hide_connections: document.querySelector('[data-setting="hide_connections"]').checked ? 1 : 0,
         hide_presence: document.querySelector('[data-setting="hide_presence"]').checked ? 1 : 0,
         dms_allowed: document.querySelector('[data-setting="dms_allowed"]').checked ? 1 : 0
       };
@@ -696,9 +692,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const isImgBB = hostname === 'imgbb.com' || hostname === 'i.ibb.co';
       const isTenor = hostname === 'tenor.com' || hostname.endsWith('.tenor.com');
       const isPostImg = hostname === 'postimg.cc' || hostname === 'i.postimg.cc';
+      const isDiscord = hostname === 'cdn.discordapp.com';
       
-      if (!isImgBB && !isTenor && !isPostImg) {
-        notyf.error("Only ImgBB, PostImg, and Tenor URLs are allowed");
+      if (!isImgBB && !isTenor && !isPostImg && !isDiscord) {
+        notyf.error("Only ImgBB, PostImg, Tenor, and Discord CDN URLs are allowed");
         return false;
       }
 
