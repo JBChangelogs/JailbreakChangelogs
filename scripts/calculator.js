@@ -703,7 +703,7 @@ function sortModalItems() {
     filtered = filtered.filter((item) => {
       const itemName = item.name.toLowerCase();
       const itemType = item.type.toLowerCase();
-      return itemName.startsWith(searchTerm) || itemType.startsWith(searchTerm);
+      return itemName.includes(searchTerm) || itemType.includes(searchTerm);
     });
   }
 
@@ -1098,9 +1098,9 @@ function handleSearch(type) {
         const itemType = item.type.toLowerCase();
         // Only return true if name or type starts with the search term
         return (
-          itemName.startsWith(searchTerm) ||
+          itemName.includes(searchTerm) ||
           // Only search by type if search term is longer than 1 character
-          (searchTerm.length > 1 && itemType.startsWith(searchTerm))
+          (searchTerm.length > 1 && itemType.includes(searchTerm))
         );
       });
     } else {
