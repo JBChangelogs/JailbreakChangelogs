@@ -272,7 +272,7 @@ app.get("/changelogs/:changelog", async (req, res) => {
 
 app.get("/seasons", async (req, res) => {
   try {
-    const latestSeason = 26;
+    const latestSeason = 27;
     res.redirect(`/seasons/${latestSeason}`);
   } catch (error) {
     console.error("Error fetching latest season:", error);
@@ -284,7 +284,7 @@ app.get("/seasons/:season", async (req, res) => {
   const seasonId = req.params.season;
   const apiUrl = `https://api.jailbreakchangelogs.xyz/seasons/get?season=${seasonId}`;
   const seasonsListUrl = 'https://api.jailbreakchangelogs.xyz/seasons/list';
-  const latestSeason = 26;
+  const latestSeason = 27;
 
   try {
     // Make both API calls in parallel

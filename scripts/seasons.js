@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const seasonDetailsContainer = document.querySelector("#season-details");
   const carouselInner = document.querySelector("#carousel-inner");
   const seasonList = document.querySelector("#seasonList");
-  const latestSeason = 26;
+  const latestSeason = 27;
 
   // Function to show the loading overlay
   function showLoadingOverlay() {
