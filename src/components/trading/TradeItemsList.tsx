@@ -58,7 +58,7 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                 <div className="flex items-center justify-between">
                   <Link 
                     href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${'sub_name' in item ? `?variant=${item.sub_name}` : ''}`}
-                    className="text-muted hover:text-[#5865F2] transition-colors font-medium"
+                    className="text-muted hover:text-blue-400 transition-colors font-medium"
                   >
                     {item.name}
                   </Link>
@@ -81,10 +81,6 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                     </span>
                   )}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-[#FFFFFF]">Cash: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : item.cash_value}</div>
-                <div className="text-sm text-[#FFFFFF]">Duped: {item.duped_value === null || item.duped_value === "N/A" ? "N/A" : item.duped_value}</div>
               </div>
             </li>
           ))}
@@ -107,7 +103,7 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                 <div className="flex items-center justify-between">
                   <Link 
                     href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${'sub_name' in item ? `?variant=${item.sub_name}` : ''}`}
-                    className="text-muted hover:text-[#5865F2] transition-colors font-medium"
+                    className="text-muted hover:text-blue-400 transition-colors font-medium"
                   >
                     {item.name}
                   </Link>
@@ -130,10 +126,6 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                     </span>
                   )}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-[#FFFFFF]">Cash: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : item.cash_value}</div>
-                <div className="text-sm text-[#FFFFFF]">Duped: {item.duped_value === null || item.duped_value === "N/A" ? "N/A" : item.duped_value}</div>
               </div>
             </li>
           ))}

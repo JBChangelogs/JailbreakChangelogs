@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Tooltip } from '@mui/material';
@@ -22,6 +22,8 @@ interface RobloxTradeUserProps {
 }
 
 export default function RobloxTradeUser({ user, showBadge = false }: RobloxTradeUserProps) {
+  const [imageError, setImageError] = useState(false);
+
   if (!user.roblox_id || !user.roblox_username) {
     return null;
   }
@@ -29,7 +31,7 @@ export default function RobloxTradeUser({ user, showBadge = false }: RobloxTrade
   return (
     <div className="flex items-center space-x-3">
       <div className="flex-shrink-0">
-        {user.roblox_avatar ? (
+        {!imageError && user.roblox_avatar ? (
           <Image
             src={user.roblox_avatar}
             alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
@@ -38,10 +40,11 @@ export default function RobloxTradeUser({ user, showBadge = false }: RobloxTrade
             unoptimized
             draggable={false}
             className="rounded-full"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-10 h-10 bg-[#2E3944] rounded-full flex items-center justify-center">
-            <RobloxIcon className="h-6 w-6 text-muted" />
+          <div className="w-10 h-10 bg-[#212A31] rounded-full flex items-center justify-center">
+            <RobloxIcon className="h-6 w-6 text-white" />
           </div>
         )}
       </div>

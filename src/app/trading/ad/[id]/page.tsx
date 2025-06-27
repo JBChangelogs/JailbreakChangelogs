@@ -200,7 +200,7 @@ export default function TradeDetailsPage() {
           <div className="flex items-center justify-between mb-6">
             <Link 
               href="/trading"
-              className="inline-flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors"
+              className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-400 transition-colors"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to Trading
@@ -231,7 +231,7 @@ export default function TradeDetailsPage() {
           <p className="text-muted text-lg mb-2">{error}</p>
           <Link 
             href="/trading"
-            className="inline-flex items-center gap-2 mt-4 text-[#5865F2] hover:text-[#4752C4] transition-colors"
+            className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-400 transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             Back to Trading
@@ -248,7 +248,7 @@ export default function TradeDetailsPage() {
         <div className="flex items-center justify-between mb-6 px-4">
           <Link 
             href="/trading"
-            className="inline-flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors"
+            className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-400 transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             Back to Trading

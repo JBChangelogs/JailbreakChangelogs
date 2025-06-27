@@ -89,7 +89,7 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                   <div>
                     <Link 
                       href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${'sub_name' in item ? `?variant=${item.sub_name}` : ''}`}
-                      className="text-[#FFFFFF] hover:text-[#5865F2] transition-colors font-medium"
+                      className="text-[#FFFFFF] hover:text-blue-400 transition-colors font-medium"
                     >
                       {item.base_name && item.sub_name 
                         ? `${item.base_name} (${item.sub_name})` 
@@ -152,7 +152,7 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                   <div>
                     <Link 
                       href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${'sub_name' in item ? `?variant=${item.sub_name}` : ''}`}
-                      className="text-[#FFFFFF] hover:text-[#5865F2] transition-colors font-medium"
+                      className="text-[#FFFFFF] hover:text-blue-400 transition-colors font-medium"
                     >
                       {item.base_name && item.sub_name 
                         ? `${item.base_name} (${item.sub_name})` 

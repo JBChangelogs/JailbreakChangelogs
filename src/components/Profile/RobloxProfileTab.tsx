@@ -57,7 +57,7 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
               </>
             ) : (
               <div className="w-full h-full bg-[#212A31] flex items-center justify-center">
-                <RobloxIcon className="text-[#5865F2] h-12 w-12" />
+                <RobloxIcon className="text-white h-12 w-12" />
               </div>
             )}
           </div>
