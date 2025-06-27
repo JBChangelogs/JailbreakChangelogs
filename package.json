@@ -20,6 +20,7 @@
     "@mui/material": "^7.1.2",
     "@mui/x-charts-pro": "^8.5.3",
     "@mui/x-date-pickers": "^8.5.3",
+    "@next/third-parties": "^15.3.4",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.2.0",

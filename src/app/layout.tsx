@@ -24,6 +24,7 @@ import SurveyProvider from '@/components/Survey/SurveyProvider';
 import ReportIssueButton from '@/components/ReportIssue/ReportIssueButton';
 import { checkMaintenanceMode, getMaintenanceMetadata } from '@/utils/maintenance';
 import { Suspense } from 'react';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const inter = Inter({ subsets: ["latin"] });
 const luckiestGuy = localFont({ 
@@ -86,6 +87,10 @@ export default async function RootLayout({
   if (isMaintenanceMode) {
     return (
       <html lang="en">
+        <head>
+          {/* Google Analytics */}
+          <GoogleAnalytics gaId="G-729QSV9S7B" />
+        </head>
         <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
           <Maintenance />
         </body>
@@ -95,6 +100,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        {/* Google Analytics */}
+        <GoogleAnalytics gaId="G-729QSV9S7B" />
+      </head>
       <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
         <Toaster
           position="bottom-right"
