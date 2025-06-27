@@ -430,7 +430,7 @@ export default function ItemDetailsPage() {
             {/* Right column - Details */}
             <div className="space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-muted">{currentItem.name}</h1>
+                <h2 className="text-3xl font-bold text-white">{currentItem.name}</h2>
                 <p className="text-sm text-muted mt-2">
                   Created by <CreatorLink creator={currentItem.creator} />
                 </p>

@@ -203,9 +203,9 @@ export default function ValuesPage() {
         
         <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-muted">
+            <h1 className="text-3xl font-bold text-muted">
               Roblox Jailbreak Value List
-            </h2>
+            </h1>
           </div>
           <p className="mb-4 text-muted">
             Welcome to our Roblox Jailbreak trading values database. We&apos;ve

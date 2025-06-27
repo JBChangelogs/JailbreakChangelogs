@@ -164,6 +164,8 @@ export default async function ItemLayout({
           }}
         />
       )}
+      {/* SEO-friendly H1 that's always present */}
+      <h1 className="sr-only">{item.name} ({item.type})</h1>
       {children}
     </>
   );
