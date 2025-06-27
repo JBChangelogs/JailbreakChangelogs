@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import Link from "next/link";
+import Script from 'next/script';
 import "./globals.css";
 import Header from "@/components/Layout/Header";
 import Maintenance from "@/components/Layout/Maintenance";
@@ -9,7 +10,6 @@ import OfflineDetector from "@/components/OfflineDetector";
 import {
   GlobeAltIcon,
   QuestionMarkCircleIcon,
-  ServerIcon,
   DocumentTextIcon,
   ShieldCheckIcon,
   EnvelopeIcon,
@@ -93,6 +93,15 @@ export default async function RootLayout({
         </head>
         <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
           <Maintenance />
+          <Script id="clarity-script" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID}");
+            `}
+          </Script>
         </body>
       </html>
     );
@@ -324,15 +333,6 @@ export default async function RootLayout({
                         </svg>
                         Discord Bot
                       </Link>
-                      <a
-                        href="https://status.jailbreakchangelogs.xyz/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted hover:text-[#FFFFFF]"
-                      >
-                        <ServerIcon className="h-5 w-5" />
-                        Service Status
-                      </a>
                       <Suspense fallback={
                         <div className="flex items-center gap-2 text-muted">
                           <BugAntIcon className="h-5 w-5" />
@@ -341,6 +341,17 @@ export default async function RootLayout({
                       }>
                         <ReportIssueButton />
                       </Suspense>
+                      <div className="pt-2">
+                        <iframe 
+                          src="https://status.jailbreakchangelogs.xyz/badge?theme=dark" 
+                          width="250" 
+                          height="30" 
+                          frameBorder="0" 
+                          scrolling="no" 
+                          style={{ colorScheme: 'normal' }}
+                          title="Service Status Badge"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -444,6 +455,15 @@ export default async function RootLayout({
             </footer>
           </div>
         </SurveyProvider>
+        <Script id="clarity-script" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID}");
+          `}
+        </Script>
       </body>
     </html>
   );

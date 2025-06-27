@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/src/app/luckiestguy_23068889.module.css"],"sourcesContent":["@font-face {\n    font-family: 'luckiestGuy';\n    src: url('@vercel/turbopack-next/internal/font/local/font?{%22path%22:%22../../public/fonts/LuckiestGuy.ttf%22,%22preload%22:true,%22has_size_adjust%22:true}') format('truetype');\n    font-display: swap;\n    \n}\n\n@font-face {\n    font-family: 'luckiestGuy Fallback';\n    src: local(\"Arial\");\n    ascent-override: 60.24%;\ndescent-override: 25.44%;\nline-gap-override: 0.00%;\nsize-adjust: 116.72%;\n\n}\n\n.className {\n    font-family: 'luckiestGuy', 'luckiestGuy Fallback';\n    \n}\n.variable {\n    --font-luckiest-guy: 'luckiestGuy', 'luckiestGuy Fallback';\n}\n\n"],"names":[],"mappings":"AAAA;;;;;;AAOA;;;;;;;;;AAUA;;;;AAIA"}}]
+}
