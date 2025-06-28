@@ -12,14 +12,14 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^7.1.2",
     "@mui/lab": "7.0.0-beta.13",
     "@mui/material": "^7.1.2",
-    "@mui/x-charts-pro": "^8.5.3",
-    "@mui/x-date-pickers": "^8.5.3",
+    "@mui/x-charts-pro": "^8.6.0",
+    "@mui/x-date-pickers": "^8.6.0",
     "@next/third-parties": "^15.3.4",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
@@ -40,14 +40,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@tailwindcss/postcss": "^4.1.10",
-    "@types/node": "^22.15.32",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/node": "^22.15.34",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-window": "^1.8.8",
-    "eslint": "^9.29.0",
+    "eslint": "^9.30.0",
     "eslint-config-next": "15.3.3",
-    "tailwindcss": "^4.1.10",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3"
   }
 }
