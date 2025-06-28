@@ -93,6 +93,7 @@ async function generateFAQJsonLd(item: Item | null): Promise<string | null> {
   const jsonLd: WithContext<FAQPage> = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    name: `Frequently Asked Questions about ${item.name}`,
     mainEntity: faqs.map(faq => ({
       '@type': 'Question',
       name: faq.question,
