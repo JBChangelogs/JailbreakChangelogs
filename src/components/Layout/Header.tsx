@@ -210,90 +210,8 @@ export default function Header() {
 
   const drawer = (
     <List>
-      <ListItem sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography 
-          sx={{ 
-            color: '#D3D9D4',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}
-        >
-          Game & Updates
-        </Typography>
-        <IconButton onClick={handleDrawerToggle} sx={{ color: '#D3D9D4' }}>
-          <CloseIcon />
-        </IconButton>
-      </ListItem>
-      <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Changelogs" />
-      </ListItem>
-      <ListItem component={Link} href="/seasons" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Seasons" />
-      </ListItem>
-      <ListItem>
-        <Typography 
-          sx={{ 
-            color: '#D3D9D4',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}
-        >
-          Values
-        </Typography>
-      </ListItem>
-      <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/values" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Value List" />
-      </ListItem>
-      <ListItem component={Link} href="/values/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Value Changelogs" />
-      </ListItem>
-      <ListItem component={Link} href="/values/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Value Calculator" />
-      </ListItem>
-      <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Dupe Calculator" />
-      </ListItem>
-      <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Trade Ads" />
-      </ListItem>
-      <ListItem>
-        <Typography 
-          sx={{ 
-            color: '#D3D9D4',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}
-        >
-          Community
-        </Typography>
-      </ListItem>
-      <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="User Search" />
-      </ListItem>
-      <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Private Servers" />
-      </ListItem>
-      <ListItem component={Link} href="/bot" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Discord Bot" />
-      </ListItem>
-      <ListItem component={Link} href="/faq" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="FAQ" />
-      </ListItem>
-      <ListItem component={Link} href="/contributors" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Contributors" />
-      </ListItem>
       {mounted && userData ? (
         <>
-          <Divider sx={{ borderColor: '#2E3944' }} />
           <ListItem 
             component={Link}
             href={`/users/${userData?.id}`}
@@ -365,27 +283,114 @@ export default function Header() {
             </ListItemIcon>
             <ListItemText primary="Logout" />
           </ListItem>
+          <Divider sx={{ borderColor: '#2E3944' }} />
         </>
       ) : (
-        <ListItem>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setLoginModalOpen(true);
-              handleDrawerToggle();
-            }}
-            sx={{
-              backgroundColor: '#5865F2',
-              '&:hover': {
-                backgroundColor: '#4752C4',
-              },
-              width: '100%'
-            }}
-          >
-            Login
-          </Button>
-        </ListItem>
+        <>
+          <ListItem>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setLoginModalOpen(true);
+                handleDrawerToggle();
+              }}
+              sx={{
+                backgroundColor: '#5865F2',
+                '&:hover': {
+                  backgroundColor: '#4752C4',
+                },
+                width: '100%'
+              }}
+            >
+              Login
+            </Button>
+          </ListItem>
+          <Divider sx={{ borderColor: '#2E3944' }} />
+        </>
       )}
+      
+      <ListItem sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography 
+          sx={{ 
+            color: '#D3D9D4',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}
+        >
+          Game & Updates
+        </Typography>
+        <IconButton onClick={handleDrawerToggle} sx={{ color: '#D3D9D4' }}>
+          <CloseIcon />
+        </IconButton>
+      </ListItem>
+      <Divider sx={{ borderColor: '#2E3944' }} />
+      
+      <ListItem component={Link} href="/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Changelogs" />
+      </ListItem>
+      <ListItem component={Link} href="/seasons" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Seasons" />
+      </ListItem>
+      <ListItem>
+        <Typography 
+          sx={{ 
+            color: '#D3D9D4',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}
+        >
+          Values
+        </Typography>
+      </ListItem>
+      <Divider sx={{ borderColor: '#2E3944' }} />
+      <ListItem component={Link} href="/values" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Value List" />
+      </ListItem>
+      <ListItem component={Link} href="/values/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Value Changelogs" />
+      </ListItem>
+      <ListItem component={Link} href="/values/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Value Calculator" />
+      </ListItem>
+      <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Dupe Calculator" />
+      </ListItem>
+      <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Trade Ads" />
+      </ListItem>
+      <ListItem>
+        <Typography 
+          sx={{ 
+            color: '#D3D9D4',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}
+        >
+          Community
+        </Typography>
+      </ListItem>
+      <Divider sx={{ borderColor: '#2E3944' }} />
+      <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="User Search" />
+      </ListItem>
+      <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Private Servers" />
+      </ListItem>
+      <ListItem component={Link} href="/bot" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Discord Bot" />
+      </ListItem>
+      <ListItem component={Link} href="/faq" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="FAQ" />
+      </ListItem>
+      <ListItem component={Link} href="/contributors" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText primary="Contributors" />
+      </ListItem>
     </List>
   );
 
