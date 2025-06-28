@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import { PROD_API_URL } from '@/services/api';
 import { getItemImagePath } from '@/utils/images';
 import { getMaintenanceMetadata } from '@/utils/maintenance';
-import { WithContext, Product } from 'schema-dts';
+import { formatFullValue } from '@/utils/values';
+import { WithContext, FAQPage } from 'schema-dts';
 import type { Item } from '@/types/index';
 import { notFound } from 'next/navigation';
 
@@ -30,27 +31,78 @@ async function fetchItem(type: string, name: string): Promise<Item | null> {
   }
 }
 
-function sanitizeJsonLd(jsonLd: WithContext<Product>): string {
+function sanitizeJsonLd(jsonLd: WithContext<FAQPage>): string {
   return JSON.stringify(jsonLd).replace(/</g, '\u003c');
 }
 
-async function generateJsonLd(item: Item | null): Promise<string | null> {
+async function generateFAQJsonLd(item: Item | null): Promise<string | null> {
   if (!item) return null;
-  const imageUrl = getItemImagePath(item.type, item.name, false, true);
-  const finalImageUrl = imageUrl || FALLBACK_IMAGE;
-  const jsonLd: WithContext<Product> = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: item.name,
-    description: item.description || `View details about ${item.name}, a ${item.type} in Jailbreak.`,
-    image: finalImageUrl,
-    url: `https://jailbreakchangelogs.xyz/item/${item.type}/${item.name}`,
-    category: item.type,
-    brand: {
-      '@type': 'Brand',
-      name: 'Roblox Jailbreak'
+  
+  const faqs = [
+    {
+      question: `What is the cash value of ${item.name}?`,
+      answer: `The cash value of ${item.name} is ${formatFullValue(item.cash_value)}.`
     }
+  ];
+
+  // Only add duped value if it's not N/A
+  if (item.duped_value && item.duped_value !== 'N/A') {
+    faqs.push({
+      question: `What is the duped value of ${item.name}?`,
+      answer: `The duped value of ${item.name} is ${formatFullValue(item.duped_value)}.`
+    });
+  }
+
+  faqs.push(
+    {
+      question: `Is ${item.name} limited?`,
+      answer: item.is_limited === 1 ? `${item.name} is a limited item.` : `${item.name} is not a limited item.`
+    },
+    {
+      question: `Is ${item.name} seasonal?`,
+      answer: item.is_seasonal === 1 ? `${item.name} is a seasonal item.` : `${item.name} is not a seasonal item.`
+    },
+    {
+      question: `Can ${item.name} be traded?`,
+      answer: item.tradable === 1 ? `${item.name} can be traded.` : `${item.name} cannot be traded.`
+    },
+    {
+      question: `What is the demand for ${item.name}?`,
+      answer: `The demand for ${item.name} is ${item.demand}.`
+    }
+  );
+
+  // Add creator info if available and clean up the name
+  if (item.creator && item.creator !== 'N/A') {
+    // Remove the ID in brackets from creator name
+    const cleanCreatorName = item.creator.replace(/\s*\(\d+\)$/, '');
+    faqs.push({
+      question: `Who created ${item.name}?`,
+      answer: `${item.name} was created by ${cleanCreatorName}.`
+    });
+  }
+
+  // Add price info if available
+  if (item.price && item.price !== 'N/A') {
+    faqs.push({
+      question: `What is the price of ${item.name}?`,
+      answer: `The price of ${item.name} is ${formatFullValue(item.price)}.`
+    });
+  }
+
+  const jsonLd: WithContext<FAQPage> = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer
+      }
+    }))
   };
+
   return sanitizeJsonLd(jsonLd);
 }
 
@@ -152,15 +204,15 @@ export default async function ItemLayout({
   if (!item) {
     notFound();
   }
-  const jsonLdData = await generateJsonLd(item);
+  const faqJsonLdData = await generateFAQJsonLd(item);
 
   return (
     <>
-      {jsonLdData && (
+      {faqJsonLdData && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: jsonLdData,
+            __html: faqJsonLdData,
           }}
         />
       )}
