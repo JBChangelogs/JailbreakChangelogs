@@ -53,7 +53,6 @@ export default function ContributorsPage() {
         const managerIds = [
           '697457253237653534', // Sen
           '465018380403867648', // 0.5x
-          '911994603794751518', // legamer
         ];
         const managerUsers = await Promise.all(
           managerIds.map(id => fetchUserById(id))
@@ -190,7 +189,7 @@ export default function ContributorsPage() {
         Value List Managers
       </h3>
       {isLoading ? (
-        <LoadingState count={3} />
+        <LoadingState count={2} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4">
@@ -246,34 +245,6 @@ export default function ContributorsPage() {
                     : managers[1]?.username}
                 </Link>
                 <p className="text-sm text-[#FFFFFF]">@{managers[1]?.username}</p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4">
-            <div className="mb-3 flex items-center space-x-3">
-              {managers[2] && (
-                <UserAvatar 
-                  userId={managers[2].id}
-                  avatarHash={managers[2].avatar || null}
-                  username={managers[2].username}
-                  size={12}
-                  showBadge={false}
-                  accent_color={managers[2].accent_color}
-                  custom_avatar={managers[2].custom_avatar}
-                  settings={managers[2].settings}
-                  premiumType={managers[2].premiumtype}
-                />
-              )}
-              <div>
-                <Link
-                  href={`/users/${managers[2]?.id}`}
-                  className="font-semibold text-blue-300 hover:text-blue-400"
-                >
-                  {managers[2]?.global_name && managers[2].global_name !== "None" 
-                    ? managers[2].global_name 
-                    : managers[2]?.username}
-                </Link>
-                <p className="text-sm text-[#FFFFFF]">@{managers[2]?.username}</p>
               </div>
             </div>
           </div>
@@ -674,4 +645,4 @@ export default function ContributorsPage() {
       </div>
     </div>
   );
-} 
+}
