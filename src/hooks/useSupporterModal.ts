@@ -13,7 +13,7 @@ const COMMENT_CHAR_LIMITS = {
   0: 200,  // Free tier
   1: 400,  // Supporter tier 1
   2: 800,  // Supporter tier 2
-  3: '∞'   // Supporter tier 3 (unlimited)
+  3: 2000  // Supporter tier 3 (2000 characters)
 } as const;
 
 const TIER_NAMES = {
@@ -49,25 +49,30 @@ export const useSupporterModal = () => {
     const currentLimit = COMMENT_CHAR_LIMITS[userTier as keyof typeof COMMENT_CHAR_LIMITS];
     const contentLength = content.length;
     
-    if (typeof currentLimit === 'number' && contentLength > currentLimit) {
+    if (contentLength > currentLimit) {
+      // If user is already at tier 3 (highest tier), don't show upgrade modal
+      if (userTier >= 3) {
+        return false; // Access denied, but no modal shown
+      }
+      
       // Find the minimum tier that would allow this content length
       let requiredTier = userTier + 1;
       while (requiredTier <= 3) {
         const requiredLimit = COMMENT_CHAR_LIMITS[requiredTier as keyof typeof COMMENT_CHAR_LIMITS];
-        if (typeof requiredLimit === 'number' && contentLength <= requiredLimit) {
+        if (contentLength <= requiredLimit) {
           break;
         }
         requiredTier++;
       }
       
-      // If we need unlimited, set to tier 3
+      // If we need more than tier 3 allows, set to tier 3 (max tier)
       if (requiredTier > 3) {
         requiredTier = 3;
       }
       
       // Format the required limit for display
       const requiredLimit = COMMENT_CHAR_LIMITS[requiredTier as keyof typeof COMMENT_CHAR_LIMITS];
-      const displayRequiredLimit = typeof requiredLimit === 'string' ? 'Unlimited' : requiredLimit;
+      const displayRequiredLimit = requiredLimit;
       
       openModal({
         feature: 'comment_length',

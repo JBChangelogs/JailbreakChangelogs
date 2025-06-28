@@ -355,7 +355,7 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
               if (!hasMeaningfulChanges && !change.suggestion_data) return null;
 
               return (
-                <div key={change.change_id} className="rounded-lg bg-[#212A31] p-4">
+                <div key={change.change_id} className="rounded-lg bg-[#212A31] p-4 overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
                     <div className="flex items-center gap-2">
                       {change.suggestion_data ? (
@@ -461,24 +461,24 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                       if (oldValue === newValue) return null;
 
                       return (
-                        <div key={key} className="flex items-start gap-2">
-                          <div className="flex-1">
+                        <div key={key} className="flex items-start gap-2 overflow-hidden">
+                          <div className="flex-1 min-w-0">
                             <div className="text-sm text-white capitalize">
                               {key.replace(/_/g, ' ')}
                             </div>
                             {change.suggestion_data ? (
                               <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-white">Old:</span>
-                                  <span className="text-muted line-through">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                  <span className="text-sm text-white flex-shrink-0">Old:</span>
+                                  <span className="text-muted line-through break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
                                     {typeof oldValue === 'boolean' || oldValue === 1 || oldValue === 0 || key.startsWith('is_')
                                       ? formatBooleanLikeValue(oldValue)
                                       : convertUrlsToLinks(oldValue === "" || oldValue === null || oldValue === undefined ? "N/A" : String(oldValue))}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-white">New:</span>
-                                  <span className="text-muted">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                  <span className="text-sm text-white flex-shrink-0">New:</span>
+                                  <span className="text-muted break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
                                     {typeof newValue === 'boolean' || newValue === 1 || newValue === 0 || key.startsWith('is_')
                                       ? formatBooleanLikeValue(newValue)
                                       : convertUrlsToLinks(newValue === "" || newValue === null || newValue === undefined ? "N/A" : String(newValue))}
@@ -487,17 +487,17 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                               </div>
                             ) : (
                               <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-white">Old:</span>
-                                  <span className="text-muted line-through">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                  <span className="text-sm text-white flex-shrink-0">Old:</span>
+                                  <span className="text-muted line-through break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
                                     {typeof oldValue === 'boolean' || oldValue === 1 || oldValue === 0 || key.startsWith('is_')
                                       ? formatBooleanLikeValue(oldValue)
                                       : convertUrlsToLinks(oldValue === "" || oldValue === null || oldValue === undefined ? "N/A" : String(oldValue))}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-white">New:</span>
-                                  <span className="text-muted">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                  <span className="text-sm text-white flex-shrink-0">New:</span>
+                                  <span className="text-muted break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
                                     {typeof newValue === 'boolean' || newValue === 1 || newValue === 0 || key.startsWith('is_')
                                       ? formatBooleanLikeValue(newValue)
                                       : convertUrlsToLinks(newValue === "" || newValue === null || newValue === undefined ? "N/A" : String(newValue))}

@@ -75,7 +75,7 @@ const supporterTiers: SupporterTier[] = [
     price: "400R$",
     priceAlt: "or $5 on Ko-fi",
     features: [
-      "Post Comments up to Unlimited characters",
+      "Post Comments up to 2,000 characters",
       "Trade Ad Duration: +24 Hours (48 Hours total)",
       "Custom Regular/Animated Avatar",
       "Custom Regular/Animated Banner",

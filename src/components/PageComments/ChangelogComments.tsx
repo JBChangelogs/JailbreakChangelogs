@@ -27,12 +27,12 @@ const COMMENT_CHAR_LIMITS = {
   0: 200,  // Free tier
   1: 400,  // Supporter tier 1
   2: 800,  // Supporter tier 2
-  3: '∞' // Supporter tier 3 (unlimited)
+  3: 2000 // Supporter tier 3 (2000 characters)
 } as const;
 
 const getCharLimit = (tier: keyof typeof COMMENT_CHAR_LIMITS): number => {
   const limit = COMMENT_CHAR_LIMITS[tier];
-  return typeof limit === 'number' ? limit : Infinity;
+  return limit;
 };
 
 // Add function to check if comment is within editing window (1 hour)
@@ -258,7 +258,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     // Check if comment length exceeds user's tier limit
     if (!checkCommentLength(newComment, currentUserPremiumType)) {
-      return; // Modal will be shown by the hook
+      // If user is tier 3 and comment is too long, show a toast error
+      if (currentUserPremiumType >= 3 && newComment.length > 2000) {
+        toast.error('Comment is too long. Maximum length is 2000 characters.');
+      }
+      return; // Modal will be shown by the hook for lower tiers
     }
 
     try {
@@ -303,7 +307,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     // Check if edit content length exceeds user's tier limit
     if (!checkCommentLength(editContent, currentUserPremiumType)) {
-      return; // Modal will be shown by the hook
+      // If user is tier 3 and comment is too long, show a toast error
+      if (currentUserPremiumType >= 3 && editContent.length > 2000) {
+        toast.error('Comment is too long. Maximum length is 2000 characters.');
+      }
+      return; // Modal will be shown by the hook for lower tiers
     }
 
     try {

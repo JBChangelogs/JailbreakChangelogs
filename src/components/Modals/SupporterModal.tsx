@@ -41,7 +41,7 @@ const SUPPORTER_TIERS = [
     name: "Supporter III",
     price: "400R$", 
     priceAlt: "or $5 on Ko-fi",
-    features: ["Post Comments up to Unlimited characters", "Custom Animated Avatar", "Custom Animated Banner"],
+    features: ["Post Comments up to 2000 characters", "Custom Animated Avatar", "Custom Animated Banner"],
     color: "border-[#FFD700]",
     badgeColor: "from-[#FFD700] to-[#DAA520]"
   }
@@ -50,9 +50,7 @@ const SUPPORTER_TIERS = [
 const getFeatureDescription = (feature: string, currentLimit?: string | number, requiredLimit?: string | number) => {
   switch (feature) {
     case 'comment_length':
-      const requiredText = requiredLimit === 'Unlimited' 
-        ? 'Supporter III (Unlimited)'
-        : `${requiredLimit} characters`;
+      const requiredText = `${requiredLimit} characters`;
       
       return {
         title: "Unlock Longer Comments",
@@ -196,7 +194,7 @@ export default function SupporterModal({
                               'Post Comments up to 200 characters',
                               'Post Comments up to 400 characters',
                               'Post Comments up to 800 characters',
-                              'Post Comments up to Unlimited characters',
+                              'Post Comments up to 2000 characters',
                             ];
                             return (
                               <span className="block text-gray-300">{commentPerks[recommendedTier ? SUPPORTER_TIERS.indexOf(recommendedTier) : 0]}</span>
