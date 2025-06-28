@@ -12,7 +12,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { PROD_API_URL, TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { storeCampaign } from '@/utils/campaign';
 import { useSearchParams } from 'next/navigation';
@@ -239,7 +239,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
               onClick={() => {
                 setIsRedirecting(true);
                 const currentURL = window.location.href;
-                const oauthRedirect = `${TEST_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
+                const oauthRedirect = `${PROD_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
 
                 toast.loading('Redirecting to Discord...', {
                   duration: 2000,

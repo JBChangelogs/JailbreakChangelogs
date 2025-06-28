@@ -6,7 +6,7 @@ import React from "react";
 import { ThemeProvider, Skeleton, Pagination, Box, Chip } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { darkTheme } from '@/theme/darkTheme';
-import { TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
@@ -100,7 +100,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
     }
     const fetchChangelog = async () => {
       try {
-        const response = await fetch(`${TEST_API_URL}/items/changelogs/get/?id=${id}`);
+        const response = await fetch(`${PROD_API_URL}/items/changelogs/get/?id=${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch changelog');
         }

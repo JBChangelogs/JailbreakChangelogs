@@ -20,7 +20,7 @@ interface Changelog {
 }
 
 import { Item } from "@/types";
-import { PROD_API_URL, TEST_API_URL  } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { formatFullDate } from '@/utils/timestamp';
 
 export const fetchUsers = async () => {
@@ -35,7 +35,7 @@ export const fetchUsers = async () => {
 export async function fetchUserById(id: string) {
   try {
     console.log('Fetching user with ID:', id);
-    const response = await fetch(`${TEST_API_URL}/users/get?id=${id}&nocache=true`);
+    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&nocache=true`);
     const data = await response.json();
     
     if (!response.ok) {

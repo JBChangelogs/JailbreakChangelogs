@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL, TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { TradeAd } from '@/types/trading';
 import { TradeAdCard } from './TradeAdCard';
 import { TradeAdTabs } from './TradeAdTabs';
@@ -69,7 +69,7 @@ export default function TradeAds() {
       const token = getToken();
       if (token) {
         try {
-          const currentUserResponse = await fetch(`${TEST_API_URL}/users/get/token?token=${token}&nocache=true`);
+          const currentUserResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
           if (currentUserResponse.ok) {
             const currentUserData = await currentUserResponse.json();
             setCurrentUserId(currentUserData.id);
@@ -140,7 +140,7 @@ export default function TradeAds() {
         return;
       }
 
-      const response = await fetch(`${TEST_API_URL}/trades/offer`, {
+      const response = await fetch(`${PROD_API_URL}/trades/offer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 
 const ESCAPE_COUNT_THRESHOLD = 5;
 const ESCAPE_TIMEOUT = 2000; // 2 seconds
@@ -9,7 +9,7 @@ const ESCAPE_TIMEOUT = 2000; // 2 seconds
 async function validateToken(token: string) {
   try {
     const response = await fetch(
-      `${TEST_API_URL}/users/get/token?token=${token}&nocache=true`,
+      `${PROD_API_URL}/users/get/token?token=${token}&nocache=true`,
       {
         method: 'GET',
         headers: {

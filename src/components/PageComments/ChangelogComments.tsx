@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, CircularProgress, Typography, TextField, Button, IconButton, Pagination, Menu, MenuItem, Skeleton, Tooltip } from '@mui/material';
-import { PROD_API_URL, TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { formatRelativeDate } from '@/utils/timestamp';
 import { UserAvatar } from '@/utils/avatar';
 import { PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, EllipsisHorizontalIcon, ChatBubbleLeftIcon, FlagIcon } from '@heroicons/react/24/outline';
@@ -181,7 +181,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     try {
       setLoadingUserData(prev => ({ ...prev, [userId]: true }));
       // Fetch user data
-      const response = await fetch(`${TEST_API_URL}/users/get?id=${userId}&nocache=true`);
+      const response = await fetch(`${PROD_API_URL}/users/get?id=${userId}&nocache=true`);
       if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
       setUserData(prev => ({ ...prev, [userId]: data }));
@@ -470,7 +470,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const response = await fetch(`${TEST_API_URL}/comments/report`, {
+      const response = await fetch(`${PROD_API_URL}/comments/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

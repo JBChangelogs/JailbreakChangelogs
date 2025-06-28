@@ -1,5 +1,5 @@
 import React from 'react';
-import { PROD_API_URL, TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { ClockIcon, UserIcon, ShieldCheckIcon, PencilIcon, TrashIcon, PlusCircleIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import { formatProfileDate } from '@/utils/timestamp';
 import { getToken } from '@/utils/auth';
@@ -44,7 +44,7 @@ const ServerList: React.FC = () => {
       let userId: string | null = null;
       if (token) {
         try {
-          const userResponse = await fetch(`${TEST_API_URL}/users/get/token?token=${token}&nocache=true`);
+          const userResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
           if (userResponse.ok) {
             const userData = await userResponse.json() as UserDataResponse;
             userId = userData.id;

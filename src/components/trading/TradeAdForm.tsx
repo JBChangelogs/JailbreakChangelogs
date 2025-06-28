@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL, TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 import { getToken } from '@/utils/auth';
 import { TradeItem, TradeAd } from '@/types/trading';
 import { UserData } from '@/types/auth';
@@ -102,7 +102,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         const token = getToken();
         if (!token) return;
 
-        const response = await fetch(`${TEST_API_URL}/users/get/token?token=${token}&nocache=true`);
+        const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
         if (response.ok) {
           const userData = await response.json();
           setUserData(userData);

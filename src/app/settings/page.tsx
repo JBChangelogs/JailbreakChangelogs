@@ -22,7 +22,7 @@ import { OpenInNew } from '@mui/icons-material';
 import { DeleteAccount } from '@/components/Settings/DeleteAccount';
 import { RobloxConnection } from '@/components/Settings/RobloxConnection';
 import { getToken } from '@/utils/auth';
-import { TEST_API_URL } from '@/services/api';
+import { PROD_API_URL } from '@/services/api';
 
 export default function SettingsPage() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -68,7 +68,7 @@ export default function SettingsPage() {
           return;
         }
 
-        const response = await fetch(`${TEST_API_URL}/users/get/token?token=${token}&nocache=true`);
+        const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
         if (!response.ok) {
           throw new Error('Failed to fetch user data');
         }
