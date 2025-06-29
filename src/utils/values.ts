@@ -179,6 +179,25 @@ export const sortAndFilterItems = async (
     );
   }
 
+  // Apply demand filtering if a specific demand level is selected
+  if (valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc') {
+    // Map the valueSort to the exact demand string from demandOrder
+    const demandMap: Record<string, string> = {
+      'demand-close-to-none': 'Close to none',
+      'demand-very-low': 'Very Low',
+      'demand-low': 'Low',
+      'demand-medium': 'Medium',
+      'demand-decent': 'Decent',
+      'demand-high': 'High',
+      'demand-very-high': 'Very High',
+      'demand-extremely-high': 'Extremely High'
+    };
+    
+    const formattedDemand = demandMap[valueSort];
+    
+    result = result.filter(item => getEffectiveDemand(item) === formattedDemand);
+  }
+
   // Apply value sorting
   switch (valueSort) {
     case "random":
@@ -227,6 +246,17 @@ export const sortAndFilterItems = async (
         const bTime = b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
         return aTime - bTime;
       });
+      break;
+    // For demand filter cases, we already filtered above, so just sort by name
+    case "demand-close-to-none":
+    case "demand-very-low":
+    case "demand-low":
+    case "demand-medium":
+    case "demand-decent":
+    case "demand-high":
+    case "demand-very-high":
+    case "demand-extremely-high":
+      result = result.sort((a, b) => a.name.localeCompare(b.name));
       break;
   }
 

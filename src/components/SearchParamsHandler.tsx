@@ -37,7 +37,15 @@ const validValueSorts = [
   "demand-desc",
   "demand-asc",
   "last-updated-desc",
-  "last-updated-asc"
+  "last-updated-asc",
+  "demand-close-to-none",
+  "demand-very-low",
+  "demand-low",
+  "demand-medium",
+  "demand-decent",
+  "demand-high",
+  "demand-very-high",
+  "demand-extremely-high"
 ] as const;
 
 export default function SearchParamsHandler({ 

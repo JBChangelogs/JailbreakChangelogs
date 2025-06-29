@@ -189,6 +189,40 @@ export default function ValuesPage() {
     });
   };
 
+  const getNoItemsMessage = () => {
+    const hasCategoryFilter = filterSort !== "name-all-items";
+    const hasDemandFilter = valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc';
+    const hasSearchTerm = debouncedSearchTerm;
+    
+    let message = "No items found";
+    
+    // Build the message based on what filters are applied
+    if (hasSearchTerm) {
+      message += ` matching "${debouncedSearchTerm}"`;
+    }
+    
+    if (hasCategoryFilter && hasDemandFilter) {
+      const categoryName = filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ");
+      const demandLevel = valueSort.replace('demand-', '').replace(/-/g, ' ');
+      const formattedDemand = demandLevel.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      
+      message += ` in ${categoryName} with ${formattedDemand} demand`;
+    } else if (hasCategoryFilter) {
+      const categoryName = filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ");
+      message += ` in ${categoryName}`;
+    } else if (hasDemandFilter) {
+      const demandLevel = valueSort.replace('demand-', '').replace(/-/g, ' ');
+      const formattedDemand = demandLevel.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      message += ` with ${formattedDemand} demand`;
+    }
+    
+    return message;
+  };
+
   return (
     <main className="min-h-screen bg-[#2E3944] mb-8">
       <Suspense fallback={null}>
@@ -288,11 +322,53 @@ export default function ValuesPage() {
                 }
               };
 
+              const getDemandValue = (demand: string): string => {
+                switch(demand) {
+                  case 'Close to none':
+                    return 'demand-close-to-none';
+                  case 'Very Low':
+                    return 'demand-very-low';
+                  case 'Low':
+                    return 'demand-low';
+                  case 'Medium':
+                    return 'demand-medium';
+                  case 'Decent':
+                    return 'demand-decent';
+                  case 'High':
+                    return 'demand-high';
+                  case 'Very High':
+                    return 'demand-very-high';
+                  case 'Extremely High':
+                    return 'demand-extremely-high';
+                  default:
+                    return 'demand-close-to-none';
+                }
+              };
+
               return (
-                <div key={demand} className="flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5">
+                <button
+                  key={demand}
+                  onClick={() => {
+                    const demandValue = getDemandValue(demand);
+                    setValueSort(demandValue as ValueSort);
+                    localStorage.setItem('valuesValueSort', demandValue);
+                    if (searchSectionRef.current) {
+                      const headerOffset = 80;
+                      const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                  className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
+                    valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
+                  }`}
+                >
                   <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
                   <span className="text-sm text-white">{demand}</span>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -382,6 +458,14 @@ export default function ValuesPage() {
               <optgroup label="Demand">
                 <option value="demand-desc">Demand (High to Low)</option>
                 <option value="demand-asc">Demand (Low to High)</option>
+                <option value="demand-extremely-high">Extremely High Demand</option>
+                <option value="demand-very-high">Very High Demand</option>
+                <option value="demand-high">High Demand</option>
+                <option value="demand-decent">Decent Demand</option>
+                <option value="demand-medium">Medium Demand</option>
+                <option value="demand-low">Low Demand</option>
+                <option value="demand-very-low">Very Low Demand</option>
+                <option value="demand-close-to-none">Close to None</option>
               </optgroup>
               <optgroup label="Last Updated">
                 <option value="last-updated-desc">
@@ -462,10 +546,7 @@ export default function ValuesPage() {
           ) : displayedItems.length === 0 ? (
             <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
               <p className="text-lg text-muted">
-                {debouncedSearchTerm 
-                  ? `No items found matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                  : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                }
+                {getNoItemsMessage()}
               </p>
               <button
                 onClick={() => {

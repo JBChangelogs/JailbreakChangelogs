@@ -41,7 +41,15 @@ export type ValueSort =
   | "demand-desc"
   | "demand-asc"
   | "last-updated-desc"
-  | "last-updated-asc";
+  | "last-updated-asc"
+  | "demand-close-to-none"
+  | "demand-very-low"
+  | "demand-low"
+  | "demand-medium"
+  | "demand-decent"
+  | "demand-high"
+  | "demand-very-high"
+  | "demand-extremely-high";
 
 export interface DupedOwner {
   item_id: number;
