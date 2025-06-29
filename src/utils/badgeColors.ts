@@ -8,27 +8,27 @@ export const getItemTypeColor = (type: string): string => {
     case "Vehicle":
       return "#c82c2c";
     case "Spoiler":
-      return "#C18800";
+      return "#8B5A00";
     case "Rim":
       return "#6335B1";
     case "Tire Sticker":
       return "#1CA1BD";
     case "Tire Style":
-      return "#4CAF50";
+      return "#2E7D32";
     case "Drift":
-      return "#FF4500";
+      return "#CC3700";
     case "Body Color":
       return "#8A2BE2";
     case "Texture":
-      return "#708090";
+      return "#4A5568";
     case "Hyperchrome":
-      return "#E91E63";
+      return "#C2185B";
     case "Furniture":
-      return "#9C6644";
+      return "#8B4513";
     case "Horn":
-      return "#4A90E2";
+      return "#1976D2";
     case "Weapon Skin":
-      return "#4a6741";
+      return "#2E7D32";
     default:
       return "#124e66"; // Default color
   }

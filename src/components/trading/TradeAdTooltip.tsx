@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { TradeItem } from '@/types/trading';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { getCategoryIcon } from '@/utils/categoryIcons';
+import { formatFullValue } from '@/utils/values';
 
 interface TradeAdTooltipProps {
   item: TradeItem;
@@ -28,7 +29,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
           <div className="flex items-center justify-between mb-1">
             <Link 
               href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${item.sub_name ? `?variant=${item.sub_name}` : ''}`}
-              className="text-muted text-lg font-semibold hover:text-[#5865F2] transition-colors truncate"
+              className="text-muted text-lg font-semibold hover:text-blue-400 transition-colors truncate"
             >
               {item.base_name && item.sub_name 
                 ? `${item.base_name} (${item.sub_name})` 
@@ -54,8 +55,8 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 </span>
               )}
             </div>
-            <p className="text-muted">Cash Value: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : item.cash_value}</p>
-            <p className="text-muted">Duped Value: {item.duped_value === null || item.duped_value === "N/A" ? "N/A" : item.duped_value}</p>
+            <p className="text-muted">Cash Value: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value)}</p>
+            <p className="text-muted">Duped Value: {item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value)}</p>
           </div>
         </div>
       </div>

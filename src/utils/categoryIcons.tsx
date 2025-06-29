@@ -58,12 +58,14 @@ export const CategoryIconBadge = ({
   isLimited, 
   isSeasonal, 
   hasChildren,
+  showCategoryForVariants = false,
   className = "h-5 w-5"
 }: { 
   type: string;
   isLimited: boolean;
   isSeasonal: boolean;
   hasChildren: boolean;
+  showCategoryForVariants?: boolean;
   className?: string;
 }) => {
   if (isSeasonal) {
@@ -82,7 +84,8 @@ export const CategoryIconBadge = ({
     );
   }
 
-  if (!hasChildren) {
+  // Show category icon based on showCategoryForVariants prop
+  if (!hasChildren || showCategoryForVariants) {
     const categoryIcon = getCategoryIcon(type);
     if (categoryIcon) {
       return (

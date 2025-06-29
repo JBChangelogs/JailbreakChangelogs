@@ -8,41 +8,45 @@ interface TradeAdTabsProps {
 }
 
 export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({ activeTab, onTabChange, hasTradeAds }) => (
-  <div className="flex space-x-4 mb-6">
-    <button
-      onClick={() => onTabChange('view')}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-        activeTab === 'view'
-          ? 'bg-[#5865F2] text-white'
-          : 'bg-[#212A31] text-muted hover:bg-[#37424D]'
-      }`}
-    >
-      <ListBulletIcon className="w-5 h-5" />
-      <span>View Trade Ads</span>
-    </button>
-    <button
-      onClick={() => onTabChange('create')}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-        activeTab === 'create'
-          ? 'bg-[#5865F2] text-white'
-          : 'bg-[#212A31] text-muted hover:bg-[#37424D]'
-      }`}
-    >
-      <PlusIcon className="w-5 h-5" />
-      <span>Create Trade Ad</span>
-    </button>
-    {hasTradeAds && (
-      <button
-        onClick={() => onTabChange('edit')}
-        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-          activeTab === 'edit'
-            ? 'bg-[#5865F2] text-white'
-            : 'bg-[#212A31] text-muted hover:bg-[#37424D]'
-        }`}
-      >
-        <PencilIcon className="w-5 h-5" />
-        <span>Edit Trade Ad</span>
-      </button>
-    )}
+  <div className="bg-[#212A31] rounded-lg border border-[#2E3944] mb-6">
+    <nav className="px-6 py-4">
+      <div className="flex space-x-1 bg-[#2E3944] rounded-lg p-1">
+        <button
+          onClick={() => onTabChange('view')}
+          className={`${
+            activeTab === 'view'
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+          } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+        >
+          <ListBulletIcon className="w-4 h-4" />
+          View Trade Ads
+        </button>
+        <button
+          onClick={() => onTabChange('create')}
+          className={`${
+            activeTab === 'create'
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+          } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+        >
+          <PlusIcon className="w-4 h-4" />
+          Create Trade Ad
+        </button>
+        {hasTradeAds && (
+          <button
+            onClick={() => onTabChange('edit')}
+            className={`${
+              activeTab === 'edit'
+                ? 'bg-[#5865F2] text-white shadow-sm'
+                : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+            } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+          >
+            <PencilIcon className="w-4 h-4" />
+            Edit Trade Ad
+          </button>
+        )}
+      </div>
+    </nav>
   </div>
 ); 

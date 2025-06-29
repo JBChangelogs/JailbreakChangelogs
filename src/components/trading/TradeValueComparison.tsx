@@ -102,7 +102,7 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                     </Link>
                     <div className="mt-1">
                       <span 
-                        className="rounded-full px-2 py-0.5 text-xs text-white bg-opacity-80"
+                        className="rounded-full px-2 py-0.5 text-xs text-white"
                         style={{ backgroundColor: getItemTypeColor(item.type) }}
                       >
                         {item.type}
@@ -165,7 +165,7 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                     </Link>
                     <div className="mt-1">
                       <span 
-                        className="rounded-full px-2 py-0.5 text-xs text-white bg-opacity-80"
+                        className="rounded-full px-2 py-0.5 text-xs text-white"
                         style={{ backgroundColor: getItemTypeColor(item.type) }}
                       >
                         {item.type}

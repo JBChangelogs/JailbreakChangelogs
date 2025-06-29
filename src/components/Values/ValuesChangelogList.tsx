@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
 import { getItemTypeColor } from '@/utils/badgeColors';
+import { formatFullValue } from '@/utils/values';
 
 interface Item {
   id: number;
@@ -132,10 +133,10 @@ const ValuesChangelogList: React.FC<ValuesChangelogListProps> = ({ changelogs })
                         Creator: {change.item.creator}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Cash Value: {change.item.cash_value}
+                        Cash Value: {formatFullValue(change.item.cash_value)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Duped Value: {change.item.duped_value}
+                        Duped Value: {formatFullValue(change.item.duped_value)}
                       </Typography>
                     </Box>
 

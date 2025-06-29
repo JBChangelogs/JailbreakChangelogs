@@ -5,10 +5,11 @@ import { Pagination, Skeleton, Checkbox, FormControlLabel } from '@mui/material'
 import { getToken } from '@/utils/auth';
 import toast from 'react-hot-toast';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
-import { sortByCashValue, sortByDemand } from '@/utils/values';
+import { sortByCashValue, sortByDemand, formatFullValue } from '@/utils/values';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { getItemTypeColor } from '@/utils/badgeColors';
+import { CategoryIconBadge } from '@/utils/categoryIcons';
 import { TradeAdErrorModal } from './TradeAdErrorModal';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -389,6 +390,16 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           fill
                         />
                       )}
+                      <div className="absolute top-2 right-2 z-5">
+                        <CategoryIconBadge
+                          type={item.type}
+                          isLimited={item.is_limited === 1}
+                          isSeasonal={item.is_seasonal === 1}
+                          hasChildren={!!item.children?.length}
+                          showCategoryForVariants={true}
+                          className="h-4 w-4"
+                        />
+                      </div>
                     </div>
                     <div className="flex flex-col flex-grow">
                       <div className="space-y-1.5">
@@ -417,13 +428,13 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                               <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
                                 (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
                                 item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
-                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value)
-                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : item.cash_value)}</div>
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
+                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
                               <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
                                 (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
                                 item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
-                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value)
-                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : item.duped_value)}</div>
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
+                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
                               {item.demand && (
                                 <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
                                   item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
