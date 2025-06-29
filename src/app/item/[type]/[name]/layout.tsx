@@ -127,7 +127,7 @@ async function generateBreadcrumbJsonLd(item: Item | null, itemType: string, ite
       '@type': 'ListItem',
       'position': 3,
       'name': item.type.charAt(0).toUpperCase() + item.type.slice(1),
-      'item': `https://jailbreakchangelogs.xyz/values?filterSort=name-${item.type}s&valueSort=cash-desc`
+      'item': `https://jailbreakchangelogs.xyz/values?filterSort=name-${decodeURIComponent(itemType).replace(/\s+/g, '-')}s`
     },
     {
       '@type': 'ListItem',

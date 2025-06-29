@@ -371,7 +371,7 @@ export default async function RootLayout({
                           href="https://github.com/v3kmmw"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-300 hover:text-blue-400 hover:underline"
+                          className="text-blue-400 hover:text-blue-300 hover:underline"
                         >
                           Jakobiis
                         </a>{" "}
