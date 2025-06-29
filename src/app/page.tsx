@@ -8,8 +8,9 @@ import {
   CalendarIcon,
   ChatBubbleLeftRightIcon,
   ArrowsRightLeftIcon,
-  ChartBarIcon,
+  ShieldCheckIcon,
   CodeBracketIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Home() {
@@ -46,7 +47,7 @@ export default function Home() {
               Roblox Jailbreak Changelogs & Values Hub
             </h1>
             <p className="mx-auto mb-8 max-w-2xl text-base text-muted md:text-lg">
-              Your comprehensive platform for Jailbreak item values, trade
+              Your comprehensive platform for Roblox Jailbreak item values, trade
               listings, update tracking, and community features. Get accurate
               trading data, post trade ads, track seasonal changes, and connect
               with other players!
@@ -70,32 +71,31 @@ export default function Home() {
             Features
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Feature 1 */}
+            {/* Feature 1 - Combined Changelogs & Seasonal */}
             <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
               <div className="mb-4 flex items-center gap-2">
                 <DocumentTextIcon className="h-6 w-6 text-[#3B82F6]" />
                 <h3 className="text-xl font-semibold text-muted">
-                  View Changelogs
+                  Changelogs & Seasons
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Access the entire history of changelogs for the game Jailbreak
-                on Roblox and stay informed about all updates, whether big or
-                small.
+                Access the entire history of changelogs for Roblox Jailbreak and stay informed 
+                about all updates, seasonal changes, and the newest rewards with their requirements.
               </p>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 2 - Private Servers */}
             <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
               <div className="mb-4 flex items-center gap-2">
                 <CalendarIcon className="h-6 w-6 text-[#3B82F6]" />
                 <h3 className="text-xl font-semibold text-muted">
-                  Seasonal Changes
+                  Private Servers
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Stay informed about the latest seasonal changes in Jailbreak,
-                such as the newest rewards and their requirements.
+                Browse and submit private server listings for Roblox Jailbreak. Connect with 
+                fellow players in dedicated trading and gaming communities.
               </p>
             </div>
 
@@ -114,7 +114,21 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 4 */}
+            {/* Feature 4 - Values Database */}
+            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <CurrencyDollarIcon className="h-6 w-6 text-[#3B82F6]" />
+                <h3 className="text-xl font-semibold text-muted">
+                  Values Database
+                </h3>
+              </div>
+              <p className="text-[#FFFFFF]">
+                View values for all tradable items in Roblox Jailbreak. Favorite items, 
+                track value history, and monitor price changes over time.
+              </p>
+            </div>
+
+            {/* Feature 5 */}
             <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
               <div className="mb-4 flex items-center gap-2">
                 <ArrowsRightLeftIcon className="h-6 w-6 text-[#3B82F6]" />
@@ -129,32 +143,17 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 5 */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <ChartBarIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-xl font-semibold text-muted">
-                  Trade Statistics
-                </h3>
-              </div>
-              <p className="text-[#FFFFFF]">
-                Access Badimo&apos;s official dataset for vehicles and vehicle
-                customization items. Track how many times items have been traded
-                and view their unique circulation numbers in the trading system.
-              </p>
-            </div>
-
             {/* Feature 6 */}
             <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
               <div className="mb-4 flex items-center gap-2">
-                <CodeBracketIcon className="h-6 w-6 text-[#3B82F6]" />
+                <ShieldCheckIcon className="h-6 w-6 text-[#3B82F6]" />
                 <h3 className="text-xl font-semibold text-muted">
-                  Open Source Contributions
+                  Dupe Detection System
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Contributions can be made by anyone! Our project is fully open
-                source on GitHub.
+                Report and check for duped items. Search by player or item to see 
+                if they have been reported as duplicated in the trading system.
               </p>
             </div>
           </div>
