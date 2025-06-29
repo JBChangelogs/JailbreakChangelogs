@@ -173,7 +173,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       metadataBase: new URL('https://jailbreakchangelogs.xyz'),
       title: `${item.name} (${item.type}) | Roblox Jailbreak`,
-      description: item.description 
+      description: item.description && item.description !== 'N/A'
         ? `${item.description.slice(0, 155)}...` 
         : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
       alternates: {
@@ -181,7 +181,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       openGraph: {
         title: `${item.name} (${item.type}) | Roblox Jailbreak`,
-        description: item.description 
+        description: item.description && item.description !== 'N/A'
           ? `${item.description.slice(0, 155)}...` 
           : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         type: 'website',
@@ -199,7 +199,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       twitter: {
         card: 'summary_large_image',
         title: `${item.name} (${item.type}) | Roblox Jailbreak`,
-        description: item.description 
+        description: item.description && item.description !== 'N/A'
           ? `${item.description.slice(0, 155)}...` 
           : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         images: [finalImageUrl],
