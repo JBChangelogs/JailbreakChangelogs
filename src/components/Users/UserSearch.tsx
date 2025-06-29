@@ -53,7 +53,7 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
   }, []);
 
   const filteredUsers = initialUsers.filter(user => {
-    const searchLower = debouncedSearchQuery.toLowerCase();
+    const searchLower = debouncedSearchQuery.trim().toLowerCase();
     const isIdSearch = /^\d{18,19}$/.test(debouncedSearchQuery);
     
     if (userType === 'roblox') {

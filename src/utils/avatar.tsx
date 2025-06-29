@@ -185,7 +185,7 @@ export const UserAvatar = ({
     return (
       <BadgeWrapper isOnline={isOnline} showBadge={showBadge} shape={finalShape}>
         <div 
-          className={`relative ${finalShape === 'circle' ? 'rounded-full' : 'rounded-lg'} overflow-hidden flex-shrink-0`}
+          className={`relative ${finalShape === 'circle' ? 'rounded-full' : finalShape === 'square' && premiumType === 3 ? 'rounded-sm' : finalShape === 'square' ? 'rounded-lg' : 'rounded-full'} overflow-hidden flex-shrink-0`}
           style={{
             ...borderStyle,
             width: size * 4,
@@ -205,7 +205,7 @@ export const UserAvatar = ({
   return (
     <BadgeWrapper isOnline={isOnline} showBadge={showBadge} shape={finalShape}>
       <div 
-        className={`relative ${finalShape === 'circle' ? 'rounded-full' : 'rounded-lg'} overflow-hidden flex-shrink-0`}
+        className={`relative ${finalShape === 'circle' ? 'rounded-full' : finalShape === 'square' && premiumType === 3 ? 'rounded-sm' : finalShape === 'square' ? 'rounded-lg' : 'rounded-full'} overflow-hidden flex-shrink-0`}
         style={{
           ...borderStyle,
           width: size * 4,
