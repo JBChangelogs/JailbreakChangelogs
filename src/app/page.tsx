@@ -9,7 +9,6 @@ import {
   ChatBubbleLeftRightIcon,
   ArrowsRightLeftIcon,
   ShieldCheckIcon,
-  CodeBracketIcon,
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
 
