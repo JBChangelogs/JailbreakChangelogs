@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Pagination, Chip, Button, Skeleton } from '@mui/material';
+import { Box, Pagination, Chip, Button, Skeleton, Divider } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { PROD_API_URL } from '@/services/api';
@@ -195,61 +195,70 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
     const typeColor = getItemTypeColor(itemType);
     
     return (
-      <Box 
+      <Link 
         key={`${favorite.item_id}-${favorite.created_at}`}
-        className="bg-[#212A31] p-3 rounded-lg shadow-sm border border-[#2E3944] hover:border-[#5865F2] transition-colors"
+        href={itemUrl}
+        className="block group"
       >
-        <div className="flex items-center mb-2">
-          <div className="relative w-16 h-16 md:w-32 md:h-[4.5rem] mr-3 rounded-md overflow-hidden flex-shrink-0">
-            {isVideo ? (
-              <video
-                src={getVideoPath(itemType, imageName)}
-                className="object-cover w-full h-full"
-                muted
-                playsInline
-                loop
-                autoPlay
-              />
-            ) : (
-              <Image 
-                src={getItemImagePath(itemType, imageName, true)}
-                alt={itemName}
-                fill
-                unoptimized
-                className="object-cover"
-                onError={handleImageError}
-              />
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between items-start">
-              <Link 
-                href={itemUrl}
-                className="text-muted hover:text-[#5865F2] transition-colors font-medium"
-              >
-                {itemName}
-              </Link>
-            </div>
-            <div className="text-xs text-[#FFFFFF]">
-              {itemType && (
-                <div className="mb-1">
-                  <Chip 
-                    label={itemType}
-                    size="small"
-                    sx={{ 
-                      backgroundColor: typeColor,
-                      color: '#fff',
-                      fontSize: '0.65rem',
-                      height: '20px'
-                    }}
-                  />
-                </div>
+        <Box 
+          className="bg-[#212A31] p-3 rounded-lg shadow-sm border border-[#2E3944] hover:border-[#5865F2] transition-colors"
+        >
+          <div className="flex items-center mb-2">
+            <div className="relative w-16 h-16 md:w-32 md:h-[4.5rem] mr-3 rounded-md overflow-hidden flex-shrink-0">
+              {isVideo ? (
+                <video
+                  src={getVideoPath(itemType, imageName)}
+                  className="object-cover w-full h-full"
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                />
+              ) : (
+                <Image 
+                  src={getItemImagePath(itemType, imageName, true)}
+                  alt={itemName}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  onError={handleImageError}
+                />
               )}
-              <span>Favorited {formatRelativeDate(favorite.created_at)}</span>
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
+                <span className="text-muted group-hover:text-blue-300 transition-colors font-medium">
+                  {itemName}
+                </span>
+              </div>
+              <div className="text-xs text-[#FFFFFF]">
+                {itemType && (
+                  <div className="mb-1">
+                    <Chip 
+                      label={itemType}
+                      size="small"
+                      sx={{ 
+                        backgroundColor: typeColor,
+                        color: '#fff',
+                        fontSize: '0.65rem',
+                        height: '20px'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </Box>
+          
+          <Divider sx={{ my: 1, backgroundColor: '#2E3944' }} />
+          
+          <div className="flex justify-start items-center text-xs">
+            <span className="text-[#FFFFFF]">
+              Favorited {formatRelativeDate(favorite.created_at)}
+            </span>
+          </div>
+        </Box>
+      </Link>
     );
   };
 
@@ -329,7 +338,7 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
   return (
     <div className="space-y-6" id="favorites-section">
       <div className="bg-[#2E3944] rounded-lg p-4 border border-[#5865F2]">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <StarIcon className="text-[#5865F2]" />
             <h2 className="text-lg font-semibold text-muted">Favorited Items [{favorites.length}]</h2>
@@ -357,7 +366,7 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
           <p className="text-[#FFFFFF] italic">No favorites yet</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
               {currentFavorites.map(renderFavorite)}
             </div>
             

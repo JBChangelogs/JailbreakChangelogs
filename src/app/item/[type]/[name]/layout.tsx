@@ -3,7 +3,7 @@ import { PROD_API_URL } from '@/services/api';
 import { getItemImagePath } from '@/utils/images';
 import { getMaintenanceMetadata } from '@/utils/maintenance';
 import { formatFullValue } from '@/utils/values';
-import { WithContext, FAQPage } from 'schema-dts';
+import { WithContext, FAQPage, BreadcrumbList, ListItem } from 'schema-dts';
 import type { Item } from '@/types/index';
 import { notFound } from 'next/navigation';
 
@@ -31,7 +31,7 @@ async function fetchItem(type: string, name: string): Promise<Item | null> {
   }
 }
 
-function sanitizeJsonLd(jsonLd: WithContext<FAQPage>): string {
+function sanitizeJsonLd(jsonLd: WithContext<FAQPage | BreadcrumbList>): string {
   return JSON.stringify(jsonLd).replace(/</g, '\u003c');
 }
 
@@ -102,6 +102,45 @@ async function generateFAQJsonLd(item: Item | null): Promise<string | null> {
         text: faq.answer
       }
     }))
+  };
+
+  return sanitizeJsonLd(jsonLd);
+}
+
+async function generateBreadcrumbJsonLd(item: Item | null, itemType: string, itemName: string): Promise<string | null> {
+  if (!item) return null;
+  
+  const breadcrumbItems: ListItem[] = [
+    {
+      '@type': 'ListItem',
+      'position': 1,
+      'name': 'Home',
+      'item': 'https://jailbreakchangelogs.xyz'
+    },
+    {
+      '@type': 'ListItem',
+      'position': 2,
+      'name': 'Values',
+      'item': 'https://jailbreakchangelogs.xyz/values'
+    },
+    {
+      '@type': 'ListItem',
+      'position': 3,
+      'name': item.type.charAt(0).toUpperCase() + item.type.slice(1),
+      'item': `https://jailbreakchangelogs.xyz/values?filterSort=name-${item.type}s&valueSort=cash-desc`
+    },
+    {
+      '@type': 'ListItem',
+      'position': 4,
+      'name': item.name,
+      'item': `https://jailbreakchangelogs.xyz/item/${itemType}/${itemName}`
+    }
+  ];
+
+  const jsonLd: WithContext<BreadcrumbList> = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': breadcrumbItems
   };
 
   return sanitizeJsonLd(jsonLd);
@@ -206,6 +245,7 @@ export default async function ItemLayout({
     notFound();
   }
   const faqJsonLdData = await generateFAQJsonLd(item);
+  const breadcrumbJsonLdData = await generateBreadcrumbJsonLd(item, type, name);
 
   return (
     <>
@@ -214,6 +254,14 @@ export default async function ItemLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: faqJsonLdData,
+          }}
+        />
+      )}
+      {breadcrumbJsonLdData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: breadcrumbJsonLdData,
           }}
         />
       )}

@@ -122,7 +122,7 @@ export default function CommentsTab({ comments, loading, error, currentUserId, u
   return (
     <div className="space-y-6" id="comments-section">
       <div className="bg-[#2E3944] rounded-lg p-4 border border-[#5865F2]">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <CommentIcon className="text-[#5865F2]" />
             <h2 className="text-lg font-semibold text-muted">

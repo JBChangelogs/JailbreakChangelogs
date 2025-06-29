@@ -240,86 +240,85 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
   };
 
   return (
-    <Box className="bg-[#212A31] p-3 rounded-lg shadow-sm border border-[#2E3944] hover:border-[#5865F2] transition-colors">
-      <div className="flex mb-2">
-        {renderThumbnail()}
-        <div className="flex-1 min-w-0">
-          {/* Item Title/Name First */}
-          <Typography 
-            variant="body2" 
-            className="text-muted font-medium mb-1"
-            sx={{ 
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical'
-            }}
-          >
-            {getItemName()}
-          </Typography>
-          
-          {/* Badge Second */}
-          <div className="mb-2">
-            <Chip 
-              label={contentType}
-              size="small"
+    <Link 
+      href={item_type.toLowerCase() === 'changelog' 
+        ? `/changelogs/${item_id}`
+        : item_type.toLowerCase() === 'season'
+        ? `/seasons/${item_id}`
+        : item_type.toLowerCase() === 'trade'
+        ? `/trading/ad/${item_id}`
+        : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`}
+      className="block group"
+    >
+      <Box className="bg-[#212A31] p-3 rounded-lg shadow-sm border border-[#2E3944] hover:border-[#5865F2] transition-colors">
+        <div className="flex mb-2">
+          {renderThumbnail()}
+          <div className="flex-1 min-w-0">
+            {/* Item Title/Name First */}
+            <Typography 
+              variant="body2" 
+              className="text-muted group-hover:text-blue-300 font-medium mb-1 transition-colors"
               sx={{ 
-                backgroundColor: typeColor,
-                color: '#fff',
-                fontSize: '0.65rem',
-                height: '20px'
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical'
               }}
-            />
-          </div>
-          
-          {/* Comment Content Third */}
-          <Typography 
-            variant="body2" 
-            className="text-muted whitespace-pre-wrap break-words"
-            sx={{
-              overflowWrap: 'break-word',
-              wordBreak: 'break-word',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: 'vertical'
-            }}
-          >
-            {convertUrlsToLinks(content)}
-          </Typography>
-        </div>
-      </div>
-      
-      <Divider sx={{ my: 1, backgroundColor: '#2E3944' }} />
-      
-      <div className="flex justify-between items-center text-xs flex-wrap gap-2">
-        <Link 
-          href={item_type.toLowerCase() === 'changelog' 
-            ? `/changelogs/${item_id}`
-            : item_type.toLowerCase() === 'season'
-            ? `/seasons/${item_id}`
-            : item_type.toLowerCase() === 'trade'
-            ? `/trading/ad/${item_id}`
-            : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`} 
-          className="text-[#5865F2] hover:underline"
-        >
-          View {contentType}
-        </Link>
-        <div className="flex items-center gap-1">
-          <Typography variant="caption" className="text-[#FFFFFF]">
-            Posted {formattedDate}
-          </Typography>
-          {edited_at && (
-            <Typography variant="caption" className="text-[#FFFFFF]">
-              (edited)
+            >
+              {getItemName()}
             </Typography>
-          )}
+            
+            {/* Badge Second */}
+            <div className="mb-2">
+              <Chip 
+                label={contentType}
+                size="small"
+                sx={{ 
+                  backgroundColor: typeColor,
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  height: '20px'
+                }}
+              />
+            </div>
+            
+            {/* Comment Content Third */}
+            <Typography 
+              variant="body2" 
+              className="text-muted whitespace-pre-wrap break-words"
+              sx={{
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical'
+              }}
+            >
+              {convertUrlsToLinks(content, true)}
+            </Typography>
+          </div>
         </div>
-      </div>
-    </Box>
+        
+        <Divider sx={{ my: 1, backgroundColor: '#2E3944' }} />
+        
+        <div className="flex justify-start items-center text-xs">
+          <div className="flex items-center gap-1">
+            <Typography variant="caption" className="text-[#FFFFFF]">
+              Posted {formattedDate}
+            </Typography>
+            {edited_at && (
+              <Typography variant="caption" className="text-[#FFFFFF]">
+                (edited)
+              </Typography>
+            )}
+          </div>
+        </div>
+      </Box>
+    </Link>
   );
 } 
