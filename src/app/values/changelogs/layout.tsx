@@ -1,12 +1,17 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Value Changelogs',
-  description: 'View the history of value changes for all tradeable items in Roblox Jailbreak',
+  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+  title: 'Roblox Jailbreak Values Changelogs & History',
+  description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
+  alternates: {
+    canonical: '/values/changelogs',
+  },
   openGraph: {
-    title: 'Value Changelogs',
-    description: 'View the history of value changes for all tradeable items in Roblox Jailbreak',
+    title: 'Roblox Jailbreak Values Changelogs & History',
+    description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
     type: 'website',
+    url: 'https://jailbreakchangelogs.xyz/values/changelogs',
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
@@ -18,8 +23,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: 'Value Changelogs',
-    description: 'View the history of value changes for all tradeable items in Roblox Jailbreak',
+    title: 'Roblox Jailbreak Values Changelogs & History',
+    description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
     images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp"],
   },
 };

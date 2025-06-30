@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'FAQ',
+  title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
   description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
   alternates: {
     canonical: '/faq',
   },
   openGraph: {
-    title: 'FAQ',
+    title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
     description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
     type: 'website',
     url: 'https://jailbreakchangelogs.xyz/faq',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FAQ',
+    title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
     description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
     images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
   },

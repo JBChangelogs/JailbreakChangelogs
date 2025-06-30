@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'Privacy Policy',
+  title: 'Jailbreak Changelogs Privacy Policy',
   description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
   alternates: {
     canonical: '/privacy',
   },
   openGraph: {
-    title: 'Privacy Policy',
+    title: 'Jailbreak Changelogs Privacy Policy',
     description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
     type: 'website',
     url: 'https://jailbreakchangelogs.xyz/privacy',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Privacy Policy',
+    title: 'Jailbreak Changelogs Privacy Policy',
     description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
     images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
   },

@@ -105,6 +105,10 @@ export default function ValuesChangelogPage() {
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
           <ValuesChangelogHeader />
+          
+          {/* H1 heading for SEO */}
+          <h1 className="sr-only">Roblox Jailbreak Values Changelogs & History</h1>
+          
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[...Array(10)].map((_, i) => (

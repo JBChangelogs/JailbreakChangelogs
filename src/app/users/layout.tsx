@@ -6,13 +6,13 @@ export const viewport: Viewport = {
 
 export const metadata = {
     metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-    title: "User Search",
+    title: "User Search - Find Community Members",
     description: "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
     alternates: {
         canonical: "/users",
     },
     openGraph: {
-      title: "User Search | Changelogs",
+      title: "User Search - Find Community Members",
       description: "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!.",
       images: [
         {
@@ -28,8 +28,8 @@ export const metadata = {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Roblox Jailbreak Values",
-      description: "View the most accurate and up-to-date values for all tradeable items in Roblox Jailbreak, from limited vehicles to rare cosmetics.",
+      title: "User Search - Find Community Members",
+      description: "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
       images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
     },
   };
