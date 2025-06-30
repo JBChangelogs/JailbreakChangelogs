@@ -120,7 +120,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   return (
     <div className="bg-[#212a31] border border-gray-700 rounded-xl p-6 space-y-6">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
+      <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
             <SparklesIcon className="w-5 h-5 text-purple-400" />
@@ -140,7 +140,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
 
       {/* Content Section */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="aspect-video bg-gray-800/50 rounded-lg mb-3 border border-gray-700/50"></div>
@@ -167,7 +167,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
           {similarItems.map((item) => (
             <Link
               key={item.id}
