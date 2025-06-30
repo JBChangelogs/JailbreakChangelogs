@@ -62,6 +62,23 @@ const CalculatorItemGrid: React.FC<{
     handleMenuClose();
   };
 
+  const groupItems = (items: TradeItem[]) => {
+    const grouped = items.reduce((acc, item) => {
+      const key = item.sub_name 
+        ? `${item.id}-${item.sub_name}` 
+        : `${item.id}-base`;
+
+      if (!acc[key]) {
+        acc[key] = { ...item, count: 1 };
+      } else {
+        acc[key].count++;
+      }
+      return acc;
+    }, {} as Record<string, TradeItem & { count: number }>);
+    
+    return Object.values(grouped);
+  };
+
   if (items.length === 0) {
     return (
       <div className="bg-[#2E3944] rounded-lg p-4">
@@ -74,13 +91,13 @@ const CalculatorItemGrid: React.FC<{
     <div className="bg-[#2E3944] rounded-lg p-4">
       <h4 className="text-muted text-sm mb-2">{title}</h4>
       <div className="grid grid-cols-4 gap-4">
-        {items.map((item, index) => {
+        {groupItems(items).map((item) => {
           const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
           const selectedValue = getSelectedValueString(item);
           const isDupedSelected = selectedValue === item.duped_value;
           
           return (
-            <div key={`${item.id}-${item.sub_name || 'base'}-${index}`} className="relative group">
+            <div key={`${item.id}-${item.sub_name || 'base'}`} className="relative group">
               <Tooltip
                 title={<TradeAdTooltip item={{
                   ...item,
@@ -115,6 +132,11 @@ const CalculatorItemGrid: React.FC<{
                       className="object-cover"
                       onError={handleImageError}
                     />
+                    {item.count > 1 && (
+                      <div className="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded-full bg-[#5865F2]/90 text-white border border-[#5865F2]">
+                        ×{item.count}
+                      </div>
+                    )}
                     {onRemove && (
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="flex flex-col gap-2">
@@ -252,9 +274,7 @@ const CalculatorValueComparison: React.FC<{
             onClick={() => window.location.hash = ''}
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
+            <CiBoxList className="w-4 h-4" />
             Browse Items
           </button>
         </div>
@@ -526,9 +546,17 @@ export const CalculatorForm: React.FC = () => {
 
   const handleRemoveItem = (itemId: number, side: 'offering' | 'requesting', subName?: string) => {
     if (side === 'offering') {
-      setOfferingItems(prev => prev.filter(item => !(item.id === itemId && item.sub_name === subName)));
+      const index = offeringItems.findIndex(item => item.id === itemId && (item.sub_name === subName || (!item.sub_name && !subName)));
+      if (index !== -1) {
+        const newOfferingItems = [...offeringItems.slice(0, index), ...offeringItems.slice(index + 1)];
+        setOfferingItems(newOfferingItems);
+      }
     } else {
-      setRequestingItems(prev => prev.filter(item => !(item.id === itemId && item.sub_name === subName)));
+      const index = requestingItems.findIndex(item => item.id === itemId && (item.sub_name === subName || (!item.sub_name && !subName)));
+      if (index !== -1) {
+        const newRequestingItems = [...requestingItems.slice(0, index), ...requestingItems.slice(index + 1)];
+        setRequestingItems(newRequestingItems);
+      }
     }
   };
 
