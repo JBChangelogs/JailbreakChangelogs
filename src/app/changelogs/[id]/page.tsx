@@ -375,6 +375,7 @@ export default function ChangelogPage() {
               imageUrl={changelog.image_url}
               changelogId={changelog.id}
               onChangelogSelect={handleChangelogSelect}
+              changelogList={changelogList}
             />
           )}
         </div>

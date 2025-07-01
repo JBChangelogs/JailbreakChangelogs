@@ -325,7 +325,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
               </button>
             </div>
           ) : (
-            <Link href={itemUrl} className="block h-full w-full">
+            <Link href={itemUrl} className="block h-full w-full" prefetch={false}>
               <div className="relative h-full w-full">
                 {isVideoItem(item.name) ? (
                   <video
@@ -375,7 +375,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
             </Link>
           )}
         </div>
-        <Link href={itemUrl} className="block">
+        <Link href={itemUrl} className="block" prefetch={false}>
           <div className="flex flex-1 flex-col space-y-2 sm:space-y-4 p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base sm:text-lg font-semibold text-muted hover:text-[#40c0e7] transition-colors">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from "next/image";
 import { ArrowRightIcon, ArrowTurnDownRightIcon } from "@heroicons/react/24/outline";
 import localFont from "next/font/local";
@@ -6,7 +6,6 @@ import { parseMarkdown } from '@/utils/changelogs';
 import ChangelogMediaEmbed from './ChangelogMediaEmbed';
 import ChangelogComments from '../PageComments/ChangelogComments';
 import ChangelogQuickNav from './ChangelogQuickNav';
-import { fetchChangelogList } from '@/utils/api';
 
 const luckiestGuy = localFont({ 
   src: '../../../public/fonts/LuckiestGuy.ttf',
@@ -18,6 +17,7 @@ interface ChangelogContentProps {
   imageUrl: string;
   changelogId: number;
   onChangelogSelect: (id: string) => void;
+  changelogList: Array<{ id: number; title: string }>;
 }
 
 const ChangelogContent: React.FC<ChangelogContentProps> = ({
@@ -26,24 +26,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   imageUrl,
   changelogId,
   onChangelogSelect,
+  changelogList,
 }) => {
-  const [changelogList, setChangelogList] = useState<Array<{ id: number; title: string }>>([]);
-  const [currentIndex, setCurrentIndex] = useState<number>(-1);
-
-  useEffect(() => {
-    const loadChangelogs = async () => {
-      try {
-        const changelogs = await fetchChangelogList();
-        setChangelogList(changelogs);
-        const index = changelogs.findIndex(c => c.id === changelogId);
-        setCurrentIndex(index);
-      } catch (error) {
-        console.error('Error loading changelogs:', error);
-      }
-    };
-    loadChangelogs();
-  }, [changelogId]);
-
+  const currentIndex = changelogList.findIndex(c => c.id === changelogId);
   const prevChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
   const nextChangelog = currentIndex < changelogList.length - 1 ? changelogList[currentIndex + 1] : null;
 

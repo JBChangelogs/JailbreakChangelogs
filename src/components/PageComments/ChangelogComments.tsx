@@ -245,7 +245,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     return () => {
       abortController.abort();
     };
-  }, [changelogId, type, itemType, fetchUserData, isMounted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changelogId, type, itemType, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
