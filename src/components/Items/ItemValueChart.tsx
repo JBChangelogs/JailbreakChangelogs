@@ -15,6 +15,7 @@ import {
   ChartOptions,
   TooltipItem,
   ChartData,
+  Filler,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -28,7 +29,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  TimeScale
+  TimeScale,
+  Filler
 );
 
 interface ValueHistory {
@@ -218,7 +220,8 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         label: 'Cash Value',
         data: filteredData.map(item => processValue(item.cash_value)),
         borderColor: '#5865F2',
-        backgroundColor: '#5865F2',
+        backgroundColor: 'rgba(88, 101, 242, 0.2)',
+        fill: true,
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
@@ -230,7 +233,8 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         label: 'Duped Value',
         data: filteredData.map(item => processValue(item.duped_value)),
         borderColor: '#ED4245',
-        backgroundColor: '#ED4245',
+        backgroundColor: 'rgba(237, 66, 69, 0.2)',
+        fill: true,
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
@@ -311,10 +315,11 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
           }
         },
         grid: {
-          color: '#37424D',
+          display: false,
         },
         ticks: {
           color: '#FFFFFF',
+          display: false,
         },
       },
       y: {
@@ -404,9 +409,13 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
           sx={{
             color: '#5865F2',
             borderColor: '#37424D',
-            '&:hover': { 
+            backgroundColor: 'rgba(88, 101, 242, 0.08)',
+            borderRadius: '6px',
+            fontWeight: 600,
+            boxShadow: '0 1px 4px 0 rgba(88,101,242,0.04)',
+            '&:hover': {
               borderColor: '#5865F2',
-              backgroundColor: 'rgba(88, 101, 242, 0.1)'
+              backgroundColor: 'rgba(88, 101, 242, 0.16)',
             },
           }}
         >
