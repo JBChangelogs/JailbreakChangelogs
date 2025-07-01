@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AuthState, AuthResponse } from '../types/auth';
 import { logout, handleTokenAuth, validateAuth, trackLogoutSource } from '../utils/auth';
 import { storeCampaign, getStoredCampaign, clearStoredCampaign, countCampaignVisit } from '../utils/campaign';
@@ -13,6 +13,7 @@ export const useAuth = () => {
     error: null,
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const isUserActiveRef = useRef(true);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -150,12 +151,55 @@ export const useAuth = () => {
   useEffect(() => {
     initializeAuth();
     
-    // Set up an interval to check auth status periodically
-    const intervalId = setInterval(() => {
-      validateAuth().catch(error => {
-        console.error('Auth validation error:', error);
-      });
-    }, 60000); // Check every minute
+    let idleTimeout: NodeJS.Timeout;
+    let authInterval: NodeJS.Timeout;
+    
+    // Function to mark user as active
+    const markUserActive = () => {
+      isUserActiveRef.current = true;
+      
+      // Clear existing idle timeout
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+      }
+      
+      // Set new idle timeout (4 minutes of inactivity - shorter than auth check interval)
+      idleTimeout = setTimeout(() => {
+        const now = new Date().toISOString();
+        console.log(`[${now}] User marked as idle - pausing auth checks`);
+        isUserActiveRef.current = false;
+      }, 240000); // 4 minutes
+    };
+    
+    // Function to start auth interval  
+    const startAuthInterval = () => {
+      if (authInterval) {
+        clearInterval(authInterval);
+      }
+      
+      authInterval = setInterval(() => {
+        const now = new Date().toISOString();
+        if (isUserActiveRef.current) {
+          console.log(`[${now}] Running auth validation...`);
+          validateAuth().catch(error => {
+            console.error('Auth validation error:', error);
+          });
+        } else {
+          console.log(`[${now}] Skipping auth validation - user is idle`);
+        }
+      }, 300000); // Check every 5 minutes when active
+    };
+    
+    // Set up activity listeners
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    activityEvents.forEach(event => {
+      document.addEventListener(event, markUserActive, true);
+    });
+    
+    // Mark user as initially active and start auth interval
+    markUserActive();
+    startAuthInterval();
     
     // Listen for auth state changes to update local state
     const handleAuthChange = (event: CustomEvent) => {
@@ -180,10 +224,21 @@ export const useAuth = () => {
     window.addEventListener('authStateChanged', handleAuthChange as EventListener);
     
     return () => {
-      clearInterval(intervalId);
+      if (authInterval) {
+        clearInterval(authInterval);
+      }
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+      }
+      
+      // Remove activity listeners
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, markUserActive, true);
+      });
+      
       window.removeEventListener('authStateChanged', handleAuthChange as EventListener);
     };
-  }, [initializeAuth]);
+      }, [initializeAuth]);
 
   return {
     ...authState,
