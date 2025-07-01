@@ -12,6 +12,26 @@ const ServerHeader: React.FC = () => {
       <p className="mb-8 text-muted">
         To submit, edit, or delete servers, please log in to your JBCL account. This helps us maintain a reliable trading environment.
       </p>
+      <div className="mb-4 p-4 rounded-lg bg-[#2B9CD9]/10 border border-[#40C0E7]/30">
+        <h3 className="text-lg font-semibold text-[#40C0E7] mb-1">Important for Joining VIP Servers</h3>
+        <p className="text-sm text-[#D3D9D4] mb-1">
+          For you to join a VIP server link, please make sure you have your <b>&apos;Who can invite me to private servers?&apos;</b> setting set to <b>Everyone</b>!
+        </p>
+        <p className="text-sm text-[#D3D9D4] mb-1">
+          <b>You have to be 13 or over to change this setting.</b>
+        </p>
+        <p className="text-sm text-[#D3D9D4]">
+          You can change that setting here: {' '}
+          <a
+            href="https://www.roblox.com/my/account#!/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline font-medium transition-colors"
+          >
+            Roblox Privacy Settings
+          </a>
+        </p>
+      </div>
     </div>
   );
 };
