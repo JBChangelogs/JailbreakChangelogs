@@ -54,6 +54,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({ user }) 
           <div className="mb-1">
             <Link 
               href={`/users/${user.id}`}
+              prefetch={false}
               className="block hover:opacity-80 transition-opacity"
             >
               <div className="flex items-center gap-2">

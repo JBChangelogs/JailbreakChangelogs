@@ -304,6 +304,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                     <div key={following.following_id} className="flex items-center justify-between">
                       <Link
                         href={isPrivateProfile ? '#' : `/users/${user.id}`}
+                        prefetch={false}
                         className={`flex-1 block p-1.5 sm:p-3 rounded-lg transition-colors ${
                           isPrivateProfile
                             ? 'cursor-not-allowed opacity-75'

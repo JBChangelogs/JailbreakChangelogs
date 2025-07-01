@@ -198,6 +198,7 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
             >
               <Link
                 href={user.settings?.profile_public === 0 && currentUserId !== user.id ? '#' : `/users/${user.id}`}
+                prefetch={false}
                 className={`block bg-[#212A31] p-4 rounded-lg shadow-md border border-[#2E3944] ${
                   user.settings?.profile_public === 0 && currentUserId !== user.id
                     ? 'cursor-not-allowed opacity-75'

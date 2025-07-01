@@ -6,6 +6,7 @@ import { Button, Tooltip, Pagination } from '@mui/material';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { ArrowUpIcon as ArrowUpSolidIcon, ArrowDownIcon as ArrowDownSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 type ItemChangeValue = string | number | boolean | null;
 
@@ -435,7 +436,13 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                             const { text, isTruncated } = truncateText(change.suggestion_data.data.reason, MAX_REASON_LENGTH);
                             return (
                               <>
-                                {text}
+                                <ReactMarkdown
+                                  components={{
+                                    strong: (props) => <b {...props} />,
+                                  }}
+                                >
+                                  {text}
+                                </ReactMarkdown>
                                 {isTruncated && (
                                   <a
                                     href={`${DISCORD_CHANNEL_URL}/${change.suggestion_data.message_id}`}

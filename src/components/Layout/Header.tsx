@@ -215,6 +215,7 @@ export default function Header() {
           <ListItem 
             component={Link}
             href={`/users/${userData?.id}`}
+            prefetch={false}
             onClick={handleDrawerToggle}
             sx={{ 
               cursor: 'pointer',
@@ -259,6 +260,7 @@ export default function Header() {
           <ListItem 
             component={Link}
             href="/settings"
+            prefetch={false}
             onClick={handleDrawerToggle}
             sx={{ 
               cursor: 'pointer',
@@ -327,10 +329,10 @@ export default function Header() {
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
       
-      <ListItem component={Link} href="/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/changelogs" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Changelogs" />
       </ListItem>
-      <ListItem component={Link} href="/seasons" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/seasons" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Seasons" />
       </ListItem>
       <ListItem>
@@ -347,19 +349,19 @@ export default function Header() {
         </Typography>
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/values" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value List" />
       </ListItem>
-      <ListItem component={Link} href="/values/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values/changelogs" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value Changelogs" />
       </ListItem>
-      <ListItem component={Link} href="/values/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values/calculator" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value Calculator" />
       </ListItem>
-      <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/dupes/calculator" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Dupe Calculator" />
       </ListItem>
-      <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/trading" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Trade Ads" />
       </ListItem>
       <ListItem>
@@ -376,19 +378,19 @@ export default function Header() {
         </Typography>
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/users" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="User Search" />
       </ListItem>
-      <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/servers" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Private Servers" />
       </ListItem>
-      <ListItem component={Link} href="/bot" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/bot" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Discord Bot" />
       </ListItem>
-      <ListItem component={Link} href="/faq" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/faq" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="FAQ" />
       </ListItem>
-      <ListItem component={Link} href="/contributors" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/contributors" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Contributors" />
       </ListItem>
     </List>
@@ -408,7 +410,7 @@ export default function Header() {
       >
         <Toolbar className="flex justify-between items-center">
           <Box className="flex items-center">
-            <Link href="/" style={{ display: 'block' }}>
+            <Link href="/" prefetch={false} style={{ display: 'block' }}>
               <Image
                 src={
                   isCollabPage
@@ -434,6 +436,7 @@ export default function Header() {
                 <Button
                   component={Link}
                   href="/changelogs"
+                  prefetch={false}
                   sx={{
                     color: '#D3D9D4',
                     '&:hover': {
@@ -448,6 +451,7 @@ export default function Header() {
                 <Button
                   component={Link}
                   href="/seasons"
+                  prefetch={false}
                   sx={{
                     color: '#D3D9D4',
                     '&:hover': {
@@ -513,6 +517,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/values"
+                      prefetch={false}
                       onClick={handleNavMenuClose}
                     >
                       Value List
@@ -521,6 +526,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/values/changelogs" 
+                      prefetch={false}
                       onClick={handleNavMenuClose}
                     >
                       Value Changelogs
@@ -529,6 +535,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/values/calculator"
+                      prefetch={false}
                       onClick={handleNavMenuClose}
                     >
                       Value Calculator
@@ -537,6 +544,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/dupes/calculator"
+                      prefetch={false}
                       onClick={handleNavMenuClose}
                     >
                       Dupe Calculator
@@ -545,6 +553,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/trading"
+                      prefetch={false}
                       onClick={handleNavMenuClose}
                     >
                       Trade Ads
@@ -606,6 +615,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/users"
+                      prefetch={false}
                       onClick={handleCommunityMenuClose}
                     >
                       <Typography variant="body1">User Search</Typography>
@@ -614,6 +624,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/servers"
+                      prefetch={false}
                       onClick={handleCommunityMenuClose}
                     >
                       <Typography variant="body1">Private Servers</Typography>
@@ -622,6 +633,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/bot"
+                      prefetch={false}
                       onClick={handleCommunityMenuClose}
                     >
                       <Typography variant="body1">Discord Bot</Typography>
@@ -630,6 +642,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/faq"
+                      prefetch={false}
                       onClick={handleCommunityMenuClose}
                     >
                       <Typography variant="body1">FAQ</Typography>
@@ -638,6 +651,7 @@ export default function Header() {
                     <MenuItem 
                       component={Link} 
                       href="/contributors"
+                      prefetch={false}
                       onClick={handleCommunityMenuClose}
                     >
                       <Typography variant="body1">Contributors</Typography>
@@ -777,6 +791,7 @@ export default function Header() {
                       <MenuItem 
                         component={Link}
                         href={`/users/${userData?.id}`}
+                        prefetch={false}
                         onClick={handleMenuClose}
                       >
                         <UserAvatar
@@ -810,6 +825,7 @@ export default function Header() {
                       <MenuItem 
                         component={Link}
                         href="/settings"
+                        prefetch={false}
                         onClick={handleMenuClose}
                       >
                         <ListItemIcon>

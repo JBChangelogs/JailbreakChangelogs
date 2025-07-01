@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { formatMessageDate } from '@/utils/timestamp';
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 interface Item {
   id: number;
@@ -319,9 +321,16 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                             </div>
                           </div>
                           {change.suggestion.data.reason && (
-                            <p className="text-sm text-gray-300 mb-2">
-                              {change.suggestion.data.reason}
-                            </p>
+                            <div className="text-sm text-gray-300 mb-2">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkBreaks]}
+                                components={{
+                                  strong: (props) => <b {...props} />,
+                                }}
+                              >
+                                {change.suggestion.data.reason}
+                              </ReactMarkdown>
+                            </div>
                           )}
                           <div className="text-xs text-gray-400">
                             Suggestion #{change.suggestion.id} • {formatMessageDate(change.suggestion.created_at)}

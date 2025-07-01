@@ -35,6 +35,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^10.1.0",
     "react-window": "^1.8.11",
+    "remark-breaks": "^4.0.0",
     "schema-dts": "^1.1.5",
     "unist-util-visit": "^5.0.0"
   },
