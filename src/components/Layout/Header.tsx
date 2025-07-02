@@ -329,10 +329,10 @@ export default function Header() {
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
       
-      <ListItem component={Link} href="/changelogs" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Changelogs" />
       </ListItem>
-      <ListItem component={Link} href="/seasons" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/seasons" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Seasons" />
       </ListItem>
       <ListItem>
@@ -436,7 +436,6 @@ export default function Header() {
                 <Button
                   component={Link}
                   href="/changelogs"
-                  prefetch={false}
                   sx={{
                     color: '#D3D9D4',
                     '&:hover': {
@@ -451,7 +450,6 @@ export default function Header() {
                 <Button
                   component={Link}
                   href="/seasons"
-                  prefetch={false}
                   sx={{
                     color: '#D3D9D4',
                     '&:hover': {
