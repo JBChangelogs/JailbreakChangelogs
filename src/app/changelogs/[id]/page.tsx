@@ -19,7 +19,6 @@ import ChangelogNavigation from '@/components/Changelogs/ChangelogNavigation';
 import ChangelogDatePicker from '@/components/Changelogs/ChangelogDatePicker';
 import ChangelogContent from '@/components/Changelogs/ChangelogContent';
 import { Skeleton } from '@mui/material';
-import localFont from "next/font/local";
 
 interface Changelog {
   id: number;
@@ -53,10 +52,6 @@ const fetchChangelog = async (id: string) => {
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
 };
-
-const luckiestGuy = localFont({ 
-  src: '../../../../public/fonts/LuckiestGuy.ttf',
-});
 
 export default function ChangelogPage() {
   const params = useParams();
@@ -303,11 +298,6 @@ export default function ChangelogPage() {
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
           <ChangelogHeader />
-          {changelog && (
-            <h1 className={`${luckiestGuy.className} mb-8 text-3xl sm:text-5xl text-muted border-b border-[#748D92] pb-4`}>
-              {changelog.title}
-            </h1>
-          )}
           <ChangelogNavigation
             changelogList={changelogList}
             selectedId=""

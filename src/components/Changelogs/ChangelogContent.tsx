@@ -36,6 +36,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
       {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
       <div className="sm:col-span-12 lg:col-span-8">
+        <h1 className={`${luckiestGuy.className} mb-8 text-3xl sm:text-5xl text-muted border-b border-[#748D92] pb-4`}>
+          {title}
+        </h1>
         <div className="prose prose-invert max-w-none">
           {parseMarkdown(sections).map((section, sectionIndex) => (
             <div key={sectionIndex} className="mb-8">
