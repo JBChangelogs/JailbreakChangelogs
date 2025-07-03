@@ -52,7 +52,7 @@ export default function Home() {
               with other players!
             </p>
             <a
-              href="https://www.roblox.com/games/606849621/Jailbreak"
+              href="roblox://experiences/start?placeId=606849621"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block rounded-lg bg-[#124E66] px-8 py-3 text-lg font-semibold text-muted hover:bg-[#0D3A4A]"
