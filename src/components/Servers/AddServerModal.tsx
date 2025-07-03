@@ -85,13 +85,6 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       return;
     }
 
-    // Validate Roblox share URL format
-    const requiredPrefix = 'https://www.roblox.com/share?code=';
-    if (!link.startsWith(requiredPrefix)) {
-      toast.error('Server link must start with: https://www.roblox.com/share?code=');
-      return;
-    }
-
     if (!neverExpires && !expires) {
       toast.error('Please select an expiration date');
       return;
@@ -151,6 +144,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
         const errorData = await response.json().catch(() => ({ message: 'Failed to save server' }));
         if (response.status === 409) {
           toast.error('This server already exists');
+        } else if (response.status === 403) {
+          toast.error('Server link must start with: https://www.roblox.com/share?code=');
         } else {
           toast.error(`Error saving server: ${errorData.message}`);
         }

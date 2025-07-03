@@ -6,7 +6,10 @@ import { getToken } from '@/utils/auth';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import AddServerModal from './AddServerModal';
-import { Skeleton } from '@mui/material';
+import { Skeleton, Tooltip } from '@mui/material';
+import { UserDetailsTooltip } from '@/components/Users/UserDetailsTooltip';
+import type { UserData } from '@/types/auth';
+import { CustomConfirmationModal } from '@/components/Modals/CustomConfirmationModal';
 
 interface Server {
   id: number;
@@ -14,16 +17,6 @@ interface Server {
   owner: string;
   rules: string;
   expires: string;
-}
-
-interface UserData {
-  id: string;
-  username: string;
-}
-
-interface UserDataResponse {
-  id: string;
-  username: string;
 }
 
 const ServerList: React.FC = () => {
@@ -34,6 +27,8 @@ const ServerList: React.FC = () => {
   const [userData, setUserData] = React.useState<Record<string, UserData>>({});
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [editingServer, setEditingServer] = React.useState<Server | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [serverToDelete, setServerToDelete] = React.useState<Server | null>(null);
 
   React.useEffect(() => {
     const fetchServersAndUser = async () => {
@@ -46,7 +41,7 @@ const ServerList: React.FC = () => {
         try {
           const userResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
           if (userResponse.ok) {
-            const userData = await userResponse.json() as UserDataResponse;
+            const userData = await userResponse.json() as UserData;
             userId = userData.id;
             setLoggedInUserId(userId);
           } else {
@@ -73,7 +68,7 @@ const ServerList: React.FC = () => {
           try {
             const response = await fetch(`${PROD_API_URL}/users/get?id=${ownerId}&nocache=true`);
             if (response.ok) {
-              const userData = await response.json() as UserDataResponse;
+              const userData = await response.json() as UserData;
               return { id: ownerId, data: userData };
             }
             return null;
@@ -128,13 +123,14 @@ const ServerList: React.FC = () => {
       const data = await serversResponse.json() as Server[];
       setServers(data);
 
-      // Fetch user data for each server owner
+      // Only fetch user data for new owner IDs
       const uniqueOwnerIds = [...new Set(data.map((server: Server) => server.owner))];
-      const userDataPromises = uniqueOwnerIds.map(async (ownerId) => {
+      const newOwnerIds = uniqueOwnerIds.filter((ownerId) => !(ownerId in userData));
+      const userDataPromises = newOwnerIds.map(async (ownerId) => {
         try {
           const response = await fetch(`${PROD_API_URL}/users/get?id=${ownerId}&nocache=true`);
           if (response.ok) {
-            const userData = await response.json() as UserDataResponse;
+            const userData = await response.json() as UserData;
             return { id: ownerId, data: userData };
           }
           return null;
@@ -145,50 +141,56 @@ const ServerList: React.FC = () => {
       });
 
       const userDataResults = await Promise.all(userDataPromises);
-      const userDataMap = userDataResults.reduce((acc, result) => {
+      const newUserDataMap = userDataResults.reduce((acc, result) => {
         if (result) {
           acc[result.id] = result.data;
         }
         return acc;
       }, {} as Record<string, UserData>);
 
-      setUserData(userDataMap);
+      setUserData((prev) => ({ ...prev, ...newUserDataMap }));
     } catch {
       toast.error('Failed to refresh server list');
     }
   };
 
-  const handleDeleteServer = async (serverLink: string) => {
+  const handleDeleteServer = (server: Server) => {
+    setServerToDelete(server);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteServer = async () => {
+    if (!serverToDelete) return;
     const token = getToken();
     if (!token) {
       toast.error('You must be logged in to delete a server.');
+      setDeleteModalOpen(false);
+      setServerToDelete(null);
       return;
     }
-
-    if (window.confirm('Are you sure you want to delete this server?')) {
-      try {
-        const response = await fetch(`${PROD_API_URL}/servers/delete`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            link: serverLink,
-            owner: token,
-          }),
-        });
-
-        if (response.ok) {
-          toast.success('Server deleted successfully!');
-          // Update the server list instead of reloading
-          handleServerAdded();
-        } else {
-          const errorData = await response.json().catch(() => ({ message: 'Failed to delete server' }));
-          toast.error(`Error deleting server: ${errorData.message}`);
-        }
-      } catch {
-        toast.error('An error occurred while deleting the server.');
+    try {
+      const response = await fetch(`${PROD_API_URL}/servers/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          link: serverToDelete.link,
+          owner: token,
+        }),
+      });
+      if (response.ok) {
+        toast.success('Server deleted successfully!');
+        handleServerAdded();
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to delete server' }));
+        toast.error(`Error deleting server: ${errorData.message}`);
       }
+    } catch {
+      toast.error('An error occurred while deleting the server.');
+    } finally {
+      setDeleteModalOpen(false);
+      setServerToDelete(null);
     }
   };
 
@@ -214,7 +216,7 @@ const ServerList: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between px-4 lg:px-0">
           <div className="flex items-center space-x-2">
             <ShieldCheckIcon className="h-5 w-5 text-[#5865F2]" />
             <Skeleton variant="text" width={120} height={24} sx={{ bgcolor: '#37424D' }} />
@@ -223,7 +225,7 @@ const ServerList: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 sm:p-6">
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
@@ -284,12 +286,11 @@ const ServerList: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4 lg:px-0">
         <div className="flex items-center space-x-2">
           <ShieldCheckIcon className="h-5 w-5 text-[#5865F2]" />
           <span className="text-muted">Total Servers: {servers.length}</span>
         </div>
-
         <button
           onClick={handleAddServer}
           className="inline-flex items-center rounded-lg border border-[#5865F2] bg-[#2B2F4C] px-4 py-2 text-muted hover:bg-[#32365A] transition-colors"
@@ -325,7 +326,7 @@ const ServerList: React.FC = () => {
                       <PencilIcon className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteServer(server.link)}
+                      onClick={() => handleDeleteServer(server)}
                       className="rounded-lg border border-[#FF6B6B] bg-[#3C2B2B] px-2 sm:px-3 py-1 text-sm text-[#FF6B6B] hover:bg-[#4A3030] transition-colors"
                       aria-label="Delete Server"
                     >
@@ -367,12 +368,32 @@ const ServerList: React.FC = () => {
                 <UserIcon className="h-5 w-5 text-[#FFFFFF]" />
                 <span className="text-muted text-sm sm:text-base">
                   Owner: {userData[server.owner] ? (
-                    <Link 
-                      href={`/users/${server.owner}`}
-                      className="text-blue-300 hover:text-blue-400 hover:underline"
+                    <Tooltip
+                      title={<UserDetailsTooltip user={userData[server.owner]} />}
+                      arrow
+                      disableTouchListener
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: '#1A2228',
+                            border: '1px solid #2E3944',
+                            maxWidth: '400px',
+                            width: 'auto',
+                            minWidth: '300px',
+                            '& .MuiTooltip-arrow': {
+                              color: '#1A2228',
+                            },
+                          },
+                        },
+                      }}
                     >
-                      @{userData[server.owner].username}
-                    </Link>
+                      <Link 
+                        href={`/users/${server.owner}`}
+                        className="text-blue-300 hover:text-blue-400 hover:underline"
+                      >
+                        @{userData[server.owner].username}
+                      </Link>
+                    </Tooltip>
                   ) : 'Unknown'}
                 </span>
               </div>
@@ -403,6 +424,22 @@ const ServerList: React.FC = () => {
         }}
         onServerAdded={handleServerAdded}
         editingServer={editingServer}
+      />
+      <CustomConfirmationModal
+        open={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setServerToDelete(null);
+        }}
+        title="Delete Server"
+        message="Are you sure you want to delete this server? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteServer}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setServerToDelete(null);
+        }}
       />
     </div>
   );

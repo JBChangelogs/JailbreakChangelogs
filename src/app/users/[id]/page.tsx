@@ -65,6 +65,14 @@ interface User {
   flags?: UserFlag[];
 }
 
+interface Server {
+  id: number;
+  link: string;
+  owner: string;
+  rules: string;
+  expires: string;
+}
+
 export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
@@ -85,6 +93,7 @@ export default function UserProfilePage() {
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
+  const [privateServers, setPrivateServers] = useState<Server[]>([]);
 
   const refreshBio = async (newBio: string) => {
     setBio(newBio);
@@ -190,6 +199,21 @@ export default function UserProfilePage() {
               })
               .finally(() => {
                 setCommentsLoading(false);
+              })
+          );
+          
+          // Fetch private servers for this user
+          fetchPromises.push(
+            fetch(`${PROD_API_URL}/servers/get?owner=${userId}`)
+              .then(res => {
+                if (!res.ok) throw null;
+                return res.json();
+              })
+              .then((data: Server[]) => {
+                setPrivateServers(Array.isArray(data) ? data : []);
+              })
+              .catch(() => {
+                setPrivateServers([]);
               })
           );
           
@@ -660,6 +684,7 @@ export default function UserProfilePage() {
               commentsLoading={commentsLoading}
               commentsError={commentsError}
               onBioUpdate={refreshBio}
+              privateServers={privateServers}
             />
           </div>
         </div>

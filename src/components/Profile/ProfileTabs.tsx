@@ -7,6 +7,7 @@ import AboutTab from './AboutTab';
 import CommentsTab from './CommentsTab';
 import FavoritesTab from './FavoritesTab';
 import RobloxProfileTab from './RobloxProfileTab';
+import PrivateServersTab from './PrivateServersTab';
 import { UserSettings } from '@/types/auth';
 
 interface User {
@@ -51,6 +52,14 @@ interface CommentData {
   owner: string;
 }
 
+interface Server {
+  id: number;
+  link: string;
+  owner: string;
+  rules: string;
+  expires: string;
+}
+
 interface ProfileTabsProps {
   user: User | null;
   currentUserId: string | null;
@@ -60,6 +69,7 @@ interface ProfileTabsProps {
   commentsLoading: boolean;
   commentsError: string | null;
   onBioUpdate?: (newBio: string) => void;
+  privateServers?: Server[];
 }
 
 const StyledTabs = styled(Tabs)(() => ({
@@ -96,7 +106,8 @@ export default function ProfileTabs({
   comments,
   commentsLoading,
   commentsError,
-  onBioUpdate
+  onBioUpdate,
+  privateServers = [],
 }: ProfileTabsProps) {
   const [value, setValue] = useState(0);
 
@@ -104,23 +115,19 @@ export default function ProfileTabs({
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1); // Remove the # symbol
-      switch (hash) {
-        case 'about':
-          setValue(0);
-          break;
-        case 'comments':
-          setValue(1);
-          break;
-        case 'favorites':
-          setValue(2);
-          break;
-        case 'roblox':
-          if (user?.roblox_id) {
-            setValue(3);
-          }
-          break;
-        default:
-          setValue(0);
+      const hasRobloxConnection = Boolean(user?.roblox_id);
+      if (hash === 'about') {
+        setValue(0);
+      } else if (hash === 'comments') {
+        setValue(1);
+      } else if (hash === 'favorites') {
+        setValue(2);
+      } else if (hash === 'servers') {
+        setValue(3);
+      } else if (hash === 'roblox' && hasRobloxConnection) {
+        setValue(4);
+      } else {
+        setValue(0);
       }
     };
 
@@ -134,15 +141,19 @@ export default function ProfileTabs({
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    const hasRobloxConnection = Boolean(user?.roblox_id);
     // Update hash based on selected tab
     if (newValue === 0) {
       // Remove hash completely for About tab
       history.pushState(null, '', window.location.pathname);
-    } else {
-      const hash = newValue === 1 ? 'comments' :
-                  newValue === 2 ? 'favorites' :
-                  'roblox';
-      window.location.hash = hash;
+    } else if (newValue === 1) {
+      window.location.hash = 'comments';
+    } else if (newValue === 2) {
+      window.location.hash = 'favorites';
+    } else if (newValue === 3) {
+      window.location.hash = 'servers';
+    } else if (hasRobloxConnection && newValue === 4) {
+      window.location.hash = 'roblox';
     }
   };
 
@@ -167,6 +178,7 @@ export default function ProfileTabs({
           <StyledTab label="About" />
           <StyledTab label="Comments" />
           <StyledTab label="Favorites" />
+          <StyledTab label="Private Servers" />
           {hasRobloxConnection && <StyledTab label="Roblox Profile" />}
         </StyledTabs>
       </Box>
@@ -196,8 +208,14 @@ export default function ProfileTabs({
           settings={user.settings}
         />
       </TabPanel>
+      <TabPanel value={value} index={3}>
+        <PrivateServersTab 
+          servers={privateServers} 
+          isOwnProfile={currentUserId === user.id}
+        />
+      </TabPanel>
       {hasRobloxConnection && (
-        <TabPanel value={value} index={3}>
+        <TabPanel value={value} index={4}>
           <RobloxProfileTab user={user} />
         </TabPanel>
       )}
