@@ -32,7 +32,7 @@ async function fetchItem(type: string, name: string): Promise<Item | null> {
 }
 
 function sanitizeJsonLd(jsonLd: WithContext<FAQPage | BreadcrumbList>): string {
-  return JSON.stringify(jsonLd).replace(/</g, '\u003c');
+  return JSON.stringify(jsonLd);
 }
 
 async function generateFAQJsonLd(item: Item | null): Promise<string | null> {
