@@ -7,6 +7,9 @@ import { handleImageError, getItemImagePath, isVideoItem, getVideoPath } from '@
 import Link from 'next/link';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { SparklesIcon } from "@heroicons/react/24/outline";
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
@@ -18,6 +21,21 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   const [similarItems, setSimilarItems] = useState<ItemDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortCriteria>('similarity');
+  const [selectLoaded, setSelectLoaded] = useState(false);
+
+  // Set selectLoaded to true after mount to ensure client-side rendering
+  useEffect(() => {
+    setSelectLoaded(true);
+  }, []);
+
+  // Create options for the select dropdown
+  const sortOptions = [
+    { value: 'similarity', label: 'Sort by Similarity' },
+    { value: 'creator', label: 'Sort by Creator' }
+  ];
+
+  // Find the current selected option
+  const selectedOption = sortOptions.find(option => option.value === sortBy) || sortOptions[0];
 
   const calculateSimilarityScore = useCallback((item1: ItemDetails, item2: ItemDetails): number => {
     let score = 0;
@@ -128,14 +146,62 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           <h3 className="text-xl font-semibold text-white">Similar Items</h3>
         </div>
         
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortCriteria)}
-          className="rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2 text-sm text-[#D3D9D4] focus:border-[#5865F2] focus:outline-none focus:ring-1 focus:ring-[#5865F2]/20"
-        >
-          <option value="similarity">Sort by Similarity</option>
-          <option value="creator">Sort by Creator</option>
-        </select>
+        {selectLoaded ? (
+          <Select
+            value={selectedOption}
+            onChange={(option: unknown) => {
+              if (!option) {
+                setSortBy('similarity');
+                return;
+              }
+              const newValue = (option as { value: SortCriteria }).value;
+              setSortBy(newValue);
+            }}
+            options={sortOptions}
+            classNamePrefix="react-select"
+            className="w-full"
+            isClearable={false}
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: '#37424D',
+                borderColor: '#2E3944',
+                color: '#D3D9D4',
+                minHeight: '40px',
+                fontSize: '14px',
+                '&:hover': {
+                  borderColor: '#5865F2',
+                },
+                '&:focus-within': {
+                  borderColor: '#5865F2',
+                  boxShadow: '0 0 0 1px #5865F2',
+                },
+              }),
+              singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+              menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
+                color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                fontSize: '14px',
+                '&:active': {
+                  backgroundColor: '#124E66',
+                  color: '#FFFFFF',
+                },
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                color: '#D3D9D4',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }),
+            }}
+            isSearchable={false}
+          />
+        ) : (
+          <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-lg animate-pulse"></div>
+        )}
       </div>
 
       {/* Content Section */}

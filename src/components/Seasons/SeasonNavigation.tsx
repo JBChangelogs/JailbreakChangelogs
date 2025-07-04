@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from 'react-hot-toast';
 import { FaDiceSix } from "react-icons/fa6";
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;
@@ -16,23 +19,87 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
   onSeasonSelect,
   onGoToLatestSeason,
 }) => {
+  const [selectLoaded, setSelectLoaded] = useState(false);
+
+  // Set selectLoaded to true after mount to ensure client-side rendering
+  useEffect(() => {
+    setSelectLoaded(true);
+  }, []);
+
+  // Create options for the select dropdown
+  const selectOptions = seasonList.map((item) => ({
+    value: item.season.toString(),
+    label: `Season ${item.season} - ${item.title}`
+  }));
+
+  // Find the current selected option
+  const selectedOption = selectOptions.find(option => option.value === selectedId) || null;
+
   return (
     <div className="mb-8 grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <select
-          value={selectedId}
-          onChange={(e) => onSeasonSelect(e.target.value)}
-          className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 text-muted focus:border-[#5865F2] focus:outline-none"
-        >
-          <option value="" disabled className="text-muted">
-            Select a season
-          </option>
-          {seasonList.map((item) => (
-            <option key={item.season} value={item.season} className="text-muted">
-              Season {item.season} - {item.title}
-            </option>
-          ))}
-        </select>
+        {selectLoaded ? (
+          <Select
+            value={selectedOption}
+            onChange={(option: unknown) => {
+              if (!option) {
+                onSeasonSelect('');
+                return;
+              }
+              const newValue = (option as { value: string }).value;
+              onSeasonSelect(newValue);
+            }}
+            options={selectOptions}
+            placeholder="Select a season"
+            classNamePrefix="react-select"
+            className="w-full"
+            isClearable={true}
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: '#212A31',
+                borderColor: '#2E3944',
+                color: '#D3D9D4',
+                minHeight: '48px',
+                '&:hover': {
+                  borderColor: '#5865F2',
+                },
+                '&:focus-within': {
+                  borderColor: '#5865F2',
+                },
+              }),
+              singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+              placeholder: (base) => ({ ...base, color: '#D3D9D4' }),
+              menu: (base) => ({ ...base, backgroundColor: '#212A31', color: '#D3D9D4', zIndex: 3000 }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#37424D' : '#212A31',
+                color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                '&:active': {
+                  backgroundColor: '#124E66',
+                  color: '#FFFFFF',
+                },
+              }),
+              clearIndicator: (base) => ({
+                ...base,
+                color: '#D3D9D4',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                color: '#D3D9D4',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }),
+            }}
+            isSearchable={false}
+          />
+        ) : (
+          <div className="w-full h-12 bg-[#212A31] border border-[#2E3944] rounded-lg animate-pulse"></div>
+        )}
 
         {seasonList.length > 0 && seasonList[0].season.toString() !== selectedId ? (
           <button

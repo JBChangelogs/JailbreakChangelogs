@@ -12,6 +12,9 @@ import { useRouter } from 'next/navigation';
 import { useSupporterModal } from '@/hooks/useSupporterModal';
 import SupporterModal from '../Modals/SupporterModal';
 import LoginModalWrapper from '../Auth/LoginModalWrapper';
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface TradeAdFormProps {
   onSuccess?: () => void;
@@ -44,6 +47,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | undefined>(tradeAd);
+  const [selectLoaded, setSelectLoaded] = useState(false);
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -334,6 +338,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
     }
   };
 
+  // Set selectLoaded to true after mount to ensure client-side rendering
+  useEffect(() => {
+    setSelectLoaded(true);
+  }, []);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -451,17 +460,62 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
             <h3 className="text-muted font-medium mb-4">Trade Ad Expiration</h3>
             <div className="flex items-center gap-4">
-              <select
-                value={expirationHours}
-                onChange={(e) => setExpirationHours(Number(e.target.value))}
-                className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 text-muted focus:border-[#124E66] focus:outline-none"
-              >
-                {[6, 12, 24, 48].map((hours) => (
-                  <option key={hours} value={hours}>
-                    {hours} {hours === 1 ? 'hour' : 'hours'}
-                  </option>
-                ))}
-              </select>
+              {selectLoaded ? (
+                <Select
+                  value={{ value: expirationHours, label: `${expirationHours} ${expirationHours === 1 ? 'hour' : 'hours'}` }}
+                  onChange={(option: unknown) => {
+                    if (!option) {
+                      setExpirationHours(6);
+                      return;
+                    }
+                    const newValue = (option as { value: number }).value;
+                    setExpirationHours(newValue);
+                  }}
+                  options={[6, 12, 24, 48].map((hours) => ({
+                    value: hours,
+                    label: `${hours} ${hours === 1 ? 'hour' : 'hours'}`
+                  }))}
+                  classNamePrefix="react-select"
+                  className="w-full"
+                  isClearable={false}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      backgroundColor: '#37424D',
+                      borderColor: '#2E3944',
+                      color: '#D3D9D4',
+                      minHeight: '40px',
+                      '&:hover': {
+                        borderColor: '#124E66',
+                      },
+                      '&:focus-within': {
+                        borderColor: '#124E66',
+                      },
+                    }),
+                    singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+                    menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected ? '#124E66' : state.isFocused ? '#2E3944' : '#37424D',
+                      color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                      '&:active': {
+                        backgroundColor: '#124E66',
+                        color: '#FFFFFF',
+                      },
+                    }),
+                    dropdownIndicator: (base) => ({
+                      ...base,
+                      color: '#D3D9D4',
+                      '&:hover': {
+                        color: '#FFFFFF',
+                      },
+                    }),
+                  }}
+                  isSearchable={false}
+                />
+              ) : (
+                <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-lg animate-pulse"></div>
+              )}
             </div>
           </div>
         )}
@@ -470,17 +524,63 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         {editMode && tradeAd && (
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] mt-4">
             <h3 className="text-muted font-medium mb-4">Trade Status</h3>
-            <select
-              value={selectedTradeAd?.status || tradeAd.status}
-              onChange={(e) => {
-                const status = e.target.value;
-                setSelectedTradeAd(prev => prev ? { ...prev, status } : { ...tradeAd, status });
-              }}
-              className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 text-muted focus:border-[#124E66] focus:outline-none"
-            >
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-            </select>
+            {selectLoaded ? (
+              <Select
+                value={{ value: selectedTradeAd?.status || tradeAd.status, label: selectedTradeAd?.status || tradeAd.status }}
+                onChange={(option: unknown) => {
+                  if (!option) {
+                    const status = 'Pending';
+                    setSelectedTradeAd(prev => prev ? { ...prev, status } : { ...tradeAd, status });
+                    return;
+                  }
+                  const status = (option as { value: string }).value;
+                  setSelectedTradeAd(prev => prev ? { ...prev, status } : { ...tradeAd, status });
+                }}
+                options={[
+                  { value: 'Pending', label: 'Pending' },
+                  { value: 'Completed', label: 'Completed' }
+                ]}
+                classNamePrefix="react-select"
+                className="w-full"
+                isClearable={false}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: '#37424D',
+                    borderColor: '#2E3944',
+                    color: '#D3D9D4',
+                    minHeight: '40px',
+                    '&:hover': {
+                      borderColor: '#124E66',
+                    },
+                    '&:focus-within': {
+                      borderColor: '#124E66',
+                    },
+                  }),
+                  singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+                  menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected ? '#124E66' : state.isFocused ? '#2E3944' : '#37424D',
+                    color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                    '&:active': {
+                      backgroundColor: '#124E66',
+                      color: '#FFFFFF',
+                    },
+                  }),
+                  dropdownIndicator: (base) => ({
+                    ...base,
+                    color: '#D3D9D4',
+                    '&:hover': {
+                      color: '#FFFFFF',
+                    },
+                  }),
+                }}
+                isSearchable={false}
+              />
+            ) : (
+              <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-lg animate-pulse"></div>
+            )}
           </div>
         )}
 
