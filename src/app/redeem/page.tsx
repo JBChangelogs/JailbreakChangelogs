@@ -180,7 +180,13 @@ export default function RedeemPage() {
               </li>
             </ol>
 
-            <div className="mt-12 pt-8 border-t border-gray-700/50">
+            <div className="mt-8 p-4 bg-yellow-900/40 border-l-4 border-yellow-400 rounded">
+              <p className="text-yellow-200 text-base font-medium">
+                <strong>Ko-fi Supporters:</strong> If purchasing a code via <a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="underline text-yellow-100">Ko-fi</a> for supporter tiers, <span className="font-bold">ensure your Discord user ID is in parenthesis inside your message</span> (e.g., <code>(1019539798383398946)</code>). This is required to receive your code!
+              </p>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-700/50">
               <p className="text-gray-300 text-lg mb-6">Thank you for supporting us!</p>
               <Link 
                 href="/supporting" 
