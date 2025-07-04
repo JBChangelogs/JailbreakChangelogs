@@ -90,6 +90,13 @@ export default async function RootLayout({
         <head>
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
+          {/* Umami Analytics */}
+          <Script 
+            defer 
+            src="https://cloud.umami.is/script.js" 
+            data-website-id="48ae24db-9fca-4738-ba09-a39aff8a600d"
+            strategy="afterInteractive"
+          />
         </head>
         <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
           <Maintenance />
@@ -112,6 +119,13 @@ export default async function RootLayout({
       <head>
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
+        {/* Umami Analytics */}
+        <Script 
+          defer 
+          src="https://cloud.umami.is/script.js" 
+          data-website-id="48ae24db-9fca-4738-ba09-a39aff8a600d"
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
         <Toaster
