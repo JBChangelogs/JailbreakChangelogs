@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ClockIcon, CalendarIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { format } from 'date-fns';
 import { toast } from 'react-hot-toast';
@@ -6,6 +6,9 @@ import { getBadgeColor, highlightText } from '@/utils/changelogs';
 import Link from 'next/link';
 import { ClockIcon as ClockIconSolid } from "@heroicons/react/24/solid";
 import { FaDiceSix } from "react-icons/fa6";
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface SearchResult {
   id: number;
@@ -47,6 +50,25 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
   onSearchChange,
   onSearchFocus,
 }) => {
+  const [selectLoaded, setSelectLoaded] = useState(false);
+
+  // Set selectLoaded to true after mount to ensure client-side rendering
+  useEffect(() => {
+    setSelectLoaded(true);
+  }, []);
+
+  // Get the list to display based on date range
+  const displayList = (dateRange.startDate || dateRange.endDate) ? filteredChangelogList : changelogList;
+  
+  // Create options for the select dropdown
+  const selectOptions = displayList.map((item) => ({
+    value: item.id.toString(),
+    label: `#${item.id} - ${item.title}`
+  }));
+
+  // Find the current selected option
+  const selectedOption = selectOptions.find(option => option.value === selectedId) || null;
+
   return (
     <div className="mb-8 grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -66,22 +88,70 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
           <CalendarIcon className="h-5 w-5 text-[#FFFFFF]" />
         </button>
 
-        <select
-          value={selectedId}
-          onChange={(e) => onChangelogSelect(e.target.value)}
-          className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 text-muted focus:border-[#5865F2] focus:outline-none"
-        >
-          <option value="" className="text-muted">
-            {(dateRange.startDate || dateRange.endDate) && filteredChangelogList.length === 0
+        {selectLoaded ? (
+          <Select
+            value={selectedOption}
+            onChange={(option: unknown) => {
+              if (!option) {
+                onChangelogSelect('');
+                return;
+              }
+              const newValue = (option as { value: string }).value;
+              onChangelogSelect(newValue);
+            }}
+            options={selectOptions}
+            placeholder={(dateRange.startDate || dateRange.endDate) && filteredChangelogList.length === 0
               ? "No changelogs found for selected date range"
               : "Select a changelog"}
-          </option>
-          {(dateRange.startDate || dateRange.endDate ? filteredChangelogList : changelogList).map((item) => (
-            <option key={item.id} value={item.id} className="text-muted">
-              #{item.id} - {item.title}
-            </option>
-          ))}
-        </select>
+            classNamePrefix="react-select"
+            className="w-full"
+            isClearable={true}
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: '#212A31',
+                borderColor: '#2E3944',
+                color: '#D3D9D4',
+                minHeight: '48px',
+                '&:hover': {
+                  borderColor: '#5865F2',
+                },
+                '&:focus-within': {
+                  borderColor: '#5865F2',
+                },
+              }),
+              singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+              placeholder: (base) => ({ ...base, color: '#D3D9D4' }),
+              menu: (base) => ({ ...base, backgroundColor: '#212A31', color: '#D3D9D4', zIndex: 3000 }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#37424D' : '#212A31',
+                color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                '&:active': {
+                  backgroundColor: '#124E66',
+                  color: '#FFFFFF',
+                },
+              }),
+              clearIndicator: (base) => ({
+                ...base,
+                color: '#D3D9D4',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                color: '#D3D9D4',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }),
+            }}
+            isSearchable={false}
+          />
+        ) : (
+          <div className="w-full h-12 bg-[#212A31] border border-[#2E3944] rounded-lg animate-pulse"></div>
+        )}
 
         {changelogList.length > 0 && Math.max(...changelogList.map(item => item.id)).toString() !== selectedId ? (
           <button

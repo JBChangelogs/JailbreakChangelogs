@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from "next/image";
 import { ArrowRightIcon, ArrowTurnDownRightIcon } from "@heroicons/react/24/outline";
 import localFont from "next/font/local";
@@ -28,9 +28,25 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   onChangelogSelect,
   changelogList,
 }) => {
+  const [imageAspectRatio, setImageAspectRatio] = useState<string>('aspect-[4/3]');
+  
   const currentIndex = changelogList.findIndex(c => c.id === changelogId);
   const prevChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
   const nextChangelog = currentIndex < changelogList.length - 1 ? changelogList[currentIndex + 1] : null;
+
+  const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    const aspectRatio = img.naturalWidth / img.naturalHeight;
+    
+    // Determine the appropriate aspect ratio class based on image dimensions
+    if (Math.abs(aspectRatio - 1) < 0.1) {
+      // Square image (ratio close to 1:1)
+      setImageAspectRatio('aspect-square');
+    } else {
+      // Everything else uses 16:9
+      setImageAspectRatio('aspect-video');
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
@@ -81,13 +97,14 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       <div className="sm:col-span-12 lg:col-span-4 space-y-8">
         {imageUrl && (
           <div>
-            <div className="relative w-full aspect-video">
+            <div className={`relative w-full ${imageAspectRatio}`}>
               <Image
                 src={`https://assets.jailbreakchangelogs.xyz${imageUrl}`}
                 alt={title}
                 fill
                 className="object-contain rounded-lg"
                 unoptimized
+                onLoad={handleImageLoad}
               />
             </div>
           </div>
