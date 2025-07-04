@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import React from "react";
-import { ThemeProvider, Skeleton, Pagination, Box, Chip } from '@mui/material';
+import { ThemeProvider, Skeleton, Pagination, Box, Chip, Tooltip } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { darkTheme } from '@/theme/darkTheme';
 import { PROD_API_URL } from '@/services/api';
@@ -277,7 +277,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                         </div>
                         {change.suggestion && (
                           <Chip
-                            label="Suggestion"
+                            label={`Suggestion #${change.suggestion.id}`}
                             size="small"
                             sx={{
                               backgroundColor: '#5865F2',
@@ -315,9 +315,51 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                                 {change.suggestion.suggestor_name}
                               </a>
                             </span>
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className="text-green-400">↑ {change.suggestion.vote_data.upvotes}</span>
-                              <span className="text-red-400">↓ {change.suggestion.vote_data.downvotes}</span>
+                            <div className="flex items-center justify-center text-xs">
+                              <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
+                                <Tooltip 
+                                  title={`${change.suggestion.vote_data.upvotes} upvote${change.suggestion.vote_data.upvotes !== 1 ? 's' : ''}`}
+                                  arrow
+                                  placement="top"
+                                  slotProps={{
+                                    tooltip: {
+                                      sx: {
+                                        bgcolor: '#1A2228',
+                                        border: '1px solid #2E3944',
+                                        '& .MuiTooltip-arrow': {
+                                          color: '#1A2228',
+                                        },
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
+                                    <span className="text-green-400 font-medium">↑</span>
+                                    <span className="text-green-400 font-semibold">{change.suggestion.vote_data.upvotes}</span>
+                                  </div>
+                                </Tooltip>
+                                <Tooltip 
+                                  title={`${change.suggestion.vote_data.downvotes} downvote${change.suggestion.vote_data.downvotes !== 1 ? 's' : ''}`}
+                                  arrow
+                                  placement="top"
+                                  slotProps={{
+                                    tooltip: {
+                                      sx: {
+                                        bgcolor: '#1A2228',
+                                        border: '1px solid #2E3944',
+                                        '& .MuiTooltip-arrow': {
+                                          color: '#1A2228',
+                                        },
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
+                                    <span className="text-red-400 font-medium">↓</span>
+                                    <span className="text-red-400 font-semibold">{change.suggestion.vote_data.downvotes}</span>
+                                  </div>
+                                </Tooltip>
+                              </div>
                             </div>
                           </div>
                           {change.suggestion.data.reason && (
@@ -333,7 +375,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                             </div>
                           )}
                           <div className="text-xs text-gray-400">
-                            Suggestion #{change.suggestion.id} • {formatMessageDate(change.suggestion.created_at)}
+                            Suggested on {formatMessageDate(change.suggestion.created_at)}
                           </div>
                         </div>
                       )}
@@ -365,6 +407,27 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                           {Object.entries(change.changes.new).map(([key, newValue]) => {
                             if (key === 'last_updated') return null;
                             const oldValue = change.changes.old[key];
+                            
+                            // Helper function to format values based on field type
+                            const formatValue = (value: any, fieldKey: string) => {
+                              if (value === "" || value === null || value === undefined) return "N/A";
+                              
+                              // Handle tradable field specifically
+                              if (fieldKey === 'tradable') {
+                                if (typeof value === 'boolean') {
+                                  return value ? 'True' : 'False';
+                                }
+                                if (typeof value === 'number') {
+                                  return value === 1 ? 'True' : 'False';
+                                }
+                                if (typeof value === 'string') {
+                                  return value === 'true' || value === '1' ? 'True' : 'False';
+                                }
+                              }
+                              
+                              return value;
+                            };
+                            
                             return (
                               <Box key={key} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 <span className="text-sm text-gray-400">
@@ -372,15 +435,15 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                                 </span>
                                 <div className="flex flex-col gap-1 pl-2">
                                   <div className="flex items-start gap-1">
-                                    <span className="text-sm font-semibold text-[#5865F2]">Old:</span>
+                                    <span className="text-sm font-semibold text-muted">Old:</span>
                                     <span className="text-sm text-gray-300 break-words">
-                                      {oldValue === "" || oldValue === null || oldValue === undefined ? "N/A" : oldValue}
+                                      {formatValue(oldValue, key)}
                                     </span>
                                   </div>
                                   <div className="flex items-start gap-1">
-                                    <span className="text-sm font-semibold text-[#5865F2]">New:</span>
+                                    <span className="text-sm font-semibold text-muted">New:</span>
                                     <span className="text-sm text-gray-300 break-words">
-                                      {newValue === "" || newValue === null || newValue === undefined ? "N/A" : newValue}
+                                      {formatValue(newValue, key)}
                                     </span>
                                   </div>
                                 </div>

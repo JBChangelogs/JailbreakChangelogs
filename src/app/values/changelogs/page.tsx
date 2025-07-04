@@ -95,6 +95,9 @@ export default function ValuesChangelogPage() {
       : a.created_at - b.created_at;
   });
 
+  // Find the changelog with the highest ID (latest)
+  const latestChangelogId = changelogs.length > 0 ? Math.max(...changelogs.map(c => c.id)) : null;
+
   const totalPages = Math.ceil(sortedChangelogs.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedChangelogs = sortedChangelogs.slice(startIndex, startIndex + itemsPerPage);
@@ -148,29 +151,43 @@ export default function ValuesChangelogPage() {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {paginatedChangelogs.map((changelog) => (
-                  <Link 
-                    key={changelog.id} 
-                    href={`/values/changelogs/${changelog.id}`}
-                    className="block"
-                  >
-                    <div className="bg-[#212A31] rounded-lg p-4 border border-[#37424D] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg hover:border-[#5865F2]">
-                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-                        <div>
-                          <h3 className="text-lg font-semibold text-[#D3D9D4]">
-                            Changelog #{changelog.id}
-                          </h3>
-                          <p className="text-sm text-gray-400">
-                            {changelog.change_count} changes
+                {paginatedChangelogs.map((changelog) => {
+                  const isLatest = changelog.id === latestChangelogId;
+                  return (
+                    <Link 
+                      key={changelog.id} 
+                      href={`/values/changelogs/${changelog.id}`}
+                      className="block"
+                    >
+                      <div className={`rounded-lg p-4 border transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg ${
+                        isLatest 
+                          ? 'bg-gradient-to-r from-[#5865F2]/10 to-[#4752C4]/10 border-[#5865F2] shadow-lg shadow-[#5865F2]/20' 
+                          : 'bg-[#212A31] border-[#37424D] hover:border-[#5865F2]'
+                      }`}>
+                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-lg font-semibold text-[#D3D9D4]">
+                                Changelog #{changelog.id}
+                              </h3>
+                              {isLatest && (
+                                <span className="px-2 py-0.5 text-xs rounded-full bg-[#5865F2] text-white font-medium">
+                                  Latest
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-400">
+                              {changelog.change_count} changes
+                            </p>
+                          </div>
+                          <p className="text-sm text-gray-400 mt-2 lg:mt-0">
+                            {formatMessageDate(changelog.created_at)}
                           </p>
                         </div>
-                        <p className="text-sm text-gray-400 mt-2 lg:mt-0">
-                          {formatMessageDate(changelog.created_at)}
-                        </p>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
               {totalPages > 1 && (
                 <div className="flex justify-center mt-8">
