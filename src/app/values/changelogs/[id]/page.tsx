@@ -409,7 +409,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                             const oldValue = change.changes.old[key];
                             
                             // Helper function to format values based on field type
-                            const formatValue = (value: any, fieldKey: string) => {
+                            const formatValue = (value: string | number | boolean | null | undefined, fieldKey: string) => {
                               if (value === "" || value === null || value === undefined) return "N/A";
                               
                               // Handle tradable field specifically

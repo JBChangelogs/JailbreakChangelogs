@@ -22,7 +22,9 @@ import { PROD_API_URL } from "@/services/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { demandOrder } from "@/utils/values";
-import Select from 'react-select';
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 export default function ValuesPage() {
   const router = useRouter();
@@ -37,6 +39,7 @@ export default function ValuesPage() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [selectLoaded, setSelectLoaded] = useState(false);
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = 24;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -68,6 +71,11 @@ export default function ValuesPage() {
         setValueSort(savedValueSort);
       }
     }
+  }, []);
+
+  // Set selectLoaded to true after mount to ensure client-side rendering
+  useEffect(() => {
+    setSelectLoaded(true);
   }, []);
 
   const handleRandomItem = async () => {
@@ -400,175 +408,204 @@ export default function ValuesPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Select
-              value={{ value: filterSort, label: (() => {
-                switch (filterSort) {
-                  case 'name-all-items': return 'All Items';
-                  case 'favorites': return 'My Favorites';
-                  case 'name-limited-items': return 'Limited Items';
-                  case 'name-seasonal-items': return 'Seasonal Items';
-                  case 'name-vehicles': return 'Vehicles';
-                  case 'name-spoilers': return 'Spoilers';
-                  case 'name-rims': return 'Rims';
-                  case 'name-body-colors': return 'Body Colors';
-                  case 'name-hyperchromes': return 'HyperChromes';
-                  case 'name-textures': return 'Body Textures';
-                  case 'name-tire-stickers': return 'Tire Stickers';
-                  case 'name-tire-styles': return 'Tire Styles';
-                  case 'name-drifts': return 'Drifts';
-                  case 'name-furnitures': return 'Furniture';
-                  case 'name-horns': return 'Horns';
-                  case 'name-weapon-skins': return 'Weapon Skins';
-                  default: return filterSort;
-                }
-              })() }}
-              onChange={(option) => {
-                if (!option) return;
-                const newValue = option.value;
-                if (newValue === "favorites") {
-                  const storedUser = localStorage.getItem('user');
-                  if (!storedUser) {
-                    toast.error('Please log in to view your favorites');
+            {selectLoaded ? (
+              <Select
+                value={{ value: filterSort, label: (() => {
+                  switch (filterSort) {
+                    case 'name-all-items': return 'All Items';
+                    case 'favorites': return 'My Favorites';
+                    case 'name-limited-items': return 'Limited Items';
+                    case 'name-seasonal-items': return 'Seasonal Items';
+                    case 'name-vehicles': return 'Vehicles';
+                    case 'name-spoilers': return 'Spoilers';
+                    case 'name-rims': return 'Rims';
+                    case 'name-body-colors': return 'Body Colors';
+                    case 'name-hyperchromes': return 'HyperChromes';
+                    case 'name-textures': return 'Body Textures';
+                    case 'name-tire-stickers': return 'Tire Stickers';
+                    case 'name-tire-styles': return 'Tire Styles';
+                    case 'name-drifts': return 'Drifts';
+                    case 'name-furnitures': return 'Furniture';
+                    case 'name-horns': return 'Horns';
+                    case 'name-weapon-skins': return 'Weapon Skins';
+                    default: return filterSort;
+                  }
+                })() }}
+                onChange={(option: unknown) => {
+                  if (!option) {
+                    // Reset to original value when cleared
+                    setFilterSort("name-all-items");
+                    localStorage.setItem('valuesFilterSort', "name-all-items");
                     return;
                   }
-                }
-                setFilterSort(newValue);
-                localStorage.setItem('valuesFilterSort', newValue);
-              }}
-              options={[
-                { value: 'name-all-items', label: 'All Items' },
-                { value: 'favorites', label: 'My Favorites' },
-                { value: 'name-limited-items', label: 'Limited Items' },
-                { value: 'name-seasonal-items', label: 'Seasonal Items' },
-                { value: 'name-vehicles', label: 'Vehicles' },
-                { value: 'name-spoilers', label: 'Spoilers' },
-                { value: 'name-rims', label: 'Rims' },
-                { value: 'name-body-colors', label: 'Body Colors' },
-                { value: 'name-hyperchromes', label: 'HyperChromes' },
-                { value: 'name-textures', label: 'Body Textures' },
-                { value: 'name-tire-stickers', label: 'Tire Stickers' },
-                { value: 'name-tire-styles', label: 'Tire Styles' },
-                { value: 'name-drifts', label: 'Drifts' },
-                { value: 'name-furnitures', label: 'Furniture' },
-                { value: 'name-horns', label: 'Horns' },
-                { value: 'name-weapon-skins', label: 'Weapon Skins' },
-              ]}
-              classNamePrefix="react-select"
-              className="w-full"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: '#37424D',
-                  borderColor: '#2E3944',
-                  color: '#D3D9D4',
-                }),
-                singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                  color: '#D3D9D4',
-                }),
-              }}
-              isSearchable={false}
-            />
-
-            <Select
-              value={{ value: valueSort, label: (() => {
-                switch (valueSort) {
-                  case 'random': return 'Random';
-                  case 'alpha-asc': return 'Name (A to Z)';
-                  case 'alpha-desc': return 'Name (Z to A)';
-                  case 'cash-desc': return 'Cash Value (High to Low)';
-                  case 'cash-asc': return 'Cash Value (Low to High)';
-                  case 'duped-desc': return 'Duped Value (High to Low)';
-                  case 'duped-asc': return 'Duped Value (Low to High)';
-                  case 'demand-desc': return 'Demand (High to Low)';
-                  case 'demand-asc': return 'Demand (Low to High)';
-                  case 'demand-extremely-high': return 'Extremely High Demand';
-                  case 'demand-very-high': return 'Very High Demand';
-                  case 'demand-high': return 'High Demand';
-                  case 'demand-decent': return 'Decent Demand';
-                  case 'demand-medium': return 'Medium Demand';
-                  case 'demand-low': return 'Low Demand';
-                  case 'demand-very-low': return 'Very Low Demand';
-                  case 'demand-close-to-none': return 'Close to None';
-                  case 'last-updated-desc': return 'Last Updated (Newest to Oldest)';
-                  case 'last-updated-asc': return 'Last Updated (Oldest to Newest)';
-                  default: return valueSort;
-                }
-              })() }}
-              onChange={(option) => {
-                if (!option) return;
-                const newValue = option.value;
-                setValueSort(newValue);
-                localStorage.setItem('valuesValueSort', newValue);
-              }}
-              options={[
-                { label: 'Display', options: [
-                  { value: 'random', label: 'Random' },
-                ]},
-                { label: 'Alphabetically', options: [
-                  { value: 'alpha-asc', label: 'Name (A to Z)' },
-                  { value: 'alpha-desc', label: 'Name (Z to A)' },
-                ]},
-                { label: 'Values', options: [
-                  { value: 'cash-desc', label: 'Cash Value (High to Low)' },
-                  { value: 'cash-asc', label: 'Cash Value (Low to High)' },
-                  { value: 'duped-desc', label: 'Duped Value (High to Low)' },
-                  { value: 'duped-asc', label: 'Duped Value (Low to High)' },
-                ]},
-                { label: 'Demand', options: [
-                  { value: 'demand-desc', label: 'Demand (High to Low)' },
-                  { value: 'demand-asc', label: 'Demand (Low to High)' },
-                  { value: 'demand-extremely-high', label: 'Extremely High Demand' },
-                  { value: 'demand-very-high', label: 'Very High Demand' },
-                  { value: 'demand-high', label: 'High Demand' },
-                  { value: 'demand-decent', label: 'Decent Demand' },
-                  { value: 'demand-medium', label: 'Medium Demand' },
-                  { value: 'demand-low', label: 'Low Demand' },
-                  { value: 'demand-very-low', label: 'Very Low Demand' },
-                  { value: 'demand-close-to-none', label: 'Close to None' },
-                ]},
-                { label: 'Last Updated', options: [
-                  { value: 'last-updated-desc', label: 'Last Updated (Newest to Oldest)' },
-                  { value: 'last-updated-asc', label: 'Last Updated (Oldest to Newest)' },
-                ]},
-              ]}
-              classNamePrefix="react-select"
-              className="w-full"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: '#37424D',
-                  borderColor: '#2E3944',
-                  color: '#D3D9D4',
-                }),
-                singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                  color: '#D3D9D4',
-                }),
-              }}
-              isSearchable={false}
-            />
-
-            <div className="grid grid-cols-2 gap-4 sm:col-span-2 lg:col-span-2">
-              <button
-                onClick={() => {
-                  setFilterSort("name-all-items");
-                  setValueSort("cash-desc");
-                  localStorage.setItem('valuesFilterSort', "name-all-items");
-                  localStorage.setItem('valuesValueSort', "cash-desc");
+                  const newValue = (option as { value: FilterSort }).value;
+                  if (newValue === "favorites") {
+                    const storedUser = localStorage.getItem('user');
+                    if (!storedUser) {
+                      toast.error('Please log in to view your favorites');
+                      return;
+                    }
+                  }
+                  setFilterSort(newValue);
+                  localStorage.setItem('valuesFilterSort', newValue);
                 }}
-                className="flex items-center justify-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 text-muted hover:bg-[#124E66] focus:outline-none"
-              >
-                <XMarkIcon className="h-5 w-5" />
-                Clear Filters
-              </button>
+                options={[
+                  { value: 'name-all-items', label: 'All Items' },
+                  { value: 'favorites', label: 'My Favorites' },
+                  { value: 'name-limited-items', label: 'Limited Items' },
+                  { value: 'name-seasonal-items', label: 'Seasonal Items' },
+                  { value: 'name-vehicles', label: 'Vehicles' },
+                  { value: 'name-spoilers', label: 'Spoilers' },
+                  { value: 'name-rims', label: 'Rims' },
+                  { value: 'name-body-colors', label: 'Body Colors' },
+                  { value: 'name-hyperchromes', label: 'HyperChromes' },
+                  { value: 'name-textures', label: 'Body Textures' },
+                  { value: 'name-tire-stickers', label: 'Tire Stickers' },
+                  { value: 'name-tire-styles', label: 'Tire Styles' },
+                  { value: 'name-drifts', label: 'Drifts' },
+                  { value: 'name-furnitures', label: 'Furniture' },
+                  { value: 'name-horns', label: 'Horns' },
+                  { value: 'name-weapon-skins', label: 'Weapon Skins' },
+                ]}
+                classNamePrefix="react-select"
+                className="w-full"
+                isClearable={true}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: '#37424D',
+                    borderColor: '#2E3944',
+                    color: '#D3D9D4',
+                  }),
+                  singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+                  menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
+                    color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                    '&:active': {
+                      backgroundColor: '#124E66',
+                      color: '#FFFFFF',
+                    },
+                  }),
+                  clearIndicator: (base) => ({
+                    ...base,
+                    color: '#D3D9D4',
+                    '&:hover': {
+                      color: '#FFFFFF',
+                    },
+                  }),
+                }}
+                isSearchable={false}
+              />
+            ) : (
+              <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
+            )}
 
+            {selectLoaded ? (
+              <Select
+                value={{ value: valueSort, label: (() => {
+                  switch (valueSort) {
+                    case 'random': return 'Random';
+                    case 'alpha-asc': return 'Name (A to Z)';
+                    case 'alpha-desc': return 'Name (Z to A)';
+                    case 'cash-desc': return 'Cash Value (High to Low)';
+                    case 'cash-asc': return 'Cash Value (Low to High)';
+                    case 'duped-desc': return 'Duped Value (High to Low)';
+                    case 'duped-asc': return 'Duped Value (Low to High)';
+                    case 'demand-desc': return 'Demand (High to Low)';
+                    case 'demand-asc': return 'Demand (Low to High)';
+                    case 'demand-extremely-high': return 'Extremely High Demand';
+                    case 'demand-very-high': return 'Very High Demand';
+                    case 'demand-high': return 'High Demand';
+                    case 'demand-decent': return 'Decent Demand';
+                    case 'demand-medium': return 'Medium Demand';
+                    case 'demand-low': return 'Low Demand';
+                    case 'demand-very-low': return 'Very Low Demand';
+                    case 'demand-close-to-none': return 'Close to None';
+                    case 'last-updated-desc': return 'Last Updated (Newest to Oldest)';
+                    case 'last-updated-asc': return 'Last Updated (Oldest to Newest)';
+                    default: return valueSort;
+                  }
+                })() }}
+                onChange={(option: unknown) => {
+                  if (!option) {
+                    // Reset to original value when cleared
+                    setValueSort("cash-desc");
+                    localStorage.setItem('valuesValueSort', "cash-desc");
+                    return;
+                  }
+                  const newValue = (option as { value: ValueSort }).value;
+                  setValueSort(newValue);
+                  localStorage.setItem('valuesValueSort', newValue);
+                }}
+                options={[
+                  { label: 'Display', options: [
+                    { value: 'random', label: 'Random' },
+                  ]},
+                  { label: 'Alphabetically', options: [
+                    { value: 'alpha-asc', label: 'Name (A to Z)' },
+                    { value: 'alpha-desc', label: 'Name (Z to A)' },
+                  ]},
+                  { label: 'Values', options: [
+                    { value: 'cash-desc', label: 'Cash Value (High to Low)' },
+                    { value: 'cash-asc', label: 'Cash Value (Low to High)' },
+                    { value: 'duped-desc', label: 'Duped Value (High to Low)' },
+                    { value: 'duped-asc', label: 'Duped Value (Low to High)' },
+                  ]},
+                  { label: 'Demand', options: [
+                    { value: 'demand-desc', label: 'Demand (High to Low)' },
+                    { value: 'demand-asc', label: 'Demand (Low to High)' },
+                    { value: 'demand-extremely-high', label: 'Extremely High Demand' },
+                    { value: 'demand-very-high', label: 'Very High Demand' },
+                    { value: 'demand-high', label: 'High Demand' },
+                    { value: 'demand-decent', label: 'Decent Demand' },
+                    { value: 'demand-medium', label: 'Medium Demand' },
+                    { value: 'demand-low', label: 'Low Demand' },
+                    { value: 'demand-very-low', label: 'Very Low Demand' },
+                    { value: 'demand-close-to-none', label: 'Close to None' },
+                  ]},
+                  { label: 'Last Updated', options: [
+                    { value: 'last-updated-desc', label: 'Last Updated (Newest to Oldest)' },
+                    { value: 'last-updated-asc', label: 'Last Updated (Oldest to Newest)' },
+                  ]},
+                ]}
+                classNamePrefix="react-select"
+                className="w-full"
+                isClearable={true}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: '#37424D',
+                    borderColor: '#2E3944',
+                    color: '#D3D9D4',
+                  }),
+                  singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
+                  menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
+                    color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
+                    '&:active': {
+                      backgroundColor: '#124E66',
+                      color: '#FFFFFF',
+                    },
+                  }),
+                  clearIndicator: (base) => ({
+                    ...base,
+                    color: '#D3D9D4',
+                    '&:hover': {
+                      color: '#FFFFFF',
+                    },
+                  }),
+                }}
+                isSearchable={false}
+              />
+            ) : (
+              <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 sm:col-span-2 lg:col-span-2">
               <button
                 onClick={handleShareClick}
                 className="flex items-center justify-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 text-muted hover:bg-[#124E66] focus:outline-none"
