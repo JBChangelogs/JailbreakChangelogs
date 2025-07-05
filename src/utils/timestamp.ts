@@ -149,4 +149,24 @@ export const formatShortDate = (timestamp: string | number): string => {
   
   // Format as "8 Jan 2025"
   return `${day} ${month} ${year}`;
+};
+
+/**
+ * Formats a Unix timestamp in a custom format: "Saturday 5 July 2025 at 22:32"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string in custom format
+ */
+export const formatCustomDate = (timestamp: string | number): string => {
+  const timestampNum = typeof timestamp === 'string' ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const day = date.getDate();
+  const month = date.toLocaleDateString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  
+  return `${weekday} ${day} ${month} ${year} at ${hours}:${minutes}`;
 }; 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, CircularProgress, Typography, TextField, Button, IconButton, Pagination, Menu, MenuItem, Skeleton, Tooltip } from '@mui/material';
 import { PROD_API_URL } from '@/services/api';
-import { formatRelativeDate } from '@/utils/timestamp';
+import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
 import { UserAvatar } from '@/utils/avatar';
 import { PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, EllipsisHorizontalIcon, ChatBubbleLeftIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { BiSolidSend } from "react-icons/bi";
@@ -818,11 +818,35 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 )}
                               </div>
                               
-                              <span className="text-xs text-[#748D92] mt-0.5">
-                                {comment.edited_at 
-                                  ? `edited ${formatRelativeDate(parseInt(comment.edited_at))}`
-                                  : `posted ${formatRelativeDate(parseInt(comment.date))}`}
-                              </span>
+                              <Tooltip 
+                                title={comment.edited_at 
+                                  ? formatCustomDate(parseInt(comment.edited_at))
+                                  : formatCustomDate(parseInt(comment.date))}
+                                placement="top"
+                                arrow
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      backgroundColor: '#0F1419',
+                                      color: '#D3D9D4',
+                                      fontSize: '0.75rem',
+                                      padding: '8px 12px',
+                                      borderRadius: '8px',
+                                      border: '1px solid #2E3944',
+                                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                      '& .MuiTooltip-arrow': {
+                                        color: '#0F1419',
+                                      }
+                                    }
+                                  }
+                                }}
+                              >
+                                <span className="text-xs text-[#748D92] mt-0.5 cursor-help">
+                                  {comment.edited_at 
+                                    ? `edited ${formatRelativeDate(parseInt(comment.edited_at))}`
+                                    : `posted ${formatRelativeDate(parseInt(comment.date))}`}
+                                </span>
+                              </Tooltip>
                             </div>
                           </div>
 
