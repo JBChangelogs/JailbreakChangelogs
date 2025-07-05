@@ -102,7 +102,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
     }
     const fetchChangelog = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/items/changelogs/get/?id=${id}`);
+        const response = await fetch(`${PROD_API_URL}/items/changelogs/get?id=${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch changelog');
         }

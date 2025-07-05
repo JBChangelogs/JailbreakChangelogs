@@ -132,7 +132,7 @@ export async function fetchChangelogList(): Promise<Changelog[]> {
 }
 
 export async function fetchChangelog(id: string): Promise<Changelog> {
-  const response = await fetch(`${PROD_API_URL}/changelogs/get/?id=${id}`);
+  const response = await fetch(`${PROD_API_URL}/changelogs/get?id=${id}`);
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
 } 

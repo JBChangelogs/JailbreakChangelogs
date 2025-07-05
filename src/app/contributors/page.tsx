@@ -467,7 +467,7 @@ export default function ContributorsPage() {
           <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4 shadow-lg">
             <div className="mb-3 flex items-center space-x-3">
               <Image
-                src="https://proxy.jailbreakchangelogs.xyz/?destination=https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Small.webp"
+                src="https://proxy.jailbreakchangelogs.xyz?destination=https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Small.webp"
                 alt="Trading Core"
                 width={150}
                 height={150}

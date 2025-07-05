@@ -48,7 +48,7 @@ const fetchChangelogList = async () => {
 };
 
 const fetchChangelog = async (id: string) => {
-  const response = await fetch(`${PROD_API_URL}/changelogs/get/?id=${id}`);
+  const response = await fetch(`${PROD_API_URL}/changelogs/get?id=${id}`);
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
 };

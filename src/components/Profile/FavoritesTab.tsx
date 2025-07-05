@@ -96,7 +96,7 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
                 if (isSubItem) {
                   // For sub-items, use the sub-items endpoint
                   const [parentId] = favorite.item_id.split('-');
-                  itemResponse = await fetch(`${PROD_API_URL}/items/get/sub/?parent_id=${parentId}`);
+                  itemResponse = await fetch(`${PROD_API_URL}/items/get/sub?parent_id=${parentId}`);
                 } else {
                   // For regular items, use the normal endpoint
                   itemResponse = await fetch(`${PROD_API_URL}/items/get?id=${favorite.item_id}`);
