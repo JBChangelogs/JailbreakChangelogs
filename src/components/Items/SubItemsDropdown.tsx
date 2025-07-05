@@ -63,20 +63,20 @@ export default function SubItemsDropdown({ children, onSelect, selectedSubItem }
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
+        className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-2 py-0.5 sm:px-3 sm:py-1.5 text-xs sm:text-sm text-muted hover:bg-[#124E66] focus:outline-none"
       >
         {getDisplayText()}
-        <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
+        <div className="absolute right-0 z-10 mt-1 w-24 sm:w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
           <button
             onClick={() => {
               onSelect(null);
               setIsOpen(false);
             }}
-            className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
+            className={`w-full px-2 py-1 sm:px-3 sm:py-2 text-left text-xs sm:text-sm text-muted hover:bg-[#124E66] ${
               selectedSubItem === null ? 'bg-[#124E66]' : ''
             }`}
           >
@@ -89,7 +89,7 @@ export default function SubItemsDropdown({ children, onSelect, selectedSubItem }
                 onSelect(child);
                 setIsOpen(false);
               }}
-              className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
+              className={`w-full px-2 py-1 sm:px-3 sm:py-2 text-left text-xs sm:text-sm text-muted hover:bg-[#124E66] ${
                 selectedSubItem?.id === child.id ? 'bg-[#124E66]' : ''
               }`}
             >

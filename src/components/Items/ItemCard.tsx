@@ -264,20 +264,20 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
       >
+        {hasChildren && item.children && (
+          <div className="absolute top-2 right-2 z-20">
+            <SubItemsDropdown
+              onSelect={setSelectedSubItem}
+              selectedSubItem={selectedSubItem}
+            >
+              {item.children}
+            </SubItemsDropdown>
+          </div>
+        )}
         <div
           ref={mediaRef}
           className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-t-lg bg-[#212A31] relative"
         >
-          {hasChildren && item.children && (
-            <div className="absolute top-2 right-2 z-10">
-              <SubItemsDropdown
-                onSelect={setSelectedSubItem}
-                selectedSubItem={selectedSubItem}
-              >
-                {item.children}
-              </SubItemsDropdown>
-            </div>
-          )}
           <div className="absolute top-2 right-2 z-10 flex gap-2">
             <CategoryIconBadge
               type={item.type}
@@ -376,51 +376,57 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
           )}
         </div>
         <Link href={itemUrl} className="block" prefetch={false}>
-          <div className="flex flex-1 flex-col space-y-2 sm:space-y-4 p-3 sm:p-4">
+          <div className="flex flex-1 flex-col space-y-2 sm:space-y-4 p-2 sm:p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base sm:text-lg font-semibold text-muted hover:text-[#40c0e7] transition-colors">
+              <h3 className="text-sm min-[375px]:text-xs min-[425px]:text-sm sm:text-lg font-semibold text-muted hover:text-[#40c0e7] transition-colors">
                 {item.name}
               </h3>
             </div>
 
             <div className="flex flex-wrap gap-1 sm:gap-2 pb-2">
               <span 
-                className="flex items-center rounded-full px-2 py-0.5 sm:py-1 text-xs text-white bg-opacity-80"
+                className="flex items-center rounded-full px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs text-white bg-opacity-80"
                 style={{ backgroundColor: getItemTypeColor(item.type) }}
               >
                 {item.type}
               </span>
               {(currentItemData.tradable === 0 || currentItemData.tradable === false) && (
-                <span className="flex items-center rounded-full bg-red-600/80 px-2 py-0.5 sm:py-1 text-xs text-white">
+                <span className="hidden sm:flex items-center rounded-full bg-red-600/80 px-2 py-0.5 sm:py-1 text-xs text-white">
                   Non-Tradable
                 </span>
               )}
             </div>
 
-            <div className="space-y-2 pb-2">
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted font-medium">Cash Value</span>
+            <div className="space-y-1 sm:space-y-2 pb-2">
+              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">
+                    <span className="sm:hidden">Cash</span>
+                    <span className="hidden sm:inline">Cash Value</span>
+                  </span>
                 </div>
-                <span className="bg-[#1d7da3] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                <span className="bg-[#1d7da3] text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
                   {formatFullValue(currentItemData.cash_value)}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted font-medium">Duped Value</span>
+              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">
+                    <span className="sm:hidden">Duped</span>
+                    <span className="hidden sm:inline">Duped Value</span>
+                  </span>
                 </div>
-                <span className="bg-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                <span className="bg-gray-600 text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
                   {formatFullValue(currentItemData.duped_value)}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted font-medium">Demand</span>
+              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Demand</span>
                 </div>
-                <span className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm ${
+                <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${
                   currentItemData.demand === "Extremely High" ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white" :
                   currentItemData.demand === "Very High" ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white" :
                   currentItemData.demand === "High" ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" :
@@ -436,7 +442,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
               </div>
             </div>
 
-            <div className="mt-auto pt-1 sm:pt-2 text-xs text-muted border-t border-[#2E3944]">
+            <div className="mt-auto pt-1 sm:pt-2 text-[10px] sm:text-xs text-muted border-t border-[#2E3944]">
               Last updated: {formatLastUpdated(currentItemData.last_updated)}
             </div>
           </div>

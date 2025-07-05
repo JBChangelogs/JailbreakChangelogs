@@ -631,7 +631,7 @@ export default function ValuesPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+        <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
           {loading ? (
             [...Array(24)].map((_, i) => <ItemCardSkeleton key={i} />)
           ) : displayedItems.length === 0 ? (
