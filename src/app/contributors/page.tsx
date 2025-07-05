@@ -70,8 +70,6 @@ export default function ContributorsPage() {
           '1190371197230268558', // Gdplayer2818
           '729353754578518058', // Toleda1
           '1181250180436217910', // nbhjlkjkl
-          '707805717947482222', // obama bin laden
-          '942858868055212062', // cattle.
           '1132568688390840321', // rezexa_11261
         ];
         const valueTeamUsers = await Promise.all(
@@ -255,7 +253,7 @@ export default function ContributorsPage() {
         Value Team
       </h3>
       {isLoading ? (
-        <LoadingState count={7} />
+        <LoadingState count={5} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4">
@@ -395,62 +393,6 @@ export default function ContributorsPage() {
                     : valueTeam[4]?.username}
                 </Link>
                 <p className="text-sm text-[#FFFFFF]">@{valueTeam[4]?.username}</p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4">
-            <div className="mb-3 flex items-center space-x-3">
-              {valueTeam[5] && (
-                <UserAvatar 
-                  userId={valueTeam[5].id}
-                  avatarHash={valueTeam[5].avatar || null}
-                  username={valueTeam[5].username}
-                  size={12}
-                  showBadge={false}
-                  accent_color={valueTeam[5].accent_color}
-                  custom_avatar={valueTeam[5].custom_avatar}
-                  settings={valueTeam[5].settings}
-                  premiumType={valueTeam[5].premiumtype}
-                />
-              )}
-              <div>
-                <Link
-                  href={`/users/${valueTeam[5]?.id}`}
-                  className="font-semibold text-blue-300 hover:text-blue-400"
-                >
-                  {valueTeam[5]?.global_name && valueTeam[5].global_name !== "None" 
-                    ? valueTeam[5].global_name 
-                    : valueTeam[5]?.username}
-                </Link>
-                <p className="text-sm text-[#FFFFFF]">@{valueTeam[5]?.username}</p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-4">
-            <div className="mb-3 flex items-center space-x-3">
-              {valueTeam[6] && (
-                <UserAvatar 
-                  userId={valueTeam[6].id}
-                  avatarHash={valueTeam[6].avatar || null}
-                  username={valueTeam[6].username}
-                  size={12}
-                  showBadge={false}
-                  accent_color={valueTeam[6].accent_color}
-                  custom_avatar={valueTeam[6].custom_avatar}
-                  settings={valueTeam[6].settings}
-                  premiumType={valueTeam[6].premiumtype}
-                />
-              )}
-              <div>
-                <Link
-                  href={`/users/${valueTeam[6]?.id}`}
-                  className="font-semibold text-blue-300 hover:text-blue-400"
-                >
-                  {valueTeam[6]?.global_name && valueTeam[6].global_name !== "None" 
-                    ? valueTeam[6].global_name 
-                    : valueTeam[6]?.username}
-                </Link>
-                <p className="text-sm text-[#FFFFFF]">@{valueTeam[6]?.username}</p>
               </div>
             </div>
           </div>
