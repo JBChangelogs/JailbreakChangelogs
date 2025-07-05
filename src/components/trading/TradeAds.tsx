@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { PROD_API_URL } from '@/services/api';
 import { TradeAd } from '@/types/trading';
+import { UserData } from '@/types/auth';
 import { TradeAdCard } from './TradeAdCard';
 import { TradeAdTabs } from './TradeAdTabs';
 import { TradeAdSkeleton } from './TradeAdSkeleton';
@@ -43,25 +44,34 @@ export default function TradeAds() {
         data = await response.json();
       }
       
-      // Fetch user data for each trade ad
-      const tradeAdsWithUsers = await Promise.all(
-        data.map(async (trade: TradeAd) => {
-          try {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get?id=${trade.author}&nocache=true`);
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              return { ...trade, user: userData };
-            }
-            return trade;
-          } catch (err) {
-            console.error('Error fetching user data:', err);
-            return trade;
+      // Collect unique user IDs from trade ads
+      const userIds = [...new Set(data.map((trade: TradeAd) => trade.author))];
+      
+      // Fetch all user data in a single batch request
+      let userMap: Record<string, UserData> = {};
+      if (userIds.length > 0) {
+        try {
+          const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
+          if (userResponse.ok) {
+            const userDataArray = await userResponse.json();
+            userMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {
+              acc[user.id] = user;
+              return acc;
+            }, {});
           }
-        })
-      );
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+        }
+      }
+      
+      // Attach user data to trade ads
+      const tradeAdsWithUsers = data.map((trade: TradeAd) => ({
+        ...trade,
+        user: userMap[trade.author] || null
+      }));
       
       // Sort trade ads by creation date, newest first
-      const sortedTradeAds = tradeAdsWithUsers.sort((a, b) => b.created_at - a.created_at);
+      const sortedTradeAds = tradeAdsWithUsers.sort((a: TradeAd & { user: UserData | null }, b: TradeAd & { user: UserData | null }) => b.created_at - a.created_at);
       
       setTradeAds(sortedTradeAds);
 
