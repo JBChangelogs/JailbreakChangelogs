@@ -188,7 +188,7 @@ export default function UserProfilePage() {
           );
 
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/comments/get/user?author=${userId}`)
+            fetch(`${PROD_API_URL}/users/comments/get/?author=${userId}`)
               .then(res => res.json())
               .then((commentsData) => {
                 setComments(Array.isArray(commentsData) ? commentsData : []);
