@@ -174,23 +174,60 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     };
   }, []);
 
-  const fetchUserData = useCallback(async (userId: string) => {
-    if (userData[userId]) return; // Skip if we already have the data
-    if (loadingUserData[userId]) return; // Skip if already loading
-    if (failedUserData.has(userId)) return; // Skip if already failed
+  const fetchUserData = useCallback(async (userIds: string[]) => {
+    if (userIds.length === 0) return;
+
+    // Filter out users we already have data for, are loading, or have failed
+    const usersToFetch = userIds.filter(userId => 
+      !userData[userId] && 
+      !loadingUserData[userId] && 
+      !failedUserData.has(userId)
+    );
+
+    if (usersToFetch.length === 0) return;
 
     try {
-      setLoadingUserData(prev => ({ ...prev, [userId]: true }));
-      // Fetch user data
-      const response = await fetch(`${PROD_API_URL}/users/get?id=${userId}&nocache=true`);
+      // Mark all users as loading
+      setLoadingUserData(prev => {
+        const newState = { ...prev };
+        usersToFetch.forEach(userId => {
+          newState[userId] = true;
+        });
+        return newState;
+      });
+
+      // Fetch user data in batch
+      const response = await fetch(`${PROD_API_URL}/users/get/batch?ids=${usersToFetch.join(',')}&nocache=true`);
       if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
-      setUserData(prev => ({ ...prev, [userId]: data }));
+      
+      // Update user data state
+      setUserData(prev => {
+        const newState = { ...prev };
+        data.forEach((user: UserData) => {
+          newState[user.id] = user;
+        });
+        return newState;
+      });
     } catch (error) {
       console.error('Error fetching user data:', error);
-      setFailedUserData(prev => new Set(prev).add(userId));
+      // Mark failed users
+      setFailedUserData(prev => {
+        const newSet = new Set(prev);
+        usersToFetch.forEach(userId => {
+          newSet.add(userId);
+        });
+        return newSet;
+      });
     } finally {
-      setLoadingUserData(prev => ({ ...prev, [userId]: false }));
+      // Mark all users as not loading
+      setLoadingUserData(prev => {
+        const newState = { ...prev };
+        usersToFetch.forEach(userId => {
+          newState[userId] = false;
+        });
+        return newState;
+      });
     }
   }, [userData, loadingUserData, failedUserData]);
 
@@ -227,9 +264,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
       // Fetch user data for each comment
       if (commentsArray.length > 0) {
-        commentsArray.forEach(comment => {
-          fetchUserData(comment.user_id);
-        });
+        const userIds = commentsArray.map(comment => comment.user_id);
+        fetchUserData(userIds);
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {

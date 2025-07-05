@@ -100,35 +100,39 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         setFollowers(data);
         
         // Fetch details for each follower
-        const detailsPromises = data.map(async (follower: Follower) => {
-          // Skip fetching if we already have the user data
-          if (follower.follower_id === userData.id) {
-            return [follower.follower_id, userData];
-          }
-
-          try {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get?id=${follower.follower_id}&nocache=true`);
-            
-            if (!userResponse.ok) {
-              throw new Error('Failed to fetch user details');
-            }
-            
-            const userData = await userResponse.json();
-            return [follower.follower_id, userData];
-          } catch (err) {
-            console.error('Error fetching follower details:', err);
-            return [follower.follower_id, null];
-          }
-        });
+        const followerIds = data.map((follower: Follower) => follower.follower_id);
+        const uniqueFollowerIds = [...new Set(followerIds)];
         
-        const detailsResults = await Promise.all(detailsPromises);
-        const detailsMap = Object.fromEntries(
-          detailsResults
-            .filter(([, data]) => data !== null)
-            .map(([id, data]) => [id, data])
-        );
-       
-        setFollowerDetails(detailsMap);
+        // Filter out the current user's own ID since we already have that data
+        const idsToFetch = uniqueFollowerIds.filter(id => id !== userData.id);
+        
+        try {
+          if (idsToFetch.length > 0) {
+            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
+            if (userResponse.ok) {
+              const userDataArray = await userResponse.json();
+              const detailsMap = userDataArray.reduce((acc: Record<string, User>, userData: User) => {
+                acc[userData.id] = userData;
+                return acc;
+              }, {});
+              
+              // Add current user's data if they're in the followers list
+              if (followerIds.includes(userData.id)) {
+                detailsMap[userData.id] = userData;
+              }
+              
+              setFollowerDetails(detailsMap);
+            }
+          } else if (followerIds.includes(userData.id)) {
+            // Only current user in followers list
+            setFollowerDetails({ [userData.id]: userData });
+          } else {
+            setFollowerDetails({});
+          }
+        } catch (err) {
+          console.error('Error fetching follower details:', err);
+          setFollowerDetails({});
+        }
       } catch (err) {
         console.error('Error fetching followers:', err);
         setError('Failed to load followers');

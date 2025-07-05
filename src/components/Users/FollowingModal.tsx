@@ -101,35 +101,39 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         setFollowingStatus(initialFollowingStatus);
         
         // Fetch details for each following
-        const detailsPromises = data.map(async (followingItem: Following) => {
-          // Skip fetching if we already have the user data
-          if (followingItem.following_id === userData.id) {
-            return [followingItem.following_id, userData] as [string, User];
-          }
-
-          try {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get?id=${followingItem.following_id}&nocache=true`);
-            
-            if (!userResponse.ok) {
-              throw new Error('Failed to fetch user details');
+        const followingIds = data.map((followingItem: Following) => followingItem.following_id);
+        const uniqueFollowingIds = [...new Set(followingIds)];
+        
+        // Filter out the current user's own ID since we already have that data
+        const idsToFetch = uniqueFollowingIds.filter(id => id !== userData.id);
+        
+        try {
+          if (idsToFetch.length > 0) {
+            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
+            if (userResponse.ok) {
+              const userDataArray = await userResponse.json();
+              const detailsMap = userDataArray.reduce((acc: Record<string, User>, userData: User) => {
+                acc[userData.id] = userData;
+                return acc;
+              }, {});
+              
+              // Add current user's data if they're in the following list
+              if (followingIds.includes(userData.id)) {
+                detailsMap[userData.id] = userData;
+              }
+              
+              setFollowingDetails(detailsMap);
             }
-            
-            const userData = await userResponse.json();
-            return [followingItem.following_id, userData] as [string, User];
-          } catch (err) {
-            console.error('Error fetching following details:', err);
-            return [followingItem.following_id, null] as [string, null];
+          } else if (followingIds.includes(userData.id)) {
+            // Only current user in following list
+            setFollowingDetails({ [userData.id]: userData });
+          } else {
+            setFollowingDetails({});
           }
-        });
-        
-        const detailsResults = await Promise.all(detailsPromises);
-        const detailsMap = Object.fromEntries(
-          detailsResults
-            .filter(([, data]) => data !== null)
-            .map(([id, data]) => [id, data as User])
-        );
-        
-        setFollowingDetails(detailsMap);
+        } catch (err) {
+          console.error('Error fetching following details:', err);
+          setFollowingDetails({});
+        }
       } catch (err) {
         console.error('Error fetching following:', err);
         setError('Failed to load following');

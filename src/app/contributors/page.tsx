@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { fetchUserById } from "@/utils/api";
+import { PROD_API_URL } from '@/services/api';
 import { UserAvatar } from "@/utils/avatar";
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@mui/material';
@@ -41,22 +41,52 @@ export default function ContributorsPage() {
     const loadUsers = async () => {
       setIsLoading(true);
       try {
+        // Collect all user IDs
+        const allUserIds = [
+          // Owners
+          '659865209741246514', // Jakobiis
+          '1019539798383398946', // Jalenzz16
+          // Managers
+          '697457253237653534', // Sen
+          '465018380403867648', // 0.5x
+          // Value Team
+          '1159540851106648174', // free
+          '1190371197230268558', // Gdplayer2818
+          '729353754578518058', // Toleda1
+          '1181250180436217910', // nbhjlkjkl
+          '1132568688390840321', // rezexa_11261
+          // Contributors
+          '1123014543891775509', // PikachuWolverine
+          '797198829538508829', // Jamey
+          // Background Pictures
+          '871014221125664819', // Thomy3da
+        ];
+
+        // Fetch all users in one batch request
+        const response = await fetch(`${PROD_API_URL}/users/get/batch?ids=${allUserIds.join(',')}&nocache=true`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch contributors');
+        }
+        
+        const allUsers = await response.json();
+        const userMap = allUsers.reduce((acc: Record<string, UserData>, user: UserData) => {
+          acc[user.id] = user;
+          return acc;
+        }, {});
+
+        // Extract users by category
         const ownerIds = [
           '659865209741246514', // Jakobiis
           '1019539798383398946', // Jalenzz16
         ];
-        const ownerUsers = await Promise.all(
-          ownerIds.map(id => fetchUserById(id))
-        );
+        const ownerUsers = ownerIds.map(id => userMap[id]).filter(Boolean);
         setOwners(ownerUsers);
 
         const managerIds = [
           '697457253237653534', // Sen
           '465018380403867648', // 0.5x
         ];
-        const managerUsers = await Promise.all(
-          managerIds.map(id => fetchUserById(id))
-        );
+        const managerUsers = managerIds.map(id => userMap[id]).filter(Boolean);
         // Sort manager users alphabetically
         managerUsers.sort((a, b) => {
           const nameA = (a.global_name && a.global_name !== "None" ? a.global_name : a.username).toLowerCase();
@@ -72,9 +102,7 @@ export default function ContributorsPage() {
           '1181250180436217910', // nbhjlkjkl
           '1132568688390840321', // rezexa_11261
         ];
-        const valueTeamUsers = await Promise.all(
-          valueTeamIds.map(id => fetchUserById(id))
-        );
+        const valueTeamUsers = valueTeamIds.map(id => userMap[id]).filter(Boolean);
         // Sort value team users alphabetically
         valueTeamUsers.sort((a, b) => {
           const nameA = (a.global_name && a.global_name !== "None" ? a.global_name : a.username).toLowerCase();
@@ -87,17 +115,13 @@ export default function ContributorsPage() {
           '1123014543891775509', // PikachuWolverine
           '797198829538508829', // Jamey
         ];
-        const contributorUsers = await Promise.all(
-          contributorIds.map(id => fetchUserById(id))
-        );
+        const contributorUsers = contributorIds.map(id => userMap[id]).filter(Boolean);
         setContributors(contributorUsers);
 
         const backgroundPictureIds = [
           '871014221125664819', // Thomy3da
         ];
-        const backgroundPictureUsers = await Promise.all(
-          backgroundPictureIds.map(id => fetchUserById(id))
-        );
+        const backgroundPictureUsers = backgroundPictureIds.map(id => userMap[id]).filter(Boolean);
         // Sort background picture users alphabetically
         backgroundPictureUsers.sort((a, b) => {
           const nameA = (a.global_name && a.global_name !== "None" ? a.global_name : a.username).toLowerCase();

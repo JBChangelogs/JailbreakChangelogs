@@ -64,29 +64,23 @@ const ServerList: React.FC = () => {
 
         // Fetch user data for each server owner
         const uniqueOwnerIds = [...new Set(data.map((server: Server) => server.owner))];
-        const userDataPromises = uniqueOwnerIds.map(async (ownerId) => {
+        
+        // Use batch endpoint to fetch all user data at once
+        if (uniqueOwnerIds.length > 0) {
           try {
-            const response = await fetch(`${PROD_API_URL}/users/get?id=${ownerId}&nocache=true`);
-            if (response.ok) {
-              const userData = await response.json() as UserData;
-              return { id: ownerId, data: userData };
+            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${uniqueOwnerIds.join(',')}&nocache=true`);
+            if (userResponse.ok) {
+              const userDataArray = await userResponse.json() as UserData[];
+              const userDataMap = userDataArray.reduce((acc, userData) => {
+                acc[userData.id] = userData;
+                return acc;
+              }, {} as Record<string, UserData>);
+              setUserData(userDataMap);
             }
-            return null;
           } catch (err) {
-            console.error(`Error fetching user data for ID ${ownerId}:`, err);
-            return null;
+            console.error('Error fetching user data:', err);
           }
-        });
-
-        const userDataResults = await Promise.all(userDataPromises);
-        const userDataMap = userDataResults.reduce((acc, result) => {
-          if (result) {
-            acc[result.id] = result.data;
-          }
-          return acc;
-        }, {} as Record<string, UserData>);
-
-        setUserData(userDataMap);
+        }
       } catch (serverErr) {
         setError(serverErr instanceof Error ? serverErr.message : 'An error occurred while fetching servers');
       } finally {
@@ -126,29 +120,22 @@ const ServerList: React.FC = () => {
       // Only fetch user data for new owner IDs
       const uniqueOwnerIds = [...new Set(data.map((server: Server) => server.owner))];
       const newOwnerIds = uniqueOwnerIds.filter((ownerId) => !(ownerId in userData));
-      const userDataPromises = newOwnerIds.map(async (ownerId) => {
+      
+      if (newOwnerIds.length > 0) {
         try {
-          const response = await fetch(`${PROD_API_URL}/users/get?id=${ownerId}&nocache=true`);
-          if (response.ok) {
-            const userData = await response.json() as UserData;
-            return { id: ownerId, data: userData };
+          const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${newOwnerIds.join(',')}&nocache=true`);
+          if (userResponse.ok) {
+            const userDataArray = await userResponse.json() as UserData[];
+            const newUserDataMap = userDataArray.reduce((acc, userData) => {
+              acc[userData.id] = userData;
+              return acc;
+            }, {} as Record<string, UserData>);
+            setUserData((prev) => ({ ...prev, ...newUserDataMap }));
           }
-          return null;
         } catch (err) {
-          console.error(`Error fetching user data for ID ${ownerId}:`, err);
-          return null;
+          console.error('Error fetching new user data:', err);
         }
-      });
-
-      const userDataResults = await Promise.all(userDataPromises);
-      const newUserDataMap = userDataResults.reduce((acc, result) => {
-        if (result) {
-          acc[result.id] = result.data;
-        }
-        return acc;
-      }, {} as Record<string, UserData>);
-
-      setUserData((prev) => ({ ...prev, ...newUserDataMap }));
+      }
     } catch {
       toast.error('Failed to refresh server list');
     }
