@@ -17,7 +17,7 @@ import { Tooltip } from '@mui/material';
 import { getToken } from '@/utils/auth';
 import { PROD_API_URL } from '@/services/api';
 import { UserBadges } from '@/components/Profile/UserBadges';
-import { formatRelativeDate, formatShortDate } from '@/utils/timestamp';
+import { formatRelativeDate, formatShortDate, formatCustomDate } from '@/utils/timestamp';
 import ProfileTabs from '@/components/Profile/ProfileTabs';
 import { DiscordIcon } from '@/components/Icons/DiscordIcon';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
@@ -529,7 +529,29 @@ export default function UserProfilePage() {
                             <p className="text-[#FFFFFF] text-sm">Login to enable status indicators and last seen timestamps. Your Discord avatar, banner, and username changes will automatically sync with your profile.</p>
                           </div>
                         ) : user.last_seen && (
-                          <p className="text-[#D3D9D4] text-sm">Last seen: {formatRelativeDate(user.last_seen)}</p>
+                          <Tooltip 
+                            title={formatCustomDate(user.last_seen)}
+                            placement="top"
+                            arrow
+                            slotProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: '#0F1419',
+                                  color: '#D3D9D4',
+                                  fontSize: '0.75rem',
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  border: '1px solid #2E3944',
+                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                  '& .MuiTooltip-arrow': {
+                                    color: '#0F1419',
+                                  }
+                                }
+                              }
+                            }}
+                          >
+                            <p className="text-[#D3D9D4] text-sm cursor-help">Last seen: {formatRelativeDate(user.last_seen)}</p>
+                          </Tooltip>
                         )}
                       </>
                     )}
@@ -538,7 +560,32 @@ export default function UserProfilePage() {
                       <Skeleton variant="text" width={224} height={12} sx={{ bgcolor: '#2E3944' }} />
                     ) : (
                       user.created_at && (
-                        <p className="text-[#D3D9D4] text-base mb-1">Member #{user.usernumber} since {formatShortDate(user.created_at)}</p>
+                        <p className="text-[#D3D9D4] text-base mb-1">
+                          Member #{user.usernumber} since{' '}
+                          <Tooltip 
+                            title={formatCustomDate(parseInt(user.created_at) * 1000)}
+                            placement="top"
+                            arrow
+                            slotProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: '#0F1419',
+                                  color: '#D3D9D4',
+                                  fontSize: '0.75rem',
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  border: '1px solid #2E3944',
+                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                  '& .MuiTooltip-arrow': {
+                                    color: '#0F1419',
+                                  }
+                                }
+                              }
+                            }}
+                          >
+                            <span className="cursor-help">{formatShortDate(user.created_at)}</span>
+                          </Tooltip>
+                        </p>
                       )
                     )}
                     

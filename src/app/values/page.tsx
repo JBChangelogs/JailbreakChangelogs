@@ -7,7 +7,7 @@ import {
   ArrowUpIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { Pagination } from '@mui/material';
+import { Pagination, Tooltip } from '@mui/material';
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -15,6 +15,7 @@ import { Item, FilterSort, ValueSort } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
 import toast from 'react-hot-toast';
 import { fetchItems, fetchLastUpdated } from '@/utils/api';
+import { formatCustomDate } from '@/utils/timestamp';
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { PROD_API_URL } from "@/services/api";
@@ -261,9 +262,31 @@ export default function ValuesPage() {
           </div>
 
           {lastUpdated && (
-            <p className="mb-4 text-sm text-muted">
-              Last updated: {lastUpdated}
-            </p>
+            <Tooltip 
+              title={formatCustomDate(Date.now())}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: '#0F1419',
+                    color: '#D3D9D4',
+                    fontSize: '0.75rem',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #2E3944',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    '& .MuiTooltip-arrow': {
+                      color: '#0F1419',
+                    }
+                  }
+                }
+              }}
+            >
+              <p className="mb-4 text-sm text-muted cursor-help">
+                Last updated: {lastUpdated}
+              </p>
+            </Tooltip>
           )}
 
           <CategoryIcons 

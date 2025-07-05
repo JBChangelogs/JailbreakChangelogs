@@ -1,6 +1,7 @@
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { Tooltip } from '@mui/material';
 import {
   getItemImagePath,
   handleImageError,
@@ -11,7 +12,7 @@ import {
   getDriftVideoPath,
   getVideoPath,
 } from "@/utils/images";
-import { formatRelativeDate } from "@/utils/timestamp";
+import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/24/solid";
@@ -443,7 +444,35 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
             </div>
 
             <div className="mt-auto pt-1 sm:pt-2 text-[10px] sm:text-xs text-muted border-t border-[#2E3944]">
-              Last updated: {formatLastUpdated(currentItemData.last_updated)}
+              {currentItemData.last_updated ? (
+                <Tooltip 
+                  title={formatCustomDate(currentItemData.last_updated)}
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: '#0F1419',
+                        color: '#D3D9D4',
+                        fontSize: '0.75rem',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #2E3944',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                        '& .MuiTooltip-arrow': {
+                          color: '#0F1419',
+                        }
+                      }
+                    }
+                  }}
+                >
+                  <span className="cursor-help">
+                    Last updated: {formatLastUpdated(currentItemData.last_updated)}
+                  </span>
+                </Tooltip>
+              ) : (
+                <>Last updated: Never</>
+              )}
             </div>
           </div>
         </Link>

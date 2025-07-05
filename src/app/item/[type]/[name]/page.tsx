@@ -5,7 +5,7 @@ import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ThemeProvider, Tabs, Tab, Box, Skeleton, Pagination } from '@mui/material';
+import { ThemeProvider, Tabs, Tab, Box, Skeleton, Pagination, Tooltip } from '@mui/material';
 import { darkTheme } from '@/theme/darkTheme';
 
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
@@ -25,7 +25,7 @@ import ItemChangelogs from '@/components/Items/ItemChangelogs';
 
 import { PROD_API_URL } from '@/services/api';
 import { handleImageError, getItemImagePath, isVideoItem, isHornItem, isDriftItem, getHornAudioPath, getDriftVideoPath, getVideoPath } from "@/utils/images";
-import { formatRelativeDate } from "@/utils/timestamp";
+import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import { getToken } from "@/utils/auth";
 import { getItemTypeColor } from "@/utils/badgeColors";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
@@ -459,7 +459,31 @@ export default function ItemDetailsPage() {
                 </div>
                 <div className="text-sm text-muted mt-2">
                   {currentItem.last_updated ? (
-                    <>Last updated: {formatRelativeDate(currentItem.last_updated)}</>
+                    <Tooltip 
+                      title={formatCustomDate(currentItem.last_updated)}
+                      placement="top"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: '#0F1419',
+                            color: '#D3D9D4',
+                            fontSize: '0.75rem',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #2E3944',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                            '& .MuiTooltip-arrow': {
+                              color: '#0F1419',
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      <span className="cursor-help">
+                        Last updated: {formatRelativeDate(currentItem.last_updated)}
+                      </span>
+                    </Tooltip>
                   ) : (
                     <>Last updated: Never</>
                   )}
