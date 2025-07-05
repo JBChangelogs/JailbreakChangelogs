@@ -259,7 +259,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
             : currentItemData.is_limited === 1 
               ? 'border-2 border-[#ffd700]' 
               : ''
-        } bg-[#212A31]`}
+        } bg-[#1a2127]`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
