@@ -112,7 +112,7 @@ export const formatRelativeDate = (timestamp: string | number): string =>
 /**
  * Formats a Unix timestamp with full date and time information
  * @param timestamp Unix timestamp in seconds or milliseconds
- * @returns Formatted date string with full details (e.g., "Monday, January 1, 2024, 3:45 PM EST")
+ * @returns Formatted date string with full details (e.g., "Monday, January 1, 2024, 3:45 PM")
  */
 export const formatFullDate = (timestamp: string | number): string => {
   const timestampNum = typeof timestamp === 'string' ? parseInt(timestamp) : timestamp;
@@ -125,8 +125,7 @@ export const formatFullDate = (timestamp: string | number): string => {
     month: 'long',
     day: 'numeric',
     hour: 'numeric',
-    minute: 'numeric',
-    timeZoneName: 'short'
+    minute: 'numeric'
   };
   
   return date.toLocaleDateString('en-US', options);
