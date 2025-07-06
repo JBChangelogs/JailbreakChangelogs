@@ -32,6 +32,24 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   const [neverExpires, setNeverExpires] = React.useState(false);
   const [originalExpires, setOriginalExpires] = React.useState<Date | null>(null);
   const [loading, setLoading] = React.useState(false);
+  
+  // Character limits
+  const MAX_RULES_LENGTH = 200;
+
+  // Handle rules input with character limit
+  const handleRulesChange = (value: string) => {
+    if (value.length <= MAX_RULES_LENGTH) {
+      setRules(value);
+    }
+  };
+
+  // Clean up rules text by normalizing whitespace
+  const cleanRulesText = (text: string): string => {
+    return text
+      .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
+      .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
+      .trim();
+  };
 
   // Prevent background scrolling when modal is open
   React.useEffect(() => {
@@ -80,8 +98,13 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   }, [isOpen, editingServer, onClose]);
 
   const handleSubmit = async () => {
-    if (!link) {
+    if (!link.trim()) {
       toast.error('Please enter a server link');
+      return;
+    }
+
+    if (rules.length > MAX_RULES_LENGTH) {
+      toast.error(`Server rules cannot exceed ${MAX_RULES_LENGTH} characters`);
       return;
     }
 
@@ -129,8 +152,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          link,
-          rules: rules.trim() || 'N/A',
+          link: link.trim(),
+          rules: cleanRulesText(rules) || 'N/A',
           expires: neverExpires || (expires && expires > oneYearFromNow) ? "Never" : (expires ? String(Math.floor(expires.getTime() / 1000)) : null),
           owner: token,
         }),
@@ -210,8 +233,9 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
               <textarea
                 id="server-rules"
                 value={rules}
-                onChange={(e) => setRules(e.target.value)}
+                onChange={(e) => handleRulesChange(e.target.value)}
                 rows={4}
+                maxLength={MAX_RULES_LENGTH}
                 className="w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 text-muted placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
                 placeholder="Enter the server rules"
               />
