@@ -12,7 +12,8 @@ import {
   getDriftVideoPath,
   getVideoPath,
 } from "@/utils/images";
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/timestamp";
+import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue } from "@/utils/values";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/24/solid";
@@ -240,13 +241,19 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
     };
   }, []);
 
-  const formatLastUpdated = (timestamp: number | null): string => {
-    if (timestamp === null) return "Never";
-    return formatRelativeDate(timestamp);
-  };
-
   // Get the current item data based on selected sub-item or parent item
   const currentItemData = selectedSubItem ? selectedSubItem.data : item;
+
+  // Use optimized real-time relative date for last updated timestamp
+  const relativeTime = useOptimizedRealTimeRelativeDate(
+    currentItemData.last_updated,
+    `item-${item.id}-${selectedSubItem?.id || 'parent'}`
+  );
+
+  const formatLastUpdated = (timestamp: number | null): string => {
+    if (timestamp === null) return "Never";
+    return relativeTime;
+  };
   const itemUrl = selectedSubItem
     ? `/item/${item.type.toLowerCase()}/${item.name}?variant=${selectedSubItem.sub_name}`
     : `/item/${item.type.toLowerCase()}/${item.name}`;

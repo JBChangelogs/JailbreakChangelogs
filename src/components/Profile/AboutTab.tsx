@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
+import { formatCustomDate } from '@/utils/timestamp';
+import { useRealTimeRelativeDate } from '@/hooks/useRealTimeRelativeDate';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getToken } from '@/utils/auth';
 import { PROD_API_URL } from '@/services/api';
@@ -22,19 +23,31 @@ interface AboutTabProps {
   onBioUpdate?: (newBio: string) => void;
 }
 
+const MAX_BIO_LENGTH = 200;
+
 export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onBioUpdate }: AboutTabProps) {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [newBio, setNewBio] = useState('');
   const [isSavingBio, setIsSavingBio] = useState(false);
+  const [localBioLastUpdated, setLocalBioLastUpdated] = useState<number | null>(bioLastUpdated || null);
+
+  // Use real-time relative date
+  const realTimeRelativeDate = useRealTimeRelativeDate(localBioLastUpdated);
 
   useEffect(() => {
     // Initialize bio from props
     setNewBio(bio || '');
-  }, [bio]);
+    setLocalBioLastUpdated(bioLastUpdated || null);
+  }, [bio, bioLastUpdated]);
 
   const handleSaveBio = async () => {
     if (!isAuthenticated()) {
       toast.error('You need to be logged in to update your bio');
+      return;
+    }
+
+    if (newBio.length > MAX_BIO_LENGTH) {
+      toast.error(`Bio cannot exceed ${MAX_BIO_LENGTH} characters`);
       return;
     }
     
@@ -65,6 +78,9 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
         onBioUpdate(newBio);
       }
       
+      // Update local timestamp immediately for real-time display
+      setLocalBioLastUpdated(Date.now());
+      
       toast.success('Bio updated successfully');
       setIsEditingBio(false);
     } catch (error) {
@@ -73,6 +89,10 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
     } finally {
       setIsSavingBio(false);
     }
+  };
+
+  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewBio(e.target.value);
   };
 
   return (
@@ -104,65 +124,72 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
         {isEditingBio && currentUserId === user.id ? (
           <div className="space-y-2">
             <textarea
-              className="w-full p-2 bg-[#212A31] text-muted border border-[#5865F2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#5865F2]"
+              className="w-full p-2 bg-[#212A31] text-muted border border-[#5865F2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#5865F2] resize-none"
               rows={3}
               value={newBio}
-              onChange={(e) => setNewBio(e.target.value)}
+              onChange={handleBioChange}
               placeholder="Write something about yourself..."
+              maxLength={MAX_BIO_LENGTH}
+              style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
             />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setIsEditingBio(false);
-                  setNewBio(bio || '');
-                }}
-                sx={{
-                  color: '#D3D9D4',
-                  borderColor: '#5865F2',
-                  padding: '6px 16px',
-                  '&:hover': {
-                    borderColor: '#4752C4',
-                    backgroundColor: 'rgba(88, 101, 242, 0.1)',
-                  },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSaveBio}
-                disabled={isSavingBio}
-                sx={{
-                  backgroundColor: '#5865F2',
-                  color: '#D3D9D4',
-                  padding: '6px 16px',
-                  '&:hover': {
-                    backgroundColor: '#4752C4',
-                  },
-                  '&.Mui-disabled': {
+            <div className="flex justify-between items-center">
+              <span className={`text-xs ${newBio.length >= MAX_BIO_LENGTH ? 'text-red-400' : 'text-muted'}`}>
+                {newBio.length}/{MAX_BIO_LENGTH} characters
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setIsEditingBio(false);
+                    setNewBio(bio || '');
+                  }}
+                  sx={{
+                    color: '#D3D9D4',
+                    borderColor: '#5865F2',
+                    padding: '6px 16px',
+                    '&:hover': {
+                      borderColor: '#4752C4',
+                      backgroundColor: 'rgba(88, 101, 242, 0.1)',
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveBio}
+                  disabled={isSavingBio}
+                  sx={{
                     backgroundColor: '#5865F2',
                     color: '#D3D9D4',
-                    opacity: 0.7
-                  }
-                }}
-              >
-                {isSavingBio ? 'Saving...' : 'Save'}
-              </Button>
+                    padding: '6px 16px',
+                    '&:hover': {
+                      backgroundColor: '#4752C4',
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: '#5865F2',
+                      color: '#D3D9D4',
+                      opacity: 0.7
+                    }
+                  }}
+                >
+                  {isSavingBio ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
           <div>
             {bio ? (
-              <p className="text-muted whitespace-pre-wrap">{convertUrlsToLinks(bio)}</p>
+              <p className="text-muted whitespace-pre-wrap break-words">{convertUrlsToLinks(bio)}</p>
             ) : (
               <p className="text-[#FFFFFF] italic">No bio yet</p>
             )}
-            {bioLastUpdated && (
+            {localBioLastUpdated && (
               <p className="text-[#FFFFFF] text-xs mt-2">
                 Last updated:{' '}
                 <Tooltip 
-                  title={formatCustomDate(bioLastUpdated)}
+                  title={formatCustomDate(localBioLastUpdated)}
                   placement="top"
                   arrow
                   slotProps={{
@@ -182,7 +209,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
                     }
                   }}
                 >
-                  <span className="cursor-help">{formatRelativeDate(bioLastUpdated)}</span>
+                  <span className="cursor-help">{realTimeRelativeDate}</span>
                 </Tooltip>
               </p>
             )}

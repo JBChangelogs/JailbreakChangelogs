@@ -25,7 +25,8 @@ import ItemChangelogs from '@/components/Items/ItemChangelogs';
 
 import { PROD_API_URL } from '@/services/api';
 import { handleImageError, getItemImagePath, isVideoItem, isHornItem, isDriftItem, getHornAudioPath, getDriftVideoPath, getVideoPath } from "@/utils/images";
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/timestamp";
+import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { getToken } from "@/utils/auth";
 import { getItemTypeColor } from "@/utils/badgeColors";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
@@ -46,6 +47,12 @@ export default function ItemDetailsPage() {
   const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Use optimized real-time relative date for last updated timestamp
+  const relativeTime = useOptimizedRealTimeRelativeDate(
+    (selectedVariant || item)?.last_updated,
+    `item-detail-${(selectedVariant || item)?.id}-${selectedVariant?.id || 'parent'}`
+  );
 
   const ITEMS_PER_PAGE = 12;
 
@@ -481,7 +488,7 @@ export default function ItemDetailsPage() {
                       }}
                     >
                       <span className="cursor-help">
-                        Last updated: {formatRelativeDate(currentItem.last_updated)}
+                        Last updated: {relativeTime}
                       </span>
                     </Tooltip>
                   ) : (
