@@ -14,6 +14,8 @@ import { getItemTypeColor } from '@/utils/badgeColors';
 import { formatMessageDate } from '@/utils/timestamp';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import { formatFullValue } from '@/utils/values';
+import { UserAvatar } from '@/utils/avatar';
 
 interface Item {
   id: number;
@@ -86,12 +88,26 @@ interface ChangelogGroup {
   created_at: number;
 }
 
+interface UserData {
+  id: string;
+  username: string;
+  avatar: string | null;
+  global_name: string;
+  accent_color: string;
+  custom_avatar?: string;
+  settings?: {
+    avatar_discord: number;
+  };
+  premiumtype?: number;
+}
+
 export default function ChangelogDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const [changelog, setChangelog] = useState<ChangelogGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [userData, setUserData] = useState<Record<string, UserData>>({});
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -111,6 +127,29 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
           throw new Error('Changelog not found');
         }
         setChangelog(data);
+        
+        // Extract unique user IDs from changelog data
+        const userIds = new Set<string>();
+        data.change_data.forEach((change: ChangeData) => {
+          userIds.add(change.changed_by_id);
+        });
+        
+        // Fetch user data in batch
+        if (userIds.size > 0) {
+          try {
+            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${Array.from(userIds).join(',')}&nocache=true`);
+            if (userResponse.ok) {
+              const userDataArray = await userResponse.json();
+              const userDataMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {
+                acc[user.id] = user;
+                return acc;
+              }, {});
+              setUserData(userDataMap);
+            }
+          } catch (err) {
+            console.error('Error fetching user data:', err);
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -412,8 +451,8 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                             const formatValue = (value: string | number | boolean | null | undefined, fieldKey: string) => {
                               if (value === "" || value === null || value === undefined) return "N/A";
                               
-                              // Handle tradable field specifically
-                              if (fieldKey === 'tradable') {
+                              // Handle boolean fields (tradable, is_limited)
+                              if (fieldKey === 'tradable' || fieldKey === 'is_limited') {
                                 if (typeof value === 'boolean') {
                                   return value ? 'True' : 'False';
                                 }
@@ -423,6 +462,11 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                                 if (typeof value === 'string') {
                                   return value === 'true' || value === '1' ? 'True' : 'False';
                                 }
+                              }
+                              
+                              // Handle value fields to show full format like values page
+                              if (fieldKey === 'cash_value' || fieldKey === 'duped_value') {
+                                return formatFullValue(value as string);
                               }
                               
                               return value;
@@ -451,17 +495,32 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                             );
                           })}
                         </div>
-                        <div className="mt-2 text-sm text-gray-400">
-                          Changed by{' '}
-                          <Link 
-                            href={`/users/${change.changed_by_id}`}
-                            className="text-blue-400 hover:text-blue-300"
-                          >
-                            {change.changed_by}
-                          </Link>
-                          {' on '}
-                          <span>{formatMessageDate(change.created_at)}</span>
-                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-[#2E3944] flex items-center gap-3">
+                      {userData[change.changed_by_id] && (
+                        <UserAvatar
+                          userId={userData[change.changed_by_id].id}
+                          avatarHash={userData[change.changed_by_id].avatar}
+                          username={userData[change.changed_by_id].username}
+                          size={8}
+                          accent_color={userData[change.changed_by_id].accent_color}
+                          custom_avatar={userData[change.changed_by_id].custom_avatar}
+                          showBadge={false}
+                          settings={userData[change.changed_by_id].settings}
+                          premiumType={userData[change.changed_by_id].premiumtype}
+                        />
+                      )}
+                      <div className="text-sm text-gray-400">
+                        Changed by{' '}
+                        <Link 
+                          href={`/users/${change.changed_by_id}`}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          {change.changed_by}
+                        </Link>
+                        {' on '}
+                        <span>{formatMessageDate(change.created_at)}</span>
                       </div>
                     </div>
                   </div>
