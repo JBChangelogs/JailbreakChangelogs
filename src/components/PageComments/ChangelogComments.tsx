@@ -67,6 +67,14 @@ interface ChangelogCommentsProps {
 
 const INITIAL_COMMENT_LENGTH = 500; // Show first 500 characters initially
 
+// Clean comment text by removing newlines and excessive whitespace
+const cleanCommentText = (text: string): string => {
+  return text
+    .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
+    .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
+    .trim();
+};
+
 const CommentSkeleton = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -319,7 +327,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          content: newComment,
+          content: cleanCommentText(newComment),
           item_id: changelogId,
           item_type: type === 'item' ? itemType : type,
           owner: token
@@ -386,7 +394,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         },
         body: JSON.stringify({
           id: commentId,
-          content: editContent,
+          content: cleanCommentText(editContent),
           item_type: type,
           author: token
         })
