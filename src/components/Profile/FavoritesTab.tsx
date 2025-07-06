@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Pagination, Chip, Button, Skeleton, Divider } from '@mui/material';
+import { Box, Pagination, Chip, Button, Skeleton, Divider, Tooltip } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { PROD_API_URL } from '@/services/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { handleImageError, getItemImagePath, isVideoItem, getVideoPath } from '@/utils/images';
-import { formatRelativeDate } from '@/utils/timestamp';
+import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { ItemDetails } from '@/types';
 
@@ -216,7 +216,7 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
                 />
               ) : (
                 <Image 
-                  src={getItemImagePath(itemType, imageName, true)}
+                  src={getItemImagePath(itemType, imageName, true, false, "light")}
                   alt={itemName}
                   fill
                   unoptimized
@@ -253,9 +253,31 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
           <Divider sx={{ my: 1, backgroundColor: '#2E3944' }} />
           
           <div className="flex justify-start items-center text-xs">
-            <span className="text-[#FFFFFF]">
-              Favorited {formatRelativeDate(favorite.created_at)}
-            </span>
+            <Tooltip 
+              title={formatCustomDate(favorite.created_at)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: '#0F1419',
+                    color: '#D3D9D4',
+                    fontSize: '0.75rem',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #2E3944',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    '& .MuiTooltip-arrow': {
+                      color: '#0F1419',
+                    }
+                  }
+                }
+              }}
+            >
+              <span className="text-[#FFFFFF] cursor-help">
+                Favorited {formatRelativeDate(favorite.created_at)}
+              </span>
+            </Tooltip>
           </div>
         </Box>
       </Link>

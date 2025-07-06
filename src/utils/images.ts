@@ -111,9 +111,10 @@ export const getVideoPath = (type: string, name: string): string => {
  * @param name - The item name
  * @param isValuesPage - Whether this is for the values page (default: false)
  * @param isSocialEmbed - Whether this is for a social media embed (default: false)
+ * @param hornBackground - Background variant for horn thumbnails ("dark" | "light", default: "dark")
  * @returns The full path to the item's media
  */
-export const getItemImagePath = (type: string, name: string, isValuesPage: boolean = false, isSocialEmbed: boolean = false): string => {
+export const getItemImagePath = (type: string, name: string, isValuesPage: boolean = false, isSocialEmbed: boolean = false, hornBackground: "dark" | "light" = "dark"): string => {
   if (isVideoItem(name)) {
     if (isSocialEmbed) {
       // Return different paths for social media embeds
@@ -132,7 +133,8 @@ export const getItemImagePath = (type: string, name: string, isValuesPage: boole
   }
 
   if (isHornItem(type)) {
-    return "https://assets.jailbreakchangelogs.xyz/assets/audios/horn_thumbnail.webp";
+    const backgroundVariant = hornBackground === "light" ? "light_bg" : "dark_bg";
+    return `https://assets.jailbreakchangelogs.xyz/assets/audios/horn_thumbnail_${backgroundVariant}.webp`;
   }
 
   if (isDriftItem(type)) {

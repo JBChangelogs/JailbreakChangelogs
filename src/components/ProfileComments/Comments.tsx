@@ -1,5 +1,5 @@
-import { Box, Typography, Divider, Chip } from '@mui/material';
-import { formatRelativeDate } from '@/utils/timestamp';
+import { Box, Typography, Divider, Chip, Tooltip } from '@mui/material';
+import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -163,8 +163,8 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
     ];
     
     if (itemTypes.includes(item_type.toLowerCase()) && itemDetails?.name) {
-      // Use the same image utility as the values page
-      const imagePath = getItemImagePath(itemDetails.type, itemDetails.name, true);
+      // Use the same image utility as the values page, with light background for horns
+      const imagePath = getItemImagePath(itemDetails.type, itemDetails.name, true, false, "light");
       
       // Special case for video items
       if (isVideoItem(itemDetails.name)) {
@@ -308,9 +308,33 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
         
         <div className="flex justify-start items-center text-xs">
           <div className="flex items-center gap-1">
-            <Typography variant="caption" className="text-[#FFFFFF]">
-              Posted {formattedDate}
-            </Typography>
+            <Tooltip 
+              title={edited_at 
+                ? formatCustomDate(edited_at)
+                : formatCustomDate(parseInt(date))}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: '#0F1419',
+                    color: '#D3D9D4',
+                    fontSize: '0.75rem',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #2E3944',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    '& .MuiTooltip-arrow': {
+                      color: '#0F1419',
+                    }
+                  }
+                }
+              }}
+            >
+              <Typography variant="caption" className="text-[#FFFFFF] cursor-help">
+                Posted {formattedDate}
+              </Typography>
+            </Tooltip>
             {edited_at && (
               <Typography variant="caption" className="text-[#FFFFFF]">
                 (edited)

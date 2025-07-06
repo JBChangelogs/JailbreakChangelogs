@@ -4,9 +4,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
-import { formatShortDate } from '@/utils/timestamp';
+import { formatShortDate, formatCustomDate } from '@/utils/timestamp';
 import TradeAdsTab from './TradeAdsTab';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Tooltip } from '@mui/material';
 
 interface User {
   id: string;
@@ -72,7 +72,31 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
               
               <div className="text-sm text-[#FFFFFF]">
                 {user.roblox_join_date && (
-                  <p>Member since {formatShortDate(user.roblox_join_date)}</p>
+                  <Tooltip 
+                    title={formatCustomDate(user.roblox_join_date)}
+                    placement="top"
+                    arrow
+                    enterDelay={200}
+                    leaveDelay={0}
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: '#0F1419',
+                          color: '#D3D9D4',
+                          fontSize: '0.75rem',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #2E3944',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                          '& .MuiTooltip-arrow': {
+                            color: '#0F1419',
+                          }
+                        }
+                      }
+                    }}
+                  >
+                    <span className="cursor-help inline-block">Member since {formatShortDate(user.roblox_join_date)}</span>
+                  </Tooltip>
                 )}
               </div>
 

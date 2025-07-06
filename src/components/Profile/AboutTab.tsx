@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { formatRelativeDate } from '@/utils/timestamp';
+import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getToken } from '@/utils/auth';
 import { PROD_API_URL } from '@/services/api';
@@ -160,7 +160,30 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
             )}
             {bioLastUpdated && (
               <p className="text-[#FFFFFF] text-xs mt-2">
-                Last updated: {formatRelativeDate(bioLastUpdated)}
+                Last updated:{' '}
+                <Tooltip 
+                  title={formatCustomDate(bioLastUpdated)}
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: '#0F1419',
+                        color: '#D3D9D4',
+                        fontSize: '0.75rem',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #2E3944',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                        '& .MuiTooltip-arrow': {
+                          color: '#0F1419',
+                        }
+                      }
+                    }
+                  }}
+                >
+                  <span className="cursor-help">{formatRelativeDate(bioLastUpdated)}</span>
+                </Tooltip>
               </p>
             )}
           </div>
