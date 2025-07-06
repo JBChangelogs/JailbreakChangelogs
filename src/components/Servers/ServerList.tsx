@@ -6,7 +6,7 @@ import { getToken } from '@/utils/auth';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import AddServerModal from './AddServerModal';
-import { Skeleton, Tooltip } from '@mui/material';
+import { Skeleton, Tooltip, Pagination } from '@mui/material';
 import { UserDetailsTooltip } from '@/components/Users/UserDetailsTooltip';
 import type { UserData } from '@/types/auth';
 import { CustomConfirmationModal } from '@/components/Modals/CustomConfirmationModal';
@@ -29,6 +29,14 @@ const ServerList: React.FC = () => {
   const [editingServer, setEditingServer] = React.useState<Server | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [serverToDelete, setServerToDelete] = React.useState<Server | null>(null);
+  const [page, setPage] = React.useState(1);
+  const itemsPerPage = 9;
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(servers.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentServers = servers.slice(startIndex, endIndex);
 
   React.useEffect(() => {
     const fetchServersAndUser = async () => {
@@ -200,6 +208,11 @@ const ServerList: React.FC = () => {
     }
   };
 
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (loading) {
     return (
       <div>
@@ -276,7 +289,12 @@ const ServerList: React.FC = () => {
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4 lg:px-0">
         <div className="flex items-center space-x-2">
           <ShieldCheckIcon className="h-5 w-5 text-[#5865F2]" />
-          <span className="text-muted">Total Servers: {servers.length}</span>
+          <span className="text-muted">
+            {servers.length > 0 
+              ? `Showing ${Math.min(itemsPerPage, servers.length - startIndex)} of ${servers.length} servers`
+              : 'Total Servers: 0'
+            }
+          </span>
         </div>
         <button
           onClick={handleAddServer}
@@ -288,12 +306,12 @@ const ServerList: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {servers.map((server, index) => (
+        {currentServers.map((server, index) => (
           <div key={server.id} className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 sm:p-6">
             <div className="mb-4 flex flex-col gap-3">
               <div className="flex items-center space-x-2">
                 <ShieldCheckIcon className="h-5 w-5 text-[#5865F2]" />
-                <span className="text-muted">Server #{index + 1}</span>
+                <span className="text-muted">Server #{startIndex + index + 1}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {loggedInUserId && loggedInUserId === server.owner ? (
@@ -402,6 +420,30 @@ const ServerList: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            sx={{
+              '& .MuiPaginationItem-root': {
+                color: '#D3D9D4',
+                '&.Mui-selected': {
+                  backgroundColor: '#5865F2',
+                  '&:hover': {
+                    backgroundColor: '#4752C4',
+                  },
+                },
+                '&:hover': {
+                  backgroundColor: '#2E3944',
+                },
+              },
+            }}
+          />
+        </div>
+      )}
 
       <AddServerModal
         isOpen={isAddModalOpen}
