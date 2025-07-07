@@ -247,4 +247,20 @@ export const useAuth = () => {
     showLoginModal,
     setShowLoginModal,
   };
+};
+
+export const getCurrentUserPremiumType = (): number => {
+  if (typeof window === 'undefined') return 0;
+  
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      return userData.premiumtype || 0;
+    }
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+  }
+  
+  return 0;
 }; 

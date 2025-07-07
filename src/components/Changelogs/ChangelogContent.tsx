@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { ArrowRightIcon, ArrowTurnDownRightIcon } from "@heroicons/react/24/outline";
 import localFont from "next/font/local";
@@ -7,6 +7,7 @@ import ChangelogMediaEmbed from './ChangelogMediaEmbed';
 import ChangelogComments from '../PageComments/ChangelogComments';
 import ChangelogQuickNav from './ChangelogQuickNav';
 import DisplayAd from '../Ads/DisplayAd';
+import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
 const luckiestGuy = localFont({ 
   src: '../../../public/fonts/LuckiestGuy.ttf',
@@ -30,10 +31,26 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   changelogList,
 }) => {
   const [imageAspectRatio, setImageAspectRatio] = useState<string>('aspect-[4/3]');
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   
   const currentIndex = changelogList.findIndex(c => c.id === changelogId);
   const prevChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
   const nextChangelog = currentIndex < changelogList.length - 1 ? changelogList[currentIndex + 1] : null;
+
+  useEffect(() => {
+    // Get current user's premium type
+    setCurrentUserPremiumType(getCurrentUserPremiumType());
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
+  }, []);
 
   const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
@@ -118,18 +135,20 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
             changelogTitle={title}
             type="changelog"
           />
-          <div className="my-8 flex justify-center">
-            <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
-              <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-                Advertisement
-              </span>
-              <DisplayAd
-                adSlot="4408799044"
-                adFormat="auto"
-                style={{ display: "block", width: "100%" }}
-              />
+          {currentUserPremiumType === 0 && (
+            <div className="my-8 flex justify-center">
+              <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
+                <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                  Advertisement
+                </span>
+                <DisplayAd
+                  adSlot="4408799044"
+                  adFormat="auto"
+                  style={{ display: "block", width: "100%" }}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

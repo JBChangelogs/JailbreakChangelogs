@@ -30,6 +30,7 @@ const supporterTiers: SupporterTier[] = [
     price: "75R$",
     priceAlt: "or $1 on Ko-fi",
     features: [
+      "Hide all advertisements",
       "Post Comments up to 400 characters",
       "Trade Ad Duration: +6 Hours (12 Hours total)",
       "Custom Animated Avatar",
@@ -53,6 +54,7 @@ const supporterTiers: SupporterTier[] = [
     price: "200R$",
     priceAlt: "or $3 on Ko-fi",
     features: [
+      "Hide all advertisements",
       "Post Comments up to 800 characters",
       "Trade Ad Duration: +12 Hours (24 Hours total)",
       "Custom Animated Avatar",
@@ -75,6 +77,7 @@ const supporterTiers: SupporterTier[] = [
     price: "400R$",
     priceAlt: "or $5 on Ko-fi",
     features: [
+      "Hide all advertisements",
       "Post Comments up to 2,000 characters",
       "Trade Ad Duration: +24 Hours (48 Hours total)",
       "Custom Regular/Animated Avatar",

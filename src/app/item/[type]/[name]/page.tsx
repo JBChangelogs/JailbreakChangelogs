@@ -33,6 +33,7 @@ import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails, DupedOwner } from '@/types';
 import DisplayAd from "@/components/Ads/DisplayAd";
+import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
 export default function ItemDetailsPage() {
   const params = useParams();
@@ -48,6 +49,7 @@ export default function ItemDetailsPage() {
   const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -56,6 +58,21 @@ export default function ItemDetailsPage() {
   );
 
   const ITEMS_PER_PAGE = 12;
+
+  useEffect(() => {
+    // Get current user's premium type
+    setCurrentUserPremiumType(getCurrentUserPremiumType());
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (item?.type && isDriftItem(item.type) && videoRef.current) {
@@ -434,18 +451,20 @@ export default function ItemDetailsPage() {
                 </div>
               </div>
               {/* Ad below the 'Don't agree with the value?' card */}
-              <div className="my-6 flex justify-center">
-                <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
-                  <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-                    Advertisement
-                  </span>
-                  <DisplayAd
-                    adSlot="4408799044"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%" }}
-                  />
+              {currentUserPremiumType === 0 && (
+                <div className="my-6 flex justify-center">
+                  <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
+                    <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                      Advertisement
+                    </span>
+                    <DisplayAd
+                      adSlot="4408799044"
+                      adFormat="auto"
+                      style={{ display: "block", width: "100%" }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Right column - Details */}

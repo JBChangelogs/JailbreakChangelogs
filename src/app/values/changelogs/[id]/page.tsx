@@ -19,6 +19,7 @@ import { formatFullValue } from '@/utils/values';
 import { UserAvatar } from '@/utils/avatar';
 import { Search, Clear } from '@mui/icons-material';
 import DisplayAd from '@/components/Ads/DisplayAd';
+import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
 interface Item {
   id: number;
@@ -115,6 +116,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
   const [selectedType, setSelectedType] = useState<string>('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const itemsPerPage = 10;
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
 
   useEffect(() => {
     if (!id) {
@@ -165,6 +167,21 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
 
     fetchChangelog();
   }, [id]);
+
+  useEffect(() => {
+    // Get current user's premium type
+    setCurrentUserPremiumType(getCurrentUserPremiumType());
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
+  }, []);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -534,18 +551,20 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
               </div>
             </div>
             {/* Ad Section */}
-            <div className="flex-shrink-0 w-full lg:w-[350px] xl:w-[400px] 2xl:w-[420px] max-w-full mt-4 lg:mt-0">
-              <div className="w-full bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center min-h-[180px]">
-                <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-                  Advertisement
-                </span>
-                <DisplayAd
-                  adSlot="4408799044"
-                  adFormat="auto"
-                  style={{ display: "block", width: "100%" }}
-                />
+            {currentUserPremiumType === 0 && (
+              <div className="flex-shrink-0 w-full lg:w-[350px] xl:w-[400px] 2xl:w-[420px] max-w-full mt-4 lg:mt-0">
+                <div className="w-full bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center min-h-[180px]">
+                  <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                    Advertisement
+                  </span>
+                  <DisplayAd
+                    adSlot="4408799044"
+                    adFormat="auto"
+                    style={{ display: "block", width: "100%" }}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* No Results Message */}

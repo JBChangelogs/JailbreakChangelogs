@@ -24,6 +24,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { demandOrder } from "@/utils/values";
 import dynamic from 'next/dynamic';
 import DisplayAd from "@/components/Ads/DisplayAd";
+import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -44,6 +45,7 @@ export default function ValuesPage() {
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = 23;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
 
   // Load saved preferences after mount
   useEffect(() => {
@@ -79,6 +81,21 @@ export default function ValuesPage() {
     setSelectLoaded(true);
   }, []);
 
+  useEffect(() => {
+    // Get current user's premium type
+    setCurrentUserPremiumType(getCurrentUserPremiumType());
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
+  }, []);
+
   const handleRandomItem = async () => {
     try {
       const loadingToast = toast.loading('Finding a random item...');
@@ -93,8 +110,6 @@ export default function ValuesPage() {
       toast.error('Failed to fetch random item');
     }
   };
-
-
 
   const handleCategorySelect = (filter: FilterSort) => {
     // If clicking the same category, reset to "All Items"
@@ -170,10 +185,12 @@ export default function ValuesPage() {
     setPage(value);
   };
 
-  const indexOfLastItem = page * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const displayedItems = sortedItems.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+  // Show one more item for premium users since ads are hidden
+  const adjustedItemsPerPage = currentUserPremiumType === 0 ? itemsPerPage : itemsPerPage + 1;
+  const adjustedIndexOfLastItem = page * adjustedItemsPerPage;
+  const adjustedIndexOfFirstItem = adjustedIndexOfLastItem - adjustedItemsPerPage;
+  const displayedItems = sortedItems.slice(adjustedIndexOfFirstItem, adjustedIndexOfLastItem);
+  const totalPages = Math.ceil(sortedItems.length / adjustedItemsPerPage);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -226,7 +243,7 @@ export default function ValuesPage() {
   };
 
   // Helper to interleave ads into the grid
-  const adCard = (
+  const adCard = currentUserPremiumType === 0 ? (
     <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
       <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
         Advertisement
@@ -238,7 +255,7 @@ export default function ValuesPage() {
         style={{ display: 'block', width: '100%' }}
       />
     </div>
-  );
+  ) : null;
 
   // Interleave ad at a random position within the current page
   const itemsWithAds = [];
@@ -246,7 +263,7 @@ export default function ValuesPage() {
     // Pick a random index to insert the ad (from 0 to displayedItems.length)
     const adIndex = Math.floor(Math.random() * (displayedItems.length + 1));
     for (let i = 0; i < displayedItems.length; i++) {
-      if (i === adIndex) {
+      if (i === adIndex && adCard) {
         itemsWithAds.push(
           <div key={`ad-${i}`} className="flex justify-center w-full">
             {adCard}
@@ -269,7 +286,7 @@ export default function ValuesPage() {
       );
     }
     // If adIndex is at the end, push ad after all items
-    if (adIndex === displayedItems.length) {
+    if (adIndex === displayedItems.length && adCard) {
       itemsWithAds.push(
         <div key={`ad-end`} className="flex justify-center w-full">
           {adCard}
