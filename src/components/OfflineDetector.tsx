@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Alert } from '@mui/material';
-import WifiOffRoundedIcon from '@mui/icons-material/WifiOffRounded';
 
 export default function OfflineDetector() {
   const [isOffline, setIsOffline] = useState(false);
@@ -35,7 +34,6 @@ export default function OfflineDetector() {
   return (
     <Alert
       severity="warning"
-      icon={<WifiOffRoundedIcon />}
       sx={{
         width: '100%',
         bgcolor: '#B45309',

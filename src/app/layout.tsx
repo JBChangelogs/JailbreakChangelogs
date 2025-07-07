@@ -90,6 +90,13 @@ export default async function RootLayout({
         <head>
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
+          {/* Google AdSense */}
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
           {/* Umami Analytics */}
           <Script 
             defer 
@@ -119,6 +126,13 @@ export default async function RootLayout({
       <head>
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
+        {/* Google AdSense */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         {/* Umami Analytics */}
         <Script 
           defer 
