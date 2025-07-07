@@ -197,10 +197,10 @@ export default async function RootLayout({
         <AuthCheck />
         <SurveyProvider>
           <SupportProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
+          <div className="flex min-h-screen flex-col">
+            <Header />
 
-              <main className="flex-1">{children}</main>
+            <main className="flex-1">{children}</main>
 
             <footer className="bg-[#212A31] py-8">
               <div className="container mx-auto px-4">

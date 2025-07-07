@@ -27,8 +27,8 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter I",
-    price: "75R$",
-    priceAlt: "or $1 on Ko-fi",
+    price: "$1",
+    priceAlt: "or 75R$ on Roblox",
     features: [
       "Hide all advertisements",
       "Post Comments up to 400 characters",
@@ -51,8 +51,8 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter II",
-    price: "200R$",
-    priceAlt: "or $3 on Ko-fi",
+    price: "$3",
+    priceAlt: "or 200R$ on Roblox",
     features: [
       "Hide all advertisements",
       "Post Comments up to 800 characters",
@@ -74,8 +74,8 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter III",
-    price: "400R$",
-    priceAlt: "or $5 on Ko-fi",
+    price: "$5",
+    priceAlt: "or 400R$ on Roblox",
     features: [
       "Hide all advertisements",
       "Post Comments up to 2,000 characters",
@@ -164,19 +164,21 @@ export default function SupportingPage() {
                     <span className="text-3xl font-bold text-white">{tier.price}</span>
                   ) : (
                     <div className="flex items-center">
-                      <span className="text-3xl font-bold text-white">{tier.price.replace('R$', '')}</span>
+                      <span className="text-3xl font-bold text-white">{tier.price}</span>
+                    </div>
+                  )}
+                  {tier.priceAlt && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-gray-400">{tier.priceAlt.replace(' on Roblox', '').replace('R$', '')}</span>
                       <Image
                         src="/assets/images/Robux_Icon.png"
                         alt="Robux"
-                        width={24}
-                        height={24}
+                        width={16}
+                        height={16}
                         className="ml-1"
                         unoptimized
                       />
                     </div>
-                  )}
-                  {tier.priceAlt && (
-                    <p className="text-sm text-gray-400">{tier.priceAlt}</p>
                   )}
                 </div>
                 <ul className="space-y-3">
@@ -202,29 +204,10 @@ export default function SupportingPage() {
 
         <div className="lg:w-80 flex-shrink-0">
           <div className="sticky top-8 bg-[#212a31] rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-6 text-center text-white">Scan to Support</h2>
+            <h2 className="text-xl font-bold mb-6 text-center text-white">Ready to Support?</h2>
             <div className="space-y-8">
               <div className="text-center">
-                <h3 className="text-lg font-semibold mb-3 text-white">Roblox Support</h3>
-                <Image 
-                  src="https://assets.jailbreakchangelogs.xyz/assets/images/support/Roblox_Supporter_QR_Code.webp"
-                  alt="Roblox Support QR Code"
-                  width={192}
-                  height={192}
-                  className="mx-auto rounded-lg shadow"
-                  unoptimized
-                />
-                <a 
-                  href="https://www.roblox.com/games/104188650191561/Support-Us"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
-                >
-                  Can&apos;t scan? Click here
-                </a>
-              </div>
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-3 text-white">Ko-fi Support</h3>
+                <h3 className="text-lg font-semibold mb-3 text-white">Ko-fi Donations</h3>
                 <Image 
                   src="https://assets.jailbreakchangelogs.xyz/assets/images/support/KoFi_Supporter_QR_Code.webp"
                   alt="Ko-fi Support QR Code"
@@ -235,6 +218,25 @@ export default function SupportingPage() {
                 />
                 <a 
                   href="https://ko-fi.com/jailbreakchangelogs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
+                >
+                  Can&apos;t scan? Click here
+                </a>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-3 text-white">Roblox Donations</h3>
+                <Image 
+                  src="https://assets.jailbreakchangelogs.xyz/assets/images/support/Roblox_Supporter_QR_Code.webp"
+                  alt="Roblox Support QR Code"
+                  width={192}
+                  height={192}
+                  className="mx-auto rounded-lg shadow"
+                  unoptimized
+                />
+                <a 
+                  href="https://www.roblox.com/games/104188650191561/Support-Us"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
