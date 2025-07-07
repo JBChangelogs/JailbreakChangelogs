@@ -18,6 +18,7 @@ import remarkBreaks from 'remark-breaks';
 import { formatFullValue } from '@/utils/values';
 import { UserAvatar } from '@/utils/avatar';
 import { Search, Clear } from '@mui/icons-material';
+import DisplayAd from '@/components/Ads/DisplayAd';
 
 interface Item {
   id: number;
@@ -396,144 +397,155 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
       <main className="min-h-screen bg-[#2E3944]">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-white mb-1">
-              Changelog #{changelog.id}
-            </h1>
-            <p className="text-gray-400">
-              {changelog.change_count} changes • Posted on {formatMessageDate(changelog.created_at)}
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-sm text-gray-400">Contributors:</span>
-              <div className="flex flex-wrap gap-2">
-                {(() => {
-                  const contributors = new Map<string, string>();
-                  
-                  changelog.change_data.forEach(change => {
-                    if (change.suggestion) {
-                      // For suggestions, use the suggestor name
-                      contributors.set(change.suggestion.user_id.toString(), change.suggestion.suggestor_name);
-                    } else {
-                      // For regular changes, use the changed_by name
-                      contributors.set(change.changed_by_id, change.changed_by);
-                    }
-                  });
-                  
-                  return Array.from(contributors.entries()).map(([userId, displayName], index, entries) => (
-                    <a
-                      key={userId}
-                      href={`https://discord.com/users/${userId}`}
-                      className="text-blue-400 hover:text-blue-300"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {displayName}{index < entries.length - 1 ? ',' : ''}
-                    </a>
-                  ));
-                })()}
+          <div className="mb-6 flex flex-col lg:flex-row lg:items-start gap-6">
+            {/* Left: Header + Search/Filter */}
+            <div className="flex-1 min-w-0 flex flex-col gap-4">
+              <div>
+                <h1 className="text-2xl font-semibold text-white mb-1">
+                  Changelog #{changelog.id}
+                </h1>
+                <p className="text-gray-400">
+                  {changelog.change_count} changes • Posted on {formatMessageDate(changelog.created_at)}
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-gray-400">Contributors:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      const contributors = new Map<string, string>();
+                      changelog.change_data.forEach(change => {
+                        if (change.suggestion) {
+                          contributors.set(change.suggestion.user_id.toString(), change.suggestion.suggestor_name);
+                        } else {
+                          contributors.set(change.changed_by_id, change.changed_by);
+                        }
+                      });
+                      return Array.from(contributors.entries()).map(([userId, displayName], index, entries) => (
+                        <a
+                          key={userId}
+                          href={`https://discord.com/users/${userId}`}
+                          className="text-blue-400 hover:text-blue-300"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {displayName}{index < entries.length - 1 ? ',' : ''}
+                        </a>
+                      ));
+                    })()}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Search and Filter Section */}
-          <div className="mb-6 space-y-4">
-            {/* Search Bar */}
-            <div className="flex gap-3">
-              <TextField
-                fullWidth
-                placeholder="Search items, types, value changes, or contributor names..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                variant="outlined"
-                size="small"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search sx={{ color: '#9CA3AF' }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (searchQuery || selectedType) && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={clearSearch}
-                        size="small"
-                        sx={{ color: '#9CA3AF' }}
-                      >
-                        <Clear />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    bgcolor: '#212A31',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#2E3944',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#5865F2',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#5865F2',
-                    },
-                    '& .MuiInputBase-input': {
-                      color: '#D3D9D4',
-                    },
-                    '& .MuiInputBase-input::placeholder': {
-                      color: '#9CA3AF',
-                      opacity: 1,
-                    },
-                  },
-                }}
-              />
-            </div>
-
-            {/* Filter Chips */}
-            <div className="space-y-2">
-              <div className="text-sm text-gray-400">
-                Filter by item type:
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {uniqueTypes.map((type) => (
-                  <Chip
-                    key={type}
-                    label={type}
+              {/* Search and Filter Section (now under header, left-aligned) */}
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="flex gap-3">
+                  <TextField
+                    fullWidth
+                    placeholder="Search items, types, value changes, or contributor names..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    variant="outlined"
                     size="small"
-                    onClick={() => handleTypeFilter(type)}
-                    sx={{
-                      backgroundColor: getItemTypeColor(type),
-                      color: 'white',
-                      '& .MuiChip-label': {
-                        color: 'white',
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search sx={{ color: '#9CA3AF' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (searchQuery || selectedType) && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={clearSearch}
+                            size="small"
+                            sx={{ color: '#9CA3AF' }}
+                          >
+                            <Clear />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                      sx: {
+                        bgcolor: '#212A31',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#2E3944',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#5865F2',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#5865F2',
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#D3D9D4',
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                          color: '#9CA3AF',
+                          opacity: 1,
+                        },
                       },
-                      '&:hover': {
-                        backgroundColor: getItemTypeColor(type),
-                      },
-                      ...(selectedType === type && {
-                        boxShadow: '0 0 0 2px #5865F2',
-                        border: '2px solid #5865F2',
-                      }),
                     }}
                   />
-                ))}
+                </div>
+                {/* Filter Chips */}
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-400">
+                    Filter by item type:
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {uniqueTypes.map((type) => (
+                      <Chip
+                        key={type}
+                        label={type}
+                        size="small"
+                        onClick={() => handleTypeFilter(type)}
+                        sx={{
+                          backgroundColor: getItemTypeColor(type),
+                          color: 'white',
+                          '& .MuiChip-label': {
+                            color: 'white',
+                          },
+                          '&:hover': {
+                            backgroundColor: getItemTypeColor(type),
+                          },
+                          ...(selectedType === type && {
+                            boxShadow: '0 0 0 2px #5865F2',
+                            border: '2px solid #5865F2',
+                          }),
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {/* Search Results Info */}
+                {searchQuery.trim().length > 0 && searchQuery.trim().length < 3 && (
+                  <div className="text-sm text-gray-400">
+                    Type at least 3 characters to search
+                  </div>
+                )}
+                {(debouncedSearchQuery.trim().length >= 3 || selectedType) && (
+                  <div className="text-sm text-gray-400">
+                    Showing {filteredChanges.length} of {changelog.change_data.length} changes
+                    {debouncedSearchQuery.trim().length >= 3 && (
+                      <span> for &quot;{debouncedSearchQuery}&quot;</span>
+                    )}
+                    {selectedType && (
+                      <span> in {selectedType}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Search Results Info */}
-            {searchQuery.trim().length > 0 && searchQuery.trim().length < 3 && (
-              <div className="text-sm text-gray-400">
-                Type at least 3 characters to search
+            {/* Ad Section */}
+            <div className="flex-shrink-0 w-full lg:w-[350px] xl:w-[400px] 2xl:w-[420px] max-w-full mt-4 lg:mt-0">
+              <div className="w-full bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center min-h-[180px]">
+                <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                  Advertisement
+                </span>
+                <DisplayAd
+                  adSlot="4408799044"
+                  adFormat="auto"
+                  style={{ display: "block", width: "100%" }}
+                />
               </div>
-            )}
-            {(debouncedSearchQuery.trim().length >= 3 || selectedType) && (
-              <div className="text-sm text-gray-400">
-                Showing {filteredChanges.length} of {changelog.change_data.length} changes
-                {debouncedSearchQuery.trim().length >= 3 && (
-                  <span> for &quot;{debouncedSearchQuery}&quot;</span>
-                )}
-                {selectedType && (
-                  <span> in {selectedType}</span>
-                )}
-              </div>
-            )}
+            </div>
           </div>
 
           {/* No Results Message */}
