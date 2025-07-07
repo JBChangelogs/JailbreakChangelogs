@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { demandOrder } from "@/utils/values";
 import dynamic from 'next/dynamic';
+import DisplayAd from "@/components/Ads/DisplayAd";
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -41,7 +42,7 @@ export default function ValuesPage() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const itemsPerPage = 24;
+  const itemsPerPage = 23;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Load saved preferences after mount
@@ -223,6 +224,58 @@ export default function ValuesPage() {
     
     return message;
   };
+
+  // Helper to interleave ads into the grid
+  const adCard = (
+    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300">
+      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-t-lg bg-[#212A31] flex items-center justify-center">
+        <DisplayAd
+          adSlot="3201343366"
+          adFormat="fluid"
+          layoutKey="-62+ck+1k-2e+c8"
+          style={{ display: 'block', width: '100%', height: '100%' }}
+        />
+      </div>
+    </div>
+  );
+
+  // Interleave ad at a random position within the current page
+  const itemsWithAds = [];
+  if (displayedItems.length > 0) {
+    // Pick a random index to insert the ad (from 0 to displayedItems.length)
+    const adIndex = Math.floor(Math.random() * (displayedItems.length + 1));
+    for (let i = 0; i < displayedItems.length; i++) {
+      if (i === adIndex) {
+        itemsWithAds.push(
+          <div key={`ad-${i}`} className="flex justify-center w-full">
+            {adCard}
+          </div>
+        );
+      }
+      itemsWithAds.push(
+        <ItemCard
+          key={displayedItems[i].id}
+          item={displayedItems[i]}
+          isFavorited={favorites.includes(displayedItems[i].id)}
+          onFavoriteChange={(fav) => {
+            setFavorites((prev) =>
+              fav
+                ? [...prev, displayedItems[i].id]
+                : prev.filter((id) => id !== displayedItems[i].id)
+            );
+          }}
+        />
+      );
+    }
+    // If adIndex is at the end, push ad after all items
+    if (adIndex === displayedItems.length) {
+      itemsWithAds.push(
+        <div key={`ad-end`} className="flex justify-center w-full">
+          {adCard}
+        </div>
+      );
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#2E3944] mb-8">
@@ -669,8 +722,8 @@ export default function ValuesPage() {
 
         <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
           {loading ? (
-            [...Array(24)].map((_, i) => <ItemCardSkeleton key={i} />)
-          ) : displayedItems.length === 0 ? (
+            [...Array(23)].map((_, i) => <ItemCardSkeleton key={i} />)
+          ) : itemsWithAds.length === 0 ? (
             <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
               <p className="text-lg text-muted">
                 {getNoItemsMessage()}
@@ -687,20 +740,7 @@ export default function ValuesPage() {
               </button>
             </div>
           ) : (
-            displayedItems.map((item) => (
-              <ItemCard 
-                key={item.id} 
-                item={item} 
-                isFavorited={favorites.includes(item.id)}
-                onFavoriteChange={(isFavorited) => {
-                  if (isFavorited) {
-                    setFavorites(prev => [...prev, item.id]);
-                  } else {
-                    setFavorites(prev => prev.filter(id => id !== item.id));
-                  }
-                }}
-              />
-            ))
+            itemsWithAds
           )}
         </div>
 
