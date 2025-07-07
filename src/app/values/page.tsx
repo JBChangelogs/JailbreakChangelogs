@@ -227,15 +227,16 @@ export default function ValuesPage() {
 
   // Helper to interleave ads into the grid
   const adCard = (
-    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300">
-      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-t-lg bg-[#212A31] flex items-center justify-center">
-        <DisplayAd
-          adSlot="3201343366"
-          adFormat="fluid"
-          layoutKey="-62+ck+1k-2e+c8"
-          style={{ display: 'block', width: '100%', height: '100%' }}
-        />
-      </div>
+    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
+      <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+        Advertisement
+      </span>
+      <DisplayAd
+        adSlot="3201343366"
+        adFormat="fluid"
+        layoutKey="-62+ck+1k-2e+c8"
+        style={{ display: 'block', width: '100%' }}
+      />
     </div>
   );
 
