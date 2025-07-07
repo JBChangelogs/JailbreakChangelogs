@@ -259,6 +259,17 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
         return true;
       }
       
+      // Search in contributor names (suggestor and changed by)
+      // Always search in changed_by name (the person who made the change)
+      if (change.changed_by.toLowerCase().includes(query)) {
+        return true;
+      }
+      
+      // If it's a suggestion, also search in suggestor name
+      if (change.suggestion && change.suggestion.suggestor_name.toLowerCase().includes(query)) {
+        return true;
+      }
+      
       // Search in value changes
       const hasValueMatch = Object.entries(change.changes.new).some(([key, newValue]) => {
         if (key === 'last_updated') return false;
@@ -430,7 +441,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
             <div className="flex gap-3">
               <TextField
                 fullWidth
-                placeholder="Search items, types, or value changes..."
+                placeholder="Search items, types, value changes, or contributor names..."
                 value={searchQuery}
                 onChange={handleSearchChange}
                 variant="outlined"
