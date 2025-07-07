@@ -96,8 +96,15 @@ export default function ValuesPage() {
 
 
   const handleCategorySelect = (filter: FilterSort) => {
-    setFilterSort(filter);
-    localStorage.setItem('valuesFilterSort', filter);
+    // If clicking the same category, reset to "All Items"
+    if (filterSort === filter) {
+      setFilterSort("name-all-items");
+      localStorage.setItem('valuesFilterSort', "name-all-items");
+    } else {
+      setFilterSort(filter);
+      localStorage.setItem('valuesFilterSort', filter);
+    }
+    
     if (searchSectionRef.current) {
       const headerOffset = 80; // Value based on header height
       const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
@@ -366,8 +373,14 @@ export default function ValuesPage() {
                   key={demand}
                   onClick={() => {
                     const demandValue = getDemandValue(demand);
-                    setValueSort(demandValue as ValueSort);
-                    localStorage.setItem('valuesValueSort', demandValue);
+                    // If clicking the same demand level, reset to default sort
+                    if (valueSort === demandValue) {
+                      setValueSort("cash-desc");
+                      localStorage.setItem('valuesValueSort', "cash-desc");
+                    } else {
+                      setValueSort(demandValue as ValueSort);
+                      localStorage.setItem('valuesValueSort', demandValue);
+                    }
                     if (searchSectionRef.current) {
                       const headerOffset = 80;
                       const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
