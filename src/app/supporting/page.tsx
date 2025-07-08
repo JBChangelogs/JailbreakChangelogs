@@ -23,6 +23,14 @@ const supporterTiers: SupporterTier[] = [
       "Custom Animated Banner",
       "Custom Regular Avatar",
       "Custom Regular Banner",
+      "Comments highlighted with border and badge",
+    ],
+    xFeatures: [
+      "Custom Animated Avatar",
+      "Custom Animated Banner",
+      "Custom Regular Avatar",
+      "Custom Regular Banner",
+      "Comments highlighted with border and badge",
     ]
   },
   {
@@ -186,11 +194,11 @@ export default function SupportingPage() {
                     <li key={index} className="flex items-center">
                       {tier.xFeatures?.includes(feature) ? (
                         <XMarkIcon
-                          className="h-5 w-5 text-red-500 mr-2 mt-1"
+                          className="h-5 w-5 text-red-500 mr-2 mt-1 flex-shrink-0"
                         />
                       ) : (
                         <CheckIcon
-                          className="h-5 w-5 text-green-500 mr-2 mt-1"
+                          className="h-5 w-5 text-green-500 mr-2 mt-1 flex-shrink-0"
                         />
                       )}
                       <span className="text-gray-300">{feature}</span>

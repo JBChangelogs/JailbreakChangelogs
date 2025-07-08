@@ -407,7 +407,7 @@ export default async function RootLayout({
                         </a>{" "}
                         and{" "}
                         <a
-                          href="https://github.com/Jalenzz16"
+                          href="https://github.com/Jalenzzz"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:text-blue-300 hover:underline"

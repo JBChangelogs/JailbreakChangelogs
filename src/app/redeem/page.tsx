@@ -52,11 +52,12 @@ export default function RedeemPage() {
 
       if (response.ok) {
         setMessage({ text: 'Code redeemed successfully!', type: 'success' });
-        // Check if code came from URL parameter
         if (typeof window !== 'undefined') {
           const urlParams = new URLSearchParams(window.location.search);
-          if (!urlParams.get('code')) {
-            setCode(''); // Only clear if not from URL
+          if (urlParams.get('code')) {
+            urlParams.delete('code');
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+            window.history.replaceState({}, '', newUrl);
           }
         }
       } else if (response.status === 400) {
@@ -66,10 +67,35 @@ export default function RedeemPage() {
         } else {
           setMessage({ text: 'Invalid code format', type: 'error' });
         }
+        
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('code')) {
+            urlParams.delete('code');
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+            window.history.replaceState({}, '', newUrl);
+          }
+        }
       } else if (response.status === 404) {
         setMessage({ text: 'Invalid Code', type: 'error' });
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('code')) {
+            urlParams.delete('code');
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+            window.history.replaceState({}, '', newUrl);
+          }
+        }
       } else if (response.status === 409) {
         setMessage({ text: 'The code has already been redeemed', type: 'error' });
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('code')) {
+            urlParams.delete('code');
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+            window.history.replaceState({}, '', newUrl);
+          }
+        }
       } else {
         setMessage({ text: 'An error occurred. Please try again.', type: 'error' });
       }
@@ -108,7 +134,7 @@ export default function RedeemPage() {
                 />
                 {message && (
                   <div className={`flex items-center space-x-2 text-sm ${
-                    message.type === 'success' ? 'text-[#1d7da3]' : 'text-red-500'
+                    message.type === 'success' ? 'text-blue-300' : 'text-red-400'
                   }`}>
                     {message.type === 'success' ? (
                       <svg className="h-4 w-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
