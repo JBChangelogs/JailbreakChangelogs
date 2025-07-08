@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { formatRelativeDate } from '@/utils/timestamp';
 import { TradeAd } from '@/types/trading';
 import { ItemGrid } from './ItemGrid';
 import RobloxTradeUser from './RobloxTradeUser';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog';
+import { useRealTimeRelativeDate } from '@/hooks/useRealTimeRelativeDate';
 
 interface TradeAdCardProps {
   trade: TradeAd;
@@ -47,6 +47,9 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
       setIsDeleting(false);
     }
   };
+
+  const createdRelative = useRealTimeRelativeDate(trade.created_at);
+  const expiresRelative = useRealTimeRelativeDate(trade.expires);
 
   return (
     <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors">
@@ -107,10 +110,10 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
         </div>
 
         <div className="mt-4 text-xs text-muted">
-          Created {formatRelativeDate(trade.created_at)}
+          Created {createdRelative}
           {trade.expires && (
             <span className="ml-2">
-              • Expires {formatRelativeDate(trade.expires)}
+              • Expires {expiresRelative}
             </span>
           )}
         </div>

@@ -18,7 +18,7 @@ export default function TermsOfServicePage() {
           <DocumentTextIcon className="h-6 w-6 text-muted" />
           <h1 className="text-2xl font-bold text-muted">Terms of Service</h1>
         </div>
-        <p className="text-sm text-muted mb-6">Last updated: April 15th, 2025</p>
+        <p className="text-sm text-muted mb-6">Last updated: July 8th, 2025</p>
         
         <div className="bg-[#212A31] p-6 rounded-lg border border-[#2E3944] hover:border-[#5865F2] transition-colors">
           <Typography className="text-muted">
@@ -38,11 +38,28 @@ export default function TermsOfServicePage() {
               <Typography className="text-muted mb-4">
                 Permission is granted to temporarily access and use our materials for personal, non-commercial viewing only.
               </Typography>
-              <ul className="list-disc list-inside text-muted space-y-1">
+              <ul className="list-disc list-inside text-muted space-y-1 mb-4">
                 <li>You must not modify or copy these materials</li>
                 <li>You must not use these materials for commercial purposes</li>
                 <li>You must not attempt to decompile or reverse engineer any software</li>
               </ul>
+              <div className="ml-4 mt-2">
+                <h3 className="text-lg font-semibold text-muted mb-2">API Terms of Service</h3>
+                <Typography className="text-muted mb-2">
+                  By accessing our API, you accept that we reserve the right to restrict or revoke your access and block IP address(es) at our sole discretion.
+                </Typography>
+                <Typography className="text-muted mb-2">
+                  Violations include, but are not limited to:
+                </Typography>
+                <ul className="list-disc list-inside text-muted space-y-1">
+                  <li>Sending excessive or spammy requests</li>
+                  <li>Engaging in abusive behavior towards the API</li>
+                  <li>Scraping or harvesting data from the API</li>
+                  <li>Sharing private endpoints with third parties without authorization</li>
+                  <li>Distributing malware, viruses, or harmful content via the API</li>
+                  <li>Harassing others through API usage</li>
+                </ul>
+              </div>
             </div>
 
             <div>

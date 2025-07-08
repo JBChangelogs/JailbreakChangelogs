@@ -1,6 +1,6 @@
 import React from 'react';
-import { formatRelativeDate } from '@/utils/timestamp';
 import { ClockIcon } from '@heroicons/react/24/outline';
+import { useRealTimeRelativeDate } from '@/hooks/useRealTimeRelativeDate';
 
 interface TradeAdMetadataProps {
   status: string;
@@ -22,6 +22,8 @@ const getStatusColor = (status: string) => {
 };
 
 export default function TradeAdMetadata({ status, created_at, expires }: TradeAdMetadataProps) {
+  const createdRelative = useRealTimeRelativeDate(created_at);
+  const expiresRelative = useRealTimeRelativeDate(expires);
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
       <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(status)}`}>
@@ -29,11 +31,11 @@ export default function TradeAdMetadata({ status, created_at, expires }: TradeAd
       </span>
       <div className="flex items-center gap-2 text-sm text-muted">
         <ClockIcon className="w-4 h-4 text-[#5865F2]" />
-        <span>Created {formatRelativeDate(created_at)}</span>
+        <span>Created {createdRelative}</span>
         {expires && (
           <>
             <span className="text-[#5865F2]">•</span>
-            <span>Expires {formatRelativeDate(expires)}</span>
+            <span>Expires {expiresRelative}</span>
           </>
         )}
       </div>
