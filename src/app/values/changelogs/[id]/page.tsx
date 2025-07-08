@@ -552,15 +552,15 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
             </div>
             {/* Ad Section */}
             {currentUserPremiumType === 0 && (
-              <div className="flex-shrink-0 w-full lg:w-[350px] xl:w-[400px] 2xl:w-[420px] max-w-full mt-4 lg:mt-0">
-                <div className="w-full bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center min-h-[180px]">
-                  <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+              <div className="flex-shrink-0 w-full max-w-[336px] mt-4 lg:mt-0">
+                <div className="w-full h-[280px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
+                  <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
                     Advertisement
                   </span>
                   <DisplayAd
                     adSlot="4408799044"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%" }}
+                    adFormat="rectangle"
+                    style={{ display: 'block', width: '100%', height: '280px' }}
                   />
                 </div>
               </div>

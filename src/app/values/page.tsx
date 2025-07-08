@@ -43,7 +43,7 @@ export default function ValuesPage() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const itemsPerPage = 23;
+  const itemsPerPage = 24;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
 
@@ -185,12 +185,10 @@ export default function ValuesPage() {
     setPage(value);
   };
 
-  // Show one more item for premium users since ads are hidden
-  const adjustedItemsPerPage = currentUserPremiumType === 0 ? itemsPerPage : itemsPerPage + 1;
-  const adjustedIndexOfLastItem = page * adjustedItemsPerPage;
-  const adjustedIndexOfFirstItem = adjustedIndexOfLastItem - adjustedItemsPerPage;
+  const adjustedIndexOfLastItem = page * itemsPerPage;
+  const adjustedIndexOfFirstItem = adjustedIndexOfLastItem - itemsPerPage;
   const displayedItems = sortedItems.slice(adjustedIndexOfFirstItem, adjustedIndexOfLastItem);
-  const totalPages = Math.ceil(sortedItems.length / adjustedItemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -241,59 +239,6 @@ export default function ValuesPage() {
     
     return message;
   };
-
-  // Helper to interleave ads into the grid
-  const adCard = currentUserPremiumType === 0 ? (
-    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
-      <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-        Advertisement
-      </span>
-      <DisplayAd
-        adSlot="3201343366"
-        adFormat="fluid"
-        layoutKey="-62+ck+1k-2e+c8"
-        style={{ display: 'block', width: '100%' }}
-      />
-    </div>
-  ) : null;
-
-  // Interleave ad at a random position within the current page
-  const itemsWithAds = [];
-  if (displayedItems.length > 0) {
-    // Pick a random index to insert the ad (from 0 to displayedItems.length)
-    const adIndex = Math.floor(Math.random() * (displayedItems.length + 1));
-    for (let i = 0; i < displayedItems.length; i++) {
-      if (i === adIndex && adCard) {
-        itemsWithAds.push(
-          <div key={`ad-${i}`} className="flex justify-center w-full">
-            {adCard}
-          </div>
-        );
-      }
-      itemsWithAds.push(
-        <ItemCard
-          key={displayedItems[i].id}
-          item={displayedItems[i]}
-          isFavorited={favorites.includes(displayedItems[i].id)}
-          onFavoriteChange={(fav) => {
-            setFavorites((prev) =>
-              fav
-                ? [...prev, displayedItems[i].id]
-                : prev.filter((id) => id !== displayedItems[i].id)
-            );
-          }}
-        />
-      );
-    }
-    // If adIndex is at the end, push ad after all items
-    if (adIndex === displayedItems.length && adCard) {
-      itemsWithAds.push(
-        <div key={`ad-end`} className="flex justify-center w-full">
-          {adCard}
-        </div>
-      );
-    }
-  }
 
   return (
     <main className="min-h-screen bg-[#2E3944] mb-8">
@@ -373,108 +318,123 @@ export default function ValuesPage() {
             onValueSort={setValueSort}
           />
 
-          <h3 className="mb-2 text-xl font-semibold text-muted">
-            Trader Notes
-          </h3>
-          <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
-            <li>This is NOT an official list, it is 100% community based</li>
-            <li>
-              Some values may be outdated but we do our best to make sure it&apos;s
-              accurate as possible
-            </li>
-            <li>
-              Please don&apos;t 100% rely on the value list, use your own judgment as
-              well
-            </li>
-          </ul>
-
-          <h3 className="mb-2 text-xl font-semibold text-muted">
-            Demand Levels Guide
-          </h3>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {demandOrder.map((demand) => {
-              const getDemandColor = (demand: string): string => {
-                switch(demand) {
-                  case 'Close to none':
-                    return 'bg-gray-500/80';
-                  case 'Very Low':
-                    return 'bg-red-500/80';
-                  case 'Low':
-                    return 'bg-orange-500/80';
-                  case 'Medium':
-                    return 'bg-yellow-500/80';
-                  case 'Decent':
-                    return 'bg-green-500/80';
-                  case 'High':
-                    return 'bg-blue-500/80';
-                  case 'Very High':
-                    return 'bg-purple-500/80';
-                  case 'Extremely High':
-                    return 'bg-pink-500/80';
-                  default:
-                    return 'bg-gray-500/80';
-                }
-              };
-
-              const getDemandValue = (demand: string): string => {
-                switch(demand) {
-                  case 'Close to none':
-                    return 'demand-close-to-none';
-                  case 'Very Low':
-                    return 'demand-very-low';
-                  case 'Low':
-                    return 'demand-low';
-                  case 'Medium':
-                    return 'demand-medium';
-                  case 'Decent':
-                    return 'demand-decent';
-                  case 'High':
-                    return 'demand-high';
-                  case 'Very High':
-                    return 'demand-very-high';
-                  case 'Extremely High':
-                    return 'demand-extremely-high';
-                  default:
-                    return 'demand-close-to-none';
-                }
-              };
-
-              return (
-                <button
-                  key={demand}
-                  onClick={() => {
-                    const demandValue = getDemandValue(demand);
-                    // If clicking the same demand level, reset to default sort
-                    if (valueSort === demandValue) {
-                      setValueSort("cash-desc");
-                      localStorage.setItem('valuesValueSort', "cash-desc");
-                    } else {
-                      setValueSort(demandValue as ValueSort);
-                      localStorage.setItem('valuesValueSort', demandValue);
+          {/* Trader Notes and Demand Levels Guide with Ad beside */}
+          <div className="mb-8 flex flex-col lg:flex-row gap-6 items-stretch">
+            <div className="flex-1 min-w-0">
+              <h3 className="mb-2 text-xl font-semibold text-muted">
+                Trader Notes
+              </h3>
+              <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
+                <li>This is NOT an official list, it is 100% community based</li>
+                <li>
+                  Some values may be outdated but we do our best to make sure it&apos;s
+                  accurate as possible
+                </li>
+                <li>
+                  Please don&apos;t 100% rely on the value list, use your own judgment as
+                  well
+                </li>
+              </ul>
+              <h3 className="mb-2 text-xl font-semibold text-muted">
+                Demand Levels Guide
+              </h3>
+              <div className="mb-4 flex flex-wrap gap-2">
+                {demandOrder.map((demand) => {
+                  const getDemandColor = (demand: string): string => {
+                    switch(demand) {
+                      case 'Close to none':
+                        return 'bg-gray-500/80';
+                      case 'Very Low':
+                        return 'bg-orange-500/80';
+                      case 'Low':
+                        return 'bg-orange-400/80';
+                      case 'Medium':
+                        return 'bg-yellow-500/80';
+                      case 'Decent':
+                        return 'bg-green-500/80';
+                      case 'High':
+                        return 'bg-blue-500/80';
+                      case 'Very High':
+                        return 'bg-purple-500/80';
+                      case 'Extremely High':
+                        return 'bg-pink-500/80';
+                      default:
+                        return 'bg-gray-500/80';
                     }
-                    if (searchSectionRef.current) {
-                      const headerOffset = 80;
-                      const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.scrollY - headerOffset;
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
+                  };
+                  const getDemandValue = (demand: string): string => {
+                    switch(demand) {
+                      case 'Close to none':
+                        return 'demand-close-to-none';
+                      case 'Very Low':
+                        return 'demand-very-low';
+                      case 'Low':
+                        return 'demand-low';
+                      case 'Medium':
+                        return 'demand-medium';
+                      case 'Decent':
+                        return 'demand-decent';
+                      case 'High':
+                        return 'demand-high';
+                      case 'Very High':
+                        return 'demand-very-high';
+                      case 'Extremely High':
+                        return 'demand-extremely-high';
+                      default:
+                        return 'demand-close-to-none';
                     }
-                  }}
-                  className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
-                    valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
-                  }`}
-                >
-                  <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
-                  <span className="text-sm text-white">{demand}</span>
-                </button>
-              );
-            })}
+                  };
+                  return (
+                    <button
+                      key={demand}
+                      onClick={() => {
+                        const demandValue = getDemandValue(demand);
+                        if (valueSort === demandValue) {
+                          setValueSort("cash-desc");
+                          localStorage.setItem('valuesValueSort', "cash-desc");
+                        } else {
+                          setValueSort(demandValue as ValueSort);
+                          localStorage.setItem('valuesValueSort', demandValue);
+                        }
+                        if (searchSectionRef.current) {
+                          const headerOffset = 80;
+                          const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
+                          const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                          window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }}
+                      className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
+                        valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
+                      }`}
+                    >
+                      <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
+                      <span className="text-sm text-white">{demand}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mb-4 text-sm text-muted">
+                <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.
+              </p>
+            </div>
+            {currentUserPremiumType === 0 && (
+              <div className="flex-shrink-0 flex justify-center items-start w-full lg:w-[336px]">
+                <div className="w-full max-w-[336px] h-[280px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
+                  <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
+                    Advertisement
+                  </span>
+                  <DisplayAd
+                    adSlot="3201343366"
+                    adFormat="rectangle"
+                    style={{ display: 'block', width: '100%', height: '280px' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          <p className="mb-4 text-sm text-muted">
-            <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.
-          </p>
         </div>
 
         <div ref={searchSectionRef} className="mb-8 flex flex-col gap-4">
@@ -741,7 +701,7 @@ export default function ValuesPage() {
         <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
           {loading ? (
             [...Array(23)].map((_, i) => <ItemCardSkeleton key={i} />)
-          ) : itemsWithAds.length === 0 ? (
+          ) : displayedItems.length === 0 ? (
             <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
               <p className="text-lg text-muted">
                 {getNoItemsMessage()}
@@ -758,7 +718,20 @@ export default function ValuesPage() {
               </button>
             </div>
           ) : (
-            itemsWithAds
+            displayedItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                isFavorited={favorites.includes(item.id)}
+                onFavoriteChange={(fav) => {
+                  setFavorites((prev) =>
+                    fav
+                      ? [...prev, item.id]
+                      : prev.filter((id) => id !== item.id)
+                  );
+                }}
+              />
+            ))
           )}
         </div>
 

@@ -44,7 +44,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [showNonTradable, setShowNonTradable] = useState(false);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
-  const ITEMS_PER_PAGE = 17;
+  const ITEMS_PER_PAGE = 18;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Set selectLoaded to true after mount to ensure client-side rendering
@@ -170,193 +170,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     }
   });
 
-  // Show one more item for premium users since ads are hidden
-  const adjustedItemsPerPage = currentUserPremiumType === 0 ? ITEMS_PER_PAGE : ITEMS_PER_PAGE + 1;
-  const adjustedStartIndex = (page - 1) * adjustedItemsPerPage;
-  const paginatedItems = filteredItems.slice(adjustedStartIndex, adjustedStartIndex + adjustedItemsPerPage);
-  const adjustedTotalPages = Math.ceil(filteredItems.length / adjustedItemsPerPage);
-
-  // Helper to interleave ads into the grid
-  const adCard = currentUserPremiumType === 0 ? (
-    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
-      <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-        Advertisement
-      </span>
-      <DisplayAd
-        adSlot="2707870412"
-        adFormat="fluid"
-        layoutKey="-6t+ed+2i-1n-4w"
-        style={{ display: 'block', width: '100%' }}
-      />
-    </div>
-  ) : null;
-
-  // Interleave ad at a random position within the current page
-  const itemsWithAds = [];
-  if (paginatedItems.length > 0) {
-    // Pick a random index to insert the ad (from 0 to paginatedItems.length)
-    const adIndex = Math.floor(Math.random() * (paginatedItems.length + 1));
-    for (let i = 0; i < paginatedItems.length; i++) {
-      const item = paginatedItems[i];
-      if (i === adIndex && adCard) {
-        itemsWithAds.push(
-          <div key={`ad-${i}`} className="flex justify-center w-full">
-            {adCard}
-          </div>
-        );
-      }
-      itemsWithAds.push(
-        <div
-          key={item.id}
-          className={`p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
-            item.tradable === 1 
-              ? 'bg-[#2E3944] hover:bg-[#37424D]'
-              : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
-          }`}
-        >
-          <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2">
-            {isVideoItem(item.name) ? (
-              <video
-                src={getVideoPath(item.type, item.name)}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-                loop
-                autoPlay
-              />
-            ) : (
-              <Image
-                src={getItemImagePath(item.type, item.name, true)}
-                alt={item.name}
-                className="w-full h-full object-cover"
-                onError={handleImageError}
-                unoptimized
-                fill
-              />
-            )}
-            <div className="absolute top-2 right-2 z-5">
-              <CategoryIconBadge
-                type={item.type}
-                isLimited={item.is_limited === 1}
-                isSeasonal={item.is_seasonal === 1}
-                hasChildren={!!item.children?.length}
-                showCategoryForVariants={true}
-                className="h-4 w-4"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col flex-grow">
-            <div className="space-y-1.5">
-              <p className="text-muted text-sm font-medium truncate">{item.name}</p>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span 
-                  className="px-2 py-0.5 text-xs rounded-full text-white"
-                  style={{ backgroundColor: getItemTypeColor(item.type) }}
-                >
-                  {item.type}
-                </span>
-                {item.is_limited === 1 && (
-                  <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                    Limited
-                  </span>
-                )}
-                {item.tradable !== 1 && (
-                  <span className="px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">
-                    Not Tradable
-                  </span>
-                )}
-              </div>
-              {item.tradable === 1 && (
-                <>
-                  <div className="text-xs text-muted space-y-1">
-                    <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                      (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
-                      item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
-                      formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
-                      : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
-                    <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                      (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
-                      item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
-                      formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
-                      : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
-                    {item.demand && (
-                      <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                        item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
-                        : item.demand}</div>
-                    )}
-                  </div>
-                  {item.children && item.children.length > 0 && (
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
-                          dropdown?.classList.toggle('hidden');
-                        }}
-                        className="w-full flex items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
-                      >
-                        {selectedVariants[item.id] || '2025'}
-                        <ChevronDownIcon className="h-4 w-4" />
-                      </button>
-                      <div className="absolute z-10 mt-1 w-full hidden rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleVariantSelect(item.id, '2025');
-                            (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                          }}
-                          className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
-                        >
-                          2025
-                        </button>
-                        {item.children?.map((child) => (
-                          <button
-                            key={child.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVariantSelect(item.id, child.sub_name);
-                              (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
-                          >
-                            {child.sub_name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-            {item.tradable === 1 && (
-              <div className="flex gap-2 mt-auto pt-2">
-                <button
-                  onClick={() => handleAddItem(item, 'offering')}
-                  className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                >
-                  Offer
-                </button>
-                <button
-                  onClick={() => handleAddItem(item, 'requesting')}
-                  className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                >
-                  Request
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-    // If adIndex is at the end, push ad after all items
-    if (adIndex === paginatedItems.length && adCard) {
-      itemsWithAds.push(
-        <div key={`ad-end`} className="flex justify-center w-full">
-          {adCard}
-        </div>
-      );
-    }
-  }
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -410,6 +226,22 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-muted font-medium">Tradable Items</h3>
         </div>
+
+        {/* Ad Placement: Above the grid, only for non-premium users */}
+        {currentUserPremiumType === 0 && (
+          <div className="flex justify-center w-full mb-6">
+            <div className="w-full max-w-[728px] h-[90px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
+              <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
+                Advertisement
+              </span>
+              <DisplayAd
+                adSlot="2707870412"
+                adFormat="leaderboard"
+                style={{ display: 'block', width: '100%', height: '90px' }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="mb-4 relative">
           <div className="relative">
@@ -673,55 +505,175 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           </div>
         ) : (
           <>
-            {filteredItems.length === 0 ? (
-              <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
-                <p className="text-lg text-muted">
-                  {searchQuery 
-                    ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                    : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {paginatedItems.length === 0 ? (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-muted">
+                    {searchQuery 
+                      ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+                      : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
                   }
-                </p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilterSort("name-all-items");
-                    setValueSort("cash-desc");
-                  }}
-                  className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
-                >
-                  Clear All Filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                {itemsWithAds.length === 0 ? (
-                  <div className="col-span-full text-center py-8">
-                    <p className="text-muted">
-                      {searchQuery 
-                        ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                        : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                      }
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSearchQuery('');
-                        setFilterSort("name-all-items");
-                        setValueSort("cash-desc");
-                      }}
-                      className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
-                    >
-                      Clear All Filters
-                    </button>
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilterSort("name-all-items");
+                      setValueSort("cash-desc");
+                    }}
+                    className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              ) : (
+                paginatedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
+                      item.tradable === 1 
+                        ? 'bg-[#2E3944] hover:bg-[#37424D]'
+                        : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
+                    }`}
+                  >
+                    <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2">
+                      {isVideoItem(item.name) ? (
+                        <video
+                          src={getVideoPath(item.type, item.name)}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          loop
+                          autoPlay
+                        />
+                      ) : (
+                        <Image
+                          src={getItemImagePath(item.type, item.name, true)}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={handleImageError}
+                          unoptimized
+                          fill
+                        />
+                      )}
+                      <div className="absolute top-2 right-2 z-5">
+                        <CategoryIconBadge
+                          type={item.type}
+                          isLimited={item.is_limited === 1}
+                          isSeasonal={item.is_seasonal === 1}
+                          hasChildren={!!item.children?.length}
+                          showCategoryForVariants={true}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col flex-grow">
+                      <div className="space-y-1.5">
+                        <p className="text-muted text-sm font-medium truncate">{item.name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span 
+                            className="px-2 py-0.5 text-xs rounded-full text-white"
+                            style={{ backgroundColor: getItemTypeColor(item.type) }}
+                          >
+                            {item.type}
+                          </span>
+                          {item.is_limited === 1 && (
+                            <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                              Limited
+                            </span>
+                          )}
+                          {item.tradable !== 1 && (
+                            <span className="px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">
+                              Not Tradable
+                            </span>
+                          )}
+                        </div>
+                        {item.tradable === 1 && (
+                          <>
+                            <div className="text-xs text-muted space-y-1">
+                              <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
+                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
+                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
+                              <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
+                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
+                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
+                              {item.demand && (
+                                <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                                  item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
+                                  : item.demand}</div>
+                              )}
+                            </div>
+                            {item.children && item.children.length > 0 && (
+                              <div className="relative">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
+                                    dropdown?.classList.toggle('hidden');
+                                  }}
+                                  className="w-full flex items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
+                                >
+                                  {selectedVariants[item.id] || '2025'}
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                </button>
+                                <div className="absolute z-10 mt-1 w-full hidden rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleVariantSelect(item.id, '2025');
+                                      (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
+                                  >
+                                    2025
+                                  </button>
+                                  {item.children?.map((child) => (
+                                    <button
+                                      key={child.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleVariantSelect(item.id, child.sub_name);
+                                        (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
+                                      }}
+                                      className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
+                                    >
+                                      {child.sub_name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {item.tradable === 1 && (
+                        <div className="flex gap-2 mt-auto pt-2">
+                          <button
+                            onClick={() => handleAddItem(item, 'offering')}
+                            className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                          >
+                            Offer
+                          </button>
+                          <button
+                            onClick={() => handleAddItem(item, 'requesting')}
+                            className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                          >
+                            Request
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  itemsWithAds
-                )}
-              </div>
-            )}
-            {!loading && adjustedTotalPages > 1 && filteredItems.length > 0 && (
+                ))
+              )}
+            </div>
+            {!loading && totalPages > 1 && filteredItems.length > 0 && (
               <div className="flex justify-center mt-4">
                 <Pagination 
-                  count={adjustedTotalPages} 
+                  count={totalPages} 
                   page={page} 
                   onChange={handlePageChange}
                   sx={{
