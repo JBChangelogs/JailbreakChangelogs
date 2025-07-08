@@ -178,39 +178,16 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   // Helper to interleave ads into the grid
   const adCard = currentUserPremiumType === 0 ? (
-    <div className="p-2 rounded-lg transition-colors text-left w-full flex flex-col bg-[#2E3944] hover:bg-[#37424D]">
-      <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2 bg-[#1a2127] flex items-center justify-center">
-        <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-          Advertisement
-        </span>
-        <DisplayAd
-          adSlot="2707870412"
-          adFormat="fluid"
-          layoutKey="-6t+ed+2i-1n-4w"
-          style={{ display: 'block', width: '100%', height: '100%' }}
-        />
-      </div>
-      <div className="flex flex-col flex-grow">
-        <div className="space-y-1.5">
-          <p className="text-muted text-sm font-medium truncate">Advertisement</p>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="px-2 py-0.5 text-xs rounded-full bg-blue-500/80 text-white">
-              Sponsored
-            </span>
-          </div>
-          <div className="text-xs text-muted space-y-1">
-            <div>Sponsored content</div>
-          </div>
-        </div>
-        <div className="flex gap-2 mt-auto pt-2">
-          <div className="flex-1 py-1 px-2 text-xs rounded-md bg-[#37424D] text-muted text-center">
-            Sponsored
-          </div>
-          <div className="flex-1 py-1 px-2 text-xs rounded-md bg-[#37424D] text-muted text-center">
-            Content
-          </div>
-        </div>
-      </div>
+    <div className="w-full max-w-[350px] sm:max-w-[400px] md:max-w-[320px] lg:max-w-[350px] xl:max-w-[400px] 2xl:max-w-[420px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
+      <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+        Advertisement
+      </span>
+      <DisplayAd
+        adSlot="2707870412"
+        adFormat="fluid"
+        layoutKey="-6t+ed+2i-1n-4w"
+        style={{ display: 'block', width: '100%' }}
+      />
     </div>
   ) : null;
 
