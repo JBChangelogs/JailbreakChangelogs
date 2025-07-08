@@ -71,6 +71,7 @@ interface Server {
   owner: string;
   rules: string;
   expires: string;
+  created_at: string;
 }
 
 export default function UserProfilePage() {

@@ -10,6 +10,7 @@ interface Server {
   owner: string;
   rules: string;
   expires: string;
+  created_at: string;
 }
 
 interface PrivateServersTabProps {
@@ -81,9 +82,9 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({ servers, isOwnPro
               </div>
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center space-x-2">
-                  <ClockIcon className="h-5 w-5 text-[#FFFFFF]" />
+                  <ClockIcon className="h-5 w-5 text-[#FFFFFF] flex-shrink-0" />
                   <span className="text-muted text-sm sm:text-base">
-                    Expires: {server.expires === "Never" ? "Never" : formatProfileDate(server.expires)}
+                    Created: {formatProfileDate(server.created_at)} • Expires: {server.expires === "Never" ? "Never" : formatProfileDate(server.expires)}
                   </span>
                 </div>
                 <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-3 sm:p-4">

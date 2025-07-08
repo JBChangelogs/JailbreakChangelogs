@@ -11,7 +11,7 @@ interface SupportBannerProps {
 const SupportBanner: React.FC<SupportBannerProps> = ({ onDismiss }) => {
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-[#5865F2] to-[#4752C4] border-t border-[#4752C4] p-4 z-50"
+      className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-[#5865F2] to-[#4752C4] border-t border-[#4752C4] p-4 z-[2001]"
       style={{
         boxShadow: '0 -4px 6px rgba(0, 0, 0, 0.2)'
       }}

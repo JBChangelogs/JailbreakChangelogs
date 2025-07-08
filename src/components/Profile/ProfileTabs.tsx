@@ -58,6 +58,7 @@ interface Server {
   owner: string;
   rules: string;
   expires: string;
+  created_at: string;
 }
 
 interface ProfileTabsProps {

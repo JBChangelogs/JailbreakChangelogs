@@ -10,6 +10,7 @@ import { Skeleton, Tooltip, Pagination } from '@mui/material';
 import { UserDetailsTooltip } from '@/components/Users/UserDetailsTooltip';
 import type { UserData } from '@/types/auth';
 import { CustomConfirmationModal } from '@/components/Modals/CustomConfirmationModal';
+import { UserAvatar } from '@/utils/avatar';
 
 interface Server {
   id: number;
@@ -17,6 +18,7 @@ interface Server {
   owner: string;
   rules: string;
   expires: string;
+  created_at: string;
 }
 
 const ServerList: React.FC = () => {
@@ -370,7 +372,20 @@ const ServerList: React.FC = () => {
 
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-[#FFFFFF]" />
+                <UserIcon className="h-5 w-5 text-[#FFFFFF] flex-shrink-0" />
+                {userData[server.owner] && (
+                  <UserAvatar
+                    userId={userData[server.owner].id}
+                    avatarHash={userData[server.owner].avatar}
+                    username={userData[server.owner].username}
+                    size={8}
+                    accent_color={userData[server.owner].accent_color}
+                    custom_avatar={userData[server.owner].custom_avatar}
+                    showBadge={false}
+                    settings={userData[server.owner].settings}
+                    premiumType={userData[server.owner].premiumtype}
+                  />
+                )}
                 <span className="text-muted text-sm sm:text-base">
                   Owner: {userData[server.owner] ? (
                     <Tooltip
@@ -406,7 +421,7 @@ const ServerList: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <ClockIcon className="h-5 w-5 text-[#FFFFFF]" />
                 <span className="text-muted text-sm sm:text-base">
-                  Expires: {server.expires === "Never" ? "Never" : formatProfileDate(server.expires)}
+                  Created: {formatProfileDate(server.created_at)} • Expires: {server.expires === "Never" ? "Never" : formatProfileDate(server.expires)}
                 </span>
               </div>
 
