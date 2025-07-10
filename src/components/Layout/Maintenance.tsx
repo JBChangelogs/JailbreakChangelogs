@@ -25,7 +25,7 @@ export default function Maintenance() {
           
           <div className="space-y-4">
             <p className="text-[#f3f4f6] text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              We're making some improvements to bring you a better experience! 🚀
+              We&apos;re making some improvements to bring you a better experience! 🚀
             </p>
             
             <p className="text-[#f3f4f6] text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
