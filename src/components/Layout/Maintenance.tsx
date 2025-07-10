@@ -20,20 +20,16 @@ export default function Maintenance() {
           />
 
           <h1 className="text-white font-extrabold mb-4 text-4xl">
-            We&apos;ll Be Back Soon
+            Under Maintenance
           </h1>
           
           <div className="space-y-4">
-            <h2 className="text-[#f3f4f6] text-2xl font-bold">
-              Maintenance in Progress
-            </h2>
-            
-            <p className="text-[#f3f4f6] text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              Oops! We&apos;re doing some quick maintenance.
+            <p className="text-[#f3f4f6] text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+              We're making some improvements to bring you a better experience! 🚀
             </p>
             
             <p className="text-[#f3f4f6] text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              Be right back! 🚀
+              Check back soon.
             </p>
           </div>
 
@@ -43,7 +39,7 @@ export default function Maintenance() {
             </h3>
             
             <p className="text-[#f3f4f6] text-base font-medium mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              Check our socials for updates
+              Follow us for updates and announcements
             </p>
             
             <div className="flex justify-center gap-4 mb-6">
