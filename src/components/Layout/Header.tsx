@@ -37,6 +37,7 @@ import { UserData } from '../../types/auth';
 import { UserAvatar } from '@/utils/avatar';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 import { PROD_API_URL } from '@/services/api';
+import { useRef } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -55,6 +56,9 @@ export default function Header() {
   const [navMenuCloseTimeout, setNavMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [communityMenuCloseTimeout, setCommunityMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   useEscapeLogin();
+
+  const navMenuButtonRef = useRef<HTMLDivElement | null>(null);
+  const communityMenuButtonRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -215,7 +219,6 @@ export default function Header() {
           <ListItem 
             component={Link}
             href={`/users/${userData?.id}`}
-            prefetch={false}
             onClick={handleDrawerToggle}
             sx={{ 
               cursor: 'pointer',
@@ -260,7 +263,6 @@ export default function Header() {
           <ListItem 
             component={Link}
             href="/settings"
-            prefetch={false}
             onClick={handleDrawerToggle}
             sx={{ 
               cursor: 'pointer',
@@ -349,19 +351,19 @@ export default function Header() {
         </Typography>
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/values" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value List" />
       </ListItem>
-      <ListItem component={Link} href="/values/changelogs" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values/changelogs" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value Changelogs" />
       </ListItem>
-      <ListItem component={Link} href="/values/calculator" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/values/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Value Calculator" />
       </ListItem>
-      <ListItem component={Link} href="/dupes/calculator" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Dupe Calculator" />
       </ListItem>
-      <ListItem component={Link} href="/trading" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Trade Ads" />
       </ListItem>
       <ListItem>
@@ -378,19 +380,19 @@ export default function Header() {
         </Typography>
       </ListItem>
       <Divider sx={{ borderColor: '#2E3944' }} />
-      <ListItem component={Link} href="/users" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="User Search" />
       </ListItem>
-      <ListItem component={Link} href="/servers" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Private Servers" />
       </ListItem>
-      <ListItem component={Link} href="/bot" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/bot" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Discord Bot" />
       </ListItem>
-      <ListItem component={Link} href="/faq" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/faq" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="FAQ" />
       </ListItem>
-      <ListItem component={Link} href="/contributors" prefetch={false} onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+      <ListItem component={Link} href="/contributors" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Contributors" />
       </ListItem>
     </List>
@@ -410,7 +412,7 @@ export default function Header() {
       >
         <Toolbar className="flex justify-between items-center">
           <Box className="flex items-center">
-            <Link href="/" prefetch={false} style={{ display: 'block' }}>
+            <Link href="/" style={{ display: 'block' }}>
               <Image
                 src={
                   isCollabPage
@@ -438,13 +440,15 @@ export default function Header() {
                   href="/changelogs"
                   sx={{
                     color: '#D3D9D4',
+                    borderRadius: '8px',
                     '&:hover': {
                       color: '#FFFFFF',
-                      backgroundColor: 'transparent'
+                      backgroundColor: '#5865F2',
+                      borderRadius: '8px',
                     }
                   }}
                 >
-                  <Typography variant="button">Changelogs</Typography>
+                  <Typography variant="button" sx={{ fontWeight: 700 }}>Changelogs</Typography>
                 </Button>
                 
                 <Button
@@ -452,209 +456,115 @@ export default function Header() {
                   href="/seasons"
                   sx={{
                     color: '#D3D9D4',
+                    borderRadius: '8px',
                     '&:hover': {
                       color: '#FFFFFF',
-                      backgroundColor: 'transparent'
+                      backgroundColor: '#5865F2',
+                      borderRadius: '8px',
                     }
                   }}
                 >
-                  <Typography variant="button">Seasons</Typography>
+                  <Typography variant="button" sx={{ fontWeight: 700 }}>Seasons</Typography>
                 </Button>
                 
+                {/* Values Dropdown */}
                 <Box
+                  sx={{ position: 'relative', display: 'inline-block' }}
                   onMouseEnter={handleNavMenuOpen}
                   onMouseLeave={handleNavMenuClose}
-                  sx={{ position: 'relative' }}
+                  ref={navMenuButtonRef}
                 >
                   <Button
                     type="button"
                     sx={{
-                      color: '#D3D9D4',
+                      color: navMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                      borderRadius: '8px',
+                      backgroundColor: navMenuOpen ? '#5865F2' : 'transparent',
                       '&:hover': {
                         color: '#FFFFFF',
-                        backgroundColor: 'transparent'
+                        backgroundColor: '#5865F2',
+                        borderRadius: '8px',
                       }
                     }}
                   >
-                    <Typography variant="button">Values</Typography>
+                    <Typography variant="button" sx={{ fontWeight: 700, color: navMenuOpen ? '#FFFFFF' : undefined }}>Values</Typography>
                     <KeyboardArrowDownIcon 
                       sx={{ 
                         ml: 0.5,
                         fontSize: '1.2rem',
                         transition: 'transform 0.2s',
-                        transform: navMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                        transform: navMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        color: navMenuOpen ? '#FFFFFF' : '#D3D9D4',
                       }} 
                     />
                   </Button>
-
-                  <Menu
-                    anchorEl={navMenuAnchorEl}
-                    open={navMenuOpen}
-                    onClose={handleNavMenuClose}
-                    slotProps={{
-                      list: {
-                        'aria-labelledby': 'nav-menu-button',
-                        onMouseLeave: handleNavMenuClose
-                      }
-                    }}
-                    sx={{
-                      pointerEvents: 'none',
-                      '& .MuiPaper-root': {
-                        pointerEvents: 'auto',
-                        backgroundColor: '#212A31',
-                        color: '#D3D9D4',
-                        mt: 1,
-                        '& .MuiMenuItem-root': {
-                          '&:hover': {
-                            backgroundColor: '#2E3944',
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem 
-                      component={Link} 
-                      href="/values"
-                      prefetch={false}
-                      onClick={handleNavMenuClose}
+                  {/* Custom Dropdown for Values - now a direct child */}
+                  {navMenuOpen && (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50 transition-all duration-200 ease-out"
+                      style={{
+                        top: '100%',
+                      }}
                     >
-                      Value List
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/values/changelogs" 
-                      prefetch={false}
-                      onClick={handleNavMenuClose}
-                    >
-                      Value Changelogs
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/values/calculator"
-                      prefetch={false}
-                      onClick={handleNavMenuClose}
-                    >
-                      Value Calculator
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/dupes/calculator"
-                      prefetch={false}
-                      onClick={handleNavMenuClose}
-                    >
-                      Dupe Calculator
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/trading"
-                      prefetch={false}
-                      onClick={handleNavMenuClose}
-                    >
-                      Trade Ads
-                    </MenuItem>
-                  </Menu>
+                      <div className="flex flex-col py-3 px-2 gap-1">
+                        <Link href="/values" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value List</Link>
+                        <Link href="/values/changelogs" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value Changelogs</Link>
+                        <Link href="/values/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value Calculator</Link>
+                        <Link href="/dupes/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Dupe Calculator</Link>
+                        <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Trade Ads</Link>
+                      </div>
+                    </div>
+                  )}
                 </Box>
 
+                {/* Community Dropdown */}
                 <Box
+                  sx={{ position: 'relative', display: 'inline-block' }}
                   onMouseEnter={handleCommunityMenuOpen}
                   onMouseLeave={handleCommunityMenuClose}
-                  sx={{ position: 'relative' }}
+                  ref={communityMenuButtonRef}
                 >
                   <Button
                     type="button"
                     sx={{
-                      color: '#D3D9D4',
+                      color: communityMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                      borderRadius: '8px',
+                      backgroundColor: communityMenuOpen ? '#5865F2' : 'transparent',
                       '&:hover': {
                         color: '#FFFFFF',
-                        backgroundColor: 'transparent'
+                        backgroundColor: '#5865F2',
+                        borderRadius: '8px',
                       }
                     }}
                   >
-                    <Typography variant="button">Community</Typography>
+                    <Typography variant="button" sx={{ fontWeight: 700, color: communityMenuOpen ? '#FFFFFF' : undefined }}>Community</Typography>
                     <KeyboardArrowDownIcon 
                       sx={{ 
                         ml: 0.5,
                         fontSize: '1.2rem',
                         transition: 'transform 0.2s',
-                        transform: communityMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                        transform: communityMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        color: communityMenuOpen ? '#FFFFFF' : '#D3D9D4',
                       }} 
                     />
                   </Button>
-
-                  <Menu
-                    anchorEl={communityMenuAnchorEl}
-                    open={communityMenuOpen}
-                    onClose={handleCommunityMenuClose}
-                    slotProps={{
-                      list: {
-                        'aria-labelledby': 'community-menu-button',
-                        onMouseLeave: handleCommunityMenuClose
-                      }
-                    }}
-                    sx={{
-                      pointerEvents: 'none',
-                      '& .MuiPaper-root': {
-                        pointerEvents: 'auto',
-                        backgroundColor: '#212A31',
-                        color: '#D3D9D4',
-                        mt: 1,
-                        '& .MuiMenuItem-root': {
-                          '&:hover': {
-                            backgroundColor: '#2E3944',
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem 
-                      component={Link} 
-                      href="/users"
-                      prefetch={false}
-                      onClick={handleCommunityMenuClose}
+                  {/* Custom Dropdown for Community - now a direct child */}
+                  {communityMenuOpen && (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50 transition-all duration-200 ease-out"
+                      style={{
+                        top: '100%',
+                      }}
                     >
-                      <Typography variant="body1">User Search</Typography>
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/servers"
-                      prefetch={false}
-                      onClick={handleCommunityMenuClose}
-                    >
-                      <Typography variant="body1">Private Servers</Typography>
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/bot"
-                      prefetch={false}
-                      onClick={handleCommunityMenuClose}
-                    >
-                      <Typography variant="body1">Discord Bot</Typography>
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/faq"
-                      prefetch={false}
-                      onClick={handleCommunityMenuClose}
-                    >
-                      <Typography variant="body1">FAQ</Typography>
-                    </MenuItem>
-                    <Divider sx={{ borderColor: '#2E3944' }} />
-                    <MenuItem 
-                      component={Link} 
-                      href="/contributors"
-                      prefetch={false}
-                      onClick={handleCommunityMenuClose}
-                    >
-                      <Typography variant="body1">Contributors</Typography>
-                    </MenuItem>
-                  </Menu>
+                      <div className="flex flex-col py-3 px-2 gap-1">
+                        <Link href="/users" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>User Search</Link>
+                        <Link href="/servers" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Private Servers</Link>
+                        <Link href="/bot" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Discord Bot</Link>
+                        <Link href="/faq" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>FAQ</Link>
+                        <Link href="/contributors" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Contributors</Link>
+                      </div>
+                    </div>
+                  )}
                 </Box>
               </Box>
 
@@ -789,7 +699,6 @@ export default function Header() {
                       <MenuItem 
                         component={Link}
                         href={`/users/${userData?.id}`}
-                        prefetch={false}
                         onClick={handleMenuClose}
                       >
                         <UserAvatar
@@ -823,7 +732,6 @@ export default function Header() {
                       <MenuItem 
                         component={Link}
                         href="/settings"
-                        prefetch={false}
                         onClick={handleMenuClose}
                       >
                         <ListItemIcon>
