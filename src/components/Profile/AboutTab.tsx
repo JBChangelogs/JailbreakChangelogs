@@ -23,7 +23,14 @@ interface AboutTabProps {
   onBioUpdate?: (newBio: string) => void;
 }
 
-const MAX_BIO_LENGTH = 200;
+const MAX_BIO_LENGTH = 512;
+
+const cleanBioText = (text: string): string => {
+  return text
+    .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
+    .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
+    .trim();
+};
 
 export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onBioUpdate }: AboutTabProps) {
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -46,7 +53,8 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
       return;
     }
 
-    if (newBio.length > MAX_BIO_LENGTH) {
+    const cleanedBio = cleanBioText(newBio);
+    if (cleanedBio.length > MAX_BIO_LENGTH) {
       toast.error(`Bio cannot exceed ${MAX_BIO_LENGTH} characters`);
       return;
     }
@@ -64,7 +72,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
       const response = await fetch(`${PROD_API_URL}/users/description/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: token, description: newBio })
+        body: JSON.stringify({ user: token, description: cleanedBio })
       });
       
       if (!response.ok) {
@@ -75,7 +83,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
       
       // Update parent component with new bio directly
       if (onBioUpdate) {
-        onBioUpdate(newBio);
+        onBioUpdate(cleanedBio);
       }
       
       // Update local timestamp immediately for real-time display
