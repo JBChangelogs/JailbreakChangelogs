@@ -25,6 +25,7 @@ import { demandOrder } from "@/utils/values";
 import dynamic from 'next/dynamic';
 import DisplayAd from "@/components/Ads/DisplayAd";
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
+import React from "react";
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -719,19 +720,36 @@ export default function ValuesPage() {
               </button>
             </div>
           ) : (
-            displayedItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                isFavorited={favorites.includes(item.id)}
-                onFavoriteChange={(fav) => {
-                  setFavorites((prev) =>
-                    fav
-                      ? [...prev, item.id]
-                      : prev.filter((id) => id !== item.id)
-                  );
-                }}
-              />
+            displayedItems.map((item, index) => (
+              <React.Fragment key={item.id}>
+                <ItemCard
+                  item={item}
+                  isFavorited={favorites.includes(item.id)}
+                  onFavoriteChange={(fav) => {
+                    setFavorites((prev) =>
+                      fav
+                        ? [...prev, item.id]
+                        : prev.filter((id) => id !== item.id)
+                    );
+                  }}
+                />
+                {/* Show in-feed ad after every 12 items */}
+                {premiumStatusLoaded && currentUserPremiumType === 0 && (index + 1) % 12 === 0 && (index + 1) < displayedItems.length && (
+                  <div className="col-span-full my-4">
+                    <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
+                      <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
+                        Advertisement
+                      </span>
+                      <DisplayAd
+                        adSlot="4358721799"
+                        adFormat="fluid"
+                        layoutKey="-62+ck+1k-2e+cb"
+                        style={{ display: 'block', width: '100%', height: '100%' }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
             ))
           )}
         </div>
