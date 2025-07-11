@@ -426,7 +426,7 @@ export default function ValuesPage() {
         <div ref={searchSectionRef} className="mb-8">
           <div className="flex flex-col lg:flex-row gap-6 items-start">
             {/* Left: Search and filter controls vertical stack */}
-            <div className="flex-1 min-w-0 flex flex-col gap-4">
+            <div className="w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4">
               {/* Search input */}
               <div className="relative">
                 <input
@@ -647,14 +647,14 @@ export default function ValuesPage() {
             </div>
             {/* Right: Ad */}
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
-              <div className="w-full max-w-[480px] lg:w-[480px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative mt-4 lg:mt-0">
+              <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0 bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative mt-4 lg:mt-0" style={{ minHeight: '250px' }}>
                 <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
                   Advertisement
                 </span>
                 <DisplayAd
                   adSlot="3201343366"
                   adFormat="auto"
-                  style={{ display: 'block', width: '100%' }}
+                  style={{ display: 'block', width: '100%', height: '100%' }}
                 />
               </div>
             )}

@@ -327,14 +327,14 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
             />
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
               <div className="my-8 flex justify-center">
-                <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
+                <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
                   <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                     Advertisement
                   </span>
                   <DisplayAd
                     adSlot="4408799044"
                     adFormat="auto"
-                    style={{ display: "block", width: "100%" }}
+                    style={{ display: "block", width: "100%", height: "100%" }}
                   />
                 </div>
               </div>
