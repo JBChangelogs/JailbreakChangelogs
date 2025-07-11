@@ -98,13 +98,6 @@ export default async function RootLayout({
             crossOrigin="anonymous"
             strategy="afterInteractive"
           />
-          {/* Umami Analytics */}
-          <Script 
-            defer 
-            src="https://cloud.umami.is/script.js" 
-            data-website-id="48ae24db-9fca-4738-ba09-a39aff8a600d"
-            strategy="afterInteractive"
-          />
         </head>
         <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
           <Maintenance />
@@ -132,13 +125,6 @@ export default async function RootLayout({
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8152532464536367"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-        {/* Umami Analytics */}
-        <Script 
-          defer 
-          src="https://cloud.umami.is/script.js" 
-          data-website-id="48ae24db-9fca-4738-ba09-a39aff8a600d"
           strategy="afterInteractive"
         />
       </head>
