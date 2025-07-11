@@ -417,12 +417,12 @@ export default function UserProfilePage() {
           <div className="bg-[#212A31] rounded-lg shadow-md border border-[#2E3944] overflow-hidden">
             <div className="p-8">
               <div className="flex flex-col items-center justify-center space-y-6">
-                <div className="relative mt-4">
+                <div className="relative -mt-6">
                   <UserAvatar
                     userId={user.id}
                     avatarHash={user.avatar}
                     username={user.username}
-                    size={24}
+                    size={38}
                     accent_color={user.accent_color}
                     custom_avatar={user.custom_avatar}
                     showBadge={false}
@@ -474,7 +474,7 @@ export default function UserProfilePage() {
           <div className="p-3 sm:p-4 md:p-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-6">
               {/* Avatar - smaller on mobile */}
-              <div className="relative -mt-10 md:-mt-18">
+              <div className="relative -mt-14 md:-mt-24">
                 {loading ? (
                   <Skeleton variant="circular" width={96} height={96} sx={{ bgcolor: '#2E3944' }} />
                 ) : (
@@ -482,7 +482,7 @@ export default function UserProfilePage() {
                     userId={user.id}
                     avatarHash={user.avatar}
                     username={user.username}
-                    size={24}
+                    size={38}
                     accent_color={user.accent_color}
                     custom_avatar={user.custom_avatar}
                     isOnline={user.settings?.hide_presence === 1 ? false : user.presence?.status === "Online"}
@@ -676,20 +676,37 @@ export default function UserProfilePage() {
                                 startIcon={<UserPlusIcon className="h-5 w-5" />}
                                 onClick={handleFollow}
                                 disabled={isLoadingFollow}
-                                sx={{
-                                  backgroundColor: isFollowing ? 'transparent' : '#5865F2',
-                                  color: isFollowing ? '#5865F2' : '#D3D9D4',
-                                  borderColor: '#5865F2',
-                                  '&:hover': {
-                                    backgroundColor: isFollowing ? 'rgba(88, 101, 242, 0.1)' : '#4752C4',
-                                    borderColor: '#4752C4',
-                                  },
-                                  '&.Mui-disabled': {
-                                    backgroundColor: 'rgba(88, 101, 242, 0.1)',
-                                    color: '#FFFFFF',
-                                    borderColor: '#2E3944',
-                                  }
-                                }}
+                                sx={
+                                  isFollowing
+                                    ? {
+                                        backgroundColor: '#2E3944',
+                                        color: '#FF5C5C',
+                                        borderColor: '#FF5C5C',
+                                        '&:hover': {
+                                          backgroundColor: '#3a2323',
+                                          borderColor: '#FF5C5C',
+                                        },
+                                        '&.Mui-disabled': {
+                                          backgroundColor: 'rgba(255, 92, 92, 0.1)',
+                                          color: '#FFFFFF',
+                                          borderColor: '#2E3944',
+                                        }
+                                      }
+                                    : {
+                                        backgroundColor: '#5865F2',
+                                        color: '#D3D9D4',
+                                        borderColor: '#5865F2',
+                                        '&:hover': {
+                                          backgroundColor: '#4752C4',
+                                          borderColor: '#4752C4',
+                                        },
+                                        '&.Mui-disabled': {
+                                          backgroundColor: 'rgba(88, 101, 242, 0.1)',
+                                          color: '#FFFFFF',
+                                          borderColor: '#2E3944',
+                                        }
+                                      }
+                                }
                               >
                                 {isFollowing ? 'Unfollow' : 'Follow'}
                               </Button>
