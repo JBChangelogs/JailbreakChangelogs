@@ -50,6 +50,7 @@ export default function ItemDetailsPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -62,6 +63,7 @@ export default function ItemDetailsPage() {
   useEffect(() => {
     // Get current user's premium type
     setCurrentUserPremiumType(getCurrentUserPremiumType());
+    setPremiumStatusLoaded(true);
 
     // Listen for auth changes
     const handleAuthChange = () => {
@@ -451,7 +453,7 @@ export default function ItemDetailsPage() {
                 </div>
               </div>
               {/* Ad below the 'Don't agree with the value?' card */}
-              {currentUserPremiumType === 0 && (
+              {premiumStatusLoaded && currentUserPremiumType === 0 && (
                 <div className="my-6 flex justify-center">
                   <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
                     <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">

@@ -32,6 +32,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 }) => {
   const [imageAspectRatio, setImageAspectRatio] = useState<string>('aspect-[4/3]');
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   
   const currentIndex = changelogList.findIndex(c => c.id === changelogId);
   const prevChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
@@ -40,6 +41,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   useEffect(() => {
     // Get current user's premium type
     setCurrentUserPremiumType(getCurrentUserPremiumType());
+    setPremiumStatusLoaded(true);
 
     // Listen for auth changes
     const handleAuthChange = () => {
@@ -135,7 +137,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
             changelogTitle={title}
             type="changelog"
           />
-          {currentUserPremiumType === 0 && (
+          {premiumStatusLoaded && currentUserPremiumType === 0 && (
             <div className="my-8 flex justify-center">
               <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative flex items-center justify-center">
                 <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">

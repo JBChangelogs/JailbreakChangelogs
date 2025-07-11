@@ -131,7 +131,7 @@ export default function ValuesChangelogPage() {
           ) : (
             <>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                <p className="text-muted mb-2 md:mb-0">Showing {changelogs.length} {changelogs.length === 1 ? 'changelog' : 'changelogs'}</p>
+                <p className="text-muted mb-2 md:mb-0">Showing {paginatedChangelogs.length} of {changelogs.length} changelog{changelogs.length === 1 ? '' : 's'}</p>
                 <Button
                   variant="outlined"
                   onClick={toggleSortOrder}

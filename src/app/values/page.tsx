@@ -46,6 +46,7 @@ export default function ValuesPage() {
   const itemsPerPage = 24;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
 
   // Load saved preferences after mount
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function ValuesPage() {
   useEffect(() => {
     // Get current user's premium type
     setCurrentUserPremiumType(getCurrentUserPremiumType());
+    setPremiumStatusLoaded(true);
 
     // Listen for auth changes
     const handleAuthChange = () => {
@@ -420,9 +422,9 @@ export default function ValuesPage() {
                 <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.
               </p>
             </div>
-            {currentUserPremiumType === 0 && (
-              <div className="flex-shrink-0 flex justify-center items-start w-full lg:w-[336px]">
-                <div className="w-full max-w-[336px] h-[280px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
+            {premiumStatusLoaded && currentUserPremiumType === 0 && (
+              <div className="flex-shrink-0 flex justify-center items-start w-full lg:w-[480px]">
+                <div className="w-full max-w-[480px] h-[280px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 flex items-center justify-center relative">
                   <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
                     Advertisement
                   </span>
