@@ -460,7 +460,7 @@ export default function ItemDetailsPage() {
                       Advertisement
                     </span>
                     <DisplayAd
-                      adSlot="4408799044"
+                      adSlot="7368028510"
                       adFormat="auto"
                       style={{ display: "block", width: "100%", height: "100%" }}
                     />

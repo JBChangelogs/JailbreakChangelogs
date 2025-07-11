@@ -652,7 +652,7 @@ export default function ValuesPage() {
                   Advertisement
                 </span>
                 <DisplayAd
-                  adSlot="3201343366"
+                  adSlot="8162235433"
                   adFormat="auto"
                   style={{ display: 'block', width: '100%', height: '100%' }}
                 />

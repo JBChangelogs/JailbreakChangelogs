@@ -237,7 +237,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 Advertisement
               </span>
               <DisplayAd
-                adSlot="2707870412"
+                adSlot="4222990422"
                 adFormat="auto"
                 style={{ display: "block", width: "100%", height: "100%" }}
               />

@@ -560,7 +560,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
                     Advertisement
                   </span>
                   <DisplayAd
-                    adSlot="4408799044"
+                    adSlot="2909908750"
                     adFormat="auto"
                     style={{ display: "block", width: "100%", height: "100%" }}
                   />
