@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
 import { fetchUserById } from '@/utils/api';
 import { readFile } from 'node:fs/promises';
@@ -261,11 +262,23 @@ export async function GET(request: Request) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      background: `url(${bannerUrl})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
       paddingTop: '15px',
     }}>
+      {/* Banner Background Image */}
+      <img
+        src={bannerUrl}
+        width={1200}
+        height={630}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '1200px',
+          height: '630px',
+          objectFit: 'cover',
+        }}
+        alt="Banner background"
+      />
       {/* User Avatar Section */}
       <div style={{
         display: 'flex',
@@ -293,7 +306,6 @@ export async function GET(request: Request) {
           </svg>
         ) : (
           // User's custom avatar image
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatarUrl}
             alt="User avatar"
