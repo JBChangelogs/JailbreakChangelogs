@@ -71,6 +71,129 @@ export async function fetchUserById(id: string) {
   }
 }
 
+export async function fetchUserByIdForOG(id: string) {
+  try {
+    console.log('Fetching user with ID for OG:', id);
+    const fields = [
+      'id',
+      'username', 
+      'global_name',
+      'usernumber',
+      'accent_color',
+      'avatar',
+      'banner',
+      'custom_avatar',
+      'custom_banner',
+      'settings'
+    ].join(',');
+    
+    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&fields=${fields}`);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      // Handle banned users specifically without logging the error response
+      if (response.status === 403) {
+        const errorMessage = data.detail || 'This user is banned from Jailbreak Changelogs.';
+        throw new Error(`BANNED_USER: ${errorMessage}`);
+      }
+      
+      // Log error response for other types of errors
+      console.error('Error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: JSON.stringify(data, null, 2)
+      });
+      
+      if (data.detail) {
+        throw new Error(`Failed to fetch user: ${response.status} - ${JSON.stringify(data.detail)}`);
+      }
+      throw new Error(`Failed to fetch user: ${response.status}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching user by ID for OG:', error);
+    
+    // Re-throw BANNED_USER errors so calling code can handle them
+    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.startsWith('BANNED_USER:')) {
+      throw error;
+    }
+    
+    return null;
+  }
+}
+
+export async function fetchUserByIdForMetadata(id: string) {
+  try {
+    console.log('Fetching user with ID for metadata:', id);
+    const fields = [
+      'accent_color',
+      'global_name',
+      'username'
+    ].join(',');
+    
+    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&fields=${fields}`);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      // Handle banned users specifically without logging the error response
+      if (response.status === 403) {
+        const errorMessage = data.detail || 'This user is banned from Jailbreak Changelogs.';
+        throw new Error(`BANNED_USER: ${errorMessage}`);
+      }
+      
+      // Log error response for other types of errors
+      console.error('Error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: JSON.stringify(data, null, 2)
+      });
+      
+      if (data.detail) {
+        throw new Error(`Failed to fetch user: ${response.status} - ${JSON.stringify(data.detail)}`);
+      }
+      throw new Error(`Failed to fetch user: ${response.status}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching user by ID for metadata:', error);
+    
+    // Re-throw BANNED_USER errors so calling code can handle them
+    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.startsWith('BANNED_USER:')) {
+      throw error;
+    }
+    
+    return null;
+  }
+}
+
+export const fetchUsersForList = async () => {
+  const fields = [
+    'id',
+    'username',
+    'global_name',
+    'avatar',
+    'usernumber',
+    'accent_color',
+    'custom_avatar',
+    'settings',
+    'premiumtype',
+    'roblox_id',
+    'roblox_username',
+    'roblox_display_name',
+    'roblox_avatar',
+    'roblox_join_date'
+  ].join(',');
+  
+  const response = await fetch(`${PROD_API_URL}/users/list?fields=${fields}&nocache=true`, {
+    cache: 'no-store',
+    next: { revalidate: 0 }
+  });
+  const data = await response.json();
+  return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
+};
+
 export async function fetchItems() {
   try {
     const response = await fetch(`${PROD_API_URL}/items/list`);

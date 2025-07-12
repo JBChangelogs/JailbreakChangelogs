@@ -1,5 +1,5 @@
 import type { Viewport, Metadata } from "next";
-import { fetchUserById } from "@/utils/api";
+import { fetchUserByIdForMetadata } from "@/utils/api";
 import { getMaintenanceMetadata } from '@/utils/maintenance';
 
 function formatAccentColor(color: number | string | null | undefined): string {
@@ -20,7 +20,7 @@ export async function generateViewport({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   
   try {
-    const user = await fetchUserById(id);
+    const user = await fetchUserByIdForMetadata(id);
     return {
       themeColor: formatAccentColor(user?.accent_color),
     };
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const userId = id;
   
   try {
-    const user = await fetchUserById(userId);
+    const user = await fetchUserByIdForMetadata(userId);
     
     if (!user) {
       return {

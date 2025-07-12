@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
-import { fetchUserById } from '@/utils/api';
+import { fetchUserByIdForOG } from '@/utils/api';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { UserData } from '@/types/auth';
@@ -125,7 +125,7 @@ export async function GET(request: Request) {
 
   let user;
   try {
-    user = await fetchUserById(id);
+    user = await fetchUserByIdForOG(id);
     if (!user) {
       return new Response('User Not Found', { status: 404 });
     }

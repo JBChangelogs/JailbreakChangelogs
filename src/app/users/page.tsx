@@ -1,11 +1,11 @@
 import { UserGroupIcon } from '@heroicons/react/24/outline';
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUsers } from '@/utils/api';
+import { fetchUsersForList } from '@/utils/api';
 import UserSearch from '@/components/Users/UserSearch';
 import OnlineUsers from '@/components/Layout/OnlineUsers';
 
 export default async function UsersPage() {
-  const users = await fetchUsers();
+  const users = await fetchUsersForList();
 
   return (
     <div className="min-h-screen bg-[#2E3944] px-4 pb-8">
