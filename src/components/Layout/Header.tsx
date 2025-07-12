@@ -106,12 +106,9 @@ export default function Header() {
       }
     };
 
-    // Initial validation
     validateAndUpdateUserData();
 
-    // Add event listener for auth changes
     const handleAuthChange = (event: CustomEvent) => {
-      // Update user data when auth state changes
       const userData = event.detail;
       setUserData(userData);
     };
@@ -500,7 +497,7 @@ export default function Header() {
                       />
                     </motion.div>
                   </Button>
-                  {/* Custom Dropdown for Values - now with Motion animations */}
+               
                   <AnimatePresence>
                     {navMenuOpen && (
                       <motion.div
@@ -612,7 +609,7 @@ export default function Header() {
                       />
                     </motion.div>
                   </Button>
-                  {/* Custom Dropdown for Community - now with Motion animations */}
+            
                   <AnimatePresence>
                     {communityMenuOpen && (
                       <motion.div
@@ -777,7 +774,6 @@ export default function Header() {
                         </Tooltip>
                       </Box>
                       
-                      {/* Custom Profile Dropdown with Motion animations */}
                       <AnimatePresence>
                         {Boolean(anchorEl) && (
                           <motion.div

@@ -118,8 +118,35 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
     fetchSeasons();
   }, [params, router]);
 
-  const handleSeasonSelect = (id: string) => {
-    router.push(`/seasons/${id}`);
+  const handleSeasonSelect = async (id: string) => {
+    window.history.pushState({}, '', `/seasons/${id}`);
+    
+    try {
+      const response = await fetch(`${PROD_API_URL}/seasons/list`);
+      const data = await response.json();
+      
+      const seasonData = data.find((s: Season) => s.season.toString() === id);
+      if (seasonData) {
+        // Check if the season has rewards
+        if (typeof seasonData.rewards === 'string' || !Array.isArray(seasonData.rewards) || seasonData.rewards.length === 0) {
+          router.push(`/seasons/${LATEST_SEASON}`);
+          return;
+        }
+        setSeason(seasonData);
+        // Always set current season (26) and next season (27)
+        const currentSeasonData = data.find((s: Season) => s.season === LATEST_SEASON);
+        const nextSeasonData = data.find((s: Season) => s.season === LATEST_SEASON + 1);
+        setCurrentSeason(currentSeasonData || null);
+        setNextSeason(nextSeasonData || null);
+      } else {
+        // Redirect to default season if the requested season doesn't exist
+        router.push(`/seasons/${LATEST_SEASON}`);
+      }
+    } catch (err) {
+      // Redirect to default season on any error
+      router.push(`/seasons/${LATEST_SEASON}`);
+      console.error('Error loading season:', err);
+    }
   };
 
   const handleGoToLatestSeason = () => {
