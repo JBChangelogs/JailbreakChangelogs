@@ -197,12 +197,17 @@ export const fetchUsersForList = async () => {
 
 export async function fetchItems() {
   try {
-    const response = await fetch(`${PROD_API_URL}/items/list`);
+    console.log('[SERVER] Fetching items from API...');
+    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/items/list`, {
+      cache: 'no-store',
+      next: { revalidate: 0 }
+    });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
+    console.log(`[SERVER] Successfully fetched ${data.length} items from API`);
     return data as Item[];
   } catch (err) {
-    console.error('Error fetching items:', err);
+    console.error('[SERVER] Error fetching items:', err);
     return [];
   }
 }
