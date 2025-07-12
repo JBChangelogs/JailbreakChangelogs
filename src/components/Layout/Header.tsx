@@ -1001,8 +1001,8 @@ export default function Header() {
           />
           <iframe 
             src="https://discord.com/widget?id=1286064050135896064&theme=dark" 
-            width="350" 
-            height="500" 
+            width={isSmallScreen ? "350" : "750"} 
+            height={isSmallScreen ? "500" : "600"} 
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
             className="relative rounded-lg shadow-2xl"
           />
