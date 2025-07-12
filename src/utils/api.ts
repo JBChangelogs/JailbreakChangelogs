@@ -20,7 +20,7 @@ interface Changelog {
 }
 
 import { Item } from "@/types";
-import { PROD_API_URL } from '@/services/api';
+import { PROD_API_URL, RAILWAY_INTERNAL_API_URL } from '@/services/api';
 import { formatFullDate } from '@/utils/timestamp';
 
 export const fetchUsers = async () => {
@@ -187,7 +187,7 @@ export const fetchUsersForList = async () => {
     'roblox_join_date'
   ].join(',');
   
-  const response = await fetch(`${PROD_API_URL}/users/list?fields=${fields}&nocache=true`, {
+  const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/users/list?fields=${fields}&nocache=true`, {
     cache: 'no-store',
     next: { revalidate: 0 }
   });
