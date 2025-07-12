@@ -130,14 +130,38 @@ export default function Header() {
   };
 
   const handleLogout = async () => {
-    await trackLogoutSource('Header Component');
-    await logout();
-    setUserData(null);
-    handleMenuClose();
-    toast.success('Successfully logged out!', {
-      duration: 2000,
-      position: 'bottom-right',
-    });
+    let loadingToast: string | undefined;
+    
+    try {
+      // Show loading toast
+      loadingToast = toast.loading('Logging you out...', {
+        duration: Infinity,
+        position: 'bottom-right',
+      });
+
+      trackLogoutSource('Header Component');
+      await logout();
+      setUserData(null);
+      handleMenuClose();
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success('Successfully logged out!', {
+        duration: 2000,
+        position: 'bottom-right',
+      });
+    } catch (err) {
+      console.error('Logout error:', err);
+      toast.error('Failed to log out. Please try again.', {
+        duration: 3000,
+        position: 'bottom-right',
+      });
+    } finally {
+      // Always dismiss the loading toast
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
+    }
   };
 
   const handleDrawerToggle = () => {
@@ -734,44 +758,43 @@ export default function Header() {
                           borderRadius: '20px',
                           transition: 'background-color 0.2s',
                           '&:hover': {
-                            backgroundColor: Boolean(anchorEl) ? '#4752C4' : '#111619'
+                            backgroundColor: '#5865F2'
                           }
                         }}
                       >
-                        <Tooltip title="Account settings">
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography 
-                              variant="body1" 
-                              sx={{ 
-                                color: '#D3D9D4',
-                                fontWeight: 600
-                              }}
-                            >
-                              {userData.username}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              sx={{
-                                padding: 0,
-                                '&:hover': {
-                                  backgroundColor: 'transparent'
-                                }
-                              }}
-                            >
-                              <UserAvatar
-                                userId={userData.id}
-                                avatarHash={userData.avatar}
-                                username={userData.username}
-                                size={10}
-                                accent_color={userData.accent_color}
-                                custom_avatar={userData.custom_avatar}
-                                showBadge={false}
-                                settings={userData.settings}
-                                premiumType={userData.premiumtype}
-                              />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              color: Boolean(anchorEl) ? '#FFFFFF' : '#D3D9D4',
+                              fontWeight: 600,
+                              transition: 'color 0.2s'
+                            }}
+                          >
+                            {userData.username}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              padding: 0,
+                              '&:hover': {
+                                backgroundColor: 'transparent'
+                              }
+                            }}
+                          >
+                            <UserAvatar
+                              userId={userData.id}
+                              avatarHash={userData.avatar}
+                              username={userData.username}
+                              size={10}
+                              accent_color={userData.accent_color}
+                              custom_avatar={userData.custom_avatar}
+                              showBadge={false}
+                              settings={userData.settings}
+                              premiumType={userData.premiumtype}
+                            />
+                          </IconButton>
+                        </Box>
                       </Box>
                       
                       <AnimatePresence>

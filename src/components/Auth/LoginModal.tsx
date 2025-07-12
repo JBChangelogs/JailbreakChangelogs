@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Tabs, 
   Tab, 
@@ -145,170 +146,303 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
   }, [onClose, isRedirecting, login, handleClose, searchParams, campaign]);
 
   return (
-    <Dialog 
-      open={open || showLoginModal} 
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        paper: {
-          sx: {
-            backgroundColor: '#212A31',
-            border: '1px solid #2E3944',
-            borderRadius: '8px',
-            '& .MuiDialogContent-root': {
-              backgroundColor: '#212A31',
-              padding: '24px',
-              '&:first-of-type': {
-                paddingTop: '24px'
+    <AnimatePresence>
+      {(open || showLoginModal) && (
+        <Dialog 
+          open={open || showLoginModal} 
+          onClose={handleClose}
+          maxWidth="sm"
+          fullWidth
+          slotProps={{
+            paper: {
+              sx: {
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                boxShadow: 'none',
+                overflow: 'visible',
+                '& .MuiDialogContent-root': {
+                  backgroundColor: '#212A31',
+                  padding: '24px',
+                  borderRadius: '8px',
+                  border: '1px solid #2E3944',
+                  '&:first-of-type': {
+                    paddingTop: '24px'
+                  }
+                }
               }
             }
-          }
-        }
-      }}
-    >
-      <DialogContent sx={{ p: 3, backgroundColor: '#212A31 !important' }}>
-        {!campaign && (
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={handleTabChange}
-              variant="fullWidth"
-              sx={{
-                '& .MuiTabs-indicator': { backgroundColor: '#5865F2' },
-                '& .Mui-selected': { color: '#5865F2 !important' },
-                '& .MuiTab-root': { color: '#D3D9D4' }
-              }}
-            >
-              <Tab label="Discord" />
-              <Tab label="Roblox" />
-            </Tabs>
-          </Box>
-        )}
-
-        <TabPanel value={tabValue} index={0}>
-          <div className="flex flex-col items-center gap-6 mb-8">
-            <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
-              alt="Discord Logo"
-              width={240}
-              height={72}
-              unoptimized
-              className="mb-2"
-            />
-            <p className="text-sm text-center text-white">
-              {campaign ? (
-                <>
-                  Log in with Discord to support the <span className="text-[#5865F2] font-medium">{campaign}</span> campaign! Your login helps the campaign owner track participation and engagement. We only collect your publicly available Discord details. Your data security is important to us - there&apos;s no need to provide a password.
-                </>
-              ) : (
-                <>
-                  Jailbreak Changelogs connects with Discord to build your user profile. We only collect your publicly available Discord details. To use our trading features, you&apos;ll need to link your Roblox account after signing in. Your data security is important to us - there&apos;s no need to provide a password.
-                </>
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleClose}
+          />
+          <motion.div
+            initial={{ 
+              opacity: 0, 
+              scale: 0.95, 
+              y: 20 
+            }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1, 
+              y: 0 
+            }}
+            exit={{ 
+              opacity: 0, 
+              scale: 0.95, 
+              y: 20 
+            }}
+            transition={{ 
+              duration: 0.3, 
+              ease: [0.4, 0, 0.2, 1] 
+            }}
+            className="relative z-10"
+          >
+            <DialogContent sx={{ p: 3, backgroundColor: '#212A31 !important' }}>
+              {!campaign && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                >
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                    <Tabs 
+                      value={tabValue} 
+                      onChange={handleTabChange}
+                      variant="fullWidth"
+                      sx={{
+                        '& .MuiTabs-indicator': { backgroundColor: '#5865F2' },
+                        '& .Mui-selected': { color: '#5865F2 !important' },
+                        '& .MuiTab-root': { color: '#D3D9D4' }
+                      }}
+                    >
+                      <Tab 
+                        icon={
+                          <Image
+                            src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
+                            alt="Discord"
+                            width={120}
+                            height={36}
+                            unoptimized
+                            draggable={false}
+                            className="opacity-70 transition-opacity"
+                          />
+                        }
+                        iconPosition="top"
+                        sx={{
+                          '&.Mui-selected .opacity-70': {
+                            opacity: 1
+                          }
+                        }}
+                      />
+                      <Tab 
+                        icon={
+                          <Image
+                            src="https://assets.jailbreakchangelogs.xyz/assets/logos/roblox/Roblox_Logo.webp"
+                            alt="Roblox"
+                            width={120}
+                            height={36}
+                            unoptimized
+                            draggable={false}
+                            className="opacity-70 transition-opacity"
+                          />
+                        }
+                        iconPosition="top"
+                        sx={{
+                          '&.Mui-selected .opacity-70': {
+                            opacity: 1
+                          }
+                        }}
+                      />
+                    </Tabs>
+                  </Box>
+                </motion.div>
               )}
-            </p>
-          </div>
 
-          <div className="space-y-4 text-center">
-            <p className="text-xs text-[#A0A7AC] mb-4">
-              By continuing, you agree to our <a href="/tos" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Privacy Policy</a>.
-            </p>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={joinDiscord}
-                  onChange={(e) => setJoinDiscord(e.target.checked)}
-                  sx={{
-                    color: '#5865F2',
-                    '&.Mui-checked': {
-                      color: '#5865F2',
-                    },
-                    '& .MuiSvgIcon-root': {
-                      color: '#5865F2',
-                    },
-                    '&.Mui-checked .MuiSvgIcon-root': {
-                      color: '#5865F2',
-                    }
-                  }}
-                />
-              }
-              label={<span className="text-sm text-[#5865F2]">Join our Discord server</span>}
-              sx={{ mb: 2 }}
-            />
-            <button
-              onClick={() => {
-                setIsRedirecting(true);
-                const currentURL = window.location.href;
-                const oauthRedirect = `${PROD_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={tabValue}
+                  initial={{ opacity: 0, x: tabValue === 0 ? -20 : 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: tabValue === 0 ? 20 : -20 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <TabPanel value={tabValue} index={0}>
+                    <motion.div 
+                      className="flex flex-col items-center gap-6 mb-8"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.4 }}
+                    >
+                      <h2 className="text-xl font-semibold text-white mb-2">Connect with Discord</h2>
+                      <p className="text-sm text-center text-white">
+                        {campaign ? (
+                          <>
+                            Log in with Discord to support the <span className="text-[#5865F2] font-medium">{campaign}</span> campaign! Your login helps the campaign owner track participation and engagement. We only collect your publicly available Discord details. Your data security is important to us - there&apos;s no need to provide a password.
+                          </>
+                        ) : (
+                          <>
+                            Jailbreak Changelogs connects with Discord to build your user profile. We only collect your publicly available Discord details. To use our trading features, you&apos;ll need to link your Roblox account after signing in. Your data security is important to us - there&apos;s no need to provide a password.
+                          </>
+                        )}
+                      </p>
+                    </motion.div>
 
-                toast.loading('Redirecting to Discord...', {
-                  duration: 2000,
-                  position: 'bottom-right',
-                });
+                    <motion.div 
+                      className="space-y-4 text-center"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                    >
+                      <p className="text-xs text-[#A0A7AC] mb-4">
+                        By continuing, you agree to our <a href="/tos" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Privacy Policy</a>.
+                      </p>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="mb-4"
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={joinDiscord}
+                              onChange={(e) => setJoinDiscord(e.target.checked)}
+                              sx={{
+                                color: '#5865F2',
+                                '&.Mui-checked': {
+                                  color: '#5865F2',
+                                },
+                                '& .MuiSvgIcon-root': {
+                                  color: '#5865F2',
+                                  fontSize: '1.25rem',
+                                },
+                                '&.Mui-checked .MuiSvgIcon-root': {
+                                  color: '#5865F2',
+                                }
+                              }}
+                            />
+                          }
+                          label={
+                            <span className="text-sm font-medium text-white cursor-pointer">
+                              Join our Discord server
+                            </span>
+                          }
+                          sx={{ 
+                            mb: 2,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: joinDiscord ? 'rgba(88, 101, 242, 0.1)' : 'rgba(88, 101, 242, 0.05)',
+                            border: `1px solid ${joinDiscord ? '#5865F2' : 'rgba(88, 101, 242, 0.3)'}`,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: 'rgba(88, 101, 242, 0.08)',
+                              borderColor: '#5865F2',
+                            }
+                          }}
+                        />
+                      </motion.div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          setIsRedirecting(true);
+                          const currentURL = window.location.href;
+                          const oauthRedirect = `${PROD_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
 
-                window.location.href = oauthRedirect;
-              }}
-              className={`w-full py-3 px-4 rounded-md flex items-center justify-center gap-2 font-medium transition-all duration-200 bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg hover:shadow-[#4752C4]/25`}
-            >
-              {campaign ? 'Login to Support Campaign' : 'Continue with Discord'}
-            </button>
-          </div>
-        </TabPanel>
+                          toast.loading('Redirecting to Discord...', {
+                            duration: 2000,
+                            position: 'bottom-right',
+                          });
 
-        {!campaign && (
-          <TabPanel value={tabValue} index={1}>
-            <div className="flex flex-col items-center gap-6 mb-8">
-              <Image
-                src="https://assets.jailbreakchangelogs.xyz/assets/logos/roblox/Roblox_Logo.webp"
-                alt="Roblox Logo"
-                width={240}
-                height={72}
-                unoptimized
-                className="mb-2"
-              />
-              <p className="text-sm text-center text-white">
-                Connect your Roblox account to unlock trading features on Jailbreak Changelogs. We use secure methods for account verification. This step is typically done after logging in with Discord.
-              </p>
-            </div>
-            <div className="space-y-4 text-center">
-              <p className="text-xs text-[#A0A7AC] mb-4">
-                By continuing, you agree to our <a href="/tos" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Privacy Policy</a>.
-              </p>
-              <button
-                onClick={() => {
-                  // Get token from cookie
-                  const token = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('token='))
-                    ?.split('=')[1];
+                          window.location.href = oauthRedirect;
+                        }}
+                        className={`w-full py-3 px-4 rounded-md flex items-center justify-center gap-2 font-medium transition-all duration-200 bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg hover:shadow-[#4752C4]/25`}
+                      >
+                        {campaign ? 'Login to Support Campaign' : 'Continue with Discord'}
+                      </motion.button>
+                    </motion.div>
+                  </TabPanel>
+                </motion.div>
+              </AnimatePresence>
 
-                  if (!token) {
-                    toast.error('Please log in with Discord first', {
-                      duration: 3000,
-                      position: 'bottom-right',
-                    });
-                    return;
-                  }
+              {!campaign && (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={tabValue}
+                    initial={{ opacity: 0, x: tabValue === 1 ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: tabValue === 1 ? 20 : -20 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <TabPanel value={tabValue} index={1}>
+                      <motion.div 
+                        className="flex flex-col items-center gap-6 mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.4 }}
+                      >
+                        <h2 className="text-xl font-semibold text-white mb-2">Connect with Roblox</h2>
+                        <p className="text-sm text-center text-white">
+                           Jailbreak Changelogs connects with Roblox to build your user profile. We only collect your publicly available Roblox details. To use our trading features, you&apos;ll need to link your Roblox account after signing in. Your data security is important to us - there&apos;s no need to provide a password.
+                         </p>
+                      </motion.div>
+                      <motion.div 
+                        className="space-y-4 text-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.4 }}
+                      >
+                        <p className="text-xs text-[#A0A7AC] mb-4">
+                          By continuing, you agree to our <a href="/tos" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted">Privacy Policy</a>.
+                        </p>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            // Get token from cookie
+                            const token = document.cookie
+                              .split('; ')
+                              .find(row => row.startsWith('token='))
+                              ?.split('=')[1];
 
-                  setIsRedirecting(true);
-                  const currentURL = window.location.href;
-                  const oauthRedirect = `${PROD_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL)}&owner=${encodeURIComponent(token)}`;
+                            if (!token) {
+                              toast.error('Please log in with Discord first', {
+                                duration: 3000,
+                                position: 'bottom-right',
+                              });
+                              return;
+                            }
 
-                  toast.loading('Redirecting to Roblox...', {
-                    duration: 2000,
-                    position: 'bottom-right',
-                  });
+                            setIsRedirecting(true);
+                            const currentURL = window.location.href;
+                            const oauthRedirect = `${PROD_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL)}&owner=${encodeURIComponent(token)}`;
 
-                  window.location.href = oauthRedirect;
-                }}
-                className={`w-full py-3 px-4 rounded-md flex items-center justify-center gap-2 font-medium transition-all duration-200 bg-[#FF5630] hover:bg-[#E54B2C] text-white shadow-lg hover:shadow-[#E54B2C]/25`}
-              >
-                Continue with Roblox
-              </button>
-            </div>
-          </TabPanel>
-        )}
-      </DialogContent>
-    </Dialog>
+                            toast.loading('Redirecting to Roblox...', {
+                              duration: 2000,
+                              position: 'bottom-right',
+                            });
+
+                            window.location.href = oauthRedirect;
+                          }}
+                          className={`w-full py-3 px-4 rounded-md flex items-center justify-center gap-2 font-medium transition-all duration-200 bg-[#FF5630] hover:bg-[#E54B2C] text-white shadow-lg hover:shadow-[#E54B2C]/25`}
+                        >
+                          Continue with Roblox
+                        </motion.button>
+                      </motion.div>
+                    </TabPanel>
+                  </motion.div>
+                </AnimatePresence>
+              )}
+            </DialogContent>
+          </motion.div>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 } 

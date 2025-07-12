@@ -132,8 +132,16 @@ export const useAuth = () => {
   };
 
   const handleLogout = async () => {
+    let loadingToast: string | undefined;
+    
     try {
-      await trackLogoutSource('useAuth Hook');
+      // Show loading toast
+      loadingToast = toast.loading('Logging you out...', {
+        duration: Infinity,
+        position: 'bottom-right',
+      });
+
+      trackLogoutSource('useAuth Hook');
       await logout();
       setAuthState({
         isAuthenticated: false,
@@ -141,10 +149,24 @@ export const useAuth = () => {
         isLoading: false,
         error: null,
       });
-      toast.success('Successfully logged out!');
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success('Successfully logged out!', {
+        duration: 3000,
+        position: 'bottom-right',
+      });
     } catch (err) {
       console.error('Logout error:', err);
-      toast.error('Failed to log out. Please try again.');
+      toast.error('Failed to log out. Please try again.', {
+        duration: 3000,
+        position: 'bottom-right',
+      });
+    } finally {
+      // Always dismiss the loading toast
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
     }
   };
 
