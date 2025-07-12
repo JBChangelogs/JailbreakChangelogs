@@ -15,8 +15,6 @@ import {
   ListItemText,
   useMediaQuery,
   useTheme,
-  Menu,
-  MenuItem,
   Typography,
   ListItemIcon,
   Divider,
@@ -38,6 +36,7 @@ import { UserAvatar } from '@/utils/avatar';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 import { PROD_API_URL } from '@/services/api';
 import { useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -488,33 +487,95 @@ export default function Header() {
                     }}
                   >
                     <Typography variant="button" sx={{ fontWeight: 700, color: navMenuOpen ? '#FFFFFF' : undefined }}>Values</Typography>
-                    <KeyboardArrowDownIcon 
-                      sx={{ 
-                        ml: 0.5,
-                        fontSize: '1.2rem',
-                        transition: 'transform 0.2s',
-                        transform: navMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                        color: navMenuOpen ? '#FFFFFF' : '#D3D9D4',
-                      }} 
-                    />
-                  </Button>
-                  {/* Custom Dropdown for Values - now a direct child */}
-                  {navMenuOpen && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50 transition-all duration-200 ease-out"
-                      style={{
-                        top: '100%',
-                      }}
+                    <motion.div
+                      animate={{ rotate: navMenuOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <div className="flex flex-col py-3 px-2 gap-1">
-                        <Link href="/values" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value List</Link>
-                        <Link href="/values/changelogs" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value Changelogs</Link>
-                        <Link href="/values/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Value Calculator</Link>
-                        <Link href="/dupes/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Dupe Calculator</Link>
-                        <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleNavMenuClose}>Trade Ads</Link>
-                      </div>
-                    </div>
-                  )}
+                      <KeyboardArrowDownIcon 
+                        sx={{ 
+                          ml: 0.5,
+                          fontSize: '1.2rem',
+                          color: navMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                        }} 
+                      />
+                    </motion.div>
+                  </Button>
+                  {/* Custom Dropdown for Values - now with Motion animations */}
+                  <AnimatePresence>
+                    {navMenuOpen && (
+                      <motion.div
+                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                        style={{
+                          top: '100%',
+                        }}
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ 
+                          duration: 0.2, 
+                          ease: [0.4, 0, 0.2, 1],
+                          staggerChildren: 0.05
+                        }}
+                      >
+                        <motion.div 
+                          className="flex flex-col py-3 px-2 gap-1"
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1 }
+                          }}
+                        >
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Link href="/values" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Value List</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.05 }}
+                          >
+                            <Link href="/values/changelogs" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Value Changelogs</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                          >
+                            <Link href="/values/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Value Calculator</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.15 }}
+                          >
+                            <Link href="/dupes/calculator" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Dupe Calculator</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.2 }}
+                          >
+                            <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Trade Ads</Link>
+                          </motion.div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Box>
 
                 {/* Community Dropdown */}
@@ -538,33 +599,95 @@ export default function Header() {
                     }}
                   >
                     <Typography variant="button" sx={{ fontWeight: 700, color: communityMenuOpen ? '#FFFFFF' : undefined }}>Community</Typography>
-                    <KeyboardArrowDownIcon 
-                      sx={{ 
-                        ml: 0.5,
-                        fontSize: '1.2rem',
-                        transition: 'transform 0.2s',
-                        transform: communityMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                        color: communityMenuOpen ? '#FFFFFF' : '#D3D9D4',
-                      }} 
-                    />
-                  </Button>
-                  {/* Custom Dropdown for Community - now a direct child */}
-                  {communityMenuOpen && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50 transition-all duration-200 ease-out"
-                      style={{
-                        top: '100%',
-                      }}
+                    <motion.div
+                      animate={{ rotate: communityMenuOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <div className="flex flex-col py-3 px-2 gap-1">
-                        <Link href="/users" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>User Search</Link>
-                        <Link href="/servers" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Private Servers</Link>
-                        <Link href="/bot" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Discord Bot</Link>
-                        <Link href="/faq" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>FAQ</Link>
-                        <Link href="/contributors" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" onClick={handleCommunityMenuClose}>Contributors</Link>
-                      </div>
-                    </div>
-                  )}
+                      <KeyboardArrowDownIcon 
+                        sx={{ 
+                          ml: 0.5,
+                          fontSize: '1.2rem',
+                          color: communityMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                        }} 
+                      />
+                    </motion.div>
+                  </Button>
+                  {/* Custom Dropdown for Community - now with Motion animations */}
+                  <AnimatePresence>
+                    {communityMenuOpen && (
+                      <motion.div
+                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                        style={{
+                          top: '100%',
+                        }}
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ 
+                          duration: 0.2, 
+                          ease: [0.4, 0, 0.2, 1],
+                          staggerChildren: 0.05
+                        }}
+                      >
+                        <motion.div 
+                          className="flex flex-col py-3 px-2 gap-1"
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1 }
+                          }}
+                        >
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Link href="/users" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>User Search</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.05 }}
+                          >
+                            <Link href="/servers" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Private Servers</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                          >
+                            <Link href="/bot" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Discord Bot</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.15 }}
+                          >
+                            <Link href="/faq" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>FAQ</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.2 }}
+                          >
+                            <Link href="/contributors" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Contributors</Link>
+                          </motion.div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Box>
               </Box>
 
@@ -596,156 +719,180 @@ export default function Header() {
                   <>
                     <Box 
                       sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        ml: 2,
-                        cursor: 'pointer',
-                        backgroundColor: '#192025',
-                        padding: '6px 12px',
-                        borderRadius: '20px',
-                        transition: 'background-color 0.2s',
-                        '&:hover': {
-                          backgroundColor: '#111619'
-                        }
+                        position: 'relative',
+                        display: 'inline-block'
                       }}
-                      onClick={handleMenuOpen}
+                      onMouseEnter={handleMenuOpen}
+                      onMouseLeave={handleMenuClose}
                     >
-                      <Tooltip title="Account settings">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography 
-                            variant="body1" 
-                            sx={{ 
-                              color: '#D3D9D4',
-                              fontWeight: 600
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1, 
+                          ml: 2,
+                          cursor: 'pointer',
+                          backgroundColor: Boolean(anchorEl) ? '#5865F2' : '#192025',
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          transition: 'background-color 0.2s',
+                          '&:hover': {
+                            backgroundColor: Boolean(anchorEl) ? '#4752C4' : '#111619'
+                          }
+                        }}
+                      >
+                        <Tooltip title="Account settings">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                color: '#D3D9D4',
+                                fontWeight: 600
+                              }}
+                            >
+                              {userData.username}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              sx={{
+                                padding: 0,
+                                '&:hover': {
+                                  backgroundColor: 'transparent'
+                                }
+                              }}
+                            >
+                              <UserAvatar
+                                userId={userData.id}
+                                avatarHash={userData.avatar}
+                                username={userData.username}
+                                size={10}
+                                accent_color={userData.accent_color}
+                                custom_avatar={userData.custom_avatar}
+                                showBadge={false}
+                                settings={userData.settings}
+                                premiumType={userData.premiumtype}
+                              />
+                            </IconButton>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                      
+                      {/* Custom Profile Dropdown with Motion animations */}
+                      <AnimatePresence>
+                        {Boolean(anchorEl) && (
+                          <motion.div
+                            className="absolute right-0 mt-0 min-w-[280px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                            style={{
+                              top: '100%',
+                            }}
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ 
+                              duration: 0.2, 
+                              ease: [0.4, 0, 0.2, 1],
+                              staggerChildren: 0.05
                             }}
                           >
-                            {userData.username}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
-                            sx={{
-                              padding: 0,
-                              '&:hover': {
-                                backgroundColor: 'transparent'
-                              }
-                            }}
-                          >
-                            <UserAvatar
-                              userId={userData.id}
-                              avatarHash={userData.avatar}
-                              username={userData.username}
-                              size={10}
-                              accent_color={userData.accent_color}
-                              custom_avatar={userData.custom_avatar}
-                              showBadge={false}
-                              settings={userData.settings}
-                              premiumType={userData.premiumtype}
-                            />
-                          </IconButton>
-                        </Box>
-                      </Tooltip>
+                            <motion.div 
+                              className="flex flex-col py-3 px-2 gap-1"
+                              initial="hidden"
+                              animate="visible"
+                              exit="hidden"
+                              variants={{
+                                hidden: { opacity: 0 },
+                                visible: { opacity: 1 }
+                              }}
+                            >
+                              <motion.div
+                                variants={{
+                                  hidden: { opacity: 0, x: -10 },
+                                  visible: { opacity: 1, x: 0 }
+                                }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <Link 
+                                  href={`/users/${userData?.id}`} 
+                                  className="flex items-center rounded-lg px-4 py-3 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
+                                  onClick={handleMenuClose}
+                                >
+                                  <UserAvatar
+                                    userId={userData.id}
+                                    avatarHash={userData.avatar}
+                                    username={userData.username}
+                                    size={10}
+                                    accent_color={userData.accent_color}
+                                    custom_avatar={userData.custom_avatar}
+                                    showBadge={false}
+                                    settings={userData.settings}
+                                    premiumType={userData.premiumtype}
+                                  />
+                                  <span className="ml-3">My account</span>
+                                </Link>
+                              </motion.div>
+                              
+                              <div className="border-t border-[#2E3944] my-1"></div>
+                              
+                              {!userData.roblox_id && (
+                                <motion.div
+                                  variants={{
+                                    hidden: { opacity: 0, x: -10 },
+                                    visible: { opacity: 1, x: 0 }
+                                  }}
+                                  transition={{ duration: 0.2, delay: 0.05 }}
+                                >
+                                  <button 
+                                    className="flex items-center w-full rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
+                                    onClick={() => { 
+                                      handleMenuClose(); 
+                                      setLoginModalOpen(true);
+                                      const event = new CustomEvent('setLoginTab', { detail: 1 });
+                                      window.dispatchEvent(event);
+                                    }}
+                                  >
+                                    <RobloxIcon className="h-5 w-5 mr-3" />
+                                    Connect Roblox
+                                  </button>
+                                </motion.div>
+                              )}
+                              
+                              <motion.div
+                                variants={{
+                                  hidden: { opacity: 0, x: -10 },
+                                  visible: { opacity: 1, x: 0 }
+                                }}
+                                transition={{ duration: 0.2, delay: 0.1 }}
+                              >
+                                <Link 
+                                  href="/settings" 
+                                  className="flex items-center rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
+                                  onClick={handleMenuClose}
+                                >
+                                  <SettingsIcon sx={{ fontSize: '1.25rem', mr: 3, color: '#D3D9D4' }} />
+                                  Settings
+                                </Link>
+                              </motion.div>
+                              
+                              <motion.div
+                                variants={{
+                                  hidden: { opacity: 0, x: -10 },
+                                  visible: { opacity: 1, x: 0 }
+                                }}
+                                transition={{ duration: 0.2, delay: 0.15 }}
+                              >
+                                <button 
+                                  className="flex items-center w-full rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
+                                  onClick={handleLogout}
+                                >
+                                  <LogoutIcon sx={{ fontSize: '1.25rem', mr: 3, color: '#D3D9D4' }} />
+                                  Logout
+                                </button>
+                              </motion.div>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </Box>
-                    <Menu
-                      anchorEl={anchorEl}
-                      id="account-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                      onClick={handleMenuClose}
-                      slotProps={{
-                        paper: {
-                          elevation: 0,
-                          sx: {
-                            overflow: 'visible',
-                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                            mt: 1.5,
-                            backgroundColor: '#212A31',
-                            color: '#D3D9D4',
-                            '& .MuiAvatar-root': {
-                              width: 32,
-                              height: 32,
-                              ml: -0.5,
-                              mr: 1,
-                            },
-                            '& .MuiMenuItem-root': {
-                              '&:hover': {
-                                backgroundColor: '#2E3944',
-                              },
-                            },
-                            '& .MuiListItemIcon-root': {
-                              color: '#D3D9D4',
-                            },
-                            '&::before': {
-                              content: '""',
-                              display: 'block',
-                              position: 'absolute',
-                              top: 0,
-                              right: 14,
-                              width: 10,
-                              height: 10,
-                              bgcolor: '#212A31',
-                              transform: 'translateY(-50%) rotate(45deg)',
-                              zIndex: 0,
-                            },
-                          },
-                        },
-                      }}
-                      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                    >
-                      <MenuItem 
-                        component={Link}
-                        href={`/users/${userData?.id}`}
-                        onClick={handleMenuClose}
-                      >
-                        <UserAvatar
-                          userId={userData.id}
-                          avatarHash={userData.avatar}
-                          username={userData.username}
-                          size={10}
-                          accent_color={userData.accent_color}
-                          custom_avatar={userData.custom_avatar}
-                          showBadge={false}
-                          settings={userData.settings}
-                          premiumType={userData.premiumtype}
-                        />
-                        <Typography variant="body1" sx={{ ml: 2 }}>My account</Typography>
-                      </MenuItem>
-                      <Divider />
-                      {!userData.roblox_id && (
-                        <MenuItem onClick={() => { 
-                          handleMenuClose(); 
-                          setLoginModalOpen(true);
-                          // Set tab to Roblox tab
-                          const event = new CustomEvent('setLoginTab', { detail: 1 });
-                          window.dispatchEvent(event);
-                        }}>
-                          <ListItemIcon>
-                            <RobloxIcon className="h-5 w-5" />
-                          </ListItemIcon>
-                          <Typography variant="body1">Connect Roblox</Typography>
-                        </MenuItem>
-                      )}
-                      <MenuItem 
-                        component={Link}
-                        href="/settings"
-                        onClick={handleMenuClose}
-                      >
-                        <ListItemIcon>
-                          <SettingsIcon fontSize="small" />
-                        </ListItemIcon>
-                        <Typography variant="body1">Settings</Typography>
-                      </MenuItem>
-                      <MenuItem onClick={handleLogout}>
-                        <ListItemIcon>
-                          <LogoutIcon fontSize="small" />
-                        </ListItemIcon>
-                        <Typography variant="body1">Logout</Typography>
-                      </MenuItem>
-                    </Menu>
                   </>
                 ) : (
                   <Button

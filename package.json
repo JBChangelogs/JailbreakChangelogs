@@ -24,6 +24,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.2.0",
     "date-fns": "^4.1.0",
+    "motion": "^12.23.3",
     "next": "^15.3.5",
     "nextjs-toploader": "^3.8.16",
     "react": "^19.1.0",
