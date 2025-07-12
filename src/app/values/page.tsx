@@ -702,7 +702,7 @@ export default function ValuesPage() {
 
         <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
           {loading ? (
-            [...Array(23)].map((_, i) => <ItemCardSkeleton key={i} />)
+            [...Array(24)].map((_, i) => <ItemCardSkeleton key={i} />)
           ) : displayedItems.length === 0 ? (
             <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
               <p className="text-lg text-muted">
@@ -736,7 +736,7 @@ export default function ValuesPage() {
                 {/* Show in-feed ad after every 12 items */}
                 {premiumStatusLoaded && currentUserPremiumType === 0 && (index + 1) % 12 === 0 && (index + 1) < displayedItems.length && (
                   <div className="col-span-full my-4">
-                    <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
+                    <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '450px', maxHeight: '500px' }}>
                       <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
                         Advertisement
                       </span>
