@@ -35,8 +35,8 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   
   const currentIndex = changelogList.findIndex(c => c.id === changelogId);
-  const prevChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
-  const nextChangelog = currentIndex < changelogList.length - 1 ? changelogList[currentIndex + 1] : null;
+  const prevChangelog = currentIndex < changelogList.length - 1 ? changelogList[currentIndex + 1] : null;
+  const nextChangelog = currentIndex > 0 ? changelogList[currentIndex - 1] : null;
 
   useEffect(() => {
     // Get current user's premium type
