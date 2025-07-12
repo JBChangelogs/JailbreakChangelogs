@@ -59,7 +59,7 @@ export default function Maintenance() {
                 </svg>
               </a>
               <a
-                href="https://discord.com/invite/kAuxDntHG9"
+                href="https://discord.jailbreakchangelogs.xyz/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full bg-[#5865F2] p-3 text-white hover:bg-[#4650c1] transition-colors"
