@@ -179,6 +179,7 @@ export const fetchUsersForList = async () => {
     'custom_avatar',
     'settings',
     'premiumtype',
+    'created_at',
     'roblox_id',
     'roblox_username',
     'roblox_display_name',
