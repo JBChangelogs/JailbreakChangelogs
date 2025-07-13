@@ -20,6 +20,7 @@ interface TradeAdFormProps {
   onSuccess?: () => void;
   editMode?: boolean;
   tradeAd?: TradeAd;
+  items?: TradeItem[];
 }
 
 interface UserPremiumTier {
@@ -35,7 +36,7 @@ const PREMIUM_TIERS: UserPremiumTier[] = [
   { tier: 3, name: 'Supporter 3', durations: [6, 12, 24, 48] },
 ];
 
-export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = false, tradeAd }) => {
+export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = false, tradeAd, items = [] }) => {
   const [loading, setLoading] = useState(true);
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
@@ -667,6 +668,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         {/* Available Items Grid */}
         <div className="mb-8">
           <AvailableItemsGrid
+            items={items}
             onSelect={handleAddItem}
             selectedItems={[...offeringItems, ...requestingItems]}
             onCreateTradeAd={handleSubmit}

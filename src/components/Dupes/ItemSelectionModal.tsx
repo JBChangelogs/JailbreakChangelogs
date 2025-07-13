@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PUBLIC_API_URL } from "@/utils/api";
 import { getItemTypeColor } from '@/utils/badgeColors';
-import toast from 'react-hot-toast';
 
 interface Item {
   id: number;
@@ -17,6 +15,7 @@ interface ItemSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onItemSelect: (item: Item) => void;
+  initialItems?: Item[];
 }
 
 const parseCashValue = (value: string): number => {
@@ -31,10 +30,11 @@ const parseCashValue = (value: string): number => {
 const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
   isOpen,
   onClose,
-  onItemSelect
+  onItemSelect,
+  initialItems = []
 }) => {
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [loading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -49,30 +49,16 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await fetch(`${PUBLIC_API_URL}/items/list`);
-        if (!response.ok) throw new Error('Failed to fetch items');
-        const data = await response.json();
-        // Sort items by cash value high to low
-        const sortedData = data.sort((a: Item, b: Item) => {
-          const aValue = parseCashValue(a.cash_value);
-          const bValue = parseCashValue(b.cash_value);
-          return bValue - aValue;
-        });
-        setItems(sortedData);
-      } catch (error) {
-        console.error('Error fetching items:', error);
-        toast.error('Failed to load items');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchItems();
+    if (initialItems.length > 0) {
+      // Sort items by cash value high to low
+      const sortedData = [...initialItems].sort((a: Item, b: Item) => {
+        const aValue = parseCashValue(a.cash_value);
+        const bValue = parseCashValue(b.cash_value);
+        return bValue - aValue;
+      });
+      setItems(sortedData);
     }
-  }, [isOpen]);
+  }, [initialItems]);
 
   const filteredItems = items.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase())

@@ -429,7 +429,11 @@ const CalculatorValueComparison: React.FC<{
   );
 };
 
-export const CalculatorForm: React.FC = () => {
+interface CalculatorFormProps {
+  initialItems?: TradeItem[];
+}
+
+export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [] }) => {
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
   const [activeTab, setActiveTab] = useState<'items' | 'values'>('items');
@@ -787,6 +791,7 @@ export const CalculatorForm: React.FC = () => {
       {activeTab === 'items' ? (
         <div className="mb-8">
           <AvailableItemsGrid
+            items={initialItems}
             onSelect={handleAddItem}
             selectedItems={[...offeringItems, ...requestingItems]}
             requireAuth={false}

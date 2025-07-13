@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PUBLIC_API_URL } from "@/utils/api";
 import { TradeItem } from '@/types/trading';
-import { Pagination, Skeleton, Checkbox, FormControlLabel } from '@mui/material';
-import { getToken } from '@/utils/auth';
+import { Pagination, Checkbox, FormControlLabel } from '@mui/material';
 import toast from 'react-hot-toast';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
 import { sortByCashValue, sortByDemand, formatFullValue } from '@/utils/values';
@@ -22,6 +20,7 @@ import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface AvailableItemsGridProps {
+  items: TradeItem[];
   onSelect: (item: TradeItem, side: 'offering' | 'requesting') => boolean;
   selectedItems: TradeItem[];
   onCreateTradeAd?: () => void;
@@ -29,11 +28,9 @@ interface AvailableItemsGridProps {
 }
 
 const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
+  items,
   onSelect,
-  requireAuth = false,
 }) => {
-  const [availableItems, setAvailableItems] = useState<TradeItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -57,29 +54,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   useEffect(() => {
     setPage(1);
   }, [debouncedSearchQuery]);
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        setLoading(true);
-        const token = getToken();
-        if (requireAuth && !token) return;
-
-        const response = await fetch(`${PUBLIC_API_URL}/items/list`);
-        if (response.ok) {
-          const data = await response.json();
-          setAvailableItems(data);
-        }
-      } catch (err) {
-        console.error('Error fetching items:', err);
-        toast.error('Failed to load items');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItems();
-  }, [requireAuth]);
 
   useEffect(() => {
     const handleShowError = (event: CustomEvent) => {
@@ -111,7 +85,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     };
   }, []);
 
-  const filteredItems = availableItems.filter(item => {
+  const filteredItems = items.filter(item => {
     // First apply search filter
     const matchesSearch = item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
                          item.type.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
@@ -461,241 +435,193 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           />
         </div>
 
-        {loading ? (
-          <div className="space-y-4">
-            {/* Search Bar Skeleton */}
-            <div className="relative">
-              <Skeleton variant="rectangular" width="100%" height={40} className="rounded-lg" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {paginatedItems.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <p className="text-muted">
+                {searchQuery 
+                  ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+                  : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+              }
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterSort("name-all-items");
+                  setValueSort("cash-desc");
+                }}
+                className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
+              >
+                Clear All Filters
+              </button>
             </div>
-
-            {/* Items Grid Skeleton */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-              {[...Array(18)].map((_, i) => (
-                <div key={i} className="p-2 rounded-lg bg-[#2E3944]">
-                  {/* Item Image Skeleton */}
-                  <Skeleton variant="rectangular" width="100%" height={120} className="rounded-md mb-2" />
-                  
-                  {/* Item Name Skeleton */}
-                  <Skeleton variant="text" width="80%" height={20} className="mb-2" />
-                  
-                  {/* Item Type and Badges Skeleton */}
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <Skeleton variant="rectangular" width={60} height={20} className="rounded-full" />
-                    <Skeleton variant="rectangular" width={60} height={20} className="rounded-full" />
-                  </div>
-                  
-                  {/* Item Values Skeleton */}
-                  <div className="space-y-1 mb-2">
-                    <Skeleton variant="text" width="60%" height={16} />
-                    <Skeleton variant="text" width="40%" height={16} />
-                    <Skeleton variant="text" width="50%" height={16} />
-                  </div>
-                  
-                  {/* Action Buttons Skeleton */}
-                  <div className="flex gap-2">
-                    <Skeleton variant="rectangular" width="50%" height={24} className="rounded-md" />
-                    <Skeleton variant="rectangular" width="50%" height={24} className="rounded-md" />
+          ) : (
+            paginatedItems.map((item) => (
+              <div
+                key={item.id}
+                className={`p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
+                  item.tradable === 1 
+                    ? 'bg-[#2E3944] hover:bg-[#37424D]'
+                    : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
+                }`}
+              >
+                <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2">
+                  {isVideoItem(item.name) ? (
+                    <video
+                      src={getVideoPath(item.type, item.name)}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                    />
+                  ) : (
+                    <Image
+                      src={getItemImagePath(item.type, item.name, true)}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                      unoptimized
+                      fill
+                    />
+                  )}
+                  <div className="absolute top-2 right-2 z-5">
+                    <CategoryIconBadge
+                      type={item.type}
+                      isLimited={item.is_limited === 1}
+                      isSeasonal={item.is_seasonal === 1}
+                      hasChildren={!!item.children?.length}
+                      showCategoryForVariants={true}
+                      className="h-4 w-4"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Pagination Skeleton */}
-            <div className="flex justify-center mt-4">
-              <Skeleton variant="rectangular" width={200} height={32} className="rounded-lg" />
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-              {paginatedItems.length === 0 ? (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-muted">
-                    {searchQuery 
-                      ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                      : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                  }
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setFilterSort("name-all-items");
-                      setValueSort("cash-desc");
-                    }}
-                    className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
-              ) : (
-                paginatedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
-                      item.tradable === 1 
-                        ? 'bg-[#2E3944] hover:bg-[#37424D]'
-                        : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2">
-                      {isVideoItem(item.name) ? (
-                        <video
-                          src={getVideoPath(item.type, item.name)}
-                          className="w-full h-full object-cover"
-                          muted
-                          playsInline
-                          loop
-                          autoPlay
-                        />
-                      ) : (
-                        <Image
-                          src={getItemImagePath(item.type, item.name, true)}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                          onError={handleImageError}
-                          unoptimized
-                          fill
-                        />
+                <div className="flex flex-col flex-grow">
+                  <div className="space-y-1.5">
+                    <p className="text-muted text-sm font-medium truncate">{item.name}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span 
+                        className="px-2 py-0.5 text-xs rounded-full text-white"
+                        style={{ backgroundColor: getItemTypeColor(item.type) }}
+                      >
+                        {item.type}
+                      </span>
+                      {item.is_limited === 1 && (
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                          Limited
+                        </span>
                       )}
-                      <div className="absolute top-2 right-2 z-5">
-                        <CategoryIconBadge
-                          type={item.type}
-                          isLimited={item.is_limited === 1}
-                          isSeasonal={item.is_seasonal === 1}
-                          hasChildren={!!item.children?.length}
-                          showCategoryForVariants={true}
-                          className="h-4 w-4"
-                        />
-                      </div>
+                      {item.tradable !== 1 && (
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">
+                          Not Tradable
+                        </span>
+                      )}
                     </div>
-                    <div className="flex flex-col flex-grow">
-                      <div className="space-y-1.5">
-                        <p className="text-muted text-sm font-medium truncate">{item.name}</p>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span 
-                            className="px-2 py-0.5 text-xs rounded-full text-white"
-                            style={{ backgroundColor: getItemTypeColor(item.type) }}
-                          >
-                            {item.type}
-                          </span>
-                          {item.is_limited === 1 && (
-                            <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                              Limited
-                            </span>
-                          )}
-                          {item.tradable !== 1 && (
-                            <span className="px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">
-                              Not Tradable
-                            </span>
+                    {item.tradable === 1 && (
+                      <>
+                        <div className="text-xs text-muted space-y-1">
+                          <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                            (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
+                            item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
+                            formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
+                            : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
+                          <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                            (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
+                            item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
+                            formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
+                            : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
+                          {item.demand && (
+                            <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                              item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
+                              : item.demand}</div>
                           )}
                         </div>
-                        {item.tradable === 1 && (
-                          <>
-                            <div className="text-xs text-muted space-y-1">
-                              <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
-                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
-                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
-                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
-                              <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
-                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
-                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
-                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
-                              {item.demand && (
-                                <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                                  item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
-                                  : item.demand}</div>
-                              )}
-                            </div>
-                            {item.children && item.children.length > 0 && (
-                              <div className="relative">
+                        {item.children && item.children.length > 0 && (
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
+                                dropdown?.classList.toggle('hidden');
+                              }}
+                              className="w-full flex items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
+                            >
+                              {selectedVariants[item.id] || '2025'}
+                              <ChevronDownIcon className="h-4 w-4" />
+                            </button>
+                            <div className="absolute z-10 mt-1 w-full hidden rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVariantSelect(item.id, '2025');
+                                  (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
+                              >
+                                2025
+                              </button>
+                              {item.children?.map((child) => (
                                 <button
+                                  key={child.id}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
-                                    dropdown?.classList.toggle('hidden');
+                                    handleVariantSelect(item.id, child.sub_name);
+                                    (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
                                   }}
-                                  className="w-full flex items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
+                                  className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
                                 >
-                                  {selectedVariants[item.id] || '2025'}
-                                  <ChevronDownIcon className="h-4 w-4" />
+                                  {child.sub_name}
                                 </button>
-                                <div className="absolute z-10 mt-1 w-full hidden rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleVariantSelect(item.id, '2025');
-                                      (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                                    }}
-                                    className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
-                                  >
-                                    2025
-                                  </button>
-                                  {item.children?.map((child) => (
-                                    <button
-                                      key={child.id}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleVariantSelect(item.id, child.sub_name);
-                                        (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                                      }}
-                                      className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
-                                    >
-                                      {child.sub_name}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                      </div>
-                      {item.tradable === 1 && (
-                        <div className="flex gap-2 mt-auto pt-2">
-                          <button
-                            onClick={() => handleAddItem(item, 'offering')}
-                            className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                          >
-                            Offer
-                          </button>
-                          <button
-                            onClick={() => handleAddItem(item, 'requesting')}
-                            className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                          >
-                            Request
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                      </>
+                    )}
                   </div>
-                ))
-              )}
-            </div>
-            {!loading && totalPages > 1 && filteredItems.length > 0 && (
-              <div className="flex justify-center mt-4">
-                <Pagination 
-                  count={totalPages} 
-                  page={page} 
-                  onChange={handlePageChange}
-                  sx={{
-                    '& .MuiPaginationItem-root': {
-                      color: '#D3D9D4',
-                      '&.Mui-selected': {
-                        backgroundColor: '#5865F2',
-                        '&:hover': {
-                          backgroundColor: '#4752C4',
-                        },
-                      },
-                      '&:hover': {
-                        backgroundColor: '#37424D',
-                      },
-                    },
-                  }}
-                />
+                  {item.tradable === 1 && (
+                    <div className="flex gap-2 mt-auto pt-2">
+                      <button
+                        onClick={() => handleAddItem(item, 'offering')}
+                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                      >
+                        Offer
+                      </button>
+                      <button
+                        onClick={() => handleAddItem(item, 'requesting')}
+                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                      >
+                        Request
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </>
+            ))
+          )}
+        </div>
+        {totalPages > 1 && filteredItems.length > 0 && (
+          <div className="flex justify-center mt-4">
+            <Pagination 
+              count={totalPages} 
+              page={page} 
+              onChange={handlePageChange}
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  color: '#D3D9D4',
+                  '&.Mui-selected': {
+                    backgroundColor: '#5865F2',
+                    '&:hover': {
+                      backgroundColor: '#4752C4',
+                    },
+                  },
+                  '&:hover': {
+                    backgroundColor: '#37424D',
+                  },
+                },
+              }}
+            />
+          </div>
         )}
       </div>
 

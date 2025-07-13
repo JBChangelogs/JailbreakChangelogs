@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PUBLIC_API_URL } from "@/utils/api";
 import DupeResultsModal from './DupeResultsModal';
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import toast from 'react-hot-toast';
@@ -10,14 +9,7 @@ import ItemSelectionModal from './ItemSelectionModal';
 import ReportDupeModal from './ReportDupeModal';
 import { getToken } from '@/utils/auth';
 import LoginModalWrapper from '../Auth/LoginModalWrapper';
-
-interface DupeResult {
-  item_id: number;
-  owner: string;
-  user_id: number | null;
-  proof: string | null;
-  created_at: number;
-}
+import type { DupeResult, Item } from '@/types';
 
 interface Suggestion {
   message: string;
@@ -25,7 +17,12 @@ interface Suggestion {
   similarity: number;
 }
 
-const DupeSearchForm: React.FC = () => {
+interface DupeSearchFormProps {
+  initialItems?: {id: number, name: string, type: string}[];
+  initialDupes?: DupeResult[];
+}
+
+const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], initialDupes = [] }) => {
   const [ownerName, setOwnerName] = useState('');
   const [itemName, setItemName] = useState('');
   const [results, setResults] = useState<DupeResult[]>([]);
@@ -37,34 +34,14 @@ const DupeSearchForm: React.FC = () => {
   const [itemSuggestions, setItemSuggestions] = useState<{ name: string, type: string }[]>([]);
   const [showOwnerSuggestions, setShowOwnerSuggestions] = useState(false);
   const [showItemSuggestions, setShowItemSuggestions] = useState(false);
-  const [allDupes, setAllDupes] = useState<DupeResult[]>([]);
-  const [allItems, setAllItems] = useState<{id: number, name: string, type: string}[]>([]);
+  const [allDupes] = useState<DupeResult[]>(initialDupes);
+  const [allItems] = useState<{id: number, name: string, type: string}[]>(initialItems);
   const [matchingItemId, setMatchingItemId] = useState<number>(0);
   const [isItemSelectionModalOpen, setIsItemSelectionModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ name: string; type: string; id: number } | null>(null);
   const [duperName, setDuperName] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const dupesResponse = await fetch(`${PUBLIC_API_URL}/dupes/list`);
-        if (!dupesResponse.ok) throw new Error('Failed to fetch dupe data');
-        const dupesData: DupeResult[] = await dupesResponse.json();
-        setAllDupes(dupesData);
-
-        const itemsResponse = await fetch(`${PUBLIC_API_URL}/items/list`);
-        if (!itemsResponse.ok) throw new Error('Failed to fetch items');
-        const itemsData = await itemsResponse.json();
-        setAllItems(itemsData);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     if (ownerName.trim()) {
@@ -368,6 +345,7 @@ const DupeSearchForm: React.FC = () => {
         isOpen={isItemSelectionModalOpen}
         onClose={() => setIsItemSelectionModalOpen(false)}
         onItemSelect={handleItemSelect}
+        initialItems={allItems as Item[]}
       />
 
       {isReportModalOpen && selectedItem && (

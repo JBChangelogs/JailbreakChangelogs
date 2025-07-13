@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { PUBLIC_API_URL } from "@/utils/api";
 import { TradeAd } from '@/types/trading';
 import { UserData } from '@/types/auth';
+import { TradeItem } from '@/types/trading';
 import { TradeAdCard } from './TradeAdCard';
 import { TradeAdTabs } from './TradeAdTabs';
-import { TradeAdSkeleton } from './TradeAdSkeleton';
 import { Pagination, Button } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
@@ -15,90 +15,46 @@ import { deleteTradeAd } from '@/utils/trading';
 import toast from 'react-hot-toast';
 import { TradeAdForm } from './TradeAdForm';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog';
+import { useAuth } from '@/hooks/useAuth';
 
-export default function TradeAds() {
-  const [tradeAds, setTradeAds] = useState<TradeAd[]>([]);
-  const [loading, setLoading] = useState(true);
+interface TradeAdsProps {
+  initialTradeAds: (TradeAd & { user: UserData | null })[];
+  initialItems?: TradeItem[];
+}
+
+export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAdsProps) {
+  const { user } = useAuth();
+  const [tradeAds, setTradeAds] = useState<(TradeAd & { user: UserData | null })[]>(initialTradeAds);
+  const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'view' | 'create' | 'edit'>('view');
   const [offerStatuses, setOfferStatuses] = useState<Record<number, { loading: boolean; error: string | null; success: boolean }>>({});
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | null>(null);
   const [showOfferConfirm, setShowOfferConfirm] = useState<number | null>(null);
   const itemsPerPage = 6;
 
-  const fetchTradeAds = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${PUBLIC_API_URL}/trades/list?nocache=true`);
-      
-      let data = [];
-      if (response.status === 404) {
-        // 404 means no trade ads found (all expired)
-        data = [];
-      } else if (!response.ok) {
-        throw new Error('Failed to fetch trade ads');
-      } else {
-        data = await response.json();
-      }
-      
-      // Collect unique user IDs from trade ads
-      const userIds = [...new Set(data.map((trade: TradeAd) => trade.author))];
-      
-      // Fetch all user data in a single batch request
-      let userMap: Record<string, UserData> = {};
-      if (userIds.length > 0) {
-        try {
-          const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
-          if (userResponse.ok) {
-            const userDataArray = await userResponse.json();
-            userMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {
-              acc[user.id] = user;
-              return acc;
-            }, {});
-          }
-        } catch (err) {
-          console.error('Error fetching user data:', err);
-        }
-      }
-      
-      // Attach user data to trade ads
-      const tradeAdsWithUsers = data.map((trade: TradeAd) => ({
-        ...trade,
-        user: userMap[trade.author] || null
-      }));
-      
-      // Sort trade ads by creation date, newest first
-      const sortedTradeAds = tradeAdsWithUsers.sort((a: TradeAd & { user: UserData | null }, b: TradeAd & { user: UserData | null }) => b.created_at - a.created_at);
-      
-      setTradeAds(sortedTradeAds);
+  // Get current user ID from auth state
+  const currentUserId = user?.id || null;
 
-      // Get current user's ID
-      const token = getToken();
-      if (token) {
-        try {
-          const currentUserResponse = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
-          if (currentUserResponse.ok) {
-            const currentUserData = await currentUserResponse.json();
-            setCurrentUserId(currentUserData.id);
-          }
-        } catch (err) {
-          console.error('Error fetching current user data:', err);
-        }
-      }
+
+
+  const refreshTradeAds = async () => {
+    try {
+      setError(null);
+      
+      // Clear the hash before reloading to avoid staying on create/edit tabs
+      window.location.hash = '';
+      // Simple refresh - just reload the page to get fresh server-side data
+      window.location.reload();
     } catch (err) {
-      console.error('Error fetching trade ads:', err);
-      setError('Failed to load trade ads');
-    } finally {
-      setLoading(false);
+      console.error('Error refreshing trade ads:', err);
+      setError('Failed to refresh trade ads');
     }
   };
 
   useEffect(() => {
-    fetchTradeAds();
-
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
       if (hash === 'create' || hash === 'edit') {
@@ -237,7 +193,7 @@ export default function TradeAds() {
       console.error('Error deleting trade ad:', error);
       toast.error('Failed to delete trade ad');
       // Refresh the trade ads list to ensure consistency
-      fetchTradeAds();
+      refreshTradeAds();
     }
   };
 
@@ -257,9 +213,7 @@ export default function TradeAds() {
 
   const userTradeAds = tradeAds.filter(trade => trade.author === currentUserId);
 
-  if (loading) {
-    return <TradeAdSkeleton />;
-  }
+
 
   if (error) {
     return (
@@ -284,7 +238,7 @@ export default function TradeAds() {
             <div className="flex justify-center gap-4">
               <Button
                 variant="outlined"
-                onClick={fetchTradeAds}
+                onClick={refreshTradeAds}
                 sx={{
                   borderColor: '#5865F2',
                   color: '#5865F2',
@@ -314,12 +268,13 @@ export default function TradeAds() {
         {activeTab === 'create' && (
           <TradeAdForm 
             onSuccess={() => {
-              fetchTradeAds();
+              refreshTradeAds();
               window.history.pushState(null, '', window.location.pathname);
               setActiveTab('view');
               setSelectedTradeAd(null);
             }}
             editMode={false}
+            items={items}
           />
         )}
       </div>
@@ -433,13 +388,14 @@ export default function TradeAds() {
       ) : (
         <TradeAdForm 
           onSuccess={() => {
-            fetchTradeAds();
+            refreshTradeAds();
             window.history.pushState(null, '', window.location.pathname);
             setActiveTab('view');
             setSelectedTradeAd(null);
           }}
           editMode={activeTab === 'edit'}
           tradeAd={selectedTradeAd || undefined}
+          items={items}
         />
       )}
 

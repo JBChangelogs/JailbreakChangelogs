@@ -1,22 +1,14 @@
-"use client";
-
-import React, { useState } from 'react';
+import React, { Suspense } from 'react';
 import DupeReportHeader from '@/components/Dupes/DupeReportHeader';
 import DupeSearchForm from '@/components/Dupes/DupeSearchForm';
-import ReportDupeModal from '@/components/Dupes/ReportDupeModal';
-import ItemSelectionModal from '@/components/Dupes/ItemSelectionModal';
+import { fetchItems, fetchDupes } from '@/utils/api';
+import Loading from './loading';
+import { Item, DupeResult } from '@/types';
 
-const DupeCalculatorPage: React.FC = () => {
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isItemSelectionModalOpen, setIsItemSelectionModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<{ name: string; type: string; id: number } | null>(null);
-  const [duperName, setDuperName] = useState('');
+// ISR configuration - cache for 5 minutes
+export const revalidate = 300;
 
-  const handleItemSelect = (item: { id: number; name: string; type: string }) => {
-    setSelectedItem(item);
-    setIsReportModalOpen(true);
-  };
-
+export default function DupeCalculatorPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <DupeReportHeader />
@@ -24,32 +16,20 @@ const DupeCalculatorPage: React.FC = () => {
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-muted">Check for Duped Items</h2>
         </div>
-        <DupeSearchForm />
+        <Suspense fallback={<Loading />}>
+          <DupeSearchFormWrapper />
+        </Suspense>
       </div>
-
-      <ItemSelectionModal
-        isOpen={isItemSelectionModalOpen}
-        onClose={() => setIsItemSelectionModalOpen(false)}
-        onItemSelect={handleItemSelect}
-      />
-
-      {isReportModalOpen && selectedItem && (
-        <ReportDupeModal
-          isOpen={isReportModalOpen}
-          onClose={() => {
-            setIsReportModalOpen(false);
-            setSelectedItem(null);
-            setDuperName('');
-          }}
-          itemName={selectedItem.name}
-          itemType={selectedItem.type}
-          ownerName={duperName}
-          itemId={selectedItem.id}
-          isOwnerNameReadOnly={false}
-        />
-      )}
     </div>
   );
-};
+}
 
-export default DupeCalculatorPage; 
+async function DupeSearchFormWrapper() {
+  const [items, dupes] = await Promise.all([
+    fetchItems(),
+    fetchDupes()
+  ]);
+  const safeDupes = Array.isArray(dupes) ? dupes as DupeResult[] : [];
+
+  return <DupeSearchForm initialItems={items as Item[]} initialDupes={safeDupes} />;
+} 

@@ -144,3 +144,11 @@ export interface ItemDetails {
     data: ItemDetails;
   }>;
 }
+
+export interface DupeResult {
+  item_id: number;
+  owner: string;
+  user_id: number | null;
+  proof: string | null;
+  created_at: number;
+}

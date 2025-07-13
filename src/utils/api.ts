@@ -20,15 +20,14 @@ interface Changelog {
 }
 
 import { Item, ItemDetails } from "@/types";
+import { UserData } from "@/types/auth";
 import { formatFullDate } from '@/utils/timestamp';
 
-// For server-side (can use internal in prod)
 export const BASE_API_URL =
   process.env.RAILWAY_ENVIRONMENT_NAME === 'production'
     ? process.env.RAILWAY_INTERNAL_API_URL
     : process.env.NEXT_PUBLIC_API_URL;
 
-// For client-side (always public)
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchUsers = async () => {
@@ -296,4 +295,80 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
   const response = await fetch(`${BASE_API_URL}/changelogs/get?id=${id}`);
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
+}
+
+export async function fetchTradeAds() {
+  try {
+    console.log(`[SERVER] Fetching trade ads from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/trades/list?nocache=true`, {
+      cache: 'no-store',
+      next: { revalidate: 0 }
+    });
+    
+    if (response.status === 404) {
+      // 404 means no trade ads found (all expired)
+      console.log('[SERVER] No trade ads found');
+      return [];
+    }
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch trade ads');
+    }
+    
+    const data = await response.json();
+    console.log(`[SERVER] Successfully fetched ${data.length} trade ads`);
+    return data;
+  } catch (err) {
+    console.error('[SERVER] Error fetching trade ads:', err);
+    return [];
+  }
+}
+
+export async function fetchUsersBatch(userIds: string[]) {
+  try {
+    if (userIds.length === 0) {
+      return {};
+    }
+    
+    console.log(`[SERVER] Fetching ${userIds.length} users in batch from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`, {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch users batch');
+    }
+    
+    const userDataArray = await response.json();
+    const userMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+    
+    console.log(`[SERVER] Successfully fetched ${userDataArray.length} users in batch`);
+    return userMap;
+  } catch (err) {
+    console.error('[SERVER] Error fetching users batch:', err);
+    return {};
+  }
+}
+
+export async function fetchDupes() {
+  try {
+    console.log(`[SERVER] Fetching dupes from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/dupes/list`, {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch dupes');
+    }
+    
+    const data = await response.json();
+    console.log(`[SERVER] Successfully fetched ${data.length} dupes`);
+    return data;
+  } catch (err) {
+    console.error('[SERVER] Error fetching dupes:', err);
+    return [];
+  }
 } 
