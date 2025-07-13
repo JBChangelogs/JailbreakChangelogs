@@ -198,7 +198,7 @@ export const fetchUsersForList = async () => {
 export async function fetchItems() {
   try {
     console.log('[SERVER] Fetching items from API...');
-    const response = await fetch(`${PROD_API_URL}/items/list`, {
+    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/items/list`, {
       next: { revalidate: 300 } // Cache for 5 minutes (300 seconds)
     });
     if (!response.ok) throw new Error("Failed to fetch items");
