@@ -5,7 +5,6 @@ import { getMaintenanceMetadata } from '@/utils/maintenance';
 import { formatFullValue } from '@/utils/values';
 import { WithContext, FAQPage, BreadcrumbList, ListItem } from 'schema-dts';
 import type { ItemDetails } from '@/types/index';
-import { notFound } from 'next/navigation';
 
 const FALLBACK_IMAGE = 'https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp';
 
@@ -241,15 +240,12 @@ export default async function ItemLayout({
 }) {
   const { type, name } = await params;
   const item = await fetchItem(type, name);
-  if (!item) {
-    notFound();
-  }
   const faqJsonLdData = await generateFAQJsonLd(item);
   const breadcrumbJsonLdData = await generateBreadcrumbJsonLd(item, type, name);
 
   return (
     <>
-      {faqJsonLdData && (
+      {item && faqJsonLdData && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -257,7 +253,7 @@ export default async function ItemLayout({
           }}
         />
       )}
-      {breadcrumbJsonLdData && (
+      {item && breadcrumbJsonLdData && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -266,7 +262,7 @@ export default async function ItemLayout({
         />
       )}
       {/* SEO-friendly H1 that's always present */}
-      <h1 className="sr-only">{item.name} ({item.type})</h1>
+      {item && <h1 className="sr-only">{item.name} ({item.type})</h1>}
       {children}
     </>
   );

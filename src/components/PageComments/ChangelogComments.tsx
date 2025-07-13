@@ -324,7 +324,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           content: cleanCommentText(newComment),
@@ -390,7 +389,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           id: commentId,
@@ -425,7 +423,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           id: commentId,
@@ -539,7 +536,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           owner: token,

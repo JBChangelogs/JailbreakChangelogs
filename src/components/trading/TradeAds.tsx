@@ -110,7 +110,6 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           id: tradeId,

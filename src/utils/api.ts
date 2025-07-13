@@ -324,6 +324,32 @@ export async function fetchTradeAds() {
   }
 }
 
+export async function fetchTradeAd(id: string) {
+  try {
+    console.log(`[SERVER] Fetching trade ad ${id} from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/trades/get?id=${id}`, {
+      cache: 'no-store',
+      next: { revalidate: 0 }
+    });
+    
+    if (response.status === 404) {
+      console.log(`[SERVER] Trade ad ${id} not found`);
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch trade ad');
+    }
+    
+    const data = await response.json();
+    console.log(`[SERVER] Successfully fetched trade ad ${id}`);
+    return data;
+  } catch (err) {
+    console.error('[SERVER] Error fetching trade ad:', err);
+    return null;
+  }
+}
+
 export async function fetchUsersBatch(userIds: string[]) {
   try {
     if (userIds.length === 0) {
