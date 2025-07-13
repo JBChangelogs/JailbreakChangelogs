@@ -15,7 +15,7 @@ import { sortAndFilterItems } from "@/utils/values";
 import toast from 'react-hot-toast';
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { PROD_API_URL } from "@/services/api";
+import { PUBLIC_API_URL } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { demandOrder } from "@/utils/values";
@@ -106,7 +106,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const handleRandomItem = async () => {
     try {
       const loadingToast = toast.loading('Finding a random item...');
-      const response = await fetch(`${PROD_API_URL}/items/random`);
+      const response = await fetch(`${PUBLIC_API_URL}/items/random`);
       if (!response.ok) throw new Error('Failed to fetch random item');
       const item = await response.json();
       toast.dismiss(loadingToast);
@@ -147,7 +147,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          const response = await fetch(`${PROD_API_URL}/favorites/get?user=${userData.id}`);
+          const response = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userData.id}`);
           if (response.ok) {
             const favoritesData = await response.json();
             if (Array.isArray(favoritesData)) {

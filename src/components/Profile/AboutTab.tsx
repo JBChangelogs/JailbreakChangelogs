@@ -7,7 +7,7 @@ import { formatCustomDate } from '@/utils/timestamp';
 import { useRealTimeRelativeDate } from '@/hooks/useRealTimeRelativeDate';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getToken } from '@/utils/auth';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { convertUrlsToLinks } from '@/utils/urlConverter';
 
 interface AboutTabProps {
@@ -69,7 +69,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
         return;
       }
       
-      const response = await fetch(`${PROD_API_URL}/users/description/update`, {
+      const response = await fetch(`${PUBLIC_API_URL}/users/description/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: token, description: cleanedBio })

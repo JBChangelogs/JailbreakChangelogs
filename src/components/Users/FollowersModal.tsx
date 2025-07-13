@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, InputAdornment } from '@mui/material';
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from '@/utils/avatar';
 import Link from 'next/link';
 import { getToken } from '@/utils/auth';
@@ -77,7 +77,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
           return;
         }
 
-        const response = await fetch(`${PROD_API_URL}/users/followers/get?user=${userId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/followers/get?user=${userId}`);
         
         if (response.status === 404) {
           setFollowers([]);
@@ -108,7 +108,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         
         try {
           if (idsToFetch.length > 0) {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
+            const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
             if (userResponse.ok) {
               const userDataArray = await userResponse.json();
               const detailsMap = userDataArray.reduce((acc: Record<string, User>, userData: User) => {
@@ -152,7 +152,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       if (!isOpen || !currentUserId) return;
 
       try {
-        const response = await fetch(`${PROD_API_URL}/users/following/get?user=${currentUserId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/following/get?user=${currentUserId}`);
         if (!response.ok) return;
 
         const followingData = await response.json();
@@ -183,7 +183,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/users/followers/add`, {
+      const response = await fetch(`${PUBLIC_API_URL}/users/followers/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ follower: token, following: followerId })

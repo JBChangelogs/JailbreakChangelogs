@@ -34,7 +34,7 @@ import { useEscapeLogin } from '@/utils/escapeLogin';
 import { UserData } from '../../types/auth';
 import { UserAvatar } from '@/utils/avatar';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -87,7 +87,7 @@ export default function Header() {
       }
 
       try {
-        const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
         if (!response.ok) {
           // Only clear data if it's an auth error
           if (response.status === 403) {

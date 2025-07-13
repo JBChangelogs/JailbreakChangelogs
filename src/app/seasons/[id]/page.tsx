@@ -6,7 +6,7 @@ import SeasonHeader from '@/components/Seasons/SeasonHeader';
 import SeasonNavigation from '@/components/Seasons/SeasonNavigation';
 import ImageGallery from '@/components/Seasons/ImageGallery';
 import ChangelogComments from '@/components/PageComments/ChangelogComments';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { useRouter } from 'next/navigation';
 import localFont from "next/font/local";
 import { formatProfileDate } from '@/utils/timestamp';
@@ -75,7 +75,7 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
           return;
         }
 
-        const response = await fetch(`${PROD_API_URL}/seasons/list`);
+        const response = await fetch(`${PUBLIC_API_URL}/seasons/list`);
         const data = await response.json();
         setSeasonList(data
           .filter((s: Season) => {
@@ -122,7 +122,7 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
     window.history.pushState({}, '', `/seasons/${id}`);
     
     try {
-      const response = await fetch(`${PROD_API_URL}/seasons/list`);
+      const response = await fetch(`${PUBLIC_API_URL}/seasons/list`);
       const data = await response.json();
       
       const seasonData = data.find((s: Season) => s.season.toString() === id);

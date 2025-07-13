@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, InputAdornment, Button } from '@mui/material';
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from '@/utils/avatar';
 import Link from 'next/link';
 import { getToken } from '@/utils/auth';
@@ -71,7 +71,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           return;
         }
 
-        const response = await fetch(`${PROD_API_URL}/users/following/get?user=${userId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/following/get?user=${userId}`);
         
         if (response.status === 404) {
           setFollowing([]);
@@ -109,7 +109,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         
         try {
           if (idsToFetch.length > 0) {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
+            const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(',')}&nocache=true`);
             if (userResponse.ok) {
               const userDataArray = await userResponse.json();
               const detailsMap = userDataArray.reduce((acc: Record<string, User>, userData: User) => {
@@ -161,7 +161,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
       const isCurrentlyFollowing = followingStatus[followingId];
       const response = await fetch(
-        `${PROD_API_URL}/users/followers/${isCurrentlyFollowing ? 'remove' : 'add'}`,
+        `${PUBLIC_API_URL}/users/followers/${isCurrentlyFollowing ? 'remove' : 'add'}`,
         {
           method: isCurrentlyFollowing ? 'DELETE' : 'POST',
           headers: { 'Content-Type': 'application/json' },

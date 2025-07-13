@@ -1,4 +1,4 @@
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 
 export function storeCampaign(campaign: string): void {
   if (typeof window === 'undefined') return;
@@ -18,7 +18,7 @@ export function clearStoredCampaign(): void {
 export async function countCampaignVisit(campaign: string, token: string): Promise<void> {
   try {
     const response = await fetch(
-      `${PROD_API_URL}/campaigns/count?campaign=${campaign}&token=${token}`,
+      `${PUBLIC_API_URL}/campaigns/count?campaign=${campaign}&token=${token}`,
       {
         method: 'POST',
         headers: {

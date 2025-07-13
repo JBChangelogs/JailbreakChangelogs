@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getMaintenanceMetadata } from '@/utils/maintenance';
 
 interface Props {
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const { id } = await params;
-    const response = await fetch(`${PROD_API_URL}/seasons/list`);
+    const response = await fetch(`${PUBLIC_API_URL}/seasons/list`);
     const seasons = await response.json();
     const season = seasons.find((s: Season) => s.season.toString() === id);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { formatRelativeDate } from '@/utils/timestamp';
 import { convertUrlsToLinks } from '@/utils/urlConverter';
 import { Button, Tooltip, Pagination } from '@mui/material';
@@ -96,7 +96,7 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
   useEffect(() => {
     const fetchChanges = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/item/changes?id=${itemId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/item/changes?id=${itemId}`);
         
         // Handle 404 as empty changes array
         if (response.status === 404) {

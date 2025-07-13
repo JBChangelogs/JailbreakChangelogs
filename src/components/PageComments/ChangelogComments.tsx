@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, CircularProgress, Typography, TextField, Button, IconButton, Pagination, Menu, MenuItem, Skeleton, Tooltip } from '@mui/material';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from '@/utils/avatar';
 import { PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, EllipsisHorizontalIcon, ChatBubbleLeftIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { BiSolidSend } from "react-icons/bi";
@@ -205,7 +205,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       // Fetch user data in batch
-      const response = await fetch(`${PROD_API_URL}/users/get/batch?ids=${usersToFetch.join(',')}&nocache=true`);
+      const response = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${usersToFetch.join(',')}&nocache=true`);
       if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
       
@@ -247,7 +247,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     const abortController = new AbortController();
     
     try {
-      const endpoint = `${PROD_API_URL}/comments/get?type=${type === 'item' ? itemType : type}&id=${changelogId}&nocache=true`;
+      const endpoint = `${PUBLIC_API_URL}/comments/get?type=${type === 'item' ? itemType : type}&id=${changelogId}&nocache=true`;
       
       const response = await fetch(endpoint, {
         signal: abortController.signal
@@ -320,7 +320,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/comments/add`, {
+      const response = await fetch(`${PUBLIC_API_URL}/comments/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/comments/edit`, {
+      const response = await fetch(`${PUBLIC_API_URL}/comments/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -421,7 +421,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/comments/delete`, {
+      const response = await fetch(`${PUBLIC_API_URL}/comments/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -535,7 +535,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/comments/report`, {
+      const response = await fetch(`${PUBLIC_API_URL}/comments/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

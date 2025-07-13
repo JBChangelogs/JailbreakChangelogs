@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { XMarkIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Image from 'next/image';
 import Link from 'next/link';
 import { getItemImagePath, handleImageError } from '@/utils/images';
@@ -116,7 +116,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
           const uniqueItemIds = [...new Set(results.map(result => result.item_id))];
           
           const itemPromises = uniqueItemIds.map(itemId => 
-            fetch(`${PROD_API_URL}/items/get?id=${itemId}`).then(res => res.json())
+            fetch(`${PUBLIC_API_URL}/items/get?id=${itemId}`).then(res => res.json())
           );
           const items = await Promise.all(itemPromises);
           setItemDetails(items);

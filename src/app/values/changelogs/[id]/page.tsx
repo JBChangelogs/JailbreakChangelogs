@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ThemeProvider, Skeleton, Pagination, Box, Chip, Tooltip, TextField, InputAdornment, IconButton } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { darkTheme } from '@/theme/darkTheme';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Image from 'next/image';
 import Link from 'next/link';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
@@ -127,7 +127,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
     }
     const fetchChangelog = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/items/changelogs/get?id=${id}`);
+        const response = await fetch(`${PUBLIC_API_URL}/items/changelogs/get?id=${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch changelog');
         }
@@ -146,7 +146,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
         // Fetch user data in batch
         if (userIds.size > 0) {
           try {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${Array.from(userIds).join(',')}&nocache=true`);
+            const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${Array.from(userIds).join(',')}&nocache=true`);
             if (userResponse.ok) {
               const userDataArray = await userResponse.json();
               const userDataMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {

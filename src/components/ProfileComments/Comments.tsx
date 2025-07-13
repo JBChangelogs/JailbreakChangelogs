@@ -3,7 +3,7 @@ import { formatRelativeDate, formatCustomDate } from '@/utils/timestamp';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { 
   getItemImagePath, 
   isVideoItem,
@@ -49,7 +49,7 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
   useEffect(() => {
     // Fetch changelog details if the item type is changelog
     if (item_type.toLowerCase() === 'changelog' && item_id) {
-      fetch(`${PROD_API_URL}/changelogs/get?id=${item_id}`)
+      fetch(`${PUBLIC_API_URL}/changelogs/get?id=${item_id}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`API request failed with status ${response.status}`);
@@ -66,7 +66,7 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
     
     // Fetch season details if the item type is season
     if (item_type.toLowerCase() === 'season' && item_id) {
-      fetch(`${PROD_API_URL}/seasons/get?season=${item_id}`)
+      fetch(`${PUBLIC_API_URL}/seasons/get?season=${item_id}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`API request failed with status ${response.status}`);
@@ -91,7 +91,7 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
     if (needsItemDetails && item_id) {
       setIsLoading(true);
       
-      fetch(`${PROD_API_URL}/items/get?id=${item_id}`)
+      fetch(`${PUBLIC_API_URL}/items/get?id=${item_id}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`API request failed with status ${response.status}`);

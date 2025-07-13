@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Alert, List, ListItem, ListItemIcon, ListItemText, Link } from '@mui/material';
 import toast from 'react-hot-toast';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import WarningIcon from '@mui/icons-material/Warning';
 import LaunchIcon from '@mui/icons-material/Launch';
 import LoginIcon from '@mui/icons-material/Login';
@@ -35,7 +35,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${PROD_API_URL}/oauth/roblox/disconnect`, {
+      const response = await fetch(`${PUBLIC_API_URL}/oauth/roblox/disconnect`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'

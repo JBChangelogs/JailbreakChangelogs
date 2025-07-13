@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 
 const MIN_TITLE_LENGTH = 10;
 const MIN_DESCRIPTION_LENGTH = 25;
@@ -35,7 +35,7 @@ export default function ReportIssueModal({ isOpen, onClose }: ReportIssueModalPr
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${PROD_API_URL}/issues/add`, {
+      const response = await fetch(`${PUBLIC_API_URL}/issues/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

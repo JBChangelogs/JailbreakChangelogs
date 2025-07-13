@@ -1,4 +1,4 @@
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getToken } from '@/utils/auth';
 
 export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
@@ -8,7 +8,7 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
   }
 
   try {
-    const response = await fetch(`${PROD_API_URL}/trades/delete?id=${tradeId}&token=${token}`, {
+    const response = await fetch(`${PUBLIC_API_URL}/trades/delete?id=${tradeId}&token=${token}`, {
       method: 'DELETE',
     });
 

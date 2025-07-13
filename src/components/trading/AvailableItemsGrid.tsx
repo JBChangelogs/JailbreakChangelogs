@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { TradeItem } from '@/types/trading';
 import { Pagination, Skeleton, Checkbox, FormControlLabel } from '@mui/material';
 import { getToken } from '@/utils/auth';
@@ -65,7 +65,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         const token = getToken();
         if (requireAuth && !token) return;
 
-        const response = await fetch(`${PROD_API_URL}/items/list`);
+        const response = await fetch(`${PUBLIC_API_URL}/items/list`);
         if (response.ok) {
           const data = await response.json();
           setAvailableItems(data);

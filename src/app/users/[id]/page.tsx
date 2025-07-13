@@ -15,7 +15,7 @@ import { UserSettings, FollowingData, FollowerData } from '@/types/auth';
 import { toast } from 'react-hot-toast';
 import { Tooltip } from '@mui/material';
 import { getToken } from '@/utils/auth';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { UserBadges } from '@/components/Profile/UserBadges';
 import { formatRelativeDate, formatShortDate, formatCustomDate } from '@/utils/timestamp';
 import ProfileTabs from '@/components/Profile/ProfileTabs';
@@ -146,7 +146,7 @@ export default function UserProfilePage() {
           
           if (currentUserId) {
             fetchPromises.push(
-              fetch(`${PROD_API_URL}/users/following/get?user=${currentUserId}`)
+              fetch(`${PUBLIC_API_URL}/users/following/get?user=${currentUserId}`)
                 .then(res => res.json())
                 .then((followingData: FollowingData[] | string) => {
                   const isUserFollowing = Array.isArray(followingData) && followingData.some(followedUser => 
@@ -159,7 +159,7 @@ export default function UserProfilePage() {
           }
           
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/users/followers/get?user=${userId}`)
+            fetch(`${PUBLIC_API_URL}/users/followers/get?user=${userId}`)
               .then(res => res.json())
               .then((followersData: FollowerData[] | string) => {
                 setFollowerCount(Array.isArray(followersData) ? followersData.length : 0);
@@ -168,7 +168,7 @@ export default function UserProfilePage() {
           );
           
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/users/following/get?user=${userId}`)
+            fetch(`${PUBLIC_API_URL}/users/following/get?user=${userId}`)
               .then(res => res.json())
               .then((followingData: FollowingData[] | string) => {
                 setFollowingCount(Array.isArray(followingData) ? followingData.length : 0);
@@ -177,7 +177,7 @@ export default function UserProfilePage() {
           );
           
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/users/description/get?user=${userId}&nocache=true`)
+            fetch(`${PUBLIC_API_URL}/users/description/get?user=${userId}&nocache=true`)
               .then(res => res.json())
               .then((bioData) => {
                 if (bioData) {
@@ -189,7 +189,7 @@ export default function UserProfilePage() {
           );
 
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/users/comments/get?author=${userId}`)
+            fetch(`${PUBLIC_API_URL}/users/comments/get?author=${userId}`)
               .then(res => res.json())
               .then((commentsData) => {
                 setComments(Array.isArray(commentsData) ? commentsData : []);
@@ -205,7 +205,7 @@ export default function UserProfilePage() {
           
           // Fetch private servers for this user
           fetchPromises.push(
-            fetch(`${PROD_API_URL}/servers/get?owner=${userId}`)
+            fetch(`${PUBLIC_API_URL}/servers/get?owner=${userId}`)
               .then(res => {
                 if (!res.ok) throw null;
                 return res.json();
@@ -261,13 +261,13 @@ export default function UserProfilePage() {
       let response;
       
       if (isFollowing) {
-        response = await fetch(`${PROD_API_URL}/users/followers/remove`, {
+        response = await fetch(`${PUBLIC_API_URL}/users/followers/remove`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ follower: token, following: userId })
         });
       } else {
-        response = await fetch(`${PROD_API_URL}/users/followers/add`, {
+        response = await fetch(`${PUBLIC_API_URL}/users/followers/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ follower: token, following: userId })

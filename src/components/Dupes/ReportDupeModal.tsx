@@ -5,7 +5,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import { getItemImagePath, handleImageError } from '@/utils/images';
 import { getItemTypeColor } from '@/utils/badgeColors';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { getToken } from '@/utils/auth';
 
@@ -95,7 +95,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/dupes/report`, {
+      const response = await fetch(`${PUBLIC_API_URL}/dupes/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

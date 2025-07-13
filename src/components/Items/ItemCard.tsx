@@ -21,7 +21,7 @@ import { StarIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { PauseIcon } from "@heroicons/react/24/solid";
 import SubItemsDropdown from "./SubItemsDropdown";
-import { PROD_API_URL } from "@/services/api";
+import { PUBLIC_API_URL } from "@/utils/api";
 import toast from "react-hot-toast";
 import { getToken } from "@/utils/auth";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -172,7 +172,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
 
     try {
       const response = await fetch(
-        `${PROD_API_URL}/favorites/${isFavorited ? "remove" : "add"}`,
+        `${PUBLIC_API_URL}/favorites/${isFavorited ? "remove" : "add"}`,
         {
           method: isFavorited ? "DELETE" : "POST",
           headers: {

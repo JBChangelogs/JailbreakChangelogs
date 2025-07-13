@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import DupeResultsModal from './DupeResultsModal';
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import toast from 'react-hot-toast';
@@ -49,12 +49,12 @@ const DupeSearchForm: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dupesResponse = await fetch(`${PROD_API_URL}/dupes/list`);
+        const dupesResponse = await fetch(`${PUBLIC_API_URL}/dupes/list`);
         if (!dupesResponse.ok) throw new Error('Failed to fetch dupe data');
         const dupesData: DupeResult[] = await dupesResponse.json();
         setAllDupes(dupesData);
 
-        const itemsResponse = await fetch(`${PROD_API_URL}/items/list`);
+        const itemsResponse = await fetch(`${PUBLIC_API_URL}/items/list`);
         if (!itemsResponse.ok) throw new Error('Failed to fetch items');
         const itemsData = await itemsResponse.json();
         setAllItems(itemsData);

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { PROD_API_URL } from '@/services/api'
+import { PUBLIC_API_URL } from '@/utils/api'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
 const ASSETS_URL = 'https://assets.jailbreakchangelogs.xyz'
@@ -11,7 +11,7 @@ interface Changelog {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const response = await fetch(`${PROD_API_URL}/changelogs/list`)
+  const response = await fetch(`${PUBLIC_API_URL}/changelogs/list`)
   const data = await response.json()
   
   return data.map((changelog: Changelog) => {

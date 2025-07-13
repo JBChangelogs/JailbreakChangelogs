@@ -13,7 +13,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { useAuth } from '@/hooks/useAuth';
 import { storeCampaign } from '@/utils/campaign';
 import { useSearchParams } from 'next/navigation';
@@ -353,7 +353,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                         onClick={() => {
                           setIsRedirecting(true);
                           const currentURL = window.location.href;
-                          const oauthRedirect = `${PROD_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
+                          const oauthRedirect = `${PUBLIC_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? '&join_discord=true' : ''}`;
 
                           toast.loading('Redirecting to Discord...', {
                             duration: 2000,
@@ -421,7 +421,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
                             setIsRedirecting(true);
                             const currentURL = window.location.href;
-                            const oauthRedirect = `${PROD_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL)}&owner=${encodeURIComponent(token)}`;
+                            const oauthRedirect = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL)}&owner=${encodeURIComponent(token)}`;
 
                             toast.loading('Redirecting to Roblox...', {
                               duration: 2000,

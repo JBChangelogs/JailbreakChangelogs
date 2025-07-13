@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { ItemDetails } from '@/types';
 import { demandOrder } from '@/utils/values';
 import Image from 'next/image';
@@ -77,7 +77,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
     const fetchAndCalculateSimilarItems = async () => {
       try {
         // Fetch only items of the same type
-        const response = await fetch(`${PROD_API_URL}/items/get?type=${encodeURIComponent(currentItem.type)}`);
+        const response = await fetch(`${PUBLIC_API_URL}/items/get?type=${encodeURIComponent(currentItem.type)}`);
         if (!response.ok) throw new Error('Failed to fetch items');
         const typeItems: ItemDetails[] = await response.json();
 

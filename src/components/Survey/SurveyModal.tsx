@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { getToken } from '@/utils/auth';
 import toast from 'react-hot-toast';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 
 interface Survey {
   id: string;
@@ -39,7 +39,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
     setSubmitting(true);
     try {
       const token = getToken();
-      const response = await fetch(`${PROD_API_URL}/surveys/submit`, {
+      const response = await fetch(`${PUBLIC_API_URL}/surveys/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

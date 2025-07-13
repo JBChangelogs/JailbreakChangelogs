@@ -6,7 +6,7 @@ import React from "react";
 import { ThemeProvider, Skeleton, Pagination, Button } from '@mui/material';
 import { darkTheme } from '@/theme/darkTheme';
 import ValuesChangelogHeader from '@/components/Values/ValuesChangelogHeader';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Link from 'next/link';
 import { formatMessageDate } from '@/utils/timestamp';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
@@ -63,7 +63,7 @@ export default function ValuesChangelogPage() {
   useEffect(() => {
     const fetchChangelogs = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/items/changelogs/list`);
+        const response = await fetch(`${PUBLIC_API_URL}/items/changelogs/list`);
         if (!response.ok) {
           throw new Error('Failed to fetch changelogs');
         }

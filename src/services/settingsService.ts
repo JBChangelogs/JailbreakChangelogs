@@ -1,8 +1,8 @@
 import { UserSettings } from '@/types/auth';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 
 export const updateBanner = async (url: string, token: string): Promise<string> => {
-  const response = await fetch(`${PROD_API_URL}/users/banner/update`, {
+  const response = await fetch(`${PUBLIC_API_URL}/users/banner/update`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -22,7 +22,7 @@ export const updateBanner = async (url: string, token: string): Promise<string> 
 };
 
 export const updateAvatar = async (url: string, token: string): Promise<string> => {
-  const response = await fetch(`${PROD_API_URL}/users/avatar/update`, {
+  const response = await fetch(`${PUBLIC_API_URL}/users/avatar/update`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ export const updateSettings = async (settings: Partial<UserSettings>, token: str
     }
   });
 
-  const response = await fetch(`${PROD_API_URL}/users/settings/update?user=${token}`, {
+  const response = await fetch(`${PUBLIC_API_URL}/users/settings/update?user=${token}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ export const updateSettings = async (settings: Partial<UserSettings>, token: str
 };
 
 export const deleteAccount = async (token: string): Promise<void> => {
-  const response = await fetch(`${PROD_API_URL}/users/delete?session_token=${token}`, {
+  const response = await fetch(`${PUBLIC_API_URL}/users/delete?session_token=${token}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'

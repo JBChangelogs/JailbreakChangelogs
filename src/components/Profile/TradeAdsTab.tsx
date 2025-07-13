@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CircularProgress, Box, Pagination, Chip } from '@mui/material';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { formatRelativeDate } from '@/utils/timestamp';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import Image from 'next/image';
@@ -55,7 +55,7 @@ export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
     const fetchTradeAds = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${PROD_API_URL}/trades/get?user=${userId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/trades/get?user=${userId}`);
         
         if (response.status === 404) {
           // Handle case where user has no trade ads

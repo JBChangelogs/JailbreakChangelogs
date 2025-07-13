@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Image from 'next/image';
 import { Skeleton } from '@mui/material';
 import Link from 'next/link';
@@ -33,7 +33,7 @@ export default function OnlineUsers({ max = 4, className = '' }: OnlineUsersProp
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${PROD_API_URL}/users/list/online`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/list/online`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch online users');

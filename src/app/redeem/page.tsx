@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getToken } from '@/utils/auth';
 import Link from 'next/link';
 
@@ -39,7 +39,7 @@ export default function RedeemPage() {
     setMessage(null);
 
     try {
-      const response = await fetch(`${PROD_API_URL}/codes/redeem`, {
+      const response = await fetch(`${PUBLIC_API_URL}/codes/redeem`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

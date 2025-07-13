@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { TradeAd } from '@/types/trading';
 import { UserData } from '@/types/auth';
 import { TradeAdCard } from './TradeAdCard';
@@ -32,7 +32,7 @@ export default function TradeAds() {
   const fetchTradeAds = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${PROD_API_URL}/trades/list?nocache=true`);
+      const response = await fetch(`${PUBLIC_API_URL}/trades/list?nocache=true`);
       
       let data = [];
       if (response.status === 404) {
@@ -51,7 +51,7 @@ export default function TradeAds() {
       let userMap: Record<string, UserData> = {};
       if (userIds.length > 0) {
         try {
-          const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
+          const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
           if (userResponse.ok) {
             const userDataArray = await userResponse.json();
             userMap = userDataArray.reduce((acc: Record<string, UserData>, user: UserData) => {
@@ -79,7 +79,7 @@ export default function TradeAds() {
       const token = getToken();
       if (token) {
         try {
-          const currentUserResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
+          const currentUserResponse = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
           if (currentUserResponse.ok) {
             const currentUserData = await currentUserResponse.json();
             setCurrentUserId(currentUserData.id);
@@ -150,7 +150,7 @@ export default function TradeAds() {
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/trades/offer`, {
+      const response = await fetch(`${PUBLIC_API_URL}/trades/offer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

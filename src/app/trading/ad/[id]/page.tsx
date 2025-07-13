@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Link from 'next/link';
 import { ArrowLeftIcon, ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from '@/components/Layout/Breadcrumb';
@@ -46,7 +46,7 @@ export default function TradeDetailsPage() {
     const fetchTradeDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${PROD_API_URL}/trades/get?id=${params.id}`);
+        const response = await fetch(`${PUBLIC_API_URL}/trades/get?id=${params.id}`);
         
         if (response.status === 404) {
           setErrorType('not_found');
@@ -64,7 +64,7 @@ export default function TradeDetailsPage() {
         }
         
         try {
-          const userResponse = await fetch(`${PROD_API_URL}/users/get?id=${data.author}&nocache=true`);
+          const userResponse = await fetch(`${PUBLIC_API_URL}/users/get?id=${data.author}&nocache=true`);
           if (userResponse.ok) {
             const userData = await userResponse.json();
             setTrade({ ...data, user: userData });
@@ -79,7 +79,7 @@ export default function TradeDetailsPage() {
         const token = getToken();
         if (token) {
           try {
-            const currentUserResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
+            const currentUserResponse = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
             if (currentUserResponse.ok) {
               const currentUserData = await currentUserResponse.json();
               setCurrentUserId(currentUserData.id);
@@ -118,7 +118,7 @@ export default function TradeDetailsPage() {
         return;
       }
 
-      const response = await fetch(`${PROD_API_URL}/trades/offer`, {
+      const response = await fetch(`${PUBLIC_API_URL}/trades/offer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

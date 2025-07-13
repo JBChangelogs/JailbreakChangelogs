@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Box, Pagination, Chip, Button, Skeleton, Divider, Tooltip } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import Image from 'next/image';
 import Link from 'next/link';
 import { handleImageError, getItemImagePath, isVideoItem, getVideoPath } from '@/utils/images';
@@ -65,7 +65,7 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
           return;
         }
 
-        const response = await fetch(`${PROD_API_URL}/favorites/get?user=${userId}`);
+        const response = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userId}`);
         
         if (!response.ok) {
           // Check if this is a 404 "No favorites found" response
@@ -96,10 +96,10 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
                 if (isSubItem) {
                   // For sub-items, use the sub-items endpoint
                   const [parentId] = favorite.item_id.split('-');
-                  itemResponse = await fetch(`${PROD_API_URL}/items/get/sub?parent_id=${parentId}`);
+                  itemResponse = await fetch(`${PUBLIC_API_URL}/items/get/sub?parent_id=${parentId}`);
                 } else {
                   // For regular items, use the normal endpoint
-                  itemResponse = await fetch(`${PROD_API_URL}/items/get?id=${favorite.item_id}`);
+                  itemResponse = await fetch(`${PUBLIC_API_URL}/items/get?id=${favorite.item_id}`);
                 }
                 
                 if (itemResponse.ok) {

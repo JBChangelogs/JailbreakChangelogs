@@ -1,5 +1,5 @@
 import React from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { ClockIcon, UserIcon, ShieldCheckIcon, PencilIcon, TrashIcon, PlusCircleIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import { formatProfileDate } from '@/utils/timestamp';
 import { getToken } from '@/utils/auth';
@@ -49,7 +49,7 @@ const ServerList: React.FC = () => {
       let userId: string | null = null;
       if (token) {
         try {
-          const userResponse = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
+          const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
           if (userResponse.ok) {
             const userData = await userResponse.json() as UserData;
             userId = userData.id;
@@ -65,7 +65,7 @@ const ServerList: React.FC = () => {
       }
 
       try {
-        const serversResponse = await fetch(`${PROD_API_URL}/servers/list?nocache=true`);
+        const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list?nocache=true`);
         if (!serversResponse.ok) {
           throw new Error('Failed to fetch servers');
         }
@@ -78,7 +78,7 @@ const ServerList: React.FC = () => {
         // Use batch endpoint to fetch all user data at once
         if (uniqueOwnerIds.length > 0) {
           try {
-            const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${uniqueOwnerIds.join(',')}&nocache=true`);
+            const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${uniqueOwnerIds.join(',')}&nocache=true`);
             if (userResponse.ok) {
               const userDataArray = await userResponse.json() as UserData[];
               const userDataMap = userDataArray.reduce((acc, userData) => {
@@ -120,7 +120,7 @@ const ServerList: React.FC = () => {
   const handleServerAdded = async () => {
     // Fetch updated server list
     try {
-      const serversResponse = await fetch(`${PROD_API_URL}/servers/list?nocache=true`);
+      const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list?nocache=true`);
       if (!serversResponse.ok) {
         throw new Error('Failed to fetch servers');
       }
@@ -133,7 +133,7 @@ const ServerList: React.FC = () => {
       
       if (newOwnerIds.length > 0) {
         try {
-          const userResponse = await fetch(`${PROD_API_URL}/users/get/batch?ids=${newOwnerIds.join(',')}&nocache=true`);
+          const userResponse = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${newOwnerIds.join(',')}&nocache=true`);
           if (userResponse.ok) {
             const userDataArray = await userResponse.json() as UserData[];
             const newUserDataMap = userDataArray.reduce((acc, userData) => {
@@ -166,7 +166,7 @@ const ServerList: React.FC = () => {
       return;
     }
     try {
-      const response = await fetch(`${PROD_API_URL}/servers/delete`, {
+      const response = await fetch(`${PUBLIC_API_URL}/servers/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

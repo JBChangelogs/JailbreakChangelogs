@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { RAILWAY_INTERNAL_API_URL } from '@/services/api';
+import { BASE_API_URL } from '@/utils/api';
 import { getItemImagePath } from '@/utils/images';
 import { getMaintenanceMetadata } from '@/utils/maintenance';
 import { formatFullValue } from '@/utils/values';
@@ -21,7 +21,7 @@ async function fetchItem(type: string, name: string): Promise<ItemDetails | null
   const itemType = decodeURIComponent(type);
   try {
     const response = await fetch(
-      `${RAILWAY_INTERNAL_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
       { next: { revalidate: 300 } }
     );
     if (!response.ok) return null;

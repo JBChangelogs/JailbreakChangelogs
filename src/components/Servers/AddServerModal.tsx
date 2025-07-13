@@ -1,7 +1,7 @@
 import React from 'react';
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from 'react-hot-toast';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getToken } from '@/utils/auth';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -143,8 +143,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
       
       const endpoint = editingServer 
-        ? `${PROD_API_URL}/servers/update?id=${editingServer.id}&token=${token}`
-        : `${PROD_API_URL}/servers/add`;
+        ? `${PUBLIC_API_URL}/servers/update?id=${editingServer.id}&token=${token}`
+        : `${PUBLIC_API_URL}/servers/add`;
       
       const response = await fetch(endpoint, {
         method: 'POST',

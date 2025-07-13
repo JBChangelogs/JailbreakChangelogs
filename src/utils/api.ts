@@ -20,11 +20,19 @@ interface Changelog {
 }
 
 import { Item, ItemDetails } from "@/types";
-import { PROD_API_URL, RAILWAY_INTERNAL_API_URL } from '@/services/api';
 import { formatFullDate } from '@/utils/timestamp';
 
+// For server-side (can use internal in prod)
+export const BASE_API_URL =
+  process.env.RAILWAY_ENVIRONMENT_NAME === 'production'
+    ? process.env.RAILWAY_INTERNAL_API_URL
+    : process.env.NEXT_PUBLIC_API_URL;
+
+// For client-side (always public)
+export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const fetchUsers = async () => {
-  const response = await fetch(`${PROD_API_URL}/users/list?nocache=true`, {
+  const response = await fetch(`${BASE_API_URL}/users/list?nocache=true`, {
     cache: 'no-store',
     next: { revalidate: 0 }
   });
@@ -35,7 +43,7 @@ export const fetchUsers = async () => {
 export async function fetchUserById(id: string) {
   try {
     console.log('Fetching user with ID:', id);
-    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&nocache=true`);
+    const response = await fetch(`${BASE_API_URL}/users/get?id=${id}&nocache=true`);
     const data = await response.json();
     
     if (!response.ok) {
@@ -87,7 +95,7 @@ export async function fetchUserByIdForOG(id: string) {
       'settings'
     ].join(',');
     
-    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/users/get?id=${id}&fields=${fields}`);
+    const response = await fetch(`${BASE_API_URL}/users/get?id=${id}&fields=${fields}`);
     const data = await response.json();
     
     if (!response.ok) {
@@ -132,7 +140,7 @@ export async function fetchUserByIdForMetadata(id: string) {
       'username'
     ].join(',');
     
-    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&fields=${fields}`);
+    const response = await fetch(`${BASE_API_URL}/users/get?id=${id}&fields=${fields}`);
     const data = await response.json();
     
     if (!response.ok) {
@@ -187,7 +195,7 @@ export const fetchUsersForList = async () => {
     'roblox_join_date'
   ].join(',');
   
-  const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/users/list?fields=${fields}&nocache=true`, {
+  const response = await fetch(`${BASE_API_URL}/users/list?fields=${fields}&nocache=true`, {
     cache: 'no-store',
     next: { revalidate: 0 }
   });
@@ -197,8 +205,8 @@ export const fetchUsersForList = async () => {
 
 export async function fetchItems() {
   try {
-    console.log('[SERVER] Fetching items from API...');
-    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/items/list`, {
+    console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/items/list`, {
       next: { revalidate: 300 } // Cache for 5 minutes (300 seconds)
     });
     if (!response.ok) throw new Error("Failed to fetch items");
@@ -260,7 +268,7 @@ export async function fetchItem(type: string, name: string): Promise<ItemDetails
     const itemType = decodeURIComponent(type);
     
     const response = await fetch(
-      `${RAILWAY_INTERNAL_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
       { next: { revalidate: 300 } } // Cache for 5 minutes (300 seconds)
     );
     
@@ -279,13 +287,13 @@ export async function fetchItem(type: string, name: string): Promise<ItemDetails
 }
 
 export async function fetchChangelogList(): Promise<Changelog[]> {
-  const response = await fetch(`${PROD_API_URL}/changelogs/list`);
+  const response = await fetch(`${BASE_API_URL}/changelogs/list`);
   if (!response.ok) throw new Error('Failed to fetch changelog list');
   return response.json();
 }
 
 export async function fetchChangelog(id: string): Promise<Changelog> {
-  const response = await fetch(`${PROD_API_URL}/changelogs/get?id=${id}`);
+  const response = await fetch(`${BASE_API_URL}/changelogs/get?id=${id}`);
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
 } 

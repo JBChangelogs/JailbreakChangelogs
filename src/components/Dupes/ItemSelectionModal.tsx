@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getItemTypeColor } from '@/utils/badgeColors';
 import toast from 'react-hot-toast';
 
@@ -51,7 +51,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/items/list`);
+        const response = await fetch(`${PUBLIC_API_URL}/items/list`);
         if (!response.ok) throw new Error('Failed to fetch items');
         const data = await response.json();
         // Sort items by cash value high to low

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { isWithinInterval } from 'date-fns';
 import { ThemeProvider } from '@mui/material';
 import { 
@@ -42,13 +42,13 @@ interface SearchResult {
 }
 
 const fetchChangelogList = async () => {
-  const response = await fetch(`${PROD_API_URL}/changelogs/list`);
+  const response = await fetch(`${PUBLIC_API_URL}/changelogs/list`);
   if (!response.ok) throw new Error('Failed to fetch changelog list');
   return response.json();
 };
 
 const fetchChangelog = async (id: string) => {
-  const response = await fetch(`${PROD_API_URL}/changelogs/get?id=${id}`);
+  const response = await fetch(`${PUBLIC_API_URL}/changelogs/get?id=${id}`);
   if (!response.ok) throw new Error('Failed to fetch changelog');
   return response.json();
 };
@@ -95,7 +95,7 @@ export default function ChangelogPage() {
   useEffect(() => {
     const fetchLatestAndRedirect = async () => {
       try {
-        const response = await fetch(`${PROD_API_URL}/changelogs/latest`);
+        const response = await fetch(`${PUBLIC_API_URL}/changelogs/latest`);
         const latestData = await response.json();
         router.push(`/changelogs/${latestData.id}`);
       } catch (err) {

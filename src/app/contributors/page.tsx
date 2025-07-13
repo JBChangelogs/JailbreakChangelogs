@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
 import { useState, useEffect } from 'react';
 import { UserData } from '@/types/auth';
@@ -40,7 +40,7 @@ export default function ContributorsPage() {
         ];
 
         // Fetch all users in one batch request
-        const response = await fetch(`${PROD_API_URL}/users/get/batch?ids=${allUserIds.join(',')}&nocache=true`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${allUserIds.join(',')}&nocache=true`);
         if (!response.ok) {
           throw new Error('Failed to fetch contributors');
         }

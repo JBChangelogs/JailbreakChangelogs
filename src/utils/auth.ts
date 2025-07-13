@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 import { UserData, AuthResponse } from '../types/auth';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { setCookie, getCookie, hasValidToken, removeCookie } from './cookies';
 
 let lastLogoutSource: string = 'Unknown';
@@ -25,7 +25,7 @@ export async function logout() {
       });
       
       // Invalidate token on server
-      const response = await fetch(`${PROD_API_URL}/users/token/invalidate?session_token=${token}`, {
+      const response = await fetch(`${PUBLIC_API_URL}/users/token/invalidate?session_token=${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export async function validateAuth(): Promise<boolean> {
       console.log(`Attempting authentication (${attempts + 1}/${maxAttempts})...`);
       
       // Validate token with server
-      const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`, {
+      const response = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
     });
 
     // Validate token with server
-    const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`, {
+    const response = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

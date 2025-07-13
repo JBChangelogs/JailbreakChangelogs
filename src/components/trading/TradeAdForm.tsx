@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { getToken } from '@/utils/auth';
 import { TradeItem, TradeAd } from '@/types/trading';
 import { UserData } from '@/types/auth';
@@ -104,7 +104,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         const token = getToken();
         if (!token) return;
 
-        const response = await fetch(`${PROD_API_URL}/users/get/token?token=${token}&nocache=true`);
+        const response = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
         if (response.ok) {
           const userData = await response.json();
           setUserData(userData);
@@ -261,7 +261,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         return;
       }
 
-      const endpoint = editMode ? `${PROD_API_URL}/trades/update?id=${tradeAd?.id}` : `${PROD_API_URL}/trades/add`;
+      const endpoint = editMode ? `${PUBLIC_API_URL}/trades/update?id=${tradeAd?.id}` : `${PUBLIC_API_URL}/trades/add`;
       const method = 'POST';
 
       const response = await fetch(endpoint, {

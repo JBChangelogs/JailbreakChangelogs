@@ -22,7 +22,7 @@ import ItemValueChart from '@/components/Items/ItemValueChart';
 import SimilarItems from '@/components/Items/SimilarItems';
 import ItemChangelogs from '@/components/Items/ItemChangelogs';
 
-import { PROD_API_URL } from '@/services/api';
+import { PUBLIC_API_URL } from "@/utils/api";
 import { handleImageError, getItemImagePath, isVideoItem, isHornItem, isDriftItem, getHornAudioPath, getDriftVideoPath, getVideoPath } from "@/utils/images";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -115,7 +115,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         const userData = JSON.parse(storedUser);
-        const favoritesResponse = await fetch(`${PROD_API_URL}/favorites/get?user=${userData.id}`);
+        const favoritesResponse = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userData.id}`);
         if (favoritesResponse.ok) {
           const favoritesData = await favoritesResponse.json();
           if (Array.isArray(favoritesData)) {
@@ -132,7 +132,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
         }
       }
 
-      const countResponse = await fetch(`${PROD_API_URL}/item/favorites?id=${item.id}&nocache=true`);
+      const countResponse = await fetch(`${PUBLIC_API_URL}/item/favorites?id=${item.id}&nocache=true`);
       if (countResponse.ok) {
         const count = await countResponse.json();
         setFavoriteCount(Number(count));
@@ -155,7 +155,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
         : String(item?.id);
 
       const response = await fetch(
-        `${PROD_API_URL}/favorites/${isFavorited ? "remove" : "add"}`,
+        `${PUBLIC_API_URL}/favorites/${isFavorited ? "remove" : "add"}`,
         {
           method: isFavorited ? "DELETE" : "POST",
           headers: {
