@@ -199,8 +199,7 @@ export async function fetchItems() {
   try {
     console.log('[SERVER] Fetching items from API...');
     const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/items/list`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
+      next: { revalidate: 300 } // Cache for 5 minutes (300 seconds)
     });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
