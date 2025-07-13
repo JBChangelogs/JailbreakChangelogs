@@ -19,7 +19,7 @@ interface Changelog {
   image_url: string;
 }
 
-import { Item } from "@/types";
+import { Item, ItemDetails } from "@/types";
 import { PROD_API_URL, RAILWAY_INTERNAL_API_URL } from '@/services/api';
 import { formatFullDate } from '@/utils/timestamp';
 
@@ -87,7 +87,7 @@ export async function fetchUserByIdForOG(id: string) {
       'settings'
     ].join(',');
     
-    const response = await fetch(`${PROD_API_URL}/users/get?id=${id}&fields=${fields}`);
+    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/users/get?id=${id}&fields=${fields}`);
     const data = await response.json();
     
     if (!response.ok) {
@@ -198,7 +198,7 @@ export const fetchUsersForList = async () => {
 export async function fetchItems() {
   try {
     console.log('[SERVER] Fetching items from API...');
-    const response = await fetch(`${RAILWAY_INTERNAL_API_URL}/items/list`, {
+    const response = await fetch(`${PROD_API_URL}/items/list`, {
       next: { revalidate: 300 } // Cache for 5 minutes (300 seconds)
     });
     if (!response.ok) throw new Error("Failed to fetch items");
@@ -250,6 +250,31 @@ export async function fetchLastUpdated(items: Item[]) {
   } catch (err) {
     console.error('Error getting last updated time:', err);
     return '';
+  }
+}
+
+export async function fetchItem(type: string, name: string): Promise<ItemDetails | null> {
+  try {
+    console.log('[SERVER] Fetching item from API:', { type, name });
+    const itemName = decodeURIComponent(name);
+    const itemType = decodeURIComponent(type);
+    
+    const response = await fetch(
+      `${RAILWAY_INTERNAL_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      { next: { revalidate: 300 } } // Cache for 5 minutes (300 seconds)
+    );
+    
+    if (!response.ok) {
+      console.log('[SERVER] Item not found:', { type: itemType, name: itemName });
+      return null;
+    }
+    
+    const data = await response.json();
+    console.log('[SERVER] Successfully fetched item:', data.name);
+    return data as ItemDetails;
+  } catch (err) {
+    console.error('[SERVER] Error fetching item:', err);
+    return null;
   }
 }
 
