@@ -30,7 +30,7 @@ export const BASE_API_URL =
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchUsers = async () => {
-  const response = await fetch(`${BASE_API_URL}/users/list?nocache=true`, {
+  const response = await fetch(`${BASE_API_URL}/users/list`, {
     cache: 'no-store',
     next: { revalidate: 0 }
   });
@@ -205,7 +205,8 @@ export async function fetchItems() {
   try {
     console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/items/list`, {
-      next: { revalidate: 300 } // Cache for 5 minutes (300 seconds)
+      cache: 'no-store',
+      next: { revalidate: 0 }
     });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
@@ -297,7 +298,7 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
 export async function fetchTradeAds() {
   try {
     console.log(`[SERVER] Fetching trade ads from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/trades/list?nocache=true`, {
+    const response = await fetch(`${BASE_API_URL}/trades/list`, {
       cache: 'no-store',
       next: { revalidate: 0 }
     });
