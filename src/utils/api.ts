@@ -21,7 +21,6 @@ interface Changelog {
 
 import { Item, ItemDetails } from "@/types";
 import { UserData } from "@/types/auth";
-import { formatFullDate } from '@/utils/timestamp';
 
 export const BASE_API_URL =
   process.env.RAILWAY_ENVIRONMENT_NAME === 'production'
@@ -222,14 +221,12 @@ export async function fetchLastUpdated(items: Item[]) {
   try {
     if (!items || items.length === 0) {
       console.log('No items provided for last updated');
-      return '';
+      return null;
     }
 
     // Create an array of all items including sub-items
     const allItems = items.reduce((acc: Item[], item) => {
-      // Add the main item
       acc.push(item);
-      // Add all sub-items if they exist
       if (item.children && Array.isArray(item.children)) {
         item.children.forEach(child => {
           if (child.data) {
@@ -246,17 +243,17 @@ export async function fetchLastUpdated(items: Item[]) {
 
     // Sort all items by last_updated in descending order and get the most recent
     const mostRecentItem = [...allItems].sort((a, b) => {
-      // Normalize timestamps to milliseconds
       const aTime = a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
       const bTime = b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
       return bTime - aTime;
     })[0];
 
-    const formattedDate = formatFullDate(mostRecentItem.last_updated);
-    return formattedDate;
+    // Return the raw timestamp (in ms)
+    const rawTimestamp = mostRecentItem.last_updated < 10000000000 ? mostRecentItem.last_updated * 1000 : mostRecentItem.last_updated;
+    return rawTimestamp;
   } catch (err) {
     console.error('Error getting last updated time:', err);
-    return '';
+    return null;
   }
 }
 

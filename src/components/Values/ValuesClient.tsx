@@ -28,7 +28,7 @@ const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
-  lastUpdatedPromise: Promise<string>;
+  lastUpdatedPromise: Promise<number | null>;
 }
 
 export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: ValuesClientProps) {
@@ -282,7 +282,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
 
         {lastUpdated && (
           <p className="mb-4 text-sm text-muted">
-            Last updated: {lastUpdated}
+            Last updated: {formatClientDate(lastUpdated)}
           </p>
         )}
 
@@ -754,4 +754,21 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
       )}
     </>
   );
+} 
+
+// Format the date client-side in the user's local timezone
+function formatClientDate(timestamp: number): string {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  // Example: Tuesday, July 15, 2025 at 11:21 PM
+  return date.toLocaleString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace(',', '') // Remove comma after weekday for a more natural look
+    .replace(/ (\d{1,2}):(\d{2}) ([AP]M)/, ' at $1:$2 $3');
 } 
