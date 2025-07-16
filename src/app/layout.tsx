@@ -308,7 +308,7 @@ export default async function RootLayout({
                     </h3>
                     <div className="space-y-2">
                       <a
-                        href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki"
+                        href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-muted hover:text-[#FFFFFF]"
