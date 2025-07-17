@@ -1,121 +1,79 @@
-"use client";
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { PUBLIC_API_URL } from "@/utils/api";
-import { UserAvatar } from "@/utils/avatar";
-import { useState, useEffect } from 'react';
+import { fetchUsersBatch } from '@/utils/api';
+import UserAvatar from '@/components/Users/UserAvatarClient';
 import { UserData } from '@/types/auth';
 
-export default function ContributorsPage() {
-  const [owners, setOwners] = useState<UserData[]>([]);
-  const [managers, setManagers] = useState<UserData[]>([]);
-  const [valueTeam, setValueTeam] = useState<UserData[]>([]);
-  const [contributors, setContributors] = useState<UserData[]>([]);
-  const [backgroundPictures, setBackgroundPictures] = useState<UserData[]>([]);
+export default async function ContributorsPage() {
+  // User IDs by role
+  const ownerIds = [
+    '659865209741246514', // Jakobiis
+    '1019539798383398946', // Jalenzz16
+  ];
+  const managerIds = [
+    '697457253237653534', // Sen
+    '465018380403867648', // 0.5x
+  ];
+  const valueTeamIds = [
+    '1159540851106648174', // free
+    '1190371197230268558', // Gdplayer2818
+    '729353754578518058', // Toleda1
+    '1181250180436217910', // nbhjlkjkl
+    '1132568688390840321', // rezexa_11261
+    '904569431886270485', // _._yes_._
+  ];
+  const contributorIds = [
+    '1123014543891775509', // PikachuWolverine
+    '797198829538508829', // Jamey
+  ];
+  const backgroundPictureIds = [
+    '871014221125664819', // Thomy3da
+  ];
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        // Collect all user IDs
-        const allUserIds = [
-          // Owners
-          '659865209741246514', // Jakobiis
-          '1019539798383398946', // Jalenzz16
-          // Managers
-          '697457253237653534', // Sen
-          '465018380403867648', // 0.5x
-          // Value Team
-          '1159540851106648174', // free
-          '1190371197230268558', // Gdplayer2818
-          '729353754578518058', // Toleda1
-          '1181250180436217910', // nbhjlkjkl
-          '1132568688390840321', // rezexa_11261
-          '904569431886270485', // new user
-          // Contributors
-          '1123014543891775509', // PikachuWolverine
-          '797198829538508829', // Jamey
-          // Background Pictures
-          '871014221125664819', // Thomy3da
-        ];
+  // All user IDs
+  const allUserIds = [
+    ...ownerIds,
+    ...managerIds,
+    ...valueTeamIds,
+    ...contributorIds,
+    ...backgroundPictureIds,
+  ];
 
-        // Fetch all users in one batch request
-        const response = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${allUserIds.join(',')}&nocache=true`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch contributors');
-        }
-        
-        const allUsers = await response.json();
-        const userMap = allUsers.reduce((acc: Record<string, UserData>, user: UserData) => {
-          acc[user.id] = user;
-          return acc;
-        }, {});
+  // Fetch all users in one batch
+  const userMap: Record<string, UserData> = await fetchUsersBatch(allUserIds);
 
-        const ownerIds = [
-          '659865209741246514', // Jakobiis
-          '1019539798383398946', // Jalenzz16
-        ];
-        setOwners(ownerIds.map(id => userMap[id]).filter(Boolean));
-
-        const managerIds = [
-          '697457253237653534', // Sen
-          '465018380403867648', // 0.5x
-        ];
-        setManagers(managerIds.map(id => userMap[id]).filter(Boolean));
-
-        const valueTeamIds = [
-          '1159540851106648174', // free
-          '1190371197230268558', // Gdplayer2818
-          '729353754578518058', // Toleda1
-          '1181250180436217910', // nbhjlkjkl
-          '1132568688390840321', // rezexa_11261
-          '904569431886270485', // _._yes_._
-        ];
-        setValueTeam(valueTeamIds.map(id => userMap[id]).filter(Boolean));
-
-        const contributorIds = [
-          '1123014543891775509', // PikachuWolverine
-          '797198829538508829', // Jamey
-        ];
-        setContributors(contributorIds.map(id => userMap[id]).filter(Boolean));
-
-        const backgroundPictureIds = [
-          '871014221125664819', // Thomy3da
-        ];
-        setBackgroundPictures(backgroundPictureIds.map(id => userMap[id]).filter(Boolean));
-      } catch (error) {
-        console.error('Error loading contributors:', error);
-      }
-    };
-    loadUsers();
-  }, []);
+  const owners = ownerIds.map(id => userMap[id]).filter(Boolean);
+  const managers = managerIds.map(id => userMap[id]).filter(Boolean);
+  const valueTeam = valueTeamIds.map(id => userMap[id]).filter(Boolean);
+  const contributors = contributorIds.map(id => userMap[id]).filter(Boolean);
+  const backgroundPictures = backgroundPictureIds.map(id => userMap[id]).filter(Boolean);
 
   const renderUser = (user: UserData, role: string) => (
     <div key={user.id} className="flex flex-col items-center text-center mb-8">
       <Link href={`/users/${user.id}`}>
-                <UserAvatar 
+        <UserAvatar 
           userId={user.id}
           avatarHash={user.avatar || null}
           username={user.username}
-          size={48}
-                  showBadge={false}
-          accent_color={user.accent_color}
+          size={32}
+          showBadge={false}
+          accent_color={user.accent_color}  
           custom_avatar={user.custom_avatar}
           settings={user.settings}
           premiumType={user.premiumtype}
         />
-                </Link>
+      </Link>
       <div className="mt-4">
-                <Link
+        <Link
           href={`/users/${user.id}`}
           className="font-bold text-lg text-white hover:text-blue-300"
-                >
+        >
           {user.global_name && user.global_name !== "None" ? user.global_name : user.username}
-                </Link>
+        </Link>
         <div className="text-sm text-gray-300 mt-1">{role}</div>
-        <div className="text-xs text-gray-500">@{user.username}</div>
-              </div>
-            </div>
+        <div className="text-xs text-blue-300">@{user.username}</div>
+      </div>
+    </div>
   );
 
   const staticContributors = [
@@ -158,7 +116,7 @@ export default function ContributorsPage() {
             <a href={contrib.link} target="_blank" rel="noopener noreferrer">
               <div
                 className="relative rounded-full overflow-hidden flex-shrink-0 border-4 border-[#124e66] bg-[#2E3944]"
-                style={{ width: 192, height: 192, minWidth: 192, minHeight: 192 }}
+                style={{ width: 128, height: 128, minWidth: 128, minHeight: 128 }}
               >
                 <Image
                   src={contrib.avatar}
@@ -179,7 +137,7 @@ export default function ContributorsPage() {
                 {contrib.name}
               </a>
               <div className="text-sm text-gray-300 mt-1">{contrib.role}</div>
-              <div className="text-xs text-gray-500">@{contrib.username}</div>
+              <div className="text-xs text-blue-300">@{contrib.username}</div>
             </div>
           </div>
         ))}
