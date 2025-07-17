@@ -80,6 +80,11 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                       Limited
                     </span>
                   )}
+                  {item.is_seasonal === 1 && (
+                    <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                      Seasonal
+                    </span>
+                  )}
                 </div>
               </div>
             </li>
@@ -123,6 +128,11 @@ export default function TradeItemsList({ offering, requesting }: TradeItemsListP
                   {item.is_limited === 1 && (
                     <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                       Limited
+                    </span>
+                  )}
+                  {item.is_seasonal === 1 && (
+                    <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                      Seasonal
                     </span>
                   )}
                 </div>

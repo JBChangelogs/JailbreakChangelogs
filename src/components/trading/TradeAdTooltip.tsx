@@ -35,11 +35,6 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 ? `${item.base_name} (${item.sub_name})` 
                 : item.name}
             </Link>
-            {item.is_limited === 1 && (
-              <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                Limited
-              </span>
-            )}
           </div>
           <div className="space-y-1 text-sm">
             <div className="flex gap-2 items-center">
@@ -49,6 +44,16 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               >
                 {item.type}
               </span>
+              {item.is_limited === 1 && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                  Limited
+                </span>
+              )}
+              {item.is_seasonal === 1 && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                  Seasonal
+                </span>
+              )}
               {item.tradable !== 1 && (
                 <span className="px-1.5 py-0.5 text-xs rounded-full bg-red-500/90 text-white border border-red-500 flex-shrink-0">
                   Non-Tradable

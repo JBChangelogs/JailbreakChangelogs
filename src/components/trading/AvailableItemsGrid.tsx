@@ -511,6 +511,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           Limited
                         </span>
                       )}
+                      {item.is_seasonal === 1 && (
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                          Seasonal
+                        </span>
+                      )}
                       {item.tradable !== 1 && (
                         <span className="px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">
                           Not Tradable
