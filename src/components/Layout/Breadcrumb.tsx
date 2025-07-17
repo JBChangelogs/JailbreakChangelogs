@@ -126,6 +126,12 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
             href: "/trading"
           };
         }
+        if (index === 2) {
+          return {
+            label: segment,
+            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          };
+        }
       }
       
       return {
