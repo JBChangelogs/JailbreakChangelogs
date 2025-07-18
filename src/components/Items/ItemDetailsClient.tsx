@@ -499,29 +499,36 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
 
               {activeTab === 0 && (
                 <>
-                  {currentItem.description && (
+                  {(!currentItem.description || currentItem.description === "N/A" || currentItem.description === "") ? (
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-white">Description</h3>
                       <div className="text-[#D3D9D4] leading-relaxed">
                         <p className="whitespace-pre-wrap">
-                          {currentItem.description === "N/A" 
-                            ? "No description available"
-                            : currentItem.description.length > visibleLength 
-                              ? (
-                                <>
-                                  {convertUrlsToLinks(`${currentItem.description.slice(0, visibleLength)}...`)}
-                                  <button
-                                    onClick={() => setVisibleLength(prev => prev + INITIAL_DESCRIPTION_LENGTH)}
-                                    className="text-blue-300 hover:text-blue-400 hover:underline text-sm inline-flex items-center gap-1 ml-1 font-medium transition-colors"
-                                  >
-                                    <ChevronDownIcon className="h-4 w-4" />
-                                    Read More
-                                  </button>
-                                </>
-                              )
-                              : convertUrlsToLinks(currentItem.description)}
+                          No description available
                         </p>
-                        {visibleLength > INITIAL_DESCRIPTION_LENGTH && currentItem.description !== "N/A" && currentItem.description.length > INITIAL_DESCRIPTION_LENGTH && (
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-white">Description</h3>
+                      <div className="text-[#D3D9D4] leading-relaxed">
+                        <p className="whitespace-pre-wrap">
+                          {currentItem.description.length > visibleLength 
+                            ? (
+                              <>
+                                {convertUrlsToLinks(`${currentItem.description.slice(0, visibleLength)}...`)}
+                                <button
+                                  onClick={() => setVisibleLength(prev => prev + INITIAL_DESCRIPTION_LENGTH)}
+                                  className="text-blue-300 hover:text-blue-400 hover:underline text-sm inline-flex items-center gap-1 ml-1 font-medium transition-colors"
+                                >
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                  Read More
+                                </button>
+                              </>
+                            )
+                            : convertUrlsToLinks(currentItem.description)}
+                        </p>
+                        {visibleLength > INITIAL_DESCRIPTION_LENGTH && currentItem.description.length > INITIAL_DESCRIPTION_LENGTH && (
                           <button
                             onClick={() => setVisibleLength(INITIAL_DESCRIPTION_LENGTH)}
                             className="mt-2 text-blue-300 hover:text-blue-400 hover:underline text-sm flex items-center gap-1 font-medium transition-colors"
