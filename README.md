@@ -2,7 +2,7 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz/)
 [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1ofdv.svg)](https://status.jailbreakchangelogs.xyz/)
-
+              
 > [!CAUTION]
 > The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz/). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
@@ -10,6 +10,11 @@
 > This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
 ![Logo](<https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png>)
+
+## big numbers = jbcl happy
+[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?variant=adaptive)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+
+Leave a ⭐ if you like the project.
 
 # Roblox Jailbreak Changelogs
 
@@ -68,5 +73,3 @@ For more details, see the [LICENSE](./LICENSE) file in this repository or visit 
 ---
 
 We hope this project enhances your Jailbreak experience.
-
-Leave a ⭐ if you like the project.
