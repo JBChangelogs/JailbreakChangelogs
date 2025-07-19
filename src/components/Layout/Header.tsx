@@ -831,7 +831,7 @@ export default function Header() {
                                 transition={{ duration: 0.2 }}
                               >
                                 <Link 
-                                  href={`/users/${userData?.id}`} 
+                                  href={`/users/${String(userData?.id).replace(/\D/g, '')}`} 
                                   className="flex items-center rounded-lg px-4 py-3 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
                                   onClick={handleMenuClose}
                                 >
