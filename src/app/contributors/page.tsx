@@ -20,7 +20,6 @@ export default async function ContributorsPage() {
     '729353754578518058', // Toleda1
     '1181250180436217910', // nbhjlkjkl
     '1132568688390840321', // rezexa_11261
-    '904569431886270485', // _._yes_._
   ];
   const contributorIds = [
     '1123014543891775509', // PikachuWolverine
