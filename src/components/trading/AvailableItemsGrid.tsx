@@ -16,6 +16,7 @@ import dynamic from 'next/dynamic';
 import DisplayAd from '@/components/Ads/DisplayAd';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -42,6 +43,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
+  const router = useRouter();
   const ITEMS_PER_PAGE = 18;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -459,11 +461,25 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             paginatedItems.map((item) => (
               <div
                 key={item.id}
-                className={`p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
+                className={`group p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
                   item.tradable === 1 
                     ? 'bg-[#2E3944] hover:bg-[#37424D]'
                     : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
                 }`}
+                tabIndex={0}
+                role="button"
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => {
+                  // Only navigate if not clicking a button or dropdown
+                  if (
+                    e.target instanceof HTMLElement &&
+                    !e.target.closest('button') &&
+                    !e.target.closest('a') &&
+                    !e.target.closest('.dropdown')
+                  ) {
+                    router.push(`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`);
+                  }
+                }}
               >
                 <div className="aspect-[4/3] relative rounded-md overflow-hidden mb-2">
                   {isVideoItem(item.name) ? (
@@ -481,7 +497,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                       alt={item.name}
                       className="w-full h-full object-cover"
                       onError={handleImageError}
-                      unoptimized
                       fill
                     />
                   )}
@@ -498,7 +513,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </div>
                 <div className="flex flex-col flex-grow">
                   <div className="space-y-1.5">
-                    <p className="text-muted text-sm font-medium truncate">{item.name}</p>
+                    <span className="text-muted text-sm font-medium truncate transition-colors group-hover:text-blue-400">
+                      {item.name}
+                    </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span 
                         className="px-2 py-0.5 text-xs rounded-full text-white"
@@ -546,6 +563,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                e.preventDefault();
                                 const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
                                 dropdown?.classList.toggle('hidden');
                               }}
@@ -558,6 +576,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  e.preventDefault();
                                   handleVariantSelect(item.id, '2025');
                                   (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
                                 }}
@@ -570,6 +589,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   key={child.id}
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    e.preventDefault();
                                     handleVariantSelect(item.id, child.sub_name);
                                     (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
                                   }}
@@ -587,13 +607,21 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   {item.tradable === 1 && (
                     <div className="flex gap-2 mt-auto pt-2">
                       <button
-                        onClick={() => handleAddItem(item, 'offering')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleAddItem(item, 'offering');
+                        }}
                         className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
                       >
                         Offer
                       </button>
                       <button
-                        onClick={() => handleAddItem(item, 'requesting')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleAddItem(item, 'requesting');
+                        }}
                         className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
                       >
                         Request
