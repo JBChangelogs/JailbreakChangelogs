@@ -60,8 +60,8 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
     setProofUrls(newUrls);
   };
 
-  const validateImgurUrl = (url: string) => {
-    return url.match(/^https:\/\/(?:i\.)?imgur\.com\/(?:a\/)?[a-zA-Z0-9]+(?:\.(?:jpg|jpeg|png|gif))?$/);
+  const validateProofUrl = (url: string) => {
+    return url.match(/^https:\/\/(?:i\.)?(imgur\.com\/(?:a\/)?[a-zA-Z0-9]+(?:\.(?:jpg|jpeg|png|gif))?|postimg\.cc\/[a-zA-Z0-9]+(?:\/(?:[a-zA-Z0-9_-]+))?(?:\.(?:jpg|jpeg|png|gif))?|i\.postimg\.cc\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|gif))$/);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,9 +73,9 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
     }
 
     // Validate proof URLs
-    const invalidUrls = proofUrls.filter(url => url.trim() && !validateImgurUrl(url));
+    const invalidUrls = proofUrls.filter(url => url.trim() && !validateProofUrl(url));
     if (invalidUrls.length > 0) {
-      toast.error('Please enter valid Imgur URLs');
+      toast.error('Please enter valid Imgur or Postimg URLs');
       return;
     }
 
@@ -189,15 +189,20 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-muted mb-1">
-                Proof URLs (Imgur only, max 5) <span className="text-red-500">*</span>
+                Proof URLs (Imgur or Postimg, max 5) <span className="text-red-500">*</span>
               </label>
+              <span className="text-xs text-blue-300 mb-2 block">
+                <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">Upload to Imgur</a>
+                {" | "}
+                <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">Upload to Postimg</a>
+              </span>
               {proofUrls.map((url, index) => (
                 <div key={index} className="relative mb-2">
                   <input
                     type="text"
                     value={url}
                     onChange={(e) => handleProofUrlChange(index, e.target.value)}
-                    placeholder="Imgur URL"
+                    placeholder="Imgur URL or Postimg URL"
                     className="w-full pl-3 pr-10 py-2 rounded-lg border border-[#2E3944] bg-[#37424D] text-muted"
                   />
                   {index > 0 && (
