@@ -217,16 +217,16 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-muted">Cash Value Difference</span>
-            <span className={`font-medium flex items-center gap-2 ${
-              (() => {
-                const offeringTotal = groupItems(offering).reduce((sum, item) => 
-                  sum + (parseCurrencyValue(item.cash_value) * item.count), 0);
-                const requestingTotal = groupItems(requesting).reduce((sum, item) => 
-                  sum + (parseCurrencyValue(item.cash_value) * item.count), 0);
-                const diff = offeringTotal - requestingTotal;
-                return diff < 0 ? 'text-[#43B581]' : diff > 0 ? 'text-red-500' : 'text-[#FFFFFF]';
-              })()
-            }`}>
+            <span className={(() => {
+              const offeringTotal = groupItems(offering).reduce((sum, item) => 
+                sum + (parseCurrencyValue(item.cash_value) * item.count), 0);
+              const requestingTotal = groupItems(requesting).reduce((sum, item) => 
+                sum + (parseCurrencyValue(item.cash_value) * item.count), 0);
+              const diff = offeringTotal - requestingTotal;
+              if (diff < 0) return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-[#43B581]/20 text-white border border-[#43B581]/30 shadow-sm text-base';
+              if (diff > 0) return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-red-500/20 text-white border border-red-500/30 shadow-sm text-base';
+              return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-gray-500/20 text-white border border-gray-500/30 shadow-sm text-base';
+            })()}>
               {(() => {
                 const offeringTotal = groupItems(offering).reduce((sum, item) => 
                   sum + (parseCurrencyValue(item.cash_value) * item.count), 0);
@@ -246,16 +246,16 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
           </div>
           <div className="flex justify-between items-center">
             <span className="text-muted">Duped Value Difference</span>
-            <span className={`font-medium flex items-center gap-2 ${
-              (() => {
-                const offeringTotal = groupItems(offering).reduce((sum, item) => 
-                  sum + (parseCurrencyValue(item.duped_value) * item.count), 0);
-                const requestingTotal = groupItems(requesting).reduce((sum, item) => 
-                  sum + (parseCurrencyValue(item.duped_value) * item.count), 0);
-                const diff = offeringTotal - requestingTotal;
-                return diff < 0 ? 'text-[#43B581]' : diff > 0 ? 'text-red-500' : 'text-[#FFFFFF]';
-              })()
-            }`}>
+            <span className={(() => {
+              const offeringTotal = groupItems(offering).reduce((sum, item) => 
+                sum + (parseCurrencyValue(item.duped_value) * item.count), 0);
+              const requestingTotal = groupItems(requesting).reduce((sum, item) => 
+                sum + (parseCurrencyValue(item.duped_value) * item.count), 0);
+              const diff = offeringTotal - requestingTotal;
+              if (diff < 0) return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-[#43B581]/20 text-white border border-[#43B581]/30 shadow-sm text-base';
+              if (diff > 0) return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-red-500/20 text-white border border-red-500/30 shadow-sm text-base';
+              return 'inline-flex items-center gap-2 font-semibold px-3 py-1 rounded-full bg-gray-500/20 text-white border border-gray-500/30 shadow-sm text-base';
+            })()}>
               {(() => {
                 const offeringTotal = groupItems(offering).reduce((sum, item) => 
                   sum + (parseCurrencyValue(item.duped_value) * item.count), 0);

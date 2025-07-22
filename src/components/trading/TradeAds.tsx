@@ -305,7 +305,7 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
       {activeTab === 'view' ? (
         <>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-muted">Showing {tradeAds.length} {tradeAds.length === 1 ? 'trade ad' : 'trade ads'}</p>
+            <p className="text-muted">Showing {sortedTradeAds.length} {sortedTradeAds.length === 1 ? 'trade ad' : 'trade ads'}</p>
             <Button
               variant="outlined"
               onClick={toggleSortOrder}
@@ -325,7 +325,7 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
             </Button>
           </div>
           <Masonry
-            columns={{ xs: 1, sm: 2, md: 3 }}
+            columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
             spacing={2}
             sx={{ width: 'auto', margin: 0 }}
           >

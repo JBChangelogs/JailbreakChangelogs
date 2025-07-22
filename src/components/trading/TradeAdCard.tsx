@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { TradeAd } from '@/types/trading';
@@ -36,6 +37,7 @@ const getStatusColor = (status: string) => {
 export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, offerStatus, currentUserId, onDelete, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -52,13 +54,23 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
 
   return (
-    <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors">
+    <div
+      className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors cursor-pointer"
+      onClick={() => router.push(`/trading/ad/${trade.id}`)}
+      tabIndex={0}
+      role="button"
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          router.push(`/trading/ad/${trade.id}`);
+        }
+      }}
+    >
       <div className="block">
         {/* Trade Ad Number */}
         <div className="flex items-center gap-2 mb-3">
-          <Link href={`/trading/ad/${trade.id}`} className="text-lg font-semibold text-muted hover:text-[#5865F2] transition-colors">
+          <span className="text-lg font-semibold text-muted hover:text-blue-300 transition-colors">
             Trade #{trade.id}
-          </Link>
+          </span>
         </div>
 
         {/* User Info */}
