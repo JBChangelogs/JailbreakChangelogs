@@ -227,9 +227,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
       errors.push('You must add at least one item to request');
     }
 
-    // Roblox ID check
-    if (!userData?.roblox_id) {
-      toast.error('You must link your Roblox account first to create trade ads.');
+    // Require all fields
+    if (!userData?.roblox_id || !userData?.roblox_username || !userData?.roblox_display_name || !userData?.roblox_avatar || !userData?.roblox_join_date) {
+      toast.error('You must link a Roblox account first to create trade ads.');
       setLoginModalOpen(true);
       // Set Roblox tab (tab index 1)
       setTimeout(() => {

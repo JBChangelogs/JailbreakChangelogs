@@ -11,7 +11,7 @@ export const revalidate = 300;
 
 export default function TradingPage() {
   return (
-    <main className="container mx-auto">
+    <main className="container mx-auto px-4 sm:px-6 lg:px-8">
       <Breadcrumb />
       <TradingDescription />
       <Suspense fallback={<Loading />}>

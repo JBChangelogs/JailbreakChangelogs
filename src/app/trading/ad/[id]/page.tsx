@@ -35,6 +35,11 @@ async function TradeDetailsWrapper({ params }: { params: Promise<{ id: string }>
     ...trade,
     user: userMap[trade.author] || null
   };
-  
+
+  // Hide if no roblox_id or roblox_username
+  if (!tradeWithUser.user || !tradeWithUser.user.roblox_id || !tradeWithUser.user.roblox_username) {
+    notFound();
+  }
+
   return <TradeDetailsClient trade={tradeWithUser} />;
 } 

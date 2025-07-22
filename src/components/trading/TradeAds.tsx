@@ -280,12 +280,13 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
     );
   }
 
-  // Sort trade ads based on sortOrder
-  const sortedTradeAds = [...tradeAds].sort((a, b) => {
-    return sortOrder === 'newest' 
-      ? b.created_at - a.created_at
-      : a.created_at - b.created_at;
-  });
+  const sortedTradeAds = [...tradeAds]
+    .filter(trade => trade.user && trade.user.roblox_id && trade.user.roblox_username)
+    .sort((a, b) => {
+      return sortOrder === 'newest' 
+        ? b.created_at - a.created_at
+        : a.created_at - b.created_at;
+    });
 
   // Calculate pagination
   const totalPages = Math.ceil(sortedTradeAds.length / itemsPerPage);
