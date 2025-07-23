@@ -114,7 +114,7 @@ export default function SupportingPage() {
               <p className="text-lg font-semibold text-blue-300">Important Information</p>
             </div>
             <p className="text-gray-300 mb-3">
-              All supporter purchases are one-time only! Once you purchase, you keep the perks forever.
+              All supporter purchases are one-time only and non-refundable! Once you purchase, you keep the perks forever.
             </p>
             <Link 
               href="/redeem" 

@@ -3,6 +3,7 @@
 import { Typography } from '@mui/material';
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 export default function TermsOfServicePage() {
   return (
@@ -18,7 +19,7 @@ export default function TermsOfServicePage() {
           <DocumentTextIcon className="h-6 w-6 text-muted" />
           <h1 className="text-2xl font-bold text-muted">Terms of Service</h1>
         </div>
-        <p className="text-sm text-muted mb-6">Last updated: July 8th, 2025</p>
+        <p className="text-sm text-muted mb-6">Last updated: July 22nd, 2025</p>
         
         <div className="bg-[#212A31] p-6 rounded-lg border border-[#2E3944] hover:border-[#5865F2] transition-colors">
           <Typography className="text-muted">
@@ -84,7 +85,14 @@ export default function TermsOfServicePage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-muted mb-4">6. Contact Information</h2>
+              <h2 className="text-xl font-semibold text-muted mb-4">6. Refund Policy</h2>
+              <Typography className="text-muted">
+                All supporter purchases are one-time only and non-refundable. By making a supporter purchase, you acknowledge and agree that you will not be entitled to a refund for any reason. For more information about supporter purchases and their benefits, please visit our <Link href="/supporting" className="text-blue-300 hover:text-blue-400 hover:underline">Supporter page</Link>.
+              </Typography>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-muted mb-4">7. Contact Information</h2>
               <Typography className="text-muted">
                 If you have any questions about these Terms of Service, please contact us:
               </Typography>
