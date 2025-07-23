@@ -21,7 +21,6 @@ import NextTopLoader from 'nextjs-toploader';
 import AuthCheck from '@/components/Auth/AuthCheck';
 import { Tooltip } from '@mui/material';
 import SurveyProvider from '@/components/Survey/SurveyProvider';
-import SupportProvider from '@/components/Support/SupportProvider';
 import ReportIssueButton from '@/components/ReportIssue/ReportIssueButton';
 import { checkMaintenanceMode, getMaintenanceMetadata } from '@/utils/maintenance';
 import { Suspense } from 'react';
@@ -183,7 +182,6 @@ export default async function RootLayout({
         <OfflineDetector />
         <AuthCheck />
         <SurveyProvider>
-          <SupportProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
             <SupportPromptModalWrapper />
@@ -471,7 +469,6 @@ export default async function RootLayout({
               </div>
             </footer>
           </div>
-        </SupportProvider>
         </SurveyProvider>
         <Script id="clarity-script" strategy="afterInteractive">
           {`

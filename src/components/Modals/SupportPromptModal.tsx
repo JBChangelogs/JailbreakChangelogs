@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface SupportPromptModalProps {
   open: boolean;
@@ -53,7 +54,18 @@ const SupportPromptModal: React.FC<SupportPromptModalProps> = ({ open, onClose }
           position: 'relative',
         }}
       >
-        <div style={{fontSize: 40, marginBottom: 12}}>❤️</div>
+        <div style={{fontSize: 40, marginBottom: 12}}>
+          <Image 
+            src="https://assets.jailbreakchangelogs.xyz/assets/images/JBCLHeart.webp"
+            alt="JailbreakChangelogs Heart"
+            width={48}
+            height={48}
+            style={{ display: 'inline-block' }}
+            priority
+            unoptimized
+            draggable={false}
+          />
+        </div>
         <h2 style={{color:'#fff', fontWeight:700, fontSize:'1.5rem', marginBottom:8}}>Support JailbreakChangelogs</h2>
         <p style={{color:'#D3D9D4', marginBottom:24}}>
           By supporting Jailbreak Changelogs, you&apos;re helping us maintain and improve this open-source project, community made for Roblox Jailbreak. Your support enables us to continue providing accurate, timely updates and new features to help the community stay informed about their favorite game.
