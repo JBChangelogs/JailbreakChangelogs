@@ -10,7 +10,7 @@ We take the security of JailbreakChangelogs seriously. If you believe you have f
 
 1. **DO NOT** disclose the vulnerability publicly.
 2. Send a detailed report privately to:
-   - Discord: Join our [Discord server](https://discord.jailbreakchangelogs.xyz/) and contact [Jalenzz16](https://discord.com/users/1019539798383398946)
+   - Discord: Join our [Discord server](https://discord.jailbreakchangelogs.xyz) and contact [Jalenzz16](https://discord.com/users/1019539798383398946)
    - Email: [support@jailbreakchangelogs.xyz](#)
 
 ### What to Include in Your Report

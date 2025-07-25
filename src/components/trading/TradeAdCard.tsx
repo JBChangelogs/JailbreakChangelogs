@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { TradeAd } from '@/types/trading';
@@ -37,7 +36,6 @@ const getStatusColor = (status: string) => {
 export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, offerStatus, currentUserId, onDelete, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const router = useRouter();
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -55,29 +53,62 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
 
   return (
     <div
-      className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors cursor-pointer"
-      onClick={() => router.push(`/trading/ad/${trade.id}`)}
+      className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors"
       tabIndex={0}
-      role="button"
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          router.push(`/trading/ad/${trade.id}`);
-        }
-      }}
+      role="region"
     >
       <div className="block">
         {/* Trade Ad Number */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg font-semibold text-muted hover:text-blue-300 transition-colors">
+          <Link
+            href={`/trading/ad/${trade.id}`}
+            className="text-lg font-semibold text-muted hover:text-blue-300 transition-colors underline-offset-2 hover:underline cursor-pointer"
+            role="button"
+            tabIndex={0}
+          >
             Trade #{trade.id}
-          </span>
+          </Link>
         </div>
 
         {/* User Info */}
         {trade.user && trade.user.roblox_id && trade.user.roblox_username && (
           <RobloxTradeUser user={trade.user} />
         )}
-        
+
+        {/* View Details and Make Offer Buttons (moved to top) */}
+        <div className="mt-4 pt-0 space-y-2">
+          {trade.status === 'Pending' && trade.author !== currentUserId && (
+            <>
+              <button
+                onClick={() => onMakeOffer(trade.id)}
+                disabled={offerStatus?.loading}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  offerStatus?.loading
+                    ? 'bg-[#2E3944] text-muted cursor-not-allowed'
+                    : offerStatus?.success
+                    ? 'bg-[#43B581] text-white hover:bg-[#3CA374]'
+                    : 'bg-[#5865F2] text-white hover:bg-[#4752C4]'
+                }`}
+              >
+                <ChatBubbleLeftIcon className="w-5 h-5" />
+                {offerStatus?.loading
+                  ? 'Making Offer...'
+                  : offerStatus?.success
+                  ? 'Offer Sent!'
+                  : 'Make Offer'}
+              </button>
+            </>
+          )}
+          <Link
+            href={`/trading/ad/${trade.id}`}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2E3944] hover:bg-[#37424D] text-muted rounded-lg transition-colors text-sm font-medium"
+            role="button"
+            tabIndex={0}
+          >
+            View Details
+          </Link>
+        </div>
+
         <div className="mt-4 flex items-center justify-between">
           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(trade.status)}`}>
             {trade.status}
@@ -129,38 +160,6 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
             </span>
           )}
         </div>
-      </div>
-
-      {/* View Details and Make Offer Buttons */}
-      <div className="mt-4 pt-4 border-t border-[#2E3944] space-y-2">
-        {trade.status === 'Pending' && trade.author !== currentUserId && (
-          <>
-            <button
-              onClick={() => onMakeOffer(trade.id)}
-              disabled={offerStatus?.loading}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                offerStatus?.loading
-                  ? 'bg-[#2E3944] text-muted cursor-not-allowed'
-                  : offerStatus?.success
-                  ? 'bg-[#43B581] text-white hover:bg-[#3CA374]'
-                  : 'bg-[#5865F2] text-white hover:bg-[#4752C4]'
-              }`}
-            >
-              <ChatBubbleLeftIcon className="w-5 h-5" />
-              {offerStatus?.loading
-                ? 'Making Offer...'
-                : offerStatus?.success
-                ? 'Offer Sent!'
-                : 'Make Offer'}
-            </button>
-          </>
-        )}
-        <Link
-          href={`/trading/ad/${trade.id}`}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2E3944] hover:bg-[#37424D] text-muted rounded-lg transition-colors text-sm font-medium"
-        >
-          View Details
-        </Link>
       </div>
 
       {/* Delete Confirmation Dialog */}

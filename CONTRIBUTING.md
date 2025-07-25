@@ -4,7 +4,7 @@ First off, thank you for considering contributing to JailbreakChangelogs. It's p
 
 ## Where do I go from here?
 
-If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.xyz/) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.xyz?report-issue)!
+If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.xyz) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.xyz?report-issue)!
 
 ## Fork & create a branch
 

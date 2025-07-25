@@ -24,6 +24,7 @@ const supporterTiers: SupporterTier[] = [
       "Custom Regular Avatar",
       "Custom Regular Banner",
       "Comments highlighted with border and badge",
+      "Get your trade ads featured in our Discord for maximum reach."
     ],
     xFeatures: [
       "Custom Animated Avatar",
@@ -31,6 +32,7 @@ const supporterTiers: SupporterTier[] = [
       "Custom Regular Avatar",
       "Custom Regular Banner",
       "Comments highlighted with border and badge",
+      "Get your trade ads featured in our Discord for maximum reach."
     ]
   },
   {
@@ -48,13 +50,15 @@ const supporterTiers: SupporterTier[] = [
       "Custom Supporter Badge",
       "Discord Role: Supporter",
       "Comments highlighted with Bronze border and badge",
+      "Get your trade ads featured in our Discord for maximum reach.",
       "All Free tier benefits"
     ],
     xFeatures: [
       "Custom Animated Avatar",
       "Custom Animated Banner",
       "Custom Regular Banner",
-      "Custom Regular Avatar"
+      "Custom Regular Avatar",
+      "Get your trade ads featured in our Discord for maximum reach.",
     ]
   },
   {
@@ -72,6 +76,7 @@ const supporterTiers: SupporterTier[] = [
       "Custom Supporter Badge",
       "Discord Role: Supporter",
       "Comments highlighted with Silver border and badge",
+      "Get your trade ads featured in our Discord for maximum reach.",
       "All Supporter I benefits"
     ],
     xFeatures: [
@@ -94,6 +99,7 @@ const supporterTiers: SupporterTier[] = [
       "Discord Role: Supporter",
       "Comments highlighted with Gold border and badge",
       "Square Avatar Display",
+      "Get your trade ads featured in our Discord for maximum reach",
       "All Supporter II benefits"
     ]
   }
