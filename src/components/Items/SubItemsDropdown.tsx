@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface SubItem {
@@ -69,35 +70,44 @@ export default function SubItemsDropdown({ children, onSelect, selectedSubItem }
         <ChevronDownIcon className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 z-10 mt-1 w-24 sm:w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
-          <button
-            onClick={() => {
-              onSelect(null);
-              setIsOpen(false);
-            }}
-            className={`w-full px-2 py-1 sm:px-3 sm:py-2 text-left text-xs sm:text-sm text-muted hover:bg-[#124E66] ${
-              selectedSubItem === null ? 'bg-[#124E66]' : ''
-            }`}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="dropdown"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="absolute right-0 z-10 mt-1 w-24 sm:w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg"
           >
-            2025
-          </button>
-          {sortedChildren.map((child) => (
             <button
-              key={child.id}
               onClick={() => {
-                onSelect(child);
+                onSelect(null);
                 setIsOpen(false);
               }}
               className={`w-full px-2 py-1 sm:px-3 sm:py-2 text-left text-xs sm:text-sm text-muted hover:bg-[#124E66] ${
-                selectedSubItem?.id === child.id ? 'bg-[#124E66]' : ''
+                selectedSubItem === null ? 'bg-[#124E66]' : ''
               }`}
             >
-              {child.sub_name}
+              2025
             </button>
-          ))}
-        </div>
-      )}
+            {sortedChildren.map((child) => (
+              <button
+                key={child.id}
+                onClick={() => {
+                  onSelect(child);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-2 py-1 sm:px-3 sm:py-2 text-left text-xs sm:text-sm text-muted hover:bg-[#124E66] ${
+                  selectedSubItem?.id === child.id ? 'bg-[#124E66]' : ''
+                }`}
+              >
+                {child.sub_name}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 } 

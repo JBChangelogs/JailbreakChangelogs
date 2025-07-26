@@ -390,15 +390,32 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
             })}
           </div>
           <p className="mb-4 text-sm text-muted">
-            <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.
+            <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.<br/>
+            Not all demand levels are currently in use; some may not be represented among items.
           </p>
         </div>
       </div>
 
       <div ref={searchSectionRef} className="mb-8">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Left: Search and filter controls vertical stack */}
-          <div className="w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4">
+        <div
+          className={
+            !premiumStatusLoaded
+              ? "flex flex-col lg:flex-row gap-6 items-start"
+              : currentUserPremiumType !== 0
+                ? "flex flex-col lg:flex-row gap-4 items-start"
+                : "flex flex-col lg:flex-row gap-6 items-start"
+          }
+        >
+          {/* Controls: horizontal row for premium, vertical stack for non-premium */}
+          <div
+            className={
+              !premiumStatusLoaded
+                ? "w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4"
+                : currentUserPremiumType !== 0
+                  ? "w-full flex flex-col lg:flex-row lg:items-center lg:gap-4"
+                  : "w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4"
+            }
+          >
             {/* Search input */}
             <div className="relative">
               <input
@@ -406,7 +423,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                 placeholder={`Search ${filterSort === "name-all-items" ? "items" : filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ").toLowerCase()}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+                className="w-full lg:w-[380px] xl:w-[480px] rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
               />
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
               {searchTerm && (
