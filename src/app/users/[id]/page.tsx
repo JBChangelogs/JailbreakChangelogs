@@ -620,10 +620,10 @@ export default function UserProfilePage() {
                               href={`https://discord.com/users/${user.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5865F2]/10 border border-[#5865F2]/20 text-[#5865F2] hover:bg-[#5865F2]/20 transition-colors max-w-[320px] sm:max-w-none"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5865F2]/10 border border-[#5865F2]/20 hover:bg-[#5865F2]/20 transition-colors max-w-[320px] sm:max-w-none"
                             >
-                              <DiscordIcon className="h-5 w-5 flex-shrink-0" />
-                              <span className="text-sm font-medium truncate">{user.username}</span>
+                              <DiscordIcon className="h-5 w-5 flex-shrink-0 text-[#5865F2]" />
+                              <span className="text-sm font-medium truncate text-muted">{user.username}</span>
                             </Link>
                           </Tooltip>
                           
