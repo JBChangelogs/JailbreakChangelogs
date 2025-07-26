@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Tooltip } from '@mui/material';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import EditIcon from '@mui/icons-material/Edit';
 import { formatCustomDate } from '@/utils/timestamp';
 import { useRealTimeRelativeDate } from '@/hooks/useRealTimeRelativeDate';
@@ -27,12 +28,16 @@ const MAX_BIO_LENGTH = 512;
 
 const cleanBioText = (text: string): string => {
   return text
-    .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
-    .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
-    .trim();
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n');
 };
 
 export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onBioUpdate }: AboutTabProps) {
+  // Read more functionality
+  const MAX_VISIBLE_LINES = 5;
+  const [bioExpanded, setBioExpanded] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [newBio, setNewBio] = useState('');
   const [isSavingBio, setIsSavingBio] = useState(false);
@@ -45,6 +50,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
     // Initialize bio from props
     setNewBio(bio || '');
     setLocalBioLastUpdated(bioLastUpdated || null);
+  setBioExpanded(false);
   }, [bio, bioLastUpdated]);
 
   const handleSaveBio = async () => {
@@ -129,7 +135,7 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
           )}
         </div>
         
-        {isEditingBio && currentUserId === user.id ? (
+  {isEditingBio && currentUserId === user.id ? (
           <div className="space-y-2">
             <textarea
               className="w-full p-2 bg-[#212A31] text-muted border border-[#5865F2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#5865F2] resize-none"
@@ -189,7 +195,37 @@ export default function AboutTab({ user, currentUserId, bio, bioLastUpdated, onB
         ) : (
           <div>
             {bio ? (
-              <p className="text-muted whitespace-pre-wrap break-words">{convertUrlsToLinks(bio)}</p>
+              (() => {
+                // Split bio into lines for truncation
+                const lines = bio.split(/\r?\n/);
+                const shouldTruncate = lines.length > MAX_VISIBLE_LINES;
+                const visibleLines = shouldTruncate && !bioExpanded ? lines.slice(0, MAX_VISIBLE_LINES) : lines;
+                return (
+                  <>
+                    <p className="text-muted whitespace-pre-wrap break-words">
+                      {convertUrlsToLinks(visibleLines.join('\n'))}
+                    </p>
+                    {shouldTruncate && (
+                      <button
+                        className="text-blue-300 hover:text-blue-400 text-sm mt-2 font-medium transition-colors duration-200 hover:underline flex items-center gap-1"
+                        onClick={() => setBioExpanded(e => !e)}
+                      >
+                        {bioExpanded ? (
+                          <>
+                            <FaChevronUp className="w-4 h-4" />
+                            Show less
+                          </>
+                        ) : (
+                          <>
+                            <FaChevronDown className="w-4 h-4" />
+                            Read more
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </>
+                );
+              })()
             ) : (
               <p className="text-[#FFFFFF] italic">No bio yet</p>
             )}

@@ -43,12 +43,12 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
     }
   };
 
-  // Clean up rules text by normalizing whitespace
   const cleanRulesText = (text: string): string => {
     return text
-      .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
-      .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
-      .trim();
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .join('\n');
   };
 
   // Prevent background scrolling when modal is open

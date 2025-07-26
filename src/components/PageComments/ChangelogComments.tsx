@@ -1,3 +1,4 @@
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, CircularProgress, Typography, TextField, Button, IconButton, Pagination, Menu, MenuItem, Skeleton, Tooltip } from '@mui/material';
 import { PUBLIC_API_URL } from "@/utils/api";
@@ -25,7 +26,7 @@ const COMMENT_CHAR_LIMITS = {
   0: 200,  // Free tier
   1: 400,  // Supporter tier 1
   2: 800,  // Supporter tier 2
-  3: 2000 // Supporter tier 3 (2000 characters)
+  3: 2000 // Supporter tier 3
 } as const;
 
 const getCharLimit = (tier: keyof typeof COMMENT_CHAR_LIMITS): number => {
@@ -63,14 +64,12 @@ interface ChangelogCommentsProps {
   };
 }
 
-const INITIAL_COMMENT_LENGTH = 500; // Show first 500 characters initially
-
-// Clean comment text by removing newlines and excessive whitespace
 const cleanCommentText = (text: string): string => {
   return text
-    .replace(/[\r\n]+/g, ' ') // Replace all newlines with a space
-    .replace(/[ ]{2,}/g, ' ') // Collapse multiple spaces
-    .trim();
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n');
 };
 
 const CommentSkeleton = () => {
@@ -596,7 +595,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="bg-[#212A31] rounded-lg p-2 sm:p-3 border border-[#5865F2]">
+      <div className="bg-[#212A31] rounded-lg p-2 sm:p-3 border border-blue-300">
         <div className="flex flex-col gap-4">
           <div>
             <h2 className={`${inter.className} font-bold text-lg sm:text-xl text-muted mb-4 tracking-tight`}>
@@ -757,7 +756,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     return (
                       <div 
                         key={comment.id} 
-                        className="group relative overflow-hidden transition-all duration-200 rounded-lg p-3 border border-transparent hover:border-[#5865F2]"
+                        className="group relative overflow-hidden transition-all duration-200 rounded-lg p-3 border border-transparent hover:border-blue-300"
                       >
                         {/* Header Section */}
                         <div className="flex items-center justify-between pb-2">
@@ -977,36 +976,39 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               ) : (
                                 <>
                                   <div className="prose prose-sm max-w-none">
-                                    <p className="text-muted whitespace-pre-wrap break-words text-sm leading-relaxed">
-                                      {expandedComments.has(comment.id) 
-                                        ? convertUrlsToLinks(comment.content)
-                                        : comment.content.length > INITIAL_COMMENT_LENGTH 
-                                          ? convertUrlsToLinks(`${comment.content.slice(0, INITIAL_COMMENT_LENGTH)}...`)
-                                          : convertUrlsToLinks(comment.content)}
-                                    </p>
+                                    {(() => {
+                                      const MAX_VISIBLE_LINES = 5;
+                                      const lines = comment.content.split(/\r?\n/);
+                                      const shouldTruncate = lines.length > MAX_VISIBLE_LINES;
+                                      const isExpanded = expandedComments.has(comment.id);
+                                      const visibleLines = shouldTruncate && !isExpanded ? lines.slice(0, MAX_VISIBLE_LINES) : lines;
+                                      return (
+                                        <>
+                                          <p className="text-muted whitespace-pre-wrap break-words text-sm leading-relaxed">
+                                            {convertUrlsToLinks(visibleLines.join('\n'))}
+                                          </p>
+                                          {shouldTruncate && (
+                                            <button
+                                              onClick={() => toggleCommentExpand(comment.id)}
+                                              className="text-blue-300 hover:text-blue-400 text-sm mt-2 font-medium transition-colors duration-200 hover:underline flex items-center gap-1"
+                                            >
+                                              {isExpanded ? (
+                                                <>
+                                                  <FaChevronUp className="w-4 h-4" />
+                                                  Show less
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <FaChevronDown className="w-4 h-4" />
+                                                  Read more
+                                                </>
+                                              )}
+                                            </button>
+                                          )}
+                                        </>
+                                      );
+                                    })()}
                                   </div>
-                                  {comment.content.length > INITIAL_COMMENT_LENGTH && (
-                                    <button
-                                      onClick={() => toggleCommentExpand(comment.id)}
-                                      className="text-[#5865F2] hover:text-blue-400 text-sm mt-2 font-medium transition-colors duration-200 hover:underline flex items-center gap-1"
-                                    >
-                                      {expandedComments.has(comment.id) ? (
-                                        <>
-                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                          </svg>
-                                          Show less
-                                        </>
-                                      ) : (
-                                        <>
-                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                          </svg>
-                                          Show more
-                                        </>
-                                      )}
-                                    </button>
-                                  )}
                                 </>
                               )}
                             </div>
