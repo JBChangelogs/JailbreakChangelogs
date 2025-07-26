@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ItemDetails } from '@/types';
@@ -52,51 +53,60 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
         <ChevronDownIcon className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isDropdownOpen && (
-        <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
-          <button
-            onClick={() => {
-              onVariantSelect(item);
-              setSelectedYear('2025');
-              setIsDropdownOpen(false);
-              // Remove variant from URL when selecting default
-              const newUrl = new URL(window.location.href);
-              newUrl.searchParams.delete('variant');
-              router.replace(newUrl.pathname + newUrl.search);
-            }}
-            className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
-              selectedYear === '2025' ? 'bg-[#124E66]' : ''
-            }`}
+      <AnimatePresence>
+        {isDropdownOpen && (
+          <motion.div
+            key="dropdown"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg"
           >
-            2025
-          </button>
-          {item.children.map((child) => (
             <button
-              key={child.id}
               onClick={() => {
-                onVariantSelect({
-                  ...item,
-                  cash_value: child.data.cash_value,
-                  duped_value: child.data.duped_value,
-                  demand: child.data.demand,
-                  last_updated: child.data.last_updated
-                });
-                setSelectedYear(child.sub_name);
+                onVariantSelect(item);
+                setSelectedYear('2025');
                 setIsDropdownOpen(false);
-                // Update URL with selected variant
+                // Remove variant from URL when selecting default
                 const newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('variant', child.sub_name);
+                newUrl.searchParams.delete('variant');
                 router.replace(newUrl.pathname + newUrl.search);
               }}
               className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
-                selectedYear === child.sub_name ? 'bg-[#124E66]' : ''
+                selectedYear === '2025' ? 'bg-[#124E66]' : ''
               }`}
             >
-              {child.sub_name}
+              2025
             </button>
-          ))}
-        </div>
-      )}
+            {item.children.map((child) => (
+              <button
+                key={child.id}
+                onClick={() => {
+                  onVariantSelect({
+                    ...item,
+                    cash_value: child.data.cash_value,
+                    duped_value: child.data.duped_value,
+                    demand: child.data.demand,
+                    last_updated: child.data.last_updated
+                  });
+                  setSelectedYear(child.sub_name);
+                  setIsDropdownOpen(false);
+                  // Update URL with selected variant
+                  const newUrl = new URL(window.location.href);
+                  newUrl.searchParams.set('variant', child.sub_name);
+                  router.replace(newUrl.pathname + newUrl.search);
+                }}
+                className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
+                  selectedYear === child.sub_name ? 'bg-[#124E66]' : ''
+                }`}
+              >
+                {child.sub_name}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 } 
