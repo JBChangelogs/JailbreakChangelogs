@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon, UserGroupIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Pagination } from '@mui/material';
 import Link from 'next/link';
 import { UserData } from '@/types/auth';
@@ -64,8 +64,8 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
       }
       
       return (
-        (user.roblox_username && user.roblox_username.toLowerCase().startsWith(searchLower)) ||
-        (user.roblox_display_name && user.roblox_display_name.toLowerCase().startsWith(searchLower))
+        (user.roblox_username && user.roblox_username.toLowerCase().includes(searchLower)) ||
+        (user.roblox_display_name && user.roblox_display_name.toLowerCase().includes(searchLower))
       );
     } else {
       if (isIdSearch) {
@@ -73,8 +73,8 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
       }
       
       return (
-        user.username.toLowerCase().startsWith(searchLower) ||
-        (user.global_name && user.global_name.toLowerCase().startsWith(searchLower))
+        user.username.toLowerCase().includes(searchLower) ||
+        (user.global_name && user.global_name.toLowerCase().includes(searchLower))
       );
     }
   });
@@ -153,13 +153,17 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
             setPage(1);
           }}
         />
-        <div className="flex items-center gap-2 text-sm text-muted whitespace-nowrap">
-          <UserGroupIcon className="h-4 w-4" />
+  <div className="flex items-center gap-2 text-sm text-muted">
           <span>
-            {debouncedSearchQuery 
-              ? `Found ${filteredUsers.length.toLocaleString()} ${userType === 'roblox' ? 'Roblox' : 'Discord'} ${filteredUsers.length === 1 ? 'user' : 'users'} matching "${debouncedSearchQuery}"`
-              : `Total ${userType === 'roblox' ? 'Roblox' : 'Discord'} Users: ${filteredUsers.length.toLocaleString()}`
-            }
+            {(() => {
+              const MAX_QUERY_DISPLAY = 32;
+              const displayQuery = debouncedSearchQuery && debouncedSearchQuery.length > MAX_QUERY_DISPLAY
+                ? debouncedSearchQuery.slice(0, MAX_QUERY_DISPLAY) + '...'
+                : debouncedSearchQuery;
+              return debouncedSearchQuery 
+                ? `Found ${filteredUsers.length.toLocaleString()} ${userType === 'roblox' ? 'Roblox' : 'Discord'} ${filteredUsers.length === 1 ? 'user' : 'users'} matching "${displayQuery}"`
+                : `Total ${userType === 'roblox' ? 'Roblox' : 'Discord'} Users: ${filteredUsers.length.toLocaleString()}`;
+            })()}
           </span>
         </div>
       </div>
@@ -168,10 +172,15 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
           <div className="col-span-full text-center py-8">
             <p className="text-muted text-lg">No users found</p>
             <p className="text-[#FFFFFF] text-sm mt-2">
-              {debouncedSearchQuery 
-                ? `No ${userType === 'roblox' ? 'Roblox' : 'Discord'} users match "${debouncedSearchQuery}"` 
-                : `No ${userType === 'roblox' ? 'Roblox' : 'Discord'} users available`
-              }
+              {(() => {
+                const MAX_QUERY_DISPLAY = 32;
+                const displayQuery = debouncedSearchQuery && debouncedSearchQuery.length > MAX_QUERY_DISPLAY
+                  ? debouncedSearchQuery.slice(0, MAX_QUERY_DISPLAY) + '...'
+                  : debouncedSearchQuery;
+                return debouncedSearchQuery 
+                  ? `No ${userType === 'roblox' ? 'Roblox' : 'Discord'} users match "${displayQuery}"` 
+                  : `No ${userType === 'roblox' ? 'Roblox' : 'Discord'} users available`;
+              })()}
             </p>
           </div>
         ) : (
