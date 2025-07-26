@@ -8,14 +8,12 @@ import ImageGallery from '@/components/Seasons/ImageGallery';
 import ChangelogComments from '@/components/PageComments/ChangelogComments';
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useRouter } from 'next/navigation';
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import { formatProfileDate } from '@/utils/timestamp';
 import DisplayAd from '@/components/Ads/DisplayAd';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
-const luckiestGuy = localFont({ 
-  src: '../../../../public/fonts/LuckiestGuy.ttf',
-});
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 const LATEST_SEASON = 27;
 
@@ -264,7 +262,7 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
           {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
           <div className="sm:col-span-12 lg:col-span-8">
-            <h1 className={`${luckiestGuy.className} mb-4 text-3xl font-semibold text-muted border-b border-[#D3D9D4] pb-2`}>
+            <h1 className={`${inter.className} mb-4 text-3xl font-bold text-muted border-b border-[#D3D9D4] pb-2 tracking-tighter`}>
               Season {season.season} / {season.title}
             </h1>
             <p className="mb-4 text-muted">
@@ -294,7 +292,7 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
               </div>
             </div>
 
-            <h2 className="mb-4 text-2xl font-semibold text-muted border-b border-[#D3D9D4] pb-2">Season Rewards</h2>
+            <h2 className={`mb-4 text-2xl font-bold text-muted border-b border-[#D3D9D4] pb-2 tracking-tight ${inter.className}`}>Season Rewards</h2>
             <div className="space-y-4">
               {season.rewards
                 .sort((a, b) => {

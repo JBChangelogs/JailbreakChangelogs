@@ -12,6 +12,7 @@ import { StarIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/ou
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 import toast from "react-hot-toast";
+import { Inter } from "next/font/google";
 
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
@@ -37,6 +38,8 @@ import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 interface ItemDetailsClientProps {
   item: ItemDetails;
 }
+
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -382,7 +385,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
             {/* Right column - Details */}
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-white">{currentItem.name}</h2>
+                <h2 className={`text-3xl font-bold text-white ${inter.className}`}>{currentItem.name}</h2>
                 <p className="text-sm text-muted mt-2">
                   Created by <CreatorLink creator={currentItem.creator} />
                 </p>

@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { HomeIcon } from '@heroicons/react/24/outline';
-import localFont from 'next/font/local';
+import { Inter } from "next/font/google";
 import Image from 'next/image';
 
-const luckiestGuy = localFont({ 
-  src: '../../../../../public/fonts/LuckiestGuy.ttf',
-});
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export default function TradeAdNotFound() {
   return (
@@ -38,7 +36,7 @@ export default function TradeAdNotFound() {
       <div className="text-center max-w-md mx-auto px-4 relative z-[1]">
         <div className="px-8 py-8 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(30,30,30,0.35)] backdrop-blur-xl border border-white/[0.12]">
           <div className="mb-8">
-            <div className={`${luckiestGuy.className} text-8xl font-bold text-[#5865F2] mb-4`}>
+            <div className={`${inter.className} text-8xl font-bold text-[#5865F2] mb-4`}>
               404
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">Trade Ad Not Found</h1>

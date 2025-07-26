@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { ArrowRightIcon, ArrowTurnDownRightIcon } from "@heroicons/react/24/outline";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import { parseMarkdown } from '@/utils/changelogs';
 import ChangelogMediaEmbed from './ChangelogMediaEmbed';
 import ChangelogComments from '../PageComments/ChangelogComments';
@@ -9,9 +9,7 @@ import ChangelogQuickNav from './ChangelogQuickNav';
 import DisplayAd from '../Ads/DisplayAd';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 
-const luckiestGuy = localFont({ 
-  src: '../../../public/fonts/LuckiestGuy.ttf',
-});
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 interface ChangelogContentProps {
   title: string;
@@ -72,14 +70,14 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
       {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
       <div className="sm:col-span-12 lg:col-span-8">
-        <h1 className={`${luckiestGuy.className} mb-8 text-3xl sm:text-5xl text-muted border-b border-[#748D92] pb-4`}>
+        <h1 className={`${inter.className} mb-8 font-bold text-3xl sm:text-5xl text-muted border-b border-[#748D92] pb-4 tracking-tighter`}>
           {title}
         </h1>
         <div className="prose prose-invert max-w-none">
           {parseMarkdown(sections).map((section, sectionIndex) => (
             <div key={sectionIndex} className="mb-8">
               {section.title && (
-                <h2 className={`${luckiestGuy.className} text-[#748D92] text-2xl sm:text-3xl mb-4`}>
+                <h2 className={`${inter.className} font-bold text-[#748D92] text-2xl sm:text-3xl mb-4 tracking-tighter`}>
                   {section.title}
                 </h2>
               )}

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import localFont from "next/font/local";
 import Link from "next/link";
 import Script from 'next/script';
 import "./globals.css";
@@ -28,11 +27,6 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import SupportPromptModalWrapper from './SupportPromptModalWrapper';
 
 const inter = Inter({ subsets: ["latin"] });
-const luckiestGuy = localFont({ 
-  src: '../../public/fonts/LuckiestGuy.ttf',
-  variable: '--font-luckiest-guy',
-});
-
 export const viewport: Viewport = {
   themeColor: "#124e66",
 };
@@ -99,7 +93,7 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         </head>
-        <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
+        <body className={`${inter.className} bg-[#2E3944]`}>
           <Maintenance />
           <Script id="clarity-script" strategy="afterInteractive">
             {`
@@ -128,7 +122,7 @@ export default async function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={`${inter.className} ${luckiestGuy.variable} bg-[#2E3944]`}>
+      <body className={`${inter.className} bg-[#2E3944]`}>
         <Toaster
           position="bottom-right"
           toastOptions={{

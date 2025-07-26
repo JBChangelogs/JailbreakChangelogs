@@ -1,4 +1,9 @@
 import Image from 'next/image';
+import localFont from 'next/font/local';
+
+const bangers = localFont({
+  src: '../../../public/fonts/Bangers.ttf',
+});
 
 export default function Maintenance() {
   return (
@@ -19,7 +24,7 @@ export default function Maintenance() {
             className="h-[140px] w-auto filter drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
           />
 
-          <h1 className="text-white font-extrabold mb-4 text-4xl">
+          <h1 className={`${bangers.className} text-white mb-4 text-5xl`}>
             Under Maintenance
           </h1>
           

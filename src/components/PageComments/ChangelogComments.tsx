@@ -8,7 +8,7 @@ import { FaSignInAlt } from "react-icons/fa";
 import { toast } from 'react-hot-toast';
 import { getToken } from '@/utils/auth';
 import { UserData } from '@/types/auth';
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import Link from 'next/link';
 import ReportCommentModal from './ReportCommentModal';
 import LoginModalWrapper from '../Auth/LoginModalWrapper';
@@ -19,9 +19,7 @@ import { UserDetailsTooltip } from '@/components/Users/UserDetailsTooltip';
 import { UserBadges } from '@/components/Profile/UserBadges';
 import CommentTimestamp from './CommentTimestamp';
 
-const luckiestGuy = localFont({ 
-  src: '../../../public/fonts/LuckiestGuy.ttf',
-});
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 const COMMENT_CHAR_LIMITS = {
   0: 200,  // Free tier
@@ -558,38 +556,35 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   };
 
   if (loading && !initialLoadComplete) {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-[#212A31] rounded-lg p-3 sm:p-6 border border-[#5865F2]">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2 className={`${luckiestGuy.className} text-lg sm:text-xl text-muted mb-4`}>
-                {type === 'changelog' 
-                  ? `Comments for Changelog ${changelogId}: ${changelogTitle}`
-                  : type === 'season'
-                    ? `Comments for Season ${changelogId}: ${changelogTitle}`
-                    : type === 'trade'
-                      ? `Comments for Trade #${changelogId}`
-                      : <>Comments for {changelogTitle} <span className="text-[#748D92]">({itemType})</span></>}
-              </h2>
-            </div>
-            
-            {/* Comment Form Skeleton */}
-            <div className="mb-6 sm:mb-8">
-              <Skeleton variant="rounded" height={100} sx={{ bgcolor: '#1E2328' }} />
-              <div className="flex justify-between items-center mt-2">
-                <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
-                <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
-              </div>
-            </div>
-
-            {/* Comments Skeleton */}
-            <CommentSkeleton />
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-[#212A31] rounded-lg p-3 sm:p-6 border border-[#5865F2]">
+        <div className="flex flex-col gap-4">
+          <div>
+            <Skeleton
+              variant="text"
+              width={320}
+              height={32}
+              sx={{ bgcolor: '#1E2328', borderRadius: '8px', marginBottom: '16px' }}
+            />
           </div>
+          
+          {/* Comment Form Skeleton */}
+          <div className="mb-6 sm:mb-8">
+            <Skeleton variant="rounded" height={100} sx={{ bgcolor: '#1E2328' }} />
+            <div className="flex justify-between items-center mt-2">
+              <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
+              <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
+            </div>
+          </div>
+
+          {/* Comments Skeleton */}
+          <CommentSkeleton />
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (error) {
     return (
@@ -604,7 +599,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       <div className="bg-[#212A31] rounded-lg p-2 sm:p-3 border border-[#5865F2]">
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className={`${luckiestGuy.className} text-lg sm:text-xl text-muted mb-4`}>
+            <h2 className={`${inter.className} font-bold text-lg sm:text-xl text-muted mb-4 tracking-tight`}>
               {type === 'changelog' 
                 ? `Comments for Changelog ${changelogId}: ${changelogTitle}`
                 : type === 'season'
@@ -831,7 +826,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       >
                                         <Link 
                                           href={`/users/${comment.user_id}`}
-                                          className="font-semibold text-muted hover:text-blue-300 transition-colors duration-200 text-sm truncate hover:underline"
+                                          className={`${inter.className} font-semibold text-blue-300 hover:text-blue-400 transition-colors duration-200 text-md truncate hover:underline`}
                                         >
                                           {userData[comment.user_id]?.username || comment.author}
                                         </Link>
