@@ -21,7 +21,7 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
   const [page, setPage] = useState(1);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userType, setUserType] = useState<'discord' | 'roblox'>('discord');
-  const usersPerPage = 15;
+  const usersPerPage = 21;
   
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 

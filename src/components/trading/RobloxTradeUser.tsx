@@ -32,16 +32,17 @@ export default function RobloxTradeUser({ user, showBadge = false }: RobloxTrade
     <div className="flex items-center space-x-3">
       <div className="flex-shrink-0">
         {!imageError && user.roblox_avatar ? (
-          <Image
-            src={user.roblox_avatar}
-            alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
-            width={40}
-            height={40}
-            unoptimized
-            draggable={false}
-            className="rounded-full"
-            onError={() => setImageError(true)}
-          />
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#212A31]">
+            <Image
+              src={user.roblox_avatar}
+              alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
+              fill
+              unoptimized
+              draggable={false}
+              className="object-cover"
+              onError={() => setImageError(true)}
+            />
+          </div>
         ) : (
           <div className="w-10 h-10 bg-[#212A31] rounded-full flex items-center justify-center">
             <RobloxIcon className="h-6 w-6 text-white" />

@@ -219,19 +219,21 @@ export const UserAvatar = ({
             <CircularProgress size={24} sx={{ color: '#5865F2' }} />
           </div>
         )}
-        <Image
-          src={avatarSource.src}
-          alt={avatarSource.alt}
-          fill
-          priority
-          draggable={false}
-          unoptimized={avatarSource.unoptimized}
-          onError={avatarSource.onError}
-          onLoad={() => {
-            setIsLoading(false);
-          }}
-          className="object-cover"
-        />
+        <div className="absolute inset-0 bg-[#212A31]">
+          <Image
+            src={avatarSource.src}
+            alt={avatarSource.alt}
+            fill
+            priority
+            draggable={false}
+            unoptimized={avatarSource.unoptimized}
+            onError={avatarSource.onError}
+            onLoad={() => {
+              setIsLoading(false);
+            }}
+            className="object-cover"
+          />
+        </div>
       </div>
     </BadgeWrapper>
   );

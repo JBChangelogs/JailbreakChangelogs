@@ -17,6 +17,7 @@ import DisplayAd from '@/components/Ads/DisplayAd';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -37,6 +38,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<Record<number, string>>({});
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
   const [showNonTradable, setShowNonTradable] = useState(false);
@@ -513,7 +515,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </div>
                 <div className="flex flex-col flex-grow">
                   <div className="space-y-1.5">
-                    <span className="text-muted text-sm font-medium truncate transition-colors group-hover:text-blue-400">
+                    <span className="text-blue-300 text-sm font-medium truncate transition-colors group-hover:text-blue-400 hover:underline">
                       {item.name}
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -564,41 +566,55 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
-                                dropdown?.classList.toggle('hidden');
+                                setOpenDropdownId(openDropdownId === item.id ? null : item.id);
                               }}
                               className="w-full flex items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
                             >
                               {selectedVariants[item.id] || '2025'}
-                              <ChevronDownIcon className="h-4 w-4" />
+                              <ChevronDownIcon className={`h-4 w-4 transition-transform ${openDropdownId === item.id ? 'rotate-180' : ''}`} />
                             </button>
-                            <div className="absolute z-10 mt-1 w-full hidden rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  handleVariantSelect(item.id, '2025');
-                                  (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                                }}
-                                className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
-                              >
-                                2025
-                              </button>
-                              {item.children?.map((child) => (
-                                <button
-                                  key={child.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    handleVariantSelect(item.id, child.sub_name);
-                                    (e.currentTarget.parentElement as HTMLElement)?.classList.add('hidden');
-                                  }}
-                                  className="w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66]"
+                            <AnimatePresence>
+                              {openDropdownId === item.id && (
+                                <motion.div
+                                  key="dropdown"
+                                  initial={{ opacity: 0, y: -8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -8 }}
+                                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                                  className="absolute z-10 mt-1 w-full rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg"
                                 >
-                                  {child.sub_name}
-                                </button>
-                              ))}
-                            </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleVariantSelect(item.id, '2025');
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
+                                      selectedVariants[item.id] === '2025' || !selectedVariants[item.id] ? 'bg-[#124E66]' : ''
+                                    }`}
+                                  >
+                                    2025
+                                  </button>
+                                  {item.children?.map((child) => (
+                                    <button
+                                      key={child.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        handleVariantSelect(item.id, child.sub_name);
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
+                                        selectedVariants[item.id] === child.sub_name ? 'bg-[#124E66]' : ''
+                                      }`}
+                                    >
+                                      {child.sub_name}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         )}
                       </>

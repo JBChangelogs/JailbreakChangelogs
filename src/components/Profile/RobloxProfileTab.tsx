@@ -44,16 +44,18 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
                     <CircularProgress size={32} sx={{ color: '#5865F2' }} />
                   </div>
                 )}
-                <Image
-                  src={user.roblox_avatar}
-                  alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
-                  fill
-                  unoptimized
-                  draggable={false}
-                  className="object-cover"
-                  onError={() => setImageError(true)}
-                  onLoad={() => setIsLoading(false)}
-                />
+                <div className="absolute inset-0 bg-[#212A31]">
+                  <Image
+                    src={user.roblox_avatar}
+                    alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
+                    fill
+                    unoptimized
+                    draggable={false}
+                    className="object-cover"
+                    onError={() => setImageError(true)}
+                    onLoad={() => setIsLoading(false)}
+                  />
+                </div>
               </>
             ) : (
               <div className="w-full h-full bg-[#212A31] flex items-center justify-center">

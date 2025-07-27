@@ -51,16 +51,18 @@ export default function RobloxUserCard({ user, currentUserId }: RobloxUserCardPr
               <CircularProgress size={24} sx={{ color: '#5865F2' }} />
             </div>
           )}
-          <Image
-            src={user.roblox_avatar}
-            alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
-            fill
-            unoptimized
-            draggable={false}
-            className="rounded-full border border-[#2E3944] object-cover"
-            onError={() => setAvatarError(true)}
-            onLoad={() => setIsLoading(false)}
-          />
+          <div className="absolute inset-0 bg-[#212A31]">
+            <Image
+              src={user.roblox_avatar}
+              alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
+              fill
+              unoptimized
+              draggable={false}
+              className="rounded-full border border-[#2E3944] object-cover"
+              onError={() => setAvatarError(true)}
+              onLoad={() => setIsLoading(false)}
+            />
+          </div>
         </div>
       ) : (
         <div className="w-12 h-12 rounded-full bg-[#1E2328] flex items-center justify-center border border-[#2E3944]">
