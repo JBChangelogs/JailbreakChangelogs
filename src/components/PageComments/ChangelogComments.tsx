@@ -6,7 +6,6 @@ import { UserAvatar } from '@/utils/avatar';
 import { PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, EllipsisHorizontalIcon, ChatBubbleLeftIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { BiSolidSend } from "react-icons/bi";
 import { FaSignInAlt } from "react-icons/fa";
-import { toast } from 'react-hot-toast';
 import { getToken } from '@/utils/auth';
 import { UserData } from '@/types/auth';
 import { Inter } from "next/font/google";
@@ -19,6 +18,8 @@ import { useSupporterModal } from '@/hooks/useSupporterModal';
 import { UserDetailsTooltip } from '@/components/Users/UserDetailsTooltip';
 import { UserBadges } from '@/components/Profile/UserBadges';
 import CommentTimestamp from './CommentTimestamp';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -34,10 +35,9 @@ const getCharLimit = (tier: keyof typeof COMMENT_CHAR_LIMITS): number => {
   return limit;
 };
 
-// Add function to check if comment is within editing window (1 hour)
 const isCommentEditable = (commentDate: string): boolean => {
   const commentTime = parseInt(commentDate);
-  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  const currentTime = Math.floor(Date.now() / 1000);
   const oneHourInSeconds = 3600;
   return (currentTime - commentTime) <= oneHourInSeconds;
 };
@@ -131,6 +131,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{comment: CommentData, timeoutId: NodeJS.Timeout} | null>(null);
+  const [undoSnackbarOpen, setUndoSnackbarOpen] = useState(false);
+  const [postSnackbarOpen, setPostSnackbarOpen] = useState(false);
+  const [postSnackbarMsg, setPostSnackbarMsg] = useState('');
+  const [postErrorSnackbarOpen, setPostErrorSnackbarOpen] = useState(false);
+  const [postErrorSnackbarMsg, setPostErrorSnackbarMsg] = useState('');
+  const [editSnackbarOpen, setEditSnackbarOpen] = useState(false);
+  const [editSnackbarMsg, setEditSnackbarMsg] = useState('');
+  const [globalErrorSnackbarOpen, setGlobalErrorSnackbarOpen] = useState(false);
+  const [globalErrorSnackbarMsg, setGlobalErrorSnackbarMsg] = useState('');
+  const [infoSnackbarOpen, setInfoSnackbarOpen] = useState(false);
+  const [infoSnackbarMsg, setInfoSnackbarMsg] = useState('');
 
   // Supporter modal hook
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
@@ -157,7 +169,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       }
     }
 
-    // Add event listener for auth changes
     const handleAuthChange = (event: CustomEvent) => {
       const userData = event.detail;
       if (userData) {
@@ -192,7 +203,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     if (usersToFetch.length === 0) return;
 
     try {
-      // Mark all users as loading
       setLoadingUserData(prev => {
         const newState = { ...prev };
         usersToFetch.forEach(userId => {
@@ -201,12 +211,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return newState;
       });
 
-      // Fetch user data in batch
       const response = await fetch(`${PUBLIC_API_URL}/users/get/batch?ids=${usersToFetch.join(',')}&nocache=true`);
       if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
       
-      // Update user data state
       setUserData(prev => {
         const newState = { ...prev };
         data.forEach((user: UserData) => {
@@ -216,7 +224,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
     } catch (error) {
       console.error('Error fetching user data:', error);
-      // Mark failed users
       setFailedUserData(prev => {
         const newSet = new Set(prev);
         usersToFetch.forEach(userId => {
@@ -225,7 +232,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return newSet;
       });
     } finally {
-      // Mark all users as not loading
       setLoadingUserData(prev => {
         const newState = { ...prev };
         usersToFetch.forEach(userId => {
@@ -274,10 +280,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        // Ignore abort errors
         return;
       }
       setError(err instanceof Error ? err.message : 'Failed to fetch comments');
+      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to fetch comments');
+      setGlobalErrorSnackbarOpen(true);
     } finally {
       setLoading(false);
       setInitialLoadComplete(true);
@@ -301,9 +308,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     // Check if comment length exceeds user's tier limit
     if (!checkCommentLength(newComment, currentUserPremiumType)) {
-      // If user is tier 3 and comment is too long, show a toast error
       if (currentUserPremiumType >= 3 && newComment.length > 2000) {
-        toast.error('Comment is too long. Maximum length is 2000 characters.');
+        setGlobalErrorSnackbarMsg('Comment is too long. Maximum length is 2000 characters.');
+        setGlobalErrorSnackbarOpen(true);
       }
       return; // Modal will be shown by the hook for lower tiers
     }
@@ -313,7 +320,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     try {
       const token = getToken();
       if (!token) {
-        toast.error('You must be logged in to comment');
+        setGlobalErrorSnackbarMsg('You must be logged in to comment');
+        setGlobalErrorSnackbarOpen(true);
         return;
       }
 
@@ -331,17 +339,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       if (response.status === 429) {
-        toast.error('🚫 Slow down! You\'re posting too fast. Take a breather and try again in a moment.', {
-          duration: 5000,
-          style: {
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #ff6b6b',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500'
-          }
-        });
+        setPostErrorSnackbarMsg("Slow down! You're posting too fast. Take a breather and try again in a moment.");
+        setPostErrorSnackbarOpen(true);
         return;
       }
 
@@ -349,15 +348,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error('Failed to post comment');
       }
 
-      toast.success('Comment posted successfully');
-      toast.success('You have 1 hour to edit your comment', {
-        duration: 4000,
-        icon: '⏰'
-      });
+      setPostSnackbarMsg('Comment posted successfully. You have 1 hour to edit your comment.');
+      setPostSnackbarOpen(true);
       setNewComment('');
       fetchComments();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to post comment');
+      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to post comment');
+      setGlobalErrorSnackbarOpen(true);
     } finally {
       setIsSubmittingComment(false);
     }
@@ -368,9 +365,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     // Check if edit content length exceeds user's tier limit
     if (!checkCommentLength(editContent, currentUserPremiumType)) {
-      // If user is tier 3 and comment is too long, show a toast error
       if (currentUserPremiumType >= 3 && editContent.length > 2000) {
-        toast.error('Comment is too long. Maximum length is 2000 characters.');
+        setGlobalErrorSnackbarMsg('Comment is too long. Maximum length is 2000 characters.');
+        setGlobalErrorSnackbarOpen(true);
       }
       return; // Modal will be shown by the hook for lower tiers
     }
@@ -378,7 +375,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     try {
       const token = getToken();
       if (!token) {
-        toast.error('You must be logged in to edit comments');
+        setGlobalErrorSnackbarMsg('You must be logged in to edit comments');
+        setGlobalErrorSnackbarOpen(true);
         return;
       }
 
@@ -398,24 +396,39 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error('Failed to edit comment');
       }
-
-      toast.success('Comment edited successfully');
+      setEditSnackbarMsg('Comment edited successfully.');
+      setEditSnackbarOpen(true);
       setEditingCommentId(null);
       setEditContent('');
       fetchComments();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to edit comment');
+      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to edit comment');
+      setGlobalErrorSnackbarOpen(true);
     }
   };
 
-  const handleDeleteComment = async (commentId: number) => {
+  const handleDeleteComment = (commentId: number) => {
+    const commentToDelete = comments.find(c => c.id === commentId);
+    if (!commentToDelete) return;
+    // Optimistically remove from UI
+    setComments(prev => prev.filter(c => c.id !== commentId));
+    // Set up undo state
+    const timeoutId = setTimeout(() => {
+      actuallyDeleteComment(commentId);
+      setPendingDelete(null);
+    }, 3000); // Changed from 5000 to 3000 ms
+    setPendingDelete({ comment: commentToDelete, timeoutId });
+    setUndoSnackbarOpen(true);
+  };
+
+  const actuallyDeleteComment = async (commentId: number) => {
     try {
       const token = getToken();
       if (!token) {
-        toast.error('You must be logged in to delete comments');
+        setGlobalErrorSnackbarMsg('You must be logged in to delete comments');
+        setGlobalErrorSnackbarOpen(true);
         return;
       }
-
       const response = await fetch(`${PUBLIC_API_URL}/comments/delete`, {
         method: 'DELETE',
         headers: {
@@ -427,15 +440,22 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           owner: token
         })
       });
-
       if (!response.ok) {
         throw new Error('Failed to delete comment');
       }
-
-      toast.success('Comment deleted successfully');
       fetchComments();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete comment');
+      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to delete comment');
+      setGlobalErrorSnackbarOpen(true);
+    }
+  };
+
+  const handleUndoDelete = () => {
+    if (pendingDelete) {
+      clearTimeout(pendingDelete.timeoutId);
+      setComments(prev => [pendingDelete.comment, ...prev]);
+      setPendingDelete(null);
+      setUndoSnackbarOpen(false);
     }
   };
 
@@ -507,7 +527,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleReportClick = () => {
     const token = getToken();
     if (!token) {
-      toast.error('You must be logged in to report comments');
+      setGlobalErrorSnackbarMsg('You must be logged in to report comments');
+      setGlobalErrorSnackbarOpen(true);
       setLoginModalOpen(true);
       return;
     }
@@ -525,7 +546,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     try {
       const token = getToken();
       if (!token) {
-        toast.error('You must be logged in to report comments');
+        setGlobalErrorSnackbarMsg('You must be logged in to report comments');
+        setGlobalErrorSnackbarOpen(true);
         return;
       }
 
@@ -545,12 +567,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error('Failed to report comment');
       }
 
-      toast.success('We have successfully received your report');
+      setInfoSnackbarMsg('We have successfully received your report');
+      setInfoSnackbarOpen(true);
       setReportModalOpen(false);
       setReportReason('');
       setReportingCommentId(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to report comment');
+      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to report comment');
+      setGlobalErrorSnackbarOpen(true);
     }
   };
 
@@ -978,14 +1002,27 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   <div className="prose prose-sm max-w-none">
                                     {(() => {
                                       const MAX_VISIBLE_LINES = 5;
+                                      const MAX_VISIBLE_CHARS = 150;
                                       const lines = comment.content.split(/\r?\n/);
-                                      const shouldTruncate = lines.length > MAX_VISIBLE_LINES;
+                                      const isLongLine = comment.content.length > MAX_VISIBLE_CHARS;
+                                      const shouldTruncate = lines.length > MAX_VISIBLE_LINES || isLongLine;
                                       const isExpanded = expandedComments.has(comment.id);
-                                      const visibleLines = shouldTruncate && !isExpanded ? lines.slice(0, MAX_VISIBLE_LINES) : lines;
+
+                                      let visibleContent: string;
+                                      if (shouldTruncate && !isExpanded) {
+                                        if (lines.length > MAX_VISIBLE_LINES) {
+                                          visibleContent = lines.slice(0, MAX_VISIBLE_LINES).join('\n');
+                                        } else {
+                                          visibleContent = comment.content.slice(0, MAX_VISIBLE_CHARS) + '...';
+                                        }
+                                      } else {
+                                        visibleContent = comment.content;
+                                      }
+
                                       return (
                                         <>
                                           <p className="text-muted whitespace-pre-wrap break-words text-sm leading-relaxed">
-                                            {convertUrlsToLinks(visibleLines.join('\n'))}
+                                            {convertUrlsToLinks(visibleContent)}
                                           </p>
                                           {shouldTruncate && (
                                             <button
@@ -1040,7 +1077,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   '&:hover': {
                                     backgroundColor: '#2E3944',
                                     color: '#ffffff',
-                                    transform: 'translateX(4px)',
                                   },
                                   '& .MuiSvgIcon-root': {
                                     transition: 'all 0.2s ease-in-out',
@@ -1143,6 +1179,113 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         currentLimit={modalState.currentLimit}
         requiredLimit={modalState.requiredLimit}
       />
+
+      {/* Undo Snackbar */}
+      <Snackbar
+        open={undoSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setUndoSnackbarOpen(false)}
+        autoHideDuration={3000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="info"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #5865F2', fontWeight: 500 }}
+          action={
+            <Button color="inherit" size="small" onClick={handleUndoDelete} sx={{ fontWeight: 700 }}>
+              UNDO
+            </Button>
+          }
+        >
+          Comment deleted.
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Post Success Snackbar */}
+      <Snackbar
+        open={postSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setPostSnackbarOpen(false)}
+        autoHideDuration={5000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="success"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #5865F2', fontWeight: 500 }}
+        >
+          {postSnackbarMsg}
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Post Error Snackbar */}
+      <Snackbar
+        open={postErrorSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setPostErrorSnackbarOpen(false)}
+        autoHideDuration={6000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="error"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #ef4444', fontWeight: 500 }}
+        >
+          {postErrorSnackbarMsg}
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Edit Success Snackbar */}
+      <Snackbar
+        open={editSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setEditSnackbarOpen(false)}
+        autoHideDuration={5000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="success"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #5865F2', fontWeight: 500 }}
+        >
+          {editSnackbarMsg}
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Global Error Snackbar */}
+      <Snackbar
+        open={globalErrorSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setGlobalErrorSnackbarOpen(false)}
+        autoHideDuration={6000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="error"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #ef4444', fontWeight: 500 }}
+        >
+          {globalErrorSnackbarMsg}
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Info Snackbar (for report received) */}
+      <Snackbar
+        open={infoSnackbarOpen}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setInfoSnackbarOpen(false)}
+        autoHideDuration={5000}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="info"
+          sx={{ background: '#212A31', color: '#fff', border: '1px solid #5865F2', fontWeight: 500 }}
+        >
+          {infoSnackbarMsg}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };
