@@ -157,7 +157,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     const token = getToken();
     setIsLoggedIn(!!token);
 
-    // Get current user ID and premium type from localStorage
+    // Get current user ID and premium type from localStorage.
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
