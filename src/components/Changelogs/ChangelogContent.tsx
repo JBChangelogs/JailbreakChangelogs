@@ -67,9 +67,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
+    <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
       {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-      <div className="sm:col-span-12 lg:col-span-8">
+      <div className="sm:col-span-12 xl:col-span-8">
         <h1 className={`${inter.className} mb-8 font-bold text-3xl sm:text-5xl text-muted border-b border-[#748D92] pb-4 tracking-tighter`}>
           {title}
         </h1>
@@ -112,7 +112,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       </div>
 
       {/* Image Section - 4/12 columns on desktop, full width on tablet and mobile */}
-      <div className="sm:col-span-12 lg:col-span-4 space-y-8">
+      <div className="sm:col-span-12 xl:col-span-4 space-y-8">
         {imageUrl && (
           <div>
             <div className={`relative w-full ${imageAspectRatio}`}>

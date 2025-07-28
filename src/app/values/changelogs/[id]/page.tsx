@@ -416,7 +416,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
       <main className="min-h-screen bg-[#2E3944]">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
-          <div className="mb-6 flex flex-col lg:flex-row lg:items-start gap-6">
+          <div className="mb-6 flex flex-col xl:flex-row xl:items-start gap-6">
             {/* Left: Header + Search/Filter */}
             <div className="flex-1 min-w-0 flex flex-col gap-4">
               <div>
@@ -554,7 +554,7 @@ export default function ChangelogDetailsPage({ params }: { params: Promise<{ id:
             </div>
             {/* Ad Section */}
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
-              <div className="flex-shrink-0 w-full max-w-[700px] mt-4 lg:mt-0">
+              <div className="flex-shrink-0 w-full max-w-[700px] mt-4 xl:mt-0">
                 <div className="w-full bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
                   <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                     Advertisement

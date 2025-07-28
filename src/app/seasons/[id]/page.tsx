@@ -259,9 +259,9 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
           onGoToLatestSeason={handleGoToLatestSeason}
         />
         
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
           {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-          <div className="sm:col-span-12 lg:col-span-8">
+          <div className="sm:col-span-12 xl:col-span-8">
             <h1 className={`${inter.className} mb-4 text-3xl font-bold text-muted border-b border-[#D3D9D4] pb-2 tracking-tighter`}>
               Season {season.season} / {season.title}
             </h1>
@@ -343,7 +343,7 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
           </div>
 
           {/* Right side - Image Gallery and Comments */}
-          <div className="sm:col-span-12 lg:col-span-4 space-y-8">
+          <div className="sm:col-span-12 xl:col-span-4 space-y-8">
             <ImageGallery rewards={season.rewards} />
             <ChangelogComments 
               changelogId={season.season} 

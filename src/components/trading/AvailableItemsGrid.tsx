@@ -1,3 +1,14 @@
+const truncateName = (name: string) => name.length > 14 ? name.slice(0, 14) + '…' : name;
+function useWindowWidth() {
+  const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return width;
+}
+
 import React, { useState, useEffect } from 'react';
 import { TradeItem } from '@/types/trading';
 import { Pagination, Checkbox, FormControlLabel } from '@mui/material';
@@ -33,6 +44,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   items,
   onSelect,
 }) => {
+  const windowWidth = useWindowWidth();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -46,15 +58,13 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const router = useRouter();
-  const ITEMS_PER_PAGE = 18;
+  const ITEMS_PER_PAGE = 20;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Set selectLoaded to true after mount to ensure client-side rendering
   useEffect(() => {
     setSelectLoaded(true);
   }, []);
 
-  // Reset page when search query changes
   useEffect(() => {
     setPage(1);
   }, [debouncedSearchQuery]);
@@ -74,11 +84,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   }, []);
 
   useEffect(() => {
-    // Get current user's premium type
     setCurrentUserPremiumType(getCurrentUserPremiumType());
     setPremiumStatusLoaded(true);
 
-    // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
     };
@@ -90,15 +98,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   }, []);
 
   const filteredItems = items.filter(item => {
-    // First apply search filter
     const matchesSearch = item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
                          item.type.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
     if (!matchesSearch) return false;
-
-    // Then apply tradable filter
     if (!showNonTradable && item.tradable !== 1) return false;
 
-    // Then apply category filter
     switch (filterSort) {
       case "name-limited-items":
         return item.is_limited === 1;
@@ -516,7 +520,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <div className="flex flex-col flex-grow">
                   <div className="space-y-1.5">
                     <span className="text-blue-300 text-sm font-medium truncate transition-colors group-hover:text-blue-400 hover:underline">
-                      {item.name}
+                      {windowWidth <= 320 ? truncateName(item.name) : item.name}
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span 

@@ -227,7 +227,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
         <div className="container mx-auto px-4 mb-8">
           <Breadcrumb />
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
             {/* Left column - Media */}
             <div className="relative">
               <div

@@ -112,7 +112,11 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
                 backgroundColor: '#212A31',
                 borderColor: '#2E3944',
                 color: '#D3D9D4',
-                minHeight: '48px',
+                minHeight: '56px',
+                paddingTop: '0.75rem',
+                paddingBottom: '0.75rem',
+                paddingLeft: '1rem',
+                paddingRight: '1rem',
                 '&:hover': {
                   borderColor: '#5865F2',
                 },
