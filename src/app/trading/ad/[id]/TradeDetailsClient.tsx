@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PUBLIC_API_URL } from "@/utils/api";
 import Link from 'next/link';
+import { DiscordIcon } from '@/components/Icons/DiscordIcon';
 import { ArrowLeftIcon, ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from '@/components/Layout/Breadcrumb';
 import ChangelogComments from '@/components/PageComments/ChangelogComments';
@@ -42,6 +43,8 @@ interface TradeDetailsClientProps {
 }
 
 export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
+  const discordChannelId = "1398359394726449352";
+  const discordGuildId = "1286064050135896064";
   const router = useRouter();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -198,42 +201,56 @@ export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-muted">Trade #{trade.id}</h1>
-                    <div className="flex items-center gap-2">
-                      {trade && trade.status === 'Pending' && trade.author !== currentUserId && (
-                        <button
-                          onClick={() => setShowOfferConfirm(true)}
-                          disabled={offerStatus.loading}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
-                            offerStatus.loading
-                              ? 'bg-[#2E3944] text-muted cursor-not-allowed'
+                    <div className="flex flex-col w-full sm:flex-row sm:items-center sm:justify-between">
+                      <h1 className="text-2xl font-bold text-muted">Trade #{trade.id}</h1>
+                      <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+                        {trade && trade.status === 'Pending' && trade.author !== currentUserId && (
+                          <button
+                            onClick={() => setShowOfferConfirm(true)}
+                            disabled={offerStatus.loading}
+                            className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
+                              offerStatus.loading
+                                ? 'bg-[#2E3944] text-muted cursor-not-allowed'
+                                : offerStatus.success
+                                ? 'bg-[#43B581] text-white hover:bg-[#3CA374]'
+                                : 'bg-[#5865F2] text-white hover:bg-[#4752C4]'
+                            }`}
+                          >
+                            <ChatBubbleLeftIcon className="w-4 h-4" />
+                            {offerStatus.loading
+                              ? 'Making Offer...'
                               : offerStatus.success
-                              ? 'bg-[#43B581] text-white hover:bg-[#3CA374]'
-                              : 'bg-[#5865F2] text-white hover:bg-[#4752C4]'
-                          }`}
-                        >
-                          <ChatBubbleLeftIcon className="w-4 h-4" />
-                          {offerStatus.loading
-                            ? 'Making Offer...'
-                            : offerStatus.success
-                            ? 'Offer Sent!'
-                            : 'Make Offer'}
-                        </button>
-                      )}
-                      {trade.author === currentUserId && (
-                        <button
-                          onClick={() => setShowDeleteConfirm(true)}
-                          disabled={isDeleting}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
-                            isDeleting
-                              ? 'bg-red-500/50 text-white cursor-not-allowed'
-                              : 'bg-red-500 text-white hover:bg-red-600'
-                          }`}
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                          {isDeleting ? 'Deleting...' : 'Delete'}
-                        </button>
-                      )}
+                              ? 'Offer Sent!'
+                              : 'Make Offer'}
+                          </button>
+                        )}
+                        {trade.author === currentUserId && (
+                          <button
+                            onClick={() => setShowDeleteConfirm(true)}
+                            disabled={isDeleting}
+                            className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
+                              isDeleting
+                                ? 'bg-red-500/50 text-white cursor-not-allowed'
+                                : 'bg-red-500 text-white hover:bg-red-600'
+                            }`}
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
+                        {/* View in Discord Button */}
+                        {trade.message_id && (
+                          <a
+                            href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1 rounded-lg text-sm bg-[#5865F2] text-white hover:bg-[#4752C4] transition-colors"
+                          >
+                            <DiscordIcon className="w-4 h-4" />
+                            View in Discord
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-2">

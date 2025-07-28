@@ -14,20 +14,21 @@ const TradingDescription: React.FC = () => {
       </p>
       <div className="mb-2 p-4 rounded-lg bg-gradient-to-r from-[#232F3B] to-[#232F3B]/80 border border-[#5865F2]/40 flex items-start gap-4 shadow-sm">
         <div className="relative z-10">
-          <span className="font-bold text-white text-base">Supporter 2+ Perk</span>
-          <div className="text-muted mt-1">
-            Your trades are automatically posted to our{' '}
-            <a
-              href="https://discord.jailbreakchangelogs.xyz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-300 underline font-semibold hover:text-blue-400 transition-colors"
-            >
-              Discord
-            </a>
-            <span className="font-medium"> #trades</span> channel for more visibility.{' '}
-            <Link href="/supporting" className="underline hover:text-blue-300 transition-colors">Learn more</Link>.
-          </div>
+            <span className="font-bold text-white text-base">Discord Trade Ad Posting</span>
+            <div className="text-muted mt-1">
+              All trades are now automatically posted to our{' '}
+              <a
+                href="https://discord.jailbreakchangelogs.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-300 underline font-semibold hover:text-blue-400 transition-colors"
+              >
+                Discord
+              </a>
+              <span className="font-medium"> #trades</span> channel for more visibility.<br />
+              <span className="font-medium">Supporters</span> have their trade ads stand out more in the Discord.{' '}
+              <Link href="/supporting" className="underline hover:text-blue-300 transition-colors">Learn more</Link>.
+            </div>
         </div>
       </div>
     </div>

@@ -63,6 +63,7 @@ export interface TradeAd {
   expires: number;
   expired: number;
   status: string;
+  message_id?: string | null;
   user?: {
     id: string;
     username: string;

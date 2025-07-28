@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import SearchIcon from '@mui/icons-material/Search';
+import { DiscordIcon } from '@/components/Icons/DiscordIcon';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { TradeAd } from '@/types/trading';
@@ -51,6 +53,8 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
   const createdRelative = useRealTimeRelativeDate(trade.created_at);
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
 
+  const discordChannelId = "1398359394726449352";
+  const discordGuildId = "1286064050135896064";
   return (
     <div
       className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] hover:border-[#5865F2] transition-colors"
@@ -75,14 +79,14 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
           <RobloxTradeUser user={trade.user} />
         )}
 
-        {/* View Details and Make Offer Buttons (moved to top) */}
-        <div className="mt-4 pt-0 space-y-2">
-          {trade.status === 'Pending' && trade.author !== currentUserId && (
-            <>
+        {/* Make Offer and View Details*/}
+        <div className="mt-4 pt-0">
+          <div className="flex flex-row gap-2">
+            {trade.status === 'Pending' && trade.author !== currentUserId && (
               <button
                 onClick={() => onMakeOffer(trade.id)}
                 disabled={offerStatus?.loading}
-                className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   offerStatus?.loading
                     ? 'bg-[#2E3944] text-muted cursor-not-allowed'
                     : offerStatus?.success
@@ -97,16 +101,28 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({ trade, onMakeOffer, of
                   ? 'Offer Sent!'
                   : 'Make Offer'}
               </button>
-            </>
+            )}
+            <Link
+              href={`/trading/ad/${trade.id}`}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#2E3944] hover:bg-[#37424D] text-muted rounded-lg transition-colors text-sm font-medium"
+              role="button"
+              tabIndex={0}
+            >
+              <SearchIcon sx={{ fontSize: 20 }} />
+              View Details
+            </Link>
+          </div>
+          {trade.message_id && (
+            <a
+              href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              <DiscordIcon className="w-5 h-5" />
+              View in Discord
+            </a>
           )}
-          <Link
-            href={`/trading/ad/${trade.id}`}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2E3944] hover:bg-[#37424D] text-muted rounded-lg transition-colors text-sm font-medium"
-            role="button"
-            tabIndex={0}
-          >
-            View Details
-          </Link>
         </div>
 
         <div className="mt-4 flex items-center justify-between">

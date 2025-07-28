@@ -32,7 +32,6 @@ const supporterTiers: SupporterTier[] = [
       "Custom Regular Avatar",
       "Custom Regular Banner",
       "Comments highlighted with border and badge",
-      "Get your trade ads featured in our Discord for maximum reach."
     ]
   },
   {
@@ -58,7 +57,6 @@ const supporterTiers: SupporterTier[] = [
       "Custom Animated Banner",
       "Custom Regular Banner",
       "Custom Regular Avatar",
-      "Get your trade ads featured in our Discord for maximum reach.",
     ]
   },
   {
