@@ -292,107 +292,120 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           onValueSort={setValueSort}
         />
 
-        {/* Trader Notes and Demand Levels Guide */}
-        <div className="mt-8 pt-8 border-t border-[#2E3944]">
-          <h3 className="mb-2 text-xl font-semibold text-muted">
-            Trader Notes
-          </h3>
-          <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
-            <li>This is NOT an official list, it is 100% community based</li>
-            <li>
-              Some values may be outdated but we do our best to make sure it&apos;s
-              accurate as possible
-            </li>
-            <li>
-              Please don&apos;t 100% rely on the value list, use your own judgment as
-              well
-            </li>
-          </ul>
-          <h3 className="mb-2 text-xl font-semibold text-muted">
-            Demand Levels Guide
-          </h3>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {demandOrder.map((demand) => {
-              const getDemandColor = (demand: string): string => {
-                switch(demand) {
-                  case 'Close to none':
-                    return 'bg-gray-500/80';
-                  case 'Very Low':
-                    return 'bg-orange-500/80';
-                  case 'Low':
-                    return 'bg-orange-400/80';
-                  case 'Medium':
-                    return 'bg-yellow-500/80';
-                  case 'Decent':
-                    return 'bg-green-500/80';
-                  case 'High':
-                    return 'bg-blue-500/80';
-                  case 'Very High':
-                    return 'bg-purple-500/80';
-                  case 'Extremely High':
-                    return 'bg-pink-500/80';
-                  default:
-                    return 'bg-gray-500/80';
-                }
-              };
-              const getDemandValue = (demand: string): string => {
-                switch(demand) {
-                  case 'Close to none':
-                    return 'demand-close-to-none';
-                  case 'Very Low':
-                    return 'demand-very-low';
-                  case 'Low':
-                    return 'demand-low';
-                  case 'Medium':
-                    return 'demand-medium';
-                  case 'Decent':
-                    return 'demand-decent';
-                  case 'High':
-                    return 'demand-high';
-                  case 'Very High':
-                    return 'demand-very-high';
-                  case 'Extremely High':
-                    return 'demand-extremely-high';
-                  default:
-                    return 'demand-close-to-none';
-                }
-              };
-              return (
-                <button
-                  key={demand}
-                  onClick={() => {
-                    const demandValue = getDemandValue(demand);
-                    if (valueSort === demandValue) {
-                      setValueSort("cash-desc");
-                      localStorage.setItem('valuesValueSort', "cash-desc");
-                    } else {
-                      setValueSort(demandValue as ValueSort);
-                      localStorage.setItem('valuesValueSort', demandValue);
-                    }
-                    if (searchSectionRef.current) {
-                      const headerOffset = 80;
-                      const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.scrollY - headerOffset;
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }}
-                  className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
-                    valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
-                  }`}
-                >
-                  <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
-                  <span className="text-sm text-white">{demand}</span>
-                </button>
-              );
-            })}
+        {/* Trader Notes, Demand Levels Guide, and YouTube Video */}
+        <div className="mt-8 pt-8 border-t border-[#2E3944] flex flex-col lg:flex-row gap-8">
+          <div className="flex-1">
+            <h3 className="mb-2 text-xl font-semibold text-muted">
+              Trader Notes
+            </h3>
+            <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
+              <li>This is NOT an official list, it is 100% community based</li>
+              <li>
+                Some values may be outdated but we do our best to make sure it&apos;s
+                accurate as possible
+              </li>
+              <li>
+                Please don&apos;t 100% rely on the value list, use your own judgment as
+                well
+              </li>
+            </ul>
+            <h3 className="mb-2 text-xl font-semibold text-muted">
+              Demand Levels Guide
+            </h3>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {demandOrder.map((demand) => {
+                const getDemandColor = (demand: string): string => {
+                  switch(demand) {
+                    case 'Close to none':
+                      return 'bg-gray-500/80';
+                    case 'Very Low':
+                      return 'bg-orange-500/80';
+                    case 'Low':
+                      return 'bg-orange-400/80';
+                    case 'Medium':
+                      return 'bg-yellow-500/80';
+                    case 'Decent':
+                      return 'bg-green-500/80';
+                    case 'High':
+                      return 'bg-blue-500/80';
+                    case 'Very High':
+                      return 'bg-purple-500/80';
+                    case 'Extremely High':
+                      return 'bg-pink-500/80';
+                    default:
+                      return 'bg-gray-500/80';
+                  }
+                };
+                const getDemandValue = (demand: string): string => {
+                  switch(demand) {
+                    case 'Close to none':
+                      return 'demand-close-to-none';
+                    case 'Very Low':
+                      return 'demand-very-low';
+                    case 'Low':
+                      return 'demand-low';
+                    case 'Medium':
+                      return 'demand-medium';
+                    case 'Decent':
+                      return 'demand-decent';
+                    case 'High':
+                      return 'demand-high';
+                    case 'Very High':
+                      return 'demand-very-high';
+                    case 'Extremely High':
+                      return 'demand-extremely-high';
+                    default:
+                      return 'demand-close-to-none';
+                  }
+                };
+                return (
+                  <button
+                    key={demand}
+                    onClick={() => {
+                      const demandValue = getDemandValue(demand);
+                      if (valueSort === demandValue) {
+                        setValueSort("cash-desc");
+                        localStorage.setItem('valuesValueSort', "cash-desc");
+                      } else {
+                        setValueSort(demandValue as ValueSort);
+                        localStorage.setItem('valuesValueSort', demandValue);
+                      }
+                      if (searchSectionRef.current) {
+                        const headerOffset = 80;
+                        const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
+                      valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
+                    }`}
+                  >
+                    <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
+                    <span className="text-sm text-white">{demand}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mb-4 text-sm text-muted">
+              <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.<br/>
+              Not all demand levels are currently in use; some may not be represented among items.
+            </p>
           </div>
-          <p className="mb-4 text-sm text-muted">
-            <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.<br/>
-            Not all demand levels are currently in use; some may not be represented among items.
-          </p>
+          <div className="flex-1 flex items-center justify-center">
+            <iframe
+              src="https://www.youtube.com/embed/yEsTOaJka3k"
+              width="100%"
+              height="315"
+              allowFullScreen
+              loading="lazy"
+              title="Jailbreak Trading Video"
+              style={{ border: 0, borderRadius: '20px', maxWidth: 560, width: '100%', height: 315 }}
+            />
+          </div>
         </div>
       </div>
 
@@ -681,8 +694,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           </div>
         )}
       </div>
-
-
 
       <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
         {displayedItems.length === 0 ? (
