@@ -1,4 +1,4 @@
-const truncateName = (name: string) => name.length > 14 ? name.slice(0, 14) + '…' : name;
+const truncateName = (name: string) => name.length > 12 ? name.slice(0, 12) + '…' : name;
 function useWindowWidth() {
   const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   useEffect(() => {
@@ -58,7 +58,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const router = useRouter();
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = windowWidth === 1024 ? 25 : 24;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
