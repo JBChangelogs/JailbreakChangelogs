@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -109,10 +109,11 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
     }
   }, []);
 
-  useEffect(() => {
-    // Set initial selected variant
-    setSelectedVariant(item);
+  const handleVariantSelect = useCallback((variant: ItemDetails) => {
+    setSelectedVariant(variant);
+  }, []);
 
+  useEffect(() => {
     // Check if item is favorited
     const checkFavoriteStatus = async () => {
       const storedUser = localStorage.getItem('user');
@@ -143,7 +144,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
     };
 
     checkFavoriteStatus();
-  }, [item]);
+  }, [item.id]); // Only depend on item.id, not the entire item object
 
   const handleFavoriteClick = async () => {
     const token = getToken();
@@ -239,7 +240,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                   <div className="absolute top-4 right-4 z-10">
                     <ItemVariantDropdown
                       item={item}
-                      onVariantSelect={setSelectedVariant}
+                      onVariantSelect={handleVariantSelect}
                     />
                   </div>
                 )}

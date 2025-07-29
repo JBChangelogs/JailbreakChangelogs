@@ -17,17 +17,20 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
 
   useEffect(() => {
     const variant = searchParams.get('variant');
+    
     if (variant && item.children) {
       const matchingChild = item.children.find(child => child.sub_name === variant);
       if (matchingChild) {
         setSelectedYear(variant);
-        onVariantSelect({
+        const variantData = {
           ...item,
           cash_value: matchingChild.data.cash_value,
           duped_value: matchingChild.data.duped_value,
           demand: matchingChild.data.demand,
+          notes: matchingChild.data.notes,
           last_updated: matchingChild.data.last_updated
-        });
+        };
+        onVariantSelect(variantData);
       } else {
         // If variant doesn't exist, remove it from URL and show default item
         const newUrl = new URL(window.location.href);
@@ -36,8 +39,12 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
         setSelectedYear('2025');
         onVariantSelect(item);
       }
+    } else if (!variant) {
+      // Reset to base item when no variant in URL
+      setSelectedYear('2025');
+      onVariantSelect(item);
     }
-  }, [searchParams, item, onVariantSelect, router]);
+  }, [searchParams, item.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item.children || item.children.length === 0) {
     return null;
@@ -83,13 +90,16 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
               <button
                 key={child.id}
                 onClick={() => {
-                  onVariantSelect({
+                  const variantData = {
                     ...item,
                     cash_value: child.data.cash_value,
                     duped_value: child.data.duped_value,
                     demand: child.data.demand,
+                    notes: child.data.notes,
                     last_updated: child.data.last_updated
-                  });
+                  };
+
+                  onVariantSelect(variantData);
                   setSelectedYear(child.sub_name);
                   setIsDropdownOpen(false);
                   // Update URL with selected variant
