@@ -24,7 +24,6 @@ import ReportIssueButton from '@/components/ReportIssue/ReportIssueButton';
 import { checkMaintenanceMode, getMaintenanceMetadata } from '@/utils/maintenance';
 import { Suspense } from 'react';
 import { GoogleAnalytics } from '@next/third-parties/google';
-import SupportPromptModalWrapper from './SupportPromptModalWrapper';
 import KofiWidget from '@/components/KofiWidget';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -180,7 +179,6 @@ export default async function RootLayout({
         <SurveyProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
-            <SupportPromptModalWrapper />
             <main className="flex-1">{children}</main>
 
             <footer className="bg-[#212A31] py-8">
