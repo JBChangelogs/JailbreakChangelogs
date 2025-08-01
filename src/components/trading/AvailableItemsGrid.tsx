@@ -98,8 +98,33 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   }, []);
 
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-                         item.type.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+    const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const tokenize = (str: string) => str.toLowerCase().match(/[a-z0-9]+/g) || [];
+    const splitAlphaNum = (str: string) => {
+      return (str.match(/[a-z]+|[0-9]+/gi) || []).map(s => s.toLowerCase());
+    };
+    const searchNormalized = normalize(debouncedSearchQuery);
+    const searchTokens = tokenize(debouncedSearchQuery);
+    const searchAlphaNum = splitAlphaNum(debouncedSearchQuery);
+    function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
+      let i = 0, j = 0;
+      while (i < searchTokens.length && j < nameTokens.length) {
+        if (nameTokens[j].includes(searchTokens[i])) {
+          i++;
+        }
+        j++;
+      }
+      return i === searchTokens.length;
+    }
+    const nameNormalized = normalize(item.name);
+    const typeNormalized = normalize(item.type);
+    const nameTokens = tokenize(item.name);
+    const nameAlphaNum = splitAlphaNum(item.name);
+    const matchesSearch =
+      nameNormalized.includes(searchNormalized) ||
+      typeNormalized.includes(searchNormalized) ||
+      isTokenSubsequence(searchTokens, nameTokens) ||
+      isTokenSubsequence(searchAlphaNum, nameAlphaNum);
     if (!matchesSearch) return false;
     if (!showNonTradable && item.tradable !== 1) return false;
 

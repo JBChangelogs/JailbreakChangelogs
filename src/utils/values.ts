@@ -171,11 +171,41 @@ export const sortAndFilterItems = async (
 
   // Apply search filter
   if (searchTerm) {
-    const searchLower = searchTerm.trim().toLowerCase();
+    const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const tokenize = (str: string) => str.toLowerCase().match(/[a-z0-9]+/g) || [];
+    const splitAlphaNum = (str: string) => {
+      return (str.match(/[a-z]+|[0-9]+/gi) || []).map(s => s.toLowerCase());
+    };
+
+    const searchNormalized = normalize(searchTerm);
+    const searchTokens = tokenize(searchTerm);
+    const searchAlphaNum = splitAlphaNum(searchTerm);
+
+    function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
+      let i = 0, j = 0;
+      while (i < searchTokens.length && j < nameTokens.length) {
+        if (nameTokens[j].includes(searchTokens[i])) {
+          i++;
+        }
+        j++;
+      }
+      return i === searchTokens.length;
+    }
+
     result = result.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchLower) ||
-        item.type.toLowerCase().includes(searchLower)
+      (item) => {
+        const nameNormalized = normalize(item.name);
+        const typeNormalized = normalize(item.type);
+        const nameTokens = tokenize(item.name);
+        const nameAlphaNum = splitAlphaNum(item.name);
+
+        return (
+          nameNormalized.includes(searchNormalized) ||
+          typeNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, nameTokens) ||
+          isTokenSubsequence(searchAlphaNum, nameAlphaNum)
+        );
+      }
     );
   }
 
