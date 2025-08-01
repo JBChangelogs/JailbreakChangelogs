@@ -25,6 +25,7 @@ import { checkMaintenanceMode, getMaintenanceMetadata } from '@/utils/maintenanc
 import { Suspense } from 'react';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import SupportPromptModalWrapper from './SupportPromptModalWrapper';
+import KofiWidget from '@/components/KofiWidget';
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
@@ -123,6 +124,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.className} bg-[#2E3944]`}>
+        <KofiWidget />
         <Toaster
           position="bottom-right"
           toastOptions={{
