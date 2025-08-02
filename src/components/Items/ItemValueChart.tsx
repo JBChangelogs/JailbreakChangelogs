@@ -49,7 +49,7 @@ interface ItemValueChartProps {
 
 const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
   const [history, setHistory] = useState<ValueHistory[]>([]);
-  const [dateRange, setDateRange] = useState<'1w' | '1m' | '6m' | '1y' | 'all'>('1m');
+  const [dateRange, setDateRange] = useState<'1w' | '1m' | '6m' | '1y' | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const chartRef = useRef<ChartJS<'line'>>(null);
 

@@ -14,7 +14,7 @@ const KofiWidget = () => {
         if (window.kofiWidgetOverlay) {
           window.kofiWidgetOverlay.draw("jailbreakchangelogs", {
             type: "floating-chat",
-            "floating-chat.donateButton.text": "Support me",
+            "floating-chat.donateButton.text": "Support Us",
             "floating-chat.donateButton.background-color": "#5bc0de",
             "floating-chat.donateButton.text-color": "#323842",
           });
@@ -24,7 +24,7 @@ const KofiWidget = () => {
     } else if (window.kofiWidgetOverlay) {
       window.kofiWidgetOverlay.draw("jailbreakchangelogs", {
         type: "floating-chat",
-        "floating-chat.donateButton.text": "Support me",
+        "floating-chat.donateButton.text": "Support Us",
         "floating-chat.donateButton.background-color": "#5bc0de",
         "floating-chat.donateButton.text-color": "#323842",
       });
