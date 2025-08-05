@@ -1,6 +1,7 @@
 import { Tooltip } from '@mui/material';
 import { SparklesIcon, BugAntIcon, TrophyIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { FaCrown, FaHandsHelping } from 'react-icons/fa';
+import { FaWrench } from "react-icons/fa6";
 import { toast } from 'react-hot-toast';
 import type { UserFlag } from '@/types/auth';
 
@@ -63,7 +64,7 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     const testerFlag = sortedFlags.find(f => f.flag === 'is_tester');
     toast(() => (
       <div className="flex items-center gap-2">
-        <BugAntIcon className="w-5 h-5 text-purple-100" />
+        <BugAntIcon className="w-5 h-5 text-black" />
         <span>{testerFlag?.description || "This user is a trusted tester of Jailbreak Changelogs!"}</span>
       </div>
     ), {
@@ -123,6 +124,22 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     });
   };
 
+  const handleContributorBadgeClick = () => {
+    const contributorFlag = sortedFlags.find(f => f.flag === 'is_contributor');
+    toast(() => (
+      <div className="flex items-center gap-2">
+        <FaWrench className="w-5 h-5 text-teal-100" />
+        <span>{contributorFlag?.description || "This user contributed to Jailbreak Changelogs!"}</span>
+      </div>
+    ), {
+      duration: 4000,
+      style: {
+        background: 'linear-gradient(to right, #0D9488, #0F766E)',
+        color: 'white',
+      },
+    });
+  };
+
   const handlePremiumBadgeClick = () => {
     const premiumMessages = {
       1: "This user has Supporter Type 1!",
@@ -174,7 +191,7 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
         return (
           <Tooltip key={`flag-${flag.flag}`} title="Trusted Tester">
             <div 
-              className={`inline-flex items-center justify-center rounded-full bg-purple-400 text-white cursor-pointer hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex items-center justify-center rounded-full bg-purple-400 text-black cursor-pointer hover:opacity-90 ${currentSize.container}`}
               onClick={handleTesterBadgeClick}
             >
               <BugAntIcon className={currentSize.icon} />
@@ -211,6 +228,17 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
               onClick={handlePartnerBadgeClick}
             >
               <FaHandsHelping className={currentSize.icon} />
+            </div>
+          </Tooltip>
+        );
+      case 'is_contributor':
+        return (
+          <Tooltip key={`flag-${flag.flag}`} title="Contributor">
+            <div 
+              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-teal-600 to-teal-700 text-white cursor-pointer hover:opacity-90 ${currentSize.container}`}
+              onClick={handleContributorBadgeClick}
+            >
+              <FaWrench className={currentSize.icon} />
             </div>
           </Tooltip>
         );
