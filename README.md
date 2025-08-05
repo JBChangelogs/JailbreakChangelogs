@@ -12,10 +12,10 @@
 ![Logo](<https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png>)
 
 ## big numbers = jbcl happy
-[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?variant=adaptive)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+Leave us a ⭐ if you like the Jailbreak Changelogs project.
 
-Leave a ⭐ if you like the project.
-
+[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%232e3944&axis=%23ffffff&line=%235bc0de)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+                   
 # Roblox Jailbreak Changelogs
 
 Welcome to the Roblox Jailbreak Changelogs repository. Discover the latest updates, changes, and patches for the game in one convenient place.
