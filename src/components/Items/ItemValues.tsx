@@ -1,7 +1,7 @@
 import React from 'react';
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
-import { formatFullValue } from '@/utils/values';
+import { formatFullValue, formatPrice } from '@/utils/values';
 
 interface ItemValuesProps {
   cashValue: string | null;
@@ -12,33 +12,6 @@ interface ItemValuesProps {
   health: number;
   type: string;
 }
-
-const formatPrice = (price: string): string => {
-  if (price === "N/A") return "N/A";
-  
-  // Remove any suffix (k, m, etc.) and convert to number
-  const numericPart = price.toLowerCase().replace(/[km]$/, '');
-  const suffix = price.toLowerCase().slice(-1);
-  const numericValue = parseFloat(numericPart);
-  
-  if (isNaN(numericValue)) return price;
-  
-  // Convert based on suffix
-  let fullNumber: number;
-  switch (suffix) {
-    case 'k':
-      fullNumber = numericValue * 1000;
-      break;
-    case 'm':
-      fullNumber = numericValue * 1000000;
-      break;
-    default:
-      fullNumber = numericValue;
-  }
-  
-  // Format with commas
-  return fullNumber.toLocaleString();
-};
 
 const getDemandColor = (demand: string): string => {
   switch(demand) {

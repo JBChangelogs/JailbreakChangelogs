@@ -327,3 +327,53 @@ export const formatFullValue = (value: string | null): string => {
   // Format with commas
   return fullNumber.toLocaleString();
 }; 
+
+/**
+ * Formats a price string (like "100k - 10m") to a full number with commas (like "100,000 - 10,000,000")
+ * @param price - The price string to format (e.g., "100k - 10m", "380m", "1.5k")
+ * @returns Formatted string with full number and commas
+ */
+export const formatPrice = (price: string | null): string => {
+  if (price === null || price === "N/A") return "N/A";
+  
+  // Handle price ranges (e.g., "100k - 10m")
+  if (price.includes(' - ')) {
+    const [minPrice, maxPrice] = price.split(' - ');
+    const formattedMin = formatSinglePrice(minPrice);
+    const formattedMax = formatSinglePrice(maxPrice);
+    return `${formattedMin} - ${formattedMax}`;
+  }
+  
+  // Handle single prices
+  return formatSinglePrice(price);
+};
+
+const formatSinglePrice = (price: string): string => {
+  if (price === "N/A" || price === "Free") return price;
+  
+  // Remove any suffix (k, m, b, etc.) and convert to number
+  const numericPart = price.toLowerCase().replace(/[kmb]$/, '');
+  const suffix = price.toLowerCase().slice(-1);
+  const numericValue = parseFloat(numericPart);
+  
+  if (isNaN(numericValue)) return price;
+  
+  // Convert based on suffix
+  let fullNumber: number;
+  switch (suffix) {
+    case 'k':
+      fullNumber = numericValue * 1000;
+      break;
+    case 'm':
+      fullNumber = numericValue * 1000000;
+      break;
+    case 'b':
+      fullNumber = numericValue * 1000000000;
+      break;
+    default:
+      fullNumber = numericValue;
+  }
+  
+  // Format with commas
+  return fullNumber.toLocaleString();
+}; 

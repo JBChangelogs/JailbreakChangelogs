@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { BASE_API_URL } from '@/utils/api';
 import { getItemImagePath } from '@/utils/images';
 import { getMaintenanceMetadata } from '@/utils/maintenance';
-import { formatFullValue } from '@/utils/values';
+import { formatFullValue, formatPrice } from '@/utils/values';
 import { WithContext, FAQPage, BreadcrumbList, ListItem } from 'schema-dts';
 import type { ItemDetails } from '@/types/index';
 
@@ -85,7 +85,7 @@ async function generateFAQJsonLd(item: ItemDetails | null): Promise<string | nul
   if (item.price && item.price !== 'N/A') {
     faqs.push({
       question: `What is the price of ${item.name}?`,
-      answer: `The price of ${item.name} is ${formatFullValue(item.price)}.`
+      answer: `The price of ${item.name} is ${formatPrice(item.price)}.`
     });
   }
 
