@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { PUBLIC_API_URL } from "@/utils/api";
 import { getToken } from '@/utils/auth';
 import Link from 'next/link';
+import Image from 'next/image';
+import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 
 export default function RedeemPage() {
   const [code, setCode] = useState('');
@@ -190,25 +192,50 @@ export default function RedeemPage() {
             <ol className="space-y-6 text-gray-300">
               <li className="flex items-start">
                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">1</span>
-                <span className="text-lg">Join our game <a href="https://www.roblox.com/games/104188650191561/Support-Us" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">here</a> to purchase a Supporter Tier</span>
+                <div className="text-lg">
+                  <span>Purchase a Supporter Tier via:</span>
+                  <ul className="mt-2 space-y-2 text-base">
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
+                      <Image
+                        src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                        alt="Ko-fi Symbol"
+                        width={16}
+                        height={16}
+                        className="mr-2"
+                        unoptimized
+                      />
+                      <span><a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Ko-fi</a> (include Discord ID in message)</span>
+                    </li>
+                    <li className="flex items-center justify-center text-gray-400 text-sm font-medium">
+                      OR
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
+                      <RobloxIcon className="w-4 h-4 mr-2" />
+                      <span>Our <a href="https://www.roblox.com/games/104188650191561/Support-Us" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Roblox game</a> (complete actions in-game)</span>
+                    </li>
+                  </ul>
+                </div>
               </li>
               <li className="flex items-start">
                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">2</span>
-                <span className="text-lg">Complete the required actions in-game</span>
+                <div className="text-lg">
+                  <span>Receive your unique code via Discord</span>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Your code will be sent to your Discord via our bot. Having issues? Join our <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Discord server</a> for support.
+                  </p>
+                </div>
               </li>
               <li className="flex items-start">
                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">3</span>
-                <span className="text-lg">Copy your unique code</span>
-              </li>
-              <li className="flex items-start">
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">4</span>
-                <span className="text-lg">Paste it here and click Redeem to get your benefits</span>
+                <span className="text-lg">Paste your code in the input field and click &quot;Redeem&quot; to get your benefits</span>
               </li>
             </ol>
 
             <div className="mt-8 p-4 bg-yellow-900/40 border-l-4 border-yellow-400 rounded">
               <p className="text-yellow-200 text-base font-medium">
-                <strong>Ko-fi Supporters:</strong> If purchasing a code via <a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="underline text-yellow-100">Ko-fi</a> for supporter tiers, <span className="font-bold">ensure your Discord user ID is in parenthesis inside your message</span> (e.g., <code>(1019539798383398946)</code>). This is required to receive your code!
+                <strong>Ko-fi Supporters:</strong> When purchasing via Ko-fi, <span className="font-bold">ensure your Discord user ID is in parenthesis inside your message</span> (e.g., <code>Hello there! (1019539798383398946)</code>). This is required to receive your code!
               </p>
             </div>
 
@@ -218,7 +245,7 @@ export default function RedeemPage() {
                 href="/supporting" 
                 className="inline-flex items-center text-blue-300 hover:text-blue-400 text-lg"
               >
-                <span>Want to see what perks you&apos;ll get?</span>
+                <span>View all supporter tiers and benefits</span>
                 <svg className="h-5 w-5 ml-2" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                   <path d="M9 5l7 7-7 7"></path>
                 </svg>

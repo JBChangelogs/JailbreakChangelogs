@@ -122,6 +122,11 @@ export default function SupportingPage() {
               <p className="text-gray-300 mb-3">
                 All supporter purchases are one-time only and non-refundable! Once you purchase, you keep the perks forever.
               </p>
+              <div className="mb-3 p-4 bg-yellow-900/40 border-l-4 border-yellow-400 rounded">
+                <p className="text-yellow-200 text-base font-medium">
+                  <strong>Ko-fi Supporters:</strong> If you&apos;re buying a supporter tier using <a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="underline text-yellow-100">Ko-fi</a>, <span className="font-bold">ensure your Discord user ID is in parenthesis inside your message</span> (e.g., <code>Hello there! (1019539798383398946)</code>). This is required to receive your code!
+                </p>
+              </div>
               <Link 
                 href="/redeem" 
                 className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
