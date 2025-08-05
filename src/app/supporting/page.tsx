@@ -38,7 +38,7 @@ const supporterTiers: SupporterTier[] = [
   {
     name: "Supporter I",
     price: "$1",
-    priceAlt: "or 75R$ on Roblox",
+    priceAlt: "or 100R$ on Roblox",
     features: [
       "Hide all advertisements",
       "Post Comments up to 400 characters",
