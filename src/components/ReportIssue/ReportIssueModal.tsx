@@ -5,9 +5,10 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { PUBLIC_API_URL } from "@/utils/api";
+import { getToken } from "@/utils/auth";
 
-const MIN_TITLE_LENGTH = 10;
-const MIN_DESCRIPTION_LENGTH = 25;
+const MAX_TITLE_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 500;
 
 interface ReportIssueModalProps {
   isOpen: boolean;
@@ -22,19 +23,25 @@ export default function ReportIssueModal({ isOpen, onClose }: ReportIssueModalPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (title.length < MIN_TITLE_LENGTH) {
-      toast.error(`Title must be at least ${MIN_TITLE_LENGTH} characters`);
+    if (title.length > MAX_TITLE_LENGTH) {
+      toast.error(`Title must be ${MAX_TITLE_LENGTH} characters or less`);
       return;
     }
 
-    if (description.length < MIN_DESCRIPTION_LENGTH) {
-      toast.error(`Description must be at least ${MIN_DESCRIPTION_LENGTH} characters`);
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      toast.error(`Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`);
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      const token = getToken();
+      if (!token) {
+        toast.error('You must be logged in to report an issue');
+        return;
+      }
+
       const response = await fetch(`${PUBLIC_API_URL}/issues/add`, {
         method: 'POST',
         headers: {
@@ -43,7 +50,7 @@ export default function ReportIssueModal({ isOpen, onClose }: ReportIssueModalPr
         body: JSON.stringify({
           title,
           description,
-          user: localStorage.getItem('userid')
+          user: token
         }),
       });
 
@@ -96,7 +103,7 @@ export default function ReportIssueModal({ isOpen, onClose }: ReportIssueModalPr
                 required
               />
               <p className="mt-1 text-xs text-muted">
-                Minimum {MIN_TITLE_LENGTH} characters
+                Maximum {MAX_TITLE_LENGTH} characters
               </p>
             </div>
 
@@ -114,7 +121,7 @@ export default function ReportIssueModal({ isOpen, onClose }: ReportIssueModalPr
                 required
               />
               <p className="mt-1 text-xs text-muted">
-                Minimum {MIN_DESCRIPTION_LENGTH} characters
+                Maximum {MAX_DESCRIPTION_LENGTH} characters
               </p>
             </div>
 
