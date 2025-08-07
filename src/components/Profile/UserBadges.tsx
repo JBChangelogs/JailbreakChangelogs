@@ -11,9 +11,15 @@ interface UserBadgesProps {
   flags?: UserFlag[];
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  primary_guild?: {
+    tag: string;
+    badge: string;
+    identity_enabled: boolean;
+    identity_guild_id: string;
+  } | null;
 }
 
-export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', className = '' }: UserBadgesProps) => {
+export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', className = '', primary_guild }: UserBadgesProps) => {
   const badges = [];
 
   // Size configurations
@@ -247,7 +253,34 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     }
   };
 
-  // Add flags badges first (sorted by index)
+  if (primary_guild) {
+    const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
+    const isJBCL = primary_guild.tag === 'JBCL';
+    const isJBCLhash = primary_guild.tag === 'b1436f31ee5e0ac93233a1391e9c9333';
+    const badgeContent = (
+      <div className={`inline-flex items-center gap-1 rounded-full bg-[#23272A] text-white px-2 py-0.5 ${currentSize.container}`}
+           style={{ minWidth: 0 }}>
+        <img
+          src={badgeUrl}
+          alt={primary_guild.tag + ' badge'}
+          className={currentSize.icon + ' rounded-full'}
+          style={{ width: '1em', height: '1em', minWidth: '1em', minHeight: '1em' }}
+        />
+        <span className="ml-1 text-xs font-semibold" style={{ lineHeight: 1 }}>{primary_guild.tag}</span>
+      </div>
+    );
+    badges.push(
+      <Tooltip key="primary-guild" title={`Guild: ${primary_guild.tag}`}>
+        {isJBCL || isJBCLhash ? (
+          <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer">
+            {badgeContent}
+          </a>
+        ) : badgeContent}
+      </Tooltip>
+    );
+    badges.push(<span key="guild-separator" className="mx-5" />);
+  }
+
   sortedFlags.forEach(flag => {
     const badge = createBadge(flag);
     if (badge) {
@@ -255,7 +288,6 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     }
   });
 
-  // Add supporter badge after flags
   if (premiumType) {
     const premiumStyles = {
       1: "bg-gradient-to-r from-[#CD7F32] to-[#B87333]", // Bronze
@@ -275,7 +307,6 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     );
   }
 
-  // Add first 100 users badge last
   if (usernumber <= 100) {
     badges.push(
       <Tooltip key="first-100" title="Early Adopter">

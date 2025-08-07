@@ -63,6 +63,12 @@ interface User {
   roblox_id: string | null;
   roblox_username?: string;
   flags?: UserFlag[];
+  primary_guild?: {
+    tag: string;
+    badge: string;
+    identity_enabled: boolean;
+    identity_guild_id: string;
+  } | null;
 }
 
 interface Server {
@@ -435,7 +441,7 @@ export default function UserProfilePage() {
                     <h1 className="text-xl md:text-2xl font-bold text-muted">
                       {user.global_name && user.global_name !== "None" ? user.global_name : user.username}
                     </h1>
-                    <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" />
+                    <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
                   </div>
                   <p className="text-[#FFFFFF]">@{user.username}</p>
                 </div>
@@ -506,7 +512,7 @@ export default function UserProfilePage() {
                           <h1 className="text-2xl md:text-3xl font-bold text-muted mb-1 max-w-[280px] lg:max-w-none truncate">
                             {user.global_name && user.global_name !== "None" ? user.global_name : user.username}
                           </h1>
-                          <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" />
+                          <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
                         </>
                       )}
                     </div>

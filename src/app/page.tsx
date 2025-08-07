@@ -18,7 +18,9 @@ export default function Home() {
   useEffect(() => {
     // Generate random number between 1 and 14
     const randomNumber = Math.floor(Math.random() * 19) + 1;
-    setBackgroundImage(`https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`);
+    setBackgroundImage(
+      `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`
+    );
   }, []);
 
   return (
@@ -46,10 +48,10 @@ export default function Home() {
               Roblox Jailbreak Changelogs & Values Hub
             </h1>
             <p className="mx-auto mb-8 max-w-2xl text-base text-muted md:text-lg">
-              Your comprehensive platform for Roblox Jailbreak item values, trade
-              listings, update tracking, and community features. Get accurate
-              trading data, post trade ads, track seasonal changes, and connect
-              with other players!
+              Your comprehensive platform for Roblox Jailbreak item values,
+              trade listings, update tracking, and community features. Get
+              accurate trading data, post trade ads, track seasonal changes, and
+              connect with other players!
             </p>
             <a
               href="roblox://experiences/start?placeId=606849621"
@@ -79,8 +81,9 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Access the entire history of changelogs for Roblox Jailbreak and stay informed 
-                about all updates, seasonal changes, and the newest rewards with their requirements.
+                Access the entire history of changelogs for Roblox Jailbreak and
+                stay informed about all updates, seasonal changes, and the
+                newest rewards with their requirements.
               </p>
             </div>
 
@@ -93,8 +96,9 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Browse and submit private server listings for Roblox Jailbreak. Connect with 
-                fellow players in dedicated trading and gaming communities.
+                Browse and submit private server listings for Roblox Jailbreak.
+                Connect with fellow players in dedicated trading and gaming
+                communities.
               </p>
             </div>
 
@@ -107,7 +111,7 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Engage with the community by commenting on changelogs, seasons, 
+                Engage with the community by commenting on changelogs, seasons,
                 item and trade ad pages. OAuth ensures only verified members can
                 participate.
               </p>
@@ -122,8 +126,8 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                View values for all tradable items in Roblox Jailbreak. Favorite items, 
-                track value history, and monitor price changes over time.
+                View values for all tradable items in Roblox Jailbreak. Favorite
+                items, track value history, and monitor price changes over time.
               </p>
             </div>
 
@@ -151,8 +155,9 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-[#FFFFFF]">
-                Report and check for duped items. Search by player or item to see 
-                if they have been reported as duplicated in the trading system.
+                Report and check for duped items. Search by player or item to
+                see if they have been reported as duplicated in the trading
+                system.
               </p>
             </div>
           </div>
