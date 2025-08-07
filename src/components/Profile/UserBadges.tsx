@@ -295,8 +295,7 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
 
   if (primary_guild) {
     const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
-  const isJBCLTag = primary_guild.tag === 'JBCL';
-  const isJBCLBadge = primary_guild.badge === 'b1436f31ee5e0ac93233a1391e9c9333';
+    const isJBCLGuildId = primary_guild.identity_guild_id === '1286064050135896064';
     const badgeContent = (
       <div
         className="inline-flex items-center gap-1 rounded-md bg-gray-700 text-white px-2.5 py-1"
@@ -319,7 +318,7 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     );
     badges.push(
       <Tooltip key="primary-guild" title={`Guild: ${primary_guild.tag}`}>
-        {(isJBCLTag && isJBCLBadge) ? (
+        {(isJBCLGuildId) ? (
           <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer">
             {badgeContent}
           </a>
