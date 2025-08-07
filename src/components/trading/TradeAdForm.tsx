@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 import { AvailableItemsGrid } from './AvailableItemsGrid';
 import { CustomConfirmationModal } from '../Modals/CustomConfirmationModal';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useSupporterModal } from '@/hooks/useSupporterModal';
 import SupporterModal from '../Modals/SupporterModal';
 import LoginModalWrapper from '../Auth/LoginModalWrapper';
@@ -42,7 +44,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [userPremiumTier, setUserPremiumTier] = useState<UserPremiumTier>(PREMIUM_TIERS[0]);
-  const [expirationHours, setExpirationHours] = useState<number>(6);
+  const [expirationHours, setExpirationHours] = useState<number | null>(null);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
@@ -111,7 +113,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           setUserData(userData);
           const tier = PREMIUM_TIERS.find(t => t.tier === userData.premiumtype) || PREMIUM_TIERS[0];
           setUserPremiumTier(tier);
-          setExpirationHours(tier.durations[0]);
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -135,7 +136,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
       // Only clear items when switching to create mode
       setOfferingItems([]);
       setRequestingItems([]);
-      setExpirationHours(userPremiumTier.durations[0]);
+      setExpirationHours(null); // <-- explicitly clear in create mode
       
       const token = getToken();
       if (!token) return;
@@ -250,7 +251,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
     }
 
     // Validate trade ad duration
-    if (!checkTradeAdDuration(expirationHours, userData?.premiumtype || 0)) {
+    if (!editMode && !checkTradeAdDuration(expirationHours!, userData?.premiumtype || 0)) {
       return;
     }
 
@@ -286,7 +287,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
             return String(item.id);
           }).join(','),
           owner: token,
-          ...(editMode ? {} : { expiration: expirationHours }),
+          ...(editMode ? {} : { expiration: expirationHours! }),
           ...(editMode && selectedTradeAd ? { status: selectedTradeAd.status } : {})
         }),
       });
@@ -458,24 +459,48 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
 
         {/* Expiration Time Selection */}
         {!editMode && (
-          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
-            <h3 className="text-muted font-medium mb-4">Trade Ad Expiration</h3>
+          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] mb-4">
+            <h3 className="text-muted font-medium mb-2 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+              </svg>
+              Trade Ad Expiration
+            </h3>
+            <p className="text-sm text-blue-300 mb-2">
+              How long should your trade ad be visible? <b>Supporters</b> can choose longer durations!
+            </p>
+            <Link
+              href="/supporting"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#2E3944] text-white font-semibold hover:bg-[#37424D] transition mb-2"
+              style={{ textDecoration: 'none' }}
+            >
+              <Image src="https://assets.jailbreakchangelogs.xyz/assets/images/JBCLHeart.webp" alt="Heart" width={16} height={16} className="w-4 h-4" />
+              Become a Supporter
+            </Link>
             <div className="flex items-center gap-4">
               {selectLoaded ? (
                 <Select
-                  value={{ value: expirationHours, label: `${expirationHours} ${expirationHours === 1 ? 'hour' : 'hours'}` }}
+                  value={
+                    expirationHours !== null
+                      ? { value: expirationHours, label: `${expirationHours} ${expirationHours === 1 ? 'hour' : 'hours'}` }
+                      : { value: null, label: 'Select expiration...' }
+                  }
                   onChange={(option: unknown) => {
-                    if (!option) {
-                      setExpirationHours(6);
+                    if (!option || (option as { value: number | null }).value == null) {
+                      setExpirationHours(null);
                       return;
                     }
                     const newValue = (option as { value: number }).value;
                     setExpirationHours(newValue);
                   }}
-                  options={[6, 12, 24, 48].map((hours) => ({
-                    value: hours,
-                    label: `${hours} ${hours === 1 ? 'hour' : 'hours'}`
-                  }))}
+                  options={[
+                    { value: null, label: 'Select expiration...' },
+                    ...[6, 12, 24, 48].map((hours) => ({
+                      value: hours,
+                      label: `${hours} ${hours === 1 ? 'hour' : 'hours'}`
+                    }))
+                  ]}
+                  placeholder="Select expiration..."
                   classNamePrefix="react-select"
                   className="w-full"
                   isClearable={false}
@@ -647,7 +672,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           </Button>
           <Button
             variant="contained"
-            onClick={handleSubmit}
+            onClick={() => {
+              if (!editMode && expirationHours === null) {
+                toast.error('Please select a trade ad expiration before creating your ad.');
+                return;
+              }
+              handleSubmit();
+            }}
             disabled={submitting}
             sx={{
               backgroundColor: '#5865F2',
@@ -656,8 +687,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
                 backgroundColor: '#4752C4',
               },
               '&.Mui-disabled': {
-                backgroundColor: '#22C55E',
-                color: 'white',
+                backgroundColor: '#444C56',
+                color: '#888',
+                cursor: 'not-allowed',
               },
             }}
           >
