@@ -4,6 +4,7 @@ import { FaCrown, FaHandsHelping } from 'react-icons/fa';
 import { FaWrench } from "react-icons/fa6";
 import { toast } from 'react-hot-toast';
 import type { UserFlag } from '@/types/auth';
+import Image from "next/image";
 
 interface UserBadgesProps {
   usernumber: number;
@@ -258,17 +259,32 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     const isJBCL = primary_guild.tag === 'JBCL';
     const isJBCLhash = primary_guild.tag === 'b1436f31ee5e0ac93233a1391e9c9333';
     const badgeContent = (
-      <div className={`inline-flex items-center gap-1 rounded-full bg-[#23272A] text-white px-2 py-0.5 ${currentSize.container}`}
-           style={{ minWidth: 0 }}>
-        <img
+      <div
+        className={`inline-flex items-center gap-1 rounded-full bg-[#1A2E3B] text-white px-2 py-0.5 ${currentSize.container}`}
+        style={{ minWidth: 0 }}
+      >
+        <Image
           src={badgeUrl}
-          alt={primary_guild.tag + ' badge'}
-          className={currentSize.icon + ' rounded-full'}
-          style={{ width: '1em', height: '1em', minWidth: '1em', minHeight: '1em' }}
+          alt={`${primary_guild.tag} guild badge`}
+          className={`${currentSize.icon} rounded-full`}
+          width={16}
+          height={16}
+          style={{
+            width: '1em',
+            height: '1em',
+            minWidth: '1em',
+            minHeight: '1em',
+          }}
         />
-        <span className="ml-1 text-xs font-semibold" style={{ lineHeight: 1 }}>{primary_guild.tag}</span>
+        <span
+          className="ml-1 text-xs font-semibold"
+          style={{ lineHeight: 1 }}
+        >
+          {primary_guild.tag}
+        </span>
       </div>
     );
+    
     badges.push(
       <Tooltip key="primary-guild" title={`Guild: ${primary_guild.tag}`}>
         {isJBCL || isJBCLhash ? (

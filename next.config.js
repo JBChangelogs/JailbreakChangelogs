@@ -7,6 +7,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.discordapp.com',
         pathname: '/avatars/**',
+        pathname: '/guild-tag-badges/**',
       },
       {
         protocol: 'https',
