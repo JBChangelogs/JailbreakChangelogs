@@ -254,49 +254,6 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
     }
   };
 
-  if (primary_guild) {
-    const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
-    const isJBCL = primary_guild.tag === 'JBCL';
-    const isJBCLhash = primary_guild.tag === 'b1436f31ee5e0ac93233a1391e9c9333';
-    const badgeContent = (
-      <div
-        className={`inline-flex items-center gap-1 rounded-full bg-[#1A2E3B] text-white px-2 py-0.5 ${currentSize.container}`}
-        style={{ minWidth: 0 }}
-      >
-        <Image
-          src={badgeUrl}
-          alt={`${primary_guild.tag} guild badge`}
-          className={`${currentSize.icon} rounded-full`}
-          width={16}
-          height={16}
-          style={{
-            width: '1em',
-            height: '1em',
-            minWidth: '1em',
-            minHeight: '1em',
-          }}
-        />
-        <span
-          className="ml-1 text-xs font-semibold"
-          style={{ lineHeight: 1 }}
-        >
-          {primary_guild.tag}
-        </span>
-      </div>
-    );
-    
-    badges.push(
-      <Tooltip key="primary-guild" title={`Guild: ${primary_guild.tag}`}>
-        {isJBCL || isJBCLhash ? (
-          <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer">
-            {badgeContent}
-          </a>
-        ) : badgeContent}
-      </Tooltip>
-    );
-    badges.push(<span key="guild-separator" className="mx-5" />);
-  }
-
   sortedFlags.forEach(flag => {
     const badge = createBadge(flag);
     if (badge) {
@@ -332,6 +289,41 @@ export const UserBadges = ({ usernumber, premiumType, flags = [], size = 'md', c
         >
           <SparklesIcon className={currentSize.icon} />
         </div>
+      </Tooltip>
+    );
+  }
+
+  if (primary_guild) {
+    const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
+  const isJBCLTag = primary_guild.tag === 'JBCL';
+  const isJBCLBadge = primary_guild.badge === 'b1436f31ee5e0ac93233a1391e9c9333';
+    const badgeContent = (
+      <div
+        className="inline-flex items-center gap-1 rounded-md bg-gray-700 text-white px-2.5 py-1"
+        style={{ minWidth: 0 }}
+      >
+        <Image
+          src={badgeUrl}
+          alt={`${primary_guild.tag} guild badge`}
+          className="w-4 h-4 object-contain block"
+          width={16}
+          height={16}
+        />
+        <span
+          className="text-sm font-semibold"
+          style={{ lineHeight: 1.1 }}
+        >
+          {primary_guild.tag}
+        </span>
+      </div>
+    );
+    badges.push(
+      <Tooltip key="primary-guild" title={`Guild: ${primary_guild.tag}`}>
+        {(isJBCLTag && isJBCLBadge) ? (
+          <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer">
+            {badgeContent}
+          </a>
+        ) : badgeContent}
       </Tooltip>
     );
   }
