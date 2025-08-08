@@ -28,6 +28,7 @@ import {
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import KofiWidget from "@/components/KofiWidget";
+import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
@@ -426,7 +427,7 @@ export default async function RootLayout({
                           href="/supporting"
                           className="flex items-center justify-center gap-2 rounded-lg bg-[#5bc0de] px-4 py-2 text-[#323842]"
                         >
-                          <img
+                          <Image
                             src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
                             alt="Kofi Symbol"
                             width={24}
