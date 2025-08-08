@@ -1,73 +1,86 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['127.0.0.1'],
+  allowedDevOrigins: ["127.0.0.1"],
+  experimental: {
+    webpackMemoryOptimizations: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn.discordapp.com',
-        pathname: '/avatars/**',
-        pathname: '/guild-tag-badges/**',
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
+        pathname: "/avatars/**",
+        pathname: "/guild-tag-badges/**",
       },
       {
-        protocol: 'https',
-        hostname: 'assets.jailbreakchangelogs.xyz',
-        pathname: '/assets/**',
+        protocol: "https",
+        hostname: "assets.jailbreakchangelogs.xyz",
+        pathname: "/assets/**",
       },
       {
-        protocol: 'https',
-        hostname: 'tr.rbxcdn.com',
-        pathname: '/**/AvatarHeadshot/**',
+        protocol: "https",
+        hostname: "tr.rbxcdn.com",
+        pathname: "/**/AvatarHeadshot/**",
       },
       {
-        protocol: 'https',
-        hostname: 'tr.rbxcdn.com',
-        pathname: '/**/Avatar/**',
+        protocol: "https",
+        hostname: "tr.rbxcdn.com",
+        pathname: "/**/Avatar/**",
       },
       {
-        protocol: 'https',
-        hostname: 'tr.rbxcdn.com',
-        pathname: '/**/AvatarBust/**',
+        protocol: "https",
+        hostname: "tr.rbxcdn.com",
+        pathname: "/**/AvatarBust/**",
       },
       {
-        protocol: 'https',
-        hostname: 'tr.rbxcdn.com',
-        pathname: '/**/AvatarFullBody/**',
-      }
+        protocol: "https",
+        hostname: "tr.rbxcdn.com",
+        pathname: "/**/AvatarFullBody/**",
+      },
     ],
   },
   async rewrites() {
     return [
-      { source: '/apple-touch-icon.png', destination: 'https://assets.jailbreakchangelogs.xyz/assets/logos/apple-touch-icon.png' },
-      { source: '/api/:path*', destination: '/api/:path*' }
-    ]
+      {
+        source: "/apple-touch-icon.png",
+        destination:
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/apple-touch-icon.png",
+      },
+      { source: "/api/:path*", destination: "/api/:path*" },
+    ];
   },
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=300, must-revalidate'
+            key: "Cache-Control",
+            value: "public, max-age=300, must-revalidate",
           },
           {
-            key: 'X-Built-By',
-            value: 'jalenzz'
-          }
-        ]
+            key: "X-Built-By",
+            value: "jalenzz",
+          },
+        ],
       },
       {
-        source: '/users',
+        source: "/users",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate'
-          }
-        ]
-      }
-    ]
-  }
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
-module.exports = nextConfig 
+module.exports = nextConfig;
