@@ -64,10 +64,10 @@ interface User {
   roblox_username?: string;
   flags?: UserFlag[];
   primary_guild?: {
-    tag: string;
-    badge: string;
+    tag: string | null;
+    badge: string | null;
     identity_enabled: boolean;
-    identity_guild_id: string;
+    identity_guild_id: string | null;
   } | null;
 }
 

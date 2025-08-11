@@ -19,10 +19,10 @@ interface UserBadgesProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   primary_guild?: {
-    tag: string;
-    badge: string;
+    tag: string | null;
+    badge: string | null;
     identity_enabled: boolean;
-    identity_guild_id: string;
+    identity_guild_id: string | null;
   } | null;
 }
 
@@ -527,7 +527,7 @@ export const UserBadges = ({
     );
   }
 
-  if (primary_guild) {
+  if (primary_guild && primary_guild.tag && primary_guild.badge && primary_guild.identity_guild_id) {
     const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
     const isJBCLGuildId =
       primary_guild.identity_guild_id === "1286064050135896064";
