@@ -345,11 +345,6 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
           {/* Right side - Image Gallery and Comments */}
           <div className="sm:col-span-12 xl:col-span-4 space-y-8">
             <ImageGallery rewards={season.rewards} />
-            <ChangelogComments 
-              changelogId={season.season} 
-              changelogTitle={season.title}
-              type="season"
-            />
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
               <div className="my-8 flex justify-center">
                 <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
@@ -364,6 +359,11 @@ export default function SeasonPage({ params }: { params: Promise<{ id: string }>
                 </div>
               </div>
             )}
+            <ChangelogComments 
+              changelogId={season.season} 
+              changelogTitle={season.title}
+              type="season"
+            />
           </div>
         </div>
       </div>

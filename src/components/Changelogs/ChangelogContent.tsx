@@ -130,12 +130,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 
         {/* Comments Section */}
         <div>
-          <ChangelogComments 
-            changelogId={changelogId} 
-            changelogTitle={title}
-            type="changelog"
-          />
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
+        {premiumStatusLoaded && currentUserPremiumType === 0 && (
             <div className="my-8 flex justify-center">
               <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
                 <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
@@ -149,6 +144,11 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
               </div>
             </div>
           )}
+          <ChangelogComments 
+            changelogId={changelogId} 
+            changelogTitle={title}
+            type="changelog"
+          />
         </div>
       </div>
     </div>
