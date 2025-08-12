@@ -4,9 +4,10 @@ import { formatRelativeDate } from '@/utils/timestamp';
 import { convertUrlsToLinks } from '@/utils/urlConverter';
 import { Button, Tooltip, Pagination } from '@mui/material';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
-import { ArrowUpIcon as ArrowUpSolidIcon, ArrowDownIcon as ArrowDownSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { formatCustomDate } from '@/utils/timestamp';
+import { Chip } from '@mui/material';
 
 type ItemChangeValue = string | number | boolean | null;
 
@@ -360,22 +361,15 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
                     <div className="flex items-center gap-2">
                       {change.suggestion_data ? (
-                        <>
-                          <span className="text-sm text-muted">
-                            Suggested by{' '}
-                            <a
-                              href={`https://discord.com/users/${change.suggestion_data.user_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:text-blue-300 hover:underline"
-                            >
-                              {change.suggestion_data.suggestor_name}
-                            </a>
-                          </span>
-                          <span className="rounded-full bg-[#5865F2]/30 px-2 py-0.5 text-xs text-white font-medium">
-                            Suggestion #{change.suggestion_data.id}
-                          </span>
-                        </>
+                        <Chip
+                          label={`Suggestion #${change.suggestion_data.id}`}
+                          size="small"
+                          sx={{
+                            backgroundColor: '#5865F2',
+                            color: 'white',
+                            '& .MuiChip-label': { color: 'white' }
+                          }}
+                        />
                       ) : (
                         <span className="text-sm text-muted">
                           Changed by{' '}
@@ -388,26 +382,34 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                      {change.suggestion_data && (
-                        <div className="flex items-center gap-2">
-                          <Tooltip title="Upvotes" arrow placement="top">
-                            <div className="flex items-center gap-1 rounded-full bg-[#5865F2]/30 px-2 py-0.5">
-                              <ArrowUpSolidIcon className="h-5 w-5 text-[#5865F2]" />
-                              <span className="text-white text-xs font-medium">{change.suggestion_data.vote_data.upvotes}</span>
-                            </div>
-                          </Tooltip>
-                          <Tooltip title="Downvotes" arrow placement="top">
-                            <div className="flex items-center gap-1 rounded-full bg-red-500/30 px-2 py-0.5">
-                              <ArrowDownSolidIcon className="h-5 w-5 text-red-500" />
-                              <span className="text-white text-xs font-medium">{change.suggestion_data.vote_data.downvotes}</span>
-                            </div>
-                          </Tooltip>
-                        </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {!change.suggestion_data && (
+                        <Tooltip 
+                          title={formatCustomDate(change.created_at * 1000)}
+                          placement="top"
+                          arrow
+                          slotProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: '#0F1419',
+                                color: '#D3D9D4',
+                                fontSize: '0.75rem',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #2E3944',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                '& .MuiTooltip-arrow': {
+                                  color: '#0F1419',
+                                }
+                              }
+                            }
+                          }}
+                        >
+                          <span className="text-sm text-muted cursor-help">
+                            {formatRelativeDate(change.created_at * 1000)}
+                          </span>
+                        </Tooltip>
                       )}
-                      <span className="text-sm text-muted">
-                        {formatRelativeDate(change.created_at * 1000)}
-                      </span>
                     </div>
                   </div>
 
@@ -417,21 +419,67 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
 
                   {change.suggestion_data && (
                     <>
-                      <div className="mb-4">
-                        <span className="text-sm text-muted">
-                          Changed by{' '}
-                          <Link
-                            href={`/users/${change.changed_by_id}`}
-                            className="text-blue-400 hover:text-blue-300 hover:underline"
-                          >
-                            {change.changed_by}
-                          </Link>
-                        </span>
-                      </div>
-                      <div className="border-b border-[#2E3944] mb-4"></div>
-                      <div className="mb-4">
-                        <div className="text-sm text-white mb-2">Reason:</div>
-                        <div className="text-sm text-muted whitespace-pre-wrap">
+                      <div className="bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-lg p-3 mt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                          <span className="text-sm font-medium text-white">
+                            Suggested by{' '}
+                            <a
+                              href={`https://discord.com/users/${change.suggestion_data.user_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 hover:underline"
+                            >
+                              {change.suggestion_data.suggestor_name}
+                            </a>
+                          </span>
+                          <div className="flex items-center justify-center text-xs">
+                            <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
+                              <Tooltip 
+                                title={`${change.suggestion_data.vote_data.upvotes} upvote${change.suggestion_data.vote_data.upvotes !== 1 ? 's' : ''}`}
+                                arrow
+                                placement="top"
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      bgcolor: '#1A2228',
+                                      border: '1px solid #2E3944',
+                                      '& .MuiTooltip-arrow': {
+                                        color: '#1A2228',
+                                      },
+                                    },
+                                  },
+                                }}
+                              >
+                                <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
+                                  <span className="text-green-400 font-medium">↑</span>
+                                  <span className="text-green-400 font-semibold">{change.suggestion_data.vote_data.upvotes}</span>
+                                </div>
+                              </Tooltip>
+                              <Tooltip 
+                                title={`${change.suggestion_data.vote_data.downvotes} downvote${change.suggestion_data.vote_data.downvotes !== 1 ? 's' : ''}`}
+                                arrow
+                                placement="top"
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      bgcolor: '#1A2228',
+                                      border: '1px solid #2E3944',
+                                      '& .MuiTooltip-arrow': {
+                                        color: '#1A2228',
+                                      },
+                                    },
+                                  },
+                                }}
+                              >
+                                <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
+                                  <span className="text-red-400 font-medium">↓</span>
+                                  <span className="text-red-400 font-semibold">{change.suggestion_data.vote_data.downvotes}</span>
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-300 mb-2">
                           {(() => {
                             const { text, isTruncated } = truncateText(change.suggestion_data.data.reason, MAX_REASON_LENGTH);
                             return (
@@ -457,7 +505,22 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                             );
                           })()}
                         </div>
+                        <div className="text-xs text-gray-400">
+                          Suggested on {formatCustomDate(change.suggestion_data.created_at * 1000)}
+                        </div>
                       </div>
+                      <div className="mt-3">
+                        <span className="text-sm text-muted">
+                          Changed by{' '}
+                          <Link
+                            href={`/users/${change.changed_by_id}`}
+                            className="text-blue-400 hover:text-blue-300 hover:underline"
+                          >
+                            {change.changed_by}
+                          </Link>
+                        </span>
+                      </div>
+                      <div className="border-b border-[#2E3944] mb-4"></div>
                     </>
                   )}
 

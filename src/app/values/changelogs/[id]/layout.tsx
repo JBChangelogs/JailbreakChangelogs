@@ -13,13 +13,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     metadataBase: new URL('https://jailbreakchangelogs.xyz'),
     title: `Value Changelog #${id}`,
-    description: `View value changes in this Jailbreak Trading update.`,
+    description: `View value changes in this Jailbreak Changelogs Value update.`,
     alternates: {
       canonical: `/values/changelogs/${id}`,
     },
     openGraph: {
       title: `Value Changelog #${id}`,
-      description: `View value changes in this Jailbreak Trading update.`,
+      description: `View value changes in this Jailbreak Changelogs Value update.`,
       type: 'website',
       url: `https://jailbreakchangelogs.xyz/values/changelogs/${id}`,
       siteName: 'Jailbreak Changelogs',
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     twitter: {
       card: "summary_large_image",
       title: `Value Changelog #${id}`,
-      description: `View value changes in this Jailbreak Trading update.`,
+      description: `View value changes in this Jailbreak Changelogs Value update.`,
       images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp"],
     },
   };

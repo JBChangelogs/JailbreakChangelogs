@@ -338,6 +338,22 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                 )}
               </div>
 
+              {/* Ad above the 'Don't agree with the value?' card */}
+              {premiumStatusLoaded && currentUserPremiumType === 0 && (
+                <div className="my-6 flex justify-center">
+                  <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
+                    <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                      Advertisement
+                    </span>
+                    <DisplayAd
+                      adSlot="7368028510"
+                      adFormat="auto"
+                      style={{ display: "block", width: "100%", height: "100%" }}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="rounded-lg bg-gradient-to-br from-[#2A3441] to-[#1E252B] p-6 mt-4 border border-[#37424D] shadow-lg">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
@@ -366,21 +382,6 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                   </div>
                 </div>
               </div>
-              {/* Ad below the 'Don't agree with the value?' card */}
-              {premiumStatusLoaded && currentUserPremiumType === 0 && (
-                <div className="my-6 flex justify-center">
-                  <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
-                    <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
-                      Advertisement
-                    </span>
-                    <DisplayAd
-                      adSlot="7368028510"
-                      adFormat="auto"
-                      style={{ display: "block", width: "100%", height: "100%" }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Right column - Details */}
