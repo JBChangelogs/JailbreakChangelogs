@@ -96,7 +96,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 
 	return (
 		<div className="bg-[#212A31] rounded-lg p-6 border border-[#2E3944]">
-			<div className="flex items-center justify-between mb-4">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
 				<div className="flex items-center gap-2">
 					<h3 className="text-muted font-semibold">{heading}</h3>
 					{contextLabel && (
@@ -108,10 +108,10 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 						</span>
 					)}
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2 sm:justify-end">
 					<span className="inline-flex items-center gap-1 text-xs text-muted/80 bg-[#2E3944] border border-[#36424E] px-2 py-1 rounded-md">
 						<ArrowsRightLeftIcon className="w-4 h-4" />
-						<span>Range</span>
+						<span className="hidden sm:inline">Range</span>
 						<span className="text-muted">{range.toLocaleString()}</span>
 					</span>
 					{enableDemandSort && (
@@ -219,7 +219,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 												)}
 												{demandDelta === null ? null : demandDelta === 0 ? (
 													<span className="inline-flex items-center gap-1 text-[#E5E7EB] mt-1">
-														<span>Same demand as baseline</span>
+														<span>Same demand</span>
 													</span>
 												) : (
 													<span className={`inline-flex items-center gap-1 mt-1 ${demandDelta > 0 ? 'text-[#43B581]' : 'text-red-400'}`}>

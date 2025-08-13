@@ -38,6 +38,18 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
   // Get current user ID from auth state
   const currentUserId = user?.id || null;
 
+  const getDemandForItem = (it: TradeItem): string | undefined => {
+    if (it.demand) return it.demand;
+    if (it.data?.demand) return it.data.demand;
+    const match = items.find(base => base.id === it.id);
+    if (!match) return undefined;
+    const subName = it.sub_name as string | undefined;
+    if (subName && Array.isArray(match.children)) {
+      const child = match.children.find(c => c.sub_name === subName);
+      if (child?.data?.demand) return child.data.demand;
+    }
+    return match.demand;
+  };
 
 
   const refreshTradeAds = async () => {
@@ -329,17 +341,24 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
             spacing={2}
             sx={{ width: 'auto', margin: 0 }}
           >
-            {currentPageItems.map((trade) => (
-              <TradeAdCard
-                key={trade.id}
-                trade={trade}
-                onMakeOffer={() => handleOfferClick(trade.id)}
-                offerStatus={offerStatuses[trade.id]}
-                currentUserId={currentUserId}
-                onDelete={() => handleDeleteTrade(trade.id)}
-                onEdit={() => handleEditTrade(trade)}
-              />
-            ))}
+            {currentPageItems.map((trade) => {
+              const enrichedTrade: TradeAd = {
+                ...trade,
+                offering: trade.offering.map(it => ({ ...it, demand: getDemandForItem(it) || it.demand })),
+                requesting: trade.requesting.map(it => ({ ...it, demand: getDemandForItem(it) || it.demand })),
+              };
+              return (
+                <TradeAdCard
+                  key={trade.id}
+                  trade={enrichedTrade}
+                  onMakeOffer={() => handleOfferClick(trade.id)}
+                  offerStatus={offerStatuses[trade.id]}
+                  currentUserId={currentUserId}
+                  onDelete={() => handleDeleteTrade(trade.id)}
+                  onEdit={() => handleEditTrade(trade)}
+                />
+              );
+            })}
           </Masonry>
           {totalPages > 1 && (
             <div className="flex justify-center mt-8 mb-8">

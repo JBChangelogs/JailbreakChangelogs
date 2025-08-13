@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
 interface CustomConfirmationModalProps {
   open: boolean;
@@ -20,22 +21,13 @@ export const CustomConfirmationModal: React.FC<CustomConfirmationModalProps> = (
   onConfirm,
   onCancel,
 }) => {
-  React.useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [open]);
+  useLockBodyScroll(open);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6 shadow-xl border border-[#5865F2]">
           <h2 className="text-white text-xl font-semibold mb-4">{title}</h2>

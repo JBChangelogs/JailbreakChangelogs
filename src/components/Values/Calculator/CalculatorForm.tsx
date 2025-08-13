@@ -15,8 +15,14 @@ import { getItemTypeColor } from '@/utils/badgeColors';
 import { CiBoxList } from "react-icons/ci";
 import { TradeAdTooltip } from '../../trading/TradeAdTooltip';
 import TotalSimilarItems from './TotalSimilarItems';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
-// Copied from TradeAdForm
+/**
+ * Parses numeric strings like "1.2m", "450k", "12,345", or "N/A".
+ * - Returns 0 for null/undefined/"N/A".
+ * - Multiplies suffixes: m -> 1_000_000, k -> 1_000.
+ * Used by totals and comparisons; keep in sync with trade forms.
+ */
 const parseValueString = (valStr: string | number | null | undefined): number => {
   if (valStr === undefined || valStr === null) return 0;
   const cleanedValStr = String(valStr).toLowerCase().replace(/,/g, '');
@@ -30,12 +36,16 @@ const parseValueString = (valStr: string | number | null | undefined): number =>
   }
 };
 
+/** Formats a number with locale separators. */
 const formatTotalValue = (total: number): string => {
   if (total === 0) return '0';
   return total.toLocaleString();
 };
 
-// Shared empty-state UI for consistency across tabs
+/**
+ * Shared empty-state panel used across tabs.
+ * Keep visual style consistent with `CustomConfirmationModal` and other surfaces.
+ */
 const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ message, onBrowse }) => {
   return (
     <div className="bg-[#2E3944] rounded-lg p-12">
@@ -59,7 +69,12 @@ const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ messa
   );
 };
 
-// Custom ItemGrid component for calculator with value type selection
+/**
+ * Item grid for the calculator.
+ * - Groups duplicates by `id` + `sub_name` and shows a quantity badge
+ * - Uses a single modal as the action surface (toggle Clean/Duped, remove one/all)
+ * - Value type selection is stored per side using `getItemKey`
+ */
 const CalculatorItemGrid: React.FC<{
   items: TradeItem[];
   onRemove?: (itemId: number, subName?: string) => void;
@@ -70,9 +85,6 @@ const CalculatorItemGrid: React.FC<{
 }> = ({ items, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueType }) => {
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [actionItem, setActionItem] = useState<(TradeItem & { count?: number }) | null>(null);
-
-  // Menu removed in favor of modal actions
-
   const openActionModal = (item: TradeItem & { count?: number }) => {
     setActionItem(item);
     setActionModalOpen(true);
@@ -83,16 +95,7 @@ const CalculatorItemGrid: React.FC<{
     setActionItem(null);
   };
 
-  // Lock body scroll when modal is open (matches CustomConfirmationModal behavior)
-  useEffect(() => {
-    if (actionModalOpen) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
-    }
-    return () => {};
-  }, [actionModalOpen]);
+  useLockBodyScroll(actionModalOpen);
 
   const groupItems = (items: TradeItem[]) => {
     const grouped = items.reduce((acc, item) => {
@@ -198,7 +201,7 @@ const CalculatorItemGrid: React.FC<{
       {/* Action Modal styled like CustomConfirmationModal */}
       {actionModalOpen && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" onClick={closeActionModal} />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" onClick={closeActionModal} />
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6 shadow-xl border border-[#5865F2]">
               <h2 className="text-white text-xl font-semibold mb-4">
@@ -243,9 +246,9 @@ const CalculatorItemGrid: React.FC<{
                         <Tooltip title="Duped value not available for this item">
                           <span style={{ display: 'inline-flex' }}>
                             <FormControlLabel
-                              control={<Checkbox disabled />}
+                              control={<Checkbox disabled sx={{ color: '#9CA3AF', '&.Mui-disabled': { color: '#9CA3AF' } }} />}
                               label="Duped (N/A)"
-                              sx={{ color: '#9CA3AF', '.MuiFormControlLabel-label': { color: '#9CA3AF' } }}
+                              sx={{ color: '#9CA3AF', '.MuiFormControlLabel-label': { color: '#9CA3AF' }, '&.Mui-disabled .MuiFormControlLabel-label': { color: '#9CA3AF' } }}
                             />
                           </span>
                         </Tooltip>
@@ -288,7 +291,12 @@ const CalculatorItemGrid: React.FC<{
   );
 };
 
-// Custom ValueComparison component for calculator with value type selection
+/**
+ * Value comparison panel.
+ * - Sums grouped items per side using the contributor-selected valuation basis
+ * - Displays totals and their difference with directional badge
+ * - Renders helpful empty state when no items selected
+ */
 const CalculatorValueComparison: React.FC<{
   offering: TradeItem[];
   requesting: TradeItem[];
@@ -331,7 +339,7 @@ const CalculatorValueComparison: React.FC<{
   }
 
   return (
-    <div className="bg-[#2E3944] rounded-lg p-6">
+    <div className="bg-[#2E3944] rounded-lg p-6 overflow-x-auto">
       <h3 className="text-lg font-semibold text-muted mb-4">Value Comparison</h3>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -516,7 +524,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     };
   }, []);
 
-  // Check for saved items on component mount
+  /**
+   * Restore prompt on mount if previously saved items exist in localStorage.
+   * invalid JSON clears storage to avoid persistent errors.
+   */
   useEffect(() => {
     try {
       const saved = localStorage.getItem('calculatorItems');
@@ -539,13 +550,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     } else if (tab === 'similar') {
       window.location.hash = 'similar';
     } else {
-      // Remove hash entirely instead of leaving a trailing '#'
       const urlWithoutHash = window.location.pathname + window.location.search;
       window.history.replaceState(null, '', urlWithoutHash);
     }
   };
 
-  // Save items to localStorage whenever they change
+  /**
+   * Persist current selections to localStorage so users can resume later.
+   * Schema: { offering: TradeItem[], requesting: TradeItem[] }
+   */
   useEffect(() => {
     if (offeringItems.length > 0 || requestingItems.length > 0) {
       saveItemsToLocalStorage(offeringItems, requestingItems);
@@ -579,6 +592,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     setShowClearConfirmModal(false);
   };
 
+  /**
+   * Computes totals and a Clean/Duped breakdown for a given side.
+   * Respects per-item selection but coerces to Clean if Duped value is not available.
+   */
   const calculateTotals = (items: TradeItem[], side: 'offering' | 'requesting') => {
     let totalValue = 0;
     let cleanSum = 0;
@@ -876,16 +893,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
       {/* Tabs */}
       <div className="bg-[#212A31] rounded-lg border border-[#2E3944] mb-6">
         <nav className="px-6 py-4">
-          <div className="flex space-x-1 bg-[#2E3944] rounded-lg p-1">
+          <div className="bg-[#2E3944] rounded-lg p-1 flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
             <button
               onClick={() => handleTabChange('items')}
               className={`${
                 activeTab === 'items'
                   ? 'bg-[#5865F2] text-white shadow-sm'
                   : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
-              } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+              } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
             >
-              <CiBoxList className="w-4 h-4" />
               Browse Items
             </button>
             <button
@@ -894,9 +910,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                 activeTab === 'similar'
                   ? 'bg-[#5865F2] text-white shadow-sm'
                   : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
-              } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+              } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
             >
-              <CiBoxList className="w-4 h-4" />
               Similar by Total
             </button>
             <button
@@ -905,9 +920,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                 activeTab === 'values'
                   ? 'bg-[#5865F2] text-white shadow-sm'
                   : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
-              } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+              } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
             >
-              <CiBoxList className="w-4 h-4" />
               Value Comparison
             </button>
           </div>

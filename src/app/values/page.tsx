@@ -3,11 +3,14 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchItems, fetchLastUpdated } from '@/utils/api';
 import ValuesClient from '@/components/Values/ValuesClient';
 import Loading from './loading';
+import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 // ISR configuration - cache for 5 minutes
 export const revalidate = 300;
 
 export default async function ValuesPage() {
+  'use cache'
+  cacheTag('items')
   const itemsPromise = fetchItems();
   const lastUpdatedPromise = itemsPromise.then(items => fetchLastUpdated(items));
 
