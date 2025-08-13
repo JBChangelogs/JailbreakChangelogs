@@ -14,6 +14,7 @@ import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { CiBoxList } from "react-icons/ci";
 import { TradeAdTooltip } from '../../trading/TradeAdTooltip';
+import TotalSimilarItems from './TotalSimilarItems';
 
 // Copied from TradeAdForm
 const parseValueString = (valStr: string | number | null | undefined): number => {
@@ -436,16 +437,19 @@ interface CalculatorFormProps {
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [] }) => {
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
-  const [activeTab, setActiveTab] = useState<'items' | 'values'>('items');
+  const [activeTab, setActiveTab] = useState<'items' | 'values' | 'similar'>('items');
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [itemValueTypes, setItemValueTypes] = useState<Record<string, 'cash' | 'duped'>>({});
+  const [totalBasis, setTotalBasis] = useState<'offering' | 'requesting'>('offering');
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
       if (hash === 'comparison') {
         setActiveTab('values');
+      } else if (hash === 'similar') {
+        setActiveTab('similar');
       } else {
         setActiveTab('items');
       }
@@ -476,12 +480,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     }
   }, []);
 
-  const handleTabChange = (tab: 'items' | 'values') => {
+  const handleTabChange = (tab: 'items' | 'values' | 'similar') => {
     setActiveTab(tab);
     if (tab === 'values') {
       window.location.hash = 'comparison';
+    } else if (tab === 'similar') {
+      window.location.hash = 'similar';
     } else {
-      window.location.hash = '';
+      // Remove hash entirely instead of leaving a trailing '#'
+      const urlWithoutHash = window.location.pathname + window.location.search;
+      window.history.replaceState(null, '', urlWithoutHash);
     }
   };
 
@@ -773,6 +781,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               Browse Items
             </button>
             <button
+              onClick={() => handleTabChange('similar')}
+              className={`${
+                activeTab === 'similar'
+                  ? 'bg-[#5865F2] text-white shadow-sm'
+                  : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+              } flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+            >
+              <CiBoxList className="w-4 h-4" />
+              Similar by Total
+            </button>
+            <button
               onClick={() => handleTabChange('values')}
               className={`${
                 activeTab === 'values'
@@ -797,7 +816,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             requireAuth={false}
           />
         </div>
-      ) : (
+      ) : activeTab === 'values' ? (
         <div className="mb-8">
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
             <CalculatorValueComparison
@@ -807,6 +826,41 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               getSelectedValue={(item, side) => getSelectedValue(item, side)}
             />
           </div>
+        </div>
+      ) : (
+        <div className="mb-8">
+          {/* Similar Items Near Total - Selector and Results */}
+          <div className="mb-4 bg-[#212A31] rounded-lg border border-[#2E3944] p-2 inline-flex gap-1">
+            <button
+              onClick={() => setTotalBasis('offering')}
+              className={`${totalBasis === 'offering' ? 'bg-[#5865F2] text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
+            >
+              Offering Total
+            </button>
+            <button
+              onClick={() => setTotalBasis('requesting')}
+              className={`${totalBasis === 'requesting' ? 'bg-[#5865F2] text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
+            >
+              Requesting Total
+            </button>
+          </div>
+
+          {(() => {
+            const offeringTotal = offeringItems.reduce((sum, item) => sum + getSelectedValue(item, 'offering'), 0);
+            const requestingTotal = requestingItems.reduce((sum, item) => sum + getSelectedValue(item, 'requesting'), 0);
+            const total = totalBasis === 'offering' ? offeringTotal : requestingTotal;
+            const title = totalBasis === 'offering' ? 'Similar Items Near Offering Total' : 'Similar Items Near Requesting Total';
+            return (
+              <TotalSimilarItems
+                targetValue={total}
+                items={initialItems}
+                excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
+                typeFilter={null}
+                range={2_500_000}
+                title={title}
+              />
+            );
+          })()}
         </div>
       )}
     </div>
