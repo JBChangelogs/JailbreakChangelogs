@@ -292,12 +292,12 @@ const CalculatorValueComparison: React.FC<{
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h4 className="text-muted font-medium">Offering Side</h4>
-            <span className="px-2 py-0.5 text-xs rounded-full text-white font-medium" style={{ backgroundColor: '#10B981' }}>Offering</span>
+            <span className="px-2 py-0.5 text-xs rounded-full text-white font-medium" style={{ backgroundColor: '#047857' }}>Offering</span>
             <span className="px-2 py-0.5 text-xs rounded-full bg-[#5865F2] text-white border border-[#5865F2]/20">
               {groupItems(offering).reduce((sum, item) => sum + item.count, 0)} item{groupItems(offering).reduce((sum, item) => sum + item.count, 0) !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #10B981' }}>
+          <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #047857' }}>
             <div className="space-y-2">
               {groupItems(offering).map((item, index, array) => {
                 const selectedValue = getSelectedValueString(item, 'offering');
@@ -354,12 +354,12 @@ const CalculatorValueComparison: React.FC<{
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h4 className="text-muted font-medium">Requesting Side</h4>
-            <span className="px-2 py-0.5 text-xs rounded-full text-white font-medium" style={{ backgroundColor: '#EF4444' }}>Requesting</span>
+            <span className="px-2 py-0.5 text-xs rounded-full text-white font-medium" style={{ backgroundColor: '#B91C1C' }}>Requesting</span>
             <span className="px-2 py-0.5 text-xs rounded-full bg-[#5865F2] text-white border border-[#5865F2]/20">
               {groupItems(requesting).reduce((sum, item) => sum + item.count, 0)} item{groupItems(requesting).reduce((sum, item) => sum + item.count, 0) !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #EF4444' }}>
+          <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #B91C1C' }}>
             <div className="space-y-2">
               {groupItems(requesting).map((item, index, array) => {
                 const selectedValue = getSelectedValueString(item, 'requesting');
@@ -690,11 +690,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
         {/* Trade Panels */}
         <div className="md:flex md:space-x-6 space-y-6 md:space-y-0">
           {/* Offering Items */}
-          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#10B981' }}>
+          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#047857' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Offering</h3>
-                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#10B981' }}>Offering</span>
+                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#047857' }}>Offering</span>
                 <span className="text-sm text-muted/70">({offeringItems.length}/8)</span>
               </div>
               <Tooltip title="Mirror to requesting">
@@ -703,11 +703,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                   onClick={() => handleMirrorItems('offering')}
                   size="small"
                   sx={{
-                    borderColor: '#10B981',
-                    color: '#10B981',
+                    borderColor: '#047857',
+                    color: '#FFFFFF',
                     '&:hover': {
-                      borderColor: '#059669',
-                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      borderColor: '#065F46',
+                      backgroundColor: 'rgba(4, 120, 87, 0.15)',
+                      color: '#FFFFFF',
                     },
                   }}
                 >
@@ -729,11 +730,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
           </div>
 
           {/* Requesting Items */}
-          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#EF4444' }}>
+          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#B91C1C' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Requesting</h3>
-                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#EF4444' }}>Requesting</span>
+                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#B91C1C' }}>Requesting</span>
                 <span className="text-sm text-muted/70">({requestingItems.length}/8)</span>
               </div>
               <Tooltip title="Mirror to offering">
@@ -742,11 +743,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                   onClick={() => handleMirrorItems('requesting')}
                   size="small"
                   sx={{
-                    borderColor: '#EF4444',
-                    color: '#EF4444',
+                    borderColor: '#B91C1C',
+                    color: '#FFFFFF',
                     '&:hover': {
-                      borderColor: '#DC2626',
-                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      borderColor: '#991B1B',
+                      backgroundColor: 'rgba(185, 28, 28, 0.15)',
+                      color: '#FFFFFF',
                     },
                   }}
                 >
@@ -838,14 +840,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             <button
               onClick={() => setTotalBasis('offering')}
               className={`${totalBasis === 'offering' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
-              style={{ backgroundColor: totalBasis === 'offering' ? '#10B981' : 'transparent' }}
+              style={{ backgroundColor: totalBasis === 'offering' ? '#047857' : 'transparent' }}
             >
               Offering Total
             </button>
             <button
               onClick={() => setTotalBasis('requesting')}
               className={`${totalBasis === 'requesting' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
-              style={{ backgroundColor: totalBasis === 'requesting' ? '#EF4444' : 'transparent' }}
+              style={{ backgroundColor: totalBasis === 'requesting' ? '#B91C1C' : 'transparent' }}
             >
               Requesting Total
             </button>
@@ -856,7 +858,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             const requestingTotal = requestingItems.reduce((sum, item) => sum + getSelectedValue(item, 'requesting'), 0);
             const total = totalBasis === 'offering' ? offeringTotal : requestingTotal;
             const title = totalBasis === 'offering' ? 'Similar Items Near Offering Total' : 'Similar Items Near Requesting Total';
-            const accentColor = totalBasis === 'offering' ? '#10B981' : '#EF4444';
+            const accentColor = totalBasis === 'offering' ? '#047857' : '#B91C1C';
             const contextLabel = totalBasis === 'offering' ? 'Offering' : 'Requesting';
             return (
               <TotalSimilarItems
