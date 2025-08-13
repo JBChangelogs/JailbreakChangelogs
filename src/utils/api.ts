@@ -205,44 +205,16 @@ export async function fetchItems() {
   try {
     console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/items/list`, {
-      next: { revalidate: 300, tags: ['items'] }
+      cache: 'no-store',
+      next: { revalidate: 0 }
     });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
-
-    // If any item was updated within the last minute, force a fresh fetch
-    try {
-      const lastUpdated = await fetchLastUpdated(data as Item[]);
-      if (lastUpdated && Date.now() - lastUpdated <= 60_000) {
-        console.log('[SERVER] Recent item update detected (< 1m). Forcing fresh fetch...');
-        const freshRes = await fetch(`${BASE_API_URL}/items/list`, { next: { revalidate: 0, tags: ['items'] } });
-        if (freshRes.ok) {
-          const freshData = await freshRes.json();
-          // Invalidate cached tag so subsequent requests repopulate with fresh data
-          try {
-            if (typeof window === 'undefined') {
-              const { revalidateTag } = await import('next/cache');
-              await revalidateTag('items');
-              console.log('[SERVER] Items cache tag invalidated after fresh fetch');
-            }
-          } catch (e) {
-            console.warn('[SERVER] Failed to revalidate tag "items":', e);
-          }
-          console.log(`[SERVER] Successfully fetched fresh ${freshData.length} items from API`);
-          return freshData as Item[];
-        } else {
-          console.warn('[SERVER] Fresh fetch failed; serving cached data');
-        }
-      }
-    } catch (innerErr) {
-      console.warn('[SERVER] Skipping force refresh due to error computing lastUpdated or fetching fresh:', innerErr);
-    }
-
     console.log(`[SERVER] Successfully fetched ${data.length} items from API`);
     return data as Item[];
   } catch (err) {
     console.error('[SERVER] Error fetching items:', err);
-    throw err;
+    return [];
   }
 }
 

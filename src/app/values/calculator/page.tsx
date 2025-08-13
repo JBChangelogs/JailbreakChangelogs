@@ -4,7 +4,6 @@ import CalculatorDescription from '@/components/Values/Calculator/CalculatorDesc
 import { CalculatorForm } from '@/components/Values/Calculator/CalculatorForm';
 import { fetchItems } from '@/utils/api';
 import Loading from './loading';
-import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 // ISR configuration - cache for 5 minutes
 export const revalidate = 300;
@@ -22,8 +21,6 @@ export default function CalculatorPage() {
 }
 
 async function CalculatorFormWrapper() {
-  'use cache'
-  cacheTag('items')
   const items = await fetchItems();
   const tradeItems = items.map(item => ({ ...item, is_sub: false, side: undefined }));
 

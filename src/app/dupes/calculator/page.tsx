@@ -4,7 +4,6 @@ import DupeSearchForm from '@/components/Dupes/DupeSearchForm';
 import { fetchItems, fetchDupes } from '@/utils/api';
 import Loading from './loading';
 import { Item, DupeResult } from '@/types';
-import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 // ISR configuration - cache for 5 minutes
 export const revalidate = 300;
@@ -26,8 +25,6 @@ export default function DupeCalculatorPage() {
 }
 
 async function DupeSearchFormWrapper() {
-  'use cache'
-  cacheTag('items')
   const [items, dupes] = await Promise.all([
     fetchItems(),
     fetchDupes()

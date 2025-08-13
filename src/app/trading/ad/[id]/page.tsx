@@ -5,7 +5,6 @@ import { fetchItems } from '@/utils/api';
 import type { Item } from '@/types';
 import TradeDetailsClient from './TradeDetailsClient';
 import Loading from './loading';
-import { unstable_cacheTag as cacheTag } from 'next/cache'
 import type { TradeItem, TradeAd } from '@/types/trading'
 
 // ISR configuration - cache for 5 minutes
@@ -20,8 +19,6 @@ export default function TradeDetailsPage({ params }: { params: Promise<{ id: str
 }
 
 async function TradeDetailsWrapper({ params }: { params: Promise<{ id: string }> }) {
-  'use cache'
-  cacheTag('items')
   const { id } = await params;
   
   const trade = await fetchTradeAd(id);

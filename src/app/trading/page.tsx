@@ -5,7 +5,6 @@ import TradeAds from '@/components/trading/TradeAds';
 import { fetchTradeAds, fetchUsersBatch, fetchItems } from '@/utils/api';
 import type { TradeAd } from '@/types/trading';
 import Loading from './loading';
-import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 // ISR configuration - cache for 5 minutes
 export const revalidate = 300;
@@ -23,8 +22,6 @@ export default function TradingPage() {
 }
 
 async function TradeAdsWrapper() {
-  'use cache'
-  cacheTag('items')
   const tradeAds = await fetchTradeAds();
   const userIds = [...new Set(tradeAds.map((trade: TradeAd) => trade.author))] as string[];
   const userMap = await fetchUsersBatch(userIds);
