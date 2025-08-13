@@ -11,6 +11,7 @@ interface TradeAdTooltipProps {
 
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const categoryIcon = getCategoryIcon(item.type);
+  const demand = (item.demand ?? item.data?.demand ?? 'N/A');
   
   return (
     <div className="p-2">
@@ -60,8 +61,34 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 </span>
               )}
             </div>
-            <p className="text-muted">Cash Value: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value)}</p>
-            <p className="text-muted">Duped Value: {item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value)}</p>
+            <div className="flex items-center gap-2">
+              <span>Cash:</span>
+              <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold" style={{ backgroundColor: '#1d7da3' }}>
+                {item.cash_value === null || item.cash_value === 'N/A' ? 'N/A' : formatFullValue(item.cash_value)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Duped:</span>
+              <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                {item.duped_value === null || item.duped_value === 'N/A' ? 'N/A' : formatFullValue(item.duped_value)}
+              </span>
+            </div>
+            <div className="text-muted flex items-center gap-2">
+              <span>Demand:</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${
+                demand === "Extremely High" ? "bg-gradient-to-r from-pink-500 to-pink-600" :
+                demand === "Very High" ? "bg-gradient-to-r from-purple-500 to-purple-600" :
+                demand === "High" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
+                demand === "Decent" ? "bg-gradient-to-r from-green-500 to-green-600" :
+                demand === "Medium" ? "bg-gradient-to-r from-yellow-600 to-yellow-700" :
+                demand === "Low" ? "bg-gradient-to-r from-orange-500 to-orange-600" :
+                demand === "Very Low" ? "bg-gradient-to-r from-red-500 to-red-600" :
+                demand === "Close to none" ? "bg-gradient-to-r from-gray-500 to-gray-600" :
+                "bg-gradient-to-r from-gray-500 to-gray-600"
+              }`}>
+                {demand === 'N/A' ? 'Unknown' : demand}
+              </span>
+            </div>
           </div>
         </div>
       </div>

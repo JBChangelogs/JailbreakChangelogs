@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { TradeItem } from '@/types/trading';
 import { Button } from '@mui/material';
 import { AvailableItemsGrid } from '../../trading/AvailableItemsGrid';
-import { ArrowsRightLeftIcon, TrashIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ArrowsRightLeftIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import Tooltip from '@mui/material/Tooltip';
 import { CustomConfirmationModal } from '../../Modals/CustomConfirmationModal';
-import { Menu, MenuItem, Button as MuiButton } from '@mui/material';
+import { Button as MuiButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import Image from 'next/image';
 import { getItemImagePath, handleImageError } from '@/utils/images';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
@@ -64,27 +64,23 @@ const CalculatorItemGrid: React.FC<{
   items: TradeItem[];
   title: string;
   onRemove?: (itemId: number, subName?: string) => void;
+  onRemoveAll?: (itemId: number, subName?: string) => void;
   onValueTypeChange: (itemId: number, subName: string | undefined, valueType: 'cash' | 'duped') => void;
   getSelectedValueString: (item: TradeItem) => string;
-}> = ({ items, title, onRemove, onValueTypeChange, getSelectedValueString }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedItem, setSelectedItem] = useState<{ id: number; subName?: string } | null>(null);
+}> = ({ items, title, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueString }) => {
+  const [actionModalOpen, setActionModalOpen] = useState(false);
+  const [actionItem, setActionItem] = useState<(TradeItem & { count?: number }) | null>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, itemId: number, subName?: string) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedItem({ id: itemId, subName });
+  // Menu removed in favor of modal actions
+
+  const openActionModal = (item: TradeItem & { count?: number }) => {
+    setActionItem(item);
+    setActionModalOpen(true);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedItem(null);
-  };
-
-  const handleValueTypeSelect = (valueType: 'cash' | 'duped') => {
-    if (selectedItem) {
-      onValueTypeChange(selectedItem.id, selectedItem.subName, valueType);
-    }
-    handleMenuClose();
+  const closeActionModal = () => {
+    setActionModalOpen(false);
+    setActionItem(null);
   };
 
   const groupItems = (items: TradeItem[]) => {
@@ -120,7 +116,7 @@ const CalculatorItemGrid: React.FC<{
           const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
           const selectedValue = getSelectedValueString(item);
           const isDupedSelected = selectedValue === item.duped_value;
-          
+        
           return (
             <div key={`${item.id}-${item.sub_name || 'base'}`} className="relative group">
               <Tooltip
@@ -148,7 +144,7 @@ const CalculatorItemGrid: React.FC<{
                 }}
               >
                 <div className="relative aspect-square">
-                  <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#2E3944]">
+                  <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#2E3944] cursor-pointer" onClick={() => openActionModal(item)}>
                     <Image
                       src={getItemImagePath(item.type, item.name, true)}
                       alt={item.name}
@@ -157,98 +153,105 @@ const CalculatorItemGrid: React.FC<{
                       className="object-cover"
                       onError={handleImageError}
                     />
+                    {/* Status badge for Clean/Duped selection */}
+                    <div
+                      className={`absolute top-1 left-1 px-1.5 py-0.5 text-xs rounded-full text-white ${isDupedSelected ? 'bg-red-500/80 border border-red-500/20' : 'bg-green-500/80 border border-green-500/20'}`}
+                    >
+                      {isDupedSelected ? 'Duped' : 'Clean'}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Edit item"
+                      onClick={(e) => { e.stopPropagation(); openActionModal(item); }}
+                      className="absolute bottom-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/60 border border-white/10 text-white"
+                    >
+                      <EllipsisVerticalIcon className="h-4 w-4" />
+                    </button>
                     {item.count > 1 && (
                       <div className="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded-full bg-[#5865F2]/90 text-white border border-[#5865F2]">
                         ×{item.count}
                       </div>
                     )}
-                    {onRemove && (
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="flex flex-col gap-2">
-                          <MuiButton
-                            size="small"
-                            variant="contained"
-                            onClick={(e) => handleMenuOpen(e, item.id, item.sub_name)}
-                            sx={{
-                              backgroundColor: isDupedSelected ? '#EF4444' : '#10B981',
-                              color: 'white',
-                              minWidth: 'auto',
-                              padding: '4px 8px',
-                              fontSize: '0.75rem',
-                              fontWeight: 'medium',
-                              '&:hover': {
-                                backgroundColor: isDupedSelected ? '#DC2626' : '#059669',
-                                color: 'white',
-                              },
-                            }}
-                          >
-                            {isDupedSelected ? 'Duped' : 'Clean'}
-                            <ChevronDownIcon className="h-3 w-3 ml-1" />
-                          </MuiButton>
-                          <button
-                            onClick={() => onRemove(item.id, item.sub_name)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium uppercase"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    {/* Hover overlay removed; modal handles actions */}
                   </div>
                 </div>
               </Tooltip>
-              <div className="mt-2 text-xs text-muted">
-              </div>
+              {/* Inline footer actions removed; actions available via modal */}
             </div>
           );
         })}
       </div>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        slotProps={{
-          paper: {
-            sx: {
-              backgroundColor: '#212A31',
-              border: '1px solid #2E3944',
-              '& .MuiMenuItem-root': {
-                color: '#D3D9D4',
-                '&:hover': {
-                  backgroundColor: '#2E3944',
-                },
-                '&.Mui-disabled': {
-                  color: '#6B7280',
-                  opacity: 0.5,
-                },
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem onClick={() => handleValueTypeSelect('cash')}>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            Clean Value
-          </div>
-        </MenuItem>
-        {selectedItem && (() => {
-          const item = items.find(i => i.id === selectedItem.id && i.sub_name === selectedItem.subName);
-          const hasDupedValue = item && item.duped_value && item.duped_value !== "N/A" && item.duped_value !== null;
-          return (
-            <MenuItem 
-              onClick={() => handleValueTypeSelect('duped')}
-              disabled={!hasDupedValue}
-            >
+      {/* Legacy context menu removed; modal is the single action surface */}
+ 
+      {/* Action Modal for mobile/desktop */}
+      <Dialog open={actionModalOpen} onClose={closeActionModal} fullWidth maxWidth="xs"
+        PaperProps={{ sx: { backgroundColor: '#212A31', border: '1px solid #2E3944' } }}>
+        <DialogTitle sx={{ color: '#D3D9D4' }}>
+          {actionItem ? (actionItem.sub_name ? `${actionItem.name} (${actionItem.sub_name})` : actionItem.name) : 'Item Actions'}
+        </DialogTitle>
+        <DialogContent>
+          {actionItem && (
+            <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                Duped Value {!hasDupedValue && '(N/A)'}
+                <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: getItemTypeColor(actionItem.type) }}>{actionItem.type}</span>
+                {actionItem.count && actionItem.count > 1 && (
+                  <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full text-[#D3D9D4] bg-[#5865F2]/20 border border-[#5865F2]/30">
+                    Quantity ×{actionItem.count}
+                  </span>
+                )}
               </div>
-            </MenuItem>
-          );
-        })()}
-      </Menu>
+              <div className="flex items-center justify-between gap-2">
+                <div className="inline-flex rounded-md overflow-hidden border border-[#36424E] bg-[#2E3944]">
+                  <MuiButton size="small" onClick={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'cash'); }}
+                    sx={{ backgroundColor: getSelectedValueString(actionItem) === actionItem.cash_value ? '#059669' : 'transparent', color: '#D3D9D4', '&:hover': { backgroundColor: '#065F46', color: 'white' } }}>
+                    Clean
+                  </MuiButton>
+                  {(actionItem.duped_value && actionItem.duped_value !== 'N/A') ? (
+                    <MuiButton size="small" onClick={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'duped'); }}
+                      sx={{ backgroundColor: getSelectedValueString(actionItem) === actionItem.duped_value ? '#DC2626' : 'transparent', color: '#D3D9D4', '&:hover': { backgroundColor: '#991B1B', color: 'white' } }}>
+                      Duped
+                    </MuiButton>
+                  ) : (
+                    <Tooltip title="Duped value not available for this item">
+                      <span style={{ display: 'inline-flex' }}>
+                        <MuiButton size="small" disabled
+                          sx={{
+                            backgroundColor: 'rgba(255,255,255,0.06)',
+                            color: '#9CA3AF',
+                            '&.Mui-disabled': {
+                              backgroundColor: 'rgba(255,255,255,0.06)',
+                              color: '#9CA3AF',
+                              cursor: 'not-allowed'
+                            }
+                          }}>
+                          Duped (N/A)
+                        </MuiButton>
+                      </span>
+                    </Tooltip>
+                  )}
+                </div>
+                {onRemove && (
+                  <div className="flex items-center gap-2">
+                    <MuiButton size="small" variant="outlined" onClick={() => { onRemove(actionItem.id, actionItem.sub_name); closeActionModal(); }}
+                      sx={{ borderColor: '#B91C1C', color: '#FCA5A5', '&:hover': { borderColor: '#991B1B', backgroundColor: 'rgba(185,28,28,0.15)' } }}>
+                      {actionItem.count && actionItem.count > 1 ? 'Remove one' : 'Delete'}
+                    </MuiButton>
+                    {onRemoveAll && actionItem.count && actionItem.count > 1 && (
+                      <MuiButton size="small" variant="contained" onClick={() => { onRemoveAll(actionItem.id, actionItem.sub_name); closeActionModal(); }}
+                        sx={{ backgroundColor: '#B91C1C', color: '#FFFFFF', '&:hover': { backgroundColor: '#991B1B' } }}>
+                        Remove all ×{actionItem.count}
+                      </MuiButton>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={closeActionModal} sx={{ color: '#D3D9D4' }}>Close</MuiButton>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
@@ -543,16 +546,36 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     setShowClearConfirmModal(false);
   };
 
-  const calculateTotals = (items: TradeItem[]) => {
-    const cashValue = items.reduce((sum, item) => {
-      const itemKey = getItemKey(item.id, item.sub_name);
-      const valueType = itemValueTypes[itemKey] || 'cash';
-      const value = parseValueString(valueType === 'cash' ? item.cash_value : item.duped_value);
-      return sum + value;
-    }, 0);
+  const calculateTotals = (items: TradeItem[], side: 'offering' | 'requesting') => {
+    let totalValue = 0;
+    let cleanSum = 0;
+    let dupedSum = 0;
+    let cleanCount = 0;
+    let dupedCount = 0;
+
+    items.forEach((item) => {
+      const itemKey = getItemKey(item.id, item.sub_name, side);
+      const rawType = itemValueTypes[itemKey] || 'cash';
+      const dupedAvailable = !!(item.duped_value && item.duped_value !== 'N/A');
+      const effectiveType = rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
+      const value = parseValueString(effectiveType === 'cash' ? item.cash_value : item.duped_value);
+      totalValue += value;
+      if (effectiveType === 'duped') {
+        dupedSum += value;
+        dupedCount += 1;
+      } else {
+        cleanSum += value;
+        cleanCount += 1;
+      }
+    });
 
     return {
-      cashValue: formatTotalValue(cashValue)
+      cashValue: formatTotalValue(totalValue),
+      total: totalValue,
+      breakdown: {
+        clean: { count: cleanCount, sum: cleanSum, formatted: formatTotalValue(cleanSum) },
+        duped: { count: dupedCount, sum: dupedSum, formatted: formatTotalValue(dupedSum) },
+      },
     };
   };
 
@@ -588,6 +611,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     }
   };
 
+  const handleRemoveAllItems = (itemId: number, side: 'offering' | 'requesting', subName?: string) => {
+    if (side === 'offering') {
+      const newOfferingItems = offeringItems.filter(item => !(item.id === itemId && (item.sub_name === subName || (!item.sub_name && !subName))));
+      setOfferingItems(newOfferingItems);
+    } else {
+      const newRequestingItems = requestingItems.filter(item => !(item.id === itemId && (item.sub_name === subName || (!item.sub_name && !subName))));
+      setRequestingItems(newRequestingItems);
+    }
+  };
+
   const handleSwapSides = () => {
     setOfferingItems(requestingItems);
     setRequestingItems(offeringItems);
@@ -617,15 +650,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
   // Helper function to get selected value for an item
   const getSelectedValue = (item: TradeItem, side: 'offering' | 'requesting'): number => {
     const itemKey = getItemKey(item.id, item.sub_name, side);
-    const valueType = itemValueTypes[itemKey] || 'cash';
-    return parseValueString(valueType === 'cash' ? item.cash_value : item.duped_value);
+    const rawType = itemValueTypes[itemKey] || 'cash';
+    const dupedAvailable = !!(item.duped_value && item.duped_value !== 'N/A');
+    const effectiveType = rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
+    return parseValueString(effectiveType === 'cash' ? item.cash_value : item.duped_value);
   };
 
   // Helper function to get selected value string for display
   const getSelectedValueString = (item: TradeItem, side: 'offering' | 'requesting'): string => {
     const itemKey = getItemKey(item.id, item.sub_name, side);
-    const valueType = itemValueTypes[itemKey] || 'cash';
-    return valueType === 'cash' ? item.cash_value : item.duped_value;
+    const rawType = itemValueTypes[itemKey] || 'cash';
+    const dupedAvailable = !!(item.duped_value && item.duped_value !== 'N/A');
+    const effectiveType = rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
+    return effectiveType === 'cash' ? item.cash_value : item.duped_value;
   };
 
   // Function to update value type for an item
@@ -736,12 +773,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               items={offeringItems}
               title="Offering"
               onRemove={(id, subName) => handleRemoveItem(id, 'offering', subName)}
+              onRemoveAll={(id, subName) => handleRemoveAllItems(id, 'offering', subName)}
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'offering')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'offering')}
             />
-            <div className="flex items-center gap-4 text-sm text-muted/70 mt-4">
-              <span>Total: <span className="font-bold text-muted">{calculateTotals(offeringItems).cashValue}</span></span>
-            </div>
+            {(() => {
+              const t = calculateTotals(offeringItems, 'offering');
+              return (
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+                  <span>Total: <span className="font-bold text-muted">{t.cashValue}</span></span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{t.breakdown.clean.count} clean • {t.breakdown.clean.formatted}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{t.breakdown.duped.count} duped • {t.breakdown.duped.formatted}</span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Requesting Items */}
@@ -777,12 +822,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               items={requestingItems}
               title="Requesting"
               onRemove={(id, subName) => handleRemoveItem(id, 'requesting', subName)}
+              onRemoveAll={(id, subName) => handleRemoveAllItems(id, 'requesting', subName)}
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'requesting')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'requesting')}
             />
-            <div className="flex items-center gap-4 text-sm text-muted/70 mt-4">
-              <span>Total: <span className="font-bold text-muted">{calculateTotals(requestingItems).cashValue}</span></span>
-            </div>
+            {(() => {
+              const t = calculateTotals(requestingItems, 'requesting');
+              return (
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+                  <span>Total: <span className="font-bold text-muted">{t.cashValue}</span></span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{t.breakdown.clean.count} clean • {t.breakdown.clean.formatted}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{t.breakdown.duped.count} duped • {t.breakdown.duped.formatted}</span>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -893,17 +946,74 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                 const title = totalBasis === 'offering' ? 'Similar Items Near Offering Total' : 'Similar Items Near Requesting Total';
                 const accentColor = totalBasis === 'offering' ? '#047857' : '#B91C1C';
                 const contextLabel = totalBasis === 'offering' ? 'Offering' : 'Requesting';
+
+                // Compute a baseline demand from the selected side (average of valid demand indices)
+                const demandScale = [
+                  'Close to none',
+                  'Very Low',
+                  'Low',
+                  'Medium',
+                  'Decent',
+                  'High',
+                  'Very High',
+                  'Extremely High',
+                ];
+                const selectedSideItems = totalBasis === 'offering' ? offeringItems : requestingItems;
+                const demandIndices = selectedSideItems
+                  .map((i) => (i.demand ?? i.data?.demand ?? 'N/A'))
+                  .map((d) => demandScale.indexOf(d as typeof demandScale[number]))
+                  .filter((idx) => idx >= 0);
+                const avgDemandIndex = demandIndices.length > 0
+                  ? Math.round(demandIndices.reduce((a, b) => a + b, 0) / demandIndices.length)
+                  : -1;
+                const baselineDemand = avgDemandIndex >= 0 ? demandScale[avgDemandIndex] : null;
+
+                // Summary of which values are used (Clean vs Duped)
+                const sideKey: 'offering' | 'requesting' = totalBasis;
+                let cleanCount = 0;
+                let dupedCount = 0;
+                selectedSideItems.forEach((it) => {
+                  const k = getItemKey(it.id, it.sub_name, sideKey);
+                  const vt = itemValueTypes[k] || 'cash';
+                  const dupedAvailable = !!(it.duped_value && it.duped_value !== 'N/A');
+                  if (vt === 'duped' && dupedAvailable) dupedCount++; else cleanCount++;
+                });
+
                 return (
-                  <TotalSimilarItems
-                    targetValue={total}
-                    items={initialItems}
-                    excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
-                    typeFilter={null}
-                    range={2_500_000}
-                    title={title}
-                    accentColor={accentColor}
-                    contextLabel={contextLabel}
-                  />
+                  <>
+                    <div className="mb-3 flex items-center gap-2 text-xs sm:text-sm">
+                      <span className="text-muted">Using selected values</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{cleanCount} clean</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{dupedCount} duped</span>
+                    </div>
+                    <TotalSimilarItems
+                      targetValue={total}
+                      items={initialItems}
+                      excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
+                      typeFilter={null}
+                      range={2_500_000}
+                      title={title}
+                      accentColor={accentColor}
+                      contextLabel={contextLabel}
+                      baselineDemand={baselineDemand}
+                      enableDemandSort={true}
+                      valuePreference={(function() {
+                        const sideItems = totalBasis === 'offering' ? offeringItems : requestingItems;
+                        const sideKey: 'offering' | 'requesting' = totalBasis;
+                        // If ALL selected items on this side are duped, compare using duped values, else use cash
+                        if (sideItems.length > 0) {
+                          const allDuped = sideItems.every((it) => {
+                            const k = getItemKey(it.id, it.sub_name, sideKey);
+                            const vt = itemValueTypes[k] || 'cash';
+                            const dupedAvailable = !!(it.duped_value && it.duped_value !== 'N/A');
+                            return vt === 'duped' && dupedAvailable;
+                          });
+                          return allDuped ? 'duped' : 'cash';
+                        }
+                        return 'cash';
+                      })()}
+                    />
+                  </>
                 );
               })()}
             </>
