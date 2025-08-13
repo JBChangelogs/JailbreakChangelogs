@@ -7,7 +7,7 @@ import { AvailableItemsGrid } from '../../trading/AvailableItemsGrid';
 import { ArrowsRightLeftIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import Tooltip from '@mui/material/Tooltip';
 import { CustomConfirmationModal } from '../../Modals/CustomConfirmationModal';
-import { Button as MuiButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import Image from 'next/image';
 import { getItemImagePath, handleImageError } from '@/utils/images';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
@@ -62,12 +62,12 @@ const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ messa
 // Custom ItemGrid component for calculator with value type selection
 const CalculatorItemGrid: React.FC<{
   items: TradeItem[];
-  title: string;
   onRemove?: (itemId: number, subName?: string) => void;
   onRemoveAll?: (itemId: number, subName?: string) => void;
   onValueTypeChange: (itemId: number, subName: string | undefined, valueType: 'cash' | 'duped') => void;
   getSelectedValueString: (item: TradeItem) => string;
-}> = ({ items, title, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueString }) => {
+  getSelectedValueType: (item: TradeItem) => 'cash' | 'duped';
+}> = ({ items, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueType }) => {
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [actionItem, setActionItem] = useState<(TradeItem & { count?: number }) | null>(null);
 
@@ -82,6 +82,17 @@ const CalculatorItemGrid: React.FC<{
     setActionModalOpen(false);
     setActionItem(null);
   };
+
+  // Lock body scroll when modal is open (matches CustomConfirmationModal behavior)
+  useEffect(() => {
+    if (actionModalOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+    return () => {};
+  }, [actionModalOpen]);
 
   const groupItems = (items: TradeItem[]) => {
     const grouped = items.reduce((acc, item) => {
@@ -110,12 +121,11 @@ const CalculatorItemGrid: React.FC<{
 
   return (
     <div className="bg-[#2E3944] rounded-lg p-4">
-      <h4 className="text-muted text-sm mb-2">{title}</h4>
       <div className="grid grid-cols-4 gap-4">
         {groupItems(items).map((item) => {
           const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
-          const selectedValue = getSelectedValueString(item);
-          const isDupedSelected = selectedValue === item.duped_value;
+          const selectedType = getSelectedValueType(item);
+          const isDupedSelected = selectedType === 'duped';
         
           return (
             <div key={`${item.id}-${item.sub_name || 'base'}`} className="relative group">
@@ -155,7 +165,9 @@ const CalculatorItemGrid: React.FC<{
                     />
                     {/* Status badge for Clean/Duped selection */}
                     <div
-                      className={`absolute top-1 left-1 px-1.5 py-0.5 text-xs rounded-full text-white ${isDupedSelected ? 'bg-red-500/80 border border-red-500/20' : 'bg-green-500/80 border border-green-500/20'}`}
+                      className="absolute top-1 left-1 px-1.5 py-0.5 text-xs rounded-full text-white"
+                      style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
+                      aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
                     >
                       {isDupedSelected ? 'Duped' : 'Clean'}
                     </div>
@@ -183,75 +195,95 @@ const CalculatorItemGrid: React.FC<{
       </div>
       {/* Legacy context menu removed; modal is the single action surface */}
  
-      {/* Action Modal for mobile/desktop */}
-      <Dialog open={actionModalOpen} onClose={closeActionModal} fullWidth maxWidth="xs"
-        PaperProps={{ sx: { backgroundColor: '#212A31', border: '1px solid #2E3944' } }}>
-        <DialogTitle sx={{ color: '#D3D9D4' }}>
-          {actionItem ? (actionItem.sub_name ? `${actionItem.name} (${actionItem.sub_name})` : actionItem.name) : 'Item Actions'}
-        </DialogTitle>
-        <DialogContent>
-          {actionItem && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: getItemTypeColor(actionItem.type) }}>{actionItem.type}</span>
-                {actionItem.count && actionItem.count > 1 && (
-                  <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full text-[#D3D9D4] bg-[#5865F2]/20 border border-[#5865F2]/30">
-                    Quantity ×{actionItem.count}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <div className="inline-flex rounded-md overflow-hidden border border-[#36424E] bg-[#2E3944]">
-                  <MuiButton size="small" onClick={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'cash'); }}
-                    sx={{ backgroundColor: getSelectedValueString(actionItem) === actionItem.cash_value ? '#059669' : 'transparent', color: '#D3D9D4', '&:hover': { backgroundColor: '#065F46', color: 'white' } }}>
-                    Clean
-                  </MuiButton>
-                  {(actionItem.duped_value && actionItem.duped_value !== 'N/A') ? (
-                    <MuiButton size="small" onClick={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'duped'); }}
-                      sx={{ backgroundColor: getSelectedValueString(actionItem) === actionItem.duped_value ? '#DC2626' : 'transparent', color: '#D3D9D4', '&:hover': { backgroundColor: '#991B1B', color: 'white' } }}>
-                      Duped
-                    </MuiButton>
-                  ) : (
-                    <Tooltip title="Duped value not available for this item">
-                      <span style={{ display: 'inline-flex' }}>
-                        <MuiButton size="small" disabled
-                          sx={{
-                            backgroundColor: 'rgba(255,255,255,0.06)',
-                            color: '#9CA3AF',
-                            '&.Mui-disabled': {
-                              backgroundColor: 'rgba(255,255,255,0.06)',
-                              color: '#9CA3AF',
-                              cursor: 'not-allowed'
-                            }
-                          }}>
-                          Duped (N/A)
-                        </MuiButton>
-                      </span>
-                    </Tooltip>
-                  )}
-                </div>
-                {onRemove && (
+      {/* Action Modal styled like CustomConfirmationModal */}
+      {actionModalOpen && (
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" onClick={closeActionModal} />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6 shadow-xl border border-[#5865F2]">
+              <h2 className="text-white text-xl font-semibold mb-4">
+                {actionItem ? (actionItem.sub_name ? `${actionItem.name} (${actionItem.sub_name})` : actionItem.name) : 'Item Actions'}
+              </h2>
+              {actionItem && (
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <MuiButton size="small" variant="outlined" onClick={() => { onRemove(actionItem.id, actionItem.sub_name); closeActionModal(); }}
-                      sx={{ borderColor: '#B91C1C', color: '#FCA5A5', '&:hover': { borderColor: '#991B1B', backgroundColor: 'rgba(185,28,28,0.15)' } }}>
-                      {actionItem.count && actionItem.count > 1 ? 'Remove one' : 'Delete'}
-                    </MuiButton>
-                    {onRemoveAll && actionItem.count && actionItem.count > 1 && (
-                      <MuiButton size="small" variant="contained" onClick={() => { onRemoveAll(actionItem.id, actionItem.sub_name); closeActionModal(); }}
-                        sx={{ backgroundColor: '#B91C1C', color: '#FFFFFF', '&:hover': { backgroundColor: '#991B1B' } }}>
-                        Remove all ×{actionItem.count}
-                      </MuiButton>
+                    <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: getItemTypeColor(actionItem.type) }}>{actionItem.type}</span>
+                    {actionItem.count && actionItem.count > 1 && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full text-[#D3D9D4] bg-[#5865F2]/20 border border-[#5865F2]/30">
+                        Quantity ×{actionItem.count}
+                      </span>
                     )}
                   </div>
-                )}
-              </div>
+                  <div className="inline-flex rounded-md border border-[#36424E] bg-[#2E3944] px-2 py-1">
+                    <FormGroup row>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={getSelectedValueType(actionItem) === 'cash'}
+                            onChange={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'cash'); }}
+                            sx={{ color: '#D3D9D4', '&.Mui-checked': { color: '#10B981' } }}
+                          />
+                        }
+                        label="Clean"
+                        sx={{ color: '#D3D9D4', '.MuiFormControlLabel-label': { color: '#D3D9D4' } }}
+                      />
+                      {(actionItem.duped_value && actionItem.duped_value !== 'N/A') ? (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={getSelectedValueType(actionItem) === 'duped'}
+                              onChange={() => { onValueTypeChange(actionItem.id, actionItem.sub_name, 'duped'); }}
+                              sx={{ color: '#D3D9D4', '&.Mui-checked': { color: '#EF4444' } }}
+                            />
+                          }
+                          label="Duped"
+                          sx={{ color: '#D3D9D4', '.MuiFormControlLabel-label': { color: '#D3D9D4' } }}
+                        />
+                      ) : (
+                        <Tooltip title="Duped value not available for this item">
+                          <span style={{ display: 'inline-flex' }}>
+                            <FormControlLabel
+                              control={<Checkbox disabled />}
+                              label="Duped (N/A)"
+                              sx={{ color: '#9CA3AF', '.MuiFormControlLabel-label': { color: '#9CA3AF' } }}
+                            />
+                          </span>
+                        </Tooltip>
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={closeActionModal}
+                      className="rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium text-muted hover:bg-[#2E3944] hover:text-white transition-colors"
+                    >
+                      Close
+                    </button>
+                    {onRemove && (
+                      <>
+                        <button
+                          onClick={() => { onRemove(actionItem.id, actionItem.sub_name); closeActionModal(); }}
+                          className="rounded-md border border-[#B91C1C] px-3 py-2 text-sm font-medium text-[#FCA5A5] hover:bg-[#B91C1C]/15 transition-colors"
+                        >
+                          {actionItem.count && actionItem.count > 1 ? 'Remove one' : 'Remove'}
+                        </button>
+                        {onRemoveAll && actionItem.count && actionItem.count > 1 && (
+                          <button
+                            onClick={() => { onRemoveAll(actionItem.id, actionItem.sub_name); closeActionModal(); }}
+                            className="rounded-md bg-[#B91C1C] px-3 py-2 text-sm font-medium text-white hover:bg-[#991B1B] transition-colors"
+                          >
+                            Remove all ×{actionItem.count}
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={closeActionModal} sx={{ color: '#D3D9D4' }}>Close</MuiButton>
-        </DialogActions>
-      </Dialog>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -262,8 +294,9 @@ const CalculatorValueComparison: React.FC<{
   requesting: TradeItem[];
   getSelectedValueString: (item: TradeItem, side: 'offering' | 'requesting') => string;
   getSelectedValue: (item: TradeItem, side: 'offering' | 'requesting') => number;
+  getSelectedValueType: (item: TradeItem, side: 'offering' | 'requesting') => 'cash' | 'duped';
   onBrowseItems: () => void;
-}> = ({ offering, requesting, getSelectedValueString, getSelectedValue, onBrowseItems }) => {
+}> = ({ offering, requesting, getSelectedValue, getSelectedValueType, onBrowseItems }) => {
   const formatCurrencyValue = (value: number): string => {
     return value.toLocaleString();
   };
@@ -314,8 +347,8 @@ const CalculatorValueComparison: React.FC<{
           <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #047857' }}>
             <div className="space-y-2">
               {groupItems(offering).map((item, index, array) => {
-                const selectedValue = getSelectedValueString(item, 'offering');
-                const isDupedSelected = selectedValue === item.duped_value;
+                const selectedType = getSelectedValueType(item, 'offering');
+                const isDupedSelected = selectedType === 'duped';
                 
                 return (
                   <div key={`${item.id}-${item.sub_name || 'base'}`} className={`flex justify-between items-center ${index !== array.length - 1 ? 'pb-3 border-b border-[#4A5568]' : ''}`}>
@@ -335,11 +368,11 @@ const CalculatorValueComparison: React.FC<{
                         >
                           {item.type}
                         </span>
-                        <span className={`ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white ${
-                          isDupedSelected 
-                            ? 'bg-red-500/80 border border-red-500/20' 
-                            : 'bg-green-500/80 border border-green-500/20'
-                        }`}>
+                        <span
+                          className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white"
+                          style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
+                          aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
+                        >
                           {isDupedSelected ? 'Duped' : 'Clean'}
                         </span>
                       </div>
@@ -376,8 +409,8 @@ const CalculatorValueComparison: React.FC<{
           <div className="bg-[#37424D] rounded-lg p-4" style={{ border: '1px solid #B91C1C' }}>
             <div className="space-y-2">
               {groupItems(requesting).map((item, index, array) => {
-                const selectedValue = getSelectedValueString(item, 'requesting');
-                const isDupedSelected = selectedValue === item.duped_value;
+                const selectedType = getSelectedValueType(item, 'requesting');
+                const isDupedSelected = selectedType === 'duped';
                 
                 return (
                   <div key={`${item.id}-${item.sub_name || 'base'}`} className={`flex justify-between items-center ${index !== array.length - 1 ? 'pb-3 border-b border-[#4A5568]' : ''}`}>
@@ -397,11 +430,11 @@ const CalculatorValueComparison: React.FC<{
                         >
                           {item.type}
                         </span>
-                        <span className={`ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white ${
-                          isDupedSelected 
-                            ? 'bg-red-500/80 border border-red-500/20' 
-                            : 'bg-green-500/80 border border-green-500/20'
-                        }`}>
+                        <span
+                          className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white"
+                          style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
+                          aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
+                        >
                           {isDupedSelected ? 'Duped' : 'Clean'}
                         </span>
                       </div>
@@ -647,22 +680,24 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     return side ? `${side}-${baseKey}` : baseKey;
   };
 
-  // Helper function to get selected value for an item
-  const getSelectedValue = (item: TradeItem, side: 'offering' | 'requesting'): number => {
+  // Helper function to get selected value TYPE for an item
+  const getSelectedValueType = (item: TradeItem, side: 'offering' | 'requesting'): 'cash' | 'duped' => {
     const itemKey = getItemKey(item.id, item.sub_name, side);
     const rawType = itemValueTypes[itemKey] || 'cash';
     const dupedAvailable = !!(item.duped_value && item.duped_value !== 'N/A');
-    const effectiveType = rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
-    return parseValueString(effectiveType === 'cash' ? item.cash_value : item.duped_value);
+    return rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
+  };
+
+  // Helper function to get selected value for an item
+  const getSelectedValue = (item: TradeItem, side: 'offering' | 'requesting'): number => {
+    const selectedType = getSelectedValueType(item, side);
+    return parseValueString(selectedType === 'cash' ? item.cash_value : item.duped_value);
   };
 
   // Helper function to get selected value string for display
   const getSelectedValueString = (item: TradeItem, side: 'offering' | 'requesting'): string => {
-    const itemKey = getItemKey(item.id, item.sub_name, side);
-    const rawType = itemValueTypes[itemKey] || 'cash';
-    const dupedAvailable = !!(item.duped_value && item.duped_value !== 'N/A');
-    const effectiveType = rawType === 'duped' && dupedAvailable ? 'duped' : 'cash';
-    return effectiveType === 'cash' ? item.cash_value : item.duped_value;
+    const selectedType = getSelectedValueType(item, side);
+    return selectedType === 'cash' ? item.cash_value : item.duped_value;
   };
 
   // Function to update value type for an item
@@ -745,7 +780,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Offering</h3>
-                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#047857' }}>Offering</span>
                 <span className="text-sm text-muted/70">({offeringItems.length}/40)</span>
               </div>
               <Tooltip title="Mirror to requesting">
@@ -771,11 +805,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             </div>
             <CalculatorItemGrid
               items={offeringItems}
-              title="Offering"
               onRemove={(id, subName) => handleRemoveItem(id, 'offering', subName)}
               onRemoveAll={(id, subName) => handleRemoveAllItems(id, 'offering', subName)}
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'offering')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'offering')}
+              getSelectedValueType={(item) => getSelectedValueType(item, 'offering')}
             />
             {(() => {
               const t = calculateTotals(offeringItems, 'offering');
@@ -794,7 +828,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Requesting</h3>
-                <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#B91C1C' }}>Requesting</span>
                 <span className="text-sm text-muted/70">({requestingItems.length}/40)</span>
               </div>
               <Tooltip title="Mirror to offering">
@@ -820,11 +853,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
             </div>
             <CalculatorItemGrid
               items={requestingItems}
-              title="Requesting"
               onRemove={(id, subName) => handleRemoveItem(id, 'requesting', subName)}
               onRemoveAll={(id, subName) => handleRemoveAllItems(id, 'requesting', subName)}
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'requesting')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'requesting')}
+              getSelectedValueType={(item) => getSelectedValueType(item, 'requesting')}
             />
             {(() => {
               const t = calculateTotals(requestingItems, 'requesting');
@@ -899,6 +932,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               requesting={requestingItems}
               getSelectedValueString={(item, side) => getSelectedValueString(item, side)}
               getSelectedValue={(item, side) => getSelectedValue(item, side)}
+              getSelectedValueType={(item, side) => getSelectedValueType(item, side)}
               onBrowseItems={() => handleTabChange('items')}
             />
           </div>
