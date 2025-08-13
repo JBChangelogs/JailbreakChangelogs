@@ -17,6 +17,8 @@ interface TotalSimilarItemsProps {
 	typeFilter?: string | null; // when null/undefined, include all types
 	range?: number; // +/- range in raw value, default 2.5m
 	title?: string;
+	accentColor?: string;
+	contextLabel?: string;
 }
 
 const parseValue = (value: string): number => {
@@ -37,6 +39,8 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 	typeFilter = null,
 	range = 2_500_000,
 	title,
+	accentColor,
+	contextLabel,
 }) => {
 	const candidates = useMemo(() => {
 		if (!items?.length || targetValue <= 0) return [] as Array<{ item: TradeItem; diff: number }>;
@@ -63,7 +67,17 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 	return (
 		<div className="bg-[#212A31] rounded-lg p-6 border border-[#2E3944]">
 			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-muted font-semibold">{heading}</h3>
+				<div className="flex items-center gap-2">
+					<h3 className="text-muted font-semibold">{heading}</h3>
+					{contextLabel && (
+						<span
+							className="inline-flex items-center px-2 py-0.5 text-xs rounded-full text-white font-medium"
+							style={{ backgroundColor: accentColor || '#5865F2' }}
+						>
+							{contextLabel}
+						</span>
+					)}
+				</div>
 				<span className="inline-flex items-center gap-1 text-xs text-muted/80 bg-[#2E3944] border border-[#36424E] px-2 py-1 rounded-md">
 					<ArrowsRightLeftIcon className="w-4 h-4" />
 					<span>Range</span>

@@ -657,7 +657,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           e.preventDefault();
                           handleAddItem(item, 'offering');
                         }}
-                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#10B981] hover:bg-[#059669] text-white"
                       >
                         Offer
                       </button>
@@ -667,7 +667,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           e.preventDefault();
                           handleAddItem(item, 'requesting');
                         }}
-                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                        className="flex-1 py-1 px-2 text-xs rounded-md transition-colors bg-[#EF4444] hover:bg-[#DC2626] text-white"
                       >
                         Request
                       </button>
