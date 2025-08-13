@@ -205,8 +205,7 @@ export async function fetchItems() {
   try {
     console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/items/list`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
+      next: { revalidate: 120 }
     });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
