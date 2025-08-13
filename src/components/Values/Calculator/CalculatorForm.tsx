@@ -429,11 +429,14 @@ const CalculatorValueComparison: React.FC<{
         <h4 className="text-muted font-medium mb-3">Overall Difference</h4>
         <div className="flex justify-between items-center">
           <span className="text-muted">Value Difference</span>
-          <span className={`font-medium flex items-center gap-2 ${
-            difference < 0 ? 'text-[#43B581]' : difference > 0 ? 'text-red-500' : 'text-[#FFFFFF]'
-          }`}>
+          <span
+            className="inline-flex items-center gap-2 px-2.5 py-1 text-sm rounded-full text-white font-medium"
+            style={{
+              backgroundColor: difference < 0 ? '#047857' : difference > 0 ? '#B91C1C' : '#37424D'
+            }}
+          >
             {difference !== 0 && (
-              difference < 0 ? <FaArrowUp className="text-[#43B581]" /> : <FaArrowDown className="text-red-500" />
+              difference < 0 ? <FaArrowUp className="text-white" /> : <FaArrowDown className="text-white" />
             )}
             {formatCurrencyValue(Math.abs(difference))}
           </span>
@@ -716,9 +719,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                   sx={{
                     borderColor: '#047857',
                     color: '#FFFFFF',
+                    backgroundColor: 'rgba(4, 120, 87, 0.15)',
                     '&:hover': {
                       borderColor: '#065F46',
-                      backgroundColor: 'rgba(4, 120, 87, 0.15)',
+                      backgroundColor: 'rgba(4, 120, 87, 0.25)',
                       color: '#FFFFFF',
                     },
                   }}
@@ -756,9 +760,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                   sx={{
                     borderColor: '#B91C1C',
                     color: '#FFFFFF',
+                    backgroundColor: 'rgba(185, 28, 28, 0.15)',
                     '&:hover': {
                       borderColor: '#991B1B',
-                      backgroundColor: 'rgba(185, 28, 28, 0.15)',
+                      backgroundColor: 'rgba(185, 28, 28, 0.25)',
                       color: '#FFFFFF',
                     },
                   }}
