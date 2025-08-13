@@ -357,6 +357,7 @@ const CalculatorValueComparison: React.FC<{
               {groupItems(offering).map((item, index, array) => {
                 const selectedType = getSelectedValueType(item, 'offering');
                 const isDupedSelected = selectedType === 'duped';
+                const demand = (item.demand ?? item.data?.demand ?? 'N/A');
                 
                 return (
                   <div key={`${item.id}-${item.sub_name || 'base'}`} className={`flex justify-between items-center ${index !== array.length - 1 ? 'pb-3 border-b border-[#4A5568]' : ''}`}>
@@ -376,12 +377,38 @@ const CalculatorValueComparison: React.FC<{
                         >
                           {item.type}
                         </span>
+                        {(item.is_limited === 1 || item.data?.is_limited === 1) && (
+                          <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                            Limited
+                          </span>
+                        )}
+                        {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
+                          <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                            Seasonal
+                          </span>
+                        )}
                         <span
                           className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white"
                           style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
                           aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
                         >
                           {isDupedSelected ? 'Duped' : 'Clean'}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-muted">Demand:</span>
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
+                          demand === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
+                          demand === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                          demand === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                          demand === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                          demand === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
+                          demand === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
+                          demand === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
+                          demand === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
+                          'bg-gradient-to-r from-gray-500 to-gray-600'
+                        }`}>
+                          {demand === 'N/A' ? 'Unknown' : demand}
                         </span>
                       </div>
                     </div>
@@ -419,6 +446,7 @@ const CalculatorValueComparison: React.FC<{
               {groupItems(requesting).map((item, index, array) => {
                 const selectedType = getSelectedValueType(item, 'requesting');
                 const isDupedSelected = selectedType === 'duped';
+                const demand = (item.demand ?? item.data?.demand ?? 'N/A');
                 
                 return (
                   <div key={`${item.id}-${item.sub_name || 'base'}`} className={`flex justify-between items-center ${index !== array.length - 1 ? 'pb-3 border-b border-[#4A5568]' : ''}`}>
@@ -438,12 +466,38 @@ const CalculatorValueComparison: React.FC<{
                         >
                           {item.type}
                         </span>
+                        {(item.is_limited === 1 || item.data?.is_limited === 1) && (
+                          <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                            Limited
+                          </span>
+                        )}
+                        {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
+                          <span className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+                            Seasonal
+                          </span>
+                        )}
                         <span
                           className="ml-2 inline-block px-2 py-0.5 text-xs rounded-full text-white"
                           style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
                           aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
                         >
                           {isDupedSelected ? 'Duped' : 'Clean'}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-muted">Demand:</span>
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
+                          demand === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
+                          demand === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                          demand === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                          demand === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                          demand === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
+                          demand === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
+                          demand === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
+                          demand === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
+                          'bg-gradient-to-r from-gray-500 to-gray-600'
+                        }`}>
+                          {demand === 'N/A' ? 'Unknown' : demand}
                         </span>
                       </div>
                     </div>

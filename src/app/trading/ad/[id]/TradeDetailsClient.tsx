@@ -18,25 +18,7 @@ import { TradeAd } from '@/types/trading';
 import TradeUserProfile from '@/components/trading/TradeUserProfile';
 import TradeAdMetadata from '@/components/trading/TradeAdMetadata';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog';
-import { Tabs, Tab, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { CiBoxList } from "react-icons/ci";
-
-const StyledTabs = styled(Tabs)(() => ({
-  borderBottom: '1px solid #2E3944',
-  '& .MuiTabs-indicator': {
-    backgroundColor: '#5865F2',
-  },
-}));
-
-const StyledTab = styled(Tab)(() => ({
-  textTransform: 'none',
-  color: '#FFFFFF',
-  minWidth: 120,
-  '&.Mui-selected': {
-    color: '#D3D9D4',
-  },
-}));
+// Removed MUI Tabs in favor of calculator-style tabs
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
@@ -173,11 +155,7 @@ export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
     }
   };
 
-  // Replace the tab state with an index
-  const tabIndex = activeTab === 'items' ? 0 : activeTab === 'values' ? 1 : 2;
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue === 0 ? 'items' : newValue === 1 ? 'values' : 'comments');
-  };
+  // Using string-based tabs to match calculator-style
 
   return (
     <>
@@ -273,35 +251,47 @@ export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
             {/* Item Images */}
             <TradeItemsImages offering={trade.offering} requesting={trade.requesting} />
 
-            {/* Tabs */}
+            {/* Tabs - calculator style */}
             <div className="bg-[#212A31] rounded-lg border border-[#2E3944] mb-6">
-              <Box sx={{ borderBottom: 1, borderColor: '#2E3944', px: 2, pt: 2 }}>
-                <StyledTabs
-                  value={tabIndex}
-                  onChange={handleTabChange}
-                  aria-label="trade details tabs"
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  allowScrollButtonsMobile
-                >
-                  <StyledTab label="Browse Items" icon={<CiBoxList className="w-4 h-4" />} iconPosition="start" />
-                  <StyledTab label="Value Comparison" icon={
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  } iconPosition="start" />
-                  <StyledTab label="Comments" icon={
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  } iconPosition="start" />
-                </StyledTabs>
-              </Box>
+              <nav className="px-6 py-4">
+                <div className="bg-[#2E3944] rounded-lg p-1 flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
+                  <button
+                    onClick={() => setActiveTab('items')}
+                    className={`${
+                      activeTab === 'items'
+                        ? 'bg-[#5865F2] text-white shadow-sm'
+                        : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+                    } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+                  >
+                    Browse Items
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('values')}
+                    className={`${
+                      activeTab === 'values'
+                        ? 'bg-[#5865F2] text-white shadow-sm'
+                        : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+                    } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+                  >
+                    Value Comparison
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('comments')}
+                    className={`${
+                      activeTab === 'comments'
+                        ? 'bg-[#5865F2] text-white shadow-sm'
+                        : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'
+                    } w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200`}
+                  >
+                    Comments
+                  </button>
+                </div>
+              </nav>
             </div>
             {/* Tab Content */}
-            {tabIndex === 0 ? (
+            {activeTab === 'items' ? (
               <TradeItemsList offering={trade.offering} requesting={trade.requesting} />
-            ) : tabIndex === 1 ? (
+            ) : activeTab === 'values' ? (
               <TradeValueComparison offering={trade.offering} requesting={trade.requesting} />
             ) : (
               <ChangelogComments
