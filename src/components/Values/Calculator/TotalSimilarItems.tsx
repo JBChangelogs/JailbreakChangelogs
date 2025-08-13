@@ -96,7 +96,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 						const isAbove = itemValue > targetValue;
 						return (
 							<Link key={`${item.id}-${item.sub_name || 'base'}`} href={`/item/${item.type.toLowerCase()}/${item.name}`} className="group">
-								<div className="bg-[#2e3944] border border-gray-700/50 rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:border-purple-500/30 hover:shadow-lg">
+								<div className="bg-[#2e3944] border border-gray-700/50 rounded-lg overflow-hidden transition-all duration-200 hover:border-purple-500/30 hover:shadow-lg">
 									<div className="relative aspect-video">
 										<Image
 											src={getItemImagePath(item.type, item.name, true)}

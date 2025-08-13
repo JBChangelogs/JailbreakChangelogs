@@ -35,6 +35,30 @@ const formatTotalValue = (total: number): string => {
   return total.toLocaleString();
 };
 
+// Shared empty-state UI for consistency across tabs
+const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ message, onBrowse }) => {
+  return (
+    <div className="bg-[#2E3944] rounded-lg p-12">
+      <div className="text-center">
+        <div className="mb-4">
+          <svg className="mx-auto h-16 w-16 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-muted mb-2">No Items Selected</h3>
+        <p className="text-muted/70 mb-6">{message}</p>
+        <button
+          onClick={onBrowse}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors"
+        >
+          <CiBoxList className="w-4 h-4" />
+          Browse Items
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Custom ItemGrid component for calculator with value type selection
 const CalculatorItemGrid: React.FC<{
   items: TradeItem[];
@@ -235,7 +259,8 @@ const CalculatorValueComparison: React.FC<{
   requesting: TradeItem[];
   getSelectedValueString: (item: TradeItem, side: 'offering' | 'requesting') => string;
   getSelectedValue: (item: TradeItem, side: 'offering' | 'requesting') => number;
-}> = ({ offering, requesting, getSelectedValueString, getSelectedValue }) => {
+  onBrowseItems: () => void;
+}> = ({ offering, requesting, getSelectedValueString, getSelectedValue, onBrowseItems }) => {
   const formatCurrencyValue = (value: number): string => {
     return value.toLocaleString();
   };
@@ -262,24 +287,10 @@ const CalculatorValueComparison: React.FC<{
   // Check if there are any items selected
   if (offering.length === 0 && requesting.length === 0) {
     return (
-      <div className="bg-[#2E3944] rounded-lg p-12">
-        <div className="text-center">
-          <div className="mb-4">
-            <svg className="mx-auto h-16 w-16 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-muted mb-2">No Items Selected</h3>
-          <p className="text-muted/70 mb-6">Go to the &quot;Browse Items&quot; tab to select items and compare their values.</p>
-          <button
-            onClick={() => window.location.hash = ''}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors"
-          >
-            <CiBoxList className="w-4 h-4" />
-            Browse Items
-          </button>
-        </div>
-      </div>
+      <EmptyState
+        message={'Go to the "Browse Items" tab to select items and compare their values.'}
+        onBrowse={onBrowseItems}
+      />
     );
   }
 
@@ -543,10 +554,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
   };
 
   const handleAddItem = (item: TradeItem, side: 'offering' | 'requesting'): boolean => {
-    if (side === 'offering' && offeringItems.length >= 8) {
+    if (side === 'offering' && offeringItems.length >= 40) {
       return false;
     }
-    if (side === 'requesting' && requestingItems.length >= 8) {
+    if (side === 'requesting' && requestingItems.length >= 40) {
       return false;
     }
 
@@ -695,7 +706,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Offering</h3>
                 <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#047857' }}>Offering</span>
-                <span className="text-sm text-muted/70">({offeringItems.length}/8)</span>
+                <span className="text-sm text-muted/70">({offeringItems.length}/40)</span>
               </div>
               <Tooltip title="Mirror to requesting">
                 <Button
@@ -735,7 +746,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Requesting</h3>
                 <span className="px-2 py-0.5 text-xs rounded-full text-white" style={{ backgroundColor: '#B91C1C' }}>Requesting</span>
-                <span className="text-sm text-muted/70">({requestingItems.length}/8)</span>
+                <span className="text-sm text-muted/70">({requestingItems.length}/40)</span>
               </div>
               <Tooltip title="Mirror to offering">
                 <Button
@@ -830,49 +841,68 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               requesting={requestingItems}
               getSelectedValueString={(item, side) => getSelectedValueString(item, side)}
               getSelectedValue={(item, side) => getSelectedValue(item, side)}
+              onBrowseItems={() => handleTabChange('items')}
             />
           </div>
         </div>
       ) : (
         <div className="mb-8">
           {/* Similar Items Near Total - Selector and Results */}
-          <div className="mb-4 bg-[#212A31] rounded-lg border border-[#2E3944] p-2 inline-flex gap-1">
-            <button
-              onClick={() => setTotalBasis('offering')}
-              className={`${totalBasis === 'offering' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
-              style={{ backgroundColor: totalBasis === 'offering' ? '#047857' : 'transparent' }}
-            >
-              Offering Total
-            </button>
-            <button
-              onClick={() => setTotalBasis('requesting')}
-              className={`${totalBasis === 'requesting' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
-              style={{ backgroundColor: totalBasis === 'requesting' ? '#B91C1C' : 'transparent' }}
-            >
-              Requesting Total
-            </button>
-          </div>
-
-          {(() => {
-            const offeringTotal = offeringItems.reduce((sum, item) => sum + getSelectedValue(item, 'offering'), 0);
-            const requestingTotal = requestingItems.reduce((sum, item) => sum + getSelectedValue(item, 'requesting'), 0);
-            const total = totalBasis === 'offering' ? offeringTotal : requestingTotal;
-            const title = totalBasis === 'offering' ? 'Similar Items Near Offering Total' : 'Similar Items Near Requesting Total';
-            const accentColor = totalBasis === 'offering' ? '#047857' : '#B91C1C';
-            const contextLabel = totalBasis === 'offering' ? 'Offering' : 'Requesting';
-            return (
-              <TotalSimilarItems
-                targetValue={total}
-                items={initialItems}
-                excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
-                typeFilter={null}
-                range={2_500_000}
-                title={title}
-                accentColor={accentColor}
-                contextLabel={contextLabel}
+          {offeringItems.length === 0 && requestingItems.length === 0 ? (
+            <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
+              <EmptyState
+                message={'Go to the "Browse Items" tab to select items and see similar items near your total.'}
+                onBrowse={() => handleTabChange('items')}
               />
-            );
-          })()}
+            </div>
+          ) : (
+            <>
+              {(offeringItems.length === 0 || requestingItems.length === 0) && !(offeringItems.length === 0 && requestingItems.length === 0) && (
+                <div className="mb-4 bg-[#2E3944] rounded-lg p-3 border" style={{ borderColor: (offeringItems.length === 0 ? '#047857' : '#B91C1C') }}>
+                  <p className="text-sm text-muted">
+                    {offeringItems.length === 0 ? 'Select at least 1 item for the Offering side.' : 'Select at least 1 item for the Requesting side.'}
+                  </p>
+                </div>
+              )}
+              <div className="mb-4 bg-[#212A31] rounded-lg border border-[#2E3944] p-2 inline-flex gap-1">
+                <button
+                  onClick={() => setTotalBasis('offering')}
+                  className={`${totalBasis === 'offering' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
+                  style={{ backgroundColor: totalBasis === 'offering' ? '#047857' : 'transparent' }}
+                >
+                  Offering Total
+                </button>
+                <button
+                  onClick={() => setTotalBasis('requesting')}
+                  className={`${totalBasis === 'requesting' ? 'text-white' : 'text-muted hover:text-[#FFFFFF] hover:bg-[#37424D]'} px-3 py-1 rounded-md text-sm font-medium`}
+                  style={{ backgroundColor: totalBasis === 'requesting' ? '#B91C1C' : 'transparent' }}
+                >
+                  Requesting Total
+                </button>
+              </div>
+
+              {(() => {
+                const offeringTotal = offeringItems.reduce((sum, item) => sum + getSelectedValue(item, 'offering'), 0);
+                const requestingTotal = requestingItems.reduce((sum, item) => sum + getSelectedValue(item, 'requesting'), 0);
+                const total = totalBasis === 'offering' ? offeringTotal : requestingTotal;
+                const title = totalBasis === 'offering' ? 'Similar Items Near Offering Total' : 'Similar Items Near Requesting Total';
+                const accentColor = totalBasis === 'offering' ? '#047857' : '#B91C1C';
+                const contextLabel = totalBasis === 'offering' ? 'Offering' : 'Requesting';
+                return (
+                  <TotalSimilarItems
+                    targetValue={total}
+                    items={initialItems}
+                    excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
+                    typeFilter={null}
+                    range={2_500_000}
+                    title={title}
+                    accentColor={accentColor}
+                    contextLabel={contextLabel}
+                  />
+                );
+              })()}
+            </>
+          )}
         </div>
       )}
     </div>
