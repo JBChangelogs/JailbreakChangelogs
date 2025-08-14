@@ -364,7 +364,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         <div className="md:flex md:space-x-6 space-y-6 md:space-y-0">
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
                 <Skeleton key={i} variant="rectangular" width="100%" height={120} className="rounded-lg" />
               ))}
@@ -373,7 +373,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
 
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
                 <Skeleton key={i} variant="rectangular" width="100%" height={120} className="rounded-lg" />
               ))}
