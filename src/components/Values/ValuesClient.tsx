@@ -8,17 +8,16 @@ import {
   ArrowUpIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { Pagination } from '@mui/material';
+import { Pagination, Slider } from '@mui/material';
 import ItemCard from "@/components/Items/ItemCard";
 import { Item, FilterSort, ValueSort } from "@/types";
-import { sortAndFilterItems } from "@/utils/values";
+import { sortAndFilterItems, demandOrder, getEffectiveCashValue } from "@/utils/values";
 import toast from 'react-hot-toast';
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
-import { demandOrder } from "@/utils/values";
 import dynamic from 'next/dynamic';
 import DisplayAd from "@/components/Ads/DisplayAd";
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
@@ -52,6 +51,25 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
+  const MAX_VALUE_RANGE = 500_000_000;
+  const [minValue, setMinValue] = useState<number>(0);
+  const [maxValue, setMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
+  const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const parseNumericValue = (value: string | null): number => {
+    if (!value || value === 'N/A') return -1;
+    const lower = value.toLowerCase();
+    const num = parseFloat(lower.replace(/[^0-9.]/g, ''));
+    if (Number.isNaN(num)) return -1;
+    if (lower.includes('k')) return num * 1_000;
+    if (lower.includes('m')) return num * 1_000_000;
+    if (lower.includes('b')) return num * 1_000_000_000;
+    return num;
+  };
+  const rangeFilteredItems = sortedItems.filter((item) => {
+    const cash = parseNumericValue(getEffectiveCashValue(item));
+    return cash >= appliedMinValue && cash <= appliedMaxValue;
+  });
 
   // Load saved preferences after mount
   useEffect(() => {
@@ -178,7 +196,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
 
   useEffect(() => {
     setPage(1);
-  }, [filterSort, valueSort, debouncedSearchTerm]);
+  }, [filterSort, valueSort, debouncedSearchTerm, appliedMinValue, appliedMaxValue]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -186,8 +204,8 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
 
   const adjustedIndexOfLastItem = page * itemsPerPage;
   const adjustedIndexOfFirstItem = adjustedIndexOfLastItem - itemsPerPage;
-  const displayedItems = sortedItems.slice(adjustedIndexOfFirstItem, adjustedIndexOfLastItem);
-  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+  const displayedItems = rangeFilteredItems.slice(adjustedIndexOfFirstItem, adjustedIndexOfLastItem);
+  const totalPages = Math.ceil(rangeFilteredItems.length / itemsPerPage);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -248,7 +266,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
         />
       </Suspense>
       
-            <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+      <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-muted">
             Roblox Jailbreak Value List
@@ -543,6 +561,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
             ) : (
               <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
             )}
+
             {/* Sort dropdown */}
             {selectLoaded ? (
               <Select
@@ -646,6 +665,39 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
             ) : (
               <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
             )}
+
+            {/* Value range slider (inline with controls) */}
+            <div className="w-full">
+              <div className="rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted">Value Range</span>
+                    <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                  </div>
+                  <span className="text-[11px] text-muted">{minValue.toLocaleString()} - {maxValue.toLocaleString()}</span>
+                </div>
+                <div className="px-1">
+                  <Slider
+                    value={[minValue, maxValue]}
+                    onChange={(_, v) => {
+                      const [min, max] = v as number[];
+                      setMinValue(min);
+                      setMaxValue(max);
+                    }}
+                    onChangeCommitted={(_, v) => {
+                      const [min, max] = v as number[];
+                      setAppliedMinValue(min);
+                      setAppliedMaxValue(max);
+                    }}
+                    valueLabelDisplay="off"
+                    min={0}
+                    max={MAX_VALUE_RANGE}
+                    step={50_000}
+                    sx={{ color: '#5865F2', mt: 1 }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           {/* Right: Ad */}
           {premiumStatusLoaded && currentUserPremiumType === 0 && (
@@ -666,8 +718,8 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-muted">
           {debouncedSearchTerm 
-            ? `Found ${sortedItems.length} ${sortedItems.length === 1 ? 'item' : 'items'} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-            : `Total ${filterSort !== "name-all-items" ? filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ") : "Items"}: ${sortedItems.length}`
+            ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? 'item' : 'items'} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+            : `Total ${filterSort !== "name-all-items" ? filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ") : "Items"}: ${rangeFilteredItems.length}`
           }
         </p>
         {totalPages > 1 && (
@@ -699,13 +751,32 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
         {displayedItems.length === 0 ? (
           <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
             <p className="text-lg text-muted">
-              {getNoItemsMessage()}
+              {rangeFilteredItems.length === 0 && sortedItems.length > 0
+                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue.toLocaleString()})`
+                : getNoItemsMessage()}
             </p>
+            {rangeFilteredItems.length === 0 && sortedItems.length > 0 && (
+              <button
+                onClick={() => {
+                  setMinValue(0);
+                  setMaxValue(MAX_VALUE_RANGE);
+                  setAppliedMinValue(0);
+                  setAppliedMaxValue(MAX_VALUE_RANGE);
+                }}
+                className="mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
+              >
+                Reset Value Range
+              </button>
+            )}
             <button
               onClick={() => {
                 setFilterSort("name-all-items");
                 setValueSort("cash-desc");
                 setSearchTerm("");
+                setMinValue(0);
+                setMaxValue(MAX_VALUE_RANGE);
+                setAppliedMinValue(0);
+                setAppliedMaxValue(MAX_VALUE_RANGE);
               }}
               className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
             >
@@ -782,7 +853,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
       )}
     </>
   );
-} 
+}
 
 // Format the date client-side in the user's local timezone
 function formatClientDate(timestamp: number): string {

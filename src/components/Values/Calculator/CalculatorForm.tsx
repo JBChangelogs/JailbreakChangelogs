@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TradeItem } from '@/types/trading';
-import { Button } from '@mui/material';
+import { Button, Slider } from '@mui/material';
 import { AvailableItemsGrid } from '../../trading/AvailableItemsGrid';
 import { ArrowsRightLeftIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import Tooltip from '@mui/material/Tooltip';
@@ -556,6 +556,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [itemValueTypes, setItemValueTypes] = useState<Record<string, 'cash' | 'duped'>>({});
   const [totalBasis, setTotalBasis] = useState<'offering' | 'requesting'>('offering');
+  const [offeringSimilarItemsRange, setOfferingSimilarItemsRange] = useState<number>(2_500_000);
+  const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] = useState<number>(2_500_000);
+  const MAX_SIMILAR_ITEMS_RANGE = 10_000_000;
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -1088,12 +1091,40 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{cleanCount} clean</span>
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{dupedCount} duped</span>
                     </div>
+
+                    {/* Range controls */}
+                    <div className="mb-4 bg-[#212A31] rounded-lg border border-[#2E3944] p-4">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted">Range</span>
+                            <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                          </div>
+                        </div>
+                        <Slider
+                          value={totalBasis === 'offering' ? offeringSimilarItemsRange : requestingSimilarItemsRange}
+                          min={0}
+                          max={MAX_SIMILAR_ITEMS_RANGE}
+                          step={50_000}
+                          onChange={(_, v) => {
+                            const val = Array.isArray(v) ? v[0] : v;
+                            if (typeof val === 'number') {
+                              if (totalBasis === 'offering') setOfferingSimilarItemsRange(val);
+                              else setRequestingSimilarItemsRange(val);
+                            }
+                          }}
+                          sx={{ color: '#5865F2' }}
+                        />
+                        <div className="text-xs text-muted">Current: {(totalBasis === 'offering' ? offeringSimilarItemsRange : requestingSimilarItemsRange).toLocaleString()}</div>
+                      </div>
+                    </div>
+
                     <TotalSimilarItems
                       targetValue={total}
                       items={initialItems}
                       excludeItems={totalBasis === 'offering' ? offeringItems : requestingItems}
                       typeFilter={null}
-                      range={2_500_000}
+                      range={totalBasis === 'offering' ? offeringSimilarItemsRange : requestingSimilarItemsRange}
                       title={title}
                       accentColor={accentColor}
                       contextLabel={contextLabel}
