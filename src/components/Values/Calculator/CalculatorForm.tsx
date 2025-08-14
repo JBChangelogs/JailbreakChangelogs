@@ -124,77 +124,79 @@ const CalculatorItemGrid: React.FC<{
 
   return (
     <div className="bg-[#2E3944] rounded-lg p-4">
-      <div className="grid grid-cols-4 gap-4">
-        {groupItems(items).map((item) => {
-          const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
-          const selectedType = getSelectedValueType(item);
-          const isDupedSelected = selectedType === 'duped';
-        
-          return (
-            <div key={`${item.id}-${item.sub_name || 'base'}`} className="relative group">
-              <Tooltip
-                title={<TradeAdTooltip item={{
-                  ...item,
-                  name: displayName,
-                  base_name: item.base_name || item.name
-                }} />}
-                arrow
-                placement="bottom"
-                disableTouchListener
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: '#1A2228',
-                      border: '1px solid #2E3944',
-                      maxWidth: '400px',
-                      width: 'auto',
-                      minWidth: '300px',
-                      '& .MuiTooltip-arrow': {
-                        color: '#1A2228',
+      <div className="max-h-[480px] overflow-y-auto pr-1" aria-label="Selected items list">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          {groupItems(items).map((item) => {
+            const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
+            const selectedType = getSelectedValueType(item);
+            const isDupedSelected = selectedType === 'duped';
+          
+            return (
+              <div key={`${item.id}-${item.sub_name || 'base'}`} className="relative group">
+                <Tooltip
+                  title={<TradeAdTooltip item={{
+                    ...item,
+                    name: displayName,
+                    base_name: item.base_name || item.name
+                  }} />}
+                  arrow
+                  placement="bottom"
+                  disableTouchListener
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: '#1A2228',
+                        border: '1px solid #2E3944',
+                        maxWidth: '400px',
+                        width: 'auto',
+                        minWidth: '300px',
+                        '& .MuiTooltip-arrow': {
+                          color: '#1A2228',
+                        },
                       },
                     },
-                  },
-                }}
-              >
-                <div className="relative aspect-square">
-                  <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#2E3944] cursor-pointer" onClick={() => openActionModal(item)}>
-                    <Image
-                      src={getItemImagePath(item.type, item.name, true)}
-                      alt={item.name}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                      onError={handleImageError}
-                    />
-                    {/* Status badge for Clean/Duped selection */}
-                    <div
-                      className="absolute top-1 left-1 px-1.5 py-0.5 text-xs rounded-full text-white"
-                      style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
-                      aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
-                    >
-                      {isDupedSelected ? 'Duped' : 'Clean'}
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Edit item"
-                      onClick={(e) => { e.stopPropagation(); openActionModal(item); }}
-                      className="absolute bottom-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/60 border border-white/10 text-white"
-                    >
-                      <EllipsisVerticalIcon className="h-4 w-4" />
-                    </button>
-                    {item.count > 1 && (
-                      <div className="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded-full bg-[#5865F2]/90 text-white border border-[#5865F2]">
-                        ×{item.count}
+                  }}
+                >
+                  <div className="relative aspect-square">
+                    <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#2E3944] cursor-pointer" onClick={() => openActionModal(item)}>
+                      <Image
+                        src={getItemImagePath(item.type, item.name, true)}
+                        alt={item.name}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                      {/* Status badge for Clean/Duped selection */}
+                      <div
+                        className="absolute top-1 left-1 px-1.5 py-0.5 text-xs rounded-full text-white"
+                        style={{ backgroundColor: isDupedSelected ? '#991B1B' : '#065F46', border: '1px solid', borderColor: isDupedSelected ? '#7F1D1D' : '#064E3B' }}
+                        aria-label={isDupedSelected ? 'Duped value selected' : 'Clean value selected'}
+                      >
+                        {isDupedSelected ? 'Duped' : 'Clean'}
                       </div>
-                    )}
-                    {/* Hover overlay removed; modal handles actions */}
+                      <button
+                        type="button"
+                        aria-label="Edit item"
+                        onClick={(e) => { e.stopPropagation(); openActionModal(item); }}
+                        className="absolute bottom-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/60 border border-white/10 text-white"
+                      >
+                        <EllipsisVerticalIcon className="h-4 w-4" />
+                      </button>
+                      {item.count > 1 && (
+                        <div className="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded-full bg-[#5865F2]/90 text-white border border-[#5865F2]">
+                          ×{item.count}
+                        </div>
+                      )}
+                      {/* Hover overlay removed; modal handles actions */}
+                    </div>
                   </div>
-                </div>
-              </Tooltip>
-              {/* Inline footer actions removed; actions available via modal */}
-            </div>
-          );
-        })}
+                </Tooltip>
+                {/* Inline footer actions removed; actions available via modal */}
+              </div>
+            );
+          })}
+        </div>
       </div>
       {/* Legacy context menu removed; modal is the single action surface */}
  

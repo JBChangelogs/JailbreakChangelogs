@@ -52,7 +52,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const MAX_VALUE_RANGE = 500_000_000;
-  const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(MAX_VALUE_RANGE);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
@@ -763,7 +762,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                 onClick={() => {
                   setMaxValue(MAX_VALUE_RANGE);
                   setAppliedMaxValue(MAX_VALUE_RANGE);
-                  setMinValue(0);
                   setAppliedMinValue(0);
                 }}
                 className="mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
@@ -776,7 +774,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                 setFilterSort("name-all-items");
                 setValueSort("cash-desc");
                 setSearchTerm("");
-                setMinValue(0);
                 setMaxValue(MAX_VALUE_RANGE);
                 setAppliedMinValue(0);
                 setAppliedMaxValue(MAX_VALUE_RANGE);
