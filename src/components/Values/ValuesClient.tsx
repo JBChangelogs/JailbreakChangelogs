@@ -415,7 +415,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           </div>
           <div className="flex-1 flex items-center justify-center">
             <iframe
-              src="https://www.youtube.com/embed/yEsTOaJka3k"
+              src="https://www.youtube.com/embed/yEsTOaJka3k?controls=0&rel=0"
               width="100%"
               height="315"
               allowFullScreen
@@ -674,20 +674,23 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                     <span className="text-xs text-muted">Value Range</span>
                     <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                   </div>
-                  <span className="text-[11px] text-muted">{minValue.toLocaleString()} - {maxValue.toLocaleString()}</span>
+                  <span className="text-[11px] text-muted">0 - {maxValue.toLocaleString()}</span>
                 </div>
                 <div className="px-1">
                   <Slider
-                    value={[minValue, maxValue]}
+                    value={maxValue}
                     onChange={(_, v) => {
-                      const [min, max] = v as number[];
-                      setMinValue(min);
-                      setMaxValue(max);
+                      const val = Array.isArray(v) ? v[0] : v;
+                      if (typeof val === 'number') {
+                        setMaxValue(val);
+                      }
                     }}
                     onChangeCommitted={(_, v) => {
-                      const [min, max] = v as number[];
-                      setAppliedMinValue(min);
-                      setAppliedMaxValue(max);
+                      const val = Array.isArray(v) ? v[0] : v;
+                      if (typeof val === 'number') {
+                        setAppliedMaxValue(val);
+                        setAppliedMinValue(0);
+                      }
                     }}
                     valueLabelDisplay="off"
                     min={0}
@@ -752,16 +755,16 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
             <p className="text-lg text-muted">
               {rangeFilteredItems.length === 0 && sortedItems.length > 0
-                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue.toLocaleString()})`
+                ? `No items found in the selected value range (0 - ${appliedMaxValue.toLocaleString()})`
                 : getNoItemsMessage()}
             </p>
             {rangeFilteredItems.length === 0 && sortedItems.length > 0 && (
               <button
                 onClick={() => {
-                  setMinValue(0);
                   setMaxValue(MAX_VALUE_RANGE);
-                  setAppliedMinValue(0);
                   setAppliedMaxValue(MAX_VALUE_RANGE);
+                  setMinValue(0);
+                  setAppliedMinValue(0);
                 }}
                 className="mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
               >
