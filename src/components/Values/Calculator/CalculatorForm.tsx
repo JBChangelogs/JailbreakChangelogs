@@ -561,6 +561,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
   const [offeringSimilarItemsRange, setOfferingSimilarItemsRange] = useState<number>(2_500_000);
   const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] = useState<number>(2_500_000);
   const MAX_SIMILAR_ITEMS_RANGE = 10_000_000;
+  
+  useLockBodyScroll(showClearConfirmModal);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -800,16 +802,46 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
       />
 
       {/* Clear Confirmation Modal */}
-      <CustomConfirmationModal
-        open={showClearConfirmModal}
-        onClose={() => setShowClearConfirmModal(false)}
-        title="Clear Calculator?"
-        message="Are you sure you want to clear your current calculation? This action cannot be undone."
-        confirmText="Clear"
-        cancelText="Cancel"
-        onConfirm={handleStartNew}
-        onCancel={() => setShowClearConfirmModal(false)}
-      />
+      {/* Replaced single-confirm modal with multi-option modal */}
+      {showClearConfirmModal && (
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" onClick={() => setShowClearConfirmModal(false)} />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6 shadow-xl border border-[#5865F2]">
+              <h2 className="text-white text-xl font-semibold mb-2">Clear Calculator?</h2>
+              <p className="text-muted/80 mb-6">Choose what to clear. This action cannot be undone.</p>
+              <div className="grid grid-cols-1 gap-3 mb-4">
+                <button
+                  onClick={() => { setOfferingItems([]); setItemValueTypes(prev => { const next = { ...prev }; Object.keys(next).forEach(k => { if (k.startsWith('offering-')) { delete next[k]; } }); return next; }); if (requestingItems.length === 0) { localStorage.removeItem('calculatorItems'); } else { saveItemsToLocalStorage([], requestingItems); } setShowClearConfirmModal(false); }}
+                  className="w-full rounded-md border border-[#047857] px-4 py-2 text-sm font-medium text-white bg-[#047857]/20 hover:bg-[#047857]/30 transition-colors"
+                >
+                  Clear Offering
+                </button>
+                <button
+                  onClick={() => { setRequestingItems([]); setItemValueTypes(prev => { const next = { ...prev }; Object.keys(next).forEach(k => { if (k.startsWith('requesting-')) { delete next[k]; } }); return next; }); if (offeringItems.length === 0) { localStorage.removeItem('calculatorItems'); } else { saveItemsToLocalStorage(offeringItems, []); } setShowClearConfirmModal(false); }}
+                  className="w-full rounded-md border border-[#B91C1C] px-4 py-2 text-sm font-medium text-white bg-[#B91C1C]/20 hover:bg-[#B91C1C]/30 transition-colors"
+                >
+                  Clear Requesting
+                </button>
+                <button
+                  onClick={() => { handleStartNew(); }}
+                  className="w-full rounded-md bg-[#B91C1C] px-4 py-2 text-sm font-medium text-white hover:bg-[#991B1B] transition-colors"
+                >
+                  Clear Both
+                </button>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowClearConfirmModal(false)}
+                  className="rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium text-muted hover:bg-[#2E3944] hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trade Sides */}
       <div className="space-y-4">
@@ -991,7 +1023,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
       {activeTab === 'items' ? (
         <div className="mb-8">
           <AvailableItemsGrid
-            items={initialItems}
+            items={initialItems.filter((i) => !i.is_sub)}
             onSelect={handleAddItem}
             selectedItems={[...offeringItems, ...requestingItems]}
             requireAuth={false}

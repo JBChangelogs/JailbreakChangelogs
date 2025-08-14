@@ -154,13 +154,14 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 						const itemDemand = getItemDemand(item);
 						const itemDemandIndex = getDemandIndex(itemDemand);
 						const demandDelta = baselineDemandIndex >= 0 && itemDemandIndex >= 0 ? itemDemandIndex - baselineDemandIndex : null;
+						const displayName = item.sub_name ? `${item.name} (${item.sub_name})` : item.name;
 						return (
-							<Link key={`${item.id}-${item.sub_name || 'base'}`} href={`/item/${item.type.toLowerCase()}/${item.name}`} className="group">
+							<Link key={`${item.id}-${item.sub_name || 'base'}`} href={`/item/${item.type.toLowerCase()}/${item.name}${item.sub_name ? `?variant=${item.sub_name}` : ''}`} className="group">
 								<div className="bg-[#2e3944] border border-gray-700/50 rounded-lg overflow-hidden transition-all duration-200 hover:border-purple-500/30 hover:shadow-lg">
 									<div className="relative aspect-video">
 										<Image
 											src={getItemImagePath(item.type, item.name, true)}
-											alt={item.name}
+											alt={displayName}
 											fill
 											unoptimized
 											className="object-cover"
@@ -169,7 +170,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 									</div>
 									<div className="p-4 space-y-2">
 										<div className="flex items-center justify-between">
-											<h4 className="text-gray-200 font-medium group-hover:text-blue-400 transition-colors line-clamp-1 mr-2">{item.name}</h4>
+											<h4 className="text-gray-200 font-medium group-hover:text-blue-400 transition-colors line-clamp-1 mr-2">{displayName}</h4>
 											<span
 												className="inline-block px-2 py-0.5 text-xs rounded-full text-white"
 												style={{ backgroundColor: getItemTypeColor(item.type) }}
@@ -222,7 +223,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 														<span>Same demand</span>
 													</span>
 												) : (
-													<span className={`inline-flex items-center gap-1 mt-1 ${demandDelta > 0 ? 'text-[#43B581]' : 'text-red-400'}`}>
+													<span className={`inline-flex items-center gap-1 mt-1 ${demandDelta > 0 ? 'text-[#43B581]' : 'text-red-400'}`}> 
 														{demandDelta > 0 ? <FaArrowCircleUp className="w-4 h-4" /> : <FaArrowAltCircleDown className="w-4 h-4" />}
 														<span>{Math.abs(demandDelta)} level{Math.abs(demandDelta) === 1 ? '' : 's'} {demandDelta > 0 ? 'higher' : 'lower'}{baselineDemand ? ` than ${baselineDemand}` : ''}</span>
 													</span>

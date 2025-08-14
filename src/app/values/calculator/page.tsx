@@ -22,7 +22,25 @@ export default function CalculatorPage() {
 
 async function CalculatorFormWrapper() {
   const items = await fetchItems();
-  const tradeItems = items.map(item => ({ ...item, is_sub: false, side: undefined }));
+  const tradeItems = items.flatMap(item => {
+    const parent = { ...item, is_sub: false, side: undefined };
+    const variants = (item.children || []).map(child => ({
+      ...parent,
+      id: child.id,
+      name: child.data.name,
+      type: child.data.type,
+      cash_value: child.data.cash_value,
+      duped_value: child.data.duped_value,
+      is_limited: child.data.is_limited ?? item.is_limited,
+      is_seasonal: child.data.is_seasonal ?? item.is_seasonal,
+      demand: child.data.demand,
+      tradable: child.data.tradable ? 1 : 0,
+      is_sub: true,
+      sub_name: child.sub_name,
+      data: child.data,
+    }));
+    return [parent, ...variants];
+  });
 
   return <CalculatorForm initialItems={tradeItems} />;
 }

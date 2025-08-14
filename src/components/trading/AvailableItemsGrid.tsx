@@ -573,21 +573,49 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     {item.tradable === 1 && (
                       <>
                         <div className="text-xs text-muted space-y-1">
-                          <div>Cash: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                            (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
-                            item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
-                            formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
-                            : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}</div>
-                          <div>Duped: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                            (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
-                            item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
-                            formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
-                            : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}</div>
-                          {item.demand && (
-                            <div>Demand: {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
-                              item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand 
-                              : item.demand}</div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <span>Cash:</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold" style={{ backgroundColor: '#1d7da3' }}>
+                              {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
+                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
+                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>Duped:</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                              {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
+                                (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
+                                item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
+                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
+                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}
+                            </span>
+                          </div>
+                          <div className="text-muted flex items-center gap-2">
+                            <span>Demand:</span>
+                            {(() => {
+                              const d = selectedVariants[item.id] && selectedVariants[item.id] !== '2025'
+                                ? (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand ?? 'N/A')
+                                : (item.demand ?? 'N/A');
+                              return (
+                                <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${
+                                  d === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
+                                  d === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                                  d === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                                  d === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                                  d === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
+                                  d === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
+                                  d === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
+                                  d === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
+                                  'bg-gradient-to-r from-gray-500 to-gray-600'
+                                }`}>
+                                  {d === 'N/A' ? 'Unknown' : d}
+                                </span>
+                              );
+                            })()}
+                          </div>
                         </div>
                         {item.children && item.children.length > 0 && (
                           <div className="relative">
