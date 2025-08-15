@@ -42,9 +42,9 @@ interface Change {
     user_id: number | string;
     suggestor_name: string;
     message_id: number | string;
-          data: {
+    data: {
         // Old format fields
-        item_name: string;
+      item_name: string;
         current_value?: string;
         suggested_value?: string;
         current_demand?: string | null;
@@ -53,7 +53,7 @@ interface Change {
         suggested_note?: string | null;
         current_trend?: string | null;
         suggested_trend?: string | null;
-        reason: string;
+      reason: string;
         // New format fields
         item_type?: string;
         item_id?: number;
@@ -63,7 +63,7 @@ interface Change {
         suggested_duped_value?: string;
         current_notes?: string;
         suggested_notes?: string;
-      };
+    };
     vote_data: {
       upvotes: number;
       downvotes: number;
@@ -483,9 +483,9 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                               />
                             )}
                           </span>
-                                                      <div className="flex items-center justify-center text-xs">
-                              <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
-                                <Tooltip 
+                          <div className="flex items-center justify-center text-xs">
+                            <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
+                              <Tooltip 
                                   title={
                                     change.suggestion_data.vote_data.voters ? (
                                       <div className="space-y-1">
@@ -503,27 +503,27 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                                       `${change.suggestion_data.vote_data.upvotes} upvote${change.suggestion_data.vote_data.upvotes !== 1 ? 's' : ''}`
                                     )
                                   }
-                                  arrow
-                                  placement="top"
-                                  slotProps={{
-                                    tooltip: {
-                                      sx: {
-                                        bgcolor: '#1A2228',
-                                        border: '1px solid #2E3944',
+                                arrow
+                                placement="top"
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      bgcolor: '#1A2228',
+                                      border: '1px solid #2E3944',
                                         maxWidth: '300px',
-                                        '& .MuiTooltip-arrow': {
-                                          color: '#1A2228',
-                                        },
+                                      '& .MuiTooltip-arrow': {
+                                        color: '#1A2228',
                                       },
                                     },
-                                  }}
-                                >
-                                  <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
-                                    <span className="text-green-400 font-medium">↑</span>
-                                    <span className="text-green-400 font-semibold">{change.suggestion_data.vote_data.upvotes}</span>
-                                  </div>
-                                </Tooltip>
-                                <Tooltip 
+                                  },
+                                }}
+                              >
+                                <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
+                                  <span className="text-green-400 font-medium">↑</span>
+                                  <span className="text-green-400 font-semibold">{change.suggestion_data.vote_data.upvotes}</span>
+                                </div>
+                              </Tooltip>
+                              <Tooltip 
                                   title={
                                     change.suggestion_data.vote_data.voters ? (
                                       <div className="space-y-1">
@@ -541,28 +541,28 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                                       `${change.suggestion_data.vote_data.downvotes} downvote${change.suggestion_data.vote_data.downvotes !== 1 ? 's' : ''}`
                                     )
                                   }
-                                  arrow
-                                  placement="top"
-                                  slotProps={{
-                                    tooltip: {
-                                      sx: {
-                                        bgcolor: '#1A2228',
-                                        border: '1px solid #2E3944',
+                                arrow
+                                placement="top"
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      bgcolor: '#1A2228',
+                                      border: '1px solid #2E3944',
                                         maxWidth: '300px',
-                                        '& .MuiTooltip-arrow': {
-                                          color: '#1A2228',
-                                        },
+                                      '& .MuiTooltip-arrow': {
+                                        color: '#1A2228',
                                       },
                                     },
-                                  }}
-                                >
-                                  <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
-                                    <span className="text-red-400 font-medium">↓</span>
-                                    <span className="text-red-400 font-semibold">{change.suggestion_data.vote_data.downvotes}</span>
-                                  </div>
-                                </Tooltip>
-                              </div>
+                                  },
+                                }}
+                              >
+                                <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
+                                  <span className="text-red-400 font-medium">↓</span>
+                                  <span className="text-red-400 font-semibold">{change.suggestion_data.vote_data.downvotes}</span>
+                                </div>
+                              </Tooltip>
                             </div>
+                          </div>
                         </div>
                         <div className="text-sm text-gray-300 mb-2">
                           {(() => {

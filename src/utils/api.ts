@@ -294,6 +294,31 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
   return response.json();
 }
 
+export async function fetchItemsChangelog(id: string) {
+  try {
+    console.log(`[SERVER] Fetching items changelog ${id} from ${BASE_API_URL}...`);
+    const response = await fetch(`${BASE_API_URL}/items/changelogs/get?id=${id}`, {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+    
+    if (response.status === 404) {
+      console.log(`[SERVER] Items changelog ${id} not found`);
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch items changelog');
+    }
+    
+    const data = await response.json();
+    console.log(`[SERVER] Successfully fetched items changelog ${id}`);
+    return data;
+  } catch (err) {
+    console.error('[SERVER] Error fetching items changelog:', err);
+    return null;
+  }
+}
+
 export async function fetchTradeAds() {
   try {
     console.log(`[SERVER] Fetching trade ads from ${BASE_API_URL}...`);
