@@ -11,6 +11,7 @@ import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { formatMessageDate } from '@/utils/timestamp';
 import { formatFullValue } from '@/utils/values';
+import ReactMarkdown from 'react-markdown';
 
 import { Search, Clear } from '@mui/icons-material';
 import DisplayAd from '@/components/Ads/DisplayAd';
@@ -258,9 +259,9 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
     <ThemeProvider theme={darkTheme}>
       <div className="space-y-6">
         {/* Header with Side-by-Side Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Changelog Info - Takes up 2/3 of the space */}
-          <div className="lg:col-span-2 bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]">
+        <div className={`grid gap-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          {/* Changelog Info - Takes up full width for premium users, 2/3 for non-premium */}
+          <div className={`${premiumStatusLoaded && currentUserPremiumType === 0 ? 'lg:col-span-2' : ''} bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]`}>
             <h1 className="text-3xl font-bold text-white mb-2">
               Changelog #{changelog.id}
             </h1>
@@ -441,12 +442,13 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                       />
                     ) : (
                       <Image
-                        src={getItemImagePath(change.item.type, change.item.name)}
+                        src={getItemImagePath(change.item.type, change.item.name, true)}
                         alt={change.item.name}
                         width={64}
                         height={64}
                         className="w-full h-full object-cover"
                         onError={handleImageError}
+                        unoptimized
                       />
                     )}
                   </div>
@@ -546,8 +548,15 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                         {change.suggestion.suggestor_name}
                       </a>
                     </div>
-                    <div className="text-sm text-[#D3D9D4] mb-2 whitespace-pre-line">
-                      {change.suggestion.data.reason}
+                    <div className="text-sm text-[#D3D9D4] mb-2">
+                      <ReactMarkdown
+                        components={{
+                          strong: (props) => <strong className="font-bold text-white" {...props} />,
+                          p: (props) => <div className="whitespace-pre-line" {...props} />,
+                        }}
+                      >
+                        {change.suggestion.data.reason}
+                      </ReactMarkdown>
                     </div>
                     <div className="text-xs text-[#D3D9D4]">
                       Suggested on {formatMessageDate(change.suggestion.created_at * 1000)}
@@ -620,7 +629,21 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
           </Masonry>
         ) : (
           <div className="text-center text-white py-8">
-            <p>No changes found matching your criteria</p>
+            <p className="text-lg font-medium mb-2">No changes found</p>
+            <p className="text-[#D3D9D4] text-sm">
+              {searchQuery && `No changes match "${searchQuery}"`}
+              {searchQuery && selectedType && ' and '}
+              {selectedType && `No changes found for item type "${selectedType}"`}
+              {!searchQuery && !selectedType && 'No changes available in this changelog'}
+            </p>
+            {(searchQuery || selectedType) && (
+              <button
+                onClick={clearSearch}
+                className="mt-3 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors duration-200"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
 
