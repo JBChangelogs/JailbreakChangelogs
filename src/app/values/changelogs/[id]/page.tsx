@@ -50,26 +50,50 @@ interface Changes {
 
 interface SuggestionData {
   id: number;
-  user_id: number;
+  user_id: number | string;
   suggestor_name: string;
-  message_id: number;
+  message_id: number | string;
   data: {
+    // Old format fields
     item_name: string;
-    current_value: string;
-    suggested_value: string;
-    current_demand: string | null;
-    suggested_demand: string | null;
-    current_note: string | null;
-    suggested_note: string | null;
-    current_trend: string | null;
-    suggested_trend: string | null;
+    current_value?: string;
+    suggested_value?: string;
+    current_demand?: string | null;
+    suggested_demand?: string | null;
+    current_note?: string | null;
+    suggested_note?: string | null;
+    current_trend?: string | null;
+    suggested_trend?: string | null;
     reason: string;
+    // New format fields
+    item_type?: string;
+    item_id?: number;
+    current_cash_value?: string;
+    suggested_cash_value?: string;
+    current_duped_value?: string;
+    suggested_duped_value?: string;
+    current_notes?: string;
+    suggested_notes?: string;
   };
   vote_data: {
     upvotes: number;
     downvotes: number;
+    voters?: Array<{
+      id: number;
+      name: string;
+      avatar: string;
+      vote_number: number;
+      vote_type: string;
+      timestamp: number;
+    }>;
   };
   created_at: number;
+  metadata?: {
+    avatar?: string;
+    guild_id?: number;
+    channel_id?: number;
+    suggestion_type?: string;
+  };
 }
 
 interface ChangeData {
