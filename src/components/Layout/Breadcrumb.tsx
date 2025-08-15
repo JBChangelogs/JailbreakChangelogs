@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -213,7 +213,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               )}
               
               {isLast ? (
-                <Typography 
+                <span 
                   className="px-2 py-0.5 rounded-full bg-[#212a31] text-blue-300 text-sm font-medium max-w-[200px] sm:max-w-[300px] truncate"
                 >
                   {item.isHome ? (
@@ -221,7 +221,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   ) : (
                     item.label
                   )}
-                </Typography>
+                </span>
               ) : (
                 <Link 
                   href={item.href}

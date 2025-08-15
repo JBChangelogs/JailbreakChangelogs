@@ -2,11 +2,33 @@ import { Skeleton } from '@mui/material';
 
 export default function Loading() {
   return (
-    <div className="space-y-6">
-      {/* Header Skeleton */}
-      <div className="bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]">
-        <Skeleton variant="text" width="60%" height={40} className="bg-[#37424D]" />
-        <Skeleton variant="text" width="40%" height={24} className="bg-[#37424D] mt-2" />
+    <main className="min-h-screen bg-[#2E3944] mb-8">
+      <div className="container mx-auto px-4">
+        <div className="space-y-6">
+      {/* Header Skeleton with Side-by-Side Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Changelog Info Skeleton - Takes up 2/3 of the space */}
+        <div className="lg:col-span-2 bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]">
+          <Skeleton variant="text" width="60%" height={40} className="bg-[#37424D]" />
+          <Skeleton variant="text" width="40%" height={24} className="bg-[#37424D] mt-2" />
+          <div className="mt-4">
+            <Skeleton variant="text" width="20%" height={20} className="bg-[#37424D]" />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} variant="text" width={Math.random() * 60 + 40} height={16} className="bg-[#37424D]" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Ad Skeleton - Takes up 1/3 of the space */}
+        <div className="lg:col-span-1">
+          <div className="bg-[#1a2127] rounded-lg border border-[#2E3944] h-full" style={{ minHeight: '250px' }}>
+            <div className="p-4">
+              <Skeleton variant="rectangular" width="100%" height="100%" className="bg-[#37424D] rounded" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Search and Filters Skeleton */}
@@ -39,6 +61,8 @@ export default function Loading() {
           </div>
         ))}
       </div>
-    </div>
+        </div>
+      </div>
+    </main>
   );
 } 

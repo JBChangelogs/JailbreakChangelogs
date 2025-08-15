@@ -135,7 +135,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
   const [selectedType, setSelectedType] = useState<string>('');
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
 
   useEffect(() => {
     // Get current user's premium type
@@ -257,54 +257,73 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Changelog #{changelog.id}
-          </h1>
-          <p className="text-[#D3D9D4] mb-4">
-            {changelog.change_count} change{changelog.change_count !== 1 ? 's' : ''} • Posted on {formatMessageDate(changelog.created_at * 1000)}
-          </p>
-          
-          {/* Contributors */}
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-[#D3D9D4] mb-2">Contributors:</h3>
-            <div className="flex flex-wrap gap-2">
-              {(() => {
-                const allContributors = new Map<string, string>();
-                
-                changelog.change_data.forEach(change => {
-                  if (change.changed_by && change.changed_by_id) {
-                    allContributors.set(change.changed_by, change.changed_by_id);
-                  }
+        {/* Header with Side-by-Side Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Changelog Info - Takes up 2/3 of the space */}
+          <div className="lg:col-span-2 bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]">
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Changelog #{changelog.id}
+            </h1>
+            <p className="text-[#D3D9D4] mb-4">
+              {changelog.change_count} change{changelog.change_count !== 1 ? 's' : ''} • Posted on {formatMessageDate(changelog.created_at * 1000)}
+            </p>
+            
+            {/* Contributors */}
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-[#D3D9D4] mb-2">Contributors:</h3>
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const allContributors = new Map<string, string>();
                   
-                  if (change.suggestion?.suggestor_name && change.suggestion.user_id) {
-                    allContributors.set(change.suggestion.suggestor_name, String(change.suggestion.user_id));
-                  }
-                });
-                
-                const sortedContributors = Array.from(allContributors.entries()).sort(([a], [b]) => 
-                  a.toLowerCase().localeCompare(b.toLowerCase())
-                );
-                
-                return sortedContributors.map(([contributorName, discordId], index) => (
-                  <span key={contributorName}>
-                    <a
-                      href={`https://discord.com/users/${discordId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline text-sm"
-                    >
-                      {contributorName}
-                    </a>
-                    {index < sortedContributors.length - 1 && (
-                      <span className="text-[#D3D9D4] text-sm">,</span>
-                    )}
-                  </span>
-                ));
-              })()}
+                  changelog.change_data.forEach(change => {
+                    if (change.changed_by && change.changed_by_id) {
+                      allContributors.set(change.changed_by, change.changed_by_id);
+                    }
+                    
+                    if (change.suggestion?.suggestor_name && change.suggestion.user_id) {
+                      allContributors.set(change.suggestion.suggestor_name, String(change.suggestion.user_id));
+                    }
+                  });
+                  
+                  const sortedContributors = Array.from(allContributors.entries()).sort(([a], [b]) => 
+                    a.toLowerCase().localeCompare(b.toLowerCase())
+                  );
+                  
+                  return sortedContributors.map(([contributorName, discordId], index) => (
+                    <span key={contributorName}>
+                      <a
+                        href={`https://discord.com/users/${discordId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline text-sm"
+                      >
+                        {contributorName}
+                      </a>
+                      {index < sortedContributors.length - 1 && (
+                        <span className="text-[#D3D9D4] text-sm">,</span>
+                      )}
+                    </span>
+                  ));
+                })()}
+              </div>
             </div>
           </div>
+
+          {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
+          {premiumStatusLoaded && currentUserPremiumType === 0 && (
+            <div className="lg:col-span-1">
+              <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative h-full" style={{ minHeight: '250px' }}>
+                <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
+                  Advertisement
+                </span>
+                <DisplayAd
+                  adSlot="8162235433"
+                  adFormat="auto"
+                  style={{ display: 'block', width: '100%', height: '100%' }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search */}
@@ -537,7 +556,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                 )}
 
                 {/* Changes */}
-                <div className="space-y-2 mb-4">
+                <div className="space-y-2 mb-4 mt-6">
                   {Object.entries(change.changes.old).map(([key, oldValue]) => {
                     if (key === 'last_updated') return null;
                     const newValue = change.changes.new[key];
@@ -546,7 +565,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                     return (
                       <div key={key} className="flex items-start gap-2">
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm text-white capitalize">
+                          <div className="text-sm text-[#D3D9D4] capitalize">
                             {key.replace(/_/g, ' ')}:
                           </div>
                           <div className="flex flex-col gap-1 mt-1">
@@ -627,20 +646,6 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                   },
                 },
               }}
-            />
-          </div>
-        )}
-
-                    {/* Ad - Only show for non-premium users */}
-        {premiumStatusLoaded && currentUserPremiumType === 0 && (
-          <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
-            <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
-              Advertisement
-            </span>
-            <DisplayAd
-              adSlot="8162235433"
-              adFormat="auto"
-              style={{ display: 'block', width: '100%', height: '100%' }}
             />
           </div>
         )}
