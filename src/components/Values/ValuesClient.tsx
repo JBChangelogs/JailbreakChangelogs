@@ -51,10 +51,18 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
-  const MAX_VALUE_RANGE = 500_000_000;
-  const [maxValue, setMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const MAX_VALUE_RANGE = 100_000_000;
+  const MIN_VALUE_DISTANCE = 4_000_000; // Enforce a larger gap between thumbs
+  const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const sliderMarks = [
+    { value: 10_000_000, label: '10M' },
+    { value: 25_000_000, label: '25M' },
+    { value: 50_000_000, label: '50M' },
+    { value: 75_000_000, label: '75M' },
+    { value: 100_000_000 },
+  ];
   const parseNumericValue = (value: string | null): number => {
     if (!value || value === 'N/A') return -1;
     const lower = value.toLowerCase();
@@ -463,7 +471,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                   placeholder={`Search ${filterSort === "name-all-items" ? "items" : filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ").toLowerCase()}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full lg:w-[380px] xl:w-[480px] rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+                  className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
                 />
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
                 {searchTerm && (
@@ -684,29 +692,39 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                     <span className="text-xs text-muted">Value Range</span>
                     <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                   </div>
-                  <span className="text-[11px] text-muted">0 - {maxValue.toLocaleString()}</span>
+                  <span className="text-[11px] text-muted">{rangeValue[0].toLocaleString()} - {rangeValue[1].toLocaleString()}</span>
                 </div>
                 <div className="px-1">
                   <Slider
-                    value={maxValue}
-                    onChange={(_, v) => {
-                      const val = Array.isArray(v) ? v[0] : v;
-                      if (typeof val === 'number') {
-                        setMaxValue(val);
+                    value={rangeValue}
+                    onChange={(_, newValue, activeThumb) => {
+                      if (!Array.isArray(newValue)) return;
+                      // Clamp only the active thumb; do NOT push the other thumb
+                      if (activeThumb === 0) {
+                        const clampedMin = Math.min(newValue[0], rangeValue[1] - MIN_VALUE_DISTANCE);
+                        setRangeValue([Math.max(0, clampedMin), rangeValue[1]]);
+                      } else if (activeThumb === 1) {
+                        const clampedMax = Math.max(newValue[1], rangeValue[0] + MIN_VALUE_DISTANCE);
+                        setRangeValue([rangeValue[0], Math.min(MAX_VALUE_RANGE, clampedMax)]);
                       }
                     }}
-                    onChangeCommitted={(_, v) => {
-                      const val = Array.isArray(v) ? v[0] : v;
-                      if (typeof val === 'number') {
-                        setAppliedMaxValue(val);
-                        setAppliedMinValue(0);
-                      }
+                    onChangeCommitted={(_, newValue) => {
+                      if (!Array.isArray(newValue)) return;
+                      setAppliedMinValue(newValue[0]);
+                      setAppliedMaxValue(newValue[1]);
                     }}
                     valueLabelDisplay="off"
                     min={0}
                     max={MAX_VALUE_RANGE}
                     step={50_000}
-                    sx={{ color: '#5865F2', mt: 1 }}
+                    marks={sliderMarks}
+                    disableSwap
+                    sx={{
+                      color: '#5865F2',
+                      mt: 1,
+                      '& .MuiSlider-markLabel': { color: '#D3D9D4' },
+                      '& .MuiSlider-mark': { backgroundColor: '#D3D9D4' },
+                    }}
                   />
                 </div>
               </div>
@@ -765,15 +783,15 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
             <p className="text-lg text-muted">
               {rangeFilteredItems.length === 0 && sortedItems.length > 0
-                ? `No items found in the selected value range (0 - ${appliedMaxValue.toLocaleString()})`
+                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue.toLocaleString()})`
                 : getNoItemsMessage()}
             </p>
             {rangeFilteredItems.length === 0 && sortedItems.length > 0 && (
               <button
                 onClick={() => {
-                  setMaxValue(MAX_VALUE_RANGE);
-                  setAppliedMaxValue(MAX_VALUE_RANGE);
+                  setRangeValue([0, MAX_VALUE_RANGE]);
                   setAppliedMinValue(0);
+                  setAppliedMaxValue(MAX_VALUE_RANGE);
                 }}
                 className="mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
               >
@@ -785,7 +803,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                 setFilterSort("name-all-items");
                 setValueSort("cash-desc");
                 setSearchTerm("");
-                setMaxValue(MAX_VALUE_RANGE);
+                setRangeValue([0, MAX_VALUE_RANGE]);
                 setAppliedMinValue(0);
                 setAppliedMaxValue(MAX_VALUE_RANGE);
               }}
