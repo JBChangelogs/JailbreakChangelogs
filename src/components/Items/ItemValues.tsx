@@ -7,6 +7,7 @@ interface ItemValuesProps {
   cashValue: string | null;
   dupedValue: string | null;
   demand: string;
+  trend?: string | null;
   notes: string;
   price: string;
   health: number;
@@ -36,7 +37,7 @@ const getDemandColor = (demand: string): string => {
   }
 };
 
-export default function ItemValues({ cashValue, dupedValue, demand, notes, price, health, type }: ItemValuesProps) {
+export default function ItemValues({ cashValue, dupedValue, demand, trend, notes, price, health, type }: ItemValuesProps) {
   const isRobuxPrice = price.toLowerCase().includes('robux');
   const isUSDPrice = price.includes('$');
   const hasNoPrice = price === "N/A";
@@ -124,6 +125,19 @@ export default function ItemValues({ cashValue, dupedValue, demand, notes, price
             <p className="text-2xl font-bold text-white">
               {demand === "N/A" ? "Unknown" : demand}
             </p>
+          </div>
+        </div>
+
+        {/* Item Trend */}
+        <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            <h4 className="text-sm text-gray-300 font-medium">Trend</h4>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-white">
+              {(!trend || trend === 'N/A') ? 'Unknown' : trend}
+            </span>
           </div>
         </div>
       </div>

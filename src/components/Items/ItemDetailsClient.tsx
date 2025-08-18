@@ -550,6 +550,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                     cashValue={currentItem.cash_value}
                     dupedValue={currentItem.duped_value}
                     demand={currentItem.demand}
+                    trend={currentItem.trend}
                     notes={currentItem.notes}
                     price={currentItem.price}
                     health={currentItem.health}
