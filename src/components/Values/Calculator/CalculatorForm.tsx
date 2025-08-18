@@ -413,6 +413,12 @@ const CalculatorValueComparison: React.FC<{
                           {demand === 'N/A' ? 'Unknown' : demand}
                         </span>
                       </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-muted">Trend:</span>
+                        <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                          {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-[#FFFFFF] font-medium">
@@ -500,6 +506,12 @@ const CalculatorValueComparison: React.FC<{
                           'bg-gradient-to-r from-gray-500 to-gray-600'
                         }`}>
                           {demand === 'N/A' ? 'Unknown' : demand}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-muted">Trend:</span>
+                        <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                          {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                         </span>
                       </div>
                     </div>

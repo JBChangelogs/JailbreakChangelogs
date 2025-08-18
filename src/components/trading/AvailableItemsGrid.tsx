@@ -616,6 +616,12 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                               );
                             })()}
                           </div>
+                          <div className="text-muted flex items-center gap-2">
+                            <span>Trend:</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                              {!item.trend || item.trend === 'N/A' ? 'Unknown' : item.trend}
+                            </span>
+                          </div>
                         </div>
                         {item.children && item.children.length > 0 && (
                           <div className="relative">

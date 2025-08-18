@@ -12,6 +12,7 @@ interface TradeAdTooltipProps {
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const categoryIcon = getCategoryIcon(item.type);
   const demand = (item.demand ?? item.data?.demand ?? 'N/A');
+  const trend = item.trend ?? null;
   
   return (
     <div className="p-2">
@@ -87,6 +88,12 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 "bg-gradient-to-r from-gray-500 to-gray-600"
               }`}>
                 {demand === 'N/A' ? 'Unknown' : demand}
+              </span>
+            </div>
+            <div className="text-muted flex items-center gap-2">
+              <span>Trend:</span>
+              <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                {!trend || trend === 'N/A' ? 'Unknown' : trend}
               </span>
             </div>
           </div>

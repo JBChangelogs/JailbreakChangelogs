@@ -206,6 +206,12 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 														"bg-gradient-to-r from-gray-500 to-gray-600"
 													}`}>{itemDemand === 'N/A' ? 'Unknown' : itemDemand}</span>
 												</span>
+												<span className="flex items-center gap-1">
+													<span>Trend:</span>
+													<span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+														{!item.trend || item.trend === 'N/A' ? 'Unknown' : item.trend}
+													</span>
+												</span>
 											</span>
 											<span className="flex flex-col items-end">
 												{diff === 0 ? (

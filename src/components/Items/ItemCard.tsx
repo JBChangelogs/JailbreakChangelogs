@@ -448,6 +448,17 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                   {currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand}
                 </span>
               </div>
+
+              {isValuesPage && (
+                <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Trend</span>
+                  </div>
+                  <span className="bg-gray-600 text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
+                    {item.trend === null || item.trend === 'N/A' ? 'Unknown' : item.trend}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="mt-auto pt-1 sm:pt-2 text-[10px] sm:text-xs text-muted border-t border-[#2E3944]">

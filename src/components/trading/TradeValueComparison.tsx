@@ -47,7 +47,8 @@ const getItemData = (item: TradeItem): TradeItem => {
       tradable: item.data.tradable ? 1 : 0,
       is_limited: item.data.is_limited ?? 0,
       name: 'sub_name' in item ? `${item.data.name} (${item.sub_name})` : item.data.name,
-      base_name: item.data.name
+      base_name: item.data.name,
+      trend: item.trend ?? null
     };
   }
   return item;
@@ -134,6 +135,12 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                         {(item.demand ?? 'N/A') === 'N/A' ? 'Unknown' : (item.demand as string)}
                       </span>
                     </div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs text-muted">Trend:</span>
+                      <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                        {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-right">
                     <div className="text-muted">Cash: {item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatCurrencyValue(parseCurrencyValue(item.cash_value))}</div>
@@ -216,6 +223,12 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                         'bg-gradient-to-r from-gray-500 to-gray-600'
                       }`}>
                         {(item.demand ?? 'N/A') === 'N/A' ? 'Unknown' : (item.demand as string)}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs text-muted">Trend:</span>
+                      <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                        {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                       </span>
                     </div>
                   </div>

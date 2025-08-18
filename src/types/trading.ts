@@ -7,6 +7,7 @@ export interface TradeItem {
   is_limited: number | null;
   is_seasonal: number | null;
   tradable: number;
+  trend?: string | null;
   base_name?: string;
   side?: 'offering' | 'requesting';
   children?: Array<{
@@ -46,6 +47,7 @@ export interface TradeItem {
     duped_owners: string;
     notes: string;
     demand: string;
+    
     description: string;
     health: number;
     tradable: boolean;
