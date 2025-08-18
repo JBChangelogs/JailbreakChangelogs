@@ -73,12 +73,14 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     if (lower.includes('b')) return num * 1_000_000_000;
     return num;
   };
-  const rangeFilteredItems = sortedItems.filter((item) => {
-    const cash = parseNumericValue(getEffectiveCashValue(item));
-    const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
-    if (isOpenEndedMax) return cash >= appliedMinValue;
-    return cash >= appliedMinValue && cash <= appliedMaxValue;
-  });
+  const rangeFilteredItems = (appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE)
+    ? sortedItems
+    : sortedItems.filter((item) => {
+        const cash = parseNumericValue(getEffectiveCashValue(item));
+        const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
+        if (isOpenEndedMax) return cash >= appliedMinValue;
+        return cash >= appliedMinValue && cash <= appliedMaxValue;
+      });
 
   // Load saved preferences after mount
   useEffect(() => {
