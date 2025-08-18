@@ -75,6 +75,8 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   };
   const rangeFilteredItems = sortedItems.filter((item) => {
     const cash = parseNumericValue(getEffectiveCashValue(item));
+    const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
+    if (isOpenEndedMax) return cash >= appliedMinValue;
     return cash >= appliedMinValue && cash <= appliedMaxValue;
   });
 
@@ -692,7 +694,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                     <span className="text-xs text-muted">Value Range</span>
                     <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                   </div>
-                  <span className="text-[11px] text-muted">{rangeValue[0].toLocaleString()} - {rangeValue[1].toLocaleString()}</span>
+                  <span className="text-[11px] text-muted">{rangeValue[0].toLocaleString()} - {rangeValue[1] >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : rangeValue[1].toLocaleString()}</span>
                 </div>
                 <div className="px-1">
                   <Slider
@@ -710,8 +712,9 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
                     }}
                     onChangeCommitted={(_, newValue) => {
                       if (!Array.isArray(newValue)) return;
-                      setAppliedMinValue(newValue[0]);
-                      setAppliedMaxValue(newValue[1]);
+                      // Use the clamped state values to avoid raw event values like [0,0]
+                      setAppliedMinValue(rangeValue[0]);
+                      setAppliedMaxValue(rangeValue[1]);
                     }}
                     valueLabelDisplay="off"
                     min={0}
@@ -783,7 +786,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
             <p className="text-lg text-muted">
               {rangeFilteredItems.length === 0 && sortedItems.length > 0
-                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue.toLocaleString()})`
+                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : appliedMaxValue.toLocaleString()})`
                 : getNoItemsMessage()}
             </p>
             {rangeFilteredItems.length === 0 && sortedItems.length > 0 && (
