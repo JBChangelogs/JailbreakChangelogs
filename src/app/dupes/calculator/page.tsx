@@ -5,9 +5,6 @@ import { fetchItems, fetchDupes } from '@/utils/api';
 import Loading from './loading';
 import { Item, DupeResult } from '@/types';
 
-// ISR configuration - cache for 5 minutes
-export const revalidate = 300;
-
 export default function DupeCalculatorPage() {
   return (
     <div className="container mx-auto px-4 py-8">

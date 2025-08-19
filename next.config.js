@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  compress: true,
+  poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1"],
   experimental: {
     webpackMemoryOptimizations: true,

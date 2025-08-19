@@ -21,7 +21,6 @@ async function fetchItem(type: string, name: string): Promise<ItemDetails | null
   try {
     const response = await fetch(
       `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
-      { next: { revalidate: 300 } }
     );
     if (!response.ok) return null;
     return await response.json() as ItemDetails;

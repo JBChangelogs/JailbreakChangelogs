@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { PUBLIC_API_URL } from '@/utils/api'
+import { BASE_API_URL } from '@/utils/api'
 import { getItemImagePath, isVideoItem, getVideoThumbnailPath, getVideoPath } from '@/utils/images'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
@@ -12,9 +12,7 @@ interface Item {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const response = await fetch(`${PUBLIC_API_URL}/items/list`, {
-    next: { revalidate: 3600 } // Cache for 1 hour
-  })
+  const response = await fetch(`${BASE_API_URL}/items/list`)
   const data = await response.json()
   
   return data.map((item: Item) => {

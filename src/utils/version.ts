@@ -3,8 +3,7 @@ import { formatFullDate } from './timestamp';
 export async function getWebsiteVersion() {
   try {
     const response = await fetch(
-      "https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/main",
-      { next: { revalidate: 3600 } } // Cache for 1 hour
+      "https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/main"
     );
     const data = await response.json();
     return {

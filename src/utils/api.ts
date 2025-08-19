@@ -30,10 +30,7 @@ export const BASE_API_URL =
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchUsers = async () => {
-  const response = await fetch(`${BASE_API_URL}/users/list`, {
-    cache: 'no-store',
-    next: { revalidate: 0 }
-  });
+  const response = await fetch(`${BASE_API_URL}/users/list`);
   const data = await response.json();
   return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
 };
@@ -193,10 +190,7 @@ export const fetchUsersForList = async () => {
     'roblox_join_date'
   ].join(',');
   
-  const response = await fetch(`${BASE_API_URL}/users/list?fields=${fields}&nocache=true`, {
-    cache: 'no-store',
-    next: { revalidate: 0 }
-  });
+  const response = await fetch(`${BASE_API_URL}/users/list?fields=${fields}&nocache=true`);
   const data = await response.json();
   return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
 };
@@ -204,9 +198,7 @@ export const fetchUsersForList = async () => {
 export async function fetchItems() {
   try {
     console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/items/list`, {
-      next: { revalidate: 120 }
-    });
+    const response = await fetch(`${BASE_API_URL}/items/list`);
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
     console.log(`[SERVER] Successfully fetched ${data.length} items from API`);
@@ -265,7 +257,6 @@ export async function fetchItem(type: string, name: string): Promise<ItemDetails
     
     const response = await fetch(
       `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
-      { next: { revalidate: 300 } } // Cache for 5 minutes (300 seconds)
     );
     
     if (!response.ok) {
@@ -297,9 +288,7 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
 export async function fetchItemsChangelog(id: string) {
   try {
     console.log(`[SERVER] Fetching items changelog ${id} from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/items/changelogs/get?id=${id}`, {
-      next: { revalidate: 300 } // Cache for 5 minutes
-    });
+    const response = await fetch(`${BASE_API_URL}/items/changelogs/get?id=${id}`);
     
     if (response.status === 404) {
       console.log(`[SERVER] Items changelog ${id} not found`);
@@ -322,10 +311,7 @@ export async function fetchItemsChangelog(id: string) {
 export async function fetchTradeAds() {
   try {
     console.log(`[SERVER] Fetching trade ads from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/trades/list`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
-    });
+    const response = await fetch(`${BASE_API_URL}/trades/list`);
     
     if (response.status === 404) {
       // 404 means no trade ads found (all expired)
@@ -349,10 +335,7 @@ export async function fetchTradeAds() {
 export async function fetchTradeAd(id: string) {
   try {
     console.log(`[SERVER] Fetching trade ad ${id} from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/trades/get?id=${id}`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
-    });
+    const response = await fetch(`${BASE_API_URL}/trades/get?id=${id}`);
     
     if (response.status === 404) {
       console.log(`[SERVER] Trade ad ${id} not found`);
@@ -379,9 +362,7 @@ export async function fetchUsersBatch(userIds: string[]) {
     }
     
     console.log(`[SERVER] Fetching ${userIds.length} users in batch from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`, {
-      next: { revalidate: 300 } // Cache for 5 minutes
-    });
+    const response = await fetch(`${BASE_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch users batch');
@@ -404,9 +385,7 @@ export async function fetchUsersBatch(userIds: string[]) {
 export async function fetchDupes() {
   try {
     console.log(`[SERVER] Fetching dupes from ${BASE_API_URL}...`);
-    const response = await fetch(`${BASE_API_URL}/dupes/list`, {
-      next: { revalidate: 300 } // Cache for 5 minutes
-    });
+    const response = await fetch(`${BASE_API_URL}/dupes/list`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch dupes');

@@ -5,9 +5,6 @@ import { CalculatorForm } from '@/components/Values/Calculator/CalculatorForm';
 import { fetchItems } from '@/utils/api';
 import Loading from './loading';
 
-// ISR configuration - cache for 5 minutes
-export const revalidate = 300;
-
 export default function CalculatorPage() {
   return (
     <main className="container mx-auto">

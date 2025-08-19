@@ -7,9 +7,6 @@ import TradeDetailsClient from './TradeDetailsClient';
 import Loading from './loading';
 import type { TradeItem, TradeAd } from '@/types/trading'
 
-// ISR configuration - cache for 5 minutes
-export const revalidate = 300;
-
 export default function TradeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<Loading />}>

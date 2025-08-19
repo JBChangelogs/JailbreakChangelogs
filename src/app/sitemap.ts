@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 
+
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
 
 export default function sitemap(): MetadataRoute.Sitemap {

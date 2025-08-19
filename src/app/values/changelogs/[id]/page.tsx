@@ -31,9 +31,6 @@ interface ChangeData {
   changed_by_id: string;
 }
 
-// ISR configuration - cache for 1 hour
-export const revalidate = 3600;
-
 export default async function ChangelogDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   

@@ -6,9 +6,6 @@ import { fetchTradeAds, fetchUsersBatch, fetchItems } from '@/utils/api';
 import type { TradeAd } from '@/types/trading';
 import Loading from './loading';
 
-// ISR configuration - cache for 5 minutes
-export const revalidate = 300;
-
 export default function TradingPage() {
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8">

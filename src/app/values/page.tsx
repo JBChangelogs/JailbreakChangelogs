@@ -4,9 +4,6 @@ import { fetchItems, fetchLastUpdated } from '@/utils/api';
 import ValuesClient from '@/components/Values/ValuesClient';
 import Loading from './loading';
 
-// ISR configuration - cache for 5 minutes
-export const revalidate = 300;
-
 export default async function ValuesPage() {
   const itemsPromise = fetchItems();
   const lastUpdatedPromise = itemsPromise.then(items => fetchLastUpdated(items));
