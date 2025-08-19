@@ -23,11 +23,15 @@ import { Item, ItemDetails } from "@/types";
 import { UserData } from "@/types/auth";
 
 export const BASE_API_URL =
-  process.env.RAILWAY_ENVIRONMENT_NAME === 'production'
-    ? process.env.RAILWAY_INTERNAL_API_URL
-    : process.env.NEXT_PUBLIC_API_URL;
+  process.env.NEXT_PHASE === 'phase-production-build' || process.env.RAILWAY_ENVIRONMENT_NAME !== 'production'
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.RAILWAY_INTERNAL_API_URL;
 
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+console.log(`[DEBUG] Using BASE_API_URL: ${BASE_API_URL}`);
+console.log(`[DEBUG] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
+console.log(`[DEBUG] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
 
 export const fetchUsers = async () => {
   const response = await fetch(`${BASE_API_URL}/users/list`);

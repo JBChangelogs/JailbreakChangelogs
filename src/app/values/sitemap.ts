@@ -12,6 +12,10 @@ interface Item {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  console.log(`[DEBUG VALUES] Using PUBLIC_API_URL: ${PUBLIC_API_URL}`);
+  console.log(`[DEBUG VALUES] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
+  console.log(`[DEBUG VALUES] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
+  
   const response = await fetch(`${PUBLIC_API_URL}/items/list`)
   const data = await response.json()
   
