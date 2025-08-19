@@ -35,7 +35,6 @@ export default function BotPage() {
               fill
               className="object-cover opacity-40"
               priority
-              unoptimized
             />
           )}
         </div>

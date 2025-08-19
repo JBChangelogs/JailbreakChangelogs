@@ -195,7 +195,6 @@ export default function SupportingPage() {
                           width={16}
                           height={16}
                           className="ml-1"
-                          unoptimized
                         />
                       </div>
                     )}
@@ -233,7 +232,6 @@ export default function SupportingPage() {
                     width={40}
                     height={40}
                     className="mx-auto mb-2"
-                    unoptimized
                   />
                   <Image 
                     src="https://assets.jailbreakchangelogs.xyz/assets/images/support/KoFi_Supporter_QR_Code.webp"
@@ -241,7 +239,6 @@ export default function SupportingPage() {
                     width={192}
                     height={192}
                     className="mx-auto rounded-lg shadow"
-                    unoptimized
                   />
                   <a 
                     href="https://ko-fi.com/jailbreakchangelogs"
@@ -261,7 +258,6 @@ export default function SupportingPage() {
                     width={192}
                     height={192}
                     className="mx-auto rounded-lg shadow"
-                    unoptimized
                   />
                   <a 
                     href="https://www.roblox.com/games/104188650191561/Support-Us"

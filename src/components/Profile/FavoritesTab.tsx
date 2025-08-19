@@ -219,7 +219,6 @@ export default function FavoritesTab({ userId, currentUserId, settings }: Favori
                   src={getItemImagePath(itemType, imageName, true, false, "light")}
                   alt={itemName}
                   fill
-                  unoptimized
                   className="object-cover"
                   onError={handleImageError}
                 />

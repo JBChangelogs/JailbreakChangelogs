@@ -121,7 +121,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                 alt={title}
                 fill
                 className="object-contain rounded-lg"
-                unoptimized
                 onLoad={handleImageLoad}
               />
             </div>

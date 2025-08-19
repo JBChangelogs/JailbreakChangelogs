@@ -122,7 +122,6 @@ export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
                 src={getItemImagePath(itemData.type, itemData.name)}
                 alt={displayName}
                 fill
-                unoptimized
                 className="object-cover"
                 onError={handleImageError}
               />

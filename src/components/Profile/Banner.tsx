@@ -52,7 +52,6 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
       return {
         src: fallbackBanner || '/assets/backgrounds/background1.webp',
         alt: "Profile banner",
-        unoptimized: true
       };
     }
 
@@ -63,7 +62,6 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
         return {
           src: getBannerUrl(userId, banner),
           alt: "Profile banner",
-          unoptimized: true,
           onError: handleBannerError
         };
       }
@@ -71,7 +69,6 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
       return {
         src: fallbackBanner || '/assets/backgrounds/background1.webp',
         alt: "Profile banner",
-        unoptimized: true
       };
     }
 
@@ -80,7 +77,6 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
       return {
         src: customBanner,
         alt: "Profile banner",
-        unoptimized: true,
         onError: handleBannerError
       };
     }
@@ -89,7 +85,6 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
     return {
       src: fallbackBanner || '/assets/backgrounds/background1.webp',
       alt: "Profile banner",
-      unoptimized: true
     };
   };
 

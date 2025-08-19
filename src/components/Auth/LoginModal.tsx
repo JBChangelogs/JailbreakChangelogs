@@ -229,7 +229,6 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                             alt="Discord"
                             width={120}
                             height={36}
-                            unoptimized
                             draggable={false}
                             className="opacity-70 transition-opacity"
                           />
@@ -248,7 +247,6 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                             alt="Roblox"
                             width={120}
                             height={36}
-                            unoptimized
                             draggable={false}
                             className="opacity-70 transition-opacity"
                           />

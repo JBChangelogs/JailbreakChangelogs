@@ -19,7 +19,6 @@ export default function Maintenance() {
             width={140}
             height={140}
             priority
-            unoptimized
             draggable={false}
             className="h-[140px] w-auto filter drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
           />

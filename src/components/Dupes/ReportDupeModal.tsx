@@ -157,7 +157,6 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
                   height={150}
                   className="object-contain"
                   onError={handleImageError}
-                  unoptimized
                 />
               </div>
               <div className="text-center">

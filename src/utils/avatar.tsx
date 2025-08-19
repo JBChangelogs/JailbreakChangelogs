@@ -159,7 +159,6 @@ export const UserAvatar = ({
         return {
           src: url,
           alt: username ? `${username}'s profile picture` : 'User avatar',
-          unoptimized: true,
           onError: () => setImageError(true)
         };
       }
@@ -170,7 +169,6 @@ export const UserAvatar = ({
       return {
         src: custom_avatar,
         alt: username ? `${username}'s profile picture` : 'User avatar',
-        unoptimized: true,
         onError: () => setCustomAvatarError(true)
       };
     }
@@ -226,7 +224,6 @@ export const UserAvatar = ({
             fill
             priority
             draggable={false}
-            unoptimized={avatarSource.unoptimized}
             onError={avatarSource.onError}
             onLoad={() => {
               setIsLoading(false);

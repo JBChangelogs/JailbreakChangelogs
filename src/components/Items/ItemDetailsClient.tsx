@@ -291,7 +291,6 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                       alt={item.name}
                       width={854}
                       height={480}
-                      unoptimized
                       priority
                       className={`h-full w-full object-cover transition-opacity duration-300 ${
                         isHovered ? "opacity-0" : "opacity-100"
@@ -315,7 +314,6 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                     alt={item.name}
                     width={854}
                     height={480}
-                    unoptimized
                     priority
                     className="h-full w-full object-cover"
                     onError={handleImageError}

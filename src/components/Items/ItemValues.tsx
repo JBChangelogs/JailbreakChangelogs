@@ -89,7 +89,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
                   width={20}
                   height={20}
                   className="h-6 w-6"
-                  unoptimized
                 />
               ) : !isUSDPrice && price.toLowerCase() !== 'free' && (
                 <BanknotesIcon className="h-6 w-6 text-white" />

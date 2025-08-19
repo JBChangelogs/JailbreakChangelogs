@@ -102,7 +102,6 @@ export default function OnlineUsers({ max = 4, className = '' }: OnlineUsersProp
                 alt={`${user.username}'s avatar`}
                 fill
                 className="object-cover"
-                unoptimized
                 draggable={false}
               />
             ) : (

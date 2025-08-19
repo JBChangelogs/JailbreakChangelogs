@@ -448,7 +448,6 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                         height={64}
                         className="w-full h-full object-cover"
                         onError={handleImageError}
-                        unoptimized
                       />
                     )}
                   </div>
@@ -610,7 +609,6 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                       width={24}
                       height={24}
                       className="w-full h-full object-cover"
-                      unoptimized
                     />
                   </div>
                   <span className="text-sm text-[#D3D9D4]">

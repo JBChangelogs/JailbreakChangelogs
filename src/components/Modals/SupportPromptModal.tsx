@@ -62,7 +62,6 @@ const SupportPromptModal: React.FC<SupportPromptModalProps> = ({ open, onClose }
             height={48}
             style={{ display: 'inline-block' }}
             priority
-            unoptimized
             draggable={false}
           />
         </div>

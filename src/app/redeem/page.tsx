@@ -203,7 +203,6 @@ export default function RedeemPage() {
                         width={16}
                         height={16}
                         className="mr-2"
-                        unoptimized
                       />
                       <span><a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Ko-fi</a> (include Discord ID in message)</span>
                     </li>

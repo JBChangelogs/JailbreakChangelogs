@@ -173,7 +173,6 @@ const TimelineContent: React.FC = () => {
                       src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}
                       alt={changelog.title}
                       fill
-                      unoptimized
                       sizes="(max-width: 768px) 100vw, 45vw"
                       className="object-cover"
                       style={{ objectFit: 'cover' }}

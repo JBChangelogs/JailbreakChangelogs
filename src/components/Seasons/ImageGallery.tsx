@@ -89,7 +89,6 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
           alt={filteredRewards[currentImageIndex].item}
           fill
           className="object-contain"
-          unoptimized
           priority
         />
         

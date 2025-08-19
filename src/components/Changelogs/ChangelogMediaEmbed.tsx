@@ -16,7 +16,6 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({ type, url }) 
             alt="Embedded image"
             fill
             className="object-contain rounded-lg"
-            unoptimized
           />
         </div>
       );

@@ -93,7 +93,6 @@ export default function TradeItemsImages({ offering, requesting }: TradeItemsIma
                     src={getItemImagePath(item.type, item.base_name || item.name, true)}
                     alt={item.name}
                     fill
-                    unoptimized
                     className="object-cover"
                     onError={handleImageError}
                   />
@@ -157,7 +156,6 @@ export default function TradeItemsImages({ offering, requesting }: TradeItemsIma
                     src={getItemImagePath(item.type, item.base_name || item.name, true)}
                     alt={item.name}
                     fill
-                    unoptimized
                     className="object-cover"
                     onError={handleImageError}
                   />

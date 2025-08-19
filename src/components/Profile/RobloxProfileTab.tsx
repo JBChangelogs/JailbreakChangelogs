@@ -49,7 +49,6 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
                     src={user.roblox_avatar}
                     alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
                     fill
-                    unoptimized
                     draggable={false}
                     className="object-cover"
                     onError={() => setImageError(true)}

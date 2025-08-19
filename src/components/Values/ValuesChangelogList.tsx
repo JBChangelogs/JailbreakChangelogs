@@ -104,7 +104,6 @@ const ValuesChangelogList: React.FC<ValuesChangelogListProps> = ({ changelogs })
                         src={getItemImagePath(change.item.type, change.item.name, true)}
                         alt={change.item.name}
                         fill
-                        unoptimized
                         className="object-cover rounded-md"
                         onError={handleImageError}
                       />

@@ -242,7 +242,6 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                               height={150}
                               className="object-contain"
                               onError={handleImageError}
-                              unoptimized
                             />
                           </div>
                           <div className="mt-2">

@@ -163,7 +163,6 @@ const CalculatorItemGrid: React.FC<{
                         src={getItemImagePath(item.type, item.name, true)}
                         alt={item.name}
                         fill
-                        unoptimized
                         className="object-cover"
                         onError={handleImageError}
                       />

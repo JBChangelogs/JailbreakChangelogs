@@ -163,7 +163,6 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 											src={getItemImagePath(item.type, item.name, true)}
 											alt={displayName}
 											fill
-											unoptimized
 											className="object-cover"
 											onError={handleImageError}
 										/>

@@ -479,7 +479,6 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                                 width={16}
                                 height={16}
                                 className="rounded-full ml-2 inline-block"
-                                unoptimized
                               />
                             )}
                           </span>
@@ -494,7 +493,7 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                                           .filter(voter => voter.vote_type === 'upvote')
                                           .map(voter => (
                                             <div key={voter.id} className="flex items-center gap-2">
-                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" unoptimized />
+                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" />
                                               <span className="text-xs">{voter.name}</span>
                                             </div>
                                           ))}
@@ -532,7 +531,7 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                                           .filter(voter => voter.vote_type === 'downvote')
                                           .map(voter => (
                                             <div key={voter.id} className="flex items-center gap-2">
-                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" unoptimized />
+                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" />
                                               <span className="text-xs">{voter.name}</span>
                                             </div>
                                           ))}

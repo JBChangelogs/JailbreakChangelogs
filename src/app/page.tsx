@@ -37,7 +37,6 @@ export default function Home() {
               fill
               className="object-cover opacity-40"
               priority
-              unoptimized
             />
           )}
         </div>

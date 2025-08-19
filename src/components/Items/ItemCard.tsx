@@ -315,7 +315,6 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                 alt={item.name}
                 width={854}
                 height={480}
-                unoptimized
                 className="h-full w-full object-cover"
                 onError={handleImageError}
               />
@@ -351,7 +350,6 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                       alt={item.name}
                       width={854}
                       height={480}
-                      unoptimized
                       className={`h-full w-full object-cover transition-opacity duration-300 ${
                         isHovered ? "opacity-0" : "opacity-100"
                       }`}
@@ -374,7 +372,6 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                     alt={item.name}
                     width={854}
                     height={480}
-                    unoptimized
                     className="h-full w-full object-cover"
                     onError={handleImageError}
                   />

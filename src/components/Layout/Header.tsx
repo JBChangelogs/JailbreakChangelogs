@@ -444,7 +444,6 @@ export default function Header() {
                 height={isSmallScreen ? 36 : 48}
                 quality={90}
                 priority
-                unoptimized
                 style={{ 
                   height: isSmallScreen ? '36px' : '48px', 
                   width: 'auto' 

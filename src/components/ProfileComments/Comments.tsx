@@ -117,7 +117,6 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
             src={`https://assets.jailbreakchangelogs.xyz/assets/images/changelogs/${item_id}.webp`}
             alt={`Changelog ${item_id}`}
             fill
-            unoptimized
             className="object-cover"
             onError={handleImageError}
           />
@@ -132,7 +131,6 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
             src={`https://assets.jailbreakchangelogs.xyz/assets/images/seasons/${item_id}/10.webp`}
             alt={`Season ${item_id}`}
             fill
-            unoptimized
             className="object-cover"
             onError={handleImageError}
           />
@@ -147,7 +145,6 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
             src="https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background_Small.webp"
             alt="Trade Ad"
             fill
-            unoptimized
             className="object-cover"
             onError={handleImageError}
           />
@@ -200,7 +197,6 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
             src={imagePath}
             alt={`${item_type} ${itemDetails.name}`}
             fill
-            unoptimized
             className="object-cover"
             onError={handleImageError}
           />

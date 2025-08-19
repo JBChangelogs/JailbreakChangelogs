@@ -56,7 +56,6 @@ export default function RobloxUserCard({ user, currentUserId }: RobloxUserCardPr
               src={user.roblox_avatar}
               alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
               fill
-              unoptimized
               draggable={false}
               className="rounded-full border border-[#2E3944] object-cover"
               onError={() => setAvatarError(true)}
