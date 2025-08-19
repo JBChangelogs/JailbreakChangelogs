@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { PUBLIC_API_URL } from '@/utils/api'
+import { BASE_API_URL } from '@/utils/api'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
 const ASSETS_URL = 'https://assets.jailbreakchangelogs.xyz'
@@ -25,11 +25,11 @@ interface Season {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  console.log(`[DEBUG SEASONS] Using PUBLIC_API_URL: ${PUBLIC_API_URL}`);
+  console.log(`[DEBUG SEASONS] Using BASE_API_URL: ${BASE_API_URL}`);
   console.log(`[DEBUG SEASONS] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
   console.log(`[DEBUG SEASONS] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
   
-  const response = await fetch(`${PUBLIC_API_URL}/seasons/list`)
+  const response = await fetch(`${BASE_API_URL}/seasons/list`)
   const data = await response.json()
   
   return data

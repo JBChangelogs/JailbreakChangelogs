@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { PUBLIC_API_URL } from '@/utils/api'
+import { BASE_API_URL } from '@/utils/api'
 import { getItemImagePath, isVideoItem, getVideoThumbnailPath, getVideoPath } from '@/utils/images'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
@@ -12,11 +12,11 @@ interface Item {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  console.log(`[DEBUG VALUES] Using PUBLIC_API_URL: ${PUBLIC_API_URL}`);
+  console.log(`[DEBUG VALUES] Using BASE_API_URL: ${BASE_API_URL}`);
   console.log(`[DEBUG VALUES] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
   console.log(`[DEBUG VALUES] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
   
-  const response = await fetch(`${PUBLIC_API_URL}/items/list`)
+  const response = await fetch(`${BASE_API_URL}/items/list`)
   const data = await response.json()
   
   return data.map((item: Item) => {
