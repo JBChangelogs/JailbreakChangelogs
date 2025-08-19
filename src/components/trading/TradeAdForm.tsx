@@ -161,8 +161,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
       const storedItems = localStorage.getItem('tradeAdFormItems');
       if (storedItems) {
         const { offering, requesting } = JSON.parse(storedItems);
-        console.log('Restoring offering items:', offering);
-        console.log('Restoring requesting items:', requesting);
         setOfferingItems(offering || []);
         setRequestingItems(requesting || []);
       }

@@ -11,10 +11,6 @@ interface Changelog {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  console.log(`[DEBUG CHANGELogs] Using BASE_API_URL: ${BASE_API_URL}`);
-  console.log(`[DEBUG CHANGELogs] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
-  console.log(`[DEBUG CHANGELogs] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
-  
   const response = await fetch(`${BASE_API_URL}/changelogs/list`)
   const data = await response.json()
   

@@ -28,11 +28,6 @@ export const BASE_API_URL =
     : process.env.RAILWAY_INTERNAL_API_URL;
 
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-console.log(`[DEBUG] Using BASE_API_URL: ${BASE_API_URL}`);
-console.log(`[DEBUG] NEXT_PHASE: ${process.env.NEXT_PHASE}`);
-console.log(`[DEBUG] RAILWAY_ENVIRONMENT_NAME: ${process.env.RAILWAY_ENVIRONMENT_NAME}`);
-
 export const fetchUsers = async () => {
   const response = await fetch(`${BASE_API_URL}/users/list`);
   const data = await response.json();
@@ -41,7 +36,6 @@ export const fetchUsers = async () => {
 
 export async function fetchUserById(id: string) {
   try {
-    console.log('Fetching user with ID:', id);
     const response = await fetch(`${BASE_API_URL}/users/get?id=${id}&nocache=true`);
     const data = await response.json();
     
@@ -80,7 +74,6 @@ export async function fetchUserById(id: string) {
 
 export async function fetchUserByIdForOG(id: string) {
   try {
-    console.log('Fetching user with ID for OG:', id);
     const fields = [
       'id',
       'username', 
@@ -132,7 +125,6 @@ export async function fetchUserByIdForOG(id: string) {
 
 export async function fetchUserByIdForMetadata(id: string) {
   try {
-    console.log('Fetching user with ID for metadata:', id);
     const fields = [
       'accent_color',
       'global_name',
@@ -201,11 +193,9 @@ export const fetchUsersForList = async () => {
 
 export async function fetchItems() {
   try {
-    console.log(`[SERVER] Fetching items from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/items/list`);
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
-    console.log(`[SERVER] Successfully fetched ${data.length} items from API`);
     return data as Item[];
   } catch (err) {
     console.error('[SERVER] Error fetching items:', err);
@@ -255,7 +245,6 @@ export async function fetchLastUpdated(items: Item[]) {
 
 export async function fetchItem(type: string, name: string): Promise<ItemDetails | null> {
   try {
-    console.log('[SERVER] Fetching item from API:', { type, name });
     const itemName = decodeURIComponent(name);
     const itemType = decodeURIComponent(type);
     
@@ -269,7 +258,6 @@ export async function fetchItem(type: string, name: string): Promise<ItemDetails
     }
     
     const data = await response.json();
-    console.log('[SERVER] Successfully fetched item:', data.name);
     return data as ItemDetails;
   } catch (err) {
     console.error('[SERVER] Error fetching item:', err);
@@ -291,7 +279,6 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
 
 export async function fetchItemsChangelog(id: string) {
   try {
-    console.log(`[SERVER] Fetching items changelog ${id} from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/items/changelogs/get?id=${id}`);
     
     if (response.status === 404) {
@@ -304,7 +291,6 @@ export async function fetchItemsChangelog(id: string) {
     }
     
     const data = await response.json();
-    console.log(`[SERVER] Successfully fetched items changelog ${id}`);
     return data;
   } catch (err) {
     console.error('[SERVER] Error fetching items changelog:', err);
@@ -314,12 +300,10 @@ export async function fetchItemsChangelog(id: string) {
 
 export async function fetchTradeAds() {
   try {
-    console.log(`[SERVER] Fetching trade ads from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/trades/list`);
     
     if (response.status === 404) {
       // 404 means no trade ads found (all expired)
-      console.log('[SERVER] No trade ads found');
       return [];
     }
     
@@ -328,7 +312,6 @@ export async function fetchTradeAds() {
     }
     
     const data = await response.json();
-    console.log(`[SERVER] Successfully fetched ${data.length} trade ads`);
     return data;
   } catch (err) {
     console.error('[SERVER] Error fetching trade ads:', err);
@@ -338,7 +321,6 @@ export async function fetchTradeAds() {
 
 export async function fetchTradeAd(id: string) {
   try {
-    console.log(`[SERVER] Fetching trade ad ${id} from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/trades/get?id=${id}`);
     
     if (response.status === 404) {
@@ -365,7 +347,6 @@ export async function fetchUsersBatch(userIds: string[]) {
       return {};
     }
     
-    console.log(`[SERVER] Fetching ${userIds.length} users in batch from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/users/get/batch?ids=${userIds.join(',')}&nocache=true`);
     
     if (!response.ok) {
@@ -378,7 +359,6 @@ export async function fetchUsersBatch(userIds: string[]) {
       return acc;
     }, {});
     
-    console.log(`[SERVER] Successfully fetched ${userDataArray.length} users in batch`);
     return userMap;
   } catch (err) {
     console.error('[SERVER] Error fetching users batch:', err);
@@ -388,7 +368,6 @@ export async function fetchUsersBatch(userIds: string[]) {
 
 export async function fetchDupes() {
   try {
-    console.log(`[SERVER] Fetching dupes from ${BASE_API_URL}...`);
     const response = await fetch(`${BASE_API_URL}/dupes/list`);
     
     if (!response.ok) {
@@ -396,7 +375,6 @@ export async function fetchDupes() {
     }
     
     const data = await response.json();
-    console.log(`[SERVER] Successfully fetched ${data.length} dupes`);
     return data;
   } catch (err) {
     console.error('[SERVER] Error fetching dupes:', err);
