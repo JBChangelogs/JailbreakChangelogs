@@ -5,6 +5,8 @@ import { fetchItemsChangelog, fetchUsersBatch } from '@/utils/api';
 import ChangelogDetailsClient from '@/components/Values/ChangelogDetailsClient';
 import Loading from './loading';
 
+export const revalidate = 120; // Revalidate every 2 minutes
+
 interface ChangeData {
   change_id: number;
   item: {

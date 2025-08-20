@@ -5,6 +5,8 @@ import { CalculatorForm } from '@/components/Values/Calculator/CalculatorForm';
 import { fetchItems } from '@/utils/api';
 import Loading from './loading';
 
+export const revalidate = 120; // Revalidate every 2 minutes
+
 export default function CalculatorPage() {
   return (
     <main className="container mx-auto">
