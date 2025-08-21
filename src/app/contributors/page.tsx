@@ -18,10 +18,17 @@ export default async function ContributorsPage() {
     '1159540851106648174', // free
     '729353754578518058', // Toleda1
     '1181250180436217910', // nbhjlkjkl
+    '1282401201069232241', // nik
+    '771012425720791093', // lumen
   ];
   const contributorIds = [
     '1123014543891775509', // PikachuWolverine
     '797198829538508829', // Jamey
+  ];
+  const testerIds = [
+    '231616789979594754', // lin6
+    '328826331867381762', // flikter
+    '719327905272037467', // trevor
   ];
   const backgroundPictureIds = [
     '871014221125664819', // Thomy3da
@@ -33,6 +40,7 @@ export default async function ContributorsPage() {
     ...managerIds,
     ...valueTeamIds,
     ...contributorIds,
+    ...testerIds,
     ...backgroundPictureIds,
   ];
 
@@ -43,6 +51,7 @@ export default async function ContributorsPage() {
   const managers = managerIds.map(id => userMap[id]).filter(Boolean);
   const valueTeam = valueTeamIds.map(id => userMap[id]).filter(Boolean);
   const contributors = contributorIds.map(id => userMap[id]).filter(Boolean);
+  const testers = testerIds.map(id => userMap[id]).filter(Boolean);
   const backgroundPictures = backgroundPictureIds.map(id => userMap[id]).filter(Boolean);
 
   const renderUser = (user: UserData, role: string) => (
@@ -99,6 +108,7 @@ export default async function ContributorsPage() {
     ...managers.map(u => ({ ...u, role: 'Value List Manager' })),
     ...valueTeam.map(u => ({ ...u, role: 'Value Team' })),
     ...contributors.map(u => ({ ...u, role: 'Value List Contributor' })),
+    ...testers.map(u => ({ ...u, role: 'Tester' })),
   ];
 
   return (
