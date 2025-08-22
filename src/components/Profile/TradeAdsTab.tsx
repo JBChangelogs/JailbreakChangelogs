@@ -52,7 +52,7 @@ export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
   const adsPerPage = 3;
 
   useEffect(() => {
-    const fetchTradeAds = async () => {
+    const fetchUserTradeAds = async () => {
       try {
         setLoading(true);
         const response = await fetch(`${PUBLIC_API_URL}/trades/get?user=${userId}`);
@@ -64,21 +64,21 @@ export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
         }
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch trade ads: ${response.status}`);
+          throw new Error(`Failed to fetch user trade ads: ${response.status}`);
         }
         
         const data = await response.json();
         setTradeAds(Array.isArray(data) ? data : [data]);
       } catch (err) {
-        console.error('Error fetching trade ads:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch trade ads');
+        console.error('Error fetching user trade ads:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch user trade ads');
       } finally {
         setLoading(false);
       }
     };
 
     if (userId) {
-      fetchTradeAds();
+      fetchUserTradeAds();
     }
   }, [userId]);
 

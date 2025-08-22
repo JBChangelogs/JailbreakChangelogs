@@ -7,6 +7,8 @@ import TradeDetailsClient from './TradeDetailsClient';
 import Loading from './loading';
 import type { TradeItem, TradeAd } from '@/types/trading'
 
+export const dynamic = "force-dynamic";
+
 export default function TradeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<Loading />}>

@@ -300,7 +300,7 @@ export async function fetchItemsChangelog(id: string) {
 
 export async function fetchTradeAds() {
   try {
-    const response = await fetch(`${BASE_API_URL}/trades/list`);
+    const response = await fetch(`${BASE_API_URL}/trades/list?nocache=true`);
     
     if (response.status === 404) {
       // 404 means no trade ads found (all expired)
