@@ -17,7 +17,6 @@ export default async function ContributorsPage() {
   const valueTeamIds = [
     '1159540851106648174', // free
     '729353754578518058', // Toleda1
-    '1181250180436217910', // nbhjlkjkl
     '771012425720791093', // lumen
   ];
   const contributorIds = [
