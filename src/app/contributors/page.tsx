@@ -18,6 +18,7 @@ export default async function ContributorsPage() {
     '1159540851106648174', // free
     '729353754578518058', // Toleda1
     '771012425720791093', // lumen
+    '1298513662578786308', // oldmacd0nald
   ];
   const contributorIds = [
     '1123014543891775509', // PikachuWolverine
