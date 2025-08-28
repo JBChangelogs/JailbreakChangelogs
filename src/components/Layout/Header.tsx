@@ -383,6 +383,9 @@ export default function Header() {
       <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Dupe Calculator" />
       </ListItem>
+      <ListItem sx={{ pl: 4, cursor: 'default' }}>
+        <ListItemText primary="Inventory Calculator (Coming Soon)" />
+      </ListItem>
       <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Trade Ads" />
       </ListItem>
@@ -589,6 +592,15 @@ export default function Header() {
                               visible: { opacity: 1, x: 0 }
                             }}
                             transition={{ duration: 0.2, delay: 0.2 }}
+                          >
+                            <div className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white cursor-default" onClick={handleNavMenuClose}>Inventory Calculator <span className="text-xs text-gray-400">(Coming Soon)</span></div>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.25 }}
                           >
                             <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Trade Ads</Link>
                           </motion.div>
