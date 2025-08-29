@@ -94,7 +94,7 @@ export const getVideoThumbnailPath = (type: string, name: string): string => {
  */
 export const getVideoPath = (type: string, name: string): string => {
   if (name === "HyperShift") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.png";
+    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm";
   }
   if (name === "Gamer TV Set") {
     return "https://assets.jailbreakchangelogs.xyz/assets/images/items/videos/furnitures/Gamer TV Set.webm";
@@ -119,7 +119,7 @@ export const getItemImagePath = (type: string, name: string, isValuesPage: boole
     if (isSocialEmbed) {
       // Return different paths for social media embeds
       if (name === "HyperShift") {
-        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm";
+        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.png";
       }
       if (name === "Gamer TV Set") {
         return "https://assets.jailbreakchangelogs.xyz/assets/images/items/furnitures/Gamer TV Set_optimized.gif";
