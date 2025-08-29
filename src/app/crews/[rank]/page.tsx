@@ -2,7 +2,8 @@ import { fetchCrewLeaderboard } from '@/utils/api';
 import { notFound } from 'next/navigation';
 import CrewDetails from '@/components/Crews/CrewDetails';
 import Breadcrumb from '@/components/Layout/Breadcrumb';
-export const revalidate = 3600; // Revalidate every hour
+
+export const dynamic = 'force-dynamic';
 
 interface CrewPageProps {
   params: Promise<{
