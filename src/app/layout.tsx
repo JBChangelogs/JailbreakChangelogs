@@ -158,7 +158,9 @@ export default async function RootLayout({
             <AuthCheck />
             <SurveyProvider>
               <div className="flex min-h-screen flex-col">
-                <Header />
+                <Suspense fallback={<div className="h-16 bg-[#212A31] border-b border-[#2E3944]" />}>
+                  <Header />
+                </Suspense>
                 <main className="flex-1">{children}</main>
 
                 <footer className="bg-[#212A31] py-8">
@@ -546,7 +548,9 @@ export default async function RootLayout({
         <AuthCheck />
         <SurveyProvider>
           <div className="flex min-h-screen flex-col">
-            <Header />
+            <Suspense fallback={<div className="h-16 bg-[#212A31] border-b border-[#2E3944]" />}>
+              <Header />
+            </Suspense>
             <main className="flex-1">{children}</main>
 
             <footer className="bg-[#212A31] py-8">
