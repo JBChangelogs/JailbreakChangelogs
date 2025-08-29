@@ -18,12 +18,27 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
 import ItemVariantDropdown from "@/components/Items/ItemVariantDropdown";
-import ChangelogComments from '@/components/PageComments/ChangelogComments';
-import ItemValueChart from '@/components/Items/ItemValueChart';
-import SimilarItems from '@/components/Items/SimilarItems';
-import ItemChangelogs from '@/components/Items/ItemChangelogs';
+import dynamic from 'next/dynamic';
+import { Change as ItemChange } from '@/components/Items/ItemChangelogs';
 
-import { PUBLIC_API_URL } from "@/utils/api";
+const ItemValueChart = dynamic(() => import('@/components/Items/ItemValueChart'), {
+  loading: () => <div className="h-[350px] bg-[#212A31] rounded animate-pulse" />,
+  ssr: false
+});
+
+const ItemChangelogs = dynamic(() => import('@/components/Items/ItemChangelogs'), {
+  loading: () => <div className="h-[350px] bg-[#212A31] rounded animate-pulse" />,
+  ssr: false
+});
+
+const ChangelogComments = dynamic(() => import('@/components/PageComments/ChangelogComments'), {
+  loading: () => <div className="h-[350px] bg-[#212A31] rounded animate-pulse" />,
+  ssr: false
+});
+
+import SimilarItems from '@/components/Items/SimilarItems';
+
+import { PUBLIC_API_URL, fetchUserFavorites, CommentData } from "@/utils/api";
 import { handleImageError, getItemImagePath, isVideoItem, isHornItem, isDriftItem, getHornAudioPath, getDriftVideoPath, getVideoPath } from "@/utils/images";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -34,18 +49,25 @@ import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails, DupedOwner } from '@/types';
 import DisplayAd from "@/components/Ads/DisplayAd";
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
+import type { UserData } from '@/types/auth';
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
+  initialChanges?: ItemChange[];
+  initialUserMap?: Record<string, UserData>;
+  similarItemsPromise?: Promise<ItemDetails[] | null>;
+  initialFavoriteCount?: number | null;
+  initialComments?: CommentData[];
+  initialCommentUserMap?: Record<string, UserData>;
 }
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
-export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
+export default function ItemDetailsClient({ item, initialChanges, initialUserMap, similarItemsPromise, initialFavoriteCount, initialComments = [], initialCommentUserMap = {} }: ItemDetailsClientProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState(0);
+  const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount || 0);
   const [selectedVariant, setSelectedVariant] = useState<ItemDetails | null>(null);
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
@@ -119,28 +141,21 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         const userData = JSON.parse(storedUser);
-        const favoritesResponse = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userData.id}`);
-        if (favoritesResponse.ok) {
-          const favoritesData = await favoritesResponse.json();
-          if (Array.isArray(favoritesData)) {
-            const isItemFavorited = favoritesData.some(fav => {
-              const favoriteId = String(fav.item_id);
-              if (favoriteId.includes('-')) {
-                const [parentId] = favoriteId.split('-');
-                return Number(parentId) === item.id;
-              }
-              return Number(favoriteId) === item.id;
-            });
-            setIsFavorited(isItemFavorited);
-          }
+        const favoritesData = await fetchUserFavorites(userData.id);
+        if (favoritesData !== null && Array.isArray(favoritesData)) {
+          const isItemFavorited = favoritesData.some(fav => {
+            const favoriteId = String(fav.item_id);
+            if (favoriteId.includes('-')) {
+              const [parentId] = favoriteId.split('-');
+              return Number(parentId) === item.id;
+            }
+            return Number(favoriteId) === item.id;
+          });
+          setIsFavorited(isItemFavorited);
         }
       }
 
-      const countResponse = await fetch(`${PUBLIC_API_URL}/item/favorites?id=${item.id}&nocache=true`);
-      if (countResponse.ok) {
-        const count = await countResponse.json();
-        setFavoriteCount(Number(count));
-      }
+
     };
 
     checkFavoriteStatus();
@@ -443,6 +458,36 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                     <>Last updated: Never</>
                   )}
                 </div>
+
+                {/* Official Metrics from Badimo dataset */}
+                {currentItem.metadata && Object.keys(currentItem.metadata).length > 0 && (
+                  <div className="mt-3">
+                    <div className="px-2 py-1 rounded-md border border-[#5865F2]/30 bg-[#5865F2]/10">
+                      <div className="text-xs font-semibold text-[#8BA2FF] uppercase tracking-wide">Official Trading Metrics</div>
+                      <div className="text-xs text-[#D3D9D4]/70">by Badimo • last 30 days</div>
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {typeof currentItem.metadata.TimesTraded === 'number' && (
+                          <div className="rounded-md border border-[#5865F2]/30 bg-[#1A1F2E] p-3">
+                            <div className="text-xs text-[#8BA2FF]">Times Traded</div>
+                            <div className="text-white text-lg font-semibold">{currentItem.metadata.TimesTraded.toLocaleString()}</div>
+                          </div>
+                        )}
+                        {typeof currentItem.metadata.UniqueCirculation === 'number' && (
+                          <div className="rounded-md border border-[#5865F2]/30 bg-[#1A1F2E] p-3">
+                            <div className="text-xs text-[#8BA2FF]">Unique Circulation</div>
+                            <div className="text-white text-lg font-semibold">{currentItem.metadata.UniqueCirculation.toLocaleString()}</div>
+                          </div>
+                        )}
+                        {typeof currentItem.metadata.DemandMultiple === 'number' && (
+                          <div className="rounded-md border border-[#5865F2]/30 bg-[#1A1F2E] p-3">
+                            <div className="text-xs text-[#8BA2FF]">Demand Multiple</div>
+                            <div className="text-white text-lg font-semibold">{currentItem.metadata.DemandMultiple.toLocaleString()}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -580,7 +625,10 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
 
               {activeTab === 2 && (
                 <div className="space-y-6">
-                  <ItemChangelogs itemId={String(currentItem.id)} />
+                  <ItemChangelogs 
+                    initialChanges={currentItem.id === item.id ? initialChanges : undefined}
+                    initialUserMap={initialUserMap}
+                  />
                 </div>
               )}
 
@@ -753,7 +801,7 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
 
               {activeTab === 4 && (
                 <div className="space-y-6">
-                  <SimilarItems currentItem={currentItem} />
+                  <SimilarItems currentItem={currentItem} similarItemsPromise={similarItemsPromise} />
                 </div>
               )}
 
@@ -763,6 +811,8 @@ export default function ItemDetailsClient({ item }: ItemDetailsClientProps) {
                   changelogTitle={item.name}
                   type="item"
                   itemType={item.type}
+                  initialComments={initialComments}
+                  initialUserMap={initialCommentUserMap}
                 />
               )}
             </div>

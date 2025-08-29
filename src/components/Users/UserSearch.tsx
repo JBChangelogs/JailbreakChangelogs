@@ -118,9 +118,6 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
     <div className="flex flex-col gap-4 mb-8">
       <div className="flex items-center gap-4 flex-1 max-w-md">
         <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MagnifyingGlassIcon className="h-4 w-4 text-[#FFFFFF]" />
-          </div>
           <input
             type="text"
             placeholder={`Search ${userType === 'roblox' ? 'Roblox' : 'Discord'} users...`}
@@ -129,18 +126,19 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
               setSearchQuery(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-9 pr-9 py-2 rounded-lg bg-[#212A31] border border-[#2E3944] text-muted placeholder-muted focus:outline-none focus:border-[#5865F2] text-sm"
+            className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
           />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
           {searchQuery && (
             <button
               onClick={() => {
                 setSearchQuery('');
                 setPage(1);
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FFFFFF] hover:text-muted transition-colors"
+              className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
               aria-label="Clear search"
             >
-              <XMarkIcon className="h-4 w-4" />
+              <XMarkIcon />
             </button>
           )}
         </div>

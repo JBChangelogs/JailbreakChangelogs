@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
-import { PUBLIC_API_URL } from "@/utils/api";
-import { formatRelativeDate } from '@/utils/timestamp';
+import { useMemo, useState } from 'react';
 import { convertUrlsToLinks } from '@/utils/urlConverter';
-import { Button, Tooltip, Pagination } from '@mui/material';
+import { Button, Pagination, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab } from '@mui/material';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { formatFullValue } from '@/utils/values';
 import { formatCustomDate } from '@/utils/timestamp';
 import { Chip } from '@mui/material';
 import Image from 'next/image';
+import { DefaultAvatar } from '@/utils/avatar';
+import type { UserData } from '@/types/auth';
 
 type ItemChangeValue = string | number | boolean | null;
 
@@ -23,7 +24,7 @@ interface ItemChanges {
   [key: string]: ItemChangeValue | undefined;
 }
 
-interface Change {
+export interface Change {
   change_id: number;
   item: string;
   changed_by: string;
@@ -71,6 +72,7 @@ interface Change {
         id: number;
         name: string;
         avatar: string;
+        avatar_hash?: string;
         vote_number: number;
         vote_type: string;
         timestamp: number;
@@ -81,17 +83,31 @@ interface Change {
       avatar?: string;
       guild_id?: number;
       channel_id?: number;
+      avatar_hash?: string;
       suggestion_type?: string;
     };
   };
 }
 
 interface ItemChangelogsProps {
-  itemId: string;
+  initialChanges?: Change[];
+  initialUserMap?: Record<string, UserData>;
 }
 
 const MAX_REASON_LENGTH = 200;
 const DISCORD_GUILD_ID = '981485815987318824';
+
+type VoteRecord = {
+  id: number;
+  name: string;
+  avatar: string;
+  avatar_hash?: string;
+  vote_number: number;
+  vote_type: string;
+  timestamp: number;
+};
+
+type VoteLists = { up: VoteRecord[]; down: VoteRecord[]; upCount: number; downCount: number };
 
 const truncateText = (text: string, maxLength: number) => {
   if (text.length <= maxLength) return { text, isTruncated: false };
@@ -110,40 +126,31 @@ const formatBooleanLikeValue = (value: ItemChangeValue | undefined): string => {
   return String(value);
 };
 
-export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
-  const [changes, setChanges] = useState<Change[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Determine which field the suggestion_type applies to (match Values changelogs behavior)
+const doesSuggestionTypeApplyToKey = (suggestionType?: string, changeKey?: string) => {
+  if (!suggestionType || !changeKey) return false;
+  const st = suggestionType.toLowerCase();
+  const key = changeKey.toLowerCase();
+  if (st === 'cash_value') return key === 'cash_value';
+  if (st === 'duped_value') return key === 'duped_value';
+  if (st === 'notes') return key === 'notes' || key === 'note';
+  if (st === 'demand') return key === 'demand';
+  if (st === 'trend') return key === 'trend';
+  return false;
+};
+
+export default function ItemChangelogs({ initialChanges, initialUserMap }: ItemChangelogsProps) {
+  const changes: Change[] = useMemo(() => initialChanges ?? [], [initialChanges]);
+  const loading = false;
+  const error: string | null = null;
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState<'all' | 'suggestions'>('all');
+  
   const itemsPerPage = 4;
-
-  useEffect(() => {
-    const fetchChanges = async () => {
-      try {
-        const response = await fetch(`${PUBLIC_API_URL}/item/changes?id=${itemId}`);
-        
-        // Handle 404 as empty changes array
-        if (response.status === 404) {
-          setChanges([]);
-          setLoading(false);
-          return;
-        }
-
-        if (!response.ok) throw new Error('Failed to fetch changes');
-        const data = await response.json();
-        setChanges(data);
-      } catch (err) {
-        console.error('Error fetching changes:', err);
-        setError('Failed to load changelogs');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChanges();
-  }, [itemId]);
+  const [votersOpen, setVotersOpen] = useState(false);
+  const [votersTab, setVotersTab] = useState<'up' | 'down'>('up');
+  const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
+  const userMap = initialUserMap || {};
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
@@ -156,28 +163,30 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
       : a.created_at - b.created_at;
   });
 
-  // Filter changes based on selected filter
-  const filteredChanges = sortedChanges.filter(change => {
-    switch (filter) {
-      case 'suggestions':
-        return change.suggestion_data !== undefined;
-      default:
-        return true;
-    }
+  // Determine which changes are displayable (hide only last_updated or no-op changes unless it's a suggestion)
+  const displayableChanges = sortedChanges.filter((change) => {
+    const changeKeys = Object.keys(change.changes.new);
+    if (changeKeys.length === 1 && changeKeys[0] === 'last_updated') return false;
+    const hasMeaningfulChanges = Object.entries(change.changes.old).some(([key, oldValue]) => {
+      if (key === 'last_updated') return false;
+      const newValue = change.changes.new[key];
+      return oldValue !== newValue;
+    });
+    return hasMeaningfulChanges || !!change.suggestion_data;
   });
 
-  // Check if there are any suggestions
-  const hasSuggestions = changes.some(change => change.suggestion_data !== undefined);
+  const suggestionsCount = displayableChanges.reduce((count, c) => count + (c.suggestion_data ? 1 : 0), 0);
+
+  
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredChanges.length / itemsPerPage);
+  const totalPages = Math.ceil(displayableChanges.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedChanges = filteredChanges.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedChanges = displayableChanges.slice(startIndex, startIndex + itemsPerPage);
 
-  // Reset to first page when filter changes
-  useEffect(() => {
-    setPage(1);
-  }, [filter]);
+  
+
+
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -236,6 +245,73 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
 
   return (
     <div className="space-y-4 mb-8">
+      <Dialog 
+        open={votersOpen} 
+        onClose={() => setVotersOpen(false)} 
+        fullWidth 
+        maxWidth="xs"
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: '#212A31',
+              border: '1px solid #2E3944',
+              borderRadius: '8px',
+            }
+          }
+        }}
+      >
+        <DialogTitle sx={{ bgcolor: '#212A31', color: '#FFFFFF', borderBottom: '1px solid #2E3944' }}>Voters</DialogTitle>
+        <DialogContent dividers sx={{ bgcolor: '#212A31' }}>
+          <Tabs
+            value={votersTab === 'up' ? 0 : 1}
+            onChange={(_, val) => setVotersTab(val === 0 ? 'up' : 'down')}
+            textColor="primary"
+            indicatorColor="primary"
+            variant="fullWidth"
+          >
+            <Tab label={`Upvotes (${activeVoters?.upCount ?? 0})`} />
+            <Tab label={`Downvotes (${activeVoters?.downCount ?? 0})`} />
+          </Tabs>
+          <div className="mt-3 space-y-2">
+            {(votersTab === 'up' ? (activeVoters?.up || []) : (activeVoters?.down || [])).length === 0 ? (
+              <div className="text-sm text-muted">No voters to display.</div>
+            ) : (
+              (votersTab === 'up' ? (activeVoters?.up || []) : (activeVoters?.down || [])).map((voter: VoteRecord) => (
+                <div key={voter.id} className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full overflow-hidden bg-[#2E3944] relative flex-shrink-0">
+                      <DefaultAvatar />
+                      {voter.avatar_hash && (
+                        <Image 
+                          src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`)}`}
+                          alt={voter.name} 
+                          fill 
+                          className="object-cover"
+                          onError={(e) => { (e as unknown as { currentTarget: HTMLElement }).currentTarget.style.display = 'none'; }}
+                        />
+                      )}
+                    </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-white">
+                      <a
+                        href={`https://discord.com/users/${voter.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 hover:underline"
+                      >
+                        {voter.name}
+                      </a>
+                    </div>
+                    <div className="text-xs text-muted">{new Date(voter.timestamp * 1000).toLocaleString()}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+        <DialogActions sx={{ bgcolor: '#212A31', borderTop: '1px solid #2E3944' }}>
+          <Button onClick={() => setVotersOpen(false)} variant="contained">Close</Button>
+        </DialogActions>
+      </Dialog>
       {/* Central Changelogs Information Banner */}
       <div className="bg-gradient-to-r from-[#5865F2]/10 to-[#4752C4]/10 border border-[#5865F2]/20 rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">
@@ -262,114 +338,56 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-        <div className="flex flex-wrap gap-2">
+      <div className="bg-gradient-to-r from-[#2A3441] to-[#1E252B] border border-[#37424D] rounded-lg p-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Chip
+              label={`${displayableChanges.length} change${displayableChanges.length !== 1 ? 's' : ''}`}
+              size="small"
+              sx={{
+                backgroundColor: '#5865F2',
+                color: '#FFFFFF',
+                '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
+              }}
+            />
+            {suggestionsCount > 0 && (
+              <Chip
+                label={`${suggestionsCount} suggestion${suggestionsCount !== 1 ? 's' : ''}`}
+                size="small"
+                sx={{
+                  backgroundColor: '#5865F2',
+                  color: '#FFFFFF',
+                  '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
+                }}
+              />
+            )}
+          </div>
           <Button
-            variant={filter === 'all' ? 'contained' : 'outlined'}
-            onClick={() => setFilter('all')}
+            variant="outlined"
+            onClick={toggleSortOrder}
+            startIcon={sortOrder === 'newest' ? <ArrowDownIcon className="h-4 w-4" /> : <ArrowUpIcon className="h-4 w-4" />}
             size="small"
             fullWidth
             sx={{
-              backgroundColor: filter === 'all' ? '#5865F2' : 'transparent',
               borderColor: '#5865F2',
-              color: filter === 'all' ? '#FFFFFF' : '#FFFFFF',
+              color: '#5865F2',
+              backgroundColor: '#212A31',
               '&:hover': {
                 borderColor: '#4752C4',
-                backgroundColor: filter === 'all' ? '#4752C4' : 'rgba(88, 101, 242, 0.1)',
+                backgroundColor: '#2B2F4C',
               },
               '@media (min-width: 640px)': {
                 width: 'auto',
               },
             }}
           >
-            All Changes
-          </Button>
-          <Button
-            variant={filter === 'suggestions' ? 'contained' : 'outlined'}
-            onClick={() => setFilter('suggestions')}
-            size="small"
-            fullWidth
-            sx={{
-              backgroundColor: filter === 'suggestions' ? '#5865F2' : 'transparent',
-              borderColor: '#5865F2',
-              color: filter === 'suggestions' ? '#FFFFFF' : '#FFFFFF',
-              '&:hover': {
-                borderColor: '#4752C4',
-                backgroundColor: filter === 'suggestions' ? '#4752C4' : 'rgba(88, 101, 242, 0.1)',
-              },
-              '@media (min-width: 640px)': {
-                width: 'auto',
-              },
-            }}
-          >
-            Suggestions
+            {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
           </Button>
         </div>
-        <Button
-          variant="outlined"
-          onClick={toggleSortOrder}
-          startIcon={sortOrder === 'newest' ? <ArrowDownIcon className="h-4 w-4" /> : <ArrowUpIcon className="h-4 w-4" />}
-          size="small"
-          fullWidth
-          sx={{
-            borderColor: '#5865F2',
-            color: '#5865F2',
-            backgroundColor: '#212A31',
-            '&:hover': {
-              borderColor: '#4752C4',
-              backgroundColor: '#2B2F4C',
-            },
-            '@media (min-width: 640px)': {
-              width: 'auto',
-            },
-          }}
-        >
-          {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
-        </Button>
       </div>
 
-      {filter === 'suggestions' && !hasSuggestions ? (
-        <div className="rounded-lg bg-gradient-to-br from-[#2A3441] to-[#1E252B] p-8 text-center border border-[#37424D] shadow-lg">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700]/20 to-[#FFA500]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#FFD700]/30">
-            <svg className="w-8 h-8 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No Suggestions Available</h3>
-          <p className="text-[#D3D9D4] text-sm mb-6 max-w-md mx-auto leading-relaxed">
-            No value suggestions have been submitted for this item yet. Be the first to suggest a value change!
-          </p>
-          <div className="bg-gradient-to-r from-[#FFD700]/10 to-[#FFA500]/10 border border-[#FFD700]/20 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-[#FFD700] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div className="text-left">
-                <h4 className="text-white font-medium mb-1">Have a suggestion?</h4>
-                <p className="text-[#D3D9D4] text-sm leading-relaxed">
-                  Join{' '}
-                  <a 
-                    href="https://discord.com/invite/baHCsb8N5A"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#FFD700] hover:text-[#FFA500] hover:underline font-medium transition-colors"
-                  >
-                    Trading Core
-                  </a>
-                  {' '}to suggest value changes and help keep our database accurate.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
+      <>
           {paginatedChanges
-            .filter((change) => {
-              // Hide cards where the only change is last_updated
-              const changeKeys = Object.keys(change.changes.new);
-              return !(changeKeys.length === 1 && changeKeys[0] === 'last_updated');
-            })
             .map((change) => {
               // Check if there are any meaningful changes (excluding last_updated)
               const hasMeaningfulChanges = Object.entries(change.changes.old).some(([key, oldValue]) => {
@@ -386,56 +404,20 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
                     <div className="flex items-center gap-2">
                       {change.suggestion_data ? (
-                        <Chip
-                          label={`Suggestion #${change.suggestion_data.id}`}
-                          size="small"
-                          sx={{
-                            backgroundColor: '#5865F2',
-                            color: 'white',
-                            '& .MuiChip-label': { color: 'white' }
-                          }}
-                        />
-                      ) : (
-                        <span className="text-sm text-muted">
-                          Changed by{' '}
-                          <Link
-                            href={`/users/${change.changed_by_id}`}
-                            className="text-blue-400 hover:text-blue-300 hover:underline"
-                          >
-                            {change.changed_by}
-                          </Link>
-                        </span>
-                      )}
+                        <>
+                          <Chip
+                            label={`Suggestion #${change.suggestion_data.id}`}
+                            size="small"
+                            sx={{
+                              backgroundColor: '#5865F2',
+                              color: 'white',
+                              '& .MuiChip-label': { color: 'white', fontWeight: 700 }
+                            }}
+                          />
+                        </>
+                      ) : null}
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      {!change.suggestion_data && (
-                        <Tooltip 
-                          title={formatCustomDate(change.created_at * 1000)}
-                          placement="top"
-                          arrow
-                          slotProps={{
-                            tooltip: {
-                              sx: {
-                                backgroundColor: '#0F1419',
-                                color: '#D3D9D4',
-                                fontSize: '0.75rem',
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid #2E3944',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                                '& .MuiTooltip-arrow': {
-                                  color: '#0F1419',
-                                }
-                              }
-                            }
-                          }}
-                        >
-                          <span className="text-sm text-muted cursor-help">
-                            {formatRelativeDate(change.created_at * 1000)}
-                          </span>
-                        </Tooltip>
-                      )}
-                    </div>
+                    <div className="flex flex-col items-end gap-1"></div>
                   </div>
 
                   {!change.suggestion_data && (
@@ -445,121 +427,72 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                   {change.suggestion_data && (
                     <>
                       <div className="bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-lg p-3 mt-2">
-                        {/* Item type and ID info for new format */}
-                        {(change.suggestion_data.data.item_type || change.suggestion_data.data.item_id) && (
-                          <div className="flex items-center gap-2 mb-2 text-xs">
-                            {change.suggestion_data.data.item_type && (
-                              <span className="px-2 py-1 bg-[#5865F2]/20 text-[#5865F2] rounded">
-                                {change.suggestion_data.data.item_type}
-                              </span>
-                            )}
-                            {change.suggestion_data.data.item_id && (
-                              <span className="px-2 py-1 bg-[#37424D] text-gray-300 rounded">
-                                ID: {change.suggestion_data.data.item_id}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                          <span className="text-sm font-medium text-white">
-                            Suggested by{' '}
-                            <a
-                              href={`https://discord.com/users/${change.suggestion_data.user_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:text-blue-300 hover:underline"
-                            >
-                              {change.suggestion_data.suggestor_name}
-                            </a>
-                            {change.suggestion_data.metadata?.avatar && (
-                              <Image 
-                                src={change.suggestion_data.metadata.avatar} 
-                                alt={`${change.suggestion_data.suggestor_name}'s avatar`}
-                                width={16}
-                                height={16}
-                                className="rounded-full ml-2 inline-block"
-                              />
+                          <div className="flex items-center gap-2">
+                            {change.suggestion_data.metadata?.avatar_hash && (
+                              <div className="w-6 h-6 rounded-full overflow-hidden bg-[#2E3944] relative flex-shrink-0">
+                                <DefaultAvatar />
+                                <Image 
+                                  src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`)}`} 
+                                  alt={`${change.suggestion_data.suggestor_name}'s avatar`}
+                                  fill
+                                  className="object-cover"
+                                  onError={(e) => { (e as unknown as { currentTarget: HTMLElement }).currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
                             )}
-                          </span>
+                            <span className="text-sm font-medium text-white">
+                              Suggested by{' '}
+                              <a
+                                href={`https://discord.com/users/${change.suggestion_data.user_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:text-blue-300 hover:underline"
+                              >
+                                {change.suggestion_data.suggestor_name}
+                              </a>
+                            </span>
+                          </div>
                           <div className="flex items-center justify-center text-xs">
                             <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
-                              <Tooltip 
-                                  title={
-                                    change.suggestion_data.vote_data.voters ? (
-                                      <div className="space-y-1">
-                                        <div className="font-medium">Upvotes ({change.suggestion_data.vote_data.upvotes}):</div>
-                                        {change.suggestion_data.vote_data.voters
-                                          .filter(voter => voter.vote_type === 'upvote')
-                                          .map(voter => (
-                                            <div key={voter.id} className="flex items-center gap-2">
-                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" />
-                                              <span className="text-xs">{voter.name}</span>
-                                            </div>
-                                          ))}
-                                      </div>
-                                    ) : (
-                                      `${change.suggestion_data.vote_data.upvotes} upvote${change.suggestion_data.vote_data.upvotes !== 1 ? 's' : ''}`
-                                    )
-                                  }
-                                arrow
-                                placement="top"
-                                slotProps={{
-                                  tooltip: {
-                                    sx: {
-                                      bgcolor: '#1A2228',
-                                      border: '1px solid #2E3944',
-                                        maxWidth: '300px',
-                                      '& .MuiTooltip-arrow': {
-                                        color: '#1A2228',
-                                      },
-                                    },
-                                  },
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const voters = change.suggestion_data?.vote_data.voters || [];
+                                  const up = voters.filter(v => v.vote_type === 'upvote');
+                                  const down = voters.filter(v => v.vote_type === 'downvote');
+                                  const upCount = change.suggestion_data?.vote_data.upvotes || 0;
+                                  const downCount = change.suggestion_data?.vote_data.downvotes || 0;
+                                  if (up.length === 0 && down.length === 0) return;
+                                  setActiveVoters({ up, down, upCount, downCount });
+                                  setVotersTab('up');
+                                  setVotersOpen(true);
                                 }}
+                                className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 hover:bg-green-500/20 focus:outline-none"
+                                aria-label="View voters"
                               >
-                                <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
-                                  <span className="text-green-400 font-medium">↑</span>
-                                  <span className="text-green-400 font-semibold">{change.suggestion_data.vote_data.upvotes}</span>
-                                </div>
-                              </Tooltip>
-                              <Tooltip 
-                                  title={
-                                    change.suggestion_data.vote_data.voters ? (
-                                      <div className="space-y-1">
-                                        <div className="font-medium">Downvotes ({change.suggestion_data.vote_data.downvotes}):</div>
-                                        {change.suggestion_data.vote_data.voters
-                                          .filter(voter => voter.vote_type === 'downvote')
-                                          .map(voter => (
-                                            <div key={voter.id} className="flex items-center gap-2">
-                                              <Image src={voter.avatar} alt={voter.name} width={16} height={16} className="rounded-full" />
-                                              <span className="text-xs">{voter.name}</span>
-                                            </div>
-                                          ))}
-                                      </div>
-                                    ) : (
-                                      `${change.suggestion_data.vote_data.downvotes} downvote${change.suggestion_data.vote_data.downvotes !== 1 ? 's' : ''}`
-                                    )
-                                  }
-                                arrow
-                                placement="top"
-                                slotProps={{
-                                  tooltip: {
-                                    sx: {
-                                      bgcolor: '#1A2228',
-                                      border: '1px solid #2E3944',
-                                        maxWidth: '300px',
-                                      '& .MuiTooltip-arrow': {
-                                        color: '#1A2228',
-                                      },
-                                    },
-                                  },
+                                <span className="text-green-400 font-medium">↑</span>
+                                <span className="text-green-400 font-semibold">{change.suggestion_data.vote_data.upvotes}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const voters = change.suggestion_data?.vote_data.voters || [];
+                                  const up = voters.filter(v => v.vote_type === 'upvote');
+                                  const down = voters.filter(v => v.vote_type === 'downvote');
+                                  const upCount = change.suggestion_data?.vote_data.upvotes || 0;
+                                  const downCount = change.suggestion_data?.vote_data.downvotes || 0;
+                                  if (up.length === 0 && down.length === 0) return;
+                                  setActiveVoters({ up, down, upCount, downCount });
+                                  setVotersTab('down');
+                                  setVotersOpen(true);
                                 }}
+                                className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 hover:bg-red-500/20 focus:outline-none"
+                                aria-label="View voters"
                               >
-                                <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
-                                  <span className="text-red-400 font-medium">↓</span>
-                                  <span className="text-red-400 font-semibold">{change.suggestion_data.vote_data.downvotes}</span>
-                                </div>
-                              </Tooltip>
+                                <span className="text-red-400 font-medium">↓</span>
+                                <span className="text-red-400 font-semibold">{change.suggestion_data.vote_data.downvotes}</span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -590,110 +523,10 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                           })()}
                         </div>
                         
-                        {/* Display suggestion details based on available data */}
-                        {(() => {
-                          // Collect all meaningful suggestion fields
-                          const suggestionFields = [];
-                          
-                          // Handle old format value
-                          if (change.suggestion_data.data.current_value && change.suggestion_data.data.suggested_value) {
-                            suggestionFields.push({
-                              label: 'Value',
-                              old: change.suggestion_data.data.current_value,
-                              new: change.suggestion_data.data.suggested_value
-                            });
-                          }
-                          
-                          // Handle new format cash value
-                          if (change.suggestion_data.data.current_cash_value && change.suggestion_data.data.suggested_cash_value) {
-                            suggestionFields.push({
-                              label: 'Cash Value',
-                              old: change.suggestion_data.data.current_cash_value,
-                              new: change.suggestion_data.data.suggested_cash_value
-                            });
-                          }
-                          
-                          // Handle new format duped value
-                          if (change.suggestion_data.data.current_duped_value && change.suggestion_data.data.suggested_duped_value) {
-                            suggestionFields.push({
-                              label: 'Duped Value',
-                              old: change.suggestion_data.data.current_duped_value,
-                              new: change.suggestion_data.data.suggested_duped_value
-                            });
-                          }
-                          
-                          // Handle new format notes
-                          if (change.suggestion_data.data.current_notes && change.suggestion_data.data.suggested_notes) {
-                            suggestionFields.push({
-                              label: 'Notes',
-                              old: change.suggestion_data.data.current_notes,
-                              new: change.suggestion_data.data.suggested_notes
-                            });
-                          }
-                          
-                          // Handle old format demand/trend/notes only if they have meaningful values
-                          if (change.suggestion_data.data.current_demand !== null && change.suggestion_data.data.suggested_demand !== null) {
-                            suggestionFields.push({
-                              label: 'Demand',
-                              old: change.suggestion_data.data.current_demand,
-                              new: change.suggestion_data.data.suggested_demand
-                            });
-                          }
-                          
-                          if (change.suggestion_data.data.current_trend !== null && change.suggestion_data.data.suggested_trend !== null) {
-                            suggestionFields.push({
-                              label: 'Trend',
-                              old: change.suggestion_data.data.current_trend,
-                              new: change.suggestion_data.data.suggested_trend
-                            });
-                          }
-                          
-                          if (change.suggestion_data.data.current_note !== null && change.suggestion_data.data.suggested_note !== null) {
-                            suggestionFields.push({
-                              label: 'Note',
-                              old: change.suggestion_data.data.current_note,
-                              new: change.suggestion_data.data.suggested_note
-                            });
-                          }
-                          
-                          // Only show the section if there are meaningful fields to display
-                          if (suggestionFields.length === 0) return null;
-                          
-                          return (
-                            <div className="bg-[#2A3441]/50 rounded-lg p-2 mb-2">
-                              <div className="text-xs text-gray-400 mb-1">Suggestion Details:</div>
-                              <div className="space-y-1">
-                                {suggestionFields.map((field, index) => (
-                                  <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                    <span className="text-xs text-gray-400 flex-shrink-0">{field.label}:</span>
-                                    <span className="text-xs text-gray-300 line-through">{field.old}</span>
-                                    <span className="text-xs text-gray-300">→</span>
-                                    <span className="text-xs text-white font-medium">{field.new}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })()}
+                        {/* Suggestion details removed; changes will be shown in the unified list below */}
                         <div className="text-xs text-gray-400">
                           Suggested on {formatCustomDate(change.suggestion_data.created_at * 1000)}
-                          {change.suggestion_data.metadata?.suggestion_type && (
-                            <span className="ml-2 px-2 py-1 bg-[#5865F2]/20 text-[#5865F2] rounded text-xs">
-                              {change.suggestion_data.metadata.suggestion_type.replace(/_/g, ' ')}
-                            </span>
-                          )}
                         </div>
-                      </div>
-                      <div className="mt-3">
-                        <span className="text-sm text-muted">
-                          Changed by{' '}
-                          <Link
-                            href={`/users/${change.changed_by_id}`}
-                            className="text-blue-400 hover:text-blue-300 hover:underline"
-                          >
-                            {change.changed_by}
-                          </Link>
-                        </span>
                       </div>
                       <div className="border-b border-[#2E3944] mb-4"></div>
                     </>
@@ -703,57 +536,84 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
                     {Object.entries(change.changes.old).map(([key, oldValue]) => {
                       if (key === 'last_updated') return null;
                       const newValue = change.changes.new[key];
+                      const isNA = (v: unknown) => v == null || (typeof v === 'string' && v.trim().toUpperCase() === 'N/A');
+                      // Hide rows where both sides are effectively N/A
+                      if (isNA(oldValue) && isNA(newValue)) return null;
                       if (oldValue === newValue) return null;
+
+                      const formatValue = (k: string, v: unknown): string => {
+                        if (k === 'cash_value' || k === 'duped_value') {
+                          return formatFullValue(String(v));
+                        }
+                        if (typeof v === 'boolean' || v === 1 || v === 0 || k.startsWith('is_')) {
+                          return formatBooleanLikeValue(v as ItemChangeValue | undefined);
+                        }
+                        const str = v === '' || v === null || v === undefined ? 'N/A' : String(v);
+                        return str;
+                      };
 
                       return (
                         <div key={key} className="flex items-start gap-2 overflow-hidden">
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm text-white capitalize">
-                              {key.replace(/_/g, ' ')}
+                            <div className="text-sm text-[#D3D9D4] capitalize">
+                              {doesSuggestionTypeApplyToKey(change.suggestion_data?.metadata?.suggestion_type, key) ? (
+                                <Chip
+                                  label={(() => {
+                                    const text = change.suggestion_data!.metadata!.suggestion_type!.replace(/_/g, ' ');
+                                    return text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                  })()}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: '#124E66',
+                                    color: '#FFFFFF',
+                                    '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  {key.replace(/_/g, ' ')}:
+                                </>
+                              )}
                             </div>
-                            {change.suggestion_data ? (
-                              <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                  <span className="text-sm text-white flex-shrink-0">Old:</span>
-                                  <span className="text-muted line-through break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
-                                    {typeof oldValue === 'boolean' || oldValue === 1 || oldValue === 0 || key.startsWith('is_')
-                                      ? formatBooleanLikeValue(oldValue)
-                                      : convertUrlsToLinks(oldValue === "" || oldValue === null || oldValue === undefined ? "N/A" : String(oldValue))}
-                                  </span>
-                                </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                  <span className="text-sm text-white flex-shrink-0">New:</span>
-                                  <span className="text-muted break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
-                                    {typeof newValue === 'boolean' || newValue === 1 || newValue === 0 || key.startsWith('is_')
-                                      ? formatBooleanLikeValue(newValue)
-                                      : convertUrlsToLinks(newValue === "" || newValue === null || newValue === undefined ? "N/A" : String(newValue))}
-                                  </span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                  <span className="text-sm text-white flex-shrink-0">Old:</span>
-                                  <span className="text-muted line-through break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
-                                    {typeof oldValue === 'boolean' || oldValue === 1 || oldValue === 0 || key.startsWith('is_')
-                                      ? formatBooleanLikeValue(oldValue)
-                                      : convertUrlsToLinks(oldValue === "" || oldValue === null || oldValue === undefined ? "N/A" : String(oldValue))}
-                                  </span>
-                                </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                  <span className="text-sm text-white flex-shrink-0">New:</span>
-                                  <span className="text-muted break-words overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
-                                    {typeof newValue === 'boolean' || newValue === 1 || newValue === 0 || key.startsWith('is_')
-                                      ? formatBooleanLikeValue(newValue)
-                                      : convertUrlsToLinks(newValue === "" || newValue === null || newValue === undefined ? "N/A" : String(newValue))}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm text-[#D3D9D4] line-through break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
+                                {convertUrlsToLinks(formatValue(key, oldValue))}
+                              </span>
+                              <span className="text-[#D3D9D4]">→</span>
+                              <span className="text-sm text-white font-medium break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
+                                {convertUrlsToLinks(formatValue(key, newValue))}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
+                  </div>
+                  <div className="flex items-center gap-2 pt-4 border-t border-[#2E3944] mt-4">
+                    <div className="w-6 h-6 rounded-full overflow-hidden bg-[#2E3944] relative flex-shrink-0">
+                      <DefaultAvatar />
+                      {userMap[change.changed_by_id]?.avatar && userMap[change.changed_by_id]?.avatar !== 'None' && (
+                        <Image
+                          src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.changed_by_id}/${userMap[change.changed_by_id].avatar}?size=64`)}`}
+                          alt={change.changed_by}
+                          fill
+                          className="object-cover"
+                          onError={(e) => { (e as unknown as { currentTarget: HTMLElement }).currentTarget.style.display = 'none'; }}
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted">
+                        Changed by{' '}
+                        <Link
+                          href={`/users/${change.changed_by_id}`}
+                          className="text-blue-400 hover:text-blue-300 hover:underline"
+                        >
+                          {change.changed_by}
+                        </Link>
+                      </span>
+                      <span className="text-xs text-gray-400">on {formatCustomDate(change.created_at * 1000)}</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -784,7 +644,6 @@ export default function ItemChangelogs({ itemId }: ItemChangelogsProps) {
             </div>
           )}
         </>
-      )}
     </div>
   );
 } 

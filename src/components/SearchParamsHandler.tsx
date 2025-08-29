@@ -45,7 +45,16 @@ const validValueSorts = [
   "demand-decent",
   "demand-high",
   "demand-very-high",
-  "demand-extremely-high"
+  "demand-extremely-high",
+  "trend-stable",
+  "trend-rising",
+  "trend-hyped",
+  "trend-avoided",
+  "trend-dropping",
+  "trend-unstable",
+  "trend-hoarded",
+  "trend-projected",
+  "trend-recovering"
 ] as const;
 
 export default function SearchParamsHandler({ 

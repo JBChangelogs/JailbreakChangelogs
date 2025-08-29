@@ -2,7 +2,7 @@ import React from 'react';
 import { TradeItem } from '@/types/trading';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import Link from 'next/link';
-import { getItemTypeColor } from '@/utils/badgeColors';
+import { getItemTypeColor, getDemandColor, getTrendColor } from '@/utils/badgeColors';
 
 interface TradeValueComparisonProps {
   offering: TradeItem[];
@@ -48,7 +48,7 @@ const getItemData = (item: TradeItem): TradeItem => {
       is_limited: item.data.is_limited ?? 0,
       name: 'sub_name' in item ? `${item.data.name} (${item.sub_name})` : item.data.name,
       base_name: item.data.name,
-      trend: item.trend ?? null
+      trend: (item.trend ?? item.data?.trend ?? null)
     };
   }
   return item;
@@ -121,23 +121,13 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs text-muted">Demand:</span>
-                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
-                        (item.demand ?? 'N/A') === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-                        (item.demand ?? 'N/A') === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                        (item.demand ?? 'N/A') === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                        (item.demand ?? 'N/A') === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                        (item.demand ?? 'N/A') === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
-                        (item.demand ?? 'N/A') === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                        (item.demand ?? 'N/A') === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                        (item.demand ?? 'N/A') === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-                        'bg-gradient-to-r from-gray-500 to-gray-600'
-                      }`}>
+                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getDemandColor(item.demand ?? 'N/A')}`}>
                         {(item.demand ?? 'N/A') === 'N/A' ? 'Unknown' : (item.demand as string)}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs text-muted">Trend:</span>
-                      <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
                         {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                       </span>
                     </div>
@@ -211,23 +201,13 @@ export default function TradeValueComparison({ offering, requesting }: TradeValu
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs text-muted">Demand:</span>
-                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
-                        (item.demand ?? 'N/A') === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-                        (item.demand ?? 'N/A') === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                        (item.demand ?? 'N/A') === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                        (item.demand ?? 'N/A') === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                        (item.demand ?? 'N/A') === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
-                        (item.demand ?? 'N/A') === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                        (item.demand ?? 'N/A') === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                        (item.demand ?? 'N/A') === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-                        'bg-gradient-to-r from-gray-500 to-gray-600'
-                      }`}>
+                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getDemandColor(item.demand ?? 'N/A')}`}>
                         {(item.demand ?? 'N/A') === 'N/A' ? 'Unknown' : (item.demand as string)}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs text-muted">Trend:</span>
-                      <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
                         {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                       </span>
                     </div>

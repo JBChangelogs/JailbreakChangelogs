@@ -47,6 +47,38 @@ export default function BotPage() {
             <p className="mx-auto mb-8 max-w-2xl text-base text-muted md:text-lg">
               Your go-to resource for information and updates about our Discord bot!
             </p>
+            
+            {/* Achievement Banner */}
+            <div className="mx-auto mb-8 max-w-2xl">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 p-1">
+                <div className="rounded-lg bg-[#212a31] p-4">
+                  <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-center">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <h2 className="text-lg font-bold text-muted md:text-xl">
+                          🏆 #1 Roblox Jailbreak Bot
+                        </h2>
+                        <p className="text-xs text-[#D3D9D4] md:text-sm">
+                          The most popular Discord bot for Jailbreak servers
+                        </p>
+                      </div>
+                    </div>
+                    <div className="hidden md:block">
+                      <div className="h-8 w-px bg-[#2E3944]"></div>
+                    </div>
+                    <div className="text-center md:text-left">
+                      <p className="text-sm font-semibold text-yellow-400 md:text-base">
+                        Most Servers Added
+                      </p>
+                      <p className="text-xs text-[#D3D9D4]">
+                        Trusted by Jailbreak communities
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <a
               href="https://discord.com/discovery/applications/1281308669299920907"
               target="_blank"

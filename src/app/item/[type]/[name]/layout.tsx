@@ -20,7 +20,7 @@ async function fetchItem(type: string, name: string): Promise<ItemDetails | null
   const itemType = decodeURIComponent(type);
   try {
     const response = await fetch(
-      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`
     );
     if (!response.ok) return null;
     return await response.json() as ItemDetails;

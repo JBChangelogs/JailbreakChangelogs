@@ -17,7 +17,7 @@ import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@
 import { sortByCashValue, sortByDemand, formatFullValue } from '@/utils/values';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import { getItemTypeColor } from '@/utils/badgeColors';
+import { getItemTypeColor, getDemandColor, getTrendColor } from '@/utils/badgeColors';
 import { CategoryIconBadge } from '@/utils/categoryIcons';
 import { TradeAdErrorModal } from './TradeAdErrorModal';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -60,6 +60,13 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const router = useRouter();
   const ITEMS_PER_PAGE = windowWidth === 1024 ? 25 : 24;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const MAX_QUERY_DISPLAY_LENGTH = 120;
+  const displayDebouncedSearchQuery = debouncedSearchQuery && debouncedSearchQuery.length > MAX_QUERY_DISPLAY_LENGTH
+    ? `${debouncedSearchQuery.slice(0, MAX_QUERY_DISPLAY_LENGTH)}...`
+    : debouncedSearchQuery;
+  const displaySearchQuery = searchQuery.length > MAX_QUERY_DISPLAY_LENGTH
+    ? `${searchQuery.slice(0, MAX_QUERY_DISPLAY_LENGTH)}...`
+    : searchQuery;
 
   useEffect(() => {
     setSelectLoaded(true);
@@ -233,7 +240,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     <div className="space-y-4" data-component="available-items-grid">
       <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-muted font-medium">Tradable Items</h3>
+          <h3 className="text-muted font-medium">Tradable Items ({filteredItems.length})</h3>
         </div>
 
         {/* Ad Placement: Above the grid, only for non-premium users */}
@@ -277,7 +284,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           </div>
           {debouncedSearchQuery && (
             <div className="mt-2 text-sm text-muted">
-              Found {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} matching &quot;{debouncedSearchQuery}&quot;
+              Found {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} matching &quot;{displayDebouncedSearchQuery}&quot;
             </div>
           )}
         </div>
@@ -473,7 +480,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             <div className="col-span-full text-center py-8">
               <p className="text-muted">
                 {searchQuery 
-                  ? `No items found matching "${searchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
+                  ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
                   : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
               }
               </p>
@@ -600,17 +607,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                 ? (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand ?? 'N/A')
                                 : (item.demand ?? 'N/A');
                               return (
-                                <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${
-                                  d === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-                                  d === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                                  d === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                                  d === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                                  d === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
-                                  d === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                                  d === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                                  d === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-                                  'bg-gradient-to-r from-gray-500 to-gray-600'
-                                }`}>
+                                <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getDemandColor(d)}`}>
                                   {d === 'N/A' ? 'Unknown' : d}
                                 </span>
                               );
@@ -618,7 +615,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           </div>
                           <div className="text-muted flex items-center gap-2">
                             <span>Trend:</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                            <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
                               {!item.trend || item.trend === 'N/A' ? 'Unknown' : item.trend}
                             </span>
                           </div>

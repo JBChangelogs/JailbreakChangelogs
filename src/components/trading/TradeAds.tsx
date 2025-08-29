@@ -51,6 +51,21 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
     return match.demand;
   };
 
+  const getTrendForItem = (it: TradeItem): string | undefined => {
+    if (it.trend && it.trend !== 'N/A') return it.trend;
+    const dataTrend = it.data?.trend;
+    if (dataTrend && dataTrend !== 'N/A') return dataTrend;
+    const match = items.find(base => base.id === it.id);
+    if (!match) return undefined;
+    const subName = it.sub_name as string | undefined;
+    if (subName && Array.isArray(match.children)) {
+      const child = match.children.find(c => c.sub_name === subName);
+      const childTrend = child?.data?.trend;
+      if (childTrend && childTrend !== 'N/A') return childTrend;
+    }
+    return match.trend ?? undefined;
+  };
+
 
   const refreshTradeAds = async () => {
     try {
@@ -248,14 +263,12 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
             <p className="text-muted/70 mb-8">This page seems empty at the moment.</p>
             <div className="flex justify-center gap-4">
               <Button
-                variant="outlined"
+                variant="contained"
                 onClick={refreshTradeAds}
                 sx={{
-                  borderColor: '#5865F2',
-                  color: '#5865F2',
+                  backgroundColor: '#5865F2',
                   '&:hover': {
-                    borderColor: '#4752C4',
-                    backgroundColor: '#2B2F4C',
+                    backgroundColor: '#4752C4',
                   },
                 }}
               >
@@ -344,8 +357,16 @@ export default function TradeAds({ initialTradeAds, initialItems = [] }: TradeAd
             {currentPageItems.map((trade) => {
               const enrichedTrade: TradeAd = {
                 ...trade,
-                offering: trade.offering.map(it => ({ ...it, demand: getDemandForItem(it) || it.demand })),
-                requesting: trade.requesting.map(it => ({ ...it, demand: getDemandForItem(it) || it.demand })),
+                offering: trade.offering.map(it => ({
+                  ...it,
+                  demand: getDemandForItem(it) || it.demand,
+                  trend: getTrendForItem(it) || it.trend,
+                })),
+                requesting: trade.requesting.map(it => ({
+                  ...it,
+                  demand: getDemandForItem(it) || it.demand,
+                  trend: getTrendForItem(it) || it.trend,
+                })),
               };
               return (
                 <TradeAdCard

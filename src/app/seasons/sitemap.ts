@@ -1,32 +1,11 @@
 import type { MetadataRoute } from 'next'
-import { BASE_API_URL } from '@/utils/api'
+import { fetchSeasonsList, Season, Reward } from '@/utils/api'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
 const ASSETS_URL = 'https://assets.jailbreakchangelogs.xyz'
 
-interface Reward {
-  id: number;
-  season_number: number;
-  item: string;
-  requirement: string;
-  link: string;
-  exclusive: string;
-  bonus: string;
-}
-
-interface Season {
-  season: number;
-  title: string;
-  description: string;
-  is_current: number;
-  start_date: number;
-  end_date: number;
-  rewards: Reward[];
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const response = await fetch(`${BASE_API_URL}/seasons/list`)
-  const data = await response.json()
+  const data = await fetchSeasonsList()
   
   return data
     .filter((season: Season) => 

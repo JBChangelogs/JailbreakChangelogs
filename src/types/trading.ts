@@ -27,6 +27,7 @@ export interface TradeItem {
       duped_owners: string;
       notes: string;
       demand: string;
+      trend?: string | null;
       description: string;
       health: number;
       tradable: boolean;
@@ -47,7 +48,7 @@ export interface TradeItem {
     duped_owners: string;
     notes: string;
     demand: string;
-    
+    trend?: string | null;
     description: string;
     health: number;
     tradable: boolean;

@@ -24,6 +24,55 @@ import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 import FollowersModal from '@/components/Users/FollowersModal';
 import FollowingModal from '@/components/Users/FollowingModal';
 import type { UserFlag } from '@/types/auth';
+import { BsMusicNoteBeamed } from "react-icons/bs";
+
+const LinSuperIdol = ({ userId }: { userId: string }) => {
+  const [showPlayButton, setShowPlayButton] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (userId === '231616789979594754') {
+      const newAudio = new Audio('/assets/images/super_idol.mp3');
+      newAudio.volume = 0.7;
+      setAudio(newAudio);
+      newAudio.play().then(() => {
+        console.log('Lin successfully became a super idol!');
+        setShowPlayButton(false);
+      }).catch(error => {
+        console.log('Lin refused to be a super idol:', error);
+        setShowPlayButton(true);
+      });
+      
+      return () => {
+        newAudio.pause();
+        newAudio.currentTime = 0;
+      };
+    }
+  }, [userId]);
+
+  const handlePlayClick = () => {
+    if (audio) {
+      audio.play().catch(error => {
+        console.log('Lin still refused to be a super idol:', error);
+      });
+      setShowPlayButton(false);
+    }
+  };
+
+  if (!showPlayButton) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50">
+      <button
+        onClick={handlePlayClick}
+        className="bg-white/10 hover:bg-white/20 text-white/80 hover:text-white p-3 rounded-full transition-all duration-300 group shadow-lg backdrop-blur-sm"
+        title="Lin is a super idol"
+      >
+        <BsMusicNoteBeamed className="text-xl opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+      </button>
+    </div>
+  );
+};
 
 interface CommentData {
   id: number;
@@ -464,6 +513,7 @@ export default function UserProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#2E3944] pb-8">
+      <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <div className="bg-[#212A31] rounded-lg shadow-md border border-[#2E3944] overflow-hidden">

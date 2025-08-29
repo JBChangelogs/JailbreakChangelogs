@@ -2,6 +2,7 @@ import React from 'react';
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import { formatFullValue, formatPrice } from '@/utils/values';
+import { getTrendColor, getDemandColor } from '@/utils/badgeColors';
 
 interface ItemValuesProps {
   cashValue: string | null;
@@ -14,28 +15,9 @@ interface ItemValuesProps {
   type: string;
 }
 
-const getDemandColor = (demand: string): string => {
-  switch(demand) {
-    case 'Close to none':
-      return 'bg-gray-500/80'; // Gray for almost no demand
-    case 'Very Low':
-      return 'bg-red-500/80'; // Red for very low demand (critical)
-    case 'Low':
-      return 'bg-orange-500/80'; // Orange for low demand (warning)
-    case 'Medium':
-      return 'bg-yellow-500/80'; // Yellow for moderate demand
-    case 'Decent':
-      return 'bg-green-500/80'; // Green for decent demand (good)
-    case 'High':
-      return 'bg-blue-500/80'; // Blue for high demand (strong)
-    case 'Very High':
-      return 'bg-purple-500/80'; // Purple for very high demand (premium)
-    case 'Extremely High':
-      return 'bg-pink-500/80'; // Pink for extremely high demand
-    default:
-      return 'bg-gray-500/80'; // Default to gray for undefined cases
-  }
-};
+
+
+
 
 export default function ItemValues({ cashValue, dupedValue, demand, trend, notes, price, health, type }: ItemValuesProps) {
   const isRobuxPrice = price.toLowerCase().includes('robux');
@@ -55,7 +37,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {/* Cash Value */}
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Cash Value</h4>
           </div>
           <p className="text-2xl font-bold text-white">
@@ -66,7 +47,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {/* Duped Value */}
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Duped Value</h4>
           </div>
           <p className="text-2xl font-bold text-white">
@@ -77,7 +57,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {/* Original Price */}
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Original Price</h4>
           </div>
           <div className="flex items-center gap-2">
@@ -104,7 +83,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {type.toLowerCase() === 'vehicle' && (
           <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <h4 className="text-sm text-gray-300 font-medium">Vehicle Health</h4>
             </div>
             <p className="text-2xl font-bold text-white">
@@ -116,11 +94,9 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {/* Item Demand */}
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Item Demand</h4>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`inline-block w-3 h-3 rounded-full ${getDemandColor(demand)}`}></span>
+          <div className={`flex items-center gap-2 p-3 rounded-lg ${getDemandColor(demand)}`}>
             <p className="text-2xl font-bold text-white">
               {demand === "N/A" ? "Unknown" : demand}
             </p>
@@ -130,12 +106,11 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
         {/* Item Trend */}
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Trend</h4>
           </div>
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 p-3 rounded-lg ${getTrendColor(trend || 'Unknown')}`}>
             <span className="text-2xl font-bold text-white">
-              {(!trend || trend === 'N/A') ? 'Unknown' : trend}
+              {(!trend || trend === 'Unknown') ? 'Unknown' : trend}
             </span>
           </div>
         </div>
@@ -145,7 +120,6 @@ export default function ItemValues({ cashValue, dupedValue, demand, trend, notes
       {notes && notes.trim() !== "" && (
         <div className="bg-[#2e3944] rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
             <h4 className="text-sm text-gray-300 font-medium">Item Notes</h4>
           </div>
           <p className="text-2xl font-bold text-white">

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { PUBLIC_API_URL } from "@/utils/api";
+import { fetchItemHistory } from "@/utils/api";
 import { Button, ButtonGroup, Skeleton } from '@mui/material';
 import toast from 'react-hot-toast';
 import {
@@ -58,10 +58,10 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
       setLoading(true);
       try {
         const historyId = variantId ? `${itemId}-${variantId}` : itemId;
-        const response = await fetch(`${PUBLIC_API_URL}/item/history?id=${historyId}`);
-        if (!response.ok) throw new Error('Failed to fetch history');
-        const data = await response.json();
-        setHistory(data);
+        const data = await fetchItemHistory(historyId);
+        if (data !== null) {
+          setHistory(data);
+        }
       } catch (error) {
         console.error('Error fetching item history:', error);
       } finally {

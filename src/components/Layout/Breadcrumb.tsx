@@ -80,6 +80,13 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
       
       // Special handling for season pages
       if (index === 1 && pathSegments[0] === 'seasons' && pathSegments.length === 2) {
+        // Special case for will-i-make-it page
+        if (segment === 'will-i-make-it') {
+          return {
+            label: 'Will I Make It?',
+            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          };
+        }
         return {
           label: `Season ${segment}`,
           href: `/${pathSegments.slice(0, index + 1).join('/')}`
@@ -129,6 +136,48 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         if (index === 2) {
           return {
             label: segment,
+            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          };
+        }
+      }
+
+      // Special handling for inventories route
+      if (pathSegments[0] === 'inventories') {
+        if (index === 0) {
+          return {
+            label: "Inventory Checker",
+            href: "/inventories"
+          };
+        }
+        if (index === 1) {
+          return {
+            label: `User ${segment}`,
+            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          };
+        }
+      }
+      
+      // Special handling for inventory-checker route (legacy)
+      if (pathSegments[0] === 'inventory-checker') {
+        if (index === 0) {
+          return {
+            label: "Inventory Checker",
+            href: "/inventories"
+          };
+        }
+      }
+      
+      // Special handling for OG route
+      if (pathSegments[0] === 'og') {
+        if (index === 0) {
+          return {
+            label: "OG Finder",
+            href: "/og"
+          };
+        }
+        if (index === 1) {
+          return {
+            label: `User ${segment}`,
             href: `/${pathSegments.slice(0, index + 1).join('/')}`
           };
         }

@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         images: changelog.image_url ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`] : [],
       },
     };
-  } catch (error: unknown) {
-    console.error('Error generating metadata:', error);
+  } catch {
+    // Don't log the error to console as it's expected for non-existent changelogs
     const { id } = await params;
     return {
       metadataBase: new URL('https://jailbreakchangelogs.xyz'),

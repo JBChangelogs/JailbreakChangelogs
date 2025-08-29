@@ -58,7 +58,7 @@ export default function ValuesChangelogPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const itemsPerPage = 10;
+  const itemsPerPage = 16;
 
   useEffect(() => {
     const fetchChangelogs = async () => {

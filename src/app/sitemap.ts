@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-
+import { isFeatureEnabled } from '@/utils/featureFlags'
 
 const BASE_URL = 'https://jailbreakchangelogs.xyz'
 
@@ -91,11 +91,47 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily' as const,
     },
     {
+      url: `${BASE_URL}/seasons/will-i-make-it`,
+      lastModified: new Date().toISOString(),
+      priority: 0.7,
+      changeFrequency: 'daily' as const,
+    },
+    {
+      url: `${BASE_URL}/values/calculator`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    },
+    {
+      url: `${BASE_URL}/dupes/calculator`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    },
+    {
       url: `${BASE_URL}/users`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
       changeFrequency: 'daily' as const,
     },
+    {
+      url: `${BASE_URL}/crews`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    },
+    ...(isFeatureEnabled('INVENTORY_CALCULATOR') ? [{
+      url: `${BASE_URL}/inventories`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    }] : []),
+    ...(isFeatureEnabled('OG_FINDER') ? [{
+      url: `${BASE_URL}/og`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    }] : []),
   ]
 
   // Sitemap URLs for each content type

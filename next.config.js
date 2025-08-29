@@ -5,6 +5,15 @@ const nextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   experimental: {
     webpackMemoryOptimizations: true,
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', '@heroicons/react', 'react-icons'],
+  },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -14,12 +23,22 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    qualities: [25, 50, 75, 90, 100],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "cdn.discordapp.com",
         pathname: "/avatars/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
         pathname: "/guild-tag-badges/**",
+      },
+      {
+        protocol: "http",
+        hostname: "proxy.jailbreakchangelogs.xyz",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -86,4 +105,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

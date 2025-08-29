@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from 'react-hot-toast';
@@ -8,6 +10,7 @@ const Select = dynamic(() => import('react-select'), { ssr: false });
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;
+  fullSeasonList: Array<{ season: number; title: string; is_current: number }>;
   selectedId: string;
   onSeasonSelect: (id: string) => void;
   onGoToLatestSeason: () => void;
@@ -15,6 +18,7 @@ interface SeasonNavigationProps {
 
 const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
   seasonList,
+  fullSeasonList,
   selectedId,
   onSeasonSelect,
   onGoToLatestSeason,
@@ -53,7 +57,7 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
             placeholder="Select a season"
             classNamePrefix="react-select"
             className="w-full"
-            isClearable={true}
+            isClearable={false}
             styles={{
               control: (base) => ({
                 ...base,
@@ -101,21 +105,24 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
           <div className="w-full h-12 bg-[#212A31] border border-[#2E3944] rounded-lg animate-pulse"></div>
         )}
 
-        {seasonList.length > 0 && seasonList[0].season.toString() !== selectedId ? (
+        {seasonList.length > 0 && (() => {
+          const currentSeason = fullSeasonList.find(season => season.is_current === 1);
+          return currentSeason && currentSeason.season.toString() !== selectedId;
+        })() ? (
           <button
             onClick={onGoToLatestSeason}
             className="rounded-lg border border-[#5865F2] bg-[#2B2F4C] p-3 text-muted hover:bg-[#32365A] focus:outline-none flex items-center justify-between"
           >
-            <span>Go to Latest Season</span>
+            <span>Go to Current Season</span>
             <ClockIcon className="h-5 w-5 text-[#5865F2]" />
           </button>
         ) : (
           <button
-            onClick={() => toast.error('Already on the latest season')}
+            onClick={() => toast.error('Already on the current season')}
             className="rounded-lg border border-[#5865F2] bg-[#2B2F4C] p-3 text-muted hover:bg-[#32365A] focus:outline-none flex items-center justify-between opacity-50 cursor-not-allowed"
             aria-disabled="true"
           >
-            <span>Go to Latest Season</span>
+            <span>Go to Current Season</span>
             <ClockIcon className="h-5 w-5 text-[#5865F2]" />
           </button>
         )}

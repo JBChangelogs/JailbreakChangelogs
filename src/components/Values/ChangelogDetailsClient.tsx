@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Pagination, Chip, TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
+import { Pagination, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, Button, useMediaQuery } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { ThemeProvider } from '@mui/material/styles';
 import { darkTheme } from '@/theme/darkTheme';
 import Image from 'next/image';
+import { DefaultAvatar } from '@/utils/avatar';
 import Link from 'next/link';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
 import { getItemTypeColor } from '@/utils/badgeColors';
 import { formatMessageDate } from '@/utils/timestamp';
 import { formatFullValue } from '@/utils/values';
 import ReactMarkdown from 'react-markdown';
-
-import { Search, Clear } from '@mui/icons-material';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import DisplayAd from '@/components/Ads/DisplayAd';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
+import ChangelogDetailsHeader from './ChangelogDetailsHeader';
 
 interface Item {
   id: number;
@@ -78,6 +79,7 @@ interface SuggestionData {
       id: number;
       name: string;
       avatar: string;
+      avatar_hash?: string;
       vote_number: number;
       vote_type: string;
       timestamp: number;
@@ -88,6 +90,7 @@ interface SuggestionData {
     avatar?: string;
     guild_id?: number;
     channel_id?: number;
+    avatar_hash?: string;
     suggestion_type?: string;
   };
 }
@@ -104,6 +107,18 @@ interface ChangeData {
   suggestion?: SuggestionData;
   changed_by_id: string;
 }
+
+type VoteRecord = {
+  id: number;
+  name: string;
+  avatar: string;
+  avatar_hash?: string;
+  vote_number: number;
+  vote_type: string;
+  timestamp: number;
+};
+
+type VoteLists = { up: VoteRecord[]; down: VoteRecord[]; upCount: number; downCount: number };
 
 interface ChangelogGroup {
   id: number;
@@ -136,7 +151,25 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
   const [selectedType, setSelectedType] = useState<string>('');
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
+  const [votersOpen, setVotersOpen] = useState(false);
+  const [votersTab, setVotersTab] = useState<'up' | 'down'>('up');
+  const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
   const itemsPerPage = 12;
+  const isAtLeast1024 = useMediaQuery('(min-width:1024px)');
+  const isAtLeast1440 = useMediaQuery('(min-width:1440px)');
+
+  // Decide which field the suggestion_type applies to
+  const doesSuggestionTypeApplyToKey = (suggestionType?: string, changeKey?: string) => {
+    if (!suggestionType || !changeKey) return false;
+    const st = suggestionType.toLowerCase();
+    const key = changeKey.toLowerCase();
+    if (st === 'cash_value') return key === 'cash_value';
+    if (st === 'duped_value') return key === 'duped_value';
+    if (st === 'notes') return key === 'notes' || key === 'note';
+    if (st === 'demand') return key === 'demand';
+    if (st === 'trend') return key === 'trend';
+    return false;
+  };
 
   useEffect(() => {
     // Get current user's premium type
@@ -161,10 +194,13 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
       return matchesType;
     }
 
-    const searchLower = searchQuery.toLowerCase();
+    const searchLower = searchQuery.trim().toLowerCase();
     
     // Search in item name
     if (change.item.name.toLowerCase().includes(searchLower)) return true;
+    
+    // Search in item type
+    if (change.item.type.toLowerCase().includes(searchLower)) return true;
     
     // Search in changed_by name
     if (change.changed_by.toLowerCase().includes(searchLower)) return true;
@@ -199,6 +235,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
     if (change.suggestion?.data) {
       const suggestionData = change.suggestion.data;
       const suggestionFields = [
+        suggestionData.item_name,
         suggestionData.current_value,
         suggestionData.suggested_value,
         suggestionData.current_cash_value,
@@ -247,6 +284,12 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
     setPage(1);
   };
 
+  // Truncate very long queries for display purposes
+  const MAX_QUERY_DISPLAY_LENGTH = 120;
+  const displayQuery = searchQuery.length > MAX_QUERY_DISPLAY_LENGTH
+    ? `${searchQuery.slice(0, MAX_QUERY_DISPLAY_LENGTH)}...`
+    : searchQuery;
+
   if (!changelog) {
     return (
       <div className="text-center text-white py-8">
@@ -261,53 +304,8 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
         {/* Header with Side-by-Side Layout */}
         <div className={`grid gap-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
           {/* Changelog Info - Takes up full width for premium users, 2/3 for non-premium */}
-          <div className={`${premiumStatusLoaded && currentUserPremiumType === 0 ? 'lg:col-span-2' : ''} bg-gradient-to-r from-[#2A3441] to-[#1E252B] rounded-lg p-6 border border-[#37424D]`}>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Changelog #{changelog.id}
-            </h1>
-            <p className="text-[#D3D9D4] mb-4">
-              {changelog.change_count} change{changelog.change_count !== 1 ? 's' : ''} • Posted on {formatMessageDate(changelog.created_at * 1000)}
-            </p>
-            
-            {/* Contributors */}
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-[#D3D9D4] mb-2">Contributors:</h3>
-              <div className="flex flex-wrap gap-2">
-                {(() => {
-                  const allContributors = new Map<string, string>();
-                  
-                  changelog.change_data.forEach(change => {
-                    if (change.changed_by && change.changed_by_id) {
-                      allContributors.set(change.changed_by, change.changed_by_id);
-                    }
-                    
-                    if (change.suggestion?.suggestor_name && change.suggestion.user_id) {
-                      allContributors.set(change.suggestion.suggestor_name, String(change.suggestion.user_id));
-                    }
-                  });
-                  
-                  const sortedContributors = Array.from(allContributors.entries()).sort(([a], [b]) => 
-                    a.toLowerCase().localeCompare(b.toLowerCase())
-                  );
-                  
-                  return sortedContributors.map(([contributorName, discordId], index) => (
-                    <span key={contributorName}>
-                      <a
-                        href={`https://discord.com/users/${discordId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline text-sm"
-                      >
-                        {contributorName}
-                      </a>
-                      {index < sortedContributors.length - 1 && (
-                        <span className="text-[#D3D9D4] text-sm">,</span>
-                      )}
-                    </span>
-                  ));
-                })()}
-              </div>
-            </div>
+          <div className={`${premiumStatusLoaded && currentUserPremiumType === 0 ? 'lg:col-span-2' : ''}`}>
+            <ChangelogDetailsHeader changelog={changelog} userData={userData} />
           </div>
 
           {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
@@ -327,45 +325,25 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
           )}
         </div>
 
-        {/* Search */}
-        <div className="bg-[#212A31] rounded-lg p-4 border border-[#37424D]">
-          <TextField
-            fullWidth
+        {/* Search - match Values page styling */}
+        <div className="relative">
+          <input
+            type="text"
             placeholder="Search changes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search className="text-[#D3D9D4]" />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton onClick={clearSearch} size="small">
-                    <Clear className="text-[#D3D9D4]" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: '#D3D9D4',
-                '& fieldset': {
-                  borderColor: '#37424D',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#5865F2',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#5865F2',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#D3D9D4',
-              },
-            }}
+            className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
           />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
+              aria-label="Clear search"
+            >
+              <XMarkIcon />
+            </button>
+          )}
         </div>
 
         {/* Filter by Item Type - Chip Style */}
@@ -408,14 +386,91 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
           </div>
         </div>
 
+        <div className="mb-2">
+          <p className="text-muted">
+            {searchQuery
+              ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? 'change' : 'changes'} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ''}`
+              : `Total ${selectedType ? `${selectedType} changes` : 'Changes'}: ${filteredChanges.length}`}
+          </p>
+        </div>
+
+        {/* Voters Dialog */}
+        <Dialog 
+          open={votersOpen} 
+          onClose={() => setVotersOpen(false)} 
+          fullWidth 
+          maxWidth="xs"
+          slotProps={{
+            paper: {
+              sx: {
+                backgroundColor: '#212A31',
+                border: '1px solid #2E3944',
+                borderRadius: '8px',
+              }
+            }
+          }}
+        >
+          <DialogTitle sx={{ bgcolor: '#212A31', color: '#FFFFFF', borderBottom: '1px solid #2E3944' }}>Voters</DialogTitle>
+          <DialogContent dividers sx={{ bgcolor: '#212A31' }}>
+            <Tabs
+              value={votersTab === 'up' ? 0 : 1}
+              onChange={(_, val) => setVotersTab(val === 0 ? 'up' : 'down')}
+              textColor="primary"
+              indicatorColor="primary"
+              variant="fullWidth"
+            >
+              <Tab label={`Upvotes (${activeVoters?.upCount ?? 0})`} />
+              <Tab label={`Downvotes (${activeVoters?.downCount ?? 0})`} />
+            </Tabs>
+            <div className="mt-3 space-y-2">
+              {(votersTab === 'up' ? (activeVoters?.up || []) : (activeVoters?.down || [])).length === 0 ? (
+                <div className="text-sm text-muted">No voters to display.</div>
+              ) : (
+                (votersTab === 'up' ? (activeVoters?.up || []) : (activeVoters?.down || [])).map((voter: VoteRecord) => (
+                  <div key={voter.id} className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full overflow-hidden bg-[#2E3944] relative flex-shrink-0">
+                      <DefaultAvatar />
+                      {voter.avatar_hash && (
+                        <Image 
+                          src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`)}`}
+                          alt={voter.name} 
+                          fill 
+                          className="object-cover"
+                          onError={(e) => { (e as unknown as { currentTarget: HTMLElement }).currentTarget.style.display = 'none'; }}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-white">
+                        <a
+                          href={`https://discord.com/users/${voter.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 hover:underline"
+                        >
+                          {voter.name}
+                        </a>
+                      </div>
+                      <div className="text-xs text-muted">{new Date(voter.timestamp * 1000).toLocaleString()}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </DialogContent>
+          <DialogActions sx={{ bgcolor: '#212A31', borderTop: '1px solid #2E3944' }}>
+            <Button onClick={() => setVotersOpen(false)} variant="contained">Close</Button>
+          </DialogActions>
+        </Dialog>
+
         {/* Changes Grid */}
         {paginatedChanges.length > 0 ? (
-          <Masonry columns={{ xs: 1, sm: 2, md: 3 }} spacing={2}>
+          <Masonry columns={isAtLeast1440 ? 3 : isAtLeast1024 ? 2 : 1} spacing={2} sx={{ mx: 'auto', maxWidth: { xs: 640, sm: 'none' } }}>
             {paginatedChanges.map((change) => (
               <div key={change.change_id} className="bg-[#212A31] rounded-lg p-4 border border-[#37424D] relative">
-                {/* Suggestion # Pill - Top Right Corner of Main Card */}
+                {/* Suggestion # Pill - Responsive placement */}
                 {change.suggestion && (
-                  <div className="absolute top-3 right-3">
+                  <div className="mb-2 lg:mb-0 lg:absolute lg:top-3 lg:right-3">
                     <Chip
                       label={`Suggestion #${change.suggestion.id}`}
                       size="small"
@@ -423,14 +478,14 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                         backgroundColor: '#5865F2',
                         color: 'white',
                         fontSize: '0.75rem',
-                        '& .MuiChip-label': { color: 'white' }
+                        '& .MuiChip-label': { color: 'white', fontWeight: 700 }
                       }}
                     />
                   </div>
                 )}
 
                 {/* Item Header */}
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#37424D]">
                     {isVideoItem(change.item.name) ? (
                       <video
@@ -455,7 +510,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                     <div className="mb-1">
                       <Link
                         href={`/item/${change.item.type}/${encodeURIComponent(change.item.name)}`}
-                        className="text-white font-semibold hover:text-[#40C0E7] transition-colors truncate block"
+                        className="text-white font-semibold hover:text-[#40C0E7] transition-colors break-words whitespace-normal block lg:pr-24"
                       >
                         {change.item.name}
                       </Link>
@@ -476,77 +531,79 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                 {/* Suggestion Data - Show First if Exists */}
                 {change.suggestion && (
                   <div className="mt-4 p-3 bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-lg relative">
-                    {/* Votes - Top Right Corner of Suggestion Panel */}
-                    <div className="absolute top-2 right-2">
+                    {/* Header: avatar, name, type chip, and votes */}
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {change.suggestion.metadata?.avatar_hash && (
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-[#2E3944] relative flex-shrink-0">
+                            <DefaultAvatar />
+                            <Image 
+                              src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`)}`}
+                              alt={`${change.suggestion.suggestor_name}'s avatar`}
+                              fill
+                              className="object-cover"
+                              onError={(e) => { (e as unknown as { currentTarget: HTMLElement }).currentTarget.style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        <span className="text-sm font-medium text-white truncate">
+                          Suggested by{' '}
+                          <a
+                            href={`https://discord.com/users/${change.suggestion.user_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline"
+                          >
+                            {change.suggestion.suggestor_name}
+                          </a>
+                        </span>
+                        
+                      </div>
                       <div className="flex items-center justify-center text-xs">
                         <div className="flex items-center justify-center rounded-full border border-gray-600 overflow-hidden">
-                          <Tooltip
-                            title={`${change.suggestion.vote_data.upvotes} upvote${change.suggestion.vote_data.upvotes !== 1 ? 's' : ''}`}
-                            placement="top"
-                            arrow
-                            slotProps={{
-                              tooltip: {
-                                sx: {
-                                  backgroundColor: '#0F1419',
-                                  color: '#D3D9D4',
-                                  fontSize: '0.75rem',
-                                  padding: '8px 12px',
-                                  borderRadius: '8px',
-                                  border: '1px solid #2E3944',
-                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                                  '& .MuiTooltip-arrow': {
-                                    color: '#0F1419',
-                                  }
-                                }
-                              }
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const voters = change.suggestion?.vote_data.voters || [];
+                              const up = voters.filter(v => v.vote_type === 'upvote');
+                              const down = voters.filter(v => v.vote_type === 'downvote');
+                              const upCount = change.suggestion?.vote_data.upvotes || 0;
+                              const downCount = change.suggestion?.vote_data.downvotes || 0;
+                              if (up.length === 0 && down.length === 0) return;
+                              setActiveVoters({ up, down, upCount, downCount });
+                              setVotersTab('up');
+                              setVotersOpen(true);
                             }}
+                            className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 hover:bg-green-500/20 focus:outline-none"
+                            aria-label="View voters"
                           >
-                            <div className="flex items-center justify-center gap-1 bg-green-500/10 border-r border-gray-600 px-2 py-1 cursor-help">
-                              <span className="text-green-400 font-medium">↑</span>
-                              <span className="text-green-400 font-semibold">{change.suggestion.vote_data.upvotes}</span>
-                            </div>
-                          </Tooltip>
-                          <Tooltip
-                            title={`${change.suggestion.vote_data.downvotes} downvote${change.suggestion.vote_data.downvotes !== 1 ? 's' : ''}`}
-                            placement="top"
-                            arrow
-                            slotProps={{
-                              tooltip: {
-                                sx: {
-                                  backgroundColor: '#0F1419',
-                                  color: '#D3D9D4',
-                                  fontSize: '0.75rem',
-                                  padding: '8px 12px',
-                                  borderRadius: '8px',
-                                  border: '1px solid #2E3944',
-                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                                  '& .MuiTooltip-arrow': {
-                                    color: '#0F1419',
-                                  }
-                                }
-                              }
+                            <span className="text-green-400 font-medium">↑</span>
+                            <span className="text-green-400 font-semibold">{change.suggestion.vote_data.upvotes}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const voters = change.suggestion?.vote_data.voters || [];
+                              const up = voters.filter(v => v.vote_type === 'upvote');
+                              const down = voters.filter(v => v.vote_type === 'downvote');
+                              const upCount = change.suggestion?.vote_data.upvotes || 0;
+                              const downCount = change.suggestion?.vote_data.downvotes || 0;
+                              if (up.length === 0 && down.length === 0) return;
+                              setActiveVoters({ up, down, upCount, downCount });
+                              setVotersTab('down');
+                              setVotersOpen(true);
                             }}
+                            className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 hover:bg-red-500/20 focus:outline-none"
+                            aria-label="View voters"
                           >
-                            <div className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 cursor-help">
-                              <span className="text-red-400 font-medium">↓</span>
-                              <span className="text-red-400 font-semibold">{change.suggestion.vote_data.downvotes}</span>
-                            </div>
-                          </Tooltip>
+                            <span className="text-red-400 font-medium">↓</span>
+                            <span className="text-red-400 font-semibold">{change.suggestion.vote_data.downvotes}</span>
+                          </button>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-sm text-[#D3D9D4] mb-2">
-                      Suggested by{' '}
-                      <a
-                        href={`https://discord.com/users/${change.suggestion.user_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline"
-                      >
-                        {change.suggestion.suggestor_name}
-                      </a>
-                    </div>
+                    {/* Reason (full) */}
                     <div className="text-sm text-[#D3D9D4] mb-2">
                       <ReactMarkdown
                         components={{
@@ -557,6 +614,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                         {change.suggestion.data.reason}
                       </ReactMarkdown>
                     </div>
+
                     <div className="text-xs text-[#D3D9D4]">
                       Suggested on {formatMessageDate(change.suggestion.created_at * 1000)}
                     </div>
@@ -568,23 +626,47 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                   {Object.entries(change.changes.old).map(([key, oldValue]) => {
                     if (key === 'last_updated') return null;
                     const newValue = change.changes.new[key];
+                    // Hide rows where both current (old) and suggested (new) are effectively N/A
+                    // Treat null/undefined and the literal string "N/A" (case-insensitive) as N/A
+                    const isNA = (v: unknown) => v == null || (typeof v === 'string' && v.trim().toUpperCase() === 'N/A');
+                    if (isNA(oldValue) && isNA(newValue)) return null;
                     if (oldValue === newValue) return null;
 
                     return (
                       <div key={key} className="flex items-start gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="text-sm text-[#D3D9D4] capitalize">
-                            {key.replace(/_/g, ' ')}:
+                            {doesSuggestionTypeApplyToKey(change.suggestion?.metadata?.suggestion_type, key) ? (
+                              <Chip
+                                label={(() => {
+                                  const text = change.suggestion!.metadata!.suggestion_type!.replace(/_/g, ' ');
+                                  return text
+                                    .split(' ')
+                                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                                    .join(' ');
+                                })()}
+                                size="small"
+                                sx={{
+                                  backgroundColor: '#124E66',
+                                  color: '#FFFFFF',
+                                  '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
+                                }}
+                              />
+                            ) : (
+                              <>
+                                {key.replace(/_/g, ' ')}:
+                              </>
+                            )}
                           </div>
                           <div className="flex flex-col gap-1 mt-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-[#D3D9D4] line-through">
+                              <span className="text-sm text-[#D3D9D4] line-through break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
                                 {key === 'cash_value' || key === 'duped_value' 
                                   ? formatFullValue(oldValue as string)
                                   : String(oldValue || 'N/A')}
                               </span>
                               <span className="text-[#D3D9D4]">→</span>
-                              <span className="text-sm text-white font-medium">
+                              <span className="text-sm text-white font-medium break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
                                 {key === 'cash_value' || key === 'duped_value' 
                                   ? formatFullValue(newValue as string)
                                   : String(newValue || 'N/A')}
@@ -629,7 +711,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
           <div className="text-center text-white py-8">
             <p className="text-lg font-medium mb-2">No changes found</p>
             <p className="text-[#D3D9D4] text-sm">
-              {searchQuery && `No changes match "${searchQuery}"`}
+              {searchQuery && `No changes match "${displayQuery}"`}
               {searchQuery && selectedType && ' and '}
               {selectedType && `No changes found for item type "${selectedType}"`}
               {!searchQuery && !selectedType && 'No changes available in this changelog'}

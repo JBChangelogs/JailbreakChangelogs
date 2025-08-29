@@ -1,26 +1,9 @@
 import { Metadata } from 'next';
-import { PUBLIC_API_URL } from "@/utils/api";
+import { fetchSeasonsList, Season, Reward } from '@/utils/api';
 import { getMaintenanceMetadata } from '@/utils/maintenance';
 
 interface Props {
   params: Promise<{ id: string }>;
-}
-
-interface Reward {
-  id: number;
-  season_number: number;
-  item: string;
-  requirement: string;
-  link: string | null;
-  exclusive: string;
-  bonus: string;
-}
-
-interface Season {
-  season: number;
-  title: string;
-  description: string;
-  rewards: Reward[];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -32,8 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const { id } = await params;
-    const response = await fetch(`${PUBLIC_API_URL}/seasons/list`);
-    const seasons = await response.json();
+    const seasons = await fetchSeasonsList();
     const season = seasons.find((s: Season) => s.season.toString() === id);
 
     if (!season) {

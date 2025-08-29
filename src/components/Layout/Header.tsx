@@ -37,6 +37,8 @@ import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { isFeatureEnabled } from '@/utils/featureFlags';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const pathname = usePathname();
@@ -48,16 +50,19 @@ export default function Header() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { showLoginModal, setShowLoginModal } = useAuth();
   const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [communityMenuAnchorEl, setCommunityMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [seasonsMenuAnchorEl, setSeasonsMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [isDiscordModalOpen, setIsDiscordModalOpen] = useState(false);
   const [navMenuCloseTimeout, setNavMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [communityMenuCloseTimeout, setCommunityMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [seasonsMenuCloseTimeout, setSeasonsMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   useEscapeLogin();
 
   const navMenuButtonRef = useRef<HTMLDivElement | null>(null);
   const communityMenuButtonRef = useRef<HTMLDivElement | null>(null);
+  const seasonsMenuButtonRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -169,13 +174,20 @@ export default function Header() {
   };
 
   const handleNavMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    // Close community menu immediately if it's open
+    // Close other menus immediately if they're open
     if (communityMenuAnchorEl) {
       if (communityMenuCloseTimeout) {
         clearTimeout(communityMenuCloseTimeout);
         setCommunityMenuCloseTimeout(null);
       }
       setCommunityMenuAnchorEl(null);
+    }
+    if (seasonsMenuAnchorEl) {
+      if (seasonsMenuCloseTimeout) {
+        clearTimeout(seasonsMenuCloseTimeout);
+        setSeasonsMenuCloseTimeout(null);
+      }
+      setSeasonsMenuAnchorEl(null);
     }
 
     if (navMenuCloseTimeout) {
@@ -195,13 +207,20 @@ export default function Header() {
   const navMenuOpen = Boolean(navMenuAnchorEl);
 
   const handleCommunityMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    // Close nav menu immediately if it's open
+    // Close other menus immediately if they're open
     if (navMenuAnchorEl) {
       if (navMenuCloseTimeout) {
         clearTimeout(navMenuCloseTimeout);
         setNavMenuCloseTimeout(null);
       }
       setNavMenuAnchorEl(null);
+    }
+    if (seasonsMenuAnchorEl) {
+      if (seasonsMenuCloseTimeout) {
+        clearTimeout(seasonsMenuCloseTimeout);
+        setSeasonsMenuCloseTimeout(null);
+      }
+      setSeasonsMenuAnchorEl(null);
     }
 
     if (communityMenuCloseTimeout) {
@@ -220,6 +239,39 @@ export default function Header() {
 
   const communityMenuOpen = Boolean(communityMenuAnchorEl);
 
+  const handleSeasonsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    // Close other menus immediately if they're open
+    if (navMenuAnchorEl) {
+      if (navMenuCloseTimeout) {
+        clearTimeout(navMenuCloseTimeout);
+        setNavMenuCloseTimeout(null);
+      }
+      setNavMenuAnchorEl(null);
+    }
+    if (communityMenuAnchorEl) {
+      if (communityMenuCloseTimeout) {
+        clearTimeout(communityMenuCloseTimeout);
+        setCommunityMenuCloseTimeout(null);
+      }
+      setCommunityMenuAnchorEl(null);
+    }
+
+    if (seasonsMenuCloseTimeout) {
+      clearTimeout(seasonsMenuCloseTimeout);
+      setSeasonsMenuCloseTimeout(null);
+    }
+    setSeasonsMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleSeasonsMenuClose = () => {
+    const timeout = setTimeout(() => {
+      setSeasonsMenuAnchorEl(null);
+    }, 150);
+    setSeasonsMenuCloseTimeout(timeout);
+  };
+
+  const seasonsMenuOpen = Boolean(seasonsMenuAnchorEl);
+
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
@@ -229,8 +281,11 @@ export default function Header() {
       if (communityMenuCloseTimeout) {
         clearTimeout(communityMenuCloseTimeout);
       }
+      if (seasonsMenuCloseTimeout) {
+        clearTimeout(seasonsMenuCloseTimeout);
+      }
     };
-  }, [navMenuCloseTimeout, communityMenuCloseTimeout]);
+  }, [navMenuCloseTimeout, communityMenuCloseTimeout, seasonsMenuCloseTimeout]);
 
   const drawer = (
     <List>
@@ -265,7 +320,7 @@ export default function Header() {
               component="div"
               onClick={() => { 
                 handleDrawerToggle();
-                setLoginModalOpen(true);
+                setShowLoginModal(true);
                 const event = new CustomEvent('setLoginTab', { detail: 1 });
                 window.dispatchEvent(event);
               }}
@@ -315,7 +370,7 @@ export default function Header() {
             <Button
               variant="contained"
               onClick={() => {
-                setLoginModalOpen(true);
+                setShowLoginModal(true);
                 handleDrawerToggle();
               }}
               sx={{
@@ -355,7 +410,17 @@ export default function Header() {
         <ListItemText primary="Changelogs" />
       </ListItem>
       <ListItem component={Link} href="/seasons" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText primary="Seasons" />
+        <ListItemText primary="Browse Seasons" />
+      </ListItem>
+      <ListItem component={Link} href="/seasons/will-i-make-it" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText 
+          primary={
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span>Will I Make It</span>
+              <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+            </Box>
+          } 
+        />
       </ListItem>
       <ListItem>
         <Typography 
@@ -383,12 +448,33 @@ export default function Header() {
       <ListItem component={Link} href="/dupes/calculator" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Dupe Calculator" />
       </ListItem>
-      <ListItem sx={{ pl: 4, cursor: 'default' }}>
-        <ListItemText primary="Inventory Calculator (Coming Soon)" />
-      </ListItem>
       <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Trade Ads" />
       </ListItem>
+      {isFeatureEnabled('INVENTORY_CALCULATOR') && (
+        <ListItem component={Link} href="/inventories" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+          <ListItemText 
+            primary={
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <span>Inventory Calculator</span>
+                <span className="text-[10px] uppercase font-semibold text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded">Beta</span>
+              </Box>
+            } 
+          />
+        </ListItem>
+      )}
+      {isFeatureEnabled('OG_FINDER') && (
+        <ListItem component={Link} href="/og" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+          <ListItemText 
+            primary={
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <span>OG Finder</span>
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+              </Box>
+            } 
+          />
+        </ListItem>
+      )}
       <ListItem>
         <Typography 
           sx={{ 
@@ -405,6 +491,16 @@ export default function Header() {
       <Divider sx={{ borderColor: '#2E3944' }} />
       <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="User Search" />
+      </ListItem>
+      <ListItem component={Link} href="/crews" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+        <ListItemText 
+          primary={
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span>Crew Leaderboard</span>
+              <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+            </Box>
+          } 
+        />
       </ListItem>
       <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Private Servers" />
@@ -473,21 +569,95 @@ export default function Header() {
                   <Typography variant="button" sx={{ fontWeight: 700 }}>Changelogs</Typography>
                 </Button>
                 
-                <Button
-                  component={Link}
-                  href="/seasons"
-                  sx={{
-                    color: '#D3D9D4',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      color: '#FFFFFF',
-                      backgroundColor: '#5865F2',
-                      borderRadius: '8px',
-                    }
-                  }}
+                {/* Seasons Dropdown */}
+                <Box
+                  sx={{ position: 'relative', display: 'inline-block' }}
+                  onMouseEnter={handleSeasonsMenuOpen}
+                  onMouseLeave={handleSeasonsMenuClose}
+                  ref={seasonsMenuButtonRef}
                 >
-                  <Typography variant="button" sx={{ fontWeight: 700 }}>Seasons</Typography>
-                </Button>
+                  <Button
+                    type="button"
+                    sx={{
+                      color: seasonsMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                      borderRadius: '8px',
+                      backgroundColor: seasonsMenuOpen ? '#5865F2' : 'transparent',
+                      '&:hover': {
+                        color: '#FFFFFF',
+                        backgroundColor: '#5865F2',
+                        borderRadius: '8px',
+                      }
+                    }}
+                  >
+                    <Typography variant="button" sx={{ fontWeight: 700, color: seasonsMenuOpen ? '#FFFFFF' : undefined }}>Seasons</Typography>
+                    <motion.div
+                      animate={{ rotate: seasonsMenuOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <KeyboardArrowDownIcon 
+                        sx={{ 
+                          ml: 0.5,
+                          fontSize: '1.2rem',
+                          color: seasonsMenuOpen ? '#FFFFFF' : '#D3D9D4',
+                        }} 
+                      />
+                    </motion.div>
+                  </Button>
+            
+                  <AnimatePresence>
+                    {seasonsMenuOpen && (
+                      <motion.div
+                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(33,42,49,0.95)] backdrop-blur-xl border border-white/[0.12] z-50"
+                        style={{
+                          top: '100%',
+                        }}
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ 
+                          duration: 0.2, 
+                          ease: [0.4, 0, 0.2, 1],
+                          staggerChildren: 0.05
+                        }}
+                      >
+                        <motion.div 
+                          className="flex flex-col py-3 px-2 gap-1"
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1 }
+                          }}
+                        >
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Link href="/seasons" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleSeasonsMenuClose}>Browse Seasons</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.05 }}
+                          >
+                            <Link href="/seasons/will-i-make-it" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleSeasonsMenuClose}>
+                              <div className="flex flex-col items-start">
+                                <span>Will I Make It</span>
+                                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Box>
                 
                 {/* Values Dropdown */}
                 <Box
@@ -527,7 +697,7 @@ export default function Header() {
                   <AnimatePresence>
                     {navMenuOpen && (
                       <motion.div
-                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(33,42,49,0.95)] backdrop-blur-xl border border-white/[0.12] z-50"
                         style={{
                           top: '100%',
                         }}
@@ -593,17 +763,40 @@ export default function Header() {
                             }}
                             transition={{ duration: 0.2, delay: 0.2 }}
                           >
-                            <div className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white cursor-default" onClick={handleNavMenuClose}>Inventory Calculator <span className="text-xs text-gray-400">(Coming Soon)</span></div>
-                          </motion.div>
-                          <motion.div
-                            variants={{
-                              hidden: { opacity: 0, x: -10 },
-                              visible: { opacity: 1, x: 0 }
-                            }}
-                            transition={{ duration: 0.2, delay: 0.25 }}
-                          >
                             <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Trade Ads</Link>
                           </motion.div>
+                          {isFeatureEnabled('INVENTORY_CALCULATOR') && (
+                            <motion.div
+                              variants={{
+                                hidden: { opacity: 0, x: -10 },
+                                visible: { opacity: 1, x: 0 }
+                              }}
+                              transition={{ duration: 0.2, delay: 0.25 }}
+                            >
+                              <Link href="/inventories" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
+                                <div className="flex flex-col items-start">
+                                  <span>Inventory Calculator</span>
+                                  <span className="text-[10px] uppercase font-semibold text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded">Beta</span>
+                                </div>
+                              </Link>
+                            </motion.div>
+                          )}
+                          {isFeatureEnabled('OG_FINDER') && (
+                            <motion.div
+                              variants={{
+                                hidden: { opacity: 0, x: -10 },
+                                visible: { opacity: 1, x: 0 }
+                              }}
+                              transition={{ duration: 0.2, delay: 0.3 }}
+                            >
+                              <Link href="/og" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
+                                <div className="flex flex-col items-start">
+                                  <span>OG Finder</span>
+                                  <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                                </div>
+                              </Link>
+                            </motion.div>
+                          )}
                         </motion.div>
                       </motion.div>
                     )}
@@ -648,7 +841,7 @@ export default function Header() {
                   <AnimatePresence>
                     {communityMenuOpen && (
                       <motion.div
-                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                        className="absolute left-1/2 -translate-x-1/2 mt-0 min-w-[260px] rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(33,42,49,0.95)] backdrop-blur-xl border border-white/[0.12] z-50"
                         style={{
                           top: '100%',
                         }}
@@ -687,7 +880,12 @@ export default function Header() {
                             }}
                             transition={{ duration: 0.2, delay: 0.05 }}
                           >
-                            <Link href="/servers" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Private Servers</Link>
+                            <Link href="/crews" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>
+                              <div className="flex flex-col items-start">
+                                <span>Crew Leaderboard</span>
+                                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                              </div>
+                            </Link>
                           </motion.div>
                           <motion.div
                             variants={{
@@ -696,7 +894,7 @@ export default function Header() {
                             }}
                             transition={{ duration: 0.2, delay: 0.1 }}
                           >
-                            <Link href="/bot" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Discord Bot</Link>
+                            <Link href="/servers" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Private Servers</Link>
                           </motion.div>
                           <motion.div
                             variants={{
@@ -705,7 +903,7 @@ export default function Header() {
                             }}
                             transition={{ duration: 0.2, delay: 0.15 }}
                           >
-                            <Link href="/faq" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>FAQ</Link>
+                            <Link href="/bot" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Discord Bot</Link>
                           </motion.div>
                           <motion.div
                             variants={{
@@ -713,6 +911,15 @@ export default function Header() {
                               visible: { opacity: 1, x: 0 }
                             }}
                             transition={{ duration: 0.2, delay: 0.2 }}
+                          >
+                            <Link href="/faq" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>FAQ</Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.25 }}
                           >
                             <Link href="/contributors" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>Contributors</Link>
                           </motion.div>
@@ -811,7 +1018,7 @@ export default function Header() {
                       <AnimatePresence>
                         {Boolean(anchorEl) && (
                           <motion.div
-                            className="absolute right-0 mt-0 min-w-[280px] rounded-2xl bg-[#2e3944] shadow-2xl border border-[#2E3944] z-50"
+                            className="absolute right-0 mt-0 min-w-[280px] rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(33,42,49,0.95)] backdrop-blur-xl border border-white/[0.12] z-50"
                             style={{
                               top: '100%',
                             }}
@@ -875,7 +1082,7 @@ export default function Header() {
                                     className="flex items-center w-full rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white" 
                                     onClick={() => { 
                                       handleMenuClose(); 
-                                      setLoginModalOpen(true);
+                                      setShowLoginModal(true);
                                       const event = new CustomEvent('setLoginTab', { detail: 1 });
                                       window.dispatchEvent(event);
                                     }}
@@ -927,7 +1134,7 @@ export default function Header() {
                 ) : (
                   <Button
                     variant="contained"
-                    onClick={() => setLoginModalOpen(true)}
+                    onClick={() => setShowLoginModal(true)}
                     sx={{
                       backgroundColor: '#5865F2',
                       '&:hover': {
@@ -997,8 +1204,8 @@ export default function Header() {
         {drawer}
       </Drawer>
       <LoginModalWrapper 
-        open={loginModalOpen} 
-        onClose={() => setLoginModalOpen(false)} 
+        open={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
       />
 
       <EscapeLoginModal />

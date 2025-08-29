@@ -1,7 +1,7 @@
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, CircularProgress, Typography, TextField, Button, IconButton, Pagination, Menu, MenuItem, Skeleton, Tooltip } from '@mui/material';
-import { PUBLIC_API_URL } from "@/utils/api";
+import { CircularProgress, TextField, Button, IconButton, Pagination, Menu, MenuItem, Tooltip } from '@mui/material';
+import { PUBLIC_API_URL, CommentData } from "@/utils/api";
 import { UserAvatar } from '@/utils/avatar';
 import { PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, EllipsisHorizontalIcon, ChatBubbleLeftIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { BiSolidSend } from "react-icons/bi";
@@ -42,18 +42,6 @@ const isCommentEditable = (commentDate: string): boolean => {
   return (currentTime - commentTime) <= oneHourInSeconds;
 };
 
-interface CommentData {
-  id: number;
-  author: string;
-  content: string;
-  date: string;
-  item_id: number;
-  item_type: string;
-  user_id: string;
-  edited_at: string | null;
-  owner: string;
-}
-
 interface ChangelogCommentsProps {
   changelogId: number;
   changelogTitle: string;
@@ -62,6 +50,8 @@ interface ChangelogCommentsProps {
   trade?: {
     author: string;
   };
+  initialComments?: CommentData[];
+  initialUserMap?: Record<string, UserData>;
 }
 
 const cleanCommentText = (text: string): string => {
@@ -72,48 +62,23 @@ const cleanCommentText = (text: string): string => {
     .join('\n');
 };
 
-const CommentSkeleton = () => {
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      {[1, 2, 3].map((index) => (
-        <div key={index} className="bg-[#2E3944] p-3 sm:p-6 rounded-lg border border-[#2E3944]">
-          <div className="flex items-start gap-2 sm:gap-3">
-            <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: '#1E2328' }} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex flex-col">
-                  <Skeleton variant="text" width={120} height={24} sx={{ bgcolor: '#1E2328' }} />
-                  <Skeleton variant="text" width={80} height={16} sx={{ bgcolor: '#1E2328' }} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Skeleton variant="text" width="100%" height={20} sx={{ bgcolor: '#1E2328' }} />
-                <Skeleton variant="text" width="90%" height={20} sx={{ bgcolor: '#1E2328' }} />
-                <Skeleton variant="text" width="80%" height={20} sx={{ bgcolor: '#1E2328' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
+
 
 const ChangelogComments: React.FC<ChangelogCommentsProps> = ({ 
   changelogId, 
   changelogTitle,
   type,
   itemType,
-  trade
+  trade,
+  initialComments = [],
+  initialUserMap = {}
 }) => {
-  const [comments, setComments] = useState<CommentData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [comments, setComments] = useState<CommentData[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [userData, setUserData] = useState<Record<string, UserData>>({});
+  const [userData, setUserData] = useState<Record<string, UserData>>(initialUserMap);
   const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
   const [failedUserData, setFailedUserData] = useState<Set<string>>(new Set());
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
@@ -242,24 +207,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   }, [userData, loadingUserData, failedUserData]);
 
-  const fetchComments = useCallback(async () => {
-    if (!isMounted) return; // Don't fetch if component is not mounted
-    setLoading(true);
-    setError(null);
-    
-    const abortController = new AbortController();
-    
+  // Function to refresh comments from server
+  const refreshComments = useCallback(async () => {
     try {
       const endpoint = `${PUBLIC_API_URL}/comments/get?type=${type === 'item' ? itemType : type}&id=${changelogId}&nocache=true`;
+      const response = await fetch(endpoint);
       
-      const response = await fetch(endpoint, {
-        signal: abortController.signal
-      });
-      
-      // Handle 404 as empty comments array
       if (response.status === 404) {
         setComments([]);
-        setInitialLoadComplete(true);
         return;
       }
 
@@ -268,39 +223,32 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       }
 
       const data = await response.json();
-      
-      // Ensure data is an array, if not, set empty array
       const commentsArray = Array.isArray(data) ? data : [];
       setComments(commentsArray);
 
-      // Fetch user data for each comment
+      // Fetch user data for new comments
       if (commentsArray.length > 0) {
         const userIds = commentsArray.map(comment => comment.user_id);
         fetchUserData(userIds);
       }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
-      }
-      setError(err instanceof Error ? err.message : 'Failed to fetch comments');
-      setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to fetch comments');
-      setGlobalErrorSnackbarOpen(true);
-    } finally {
-      setLoading(false);
-      setInitialLoadComplete(true);
+    } catch (err) {
+      console.error('Error refreshing comments:', err);
     }
+  }, [changelogId, type, itemType, fetchUserData]);
 
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changelogId, type, itemType, isMounted]);
-
+  // Initialize comments with server-side data
   useEffect(() => {
     if (isMounted) {
-      fetchComments();
+      setInitialLoadComplete(true);
     }
-  }, [fetchComments, isMounted]);
+  }, [isMounted]);
+
+  // Refresh comments when changelogId changes (for quick nav navigation)
+  useEffect(() => {
+    if (isMounted && initialLoadComplete) {
+      refreshComments();
+    }
+  }, [changelogId, isMounted, initialLoadComplete, refreshComments]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -351,7 +299,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setPostSnackbarMsg('Comment posted successfully. You have 1 hour to edit your comment.');
       setPostSnackbarOpen(true);
       setNewComment('');
-      fetchComments();
+      refreshComments();
     } catch (err) {
       setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to post comment');
       setGlobalErrorSnackbarOpen(true);
@@ -400,7 +348,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setEditSnackbarOpen(true);
       setEditingCommentId(null);
       setEditContent('');
-      fetchComments();
+      refreshComments();
     } catch (err) {
       setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to edit comment');
       setGlobalErrorSnackbarOpen(true);
@@ -443,7 +391,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error('Failed to delete comment');
       }
-      fetchComments();
+      refreshComments();
     } catch (err) {
       setGlobalErrorSnackbarMsg(err instanceof Error ? err.message : 'Failed to delete comment');
       setGlobalErrorSnackbarOpen(true);
@@ -578,44 +526,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  if (loading && !initialLoadComplete) {
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="bg-[#212A31] rounded-lg p-3 sm:p-6 border border-[#5865F2]">
-        <div className="flex flex-col gap-4">
-          <div>
-            <Skeleton
-              variant="text"
-              width={320}
-              height={32}
-              sx={{ bgcolor: '#1E2328', borderRadius: '8px', marginBottom: '16px' }}
-            />
-          </div>
-          
-          {/* Comment Form Skeleton */}
-          <div className="mb-6 sm:mb-8">
-            <Skeleton variant="rounded" height={100} sx={{ bgcolor: '#1E2328' }} />
-            <div className="flex justify-between items-center mt-2">
-              <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
-              <Skeleton variant="rounded" width={120} height={36} sx={{ bgcolor: '#1E2328' }} />
-            </div>
-          </div>
 
-          {/* Comments Skeleton */}
-          <CommentSkeleton />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-  if (error) {
-    return (
-      <Box className="bg-[#2E3944] rounded-lg p-4 border border-[#5865F2]">
-        <Typography className="text-red-500">Error: {error}</Typography>
-      </Box>
-    );
-  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -815,8 +726,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               <div className="flex items-center gap-2 flex-wrap">
                                 {loadingUserData[comment.user_id] ? (
                                   <>
-                                    <Skeleton variant="text" width={120} height={20} sx={{ bgcolor: '#1E2328' }} />
-                                    <Skeleton variant="text" width={80} height={16} sx={{ bgcolor: '#1E2328' }} />
+                                    <div className="w-30 h-5 bg-[#1E2328] rounded animate-pulse" />
+                                    <div className="w-20 h-4 bg-[#1E2328] rounded animate-pulse" />
                                   </>
                                 ) : hideRecent ? (
                                   <div className="flex items-center gap-2">
@@ -993,9 +904,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <div>
                               {loadingUserData[comment.user_id] ? (
                                 <div className="space-y-2">
-                                  <Skeleton variant="text" width="100%" height={20} sx={{ bgcolor: '#1E2328' }} />
-                                  <Skeleton variant="text" width="90%" height={20} sx={{ bgcolor: '#1E2328' }} />
-                                  <Skeleton variant="text" width="80%" height={20} sx={{ bgcolor: '#1E2328' }} />
+                                  <div className="w-full h-5 bg-[#1E2328] rounded animate-pulse" />
+                                  <div className="w-[90%] h-5 bg-[#1E2328] rounded animate-pulse" />
+                                  <div className="w-[80%] h-5 bg-[#1E2328] rounded animate-pulse" />
                                 </div>
                               ) : (
                                 <>

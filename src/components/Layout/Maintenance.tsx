@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { canBypassMaintenance } from '@/utils/maintenance';
 import Image from 'next/image';
 import localFont from 'next/font/local';
 
@@ -6,9 +11,40 @@ const bangers = localFont({
 });
 
 export default function Maintenance() {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const [shouldShowMaintenance, setShouldShowMaintenance] = useState(true);
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated && user) {
+        const canBypass = canBypassMaintenance();
+        if (canBypass) {
+          setShouldShowMaintenance(false);
+          window.location.href = '/';
+          return;
+        }
+      }
+      setShouldShowMaintenance(true);
+    }
+  }, [isAuthenticated, user, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#2E3944] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white">Checking access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!shouldShowMaintenance) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#2e3944] text-[#D3D9D4] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-no-repeat bg-center relative">
-      {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/70 z-[1]" />
       
       <div className="container mx-auto max-w-2xl relative z-[2] px-4">

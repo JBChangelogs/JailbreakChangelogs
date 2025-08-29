@@ -11,7 +11,7 @@ import { Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import Image from 'next/image';
 import { getItemImagePath, handleImageError } from '@/utils/images';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
-import { getItemTypeColor } from '@/utils/badgeColors';
+import { getItemTypeColor, getDemandColor, getTrendColor } from '@/utils/badgeColors';
 import { CiBoxList } from "react-icons/ci";
 import { TradeAdTooltip } from '../../trading/TradeAdTooltip';
 import TotalSimilarItems from './TotalSimilarItems';
@@ -398,23 +398,13 @@ const CalculatorValueComparison: React.FC<{
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="text-xs text-muted">Demand:</span>
-                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
-                          demand === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-                          demand === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                          demand === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                          demand === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                          demand === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
-                          demand === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                          demand === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                          demand === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-                          'bg-gradient-to-r from-gray-500 to-gray-600'
-                        }`}>
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getDemandColor(demand)}`}>
                           {demand === 'N/A' ? 'Unknown' : demand}
                         </span>
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="text-xs text-muted">Trend:</span>
-                        <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
                           {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                         </span>
                       </div>
@@ -493,23 +483,13 @@ const CalculatorValueComparison: React.FC<{
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="text-xs text-muted">Demand:</span>
-                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${
-                          demand === 'Extremely High' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-                          demand === 'Very High' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                          demand === 'High' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                          demand === 'Decent' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                          demand === 'Medium' ? 'bg-gradient-to-r from-yellow-600 to-yellow-700' :
-                          demand === 'Low' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                          demand === 'Very Low' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                          demand === 'Close to none' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-                          'bg-gradient-to-r from-gray-500 to-gray-600'
-                        }`}>
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getDemandColor(demand)}`}>
                           {demand === 'N/A' ? 'Unknown' : demand}
                         </span>
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="text-xs text-muted">Trend:</span>
-                        <span className="inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold bg-gray-600">
+                        <span className={`inline-block px-2 py-0.5 text-xs rounded-full text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
                           {!('trend' in item) || item.trend === null || item.trend === 'N/A' ? 'Unknown' : (item.trend as string)}
                         </span>
                       </div>
@@ -748,7 +728,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
     setRequestingItems(offeringItems);
   };
 
-  const handleClearSides = () => {
+  const handleClearSides = (event?: React.MouseEvent) => {
+    // If Shift key is held down, clear both sides immediately without showing modal
+    if (event?.shiftKey) {
+      handleStartNew();
+      return;
+    }
+    
     setShowClearConfirmModal(true);
   };
 
@@ -874,7 +860,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               Swap Sides
             </Button>
           </Tooltip>
-          <Tooltip title="Clear all items">
+          <Tooltip title="Clear all items (hold Shift to clear both sides instantly)">
             <Button
               variant="contained"
               onClick={handleClearSides}

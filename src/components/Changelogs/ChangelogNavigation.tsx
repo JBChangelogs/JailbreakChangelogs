@@ -105,7 +105,7 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
               : "Select a changelog"}
             classNamePrefix="react-select"
             className="w-full"
-            isClearable={true}
+            isClearable={false}
             styles={{
               control: (base) => ({
                 ...base,
@@ -213,7 +213,7 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
             setTimeout(() => onSearchFocus(false), 200);
           }}
           placeholder="Search changelogs..."
-          className="w-full rounded-lg border border-[#2E3944] bg-[#212A31] p-3 pl-10 pr-10 text-muted focus:border-[#5865F2] focus:outline-none"
+          className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
         />
         <div className="absolute left-3 top-1/2 -translate-y-1/2">
           <MagnifyingGlassIcon className="h-5 w-5 text-[#FFFFFF]" />
@@ -225,6 +225,7 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
                 onSearchChange('');
               }}
               className="text-[#FFFFFF] hover:text-muted transition-colors"
+              aria-label="Clear search"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -275,7 +276,7 @@ const ChangelogNavigation: React.FC<ChangelogNavigationProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onChangelogSelect(item.id.toString())}
-                  className="w-full px-4 py-3 text-left hover:bg-[#37424D] focus:outline-none border-b border-[#2E3944] last:border-b-0"
+                  className="w-full px-4 py-3 text-left hover:bg-[#2B2F4C] focus:outline-none border-b border-[#2E3944] last:border-b-0"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span 

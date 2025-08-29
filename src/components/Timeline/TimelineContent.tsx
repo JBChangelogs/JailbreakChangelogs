@@ -1,42 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { fetchChangelogList } from '@/utils/api';
+import { Changelog } from '@/utils/api';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
-interface Changelog {
-  id: number;
-  title: string;
-  image_url: string;
+interface TimelineContentProps {
+  changelogs: Changelog[];
 }
 
-const TimelineContent: React.FC = () => {
-  const [changelogs, setChangelogs] = useState<Changelog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadChangelogs = async () => {
-      try {
-        const data = await fetchChangelogList();
-        // Sort by ID in descending order (newest first)
-        const sortedData = [...data].sort((a, b) => b.id - a.id);
-        setChangelogs(sortedData);
-      } catch (err) {
-        setError('Failed to load changelogs');
-        console.error('Error loading changelogs:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadChangelogs();
-  }, []);
-
+const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -76,43 +52,6 @@ const TimelineContent: React.FC = () => {
       }
     }
   };
-
-  if (loading) {
-    return (
-      <motion.div 
-        className="space-y-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {[...Array(3)].map((_, i) => (
-          <motion.div 
-            key={i} 
-            className="animate-pulse"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-          >
-            <div className="aspect-video bg-[#37424D] rounded-lg mb-2"></div>
-            <div className="h-6 bg-[#37424D] rounded w-3/4"></div>
-          </motion.div>
-        ))}
-      </motion.div>
-    );
-  }
-
-  if (error) {
-    return (
-      <motion.div 
-        className="rounded-lg bg-red-500/20 p-4 text-red-500"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        {error}
-      </motion.div>
-    );
-  }
 
   return (
     <div className="relative">

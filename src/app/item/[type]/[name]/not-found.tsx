@@ -1,39 +1,16 @@
 import Link from 'next/link';
 import { HomeIcon } from '@heroicons/react/24/outline';
 import { Inter } from "next/font/google";
-import Image from 'next/image';
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export default function ItemNotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background image */}
-      <Image
-        src="https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp"
-        alt="Background"
-        fill
-        priority
-        quality={100}
-        className="object-cover z-[-3] pointer-events-none select-none"
-        sizes="100vw"
-      />
-      
-      {/* Vignette overlay */}
-      <Image
-        src="https://assets.jailbreakchangelogs.xyz/assets/backgrounds/vignette.png"
-        alt="Vignette background"
-        fill
-        priority
-        quality={100}
-        className="object-cover z-[-2] pointer-events-none select-none"
-        sizes="100vw"
-      />
-      
+    <div className="min-h-screen flex items-center justify-center bg-[#2e3944] text-[#D3D9D4] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-no-repeat bg-center relative">
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/50 z-[-1]" />
+      <div className="absolute inset-0 bg-black/50 z-[1]" />
       
-      <div className="text-center max-w-md mx-auto px-4 relative z-[1]">
+      <div className="text-center max-w-md mx-auto px-4 relative z-[2]">
         <div className="px-8 py-8 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(30,30,30,0.35)] backdrop-blur-xl border border-white/[0.12]">
           <div className="mb-8">
             <div className={`${inter.className} font-bold text-9xl text-[#5865F2]`}>

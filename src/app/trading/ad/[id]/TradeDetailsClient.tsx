@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL, CommentData } from "@/utils/api";
+import { UserData } from '@/types/auth';
 import Link from 'next/link';
 import { DiscordIcon } from '@/components/Icons/DiscordIcon';
 import { ArrowLeftIcon, ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -22,9 +23,11 @@ import { ConfirmDialog } from '@/components/UI/ConfirmDialog';
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
+  initialComments?: CommentData[];
+  initialUserMap?: Record<string, UserData>;
 }
 
-export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
+export default function TradeDetailsClient({ trade, initialComments = [], initialUserMap = {} }: TradeDetailsClientProps) {
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
   const router = useRouter();
@@ -299,6 +302,8 @@ export default function TradeDetailsClient({ trade }: TradeDetailsClientProps) {
                 changelogTitle={`Trade #${trade.id}`}
                 type="trade"
                 trade={trade}
+                initialComments={initialComments}
+                initialUserMap={initialUserMap}
               />
             )}
           </div>

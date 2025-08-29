@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TradeItem } from "@/types/trading";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { getItemTypeColor } from "@/utils/badgeColors";
+import { getItemTypeColor, getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 import { FaArrowCircleUp, FaArrowAltCircleDown } from "react-icons/fa";
 import { formatFullValue, demandOrder } from "@/utils/values";
@@ -193,21 +193,11 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
 												</span>
 												<span className="flex items-center gap-1">
 													<span>Demand:</span>
-													<span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${
-														itemDemand === "Extremely High" ? "bg-gradient-to-r from-pink-500 to-pink-600" :
-														itemDemand === "Very High" ? "bg-gradient-to-r from-purple-500 to-purple-600" :
-														itemDemand === "High" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
-														itemDemand === "Decent" ? "bg-gradient-to-r from-green-500 to-green-600" :
-														itemDemand === "Medium" ? "bg-gradient-to-r from-yellow-600 to-yellow-700" :
-														itemDemand === "Low" ? "bg-gradient-to-r from-orange-500 to-orange-600" :
-														itemDemand === "Very Low" ? "bg-gradient-to-r from-red-500 to-red-600" :
-														itemDemand === "Close to none" ? "bg-gradient-to-r from-gray-500 to-gray-600" :
-														"bg-gradient-to-r from-gray-500 to-gray-600"
-													}`}>{itemDemand === 'N/A' ? 'Unknown' : itemDemand}</span>
+													<span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getDemandColor(itemDemand)}`}>{itemDemand === 'N/A' ? 'Unknown' : itemDemand}</span>
 												</span>
 												<span className="flex items-center gap-1">
 													<span>Trend:</span>
-													<span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+													<span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
 														{!item.trend || item.trend === 'N/A' ? 'Unknown' : item.trend}
 													</span>
 												</span>

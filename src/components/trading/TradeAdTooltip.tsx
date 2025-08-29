@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { TradeItem } from '@/types/trading';
-import { getItemTypeColor } from '@/utils/badgeColors';
+import { getItemTypeColor, getDemandColor, getTrendColor } from '@/utils/badgeColors';
 import { getCategoryIcon } from '@/utils/categoryIcons';
 import { formatFullValue } from '@/utils/values';
 
@@ -12,7 +12,7 @@ interface TradeAdTooltipProps {
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const categoryIcon = getCategoryIcon(item.type);
   const demand = (item.demand ?? item.data?.demand ?? 'N/A');
-  const trend = item.trend ?? null;
+  const trend = (item.trend ?? item.data?.trend ?? null);
   
   return (
     <div className="p-2">
@@ -76,23 +76,13 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             </div>
             <div className="text-muted flex items-center gap-2">
               <span>Demand:</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${
-                demand === "Extremely High" ? "bg-gradient-to-r from-pink-500 to-pink-600" :
-                demand === "Very High" ? "bg-gradient-to-r from-purple-500 to-purple-600" :
-                demand === "High" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
-                demand === "Decent" ? "bg-gradient-to-r from-green-500 to-green-600" :
-                demand === "Medium" ? "bg-gradient-to-r from-yellow-600 to-yellow-700" :
-                demand === "Low" ? "bg-gradient-to-r from-orange-500 to-orange-600" :
-                demand === "Very Low" ? "bg-gradient-to-r from-red-500 to-red-600" :
-                demand === "Close to none" ? "bg-gradient-to-r from-gray-500 to-gray-600" :
-                "bg-gradient-to-r from-gray-500 to-gray-600"
-              }`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getDemandColor(demand)}`}>
                 {demand === 'N/A' ? 'Unknown' : demand}
               </span>
             </div>
             <div className="text-muted flex items-center gap-2">
               <span>Trend:</span>
-              <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+              <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getTrendColor(trend || 'Unknown')}`}>
                 {!trend || trend === 'N/A' ? 'Unknown' : trend}
               </span>
             </div>

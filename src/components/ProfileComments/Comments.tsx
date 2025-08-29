@@ -181,7 +181,7 @@ export default function Comment({ content, date, item_type, item_id, edited_at }
                 const parentEl = videoEl.parentElement;
                 if (parentEl) {
                   const img = document.createElement('img');
-                  img.src = '/assets/images/placeholder.png';
+                  img.src = '/assets/images/Placeholder.webp';
                   img.className = 'object-cover h-full w-full';
                   parentEl.replaceChild(img, videoEl);
                 }

@@ -25,7 +25,7 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import toast from "react-hot-toast";
 import { getToken } from "@/utils/auth";
 import { usePathname, useSearchParams } from "next/navigation";
-import { getItemTypeColor } from "@/utils/badgeColors";
+import { getItemTypeColor, getTrendColor, getDemandColor } from "@/utils/badgeColors";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 
 interface ItemCardProps {
@@ -315,6 +315,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                 alt={item.name}
                 width={854}
                 height={480}
+
                 className="h-full w-full object-cover"
                 onError={handleImageError}
               />
@@ -431,17 +432,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                 <div className="flex items-center gap-1 sm:gap-2">
                   <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Demand</span>
                 </div>
-                <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${
-                  currentItemData.demand === "Extremely High" ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white" :
-                  currentItemData.demand === "Very High" ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white" :
-                  currentItemData.demand === "High" ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" :
-                  currentItemData.demand === "Decent" ? "bg-gradient-to-r from-green-500 to-green-600 text-white" :
-                  currentItemData.demand === "Medium" ? "bg-gradient-to-r from-yellow-600 to-yellow-700 text-white" :
-                  currentItemData.demand === "Low" ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white" :
-                  currentItemData.demand === "Very Low" ? "bg-gradient-to-r from-red-500 to-red-600 text-white" :
-                  currentItemData.demand === "Close to none" ? "bg-gradient-to-r from-gray-500 to-gray-600 text-white" :
-                  "bg-gradient-to-r from-gray-500 to-gray-600 text-white"
-                }`}>
+                <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${getDemandColor(currentItemData.demand)}`}>
                   {currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand}
                 </span>
               </div>
@@ -451,7 +442,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                   <div className="flex items-center gap-1 sm:gap-2">
                     <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Trend</span>
                   </div>
-                  <span className="bg-gray-600 text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
+                  <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${getTrendColor(item.trend === null || item.trend === 'N/A' ? 'Unknown' : item.trend)}`}>
                     {item.trend === null || item.trend === 'N/A' ? 'Unknown' : item.trend}
                   </span>
                 </div>

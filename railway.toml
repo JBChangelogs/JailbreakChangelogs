@@ -1,0 +1,16 @@
+[build]
+builder = "railpack"
+buildCommand = "pnpm build"
+
+[deploy]
+startCommand = "pnpm start"
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+maxRestartRetries = 10
+
+# Environment variables that might be needed
+[variables]
+NODE_ENV = "production"
+PORT = "8080"
+NEXT_TELEMETRY_DISABLED = "1"

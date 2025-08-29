@@ -49,7 +49,16 @@ export type ValueSort =
   | "demand-decent"
   | "demand-high"
   | "demand-very-high"
-  | "demand-extremely-high";
+  | "demand-extremely-high"
+  | "trend-stable"
+  | "trend-rising"
+  | "trend-hyped"
+  | "trend-avoided"
+  | "trend-dropping"
+  | "trend-unstable"
+  | "trend-hoarded"
+  | "trend-projected"
+  | "trend-recovering";
 
 export interface DupedOwner {
   item_id: number;
@@ -94,12 +103,20 @@ export interface Item {
       duped_owners: string;
       notes: string;
       demand: string;
+      trend?: string | null;
       description: string;
       health: number;
       tradable: boolean;
       last_updated: number;
     };
   }[];
+}
+
+export interface RobloxUser {
+  id: number;
+  name: string;
+  displayName: string;
+  username: string;
 }
 
 export interface ItemsResponse {
@@ -138,6 +155,11 @@ export interface ItemDetails {
   health: number;
   tradable: boolean | number;
   last_updated: number;
+  metadata?: {
+    TimesTraded?: number;
+    UniqueCirculation?: number;
+    DemandMultiple?: number;
+  };
   children?: Array<{
     id: number;
     parent: number;

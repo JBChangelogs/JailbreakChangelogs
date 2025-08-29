@@ -1,5 +1,5 @@
 import { Item, FilterSort, ValueSort } from "@/types";
-import { PUBLIC_API_URL } from "@/utils/api";
+
 
 export const demandOrder = [
   "Close to none",
@@ -12,7 +12,19 @@ export const demandOrder = [
   "Extremely High",
 ] as const;
 
-const parseCashValue = (value: string | null): number => {
+export const trendOrder = [
+  "Avoided",
+  "Dropping",
+  "Unstable",
+  "Hoarded",
+  "Projected",
+  "Stable",
+  "Recovering",
+  "Rising",
+  "Hyped",
+] as const;
+
+export const parseCashValue = (value: string | null): number => {
   if (value === null || value === "N/A") return -1;
   const num = parseFloat(value.replace(/[^0-9.]/g, ""));
   if (value.toLowerCase().includes("k")) return num * 1000;
@@ -30,6 +42,12 @@ export const sortByCashValue = (a: string, b: string, order: 'asc' | 'desc' = 'd
 export const sortByDemand = (a: string, b: string, order: 'asc' | 'desc' = 'desc'): number => {
   const aIndex = demandOrder.indexOf(a as typeof demandOrder[number]);
   const bIndex = demandOrder.indexOf(b as typeof demandOrder[number]);
+  return order === 'desc' ? bIndex - aIndex : aIndex - bIndex;
+};
+
+export const sortByTrend = (a: string | null, b: string | null, order: 'asc' | 'desc' = 'desc'): number => {
+  const aIndex = a ? trendOrder.indexOf(a as typeof trendOrder[number]) : -1;
+  const bIndex = b ? trendOrder.indexOf(b as typeof trendOrder[number]) : -1;
   return order === 'desc' ? bIndex - aIndex : aIndex - bIndex;
 };
 
@@ -96,7 +114,28 @@ export const getEffectiveDemand = (item: Item): string => {
   return item.demand;
 };
 
-export const filterByType = async (items: Item[], filterSort: FilterSort): Promise<Item[]> => {
+// Helper function to get the effective trend for an item (considering variants)
+export const getEffectiveTrend = (item: Item): string | null => {
+  // If item has children (variants), use the default variant (2023) if available
+  if (item.children && item.children.length > 0) {
+    // Sort children by sub_name in descending order to find the most recent
+    const sortedChildren = [...item.children].sort((a, b) => {
+      return parseInt(b.sub_name) - parseInt(a.sub_name);
+    });
+    
+    // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
+    const defaultVariant = sortedChildren.find(child => child.sub_name === '2023') || sortedChildren[0];
+    
+    if (defaultVariant) {
+      return defaultVariant.data.trend || null;
+    }
+  }
+  
+  // Fall back to parent item's trend
+  return item.trend;
+};
+
+export const filterByType = async (items: Item[], filterSort: FilterSort, userFavorites?: Array<{ item_id: string }>): Promise<Item[]> => {
   switch (filterSort) {
     case "name-limited-items":
       return items.filter((item) => item.is_limited === 1);
@@ -127,30 +166,20 @@ export const filterByType = async (items: Item[], filterSort: FilterSort): Promi
     case "name-weapon-skins":
       return items.filter((item) => item.type.toLowerCase() === "weapon skin");
     case "favorites":
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        try {
-          const response = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userData.id}`);
-          const favorites = await response.json();
-          if (Array.isArray(favorites)) {
-            // Create a Set of both direct IDs and parent IDs from variants
-            const favoriteIds = new Set(
-              favorites.map(fav => {
-                const itemId = String(fav.item_id);
-                // If it's a variant (contains hyphen), get both the full ID and parent ID
-                if (itemId.includes('-')) {
-                  const [parentId] = itemId.split('-');
-                  return [itemId, parentId];
-                }
-                return [itemId];
-              }).flat()
-            );
-            return items.filter(item => favoriteIds.has(String(item.id)));
-          }
-        } catch (error) {
-          console.error('Error fetching favorites:', error);
-        }
+      if (userFavorites && Array.isArray(userFavorites)) {
+        // Create a Set of both direct IDs and parent IDs from variants
+        const favoriteIds = new Set(
+          userFavorites.map(fav => {
+            const itemId = String(fav.item_id);
+            // If it's a variant (contains hyphen), get both the full ID and parent ID
+            if (itemId.includes('-')) {
+              const [parentId] = itemId.split('-');
+              return [itemId, parentId];
+            }
+            return [itemId];
+          }).flat()
+        );
+        return items.filter(item => favoriteIds.has(String(item.id)));
       }
       return [];
     default:
@@ -162,12 +191,13 @@ export const sortAndFilterItems = async (
   items: Item[],
   filterSort: FilterSort,
   valueSort: ValueSort,
-  searchTerm: string = ""
+  searchTerm: string = "",
+  userFavorites?: Array<{ item_id: string }>
 ): Promise<Item[]> => {
   let result = [...items];
 
   // Apply filter based on filterSort
-  result = await filterByType(result, filterSort);
+  result = await filterByType(result, filterSort, userFavorites);
 
   // Apply search filter
   if (searchTerm) {
@@ -228,6 +258,26 @@ export const sortAndFilterItems = async (
     result = result.filter(item => getEffectiveDemand(item) === formattedDemand);
   }
 
+  // Apply trend filtering if a specific trend level is selected
+  if (valueSort.startsWith('trend-')) {
+    // Map the valueSort to the exact trend string from trendOrder
+    const trendMap: Record<string, string> = {
+      'trend-stable': 'Stable',
+      'trend-rising': 'Rising',
+      'trend-hyped': 'Hyped',
+      'trend-avoided': 'Avoided',
+      'trend-dropping': 'Dropping',
+      'trend-unstable': 'Unstable',
+      'trend-hoarded': 'Hoarded',
+      'trend-projected': 'Projected',
+      'trend-recovering': 'Recovering'
+    };
+    
+    const formattedTrend = trendMap[valueSort];
+    
+    result = result.filter(item => getEffectiveTrend(item) === formattedTrend);
+  }
+
   // Apply value sorting
   switch (valueSort) {
     case "random":
@@ -277,7 +327,7 @@ export const sortAndFilterItems = async (
         return aTime - bTime;
       });
       break;
-    // For demand filter cases, we already filtered above, so just sort by name
+    // For demand filter cases, we already filtered above, so sort by cash value (high to low)
     case "demand-close-to-none":
     case "demand-very-low":
     case "demand-low":
@@ -286,7 +336,19 @@ export const sortAndFilterItems = async (
     case "demand-high":
     case "demand-very-high":
     case "demand-extremely-high":
-      result = result.sort((a, b) => a.name.localeCompare(b.name));
+      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'desc'));
+      break;
+    // For trend filter cases, we already filtered above, so sort by cash value (high to low)
+    case "trend-stable":
+    case "trend-rising":
+    case "trend-hyped":
+    case "trend-avoided":
+    case "trend-dropping":
+    case "trend-unstable":
+    case "trend-hoarded":
+    case "trend-projected":
+    case "trend-recovering":
+      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'desc'));
       break;
   }
 

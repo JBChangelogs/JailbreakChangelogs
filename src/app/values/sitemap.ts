@@ -11,7 +11,7 @@ interface Item {
   image_url?: string;
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> { 
   const response = await fetch(`${BASE_API_URL}/items/list`)
   const data = await response.json()
   

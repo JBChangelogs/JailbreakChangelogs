@@ -1,59 +1,59 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { fetchUsersBatch } from '@/utils/api';
+import { fetchUsersWithFlags, UserWithFlags } from '@/utils/api';
 import UserAvatar from '@/components/Users/UserAvatarClient';
-import { UserData } from '@/types/auth';
 
 export default async function ContributorsPage() {
-  // User IDs by role
-  const ownerIds = [
-    '659865209741246514', // Jakobiis
-    '1019539798383398946', // Jalenzz16
-  ];
-  const managerIds = [
-    '697457253237653534', // Sen
-    '465018380403867648', // 0.5x
-  ];
-  const valueTeamIds = [
-    '1159540851106648174', // free
-    '729353754578518058', // Toleda1
-    '771012425720791093', // lumen
-    '1298513662578786308', // oldmacd0nald
-  ];
-  const contributorIds = [
-    '1123014543891775509', // PikachuWolverine
-    '797198829538508829', // Jamey
-  ];
-  const testerIds = [
-    '231616789979594754', // lin6
-    '328826331867381762', // flikter
-    '719327905272037467', // trevor
-  ];
-  const backgroundPictureIds = [
-    '871014221125664819', // Thomy3da
-  ];
+  const usersWithFlags = await fetchUsersWithFlags();
+  const getUserRole = (user: UserWithFlags): string => {
+    const enabledFlags = user.flags.filter(flag => flag.enabled);
+    const highestPriorityFlag = enabledFlags.reduce((highest, current) => 
+      current.index < highest.index ? current : highest
+    )
+    const flagToRole: Record<string, string> = {
+      'is_owner': 'Owner',
+      'is_partner': 'Partner',
+      'is_vtm': 'Value List Manager', 
+      'is_vt': 'Value Team',
+      'is_contributor': 'Value List Contributor',
+      'is_tester': 'Tester'
+    };
+    
+    return flagToRole[highestPriorityFlag.flag] || 'Member';
+  };
 
-  // All user IDs
-  const allUserIds = [
-    ...ownerIds,
-    ...managerIds,
-    ...valueTeamIds,
-    ...contributorIds,
-    ...testerIds,
-    ...backgroundPictureIds,
-  ];
+  const userRoleMap = new Map<string, { user: UserWithFlags; role: string }>();
+  
+  usersWithFlags.forEach(user => {
+    const role = getUserRole(user);
+    userRoleMap.set(user.id, { user, role });
+  });
 
-  // Fetch all users in one batch
-  const userMap: Record<string, UserData> = await fetchUsersBatch(allUserIds);
+  const owners = Array.from(userRoleMap.values())
+    .filter(({ role }) => role === 'Owner')
+    .map(({ user }) => ({ ...user, role: 'Owner' }));
+    
+  const partners = Array.from(userRoleMap.values())
+    .filter(({ role }) => role === 'Partner')
+    .map(({ user }) => ({ ...user, role: 'Partner' }));
 
-  const owners = ownerIds.map(id => userMap[id]).filter(Boolean);
-  const managers = managerIds.map(id => userMap[id]).filter(Boolean);
-  const valueTeam = valueTeamIds.map(id => userMap[id]).filter(Boolean);
-  const contributors = contributorIds.map(id => userMap[id]).filter(Boolean);
-  const testers = testerIds.map(id => userMap[id]).filter(Boolean);
-  const backgroundPictures = backgroundPictureIds.map(id => userMap[id]).filter(Boolean);
+  const managers = Array.from(userRoleMap.values())
+  .filter(({ role }) => role === 'Value List Manager')
+  .map(({ user }) => ({ ...user, role: 'Value List Manager' }));
+    
+  const valueTeam = Array.from(userRoleMap.values())
+    .filter(({ role }) => role === 'Value Team')
+    .map(({ user }) => ({ ...user, role: 'Value Team' }));
 
-  const renderUser = (user: UserData, role: string) => (
+  const testers = Array.from(userRoleMap.values())
+  .filter(({ role }) => role === 'Tester')
+  .map(({ user }) => ({ ...user, role: 'Tester' }));
+
+  const contributors = Array.from(userRoleMap.values())
+  .filter(({ role }) => role === 'Value List Contributor')
+  .map(({ user }) => ({ ...user, role: 'Value List Contributor' }));
+
+  const renderUser = (user: UserWithFlags, role: string) => (
     <div key={user.id} className="flex flex-col items-center text-center mb-8">
       <Link href={`/users/${user.id}`}>
         <UserAvatar 
@@ -103,11 +103,12 @@ export default async function ContributorsPage() {
   ];
 
   const team = [
-    ...owners.map(u => ({ ...u, role: 'Owner' })),
-    ...managers.map(u => ({ ...u, role: 'Value List Manager' })),
-    ...valueTeam.map(u => ({ ...u, role: 'Value Team' })),
-    ...contributors.map(u => ({ ...u, role: 'Value List Contributor' })),
-    ...testers.map(u => ({ ...u, role: 'Tester' })),
+    ...owners,
+    ...partners,
+    ...managers,
+    ...valueTeam,
+    ...testers,
+    ...contributors,
   ];
 
   return (
@@ -147,7 +148,6 @@ export default async function ContributorsPage() {
             </div>
           </div>
         ))}
-        {backgroundPictures.map(user => renderUser(user, 'Background Pictures'))}
       </div>
       <div className="mt-16 text-center">
         <Link

@@ -3,32 +3,20 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
 import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
   ArrowUpIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { Pagination } from '@mui/material';
-import ItemCard from "@/components/Items/ItemCard";
 import { Item, FilterSort, ValueSort } from "@/types";
-import { sortAndFilterItems, demandOrder, getEffectiveCashValue } from "@/utils/values";
+import { sortAndFilterItems } from "@/utils/values";
 import toast from 'react-hot-toast';
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
-import dynamic from 'next/dynamic';
-import DisplayAd from "@/components/Ads/DisplayAd";
-import { getCurrentUserPremiumType } from '@/hooks/useAuth';
-import React from "react";
-
-const Select = dynamic(() => import('react-select'), { ssr: false });
-
-const Slider = dynamic(() => import('@mui/material/Slider'), { 
-  ssr: false,
-  loading: () => <div className="w-full h-8 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse mt-1"></div>
-});
+import TradingGuides from "./TradingGuides";
+import ValuesSearchControls from "./ValuesSearchControls";
+import ValuesItemsGrid from "./ValuesItemsGrid";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -46,46 +34,15 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
-  const [page, setPage] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const itemsPerPage = 24;
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const MAX_VALUE_RANGE = 100_000_000;
-  const MIN_VALUE_DISTANCE = 4_000_000; // Enforce a larger gap between thumbs
   const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
-  const sliderMarks = [
-    { value: 10_000_000, label: '10M' },
-    { value: 25_000_000, label: '25M' },
-    { value: 50_000_000, label: '50M' },
-    { value: 75_000_000, label: '75M' },
-    { value: 100_000_000 },
-  ];
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === 'N/A') return -1;
-    const lower = value.toLowerCase();
-    const num = parseFloat(lower.replace(/[^0-9.]/g, ''));
-    if (Number.isNaN(num)) return -1;
-    if (lower.includes('k')) return num * 1_000;
-    if (lower.includes('m')) return num * 1_000_000;
-    if (lower.includes('b')) return num * 1_000_000_000;
-    return num;
-  };
-  const rangeFilteredItems = (appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE)
-    ? sortedItems
-    : sortedItems.filter((item) => {
-        const cash = parseNumericValue(getEffectiveCashValue(item));
-        const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
-        if (isOpenEndedMax) return cash >= appliedMinValue;
-        return cash >= appliedMinValue && cash <= appliedMaxValue;
-      });
 
   // Load saved preferences after mount
   useEffect(() => {
@@ -116,33 +73,12 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     }
   }, []);
 
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
 
-  useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener('authStateChanged', handleAuthChange);
-    return () => {
-      window.removeEventListener('authStateChanged', handleAuthChange);
-    };
-  }, []);
 
   const handleRandomItem = async () => {
     try {
       const loadingToast = toast.loading('Finding a random item...');
-      const response = await fetch(`${PUBLIC_API_URL}/items/random`);
-      if (!response.ok) throw new Error('Failed to fetch random item');
-      const item = await response.json();
+      const item = await fetchRandomItem();
       toast.dismiss(loadingToast);
       toast.success(`Redirecting to ${item.name} ${item.type}...`);
       router.push(`/item/${item.type.toLowerCase()}/${item.name}`);
@@ -174,54 +110,41 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     }
   };
 
-  // Load favorites
-  useEffect(() => {
-    const loadFavorites = async () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const userData = JSON.parse(storedUser);
-          const response = await fetch(`${PUBLIC_API_URL}/favorites/get?user=${userData.id}`);
-          if (response.ok) {
-            const favoritesData = await response.json();
-            if (Array.isArray(favoritesData)) {
-              // Extract parent IDs from favorites (take first part before hyphen if exists)
-              const favoriteIds = favoritesData.map(fav => {
-                const itemId = String(fav.item_id);
-                return itemId.includes('-') ? Number(itemId.split('-')[0]) : Number(itemId);
-              });
-              setFavorites(favoriteIds);
-            }
+  // Load favorites only when user selects favorites filter
+  const loadFavorites = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        if (userData && userData.id) {
+          const favoritesData = await fetchUserFavorites(userData.id);
+          if (favoritesData !== null && Array.isArray(favoritesData)) {
+            setFavorites(favoritesData);
           }
-        } catch (err) {
-          console.error('Error loading favorites:', err);
         }
+      } catch (err) {
+        console.error('Error loading favorites:', err);
       }
-    };
+    }
+  };
 
-    loadFavorites();
-  }, []);
+  // Load favorites only when favorites filter is selected
+  useEffect(() => {
+    if (filterSort === 'favorites') {
+      loadFavorites();
+    }
+  }, [filterSort]);
 
   useEffect(() => {
     const updateSortedItems = async () => {
-      const sorted = await sortAndFilterItems(items, filterSort, valueSort, debouncedSearchTerm);
+      const favoritesData = favorites.map(id => ({ item_id: String(id) }));
+      const sorted = await sortAndFilterItems(items, filterSort, valueSort, debouncedSearchTerm, favoritesData);
       setSortedItems(sorted);
     };
     updateSortedItems();
-  }, [items, debouncedSearchTerm, filterSort, valueSort]);
+  }, [items, debouncedSearchTerm, filterSort, valueSort, favorites]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [filterSort, valueSort, debouncedSearchTerm, appliedMinValue, appliedMaxValue]);
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
-
-  const adjustedIndexOfLastItem = page * itemsPerPage;
-  const adjustedIndexOfFirstItem = adjustedIndexOfLastItem - itemsPerPage;
-  const displayedItems = rangeFilteredItems.slice(adjustedIndexOfFirstItem, adjustedIndexOfLastItem);
-  const totalPages = Math.ceil(rangeFilteredItems.length / itemsPerPage);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -239,39 +162,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     });
   };
 
-  const getNoItemsMessage = () => {
-    const hasCategoryFilter = filterSort !== "name-all-items";
-    const hasDemandFilter = valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc';
-    const hasSearchTerm = debouncedSearchTerm;
-    
-    let message = "No items found";
-    
-    // Build the message based on what filters are applied
-    if (hasSearchTerm) {
-      message += ` matching "${debouncedSearchTerm}"`;
-    }
-    
-    if (hasCategoryFilter && hasDemandFilter) {
-      const categoryName = filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ");
-      const demandLevel = valueSort.replace('demand-', '').replace(/-/g, ' ');
-      const formattedDemand = demandLevel.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
-      message += ` in ${categoryName} with ${formattedDemand} demand`;
-    } else if (hasCategoryFilter) {
-      const categoryName = filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ");
-      message += ` in ${categoryName}`;
-    } else if (hasDemandFilter) {
-      const demandLevel = valueSort.replace('demand-', '').replace(/-/g, ' ');
-      const formattedDemand = demandLevel.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      message += ` with ${formattedDemand} demand`;
-    }
-    
-    return message;
-  };
+
 
   return (
     <>
@@ -326,592 +217,67 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           onValueSort={setValueSort}
         />
 
-        {/* Trader Notes, Demand Levels Guide, and YouTube Video */}
-        <div className="mt-8 pt-8 border-t border-[#2E3944] flex flex-col lg:flex-row gap-8">
-          <div className="flex-1">
-            <h3 className="mb-2 text-xl font-semibold text-muted">
-              Trader Notes
-            </h3>
-            <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
-              <li>This is NOT an official list, it is 100% community based</li>
-              <li>
-                Some values may be outdated but we do our best to make sure it&apos;s
-                accurate as possible
-              </li>
-              <li>
-                Please don&apos;t 100% rely on the value list, use your own judgment as
-                well
-              </li>
-            </ul>
-            <h3 className="mb-2 text-xl font-semibold text-muted">
-              Demand Levels Guide
-            </h3>
-            <div className="mb-4 flex flex-wrap gap-2">
-              {demandOrder.map((demand) => {
-                const getDemandColor = (demand: string): string => {
-                  switch(demand) {
-                    case 'Close to none':
-                      return 'bg-gray-500/80';
-                    case 'Very Low':
-                      return 'bg-orange-500/80';
-                    case 'Low':
-                      return 'bg-orange-400/80';
-                    case 'Medium':
-                      return 'bg-yellow-500/80';
-                    case 'Decent':
-                      return 'bg-green-500/80';
-                    case 'High':
-                      return 'bg-blue-500/80';
-                    case 'Very High':
-                      return 'bg-purple-500/80';
-                    case 'Extremely High':
-                      return 'bg-pink-500/80';
-                    default:
-                      return 'bg-gray-500/80';
-                  }
-                };
-                const getDemandValue = (demand: string): string => {
-                  switch(demand) {
-                    case 'Close to none':
-                      return 'demand-close-to-none';
-                    case 'Very Low':
-                      return 'demand-very-low';
-                    case 'Low':
-                      return 'demand-low';
-                    case 'Medium':
-                      return 'demand-medium';
-                    case 'Decent':
-                      return 'demand-decent';
-                    case 'High':
-                      return 'demand-high';
-                    case 'Very High':
-                      return 'demand-very-high';
-                    case 'Extremely High':
-                      return 'demand-extremely-high';
-                    default:
-                      return 'demand-close-to-none';
-                  }
-                };
-                return (
-                  <button
-                    key={demand}
-                    onClick={() => {
-                      const demandValue = getDemandValue(demand);
-                      if (valueSort === demandValue) {
-                        setValueSort("cash-desc");
-                        localStorage.setItem('valuesValueSort', "cash-desc");
-                      } else {
-                        setValueSort(demandValue as ValueSort);
-                        localStorage.setItem('valuesValueSort', demandValue);
-                      }
-                      if (searchSectionRef.current) {
-                        const headerOffset = 80;
-                        const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.scrollY - headerOffset;
-                        window.scrollTo({
-                          top: offsetPosition,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
-                      valueSort === getDemandValue(demand) ? 'ring-2 ring-[#5865F2]' : ''
-                    }`}
-                  >
-                    <span className={`inline-block w-2 h-2 rounded-full ${getDemandColor(demand)}`}></span>
-                    <span className="text-sm text-white">{demand}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mb-4 text-sm text-muted">
-              <strong>Note:</strong> Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.<br/>
-              Not all demand levels are currently in use; some may not be represented among items.
-            </p>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <iframe
-              src="https://www.youtube.com/embed/yEsTOaJka3k?controls=0&rel=0"
-              width="100%"
-              height="315"
-              allowFullScreen
-              loading="lazy"
-              title="Jailbreak Trading Video"
-              style={{ border: 0, borderRadius: '20px', maxWidth: 560, width: '100%', height: 315 }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div ref={searchSectionRef} className="mb-8">
-        <div
-          className={
-            !premiumStatusLoaded
-              ? "flex flex-col lg:flex-row gap-6 items-start"
-              : currentUserPremiumType !== 0
-                ? "flex flex-col lg:flex-row gap-4 items-start"
-                : "flex flex-col lg:flex-row gap-6 items-start"
-          }
-        >
-          {/* Controls: horizontal row for premium, vertical stack for non-premium */}
-          <div
-            className={
-              !premiumStatusLoaded
-                ? "w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4"
-                : currentUserPremiumType !== 0
-                  ? "w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4"
-                  : "w-full lg:flex-1 lg:min-w-0 flex flex-col gap-4"
+        <TradingGuides
+          valueSort={valueSort}
+          onValueSortChange={setValueSort}
+          onScrollToSearch={() => {
+            if (searchSectionRef.current) {
+              const headerOffset = 80;
+              const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.scrollY - headerOffset;
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
             }
-          >
-            {/* Top controls row: Search + Filter + Sort */}
-            <div
-              className={
-                !premiumStatusLoaded
-                  ? "w-full flex flex-col gap-4"
-                  : currentUserPremiumType !== 0
-                    ? "w-full flex flex-col lg:flex-row lg:items-center lg:gap-4"
-                    : "w-full flex flex-col gap-4"
-              }
-            >
-              {/* Search input - takes 50% width for premium users */}
-              <div className={`relative ${
-                !premiumStatusLoaded
-                  ? "w-full"
-                  : currentUserPremiumType !== 0
-                    ? "w-full lg:w-1/2"
-                    : "w-full"
-              }`}>
-                <input
-                  type="text"
-                  placeholder={`Search ${filterSort === "name-all-items" ? "items" : filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ").toLowerCase()}...`}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
-                />
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
-                    aria-label="Clear search"
-                  >
-                    <XMarkIcon />
-                  </button>
-                )}
-              </div>
-              
-              {/* Filter and Sort dropdowns container - takes remaining 50% width for premium users */}
-              <div className={`flex gap-4 ${
-                !premiumStatusLoaded
-                  ? "w-full flex-col"
-                  : currentUserPremiumType !== 0
-                    ? "w-full lg:w-1/2 lg:flex-row"
-                    : "w-full flex-col"
-              }`}>
-                {/* Filter dropdown */}
-                <div className={`${
-                  !premiumStatusLoaded
-                    ? "w-full"
-                    : currentUserPremiumType !== 0
-                      ? "w-full lg:w-1/2"
-                      : "w-full"
-                }`}>
-                  {selectLoaded ? (
-                    <Select
-                      value={{ value: filterSort, label: (() => {
-                        switch (filterSort) {
-                          case 'name-all-items': return 'All Items';
-                          case 'favorites': return 'My Favorites';
-                          case 'name-limited-items': return 'Limited Items';
-                          case 'name-seasonal-items': return 'Seasonal Items';
-                          case 'name-vehicles': return 'Vehicles';
-                          case 'name-spoilers': return 'Spoilers';
-                          case 'name-rims': return 'Rims';
-                          case 'name-body-colors': return 'Body Colors';
-                          case 'name-hyperchromes': return 'HyperChromes';
-                          case 'name-textures': return 'Body Textures';
-                          case 'name-tire-stickers': return 'Tire Stickers';
-                          case 'name-tire-styles': return 'Tire Styles';
-                          case 'name-drifts': return 'Drifts';
-                          case 'name-furnitures': return 'Furniture';
-                          case 'name-horns': return 'Horns';
-                          case 'name-weapon-skins': return 'Weapon Skins';
-                          default: return filterSort;
-                        }
-                      })() }}
-                      onChange={(option: unknown) => {
-                        if (!option) {
-                          // Reset to original value when cleared
-                          setFilterSort("name-all-items");
-                          localStorage.setItem('valuesFilterSort', "name-all-items");
-                          return;
-                        }
-                        const newValue = (option as { value: FilterSort }).value;
-                        if (newValue === "favorites") {
-                          const storedUser = localStorage.getItem('user');
-                          if (!storedUser) {
-                            toast.error('Please log in to view your favorites');
-                            return;
-                          }
-                        }
-                        setFilterSort(newValue);
-                        localStorage.setItem('valuesFilterSort', newValue);
-                      }}
-                      options={[
-                        { value: 'name-all-items', label: 'All Items' },
-                        { value: 'favorites', label: 'My Favorites' },
-                        { value: 'name-limited-items', label: 'Limited Items' },
-                        { value: 'name-seasonal-items', label: 'Seasonal Items' },
-                        { value: 'name-vehicles', label: 'Vehicles' },
-                        { value: 'name-spoilers', label: 'Spoilers' },
-                        { value: 'name-rims', label: 'Rims' },
-                        { value: 'name-body-colors', label: 'Body Colors' },
-                        { value: 'name-hyperchromes', label: 'HyperChromes' },
-                        { value: 'name-textures', label: 'Body Textures' },
-                        { value: 'name-tire-stickers', label: 'Tire Stickers' },
-                        { value: 'name-tire-styles', label: 'Tire Styles' },
-                        { value: 'name-drifts', label: 'Drifts' },
-                        { value: 'name-furnitures', label: 'Furniture' },
-                        { value: 'name-horns', label: 'Horns' },
-                        { value: 'name-weapon-skins', label: 'Weapon Skins' },
-                      ]}
-                      classNamePrefix="react-select"
-                      className="w-full"
-                      isClearable={true}
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          backgroundColor: '#37424D',
-                          borderColor: '#2E3944',
-                          color: '#D3D9D4',
-                        }),
-                        singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                        menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                        option: (base, state) => ({
-                          ...base,
-                          backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                          color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
-                          '&:active': {
-                            backgroundColor: '#124E66',
-                            color: '#FFFFFF',
-                          },
-                        }),
-                        clearIndicator: (base) => ({
-                          ...base,
-                          color: '#D3D9D4',
-                          '&:hover': {
-                            color: '#FFFFFF',
-                          },
-                        }),
-                      }}
-                      isSearchable={false}
-                    />
-                  ) : (
-                    <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
-                  )}
-                </div>
-
-                {/* Sort dropdown */}
-                <div className={`${
-                  !premiumStatusLoaded
-                    ? "w-full"
-                    : currentUserPremiumType !== 0
-                      ? "w-full lg:w-1/2"
-                      : "w-full"
-                }`}>
-                  {selectLoaded ? (
-                    <Select
-                      value={{ value: valueSort, label: (() => {
-                        switch (valueSort) {
-                          case 'random': return 'Random';
-                          case 'alpha-asc': return 'Name (A to Z)';
-                          case 'alpha-desc': return 'Name (Z to A)';
-                          case 'cash-desc': return 'Cash Value (High to Low)';
-                          case 'cash-asc': return 'Cash Value (Low to High)';
-                          case 'duped-desc': return 'Duped Value (High to Low)';
-                          case 'duped-asc': return 'Duped Value (Low to High)';
-                          case 'demand-desc': return 'Demand (High to Low)';
-                          case 'demand-asc': return 'Demand (Low to High)';
-                          case 'demand-extremely-high': return 'Extremely High Demand';
-                          case 'demand-very-high': return 'Very High Demand';
-                          case 'demand-high': return 'High Demand';
-                          case 'demand-decent': return 'Decent Demand';
-                          case 'demand-medium': return 'Medium Demand';
-                          case 'demand-low': return 'Low Demand';
-                          case 'demand-very-low': return 'Very Low Demand';
-                          case 'demand-close-to-none': return 'Close to None';
-                          case 'last-updated-desc': return 'Last Updated (Newest to Oldest)';
-                          case 'last-updated-asc': return 'Last Updated (Oldest to Newest)';
-                          default: return valueSort;
-                        }
-                      })() }}
-                      onChange={(option: unknown) => {
-                        if (!option) {
-                          // Reset to original value when cleared
-                          setValueSort("cash-desc");
-                          localStorage.setItem('valuesValueSort', "cash-desc");
-                          return;
-                        }
-                        const newValue = (option as { value: ValueSort }).value;
-                        setValueSort(newValue);
-                        localStorage.setItem('valuesValueSort', newValue);
-                      }}
-                      options={[
-                        { label: 'Display', options: [
-                          { value: 'random', label: 'Random' },
-                        ]},
-                        { label: 'Last Updated', options: [
-                          { value: 'last-updated-desc', label: 'Last Updated (Newest to Oldest)' },
-                          { value: 'last-updated-asc', label: 'Last Updated (Oldest to Newest)' },
-                        ]},
-                        { label: 'Alphabetically', options: [
-                          { value: 'alpha-asc', label: 'Name (A to Z)' },
-                          { value: 'alpha-desc', label: 'Name (Z to A)' },
-                        ]},
-                        { label: 'Values', options: [
-                          { value: 'cash-desc', label: 'Cash Value (High to Low)' },
-                          { value: 'cash-asc', label: 'Cash Value (Low to High)' },
-                          { value: 'duped-desc', label: 'Duped Value (High to Low)' },
-                          { value: 'duped-asc', label: 'Duped Value (Low to High)' },
-                        ]},
-                        { label: 'Demand', options: [
-                          { value: 'demand-desc', label: 'Demand (High to Low)' },
-                          { value: 'demand-asc', label: 'Demand (Low to High)' },
-                          { value: 'demand-extremely-high', label: 'Extremely High Demand' },
-                          { value: 'demand-very-high', label: 'Very High Demand' },
-                          { value: 'demand-high', label: 'High Demand' },
-                          { value: 'demand-decent', label: 'Decent Demand' },
-                          { value: 'demand-medium', label: 'Medium Demand' },
-                          { value: 'demand-low', label: 'Low Demand' },
-                          { value: 'demand-very-low', label: 'Very Low Demand' },
-                          { value: 'demand-close-to-none', label: 'Close to None' },
-                        ]},
-                      ]}
-                      classNamePrefix="react-select"
-                      className="w-full"
-                      isClearable={true}
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          backgroundColor: '#37424D',
-                          borderColor: '#2E3944',
-                          color: '#D3D9D4',
-                        }),
-                        singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                        menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                        option: (base, state) => ({
-                          ...base,
-                          backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                          color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
-                          '&:active': {
-                            backgroundColor: '#124E66',
-                            color: '#FFFFFF',
-                          },
-                        }),
-                        clearIndicator: (base) => ({
-                          ...base,
-                          color: '#D3D9D4',
-                          '&:hover': {
-                            color: '#FFFFFF',
-                          },
-                        }),
-                      }}
-                      isSearchable={false}
-                    />
-                  ) : (
-                    <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Value range slider (always its own row) */}
-            <div className="w-full">
-              <div className="rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted">Value Range</span>
-                    <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
-                  </div>
-                  <span className="text-[11px] text-muted">{rangeValue[0].toLocaleString()} - {rangeValue[1] >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : rangeValue[1].toLocaleString()}</span>
-                </div>
-                <div className="px-1">
-                  <Slider
-                    value={rangeValue}
-                    onChange={(_, newValue, activeThumb) => {
-                      if (!Array.isArray(newValue)) return;
-                      // Clamp only the active thumb; do NOT push the other thumb
-                      if (activeThumb === 0) {
-                        const clampedMin = Math.min(newValue[0], rangeValue[1] - MIN_VALUE_DISTANCE);
-                        setRangeValue([Math.max(0, clampedMin), rangeValue[1]]);
-                      } else if (activeThumb === 1) {
-                        const clampedMax = Math.max(newValue[1], rangeValue[0] + MIN_VALUE_DISTANCE);
-                        setRangeValue([rangeValue[0], Math.min(MAX_VALUE_RANGE, clampedMax)]);
-                      }
-                    }}
-                    onChangeCommitted={(_, newValue) => {
-                      if (!Array.isArray(newValue)) return;
-                      // Use the clamped state values to avoid raw event values like [0,0]
-                      setAppliedMinValue(rangeValue[0]);
-                      setAppliedMaxValue(rangeValue[1]);
-                    }}
-                    valueLabelDisplay="off"
-                    min={0}
-                    max={MAX_VALUE_RANGE}
-                    step={50_000}
-                    marks={sliderMarks}
-                    disableSwap
-                    sx={{
-                      color: '#5865F2',
-                      mt: 1,
-                      '& .MuiSlider-markLabel': { color: '#D3D9D4' },
-                      '& .MuiSlider-mark': { backgroundColor: '#D3D9D4' },
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Right: Ad */}
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0 bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative mt-4 lg:mt-0" style={{ minHeight: '250px' }}>
-              <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
-                Advertisement
-              </span>
-              <DisplayAd
-                adSlot="8162235433"
-                adFormat="auto"
-                style={{ display: 'block', width: '100%', height: '100%' }}
-              />
-            </div>
-          )}
-        </div>
+          }}
+        />
       </div>
 
-      <div className="mb-4 flex flex-col gap-4">
-        <p className="text-muted">
-          {debouncedSearchTerm 
-            ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? 'item' : 'items'} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-            : `Total ${filterSort !== "name-all-items" ? filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ") : "Items"}: ${rangeFilteredItems.length}`
-          }
-        </p>
-        {totalPages > 1 && (
-          <div className="flex justify-center">
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={handlePageChange}
-              sx={{
-                '& .MuiPaginationItem-root': {
-                  color: '#D3D9D4',
-                  '&.Mui-selected': {
-                    backgroundColor: '#5865F2',
-                    '&:hover': {
-                      backgroundColor: '#4752C4',
-                    },
-                  },
-                  '&:hover': {
-                    backgroundColor: '#2E3944',
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
-      </div>
+      <ValuesSearchControls
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterSort={filterSort}
+        setFilterSort={setFilterSort}
+        valueSort={valueSort}
+        setValueSort={setValueSort}
+        rangeValue={rangeValue}
+        setRangeValue={setRangeValue}
+        setAppliedMinValue={setAppliedMinValue}
+        setAppliedMaxValue={setAppliedMaxValue}
+        searchSectionRef={searchSectionRef}
+      />
 
-      <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
-        {displayedItems.length === 0 ? (
-          <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
-            <p className="text-lg text-muted">
-              {rangeFilteredItems.length === 0 && sortedItems.length > 0
-                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : appliedMaxValue.toLocaleString()})`
-                : getNoItemsMessage()}
-            </p>
-            {rangeFilteredItems.length === 0 && sortedItems.length > 0 && (
-              <button
-                onClick={() => {
-                  setRangeValue([0, MAX_VALUE_RANGE]);
-                  setAppliedMinValue(0);
-                  setAppliedMaxValue(MAX_VALUE_RANGE);
-                }}
-                className="mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
-              >
-                Reset Value Range
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setFilterSort("name-all-items");
-                setValueSort("cash-desc");
-                setSearchTerm("");
-                setRangeValue([0, MAX_VALUE_RANGE]);
-                setAppliedMinValue(0);
-                setAppliedMaxValue(MAX_VALUE_RANGE);
-              }}
-              className="mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 text-muted hover:bg-[#1A5F7A] focus:outline-none"
-            >
-              Clear All Filters
-            </button>
-          </div>
-        ) : (
-          displayedItems.map((item, index) => (
-            <React.Fragment key={item.id}>
-              <ItemCard
-                item={item}
-                isFavorited={favorites.includes(item.id)}
-                onFavoriteChange={(fav) => {
-                  setFavorites((prev) =>
-                    fav
-                      ? [...prev, item.id]
-                      : prev.filter((id) => id !== item.id)
-                  );
-                }}
-              />
-              {/* Show in-feed ad after every 12 items */}
-              {premiumStatusLoaded && currentUserPremiumType === 0 && (index + 1) % 12 === 0 && (index + 1) < displayedItems.length && (
-                <div className="col-span-full my-4">
-                  <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '450px', maxHeight: '500px' }}>
-                    <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
-                      Advertisement
-                    </span>
-                    <DisplayAd
-                      adSlot="4358721799"
-                      adFormat="fluid"
-                      layoutKey="-62+ck+1k-2e+cb"
-                      style={{ display: 'block', width: '100%', height: '100%' }}
-                    />
-                  </div>
-                </div>
-              )}
-            </React.Fragment>
-          ))
-        )}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8">
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            sx={{
-              '& .MuiPaginationItem-root': {
-                color: '#D3D9D4',
-                '&.Mui-selected': {
-                  backgroundColor: '#5865F2',
-                  '&:hover': {
-                    backgroundColor: '#4752C4',
-                  },
-                },
-                '&:hover': {
-                  backgroundColor: '#2E3944',
-                },
-              },
-            }}
-          />
-        </div>
-      )}
+      <ValuesItemsGrid
+        items={sortedItems}
+        favorites={favorites}
+        onFavoriteChange={(itemId, isFavorited) => {
+          setFavorites((prev) =>
+            isFavorited
+              ? [...prev, itemId]
+              : prev.filter((id) => id !== itemId)
+          );
+        }}
+        appliedMinValue={appliedMinValue}
+        appliedMaxValue={appliedMaxValue}
+        MAX_VALUE_RANGE={MAX_VALUE_RANGE}
+        onResetValueRange={() => {
+          setRangeValue([0, MAX_VALUE_RANGE]);
+          setAppliedMinValue(0);
+          setAppliedMaxValue(MAX_VALUE_RANGE);
+        }}
+        onClearAllFilters={() => {
+          setFilterSort("name-all-items");
+          setValueSort("cash-desc");
+          setSearchTerm("");
+          setRangeValue([0, MAX_VALUE_RANGE]);
+          setAppliedMinValue(0);
+          setAppliedMaxValue(MAX_VALUE_RANGE);
+        }}
+        filterSort={filterSort}
+        valueSort={valueSort}
+        debouncedSearchTerm={debouncedSearchTerm}
+      />
 
       {showBackToTop && (
         <button
@@ -947,4 +313,4 @@ function formatClientDate(timestamp: number): string {
   
   // Remove comma after weekday and combine with "at"
   return dateStr.replace(',', '') + ' at ' + timeStr;
-} 
+}   
