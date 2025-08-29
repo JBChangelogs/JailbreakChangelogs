@@ -119,7 +119,7 @@ export const getItemImagePath = (type: string, name: string, isValuesPage: boole
     if (isSocialEmbed) {
       // Return different paths for social media embeds
       if (name === "HyperShift") {
-        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.png";
+        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift.webm";
       }
       if (name === "Gamer TV Set") {
         return "https://assets.jailbreakchangelogs.xyz/assets/images/items/furnitures/Gamer TV Set_optimized.gif";
