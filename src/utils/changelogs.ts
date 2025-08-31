@@ -5,7 +5,8 @@ export function parseMarkdown(text: string) {
   const sections = text.split('\n\n');
   return sections.map(section => {
     const lines = section.split('\n');
-    const title = lines[0].startsWith('## ') ? lines[0].substring(3) : null;
+    const title = lines[0].startsWith('## ') ? lines[0].substring(3) : 
+                  lines[0].startsWith('# ') ? lines[0].substring(2) : null;
     const items = lines.slice(title ? 1 : 0).filter(line => line.trim());
     
     return {
