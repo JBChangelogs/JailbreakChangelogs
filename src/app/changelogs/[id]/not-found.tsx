@@ -9,6 +9,8 @@ export default function ChangelogNotFound() {
     <div className="min-h-screen flex items-center justify-center bg-[#2e3944] text-[#D3D9D4] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-no-repeat bg-center relative">
       {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50 z-[1]" />
+      {/* Vignette overlay */}
+      <div className="absolute inset-0 bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/vignette.png')] bg-cover bg-no-repeat bg-center z-[1]" />
       
       <div className="text-center max-w-md mx-auto px-4 relative z-[2]">
         <div className="px-8 py-8 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(30,30,30,0.35)] backdrop-blur-xl border border-white/[0.12]">

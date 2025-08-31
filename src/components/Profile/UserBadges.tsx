@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { FaCrown, FaHandsHelping } from "react-icons/fa";
 import { FaWrench } from "react-icons/fa6";
+import { CgCodeSlash } from "react-icons/cg";
 import { toast } from "react-hot-toast";
 import type { UserFlag } from "@/types/auth";
 import Image from "next/image";
@@ -108,7 +109,7 @@ export const UserBadges = ({
         duration: 4000,
         style: {
           background: "linear-gradient(to right, #8B5CF6, #6D28D9)",
-          color: "white",
+          color: "black",
         },
       }
     );
@@ -204,6 +205,30 @@ export const UserBadges = ({
     );
   };
 
+  const handleDeveloperBadgeClick = () => {
+    const developerFlag = sortedFlags.find(
+      (f) => f.flag === "is_developer"
+    );
+    toast(
+      () => (
+        <div className="flex items-center gap-2">
+          <CgCodeSlash className="w-5 h-5 text-black" />
+          <span>
+            {developerFlag?.description ||
+              "This user is a developer for Jailbreak Changelogs!"}
+          </span>
+        </div>
+      ),
+      {
+        duration: 4000,
+        style: {
+          background: "linear-gradient(to right, #84CC16, #65A30D)",
+          color: "black",
+        },
+      }
+    );
+  };
+
   const handlePremiumBadgeClick = () => {
     const premiumMessages = {
       1: "This user has Supporter Type 1!",
@@ -218,7 +243,7 @@ export const UserBadges = ({
     };
 
     const premiumTextColors = {
-      1: "white", // Bronze - white text
+      1: "black", // Bronze - black text
       2: "black", // Silver - black text
       3: "black", // Gold - black text
     };
@@ -436,6 +461,38 @@ export const UserBadges = ({
               onClick={handleContributorBadgeClick}
             >
               <FaWrench className={currentSize.icon} />
+            </div>
+          </Tooltip>
+        );
+      case "is_developer":
+        return (
+          <Tooltip
+            key={`flag-${flag.flag}`}
+            title="Developer"
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "#0F1419",
+                  color: "#D3D9D4",
+                  fontSize: "0.75rem",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid #2E3944",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  "& .MuiTooltip-arrow": {
+                    color: "#0F1419",
+                  },
+                },
+              },
+            }}
+          >
+            <div
+              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-lime-500 to-lime-600 text-black cursor-help hover:opacity-90 ${currentSize.container}`}
+              onClick={handleDeveloperBadgeClick}
+            >
+              <CgCodeSlash className={currentSize.icon} />
             </div>
           </Tooltip>
         );

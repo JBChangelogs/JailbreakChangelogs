@@ -378,7 +378,7 @@ export default async function RootLayout({
                       <p className="text-muted">
                         Maintained by{" "}
                         <a
-                          href="https://github.com/v3kmmw"
+                          href="https://github.com/Jakobiis"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:text-blue-300 hover:underline"
@@ -768,7 +768,7 @@ export default async function RootLayout({
                       <p className="text-muted">
                         Maintained by{" "}
                         <a
-                          href="https://github.com/v3kmmw"
+                          href="https://github.com/Jakobiis"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:text-blue-300 hover:underline"

@@ -141,19 +141,21 @@ export default function SeasonDetailsClient({
             {/* XP Calculator Button - Only show for highest season */}
             {season.season === latestSeasonNumber && (
               <div className="mb-6 rounded-lg border border-[#124E66] bg-[#124E66]/10 p-4">
-                <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                  <div>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex-1">
                     <h3 className="text-lg font-semibold text-[#FFFFFF] mb-2">🎯 XP Progress Calculator</h3>
                     <p className="text-muted text-sm">
                       Calculate how long it will take to reach your target level and see if you can complete the season on time.
                     </p>
                   </div>
-                  <Link
-                    href="/seasons/will-i-make-it"
-                    className="rounded-lg bg-[#124E66] px-6 py-3 font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] whitespace-nowrap inline-block text-center"
-                  >
-                    Calculate My Progress
-                  </Link>
+                  <div className="flex-shrink-0">
+                    <Link
+                      href="/seasons/will-i-make-it"
+                      className="rounded-lg bg-[#124E66] px-6 py-3 font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] inline-block text-center w-full lg:w-auto"
+                    >
+                      Calculate My Progress
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

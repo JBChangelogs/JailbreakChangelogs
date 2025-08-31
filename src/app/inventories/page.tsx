@@ -5,15 +5,15 @@ import Image from 'next/image';
 import CopyButton from './CopyButton';
 import { Suspense } from 'react';
 import ExperimentalFeatureBanner from '@/components/UI/ExperimentalFeatureBanner';
+import ComingSoon from '@/components/UI/ComingSoon';
 import { isFeatureEnabled } from '@/utils/featureFlags';
-import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default function InventoriesPage() {
   // Check if Inventory Calculator feature is enabled
   if (!isFeatureEnabled('INVENTORY_CALCULATOR')) {
-    redirect('/');
+    return <ComingSoon />;
   }
 
   return (

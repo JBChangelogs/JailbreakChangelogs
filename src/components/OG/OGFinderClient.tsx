@@ -109,7 +109,7 @@ export default function OGFinderClient({
                 id="searchInput"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                placeholder="Enter username or Roblox ID (e.g., v3kmw or 1910948809)"
+                placeholder="Enter username or Roblox ID (e.g., Jakobiis or 1910948809)"
                 className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
                 required
               />

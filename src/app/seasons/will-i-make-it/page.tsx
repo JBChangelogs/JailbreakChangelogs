@@ -54,7 +54,6 @@ export default async function WillIMakeItPage() {
             endDate={season.end_date}
             doubleXpStart={season.end_date - season.xp_data.doubleXpDuration}
             seasonEnds={season.end_date}
-            totalDays={season.xp_data.xp_rates.totalDays}
           />
         </div>
 

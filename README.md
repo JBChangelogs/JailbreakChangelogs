@@ -39,7 +39,7 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 ## Acknowledgements
 
 - [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
-- [Jakobiis](https://github.com/v3kmmw/) - Co-founder, Lead Back-end Developer & API Architect
+- [Jakobiis](https://github.com/Jakobiis/) - Co-founder, Lead Back-end Developer & API Architect
 
 ## Contributing
 

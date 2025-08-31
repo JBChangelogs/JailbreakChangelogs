@@ -341,7 +341,6 @@ export async function fetchItemChanges(id: string) {
   try {
     const response = await fetch(`${BASE_API_URL}/item/changes?id=${id}`);
     if (response.status === 404) {
-      console.log(`[SERVER] Item changes for item ${id} not found`);
       return [] as unknown[];
     }
     if (!response.ok) {
@@ -619,7 +618,6 @@ export async function fetchComments(type: string, id: string, itemType?: string)
     const response = await fetch(`${BASE_API_URL}/comments/get?type=${commentType}&id=${id}&nocache=true`);
     
     if (response.status === 404) {
-      console.log(`[SERVER] Comments for ${commentType} ${id} not found`);
       return { comments: [], userMap: {} };
     }
     

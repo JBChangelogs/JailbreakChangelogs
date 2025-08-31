@@ -415,7 +415,7 @@ export default function Header() {
       <ListItem component={Link} href="/seasons/will-i-make-it" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText 
           primary={
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
               <span>Will I Make It</span>
               <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
             </Box>
@@ -451,30 +451,56 @@ export default function Header() {
       <ListItem component={Link} href="/trading" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Trade Ads" />
       </ListItem>
-      {isFeatureEnabled('INVENTORY_CALCULATOR') && (
-        <ListItem component={Link} href="/inventories" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-          <ListItemText 
-            primary={
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span>Inventory Calculator</span>
+      <ListItem 
+        component={Link}
+        href="/inventories"
+        onClick={handleDrawerToggle}
+        sx={{ 
+          pl: 4,
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: '#2E3944'
+          }
+        }}
+      >
+        <ListItemText 
+          primary={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <span>Inventory Calculator</span>
+              {isFeatureEnabled('INVENTORY_CALCULATOR') ? (
                 <span className="text-[10px] uppercase font-semibold text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded">Beta</span>
-              </Box>
-            } 
-          />
-        </ListItem>
-      )}
-      {isFeatureEnabled('OG_FINDER') && (
-        <ListItem component={Link} href="/og" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-          <ListItemText 
-            primary={
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span>OG Finder</span>
+              ) : (
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+              )}
+            </Box>
+          } 
+        />
+      </ListItem>
+      <ListItem 
+        component={Link}
+        href="/og"
+        onClick={handleDrawerToggle}
+        sx={{ 
+          pl: 4,
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: '#2E3944'
+          }
+        }}
+      >
+        <ListItemText 
+          primary={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <span>OG Finder</span>
+              {isFeatureEnabled('OG_FINDER') ? (
                 <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
-              </Box>
-            } 
-          />
-        </ListItem>
-      )}
+              ) : (
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+              )}
+            </Box>
+          } 
+        />
+      </ListItem>
       <ListItem>
         <Typography 
           sx={{ 
@@ -492,16 +518,16 @@ export default function Header() {
       <ListItem component={Link} href="/users" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="User Search" />
       </ListItem>
-      <ListItem component={Link} href="/crews" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
-        <ListItemText 
-          primary={
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span>Crew Leaderboard</span>
-              <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
-            </Box>
-          } 
-        />
-      </ListItem>
+              <ListItem component={Link} href="/crews" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
+          <ListItemText 
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                <span>Crew Leaderboard</span>
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+              </Box>
+            } 
+          />
+        </ListItem>
       <ListItem component={Link} href="/servers" onClick={handleDrawerToggle} sx={{ pl: 4 }}>
         <ListItemText primary="Private Servers" />
       </ListItem>
@@ -647,7 +673,7 @@ export default function Header() {
                             transition={{ duration: 0.2, delay: 0.05 }}
                           >
                             <Link href="/seasons/will-i-make-it" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleSeasonsMenuClose}>
-                              <div className="flex flex-col items-start">
+                              <div className="flex items-center gap-2 flex-wrap"> 
                                 <span>Will I Make It</span>
                                 <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                               </div>
@@ -765,38 +791,42 @@ export default function Header() {
                           >
                             <Link href="/trading" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>Trade Ads</Link>
                           </motion.div>
-                          {isFeatureEnabled('INVENTORY_CALCULATOR') && (
-                            <motion.div
-                              variants={{
-                                hidden: { opacity: 0, x: -10 },
-                                visible: { opacity: 1, x: 0 }
-                              }}
-                              transition={{ duration: 0.2, delay: 0.25 }}
-                            >
-                              <Link href="/inventories" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
-                                <div className="flex flex-col items-start">
-                                  <span>Inventory Calculator</span>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.25 }}
+                          >
+                            <Link href="/inventories" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span>Inventory Calculator</span>
+                                {isFeatureEnabled('INVENTORY_CALCULATOR') ? (
                                   <span className="text-[10px] uppercase font-semibold text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded">Beta</span>
-                                </div>
-                              </Link>
-                            </motion.div>
-                          )}
-                          {isFeatureEnabled('OG_FINDER') && (
-                            <motion.div
-                              variants={{
-                                hidden: { opacity: 0, x: -10 },
-                                visible: { opacity: 1, x: 0 }
-                              }}
-                              transition={{ duration: 0.2, delay: 0.3 }}
-                            >
-                              <Link href="/og" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
-                                <div className="flex flex-col items-start">
-                                  <span>OG Finder</span>
+                                ) : (
+                                  <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+                                )}
+                              </div>
+                            </Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.3 }}
+                          >
+                            <Link href="/og" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span>OG Finder</span>
+                                {isFeatureEnabled('OG_FINDER') ? (
                                   <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
-                                </div>
-                              </Link>
-                            </motion.div>
-                          )}
+                                ) : (
+                                  <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+                                )}
+                              </div>
+                            </Link>
+                          </motion.div>
                         </motion.div>
                       </motion.div>
                     )}
@@ -881,7 +911,7 @@ export default function Header() {
                             transition={{ duration: 0.2, delay: 0.05 }}
                           >
                             <Link href="/crews" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleCommunityMenuClose}>
-                              <div className="flex flex-col items-start">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span>Crew Leaderboard</span>
                                 <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                               </div>
