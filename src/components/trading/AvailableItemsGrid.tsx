@@ -1,4 +1,3 @@
-const truncateName = (name: string) => name.length > 12 ? name.slice(0, 12) + '…' : name;
 function useWindowWidth() {
   const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   useEffect(() => {
@@ -11,12 +10,11 @@ function useWindowWidth() {
 
 import React, { useState, useEffect } from 'react';
 import { TradeItem } from '@/types/trading';
-import { Pagination, Checkbox, FormControlLabel } from '@mui/material';
+import { Pagination } from '@mui/material';
 import toast from 'react-hot-toast';
 import { getItemImagePath, handleImageError, isVideoItem, getVideoPath } from '@/utils/images';
 import { sortByCashValue, sortByDemand, formatFullValue } from '@/utils/values';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { getItemTypeColor, getDemandColor, getTrendColor } from '@/utils/badgeColors';
 import { CategoryIconBadge } from '@/utils/categoryIcons';
 import { TradeAdErrorModal } from './TradeAdErrorModal';
@@ -53,7 +51,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
-  const [showNonTradable, setShowNonTradable] = useState(false);
+
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
@@ -133,7 +131,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
       isTokenSubsequence(searchTokens, nameTokens) ||
       isTokenSubsequence(searchAlphaNum, nameAlphaNum);
     if (!matchesSearch) return false;
-    if (!showNonTradable && item.tradable !== 1) return false;
+    if (item.tradable !== 1) return false;
 
     switch (filterSort) {
       case "name-limited-items":
@@ -238,10 +236,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   return (
     <div className="space-y-4" data-component="available-items-grid">
-      <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944]">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-muted font-medium">Tradable Items ({filteredItems.length})</h3>
-        </div>
+      <div className="bg-[#212A31] rounded-lg p-1 sm:p-2 pt-4 border border-[#2E3944]">
+
 
         {/* Ad Placement: Above the grid, only for non-premium users */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
@@ -261,24 +257,21 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
         <div className="mb-4 relative">
           <div className="relative">
-            <SearchIcon 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted/50"
-              sx={{ fontSize: 20 }}
-            />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
             <input
               type="text"
               placeholder="Search items by name or type..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 bg-[#2E3944] border border-[#37424D] rounded-lg text-muted placeholder-[#D3D9D4]/50 focus:outline-none focus:border-[#5865F2]"
+              className="w-full rounded-lg border px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:outline-none transition-all duration-300 border-[#2E3944] bg-[#37424D] focus:border-[#124E66]"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FFFFFF] hover:text-muted transition-colors"
+                className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
                 aria-label="Clear search"
               >
-                <ClearIcon sx={{ fontSize: 20 }} />
+                <XMarkIcon />
               </button>
             )}
           </div>
@@ -342,7 +335,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               ]}
               classNamePrefix="react-select"
               className="w-full"
-              isClearable={true}
+              isClearable={false}
               styles={{
                 control: (base) => ({
                   ...base,
@@ -413,7 +406,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               ]}
               classNamePrefix="react-select"
               className="w-full"
-              isClearable={true}
+              isClearable={false}
               styles={{
                 control: (base) => ({
                   ...base,
@@ -446,36 +439,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
           )}
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showNonTradable}
-                onChange={(e) => {
-                  setShowNonTradable(e.target.checked);
-                  setPage(1);
-                }}
-                sx={{
-                  color: '#D3D9D4',
-                  '&.Mui-checked': {
-                    color: '#5865F2',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    fontSize: 20,
-                  },
-                }}
-              />
-            }
-            label="Show Non-Tradable Items"
-            sx={{
-              color: '#D3D9D4',
-              '& .MuiFormControlLabel-label': {
-                fontSize: '0.875rem',
-              },
-            }}
-          />
+
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           {paginatedItems.length === 0 ? (
             <div className="col-span-full text-center py-8">
               <p className="text-muted">
@@ -501,8 +468,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 key={item.id}
                 className={`group p-2 rounded-lg transition-colors text-left w-full flex flex-col ${
                   item.tradable === 1 
-                    ? 'bg-[#2E3944] hover:bg-[#37424D]'
-                    : 'bg-[#2E3944] opacity-50 cursor-not-allowed'
+                    ? 'bg-[#1a2127] hover:bg-[#212A31]'
+                    : 'bg-[#1a2127] opacity-50 cursor-not-allowed'
                 }`}
                 tabIndex={0}
                 role="button"
@@ -551,8 +518,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </div>
                 <div className="flex flex-col flex-grow">
                   <div className="space-y-1.5">
-                    <span className="text-blue-300 text-sm font-medium truncate transition-colors group-hover:text-blue-400 hover:underline">
-                      {windowWidth <= 320 ? truncateName(item.name) : item.name}
+                    <span className="text-muted text-sm font-semibold transition-colors group-hover:text-[#40c0e7] max-w-full">
+                      {item.name}
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span 
@@ -580,42 +547,56 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     {item.tradable === 1 && (
                       <>
                         <div className="text-xs text-muted space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span>Cash:</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold" style={{ backgroundColor: '#1d7da3' }}>
+                          <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1.5">
+                            <span className="text-xs text-muted font-medium whitespace-nowrap">Cash</span>
+                            <span className="bg-[#1d7da3] text-white text-xs px-2 py-0.5 font-bold rounded-lg shadow-sm">
                               {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
                                 (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === null || 
                                 item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value === "N/A" ? "N/A" :
-                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null))
-                                : (item.cash_value === null || item.cash_value === "N/A" ? "N/A" : formatFullValue(item.cash_value))}
+                                (() => {
+                                  const value = item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.cash_value ?? null;
+                                  if (value === null || value === "N/A") return "N/A";
+                                  return windowWidth <= 640 ? value : formatFullValue(value);
+                                })())
+                                : (() => {
+                                    if (item.cash_value === null || item.cash_value === "N/A") return "N/A";
+                                    return windowWidth <= 640 ? item.cash_value : formatFullValue(item.cash_value);
+                                  })()}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span>Duped:</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold bg-gray-600">
+                          <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1.5">
+                            <span className="text-xs text-muted font-medium whitespace-nowrap">Duped</span>
+                            <span className="bg-gray-600 text-white text-xs px-2 py-0.5 font-bold rounded-lg shadow-sm">
                               {selectedVariants[item.id] && selectedVariants[item.id] !== '2025' ? 
                                 (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === null || 
                                 item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value === "N/A" ? "N/A" :
-                                formatFullValue(item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null))
-                                : (item.duped_value === null || item.duped_value === "N/A" ? "N/A" : formatFullValue(item.duped_value))}
+                                (() => {
+                                  const value = item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.duped_value ?? null;
+                                  if (value === null || value === "N/A") return "N/A";
+                                  return windowWidth <= 640 ? value : formatFullValue(value);
+                                })())
+                                : (() => {
+                                    if (item.duped_value === null || item.duped_value === "N/A") return "N/A";
+                                    return windowWidth <= 640 ? item.duped_value : formatFullValue(item.duped_value);
+                                  })()}
                             </span>
                           </div>
-                          <div className="text-muted flex items-center gap-2">
-                            <span>Demand:</span>
+                          <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1.5">
+                            <span className="text-xs text-muted font-medium whitespace-nowrap">Demand</span>
                             {(() => {
                               const d = selectedVariants[item.id] && selectedVariants[item.id] !== '2025'
                                 ? (item.children?.find(child => child.sub_name === selectedVariants[item.id])?.data.demand ?? 'N/A')
                                 : (item.demand ?? 'N/A');
                               return (
-                                <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getDemandColor(d)}`}>
+                                <span className={`text-xs px-2 py-0.5 font-bold rounded-lg shadow-sm ${getDemandColor(d)}`}>
                                   {d === 'N/A' ? 'Unknown' : d}
                                 </span>
                               );
                             })()}
                           </div>
-                          <div className="text-muted flex items-center gap-2">
-                            <span>Trend:</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap text-white font-semibold ${getTrendColor(item.trend || 'Unknown')}`}>
+                          <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1.5">
+                            <span className="text-xs text-muted font-medium whitespace-nowrap">Trend</span>
+                            <span className={`text-xs px-2 py-0.5 font-bold rounded-lg shadow-sm ${getTrendColor(item.trend || 'Unknown')}`}>
                               {!item.trend || item.trend === 'N/A' ? 'Unknown' : item.trend}
                             </span>
                           </div>

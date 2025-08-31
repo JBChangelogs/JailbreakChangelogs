@@ -1,3 +1,4 @@
+// removed from layout (might be added back in the future)
 "use client";
 
 import Image from "next/image";

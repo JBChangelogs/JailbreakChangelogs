@@ -15,6 +15,7 @@ import { useSupporterModal } from '@/hooks/useSupporterModal';
 import SupporterModal from '../Modals/SupporterModal';
 import LoginModalWrapper from '../Auth/LoginModalWrapper';
 import dynamic from 'next/dynamic';
+import { ArrowsRightLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const Select = dynamic(() => import('react-select'), { ssr: false });
 
@@ -105,7 +106,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
     const fetchUserData = async () => {
       try {
         const token = getToken();
-        if (!token) return;
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
         const response = await fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`);
         if (response.ok) {
@@ -213,6 +217,32 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
         setRequestingItems(newRequestingItems);
         saveItemsToLocalStorage(offeringItems, newRequestingItems);
       }
+    }
+  };
+
+  const handleSwapSides = () => {
+    setOfferingItems(requestingItems);
+    setRequestingItems(offeringItems);
+  };
+
+  const handleClearSides = (event?: React.MouseEvent) => {
+    // If Shift key is held down, clear both sides immediately without showing modal
+    if (event?.shiftKey) {
+      handleStartNewTradeAd();
+      return;
+    }
+    
+    setShowClearConfirmModal(true);
+  };
+
+  const handleMirrorItems = (fromSide: 'offering' | 'requesting') => {
+    const sourceItems = fromSide === 'offering' ? offeringItems : requestingItems;
+    const targetSide = fromSide === 'offering' ? 'requesting' : 'offering';
+    
+    if (targetSide === 'offering') {
+      setOfferingItems(sourceItems);
+    } else {
+      setRequestingItems(sourceItems);
     }
   };
 
@@ -434,16 +464,46 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           onCancel={handleSuccessModalClose}
         />
 
-        <CustomConfirmationModal
-          open={showClearConfirmModal}
-          onClose={() => setShowClearConfirmModal(false)}
-          title="Clear Trade Ad?"
-          message="Are you sure you want to clear your current trade ad? This actiotn cannot be undone."
-          confirmText="Clear"
-          cancelText="Cancel"
-          onConfirm={handleStartNewTradeAd}
-          onCancel={() => setShowClearConfirmModal(false)}
-        />
+        {/* Clear Confirmation Modal - Multi-option like calculator */}
+        {showClearConfirmModal && (
+          <div className="fixed inset-0 z-50">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" onClick={() => setShowClearConfirmModal(false)} />
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <div className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6 shadow-xl border border-[#5865F2]">
+                <h2 className="text-white text-xl font-semibold mb-2">Clear Trade Ad?</h2>
+                <p className="text-muted/80 mb-6">Choose what to clear. This action cannot be undone.</p>
+                <div className="grid grid-cols-1 gap-3 mb-4">
+                  <button
+                    onClick={() => { setOfferingItems([]); if (requestingItems.length === 0) { localStorage.removeItem('tradeAdFormItems'); } else { saveItemsToLocalStorage([], requestingItems); } setShowClearConfirmModal(false); }}
+                    className="w-full rounded-md border border-[#047857] px-4 py-2 text-sm font-medium text-white bg-[#047857]/20 hover:bg-[#047857]/30 transition-colors"
+                  >
+                    Clear Offering
+                  </button>
+                  <button
+                    onClick={() => { setRequestingItems([]); if (offeringItems.length === 0) { localStorage.removeItem('tradeAdFormItems'); } else { saveItemsToLocalStorage(offeringItems, []); } setShowClearConfirmModal(false); }}
+                    className="w-full rounded-md border border-[#B91C1C] px-4 py-2 text-sm font-medium text-white bg-[#B91C1C]/20 hover:bg-[#B91C1C]/30 transition-colors"
+                  >
+                    Clear Requesting
+                  </button>
+                  <button
+                    onClick={() => { handleStartNewTradeAd(); }}
+                    className="w-full rounded-md bg-[#B91C1C] px-4 py-2 text-sm font-medium text-white hover:bg-[#991B1B] transition-colors"
+                  >
+                    Clear Both
+                  </button>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowClearConfirmModal(false)}
+                    className="rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium text-muted hover:bg-[#2E3944] hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <SupporterModal
           isOpen={modalState.isOpen}
@@ -608,40 +668,110 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           </div>
         )}
 
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center gap-3">
+          <Button
+            variant="contained"
+            onClick={handleSwapSides}
+            sx={{
+              backgroundColor: '#5865F2',
+              color: '#FFFFFF',
+              '&:hover': {
+                backgroundColor: '#4752C4',
+              },
+            }}
+          >
+            <ArrowsRightLeftIcon className="h-5 w-5 mr-1" />
+            Swap Sides
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleClearSides}
+            sx={{
+              backgroundColor: '#EF4444',
+              color: '#FFFFFF',
+              '&:hover': {
+                backgroundColor: '#DC2626',
+              },
+            }}
+          >
+            <TrashIcon className="h-5 w-5 mr-1" />
+            Clear
+          </Button>
+        </div>
+
         {/* Offering Items */}
         <div className="md:flex md:space-x-6 space-y-6 md:space-y-0">
-          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1">
+          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#047857' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Offering</h3>
                 <span className="text-sm text-muted/70">({offeringItems.length}/8)</span>
               </div>
+              <Button
+                variant="outlined"
+                onClick={() => handleMirrorItems('offering')}
+                size="small"
+                sx={{
+                  borderColor: '#047857',
+                  color: '#FFFFFF',
+                  backgroundColor: 'rgba(4, 120, 87, 0.15)',
+                  '&:hover': {
+                    borderColor: '#065F46',
+                    backgroundColor: 'rgba(4, 120, 87, 0.25)',
+                    color: '#FFFFFF',
+                  },
+                }}
+              >
+                <ArrowsRightLeftIcon className="h-4 w-4 mr-1" />
+                Mirror
+              </Button>
             </div>
             <ItemGrid items={offeringItems} title="Offering" onRemove={(id, subName) => handleRemoveItem(id, 'offering', subName)} />
-            <div className="flex items-center gap-4 text-sm text-muted/70 mt-4">
-              <span>Cash: <span className="font-bold text-muted">{calculateTotals(offeringItems).cashValue}</span></span>
-              <span>Duped: <span className="font-bold text-muted">{calculateTotals(offeringItems).dupedValue}</span></span>
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+              <span>Total: <span className="font-bold text-muted">{calculateTotals(offeringItems).cashValue}</span></span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{offeringItems.length} clean • {calculateTotals(offeringItems).cashValue}</span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">0 duped • 0</span>
             </div>
           </div>
 
           {/* Requesting Items */}
-          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1">
+          <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#B91C1C' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-muted font-medium">Requesting</h3>
                 <span className="text-sm text-muted/70">({requestingItems.length}/8)</span>
               </div>
+              <Button
+                variant="outlined"
+                onClick={() => handleMirrorItems('requesting')}
+                size="small"
+                sx={{
+                  borderColor: '#B91C1C',
+                  color: '#FFFFFF',
+                  backgroundColor: 'rgba(185, 28, 28, 0.15)',
+                  '&:hover': {
+                    borderColor: '#991B1B',
+                    backgroundColor: 'rgba(185, 28, 28, 0.25)',
+                    color: '#FFFFFF',
+                  },
+                }}
+              >
+                <ArrowsRightLeftIcon className="h-4 w-4 mr-1" />
+                Mirror
+              </Button>
             </div>
             <ItemGrid items={requestingItems} title="Requesting" onRemove={(id, subName) => handleRemoveItem(id, 'requesting', subName)} />
-            <div className="flex items-center gap-4 text-sm text-muted/70 mt-4">
-              <span>Cash: <span className="font-bold text-muted">{calculateTotals(requestingItems).cashValue}</span></span>
-              <span>Duped: <span className="font-bold text-muted">{calculateTotals(requestingItems).dupedValue}</span></span>
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+              <span>Total: <span className="font-bold text-muted">{calculateTotals(requestingItems).cashValue}</span></span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{requestingItems.length} clean • {calculateTotals(requestingItems).cashValue}</span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">0 duped • 0</span>
             </div>
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col sm:flex-row justify-end gap-3">
           <Button
             variant="outlined"
             onClick={() => {
@@ -656,6 +786,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
             sx={{
               borderColor: '#D3D9D4',
               color: '#D3D9D4',
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              padding: { xs: '6px 12px', sm: '8px 16px' },
               '&:hover': {
                 borderColor: '#D3D9D4',
                 backgroundColor: 'rgba(211, 217, 212, 0.1)',
@@ -681,6 +813,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
             sx={{
               backgroundColor: '#5865F2',
               color: 'white',
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              padding: { xs: '6px 12px', sm: '8px 16px' },
               '&:hover': {
                 backgroundColor: '#4752C4',
               },

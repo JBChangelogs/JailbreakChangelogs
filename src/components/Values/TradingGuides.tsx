@@ -95,7 +95,7 @@ export default function TradingGuides({ valueSort, onValueSortChange, onScrollTo
             Trading Guides & Information
           </h3>
           {!isExpanded && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#5865F2] text-white animate-pulse">
+            <span className="hidden md:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#5865F2] text-white animate-pulse">
               Click me!
             </span>
           )}

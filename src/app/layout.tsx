@@ -27,7 +27,6 @@ import {
 } from "@/utils/maintenance";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import KofiWidget from "@/components/KofiWidget";
 import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -164,7 +163,6 @@ export default async function RootLayout({
                 <main className="flex-1">{children}</main>
 
                 <footer className="bg-[#212A31] py-8">
-              <KofiWidget />
               <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {/* Follow Us */}
@@ -554,7 +552,6 @@ export default async function RootLayout({
             <main className="flex-1">{children}</main>
 
             <footer className="bg-[#212A31] py-8">
-              <KofiWidget />
               <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {/* Follow Us */}

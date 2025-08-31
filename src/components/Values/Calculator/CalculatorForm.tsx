@@ -47,8 +47,30 @@ const formatTotalValue = (total: number): string => {
  * Keep visual style consistent with `CustomConfirmationModal` and other surfaces.
  */
 const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ message, onBrowse }) => {
+  const handleClick = () => {
+    onBrowse();
+    // Scroll to items grid after a short delay to ensure tab switch completes
+    setTimeout(() => {
+      const itemsGrid = document.querySelector('[data-component="available-items-grid"]');
+      if (itemsGrid) {
+        itemsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   return (
-    <div className="bg-[#2E3944] rounded-lg p-12">
+    <div 
+      className="bg-[#2E3944] rounded-lg p-12 cursor-pointer hover:bg-[#37424D] transition-colors border-2 border-dashed border-[#5865F2]/30 hover:border-[#5865F2]/60"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+    >
       <div className="text-center">
         <div className="mb-4">
           <svg className="mx-auto h-16 w-16 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,13 +79,11 @@ const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({ messa
         </div>
         <h3 className="text-lg font-medium text-muted mb-2">No Items Selected</h3>
         <p className="text-muted/70 mb-6">{message}</p>
-        <button
-          onClick={onBrowse}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors"
-        >
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors">
           <CiBoxList className="w-4 h-4" />
           Browse Items
-        </button>
+        </div>
+        <p className="text-xs text-muted/60 mt-3">Click anywhere to browse items</p>
       </div>
     </div>
   );
@@ -82,7 +102,8 @@ const CalculatorItemGrid: React.FC<{
   onValueTypeChange: (itemId: number, subName: string | undefined, valueType: 'cash' | 'duped') => void;
   getSelectedValueString: (item: TradeItem) => string;
   getSelectedValueType: (item: TradeItem) => 'cash' | 'duped';
-}> = ({ items, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueType }) => {
+  side?: 'offering' | 'requesting';
+}> = ({ items, onRemove, onRemoveAll, onValueTypeChange, getSelectedValueType, side }) => {
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [actionItem, setActionItem] = useState<(TradeItem & { count?: number }) | null>(null);
   const openActionModal = (item: TradeItem & { count?: number }) => {
@@ -115,9 +136,43 @@ const CalculatorItemGrid: React.FC<{
   };
 
   if (items.length === 0) {
+    const handleClick = () => {
+      // Switch to items tab
+      if (typeof window !== 'undefined') {
+        window.location.hash = '';
+      }
+      // Scroll to items grid after a short delay to ensure tab switch completes
+      setTimeout(() => {
+        const itemsGrid = document.querySelector('[data-component="available-items-grid"]');
+        if (itemsGrid) {
+          itemsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    };
+
+    const isOffering = side === 'offering';
+    const borderColor = isOffering ? 'border-[#047857]/30 hover:border-[#047857]/60' : 'border-[#B91C1C]/30 hover:border-[#B91C1C]/60';
+
     return (
-      <div className="bg-[#2E3944] rounded-lg p-4">
-        <p className="text-muted text-sm text-center">No items selected</p>
+      <div 
+        className={`bg-[#2E3944] rounded-lg p-6 cursor-pointer hover:bg-[#37424D] transition-colors border-2 border-dashed text-center ${borderColor}`}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        <div className="mb-2">
+          <svg className="mx-auto h-8 w-8 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <p className="text-muted text-sm font-medium">No items selected</p>
+        <p className="text-xs text-muted/60 mt-1">Click to browse items</p>
       </div>
     );
   }
@@ -915,11 +970,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'offering')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'offering')}
               getSelectedValueType={(item) => getSelectedValueType(item, 'offering')}
+              side="offering"
             />
             {(() => {
               const t = calculateTotals(offeringItems, 'offering');
               return (
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+                <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
                   <span>Total: <span className="font-bold text-muted">{t.cashValue}</span></span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{t.breakdown.clean.count} clean • {t.breakdown.clean.formatted}</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{t.breakdown.duped.count} duped • {t.breakdown.duped.formatted}</span>
@@ -963,11 +1019,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
               onValueTypeChange={(id, subName, valueType) => updateItemValueType(id, subName, valueType, 'requesting')}
               getSelectedValueString={(item) => getSelectedValueString(item, 'requesting')}
               getSelectedValueType={(item) => getSelectedValueType(item, 'requesting')}
+              side="requesting"
             />
             {(() => {
               const t = calculateTotals(requestingItems, 'requesting');
               return (
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
+                <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted/70 mt-4">
                   <span>Total: <span className="font-bold text-muted">{t.cashValue}</span></span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-green-500/80 border border-green-500/20">{t.breakdown.clean.count} clean • {t.breakdown.clean.formatted}</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-white bg-red-500/80 border border-red-500/20">{t.breakdown.duped.count} duped • {t.breakdown.duped.formatted}</span>

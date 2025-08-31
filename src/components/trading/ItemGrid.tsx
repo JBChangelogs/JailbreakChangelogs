@@ -69,9 +69,43 @@ const groupItems = (items: TradeItem[]) => {
 
 export const ItemGrid: React.FC<ItemGridProps> = ({ items, title, onRemove }) => {
   if (items.length === 0) {
+    const isOffering = title.toLowerCase() === 'offering';
+    const borderColor = isOffering ? 'border-[#047857]/30 hover:border-[#047857]/60' : 'border-[#B91C1C]/30 hover:border-[#B91C1C]/60';
+    
     return (
-      <div className="bg-[#2E3944] rounded-lg p-4">
-        <p className="text-muted text-sm text-center">No items selected</p>
+      <div 
+        className={`bg-[#2E3944] rounded-lg p-6 cursor-pointer hover:bg-[#37424D] transition-colors border-2 border-dashed text-center ${borderColor}`}
+        onClick={() => {
+          // Scroll to items grid after a short delay to ensure tab switch completes
+          setTimeout(() => {
+            const itemsGrid = document.querySelector('[data-component="available-items-grid"]');
+            if (itemsGrid) {
+              itemsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+        }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            // Scroll to items grid after a short delay to ensure tab switch completes
+            setTimeout(() => {
+              const itemsGrid = document.querySelector('[data-component="available-items-grid"]');
+              if (itemsGrid) {
+                itemsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }
+        }}
+      >
+        <div className="mb-2">
+          <svg className="mx-auto h-8 w-8 text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <p className="text-muted text-sm font-medium">No items selected</p>
+        <p className="text-xs text-muted/60 mt-1">Click to browse items</p>
       </div>
     );
   }
