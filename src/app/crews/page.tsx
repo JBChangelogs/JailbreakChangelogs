@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { fetchCrewLeaderboard, AVAILABLE_CREW_SEASONS } from '@/utils/api';
 import CrewLeaderboard from '@/components/Crews/CrewLeaderboard';
+import CrewSeasonSelector from '@/components/Crews/CrewSeasonSelector';
 import Breadcrumb from '@/components/Layout/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,7 @@ export default async function CrewsPage({ searchParams }: CrewsPageProps) {
           </div>
 
           <Suspense fallback={<CrewLeaderboardSkeleton />}>
+            <CrewSeasonSelector currentSeason={validSeason} />
             <CrewLeaderboard leaderboard={leaderboard} currentSeason={validSeason} />
           </Suspense>
         </div>
