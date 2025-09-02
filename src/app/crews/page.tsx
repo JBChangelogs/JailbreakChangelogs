@@ -1,12 +1,23 @@
 import { Suspense } from 'react';
-import { fetchCrewLeaderboard } from '@/utils/api';
+import { fetchCrewLeaderboard, AVAILABLE_CREW_SEASONS } from '@/utils/api';
 import CrewLeaderboard from '@/components/Crews/CrewLeaderboard';
 import Breadcrumb from '@/components/Layout/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CrewsPage() {
-  const leaderboard = await fetchCrewLeaderboard();
+interface CrewsPageProps {
+  searchParams: Promise<{ season?: string }>;
+}
+
+export default async function CrewsPage({ searchParams }: CrewsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const seasonParam = resolvedSearchParams.season;
+  const selectedSeason = seasonParam ? parseInt(seasonParam, 10) : 19;
+  
+  // Validate season parameter
+  const validSeason = AVAILABLE_CREW_SEASONS.includes(selectedSeason) ? selectedSeason : 19;
+  
+  const leaderboard = await fetchCrewLeaderboard(validSeason);
 
   return (
     <div className="min-h-screen bg-[#2E3944] text-white">
@@ -24,7 +35,7 @@ export default async function CrewsPage() {
           </div>
 
           <Suspense fallback={<CrewLeaderboardSkeleton />}>
-            <CrewLeaderboard leaderboard={leaderboard} />
+            <CrewLeaderboard leaderboard={leaderboard} currentSeason={validSeason} />
           </Suspense>
         </div>
       </div>

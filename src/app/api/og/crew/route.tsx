@@ -58,6 +58,7 @@ const calculateSeed = (rank: string): number => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const rank = searchParams.get('rank');
+  const season = searchParams.get('season');
   
   if (!rank) {
     return new Response('Missing rank', { status: 400 });
@@ -75,7 +76,8 @@ export async function GET(request: Request) {
       return new Response('Invalid rank', { status: 400 });
     }
 
-    const leaderboard = await fetchCrewLeaderboard();
+    const selectedSeason = season ? parseInt(season, 10) : 19;
+    const leaderboard = await fetchCrewLeaderboard(selectedSeason);
     crew = leaderboard[rankNumber - 1]; // Convert 1-based rank to 0-based index
 
     if (!crew) {
@@ -153,8 +155,14 @@ export async function GET(request: Request) {
           fontFamily: 'LuckiestGuy',
           color: '#93c5fd',
           marginBottom: '16px',
+          flexDirection: 'column',
         }}>
           <b>Crew #{rank}</b>
+          {season && season !== '19' && (
+            <span style={{ fontSize: 20, marginTop: '8px', color: '#fbbf24' }}>
+              Season {season}
+            </span>
+          )}
         </div>
         <div style={{
           display: 'flex',

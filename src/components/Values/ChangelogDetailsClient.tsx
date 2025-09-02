@@ -158,6 +158,29 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
   const isAtLeast1024 = useMediaQuery('(min-width:1024px)');
   const isAtLeast1440 = useMediaQuery('(min-width:1440px)');
 
+  // Format boolean-like values (1/0) to True/False
+  const formatBooleanLikeValue = (value: unknown): string => {
+    if (value === undefined || value === null) return 'N/A';
+    if (value === 1) return 'True';
+    if (value === 0) return 'False';
+    if (value === true) return 'True';
+    if (value === false) return 'False';
+    return String(value);
+  };
+
+  // Format creator information the same way as CreatorLink component
+  const formatCreatorValue = (value: unknown): { display: string; robloxId?: string } => {
+    if (value === undefined || value === null) return { display: 'N/A' };
+    if (value === 'N/A') return { display: '???' };
+    
+    const strValue = String(value);
+    const match = strValue.match(/(.*?)\s*\((\d+)\)/);
+    if (!match) return { display: strValue };
+    
+    const [, name, id] = match;
+    return { display: name, robloxId: id };
+  };
+
   // Decide which field the suggestion_type applies to
   const doesSuggestionTypeApplyToKey = (suggestionType?: string, changeKey?: string) => {
     if (!suggestionType || !changeKey) return false;
@@ -392,6 +415,30 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
               ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? 'change' : 'changes'} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ''}`
               : `Total ${selectedType ? `${selectedType} changes` : 'Changes'}: ${filteredChanges.length}`}
           </p>
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    color: '#D3D9D4',
+                    '&.Mui-selected': {
+                      backgroundColor: '#5865F2',
+                      '&:hover': {
+                        backgroundColor: '#4752C4',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(88, 101, 242, 0.1)',
+                    },
+                  },
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Voters Dialog */}
@@ -418,9 +465,44 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
               textColor="primary"
               indicatorColor="primary"
               variant="fullWidth"
+              sx={{
+                '& .MuiTab-root': {
+                  minHeight: 'auto',
+                  padding: '8px 12px',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#D3D9D4',
+                  '&.Mui-selected': {
+                    color: '#FFFFFF',
+                    fontWeight: 600,
+                  },
+                  '&:hover': {
+                    color: '#FFFFFF',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#5865F2',
+                  height: '3px',
+                }
+              }}
             >
-              <Tab label={`Upvotes (${activeVoters?.upCount ?? 0})`} />
-              <Tab label={`Downvotes (${activeVoters?.downCount ?? 0})`} />
+              <Tab 
+                label={
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">Upvotes</span>
+                    <span className="text-xs text-muted mt-1">({activeVoters?.upCount ?? 0})</span>
+                  </div>
+                } 
+              />
+              <Tab 
+                label={
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">Downvotes</span>
+                    <span className="text-xs text-muted mt-1">({activeVoters?.downCount ?? 0})</span>
+                  </div>
+                } 
+              />
             </Tabs>
             <div className="mt-3 space-y-2">
               {(votersTab === 'up' ? (activeVoters?.up || []) : (activeVoters?.down || [])).length === 0 ? (
@@ -451,7 +533,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                           {voter.name}
                         </a>
                       </div>
-                      <div className="text-xs text-muted">{new Date(voter.timestamp * 1000).toLocaleString()}</div>
+                      <div className="text-xs text-muted">{new Date(voter.timestamp * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                   </div>
                 ))
@@ -611,7 +693,10 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                           p: (props) => <div className="whitespace-pre-line" {...props} />,
                         }}
                       >
-                        {change.suggestion.data.reason}
+                        {change.suggestion.data.reason?.replace(
+                          /(Common Trades?:?)/gi,
+                          '**$1**'
+                        )}
                       </ReactMarkdown>
                     </div>
 
@@ -663,13 +748,47 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                               <span className="text-sm text-[#D3D9D4] line-through break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
                                 {key === 'cash_value' || key === 'duped_value' 
                                   ? formatFullValue(oldValue as string)
-                                  : String(oldValue || 'N/A')}
+                                  : key === 'creator'
+                                  ? (() => {
+                                      const creatorInfo = formatCreatorValue(oldValue);
+                                      if (creatorInfo.robloxId) {
+                                        return (
+                                          <a
+                                            href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+                                          >
+                                            {creatorInfo.display}
+                                          </a>
+                                        );
+                                      }
+                                      return creatorInfo.display;
+                                    })()
+                                  : formatBooleanLikeValue(oldValue)}
                               </span>
                               <span className="text-[#D3D9D4]">→</span>
                               <span className="text-sm text-white font-medium break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
                                 {key === 'cash_value' || key === 'duped_value' 
                                   ? formatFullValue(newValue as string)
-                                  : String(newValue || 'N/A')}
+                                  : key === 'creator'
+                                  ? (() => {
+                                      const creatorInfo = formatCreatorValue(newValue);
+                                      if (creatorInfo.robloxId) {
+                                        return (
+                                          <a
+                                            href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+                                          >
+                                            {creatorInfo.display}
+                                          </a>
+                                        );
+                                      }
+                                      return creatorInfo.display;
+                                    })()
+                                  : formatBooleanLikeValue(newValue)}
                               </span>
                             </div>
                           </div>

@@ -99,7 +99,7 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
     return (
       <InventoryCheckerClient 
         robloxId={actualRobloxId} 
-        error={result.message} 
+        error={result.message}
       />
     );
   }

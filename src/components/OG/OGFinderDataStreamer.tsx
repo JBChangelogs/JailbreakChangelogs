@@ -194,8 +194,10 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     Object.values(mainUserAvatar).forEach((avatar) => {
       const avatarData = avatar as { targetId: number; state: string; imageUrl?: string; version: string };
       if (avatarData && avatarData.targetId && avatarData.state === 'Completed' && avatarData.imageUrl) {
+        // Only add completed avatars to the data
         robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
       }
+      // For blocked avatars, don't add them to the data so components can use their own fallback
     });
   }
 

@@ -7,6 +7,7 @@ import { RobloxUser } from '@/types';
 import { fetchMissingRobloxData } from '@/app/inventories/actions';
 import localFont from 'next/font/local';
 import { Inter } from 'next/font/google';
+import Link from 'next/link';
 
 const bangers = localFont({
   src: '../../../public/fonts/Bangers.ttf',
@@ -17,9 +18,10 @@ const inter = Inter({ subsets: ['latin'] });
 interface CrewDetailsProps {
   crew: CrewLeaderboardEntryType;
   rank: number;
+  currentSeason: number;
 }
 
-export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
+export default function CrewDetails({ crew, rank, currentSeason }: CrewDetailsProps) {
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>({});
   const [robloxAvatars, setRobloxAvatars] = useState<Record<string, string>>({});
 
@@ -30,29 +32,25 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
     
     // Fetch user data for all crew members
     const fetchAllUserData = async () => {
-      const missingIds = userIdsToLoad.filter(id => !robloxUsers[id]);
-    
-    if (missingIds.length === 0) return;
-    
-    try {
-      const result = await fetchMissingRobloxData(missingIds);
-      
-      // Update state with new user data
-      if (result.userData && typeof result.userData === 'object') {
-        setRobloxUsers(prev => ({ ...prev, ...result.userData }));
-      }
-      
-      // Update state with new avatar data
-      if (result.avatarData && typeof result.avatarData === 'object') {
-        setRobloxAvatars(prev => ({ ...prev, ...result.avatarData }));
-      }
-    } catch (error) {
+      try {
+        const result = await fetchMissingRobloxData(userIdsToLoad);
+        
+        // Update state with new user data
+        if (result.userData && typeof result.userData === 'object') {
+          setRobloxUsers(prev => ({ ...prev, ...result.userData }));
+        }
+        
+        // Update state with new avatar data
+        if (result.avatarData && typeof result.avatarData === 'object') {
+          setRobloxAvatars(prev => ({ ...prev, ...result.avatarData }));
+        }
+      } catch (error) {
         console.error('Failed to fetch user data:', error);
       }
     };
 
     fetchAllUserData();
-  }, [crew.MemberUserIds, robloxUsers]);
+  }, [crew.MemberUserIds]); // Only depend on crew.MemberUserIds, not robloxUsers
 
   // Helper function to get user display name
   const getUserDisplay = (userId: string) => {
@@ -68,7 +66,9 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
 
   // Helper function to get user avatar
   const getUserAvatar = (userId: string) => {
-    return robloxAvatars[userId] || null;
+    const avatarData = robloxAvatars[userId];
+    // The processed avatar data is already the imageUrl string
+    return avatarData || null;
   };
 
   // Helper function to format rating
@@ -123,7 +123,30 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
 
   return (
     <div className="space-y-8">
-            {/* Crew Header with Flag, Rank, and Info */}
+      {/* Historical Season Notice */}
+      {currentSeason !== 19 && (
+        <div className="p-4 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2 text-blue-200">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">Historical Data</span>
+            </div>
+            <Link
+              href="/crews"
+              className="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm font-medium inline-block w-fit"
+            >
+              Go to Current Season
+            </Link>
+          </div>
+          <p className="text-blue-100 text-sm mt-2">
+            This is historical data from Season {currentSeason}.
+          </p>
+        </div>
+      )}
+
+      {/* Crew Header with Flag, Rank, and Info */}
       <div className={`rounded-lg p-4 sm:p-6 border ${
         rank === 1 
           ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-yellow-400/50' 
@@ -143,17 +166,20 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
               height={128}
               className="w-full h-full object-cover"
             />
-            {getUserAvatar(crew.OwnerUserId.toString()) && (
-              <div className="absolute inset-0 flex items-center justify-start pl-3 sm:pl-4">
-                <Image
-                  src={getUserAvatar(crew.OwnerUserId.toString())!}
-                  alt={`${getUserDisplay(crew.OwnerUserId.toString())}'s avatar`}
-                  width={48}
-                  height={48}
-                  className="rounded-full shadow-lg sm:w-16 sm:h-16"
-                />
-              </div>
-            )}
+            {(() => {
+              const ownerAvatarUrl = getUserAvatar(crew.OwnerUserId.toString());
+              return ownerAvatarUrl ? (
+                <div className="absolute inset-0 flex items-center justify-start pl-3 sm:pl-4">
+                  <Image
+                    src={ownerAvatarUrl}
+                    alt={`${getUserDisplay(crew.OwnerUserId.toString())}'s avatar`}
+                    width={48}
+                    height={48}
+                    className="rounded-full shadow-lg sm:w-16 sm:h-16"
+                  />
+                </div>
+              ) : null;
+            })()}
           </div>
           
           {/* Crew Info with Rank */}
@@ -177,6 +203,11 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
               </h2>
               <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
             </div>
+            {currentSeason !== 19 && (
+              <p className="text-gray-400 text-sm">
+                Season {currentSeason} • Historical Data
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -309,24 +340,27 @@ export default function CrewDetails({ crew, rank }: CrewDetailsProps) {
         {/* Additional Stats Row */}
         <div className="mt-6 pt-6 border-t border-[#37424D]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center justify-between p-3 bg-[#1A2328] rounded-lg border border-[#2E3944]">
-              <span className="text-gray-400 text-sm">Win/Loss Ratio</span>
+            <div className="flex items-center justify-between p-3 bg-[#2E3944] rounded-lg border border-[#37424D]">
+              <span className="text-gray-200 text-sm">Win/Loss Ratio</span>
               <span className="text-white font-semibold">
                 {crew.BattlesPlayed > 0 
                   ? `${crew.BattlesWon}-${crew.BattlesPlayed - crew.BattlesWon}` 
                   : '0-0'}
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-[#1A2328] rounded-lg border border-[#2E3944]">
-              <span className="text-gray-400 text-sm">Avg Rating</span>
+            <div className="flex items-center justify-between p-3 bg-[#2E3944] rounded-lg border border-[#37424D]">
+              <span className="text-gray-200 text-sm">Avg Rating</span>
               <span className="text-white font-semibold">{formatRating(crew.Rating)}</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-[#1A2328] rounded-lg border border-[#2E3944]">
-              <span className="text-gray-400 text-sm">Activity</span>
-              <span className={`font-semibold ${timeSinceLastBattle.includes('d') && parseInt(timeSinceLastBattle.split('d')[0]) > 14 ? 'text-red-400' : 'text-green-400'}`}>
-                {timeSinceLastBattle.includes('d') && parseInt(timeSinceLastBattle.split('d')[0]) > 14 ? 'Inactive' : 'Active'}
-              </span>
-        </div>
+            {/* Only show Activity for current season */}
+            {currentSeason === 19 && (
+              <div className="flex items-center justify-between p-3 bg-[#2E3944] rounded-lg border border-[#37424D]">
+                <span className="text-gray-200 text-sm">Activity</span>
+                <span className={`font-semibold ${timeSinceLastBattle.includes('d') && parseInt(timeSinceLastBattle.split('d')[0]) > 14 ? 'text-red-400' : 'text-green-400'}`}>
+                  {timeSinceLastBattle.includes('d') && parseInt(timeSinceLastBattle.split('d')[0]) > 14 ? 'Inactive' : 'Active'}
+                </span>
+              </div>
+            )}
         </div>
         </div>
       </div>
@@ -410,7 +444,7 @@ function CrewMember({
           >
             {displayName}
           </a>
-          {username !== displayName && (
+          {username && (
             <span className="text-gray-300 text-xs sm:text-sm truncate">(@{username})</span>
           )}
           {isOwner && (

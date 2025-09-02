@@ -49,7 +49,7 @@ export const BASE_API_URL =
 
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
-export const CREW_LEADERBOARD_URL = process.env.NEXT_PUBLIC_CREW_LEADERBOARD_URL;
+export const CREW_LEADERBOARD_BASE_URL = process.env.NEXT_PUBLIC_CREW_LEADERBOARD_BASE_URL;
 export interface OnlineUser {
   id: string;
   username: string;
@@ -645,7 +645,7 @@ export async function fetchComments(type: string, id: string, itemType?: string)
 export async function fetchInventoryData(robloxId: string) {
   console.log('[SERVER] fetchInventoryData called with robloxId:', robloxId);
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/user?id=${robloxId}`, {
+    const response = await fetch(`${INVENTORY_API_URL}/user?id=${robloxId}&nocache=true`, {
       headers: {
         'User-Agent': 'JailbreakChangelogs-InventoryChecker/1.0'
       }
@@ -653,16 +653,36 @@ export async function fetchInventoryData(robloxId: string) {
     
     if (!response.ok) {
       console.error(`[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`);
-      if (response.status === 404) {
-        return { error: 'not_found', message: 'This user has not been scanned by our bots yet. Their inventory data is not available.' };
+      
+      // Handle specific HTTP status codes with user-friendly messages
+      switch (response.status) {
+        case 404:
+          return { error: 'not_found', message: 'This user has not been scanned by our bots yet. Their inventory data is not available.' };
+        case 500:
+          return { error: 'server_error', message: 'Our inventory service is currently experiencing issues. Please try again in a few minutes.' };
+        case 429:
+          return { error: 'rate_limit', message: 'Too many requests. Please wait a moment before trying again.' };
+        case 503:
+          return { error: 'service_unavailable', message: 'Our inventory service is temporarily unavailable. Please try again later.' };
+        default:
+          return { error: 'api_error', message: `Unable to fetch inventory data (Error ${response.status}). Please try again.` };
       }
-      throw new Error(`Failed to fetch inventory data: ${response.status}`);
     }
     
     const data = await response.json();
     return data;
   } catch (err) {
     console.error('[SERVER] Error fetching inventory data:', err);
+    
+    // Handle specific error types
+    if (err instanceof TypeError && err.message.includes('fetch')) {
+      return { error: 'network_error', message: 'Network error. Please check your connection and try again.' };
+    }
+    
+    if (err instanceof Error) {
+      return { error: 'fetch_error', message: `Failed to fetch inventory data: ${err.message}` };
+    }
+    
     return { error: 'fetch_error', message: 'Failed to fetch inventory data. Please try again.' };
   }
 }
@@ -903,7 +923,7 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
 }
 
 export interface CrewLeaderboardEntry {
-  ClanId: string;
+  ClanId?: string; // Make ClanId optional since older seasons don't have it
   ClanName: string;
   OwnerUserId: number;
   BattlesPlayed: number;
@@ -914,18 +934,82 @@ export interface CrewLeaderboardEntry {
   LastBattlePlayedUTCStr: string;
 }
 
-export async function fetchCrewLeaderboard(): Promise<CrewLeaderboardEntry[]> {
+const CREW_LEADERBOARD_URLS = {
+  2: `${CREW_LEADERBOARD_BASE_URL}/2/latest.json`,
+  3: `${CREW_LEADERBOARD_BASE_URL}/3/latest.json`,
+  4: `${CREW_LEADERBOARD_BASE_URL}/4/latest.json`,
+  5: `${CREW_LEADERBOARD_BASE_URL}/5/latest.json`,
+  6: `${CREW_LEADERBOARD_BASE_URL}/6/latest.json`,
+  7: `${CREW_LEADERBOARD_BASE_URL}/7/latest.json`,
+  8: `${CREW_LEADERBOARD_BASE_URL}/8/latest.json`,
+  9: `${CREW_LEADERBOARD_BASE_URL}/9/latest.json`,
+  10: `${CREW_LEADERBOARD_BASE_URL}/10/latest.json`,
+  11: `${CREW_LEADERBOARD_BASE_URL}/11/latest.json`,
+  12: `${CREW_LEADERBOARD_BASE_URL}/12/latest.json`,
+  13: `${CREW_LEADERBOARD_BASE_URL}/13/latest.json`,
+  14: `${CREW_LEADERBOARD_BASE_URL}/14/latest.json`,
+  15: `${CREW_LEADERBOARD_BASE_URL}/15/latest.json`,
+  16: `${CREW_LEADERBOARD_BASE_URL}/16/latest.json`,
+  17: `${CREW_LEADERBOARD_BASE_URL}/17/latest.json`,
+  18: `${CREW_LEADERBOARD_BASE_URL}/18/latest.json`,
+  19: `${CREW_LEADERBOARD_BASE_URL}/19/latest.json`,
+};
+
+export const AVAILABLE_CREW_SEASONS = Object.keys(CREW_LEADERBOARD_URLS).map(Number).sort((a, b) => b - a);
+
+export async function fetchCrewLeaderboard(season?: number): Promise<CrewLeaderboardEntry[]> {
   try {
-    const response = await fetch(`${CREW_LEADERBOARD_URL}`);
+    // Default to latest season (19) if no season specified
+    const targetSeason = season || 19;
+    
+    if (!CREW_LEADERBOARD_URLS[targetSeason as keyof typeof CREW_LEADERBOARD_URLS]) {
+      throw new Error(`Season ${targetSeason} not available`);
+    }
+    
+    const url = CREW_LEADERBOARD_URLS[targetSeason as keyof typeof CREW_LEADERBOARD_URLS];
+    const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error('Failed to fetch crew leaderboard');
+      throw new Error(`Failed to fetch crew leaderboard for season ${targetSeason}`);
     }
     
     const data = await response.json();
-    return data as CrewLeaderboardEntry[];
+    
+    // Validate that we got data
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error(`[ERROR] Season ${targetSeason} API returned invalid data:`, data);
+      throw new Error(`Invalid data returned for season ${targetSeason}`);
+    }
+    
+    // Normalize the data to ensure all entries have required fields
+    const normalizedData = data.map((crew: {
+      ClanId?: string | number;
+      ClanName?: string;
+      OwnerUserId?: number;
+      BattlesPlayed?: number;
+      BattlesWon?: number;
+      MemberUserIds?: number[];
+      Rating?: number;
+      LastBattlePlayedUTC?: number;
+      LastBattlePlayedUTCStr?: string;
+    }, index: number) => ({
+      ...crew,
+      // Generate a fallback ClanId for older seasons that don't have it
+      ClanId: crew.ClanId || `season_${targetSeason}_rank_${index + 1}`,
+      // Ensure all required fields exist
+      ClanName: crew.ClanName || 'Unknown Crew',
+      OwnerUserId: crew.OwnerUserId || 0,
+      BattlesPlayed: crew.BattlesPlayed || 0,
+      BattlesWon: crew.BattlesWon || 0,
+      MemberUserIds: Array.isArray(crew.MemberUserIds) ? crew.MemberUserIds : [],
+      Rating: crew.Rating || 0,
+      LastBattlePlayedUTC: crew.LastBattlePlayedUTC || 0,
+      LastBattlePlayedUTCStr: crew.LastBattlePlayedUTCStr || 'Unknown'
+    }));
+    
+    return normalizedData as CrewLeaderboardEntry[];
   } catch (err) {
-    console.error('[SERVER] Error fetching crew leaderboard:', err);
+    console.error(`[SERVER] Error fetching crew leaderboard for season ${season}:`, err);
     return [];
   }
 }

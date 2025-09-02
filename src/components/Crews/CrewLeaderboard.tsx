@@ -16,9 +16,10 @@ const bangers = localFont({
 
 interface CrewLeaderboardProps {
   leaderboard: CrewLeaderboardEntryType[];
+  currentSeason: number;
 }
 
-export default function CrewLeaderboard({ leaderboard }: CrewLeaderboardProps) {
+export default function CrewLeaderboard({ leaderboard, currentSeason }: CrewLeaderboardProps) {
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>({});
   const [robloxAvatars, setRobloxAvatars] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,7 +106,14 @@ export default function CrewLeaderboard({ leaderboard }: CrewLeaderboardProps) {
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-300">Crew Leaderboard ({filteredLeaderboard.length})</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-300">
+        Crew Leaderboard ({filteredLeaderboard.length}) 
+        {currentSeason !== 19 && (
+          <span className="text-sm font-normal text-gray-400 ml-2">
+            - Season {currentSeason}
+          </span>
+        )}
+      </h2>
       
       {/* Search Bar */}
       <div className="mb-6">
@@ -130,20 +138,60 @@ export default function CrewLeaderboard({ leaderboard }: CrewLeaderboardProps) {
         </div>
       </div>
 
+      {/* Historical Season Notice */}
+      {currentSeason !== 19 && (
+        <div className="mb-4 p-4 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2 text-blue-200">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">Historical Data</span>
+            </div>
+            <Link
+              href="/crews"
+              className="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm font-medium inline-block w-fit"
+            >
+              Go to Current Season
+            </Link>
+          </div>
+          <p className="text-blue-100 text-sm mt-2">
+            This is historical data from Season {currentSeason}.
+          </p>
+        </div>
+      )}
+
       <div className="bg-[#212A31] rounded-lg p-4 shadow-sm border border-[#2E3944]">
         <div className="max-h-[48rem] overflow-y-auto space-y-3 pr-2">
-          {filteredLeaderboard.map((crew) => {
-            // Find the original rank of this crew in the full leaderboard
-            const originalIndex = leaderboard.findIndex(c => c.ClanId === crew.ClanId);
+          {filteredLeaderboard.map((crew, crewIndex) => {
+            // The API data is already sorted by rating, so the position in the array is the rank
+            // We need to find the original position in the full leaderboard to maintain proper ranking
+            const originalIndex = leaderboard.findIndex(c => {
+              if (crew.ClanId && c.ClanId) {
+                // If both have ClanId, match by that
+                return c.ClanId === crew.ClanId;
+              } else if (!crew.ClanId && !c.ClanId) {
+                // If neither has ClanId, match by name and owner
+                return c.ClanName === crew.ClanName && c.OwnerUserId === crew.OwnerUserId;
+              } else {
+                // One has ClanId, one doesn't - match by name and owner
+                return c.ClanName === crew.ClanName && c.OwnerUserId === crew.OwnerUserId;
+              }
+            });
+            
+            // Use the original index if found, otherwise fall back to current position
+            const finalIndex = originalIndex >= 0 ? originalIndex : crewIndex;
+            
             return (
               <CrewLeaderboardEntry 
-                key={crew.ClanId} 
+                key={crew.ClanId || `crew_${crewIndex}`} 
                 crew={crew} 
-                index={originalIndex}
+                index={finalIndex}
                 getUserDisplay={getUserDisplay}
                 getUsername={getUsername}
                 getUserAvatar={getUserAvatar}
                 formatRating={formatRating}
+                currentSeason={currentSeason}
               />
             );
           })}
@@ -166,6 +214,7 @@ interface CrewLeaderboardEntryProps {
   getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string | null;
   formatRating: (rating: number) => string;
+  currentSeason: number;
 }
 
 function CrewLeaderboardEntry({ 
@@ -174,7 +223,8 @@ function CrewLeaderboardEntry({
   getUserDisplay, 
   getUsername, 
   getUserAvatar, 
-  formatRating
+  formatRating,
+  currentSeason
 }: CrewLeaderboardEntryProps) {
   const ownerId = crew.OwnerUserId.toString();
   const displayName = getUserDisplay(ownerId);
@@ -258,8 +308,8 @@ function CrewLeaderboardEntry({
         
         {/* View Crew Button - positioned on the right side */}
         <Link
-          href={`/crews/${index + 1}`}
-          className="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm font-medium inline-block"
+          href={`/crews/${index + 1}${currentSeason !== 19 ? `?season=${currentSeason}` : ''}`}
+          className="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm font-medium inline-block w-fit"
         >
           View Crew
         </Link>

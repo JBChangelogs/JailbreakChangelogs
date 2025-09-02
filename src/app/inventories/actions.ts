@@ -21,7 +21,8 @@ export async function fetchMissingRobloxData(userIds: string[]) {
     if (avatarData && typeof avatarData === 'object') {
       Object.values(avatarData).forEach((avatar) => {
         const avatarData = avatar as { targetId: number; state: string; imageUrl?: string; version: string };
-        if (avatarData && avatarData.targetId && avatarData.state === 'Completed' && avatarData.imageUrl) {
+        if (avatarData && avatarData.targetId && avatarData.imageUrl) {
+          // Include both completed and blocked avatars since blocked avatars still have valid images
           processedAvatarData[avatarData.targetId.toString()] = avatarData.imageUrl;
         }
       });
@@ -54,8 +55,10 @@ export async function fetchOriginalOwnerAvatars(userIds: string[]) {
       Object.values(avatarData).forEach((avatar) => {
         const avatarData = avatar as { targetId: number; state: string; imageUrl?: string; version: string };
         if (avatarData && avatarData.targetId && avatarData.state === 'Completed' && avatarData.imageUrl) {
+          // Only add completed avatars to the data
           processedAvatarData[avatarData.targetId.toString()] = avatarData.imageUrl;
         }
+        // For blocked avatars, don't add them to the data so components can use their own fallback
       });
     }
     
