@@ -242,7 +242,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
         {/* Ad Placement: Above the grid, only for non-premium users */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
-          <div className="flex justify-center w-full mb-6">
+          <div className="flex flex-col items-center w-full mb-6">
             <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
               <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                 Advertisement
