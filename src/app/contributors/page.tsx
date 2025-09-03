@@ -12,6 +12,7 @@ export default async function ContributorsPage() {
     )
     const flagToRole: Record<string, string> = {
       'is_owner': 'Owner',
+      'is_developer': 'Developer',
       'is_partner': 'Partner',
       'is_vtm': 'Value List Manager', 
       'is_vt': 'Value Team',
@@ -32,6 +33,10 @@ export default async function ContributorsPage() {
   const owners = Array.from(userRoleMap.values())
     .filter(({ role }) => role === 'Owner')
     .map(({ user }) => ({ ...user, role: 'Owner' }));
+    
+  const developers = Array.from(userRoleMap.values())
+    .filter(({ role }) => role === 'Developer')
+    .map(({ user }) => ({ ...user, role: 'Developer' }));
     
   const partners = Array.from(userRoleMap.values())
     .filter(({ role }) => role === 'Partner')
@@ -104,6 +109,7 @@ export default async function ContributorsPage() {
 
   const team = [
     ...owners,
+    ...developers,
     ...partners,
     ...managers,
     ...valueTeam,
