@@ -15,8 +15,11 @@ import { formatFullValue } from '@/utils/values';
 import ReactMarkdown from 'react-markdown';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import DisplayAd from '@/components/Ads/DisplayAd';
+import AdRemovalNotice from '@/components/Ads/AdRemovalNotice';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import ChangelogDetailsHeader from './ChangelogDetailsHeader';
+import { FaCircleMinus } from "react-icons/fa6";
+import { FaPlusCircle } from "react-icons/fa";
 
 interface Item {
   id: number;
@@ -333,7 +336,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
 
           {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
           {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 flex flex-col">
               <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative h-full" style={{ minHeight: '250px' }}>
                 <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                   Advertisement
@@ -344,6 +347,7 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                   style={{ display: 'block', width: '100%', height: '100%' }}
                 />
               </div>
+              <AdRemovalNotice className="mt-2" />
             </div>
           )}
         </div>
@@ -707,8 +711,8 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                 )}
 
                 {/* Changes */}
-                <div className="space-y-2 mb-4 mt-6">
-                  {Object.entries(change.changes.old).map(([key, oldValue]) => {
+                <div className="space-y-4 mb-4 mt-6">
+                  {Object.entries(change.changes.old).map(([key, oldValue], index) => {
                     if (key === 'last_updated') return null;
                     const newValue = change.changes.new[key];
                     // Hide rows where both current (old) and suggested (new) are effectively N/A
@@ -718,81 +722,101 @@ export default function ChangelogDetailsClient({ changelog, userData }: Changelo
                     if (oldValue === newValue) return null;
 
                     return (
-                      <div key={key} className="flex items-start gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm text-[#D3D9D4] capitalize">
-                            {doesSuggestionTypeApplyToKey(change.suggestion?.metadata?.suggestion_type, key) ? (
-                              <Chip
-                                label={(() => {
-                                  const text = change.suggestion!.metadata!.suggestion_type!.replace(/_/g, ' ');
-                                  return text
-                                    .split(' ')
-                                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                                    .join(' ');
-                                })()}
-                                size="small"
-                                sx={{
-                                  backgroundColor: '#124E66',
-                                  color: '#FFFFFF',
-                                  '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
-                                }}
-                              />
-                            ) : (
-                              <>
-                                {key.replace(/_/g, ' ')}:
-                              </>
-                            )}
-                          </div>
-                          <div className="flex flex-col gap-1 mt-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-[#D3D9D4] line-through break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
-                                {key === 'cash_value' || key === 'duped_value' 
-                                  ? formatFullValue(oldValue as string)
-                                  : key === 'creator'
-                                  ? (() => {
-                                      const creatorInfo = formatCreatorValue(oldValue);
-                                      if (creatorInfo.robloxId) {
-                                        return (
-                                          <a
-                                            href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-                                          >
-                                            {creatorInfo.display}
-                                          </a>
-                                        );
-                                      }
-                                      return creatorInfo.display;
-                                    })()
-                                  : formatBooleanLikeValue(oldValue)}
-                              </span>
-                              <span className="text-[#D3D9D4]">→</span>
-                              <span className="text-sm text-white font-medium break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
-                                {key === 'cash_value' || key === 'duped_value' 
-                                  ? formatFullValue(newValue as string)
-                                  : key === 'creator'
-                                  ? (() => {
-                                      const creatorInfo = formatCreatorValue(newValue);
-                                      if (creatorInfo.robloxId) {
-                                        return (
-                                          <a
-                                            href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-                                          >
-                                            {creatorInfo.display}
-                                          </a>
-                                        );
-                                      }
-                                      return creatorInfo.display;
-                                    })()
-                                  : formatBooleanLikeValue(newValue)}
-                              </span>
+                      <div key={key}>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-[#D3D9D4] capitalize">
+                              {doesSuggestionTypeApplyToKey(change.suggestion?.metadata?.suggestion_type, key) ? (
+                                <Chip
+                                  label={(() => {
+                                    const text = change.suggestion!.metadata!.suggestion_type!.replace(/_/g, ' ');
+                                    return text
+                                      .split(' ')
+                                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                                      .join(' ');
+                                  })()}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: '#124E66',
+                                    color: '#FFFFFF',
+                                    '& .MuiChip-label': { color: '#FFFFFF', fontWeight: 600 },
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  {key.replace(/_/g, ' ')}:
+                                </>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mt-1">
+                              <div className="min-w-0">
+                                <div className="text-xs text-[#9CA3AF] mb-1 font-medium flex items-center gap-1">
+                                  <FaCircleMinus className="text-red-400 w-3 h-3" />
+                                  OLD VALUE
+                                </div>
+                                <div className="text-sm text-[#D3D9D4] line-through break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
+                                  {key === 'cash_value' || key === 'duped_value' 
+                                    ? formatFullValue(oldValue as string)
+                                    : key === 'creator'
+                                    ? (() => {
+                                        const creatorInfo = formatCreatorValue(oldValue);
+                                        if (creatorInfo.robloxId) {
+                                          return (
+                                            <a
+                                              href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+                                            >
+                                              {creatorInfo.display}
+                                            </a>
+                                          );
+                                        }
+                                        return creatorInfo.display;
+                                      })()
+                                    : formatBooleanLikeValue(oldValue)}
+                                </div>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs text-[#9CA3AF] mb-1 font-medium flex items-center gap-1">
+                                  <FaPlusCircle className="text-green-400 w-3 h-3" />
+                                  NEW VALUE
+                                </div>
+                                <div className="text-sm text-white font-medium break-words overflow-hidden" style={{ wordBreak: 'normal', overflowWrap: 'anywhere' }}>
+                                  {key === 'cash_value' || key === 'duped_value' 
+                                    ? formatFullValue(newValue as string)
+                                    : key === 'creator'
+                                    ? (() => {
+                                        const creatorInfo = formatCreatorValue(newValue);
+                                        if (creatorInfo.robloxId) {
+                                          return (
+                                            <a
+                                              href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+                                            >
+                                              {creatorInfo.display}
+                                            </a>
+                                          );
+                                        }
+                                        return creatorInfo.display;
+                                      })()
+                                    : formatBooleanLikeValue(newValue)}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        {index < Object.entries(change.changes.old).filter(([k, v]) => {
+                          if (k === 'last_updated') return false;
+                          const nv = change.changes.new[k];
+                          const isNA = (val: unknown) => val == null || (typeof val === 'string' && val.trim().toUpperCase() === 'N/A');
+                          if (isNA(v) && isNA(nv)) return false;
+                          return v !== nv;
+                        }).length - 1 && (
+                          <div className="border-t border-[#2E3944] mt-4 pt-4"></div>
+                        )}
                       </div>
                     );
                   })}

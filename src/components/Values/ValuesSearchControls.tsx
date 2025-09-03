@@ -5,6 +5,7 @@ import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FilterSort, ValueSort } from "@/types";
 import dynamic from 'next/dynamic';
 import DisplayAd from "@/components/Ads/DisplayAd";
+import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
 
@@ -458,15 +459,18 @@ export default function ValuesSearchControls({
         </div>
         {/* Right: Ad */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
-          <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0 bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative mt-4 lg:mt-0" style={{ minHeight: '250px' }}>
-            <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
-              Advertisement
-            </span>
-            <DisplayAd
-              adSlot="8162235433"
-              adFormat="auto"
-              style={{ display: 'block', width: '100%', height: '100%' }}
-            />
+          <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0 flex flex-col">
+            <div className="bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
+              <span className="absolute top-2 left-2 text-xs font-semibold text-white bg-[#212A31] px-2 py-0.5 rounded z-10">
+                Advertisement
+              </span>
+              <DisplayAd
+                adSlot="8162235433"
+                adFormat="auto"
+                style={{ display: 'block', width: '100%', height: '100%' }}
+              />
+            </div>
+            <AdRemovalNotice className="mt-2" />
           </div>
         )}
       </div>

@@ -5,6 +5,17 @@ import { storeCampaign, getStoredCampaign, clearStoredCampaign, countCampaignVis
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+// Helper function to track user status in Clarity
+const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
+  if (typeof window !== 'undefined' && window.clarity) {
+    if (action === 'logout') {
+      window.clarity("set", "user_status", "logout");
+    } else {
+      window.clarity("set", "user_status", isAuthenticated ? "authenticated" : "anonymous");
+    }
+  }
+};
+
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
@@ -29,6 +40,9 @@ export const useAuth = () => {
             isLoading: false,
             error: null,
           });
+
+          // Track user status in Clarity
+          trackUserStatus(true);
 
           // If user is already logged in and there's a campaign in URL, clear it and show toast
           const campaign = searchParams.get('campaign');
@@ -63,6 +77,9 @@ export const useAuth = () => {
           error: null,
         });
 
+        // Track user status in Clarity
+        trackUserStatus(false);
+
         // Check for campaign and store it if user is not logged in
         const campaign = searchParams.get('campaign');
         if (campaign) {
@@ -82,6 +99,9 @@ export const useAuth = () => {
         isLoading: false,
         error: 'Failed to initialize auth',
       });
+
+      // Track user status in Clarity
+      trackUserStatus(false);
     }
   }, [router, searchParams]);
 
@@ -91,15 +111,18 @@ export const useAuth = () => {
       const response = await handleTokenAuth(token);
       
       if (response.success && response.data) {
-        setAuthState({
-          isAuthenticated: true,
-          user: response.data,
-          isLoading: false,
-          error: null,
-        });
+                  setAuthState({
+            isAuthenticated: true,
+            user: response.data,
+            isLoading: false,
+            error: null,
+          });
 
-        // Check for campaign and count visit after successful login
-        const campaign = getStoredCampaign();
+          // Track user status in Clarity
+          trackUserStatus(true);
+
+          // Check for campaign and count visit after successful login
+          const campaign = getStoredCampaign();
         if (campaign) {
           await countCampaignVisit(campaign, token);
           toast.success('Campaign visit recorded!', {
@@ -115,6 +138,9 @@ export const useAuth = () => {
           isLoading: false,
           error: response.error || 'Login failed',
         });
+
+        // Track user status in Clarity
+        trackUserStatus(false);
       }
       
       return response;
@@ -127,6 +153,9 @@ export const useAuth = () => {
         isLoading: false,
         error: errorMessage,
       });
+
+      // Track user status in Clarity
+      trackUserStatus(false);
       return { success: false, error: errorMessage };
     }
   };
@@ -149,6 +178,9 @@ export const useAuth = () => {
         isLoading: false,
         error: null,
       });
+
+      // Track user status in Clarity
+      trackUserStatus(false, 'logout');
       
       // Dismiss loading toast and show success
       toast.dismiss(loadingToast);
@@ -233,6 +265,8 @@ export const useAuth = () => {
           isLoading: false,
           error: null,
         });
+        // Track user status in Clarity
+        trackUserStatus(true);
       } else {
         setAuthState({
           isAuthenticated: false,
@@ -240,6 +274,8 @@ export const useAuth = () => {
           isLoading: false,
           error: null,
         });
+        // Track user status in Clarity
+        trackUserStatus(false);
       }
     };
     

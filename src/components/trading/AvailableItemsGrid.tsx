@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { FilterSort, ValueSort } from '@/types';
 import dynamic from 'next/dynamic';
 import DisplayAd from '@/components/Ads/DisplayAd';
+import AdRemovalNotice from '@/components/Ads/AdRemovalNotice';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -252,6 +253,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 style={{ display: "block", width: "100%", height: "100%" }}
               />
             </div>
+            <AdRemovalNotice className="mt-2" />
           </div>
         )}
 
@@ -441,6 +443,31 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
 
         </div>
+
+        {/* Top Pagination */}
+        {totalPages > 1 && filteredItems.length > 0 && (
+          <div className="flex justify-center mb-4">
+            <Pagination 
+              count={totalPages} 
+              page={page} 
+              onChange={handlePageChange}
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  color: '#D3D9D4',
+                  '&.Mui-selected': {
+                    backgroundColor: '#5865F2',
+                    '&:hover': {
+                      backgroundColor: '#4752C4',
+                    },
+                  },
+                  '&:hover': {
+                    backgroundColor: '#37424D',
+                  },
+                },
+              }}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           {paginatedItems.length === 0 ? (

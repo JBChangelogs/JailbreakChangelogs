@@ -6,6 +6,7 @@ import { parseMarkdown } from '@/utils/changelogs';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import { CommentData } from '@/utils/api';
 import { UserData } from '@/types/auth';
+import AdRemovalNotice from '../Ads/AdRemovalNotice';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports for heavy components
@@ -154,7 +155,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         {/* Comments Section */}
         <div>
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="my-8 flex justify-center">
+            <div className="my-8 flex flex-col items-center">
               <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
                 <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                   Advertisement
@@ -165,6 +166,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                   style={{ display: "block", width: "100%", height: "100%" }}
                 />
               </div>
+              <AdRemovalNotice className="mt-2" />
             </div>
           )}
           <ChangelogComments 

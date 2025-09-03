@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { Inter } from "next/font/google";
 import { formatProfileDate } from '@/utils/timestamp';
 import DisplayAd from '@/components/Ads/DisplayAd';
+import AdRemovalNotice from '@/components/Ads/AdRemovalNotice';
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import { Season, CommentData } from '@/utils/api';
 import { UserData } from '@/types/auth';
@@ -238,7 +239,7 @@ export default function SeasonDetailsClient({
           <div className="sm:col-span-12 xl:col-span-4 space-y-8">
             <ImageGallery rewards={season.rewards} />
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
-              <div className="my-8 flex justify-center">
+              <div className="my-8 flex flex-col items-center">
                 <div className="w-full max-w-[700px] bg-[#1a2127] rounded-lg overflow-hidden border border-[#2E3944] shadow transition-all duration-300 relative" style={{ minHeight: '250px' }}>
                   <span className="absolute top-2 left-2 text-xs text-muted bg-[#212A31] px-2 py-0.5 rounded z-10">
                     Advertisement
@@ -249,6 +250,7 @@ export default function SeasonDetailsClient({
                     style={{ display: "block", width: "100%", height: "100%" }}
                   />
                 </div>
+                <AdRemovalNotice className="mt-2" />
               </div>
             )}
             <ChangelogComments 

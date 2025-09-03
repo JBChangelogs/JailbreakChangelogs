@@ -6,6 +6,7 @@ import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
 import DisplayAd from "@/components/Ads/DisplayAd";
+import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from '@/hooks/useAuth';
 import React from "react";
 
@@ -205,6 +206,7 @@ export default function ValuesItemsGrid({
                       style={{ display: 'block', width: '100%', height: '100%' }}
                     />
                   </div>
+                  <AdRemovalNotice />
                 </div>
               )}
             </React.Fragment>
