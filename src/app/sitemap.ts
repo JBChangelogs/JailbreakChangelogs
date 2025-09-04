@@ -73,12 +73,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
     },
     {
-      url: `${BASE_URL}/dupes`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: 'daily' as const,
-    },
-    {
       url: `${BASE_URL}/settings`,
       lastModified: new Date().toISOString(),
       priority: 0.4,
@@ -128,6 +122,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }] : []),
     ...(isFeatureEnabled('OG_FINDER') ? [{
       url: `${BASE_URL}/og`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily' as const,
+    }] : []),
+    ...(isFeatureEnabled('DUPE_FINDER') ? [{
+      url: `${BASE_URL}/dupes`,
       lastModified: new Date().toISOString(),
       priority: 0.8,
       changeFrequency: 'daily' as const,

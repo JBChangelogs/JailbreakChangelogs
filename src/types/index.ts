@@ -177,3 +177,30 @@ export interface DupeResult {
   proof: string | null;
   created_at: number;
 }
+
+export interface DupeFinderHistoryEntry {
+  UserId: number;
+  TradeTime: number;
+}
+
+export interface DupeFinderInfo {
+  title: string;
+  value: string;
+}
+
+export interface DupeFinderItem {
+  item_id: number;
+  latest_owner: string;
+  logged_at: number;
+  tradePopularMetric: number;
+  level: number | null;
+  history: DupeFinderHistoryEntry[];
+  timesTraded: number;
+  id: string;
+  categoryTitle: string;
+  info: DupeFinderInfo[];
+  uniqueCirculation: number;
+  season: number | null;
+  title: string;
+  isOriginalOwner: boolean;
+}

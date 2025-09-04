@@ -437,6 +437,25 @@ export async function fetchDupes() {
   }
 }
 
+export async function fetchDupeFinderData(userId: string) {
+  try {
+    const url = `${INVENTORY_API_URL}/users/dupes?id=${userId}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { error: 'User not found or no dupe data available' };
+      }
+      throw new Error('Failed to fetch dupe finder data');
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('[SERVER] Error fetching dupe finder data:', err);
+    return { error: 'Failed to fetch dupe finder data. Please try again.' };
+  }
+}
+
 export async function fetchLatestSeason() {
   try {
     const response = await fetch(`${BASE_API_URL}/seasons/latest`);

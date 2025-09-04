@@ -501,6 +501,31 @@ export default function Header() {
           } 
         />
       </ListItem>
+      <ListItem 
+        component={Link}
+        href="/dupes"
+        onClick={handleDrawerToggle}
+        sx={{ 
+          pl: 4,
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: '#2E3944'
+          }
+        }}
+      >
+        <ListItemText 
+          primary={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <span>Dupe Finder</span>
+              {isFeatureEnabled('DUPE_FINDER') ? (
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+              ) : (
+                <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+              )}
+            </Box>
+          } 
+        />
+      </ListItem>
       <ListItem>
         <Typography 
           sx={{ 
@@ -820,6 +845,24 @@ export default function Header() {
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span>OG Finder</span>
                                 {isFeatureEnabled('OG_FINDER') ? (
+                                  <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
+                                ) : (
+                                  <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>
+                                )}
+                              </div>
+                            </Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 }
+                            }}
+                            transition={{ duration: 0.2, delay: 0.35 }}
+                          >
+                            <Link href="/dupes" className="rounded-lg px-4 py-2 text-base text-[#D3D9D4] hover:bg-[#2E3944] transition-colors font-bold hover:text-white block" onClick={handleNavMenuClose}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span>Dupe Finder</span>
+                                {isFeatureEnabled('DUPE_FINDER') ? (
                                   <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">New</span>
                                 ) : (
                                   <span className="text-[10px] uppercase font-semibold text-white bg-[#5865F2] px-1.5 py-0.5 rounded">Coming Soon</span>

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Dialog } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from './actions';
 import { fetchItems } from '@/utils/api';
 import { RobloxUser, Item } from '@/types';
@@ -209,7 +209,7 @@ export default function InventoryCheckerClient({ initialData, robloxId, original
     setSelectedItem(null);
   };
 
-  if (!initialData || isLoading || externalIsLoading) {
+  if (isLoading || externalIsLoading) {
     return (
       <SearchForm
         searchId={searchId}
@@ -217,7 +217,6 @@ export default function InventoryCheckerClient({ initialData, robloxId, original
         handleSearch={handleSearch}
         isLoading={isLoading}
         externalIsLoading={externalIsLoading || false}
-        error={error}
       />
     );
   }
@@ -238,28 +237,45 @@ export default function InventoryCheckerClient({ initialData, robloxId, original
         handleSearch={handleSearch}
         isLoading={isLoading}
         externalIsLoading={externalIsLoading || false}
-        error={error}
       />
 
-      {/* User Stats */}
-      <UserStats
-        initialData={initialData}
-        robloxUsers={robloxUsers}
-        robloxAvatars={robloxAvatars}
-        itemsData={itemsData}
-      />
+      {/* Error Display */}
+      {error && !initialData && (
+        <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-red-500/10 rounded-full">
+                <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-red-400 mb-2">Unable to Fetch Inventory Data</h3>
+            <p className="text-gray-300">{error}</p>
+          </div>
+        </div>
+      )}
 
-      {/* Inventory Items */}
-      <InventoryItems
-        initialData={initialData}
-        robloxUsers={robloxUsers}
-        robloxAvatars={robloxAvatars}
-        onItemClick={handleItemClick}
-        itemsData={itemsData}
-      />
+      {/* User Stats and Inventory Items - Only show when no error and has data */}
+      {!error && initialData && (
+        <>
+          {/* User Stats */}
+          <UserStats
+            initialData={initialData}
+            robloxUsers={robloxUsers}
+            robloxAvatars={robloxAvatars}
+            itemsData={itemsData}
+          />
 
-      {/* Trade History Modal */}
-      {selectedItem && (
+          {/* Inventory Items */}
+          <InventoryItems
+            initialData={initialData}
+            robloxUsers={robloxUsers}
+            robloxAvatars={robloxAvatars}
+            onItemClick={handleItemClick}
+            itemsData={itemsData}
+          />
+
+          {/* Trade History Modal */}
+          {selectedItem && (
         <Dialog open={showHistoryModal} onClose={closeHistoryModal} className="relative z-50">
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           
@@ -416,6 +432,8 @@ export default function InventoryCheckerClient({ initialData, robloxId, original
           </div>
         </div>
         </Dialog>
+          )}
+        </>
       )}
     </div>
   );

@@ -700,6 +700,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({ onSuccess, editMode = 
           </Button>
         </div>
 
+        {/* Pro tip about Shift+Clear */}
+        <div className="text-center">
+          <div className="text-xs text-[#D3D9D4] flex items-center justify-center gap-1">
+            💡 Pro tip: Hold Shift while clicking Clear to clear both sides instantly without confirmation
+          </div>
+        </div>
+
         {/* Offering Items */}
         <div className="md:flex md:space-x-6 space-y-6 md:space-y-0">
           <div className="bg-[#212A31] rounded-lg p-4 border border-[#2E3944] flex-1" style={{ borderColor: '#047857' }}>

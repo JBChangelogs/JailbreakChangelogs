@@ -933,6 +933,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ initialItems = [
           </Tooltip>
         </div>
 
+        {/* Pro tip about Shift+Clear */}
+        <div className="text-center">
+          <div className="text-xs text-[#D3D9D4] flex items-center justify-center gap-1">
+            💡 Pro tip: Hold Shift while clicking Clear to clear both sides instantly without confirmation
+          </div>
+        </div>
+
         {/* Trade Panels */}
         <div className="md:flex md:space-x-6 space-y-6 md:space-y-0">
           {/* Offering Items */}
