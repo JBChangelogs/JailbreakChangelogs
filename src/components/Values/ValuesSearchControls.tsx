@@ -47,6 +47,7 @@ export default function ValuesSearchControls({
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
+  const [isItemIdSearch, setIsItemIdSearch] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const MAX_VALUE_RANGE = 100_000_000;
   const MIN_VALUE_DISTANCE = 4_000_000;
@@ -79,6 +80,12 @@ export default function ValuesSearchControls({
       window.removeEventListener('authStateChanged', handleAuthChange);
     };
   }, []);
+
+  // Detect if search term uses id: syntax (item ID search)
+  useEffect(() => {
+    const isIdSearch = /^id:\s*\d*$/i.test(searchTerm.trim());
+    setIsItemIdSearch(isIdSearch && searchTerm.trim() !== '');
+  }, [searchTerm]);
 
   // Handle Ctrl+F to focus search input
   useEffect(() => {
@@ -150,7 +157,9 @@ export default function ValuesSearchControls({
                 className={`w-full rounded-lg border px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:outline-none transition-all duration-300 ${
                   isSearchHighlighted 
                     ? 'border-[#124E66] bg-[#1A5F7A] shadow-lg shadow-[#124E66]/20' 
-                    : 'border-[#2E3944] bg-[#37424D] focus:border-[#124E66]'
+                    : isItemIdSearch
+                      ? 'border-[#5865F2] bg-[#5865F2]/10 shadow-lg shadow-[#5865F2]/20'
+                      : 'border-[#2E3944] bg-[#37424D] focus:border-[#124E66]'
                 }`}
               />
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
@@ -162,6 +171,11 @@ export default function ValuesSearchControls({
                 >
                   <XMarkIcon />
                 </button>
+              )}
+              {isItemIdSearch && (
+                <div className="absolute -bottom-6 left-0 text-xs text-[#8BA2FF] font-medium">
+                  Searching by Item ID
+                </div>
               )}
             </div>
             

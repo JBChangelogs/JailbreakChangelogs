@@ -466,7 +466,9 @@ export default function ItemDetailsClient({ item, initialChanges, initialUserMap
                   <div className="mt-3">
                     <div className="px-2 py-1 rounded-md border border-[#5865F2]/30 bg-[#5865F2]/10">
                       <div className="text-xs font-semibold text-[#8BA2FF] uppercase tracking-wide">Official Trading Metrics</div>
-                      <div className="text-xs text-[#D3D9D4]/70">by Badimo • last 30 days</div>
+                      <div className="text-xs text-[#D3D9D4]/70">
+                        by Badimo • {currentItem.metadata.LastUpdated ? `updated ${formatCustomDate(currentItem.metadata.LastUpdated)}` : 'last 30 days'}
+                      </div>
                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {typeof currentItem.metadata.TimesTraded === 'number' && (
                           <div className="rounded-md border border-[#5865F2]/30 bg-[#1A1F2E] p-3">

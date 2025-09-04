@@ -159,6 +159,7 @@ export interface ItemDetails {
     TimesTraded?: number;
     UniqueCirculation?: number;
     DemandMultiple?: number;
+    LastUpdated?: number;
   };
   children?: Array<{
     id: number;
