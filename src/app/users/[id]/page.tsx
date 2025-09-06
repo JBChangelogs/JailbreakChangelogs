@@ -486,11 +486,13 @@ export default function UserProfilePage() {
                   />
                 </div>
                 <div className="text-center space-y-2">
-                  <div className="flex flex-wrap justify-center items-center gap-2">
+                  <div className="flex flex-col md:flex-row md:flex-wrap justify-center items-center gap-2">
                     <h1 className="text-xl md:text-2xl font-bold text-muted">
                       {user.global_name && user.global_name !== "None" ? user.global_name : user.username}
                     </h1>
-                    <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
+                    <div className="md:ml-0">
+                      <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
+                    </div>
                   </div>
                   <p className="text-[#FFFFFF]">@{user.username}</p>
                 </div>
@@ -551,7 +553,7 @@ export default function UserProfilePage() {
               <div className="flex-1 w-full">
                 <div className="flex flex-col md:flex-row justify-between">
                   <div className="text-center md:text-left w-full md:w-auto">
-                    <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 max-w-full">
+                    <div className="flex flex-col md:flex-row md:flex-wrap justify-center md:justify-start items-center gap-2 max-w-full">
                       {loading ? (
                         <>
                           <Skeleton variant="text" width={160} height={28} sx={{ bgcolor: '#2E3944' }} />
@@ -562,7 +564,9 @@ export default function UserProfilePage() {
                           <h1 className="text-2xl md:text-3xl font-bold text-muted mb-1 max-w-[280px] lg:max-w-none truncate">
                             {user.global_name && user.global_name !== "None" ? user.global_name : user.username}
                           </h1>
-                          <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
+                          <div className="md:ml-0">
+                            <UserBadges usernumber={user.usernumber} premiumType={user.premiumtype} flags={user.flags} size="lg" primary_guild={user.primary_guild} />
+                          </div>
                         </>
                       )}
                     </div>
@@ -746,11 +750,14 @@ export default function UserProfilePage() {
                                           backgroundColor: 'rgba(255, 92, 92, 0.1)',
                                           color: '#FFFFFF',
                                           borderColor: '#2E3944',
+                                        },
+                                        '& .MuiButton-startIcon': {
+                                          color: '#FF5C5C',
                                         }
                                       }
                                     : {
                                         backgroundColor: '#5865F2',
-                                        color: '#D3D9D4',
+                                        color: '#FFFFFF',
                                         borderColor: '#5865F2',
                                         '&:hover': {
                                           backgroundColor: '#4752C4',
@@ -760,6 +767,9 @@ export default function UserProfilePage() {
                                           backgroundColor: 'rgba(88, 101, 242, 0.1)',
                                           color: '#FFFFFF',
                                           borderColor: '#2E3944',
+                                        },
+                                        '& .MuiButton-startIcon': {
+                                          color: '#FFFFFF',
                                         }
                                       }
                                 }
@@ -777,10 +787,13 @@ export default function UserProfilePage() {
                                 onClick={() => toast.error('You need to be logged in to follow users')}
                                 sx={{
                                   backgroundColor: '#5865F2',
-                                  color: '#ffffff',
+                                  color: '#FFFFFF',
                                   '&:hover': {
                                     backgroundColor: '#4752C4',
                                   },
+                                  '& .MuiButton-startIcon': {
+                                    color: '#FFFFFF',
+                                  }
                                 }}
                               >
                                 Follow

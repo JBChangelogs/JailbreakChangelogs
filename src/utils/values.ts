@@ -250,7 +250,7 @@ export const sortAndFilterItems = async (
   }
 
   // Apply demand filtering if a specific demand level is selected
-  if (valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc') {
+  if (valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc' && valueSort !== 'demand-multiple-desc' && valueSort !== 'demand-multiple-asc') {
     // Map the valueSort to the exact demand string from demandOrder
     const demandMap: Record<string, string> = {
       'demand-close-to-none': 'Close to none',
@@ -335,6 +335,48 @@ export const sortAndFilterItems = async (
         const aTime = a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
         const bTime = b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
         return aTime - bTime;
+      });
+      break;
+    case "times-traded-desc":
+      result = result.sort((a, b) => {
+        const aTimesTraded = a.metadata?.TimesTraded ?? 0;
+        const bTimesTraded = b.metadata?.TimesTraded ?? 0;
+        return bTimesTraded - aTimesTraded;
+      });
+      break;
+    case "times-traded-asc":
+      result = result.sort((a, b) => {
+        const aTimesTraded = a.metadata?.TimesTraded ?? 0;
+        const bTimesTraded = b.metadata?.TimesTraded ?? 0;
+        return aTimesTraded - bTimesTraded;
+      });
+      break;
+    case "unique-circulation-desc":
+      result = result.sort((a, b) => {
+        const aUniqueCirculation = a.metadata?.UniqueCirculation ?? 0;
+        const bUniqueCirculation = b.metadata?.UniqueCirculation ?? 0;
+        return bUniqueCirculation - aUniqueCirculation;
+      });
+      break;
+    case "unique-circulation-asc":
+      result = result.sort((a, b) => {
+        const aUniqueCirculation = a.metadata?.UniqueCirculation ?? 0;
+        const bUniqueCirculation = b.metadata?.UniqueCirculation ?? 0;
+        return aUniqueCirculation - bUniqueCirculation;
+      });
+      break;
+    case "demand-multiple-desc":
+      result = result.sort((a, b) => {
+        const aDemandMultiple = a.metadata?.DemandMultiple ?? 0;
+        const bDemandMultiple = b.metadata?.DemandMultiple ?? 0;
+        return bDemandMultiple - aDemandMultiple;
+      });
+      break;
+    case "demand-multiple-asc":
+      result = result.sort((a, b) => {
+        const aDemandMultiple = a.metadata?.DemandMultiple ?? 0;
+        const bDemandMultiple = b.metadata?.DemandMultiple ?? 0;
+        return aDemandMultiple - bDemandMultiple;
       });
       break;
     // For demand filter cases, we already filtered above, so sort by cash value (high to low)

@@ -42,6 +42,12 @@ export type ValueSort =
   | "demand-asc"
   | "last-updated-desc"
   | "last-updated-asc"
+  | "times-traded-desc"
+  | "times-traded-asc"
+  | "unique-circulation-desc"
+  | "unique-circulation-asc"
+  | "demand-multiple-desc"
+  | "demand-multiple-asc"
   | "demand-close-to-none"
   | "demand-very-low"
   | "demand-low"
@@ -86,6 +92,12 @@ export interface Item {
   health: number;
   tradable: number;
   last_updated: number;
+  metadata?: {
+    TimesTraded?: number;
+    UniqueCirculation?: number;
+    DemandMultiple?: number;
+    LastUpdated?: number;
+  };
   children?: {
     id: number;
     parent: number;

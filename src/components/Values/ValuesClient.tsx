@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
 import {
-  ArrowUpIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { Item, FilterSort, ValueSort } from "@/types";
@@ -34,7 +33,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
-  const [showBackToTop, setShowBackToTop] = useState(false);
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
@@ -146,21 +144,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
 
 
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
 
 
 
@@ -279,15 +262,6 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
         debouncedSearchTerm={debouncedSearchTerm}
       />
 
-      {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 rounded-full bg-[#124E66] p-3 text-muted shadow-lg hover:bg-[#1A5F7A] focus:outline-none z-[2000]"
-          aria-label="Back to top"
-        >
-          <ArrowUpIcon className="h-6 w-6" />
-        </button>
-      )}
     </>
   );
 }

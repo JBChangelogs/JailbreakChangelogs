@@ -3,8 +3,13 @@ import Link from 'next/link';
 import { fetchUsersWithFlags, UserWithFlags } from '@/utils/api';
 import UserAvatar from '@/components/Users/UserAvatarClient';
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export default async function ContributorsPage() {
   const usersWithFlags = await fetchUsersWithFlags();
+  
+  // Filter out excluded users
+  const filteredUsers = usersWithFlags.filter(user => user.id !== '1327206739665489930');
   const getUserRole = (user: UserWithFlags): string => {
     const enabledFlags = user.flags.filter(flag => flag.enabled);
     const highestPriorityFlag = enabledFlags.reduce((highest, current) => 
@@ -25,7 +30,7 @@ export default async function ContributorsPage() {
 
   const userRoleMap = new Map<string, { user: UserWithFlags; role: string }>();
   
-  usersWithFlags.forEach(user => {
+  filteredUsers.forEach(user => {
     const role = getUserRole(user);
     userRoleMap.set(user.id, { user, role });
   });

@@ -10,6 +10,12 @@ export interface TradeItem {
   trend?: string | null;
   base_name?: string;
   side?: 'offering' | 'requesting';
+  metadata?: {
+    TimesTraded?: number;
+    UniqueCirculation?: number;
+    DemandMultiple?: number;
+    LastUpdated?: number;
+  };
   children?: Array<{
     id: number;
     parent: number;

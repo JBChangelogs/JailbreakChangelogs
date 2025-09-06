@@ -325,6 +325,12 @@ export default function ValuesSearchControls({
                         case 'trend-recovering': return 'Recovering Trend';
                         case 'trend-rising': return 'Rising Trend';
                         case 'trend-hyped': return 'Hyped Trend';
+                        case 'times-traded-desc': return 'Times Traded (High to Low)';
+                        case 'times-traded-asc': return 'Times Traded (Low to High)';
+                        case 'unique-circulation-desc': return 'Unique Circulation (High to Low)';
+                        case 'unique-circulation-asc': return 'Unique Circulation (Low to High)';
+                        case 'demand-multiple-desc': return 'Demand Multiple (High to Low)';
+                        case 'demand-multiple-asc': return 'Demand Multiple (Low to High)';
                         default: return valueSort;
                       }
                     })() }}
@@ -356,6 +362,14 @@ export default function ValuesSearchControls({
                         { value: 'cash-asc', label: 'Cash Value (Low to High)' },
                         { value: 'duped-desc', label: 'Duped Value (High to Low)' },
                         { value: 'duped-asc', label: 'Duped Value (Low to High)' },
+                      ]},
+                      { label: 'Trading Metrics', options: [
+                        { value: 'times-traded-desc', label: 'Times Traded (High to Low)' },
+                        { value: 'times-traded-asc', label: 'Times Traded (Low to High)' },
+                        { value: 'unique-circulation-desc', label: 'Unique Circulation (High to Low)' },
+                        { value: 'unique-circulation-asc', label: 'Unique Circulation (Low to High)' },
+                        { value: 'demand-multiple-desc', label: 'Demand Multiple (High to Low)' },
+                        { value: 'demand-multiple-asc', label: 'Demand Multiple (Low to High)' },
                       ]},
                       { label: 'Demand', options: [
                         { value: 'demand-desc', label: 'Demand (High to Low)' },
