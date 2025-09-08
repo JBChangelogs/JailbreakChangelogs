@@ -37,7 +37,7 @@ export default function HyperchromeCalculatorModal({ open, onClose }: Hyperchrom
     const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
     const pityPercent = Math.min(Math.max(pity, 0), 100);
     return calculateRobberiesToLevelUp(lvl, pityPercent, false);
-  }, [level, pity, isPrivate]);
+  }, [level, pity]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
