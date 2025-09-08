@@ -652,6 +652,17 @@ export async function fetchItemsByType(type: string) {
   }
 }
 
+// Convenience wrapper for HyperChrome items only
+export async function fetchHyperchromes() {
+  try {
+    const data = await fetchItemsByType('HyperChrome');
+    return data; // Same structure as values page, filtered to HyperChromes
+  } catch (err) {
+    console.error('[SERVER] Error fetching hyperchromes:', err);
+    return null;
+  }
+}
+
 export interface CommentData {
   id: number;
   author: string;

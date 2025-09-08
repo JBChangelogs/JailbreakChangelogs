@@ -14,6 +14,7 @@ import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import TradingGuides from "./TradingGuides";
+import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorModal";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 
@@ -41,6 +42,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const [showHcModal, setShowHcModal] = useState(false);
 
   // Load saved preferences after mount
   useEffect(() => {
@@ -186,6 +188,12 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
             <SparklesIcon className="h-4 w-4 sm:h-6 sm:w-6" />
             <span className="text-sm sm:text-base">Random Item</span>
           </button>
+          <button
+            onClick={() => setShowHcModal(true)}
+            className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#2E3944] bg-[#5865F2] px-4 sm:px-6 py-2 sm:py-3 text-white hover:bg-[#4752C4] focus:outline-none"
+          >
+            <span className="text-sm sm:text-base">Hyperchrome Pity Calculator</span>
+          </button>
         </div>
 
         {lastUpdated && (
@@ -216,6 +224,8 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           }}
         />
       </div>
+
+      <HyperchromeCalculatorModal open={showHcModal} onClose={() => setShowHcModal(false)} />
 
       <ValuesSearchControls
         searchTerm={searchTerm}
