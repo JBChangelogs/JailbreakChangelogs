@@ -16,7 +16,6 @@ interface HyperchromeCalculatorModalProps {
 export default function HyperchromeCalculatorModal({ open, onClose }: HyperchromeCalculatorModalProps) {
   const [level, setLevel] = useState(0);
   const [pity, setPity] = useState(0);
-  const [isCeo, setIsCeo] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [step, setStep] = useState(1);
@@ -28,7 +27,6 @@ export default function HyperchromeCalculatorModal({ open, onClose }: Hyperchrom
       // reset when closing
       setLevel(0);
       setPity(0);
-      setIsCeo(false);
       setIsPrivate(false);
       setStep(1);
       setHasCalculated(false);
@@ -38,8 +36,8 @@ export default function HyperchromeCalculatorModal({ open, onClose }: Hyperchrom
   const robberiesNeeded = useMemo(() => {
     const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
     const pityPercent = Math.min(Math.max(pity, 0), 100);
-    return calculateRobberiesToLevelUp(lvl, pityPercent, isCeo, isPrivate);
-  }, [level, pity, isCeo, isPrivate]);
+    return calculateRobberiesToLevelUp(lvl, pityPercent, false);
+  }, [level, pity, isPrivate]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -115,22 +113,13 @@ export default function HyperchromeCalculatorModal({ open, onClose }: Hyperchrom
             <div className="space-y-3">
               <label className="block text-sm font-medium text-white">Which modifiers apply to your current session?</label>
               <div>
-                <div className="text-sm font-medium text-white mb-1">Robbed CEO</div>
-                <Checkbox
-                  checked={isCeo}
-                  onChange={(e) => setIsCeo(e.target.checked)}
-                  sx={{ color: '#5865F2', '&.Mui-checked': { color: '#5865F2' } }}
-                />
-                <div className="text-sm text-[#A0A7AC]">Robbing CEO roughly halves the required robberies.</div>
-              </div>
-              <div>
                 <div className="text-sm font-medium text-white mb-1">Private server</div>
                 <Checkbox
                   checked={isPrivate}
                   onChange={(e) => setIsPrivate(e.target.checked)}
                   sx={{ color: '#5865F2', '&.Mui-checked': { color: '#5865F2' } }}
                 />
-                <div className="text-sm text-[#A0A7AC]">Private servers often take longer (+50% estimate).</div>
+                <div className="text-sm text-[#A0A7AC]">Enabling private server increases the required robberies by 50%.</div>
               </div>
             </div>
           )}
@@ -168,7 +157,7 @@ export default function HyperchromeCalculatorModal({ open, onClose }: Hyperchrom
                 <div className="text-base text-[#D3D9D4]">robberies to reach HyperChrome Level {Math.min(level + 1, 5)}</div>
               </div>
               <div className="mt-2 text-xs text-[#A0A7AC]">
-                Based on Level {level}, {pity}% pity{isCeo ? ', CEO robbed' : ''}{isPrivate ? ', private server' : ''}.
+                Based on Level {level}, {pity}% pity{isPrivate ? ', private server' : ''}.
               </div>
             </div>
           )}

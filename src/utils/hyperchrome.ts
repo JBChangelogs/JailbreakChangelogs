@@ -5,15 +5,13 @@ export type HyperchromeLevel = 0 | 1 | 2 | 3 | 4;
 export function calculateRobberiesToLevelUp(
   currentLevel: HyperchromeLevel,
   currentPityPercent: number,
-  isCeoRobbed: boolean,
   isPrivateServer: boolean
 ): number {
   const boundedPity = Math.min(Math.max(currentPityPercent, 0), 100);
   const base = HYPERCHROME_PITY[currentLevel];
-  const ceoMultiplier = isCeoRobbed ? 0.5 : 1;
   const privateMultiplier = isPrivateServer ? 1.5 : 1;
   const remainingPercent = (100 - boundedPity) / 100;
-  return Math.ceil(base * remainingPercent * ceoMultiplier * privateMultiplier);
+  return Math.ceil(base * remainingPercent * privateMultiplier);
 }
 
 export function calculateAllLevelPercentages(
