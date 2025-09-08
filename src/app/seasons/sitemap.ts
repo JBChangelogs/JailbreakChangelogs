@@ -7,7 +7,28 @@ const ASSETS_URL = 'https://assets.jailbreakchangelogs.xyz'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const data = await fetchSeasonsList()
   
-  return data
+  const staticEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/seasons`,
+      lastModified: new Date().toISOString(),
+      priority: 0.6,
+      changeFrequency: 'weekly',
+    },
+    {
+      url: `${BASE_URL}/seasons/will-i-make-it`,
+      lastModified: new Date().toISOString(),
+      priority: 0.6,
+      changeFrequency: 'weekly',
+    },
+    {
+      url: `${BASE_URL}/seasons/contracts`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: 'daily',
+    },
+  ]
+
+  const dynamicSeasonEntries = data
     .filter((season: Season) => 
       Array.isArray(season.rewards) && season.rewards.length > 0
     )
@@ -34,4 +55,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       return entry
     })
+
+  return [...staticEntries, ...dynamicSeasonEntries]
 } 

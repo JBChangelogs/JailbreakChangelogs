@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { TrophyIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { RobloxIcon } from '@/components/Icons/RobloxIcon';
 
 interface SupporterTier {
@@ -10,7 +10,6 @@ interface SupporterTier {
   priceAlt?: string;
   features: string[];
   recommended?: boolean;
-  xFeatures?: string[];
 }
 
 const supporterTiers: SupporterTier[] = [
@@ -20,19 +19,7 @@ const supporterTiers: SupporterTier[] = [
     features: [
       "Post Comments up to 200 characters",
       "Trade Ad Duration: 6 Hours",
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
-      "Custom Regular Avatar",
-      "Custom Regular Banner",
-      "Comments highlighted with border and badge",
       "Get your trade ads featured in our Discord for maximum reach."
-    ],
-    xFeatures: [
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
-      "Custom Regular Avatar",
-      "Custom Regular Banner",
-      "Comments highlighted with border and badge",
     ]
   },
   {
@@ -43,21 +30,11 @@ const supporterTiers: SupporterTier[] = [
       "Hide all advertisements",
       "Post Comments up to 400 characters",
       "Trade Ad Duration: +6 Hours (12 Hours total)",
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
-      "Custom Regular Banner",
-      "Custom Regular Avatar",
       "Custom Supporter Badge",
       "Discord Role: Supporter",
       "Comments highlighted with Bronze border and badge",
       "Get your trade ads featured in our Discord for maximum reach.",
       "All Free tier benefits"
-    ],
-    xFeatures: [
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
-      "Custom Regular Banner",
-      "Custom Regular Avatar",
     ]
   },
   {
@@ -68,8 +45,6 @@ const supporterTiers: SupporterTier[] = [
       "Hide all advertisements",
       "Post Comments up to 800 characters",
       "Trade Ad Duration: +12 Hours (24 Hours total)",
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
       "Custom Regular Banner",
       "Custom Regular Avatar",
       "Custom Supporter Badge",
@@ -77,10 +52,6 @@ const supporterTiers: SupporterTier[] = [
       "Comments highlighted with Silver border and badge",
       "Get your trade ads featured in our Discord for maximum reach.",
       "All Supporter I benefits"
-    ],
-    xFeatures: [
-      "Custom Animated Avatar",
-      "Custom Animated Banner"
     ],
     recommended: true
   },
@@ -92,8 +63,8 @@ const supporterTiers: SupporterTier[] = [
       "Hide all advertisements",
       "Post Comments up to 2,000 characters",
       "Trade Ad Duration: +24 Hours (48 Hours total)",
-      "Custom Regular/Animated Avatar",
-      "Custom Regular/Animated Banner",
+      "Custom Regular/Animated Avatar (new uploads only)",
+      "Custom Regular/Animated Banner (new uploads only)",
       "Custom Supporter Badge",
       "Discord Role: Supporter",
       "Comments highlighted with Gold border and badge",
@@ -202,15 +173,7 @@ export default function SupportingPage() {
                   <ul className="space-y-3">
                     {tier.features.map((feature, index) => (
                       <li key={index} className="flex items-center">
-                        {tier.xFeatures?.includes(feature) ? (
-                          <XMarkIcon
-                            className="h-5 w-5 text-red-500 mr-2 mt-1 flex-shrink-0"
-                          />
-                        ) : (
-                          <CheckIcon
-                            className="h-5 w-5 text-green-500 mr-2 mt-1 flex-shrink-0"
-                          />
-                        )}
+                        <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1 flex-shrink-0" />
                         <span className="text-gray-300">{feature}</span>
                       </li>
                     ))}

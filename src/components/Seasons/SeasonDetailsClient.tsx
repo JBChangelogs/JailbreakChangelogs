@@ -160,6 +160,26 @@ export default function SeasonDetailsClient({
                 </div>
               </div>
             )}
+
+            {/* Weekly Contracts Promo */}
+            <div className="mb-6 rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[#FFFFFF] mb-2">📋 Weekly Contracts</h3>
+                  <p className="text-muted text-sm">
+                    View your weekly contracts and their xp rewards.
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <Link
+                    href="/seasons/contracts"
+                    className="rounded-lg bg-[#5865F2] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#4752C4] inline-block text-center w-full lg:w-auto"
+                  >
+                    View Contracts
+                  </Link>
+                </div>
+              </div>
+            </div>
             
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4">

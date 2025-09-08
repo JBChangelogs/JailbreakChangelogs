@@ -472,6 +472,39 @@ export async function fetchLatestSeason() {
   }
 }
 
+export interface SeasonContract {
+  team: 'Criminal' | 'Police';
+  name: string;
+  description: string;
+  reqseasonpass: boolean;
+  goal: number;
+  reward: number;
+}
+
+export interface SeasonContractsResponse {
+  data: SeasonContract[];
+  updated_at: number;
+}
+
+export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | null> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/seasons/contract`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch season contracts');
+    }
+
+    const data = await response.json();
+    return data as SeasonContractsResponse;
+  } catch (err) {
+    console.error('[SERVER] Error fetching season contracts:', err);
+    return null;
+  }
+}
+
 export async function fetchSeasonsList() {
   try {
     const response = await fetch(`${BASE_API_URL}/seasons/list`);

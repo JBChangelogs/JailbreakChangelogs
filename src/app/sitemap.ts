@@ -85,12 +85,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily' as const,
     },
     {
-      url: `${BASE_URL}/seasons/will-i-make-it`,
-      lastModified: new Date().toISOString(),
-      priority: 0.7,
-      changeFrequency: 'daily' as const,
-    },
-    {
       url: `${BASE_URL}/values/calculator`,
       lastModified: new Date().toISOString(),
       priority: 0.8,

@@ -68,14 +68,19 @@ export default function XpImportantDates({ season, title, startDate, endDate, do
     const minutes = Math.floor((seconds % (60 * 60)) / 60);
     const secs = seconds % 60;
 
+    const dLabel = days === 1 ? 'day' : 'days';
+    const hLabel = hours === 1 ? 'hour' : 'hours';
+    const mLabel = minutes === 1 ? 'minute' : 'minutes';
+    const sLabel = secs === 1 ? 'second' : 'seconds';
+
     if (days > 0) {
-      return `${days} days ${hours} hours ${minutes} minutes ${secs} seconds`;
+      return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
     } else if (hours > 0) {
-      return `${hours} hours ${minutes} minutes ${secs} seconds`;
+      return `${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
     } else if (minutes > 0) {
-      return `${minutes} minutes ${secs} seconds`;
+      return `${minutes} ${mLabel} ${secs} ${sLabel}`;
     } else {
-      return `${secs} seconds`;
+      return `${secs} ${sLabel}`;
     }
   };
 

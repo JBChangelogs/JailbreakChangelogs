@@ -238,7 +238,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <div className="text-muted flex flex-wrap items-center min-w-0">
+      <div className="text-muted flex flex-wrap items-center min-w-0 text-xs sm:text-sm">
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1;
           
@@ -247,7 +247,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               {index > 0 && (
                 <span className="mx-2 text-muted">
                   <svg
-                    className="w-4 h-4"
+                    className="w-3 h-3 sm:w-4 sm:h-4"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -263,10 +263,10 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               
               {isLast ? (
                 <span 
-                  className="px-2 py-0.5 rounded-full bg-[#212a31] text-blue-300 text-sm font-medium max-w-[200px] sm:max-w-[300px] truncate"
+                  className="px-2 py-0.5 rounded-full bg-[#212a31] text-blue-300 text-xs sm:text-sm font-medium max-w-[200px] sm:max-w-[300px] truncate"
                 >
                   {item.isHome ? (
-                    <HomeIcon className="w-4 h-4" />
+                    <HomeIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                   ) : (
                     item.label
                   )}
@@ -274,10 +274,10 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               ) : (
                 <Link 
                   href={item.href}
-                  className="text-muted hover:text-muted max-w-[200px] sm:max-w-[300px] truncate"
+                  className="text-muted hover:text-muted text-xs sm:text-sm max-w-[200px] sm:max-w-[300px] truncate"
                 >
                   {item.isHome ? (
-                    <HomeIcon className="w-5 h-5" />
+                    <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
                     item.label
                   )}
