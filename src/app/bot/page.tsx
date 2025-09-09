@@ -16,7 +16,7 @@ export default function BotPage() {
   const [backgroundImage, setBackgroundImage] = useState("");
 
   useEffect(() => {
-    const randomNumber = Math.floor(Math.random() * 19) + 1;
+    const randomNumber = Math.floor(Math.random() * 21) + 1;
     setBackgroundImage(`https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`);
   }, []);
 

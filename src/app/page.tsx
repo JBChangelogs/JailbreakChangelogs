@@ -16,8 +16,7 @@ export default function Home() {
   const [backgroundImage, setBackgroundImage] = useState("");
 
   useEffect(() => {
-    // Generate random number between 1 and 14
-    const randomNumber = Math.floor(Math.random() * 19) + 1;
+    const randomNumber = Math.floor(Math.random() * 21) + 1;
     setBackgroundImage(
       `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`
     );
