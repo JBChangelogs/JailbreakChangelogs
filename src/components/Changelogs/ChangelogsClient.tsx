@@ -4,20 +4,22 @@ import { useState, useEffect, useRef } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { Changelog } from "@/utils/api";
-import Image from 'next/image';
+import Image from "next/image";
 
 interface ChangelogsClientProps {
   changelogListPromise: Promise<Changelog[]>;
 }
 
-export default function ChangelogsClient({ changelogListPromise }: ChangelogsClientProps) {
+export default function ChangelogsClient({
+  changelogListPromise,
+}: ChangelogsClientProps) {
   const router = useRouter();
-  
+
   // Use the use hook to resolve promises
   const changelogList = use(changelogListPromise);
-  
+
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [sortedChangelogs, setSortedChangelogs] = useState<Changelog[]>([]);
   const backToTopRef = useRef<HTMLDivElement>(null);
@@ -38,12 +40,12 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLatestChangelog = () => {
@@ -52,7 +54,7 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
       const latestChangelog = sortedChangelogs[0]; // Already sorted by newest first
       router.push(`/changelogs/${latestChangelog.id}`);
     } else {
-      toast.error('No changelogs available');
+      toast.error("No changelogs available");
     }
   };
 
@@ -68,14 +70,15 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
   return (
     <div className="py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Changelogs</h1>
-        <p className="text-gray-300 mb-6">
-          Stay updated with the latest changes and improvements to Jailbreak Changelogs.
+        <h1 className="mb-4 text-4xl font-bold text-white">Changelogs</h1>
+        <p className="mb-6 text-gray-300">
+          Stay updated with the latest changes and improvements to Jailbreak
+          Changelogs.
         </p>
-        
+
         <button
           onClick={handleLatestChangelog}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
         >
           View Latest Changelog
         </button>
@@ -86,21 +89,20 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
           <div
             key={changelog.id}
             onClick={() => router.push(`/changelogs/${changelog.id}`)}
-            className="bg-[#212A31] rounded-lg p-6 cursor-pointer hover:bg-[#2A343C] transition-colors duration-200 border border-[#37424D]"
+            className="cursor-pointer rounded-lg border border-[#37424D] bg-[#212A31] p-6 transition-colors duration-200 hover:bg-[#2A343C]"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="mb-2 text-xl font-semibold text-white">
                   {changelog.title}
                 </h2>
-                <p className="text-gray-400 text-sm mb-3">
+                <p className="mb-3 text-sm text-gray-400">
                   {formatDate(changelog.title)}
                 </p>
-                <div className="text-gray-300 line-clamp-3">
-                  {changelog.sections.length > 200 
-                    ? `${changelog.sections.substring(0, 200)}...` 
-                    : changelog.sections
-                  }
+                <div className="line-clamp-3 text-gray-300">
+                  {changelog.sections.length > 200
+                    ? `${changelog.sections.substring(0, 200)}...`
+                    : changelog.sections}
                 </div>
               </div>
               {changelog.image_url && (
@@ -110,7 +112,7 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
                     alt="Changelog"
                     width={64}
                     height={64}
-                    className="w-16 h-16 object-cover rounded-lg"
+                    className="h-16 w-16 rounded-lg object-cover"
                   />
                 </div>
               )}
@@ -121,13 +123,13 @@ export default function ChangelogsClient({ changelogListPromise }: ChangelogsCli
 
       {/* Back to top button */}
       {showBackToTop && (
-        <div ref={backToTopRef} className="fixed bottom-8 right-8 z-50">
+        <div ref={backToTopRef} className="fixed right-8 bottom-8 z-50">
           <button
             onClick={scrollToTop}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+            className="rounded-full bg-blue-600 p-3 text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-blue-700"
             aria-label="Back to top"
           >
-            <ArrowUpIcon className="w-6 h-6" />
+            <ArrowUpIcon className="h-6 w-6" />
           </button>
         </div>
       )}

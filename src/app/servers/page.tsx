@@ -1,11 +1,11 @@
 "use client";
 
-import React from 'react';
-import { ThemeProvider } from '@mui/material';
-import { darkTheme } from '@/theme/darkTheme';
-import Breadcrumb from '@/components/Layout/Breadcrumb';
-import ServerHeader from '@/components/Servers/ServerHeader';
-import ServerList from '@/components/Servers/ServerList';
+import React from "react";
+import { ThemeProvider } from "@mui/material";
+import { darkTheme } from "@/theme/darkTheme";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+import ServerHeader from "@/components/Servers/ServerHeader";
+import ServerList from "@/components/Servers/ServerList";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 export default function ServersPage() {
@@ -39,7 +39,7 @@ export default function ServersPage() {
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 rounded-full bg-[#124E66] p-3 text-muted shadow-lg hover:bg-[#1A5F7A] focus:outline-none z-[2000]"
+            className="text-muted fixed right-8 bottom-8 z-[2000] rounded-full bg-[#124E66] p-3 shadow-lg hover:bg-[#1A5F7A] focus:outline-none"
             aria-label="Back to top"
           >
             <ArrowUpIcon className="h-6 w-6" />
@@ -48,4 +48,4 @@ export default function ServersPage() {
       </main>
     </ThemeProvider>
   );
-} 
+}

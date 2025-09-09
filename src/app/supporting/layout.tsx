@@ -1,18 +1,20 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
   title: "Support Us",
-  description: "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
+  description:
+    "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
   alternates: {
     canonical: "/supporting",
   },
   openGraph: {
     title: "Support Us",
-    description: "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
+    description:
+      "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
     type: "website",
-    siteName: 'Jailbreak Changelogs',
-    url: 'https://jailbreakchangelogs.xyz/supporting',
+    siteName: "Jailbreak Changelogs",
+    url: "https://jailbreakchangelogs.xyz/supporting",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -25,8 +27,11 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Support Jailbreak Changelogs",
-    description: "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    description:
+      "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -36,4 +41,4 @@ export default function SupportingLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

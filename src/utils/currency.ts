@@ -4,20 +4,20 @@
  * @returns Formatted currency string
  */
 export function formatCurrencyValue(value: number): string {
-  if (value === 0) return '0';
-  
-  const suffixes = ['', 'K', 'M', 'B'];
+  if (value === 0) return "0";
+
+  const suffixes = ["", "K", "M", "B"];
   const base = 1000;
-  
+
   // Find the appropriate suffix index
   const suffixIndex = Math.min(
     Math.floor(Math.log(value) / Math.log(base)),
-    suffixes.length - 1
+    suffixes.length - 1,
   );
-  
+
   // Calculate the scaled value
   const scaledValue = value / Math.pow(base, suffixIndex);
-  
+
   // Format the number with appropriate decimal places
   let formattedValue: string;
   if (suffixIndex === 0) {
@@ -28,9 +28,9 @@ export function formatCurrencyValue(value: number): string {
     formattedValue = Math.round(scaledValue).toString();
   } else {
     // For other values, show one decimal place
-    formattedValue = scaledValue.toFixed(1).replace(/\.0$/, '');
+    formattedValue = scaledValue.toFixed(1).replace(/\.0$/, "");
   }
-  
+
   return `${formattedValue}${suffixes[suffixIndex]}`;
 }
 
@@ -41,22 +41,22 @@ export function formatCurrencyValue(value: number): string {
  */
 export function parseCurrencyValue(value: string): number {
   if (!value) return 0;
-  
+
   // Remove any non-alphanumeric characters except decimal point
-  const cleanValue = value.replace(/[^0-9.]/g, '');
-  
+  const cleanValue = value.replace(/[^0-9.]/g, "");
+
   // Get the suffix if it exists
-  const suffix = value.match(/[KMB]$/i)?.[0]?.toUpperCase() || '';
-  
+  const suffix = value.match(/[KMB]$/i)?.[0]?.toUpperCase() || "";
+
   // Parse the numeric part
   const numericValue = parseFloat(cleanValue);
-  
+
   // Apply the appropriate multiplier based on the suffix
   const multipliers: { [key: string]: number } = {
-    'K': 1000,
-    'M': 1000000,
-    'B': 1000000000
+    K: 1000,
+    M: 1000000,
+    B: 1000000000,
   };
-  
+
   return numericValue * (multipliers[suffix] || 1);
-} 
+}

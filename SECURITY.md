@@ -40,6 +40,7 @@ When reporting a vulnerability, please include:
 ## Out of Scope
 
 The following are considered out of scope:
+
 - Theoretical vulnerabilities without proof of concept
 - Issues related to user-generated content
 - Issues on sites/services not owned by JailbreakChangelogs

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Tabs, Tab, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import AboutTab from './AboutTab';
-import CommentsTab from './CommentsTab';
-import FavoritesTab from './FavoritesTab';
-import RobloxProfileTab from './RobloxProfileTab';
-import PrivateServersTab from './PrivateServersTab';
-import { UserSettings } from '@/types/auth';
+import { useState, useEffect } from "react";
+import { Tabs, Tab, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import AboutTab from "./AboutTab";
+import CommentsTab from "./CommentsTab";
+import FavoritesTab from "./FavoritesTab";
+import RobloxProfileTab from "./RobloxProfileTab";
+import PrivateServersTab from "./PrivateServersTab";
+import { UserSettings } from "@/types/auth";
 
 interface User {
   id: string;
@@ -74,21 +74,29 @@ interface ProfileTabsProps {
 }
 
 const StyledTabs = styled(Tabs)(() => ({
-  borderBottom: '1px solid #2E3944',
-  '& .MuiTabs-indicator': {
-    backgroundColor: '#5865F2',
+  borderBottom: "1px solid #2E3944",
+  "& .MuiTabs-indicator": {
+    backgroundColor: "#5865F2",
   },
 }));
 
 const StyledTab = styled(Tab)(() => ({
-  textTransform: 'none',
-  color: '#FFFFFF',
-  '&.Mui-selected': {
-    color: '#D3D9D4',
+  textTransform: "none",
+  color: "#FFFFFF",
+  "&.Mui-selected": {
+    color: "#D3D9D4",
   },
 }));
 
-const TabPanel = ({ children, value, index }: { children: React.ReactNode; value: number; index: number }) => (
+const TabPanel = ({
+  children,
+  value,
+  index,
+}: {
+  children: React.ReactNode;
+  value: number;
+  index: number;
+}) => (
   <div
     role="tabpanel"
     hidden={value !== index}
@@ -117,15 +125,15 @@ export default function ProfileTabs({
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1); // Remove the # symbol
       const hasRobloxConnection = Boolean(user?.roblox_id);
-      if (hash === 'about') {
+      if (hash === "about") {
         setValue(0);
-      } else if (hash === 'comments') {
+      } else if (hash === "comments") {
         setValue(1);
-      } else if (hash === 'favorites') {
+      } else if (hash === "favorites") {
         setValue(2);
-      } else if (hash === 'servers') {
+      } else if (hash === "servers") {
         setValue(3);
-      } else if (hash === 'roblox' && hasRobloxConnection) {
+      } else if (hash === "roblox" && hasRobloxConnection) {
         setValue(4);
       } else {
         setValue(0);
@@ -136,8 +144,8 @@ export default function ProfileTabs({
     handleHashChange();
 
     // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, [user?.roblox_id]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -146,15 +154,15 @@ export default function ProfileTabs({
     // Update hash based on selected tab
     if (newValue === 0) {
       // Remove hash completely for About tab
-      history.pushState(null, '', window.location.pathname);
+      history.pushState(null, "", window.location.pathname);
     } else if (newValue === 1) {
-      window.location.hash = 'comments';
+      window.location.hash = "comments";
     } else if (newValue === 2) {
-      window.location.hash = 'favorites';
+      window.location.hash = "favorites";
     } else if (newValue === 3) {
-      window.location.hash = 'servers';
+      window.location.hash = "servers";
     } else if (hasRobloxConnection && newValue === 4) {
-      window.location.hash = 'roblox';
+      window.location.hash = "roblox";
     }
   };
 
@@ -166,11 +174,11 @@ export default function ProfileTabs({
   const hasRobloxConnection = Boolean(user.roblox_id);
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <StyledTabs 
-          value={value} 
-          onChange={handleChange} 
+    <Box sx={{ width: "100%" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <StyledTabs
+          value={value}
+          onChange={handleChange}
           aria-label="profile tabs"
           variant="scrollable"
           scrollButtons="auto"
@@ -203,15 +211,15 @@ export default function ProfileTabs({
         />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        <FavoritesTab 
-          userId={user.id} 
+        <FavoritesTab
+          userId={user.id}
           currentUserId={currentUserId}
           settings={user.settings}
         />
       </TabPanel>
       <TabPanel value={value} index={3}>
-        <PrivateServersTab 
-          servers={privateServers} 
+        <PrivateServersTab
+          servers={privateServers}
           isOwnProfile={currentUserId === user.id}
         />
       </TabPanel>
@@ -222,4 +230,4 @@ export default function ProfileTabs({
       )}
     </Box>
   );
-} 
+}

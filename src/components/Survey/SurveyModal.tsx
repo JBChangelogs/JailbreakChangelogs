@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
-import { getToken } from '@/utils/auth';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { getToken } from "@/utils/auth";
+import toast from "react-hot-toast";
 import { PUBLIC_API_URL } from "@/utils/api";
 
 interface Survey {
@@ -26,13 +26,13 @@ interface SurveyModalProps {
 }
 
 const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!answer.trim()) {
-      toast.error('Please provide an answer');
+      toast.error("Please provide an answer");
       return;
     }
 
@@ -40,25 +40,28 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
     try {
       const token = getToken();
       const response = await fetch(`${PUBLIC_API_URL}/surveys/submit`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: survey.id,
           answer: answer,
           owner: token,
-        })
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit survey');
+        throw new Error("Failed to submit survey");
       }
 
-      toast.success('Thank you for your feedback!');
+      toast.success("Thank you for your feedback!");
       onClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit survey. Please try again.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit survey. Please try again.";
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -68,52 +71,52 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
   if (!open) return null;
 
   return (
-    <div 
+    <div
       className="modal-overlay"
       onClick={onClose}
       style={{
-        display: 'flex',
-        position: 'fixed',
+        display: "flex",
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         zIndex: 1000,
-        justifyContent: 'center',
-        alignItems: 'center'
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      <div 
+      <div
         className="modal-container"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         style={{
-          backgroundColor: '#212A31',
-          border: '1px solid #2E3944',
-          borderRadius: '8px',
-          minWidth: '400px',
-          maxWidth: '600px',
-          width: '100%',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          backgroundColor: "#212A31",
+          border: "1px solid #2E3944",
+          borderRadius: "8px",
+          minWidth: "400px",
+          maxWidth: "600px",
+          width: "100%",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div 
+        <div
           className="modal-header"
           style={{
-            color: '#D3D9D4',
-            borderBottom: '1px solid #2E3944',
-            padding: '16px 24px',
-            fontSize: '1.25rem',
-            fontWeight: 600
+            color: "#D3D9D4",
+            borderBottom: "1px solid #2E3944",
+            padding: "16px 24px",
+            fontSize: "1.25rem",
+            fontWeight: 600,
           }}
         >
           Survey
         </div>
-        <div 
+        <div
           className="modal-body"
           style={{
-            padding: '24px',
-            color: '#D3D9D4'
+            padding: "24px",
+            color: "#D3D9D4",
           }}
         >
           <p className="mb-4">{survey.question}</p>
@@ -121,7 +124,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              className="w-full p-2 rounded bg-[#2E3944] border border-[#37424D] text-white"
+              className="w-full rounded border border-[#37424D] bg-[#2E3944] p-2 text-white"
               rows={4}
               placeholder="Type your answer here..."
             />
@@ -129,16 +132,16 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded bg-[#37424D] text-white hover:bg-[#2E3944] transition-colors"
+                className="rounded bg-[#37424D] px-4 py-2 text-white transition-colors hover:bg-[#2E3944]"
               >
                 Skip
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-4 py-2 rounded bg-[#1A5F7A] text-white hover:bg-[#124e66] transition-colors disabled:opacity-50"
+                className="rounded bg-[#1A5F7A] px-4 py-2 text-white transition-colors hover:bg-[#124e66] disabled:opacity-50"
               >
-                {submitting ? 'Submitting...' : 'Submit'}
+                {submitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>
@@ -148,4 +151,4 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
   );
 };
 
-export default SurveyModal; 
+export default SurveyModal;

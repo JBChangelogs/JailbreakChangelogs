@@ -1,47 +1,56 @@
-import { UserSettings } from '@/types/auth';
+import { UserSettings } from "@/types/auth";
 import { PUBLIC_API_URL } from "@/utils/api";
 
-export const updateBanner = async (url: string, token: string): Promise<string> => {
+export const updateBanner = async (
+  url: string,
+  token: string,
+): Promise<string> => {
   const response = await fetch(`${PUBLIC_API_URL}/users/banner/update`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       url,
-      owner: token
-    })
+      owner: token,
+    }),
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to update banner');
+    throw new Error(errorData.message || "Failed to update banner");
   }
 
   return url;
 };
 
-export const updateAvatar = async (url: string, token: string): Promise<string> => {
+export const updateAvatar = async (
+  url: string,
+  token: string,
+): Promise<string> => {
   const response = await fetch(`${PUBLIC_API_URL}/users/avatar/update`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       url,
-      owner: token
-    })
+      owner: token,
+    }),
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to update avatar');
+    throw new Error(errorData.message || "Failed to update avatar");
   }
 
   return url;
 };
 
-export const updateSettings = async (settings: Partial<UserSettings>, token: string): Promise<UserSettings> => {
+export const updateSettings = async (
+  settings: Partial<UserSettings>,
+  token: string,
+): Promise<UserSettings> => {
   // Create a request body with only the specific fields that should be sent to the API
   const requestBody = {
     profile_public: settings.profile_public,
@@ -52,42 +61,51 @@ export const updateSettings = async (settings: Partial<UserSettings>, token: str
     banner_discord: settings.banner_discord,
     avatar_discord: settings.avatar_discord,
     hide_presence: settings.hide_presence,
-    dms_allowed: settings.dms_allowed
+    dms_allowed: settings.dms_allowed,
   };
 
   // Remove any undefined or null values to keep the request body clean
-  Object.keys(requestBody).forEach(key => {
-    if (requestBody[key as keyof typeof requestBody] === undefined || requestBody[key as keyof typeof requestBody] === null) {
+  Object.keys(requestBody).forEach((key) => {
+    if (
+      requestBody[key as keyof typeof requestBody] === undefined ||
+      requestBody[key as keyof typeof requestBody] === null
+    ) {
       delete requestBody[key as keyof typeof requestBody];
     }
   });
 
-  const response = await fetch(`${PUBLIC_API_URL}/users/settings/update?user=${token}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
+  const response = await fetch(
+    `${PUBLIC_API_URL}/users/settings/update?user=${token}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     },
-    body: JSON.stringify(requestBody)
-  });
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to update settings');
+    throw new Error(errorData.message || "Failed to update settings");
   }
 
   return response.json();
 };
 
 export const deleteAccount = async (token: string): Promise<void> => {
-  const response = await fetch(`${PUBLIC_API_URL}/users/delete?session_token=${token}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+  const response = await fetch(
+    `${PUBLIC_API_URL}/users/delete?session_token=${token}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to delete account');
+    throw new Error(errorData.message || "Failed to delete account");
   }
-}; 
+};

@@ -51,4 +51,4 @@ export interface CalculationResults {
     doubleXpStart: string;
     seasonEnds: string;
   };
-} 
+}

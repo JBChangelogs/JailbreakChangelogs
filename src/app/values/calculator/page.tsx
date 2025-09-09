@@ -1,9 +1,9 @@
-import React, { Suspense } from 'react';
-import Breadcrumb from '@/components/Layout/Breadcrumb';
-import CalculatorDescription from '@/components/Values/Calculator/CalculatorDescription';
-import { CalculatorForm } from '@/components/Values/Calculator/CalculatorForm';
-import { fetchItems } from '@/utils/api';
-import Loading from './loading';
+import React, { Suspense } from "react";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
+import { CalculatorForm } from "@/components/Values/Calculator/CalculatorForm";
+import { fetchItems } from "@/utils/api";
+import Loading from "./loading";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
@@ -21,9 +21,9 @@ export default function CalculatorPage() {
 
 async function CalculatorFormWrapper() {
   const items = await fetchItems();
-  const tradeItems = items.flatMap(item => {
+  const tradeItems = items.flatMap((item) => {
     const parent = { ...item, is_sub: false, side: undefined };
-    const variants = (item.children || []).map(child => ({
+    const variants = (item.children || []).map((child) => ({
       ...parent,
       id: child.id,
       name: child.data.name,

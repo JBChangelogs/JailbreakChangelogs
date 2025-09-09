@@ -1,11 +1,11 @@
-import { UserGroupIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUsersForList } from '@/utils/api';
-import UserSearch from '@/components/Users/UserSearch';
-import OnlineUsers from '@/components/Layout/OnlineUsers';
-import { fetchOnlineUsers, OnlineUser } from '@/utils/api';
+import { fetchUsersForList } from "@/utils/api";
+import UserSearch from "@/components/Users/UserSearch";
+import OnlineUsers from "@/components/Layout/OnlineUsers";
+import { fetchOnlineUsers, OnlineUser } from "@/utils/api";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
   const users = await fetchUsersForList();
@@ -13,14 +13,16 @@ export default async function UsersPage() {
 
   return (
     <div className="min-h-screen bg-[#2E3944] px-4 pb-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         <Breadcrumb />
-        
-        <div className="flex items-center gap-2 mb-2">
-          <UserGroupIcon className="h-6 w-6 text-muted" />
-          <h1 className="text-2xl font-bold text-muted">User Search</h1>
+
+        <div className="mb-2 flex items-center gap-2">
+          <UserGroupIcon className="text-muted h-6 w-6" />
+          <h1 className="text-muted text-2xl font-bold">User Search</h1>
         </div>
-        <p className="text-sm text-[#FFFFFF] mb-6">Find users by their username or display name</p>
+        <p className="mb-6 text-sm text-[#FFFFFF]">
+          Find users by their username or display name
+        </p>
 
         <div className="mb-6">
           <OnlineUsers max={5} initial={online} />
@@ -30,4 +32,4 @@ export default async function UsersPage() {
       </div>
     </div>
   );
-} 
+}

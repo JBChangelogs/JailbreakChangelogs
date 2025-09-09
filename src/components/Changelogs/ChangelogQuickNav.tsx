@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 interface ChangelogQuickNavProps {
@@ -13,34 +13,44 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
   onChangelogSelect,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-[#2E3944] gap-4 sm:gap-0">
+    <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#2E3944] pt-4 sm:flex-row sm:gap-0">
       {prevChangelog && (
-        <button 
+        <button
           onClick={() => {
             onChangelogSelect(prevChangelog.id.toString());
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="flex items-center gap-2 text-muted transition-colors w-full sm:w-auto bg-transparent border border-blue-300 hover:border-blue-400 rounded-lg p-4 group"
+          className="text-muted group flex w-full items-center gap-2 rounded-lg border border-blue-300 bg-transparent p-4 transition-colors hover:border-blue-400 sm:w-auto"
         >
           <ChevronLeftIcon className="h-5 w-5 text-blue-300 group-hover:text-blue-400" />
           <div className="flex flex-col items-start">
             <span className="text-sm text-[#FFFFFF]">Previous</span>
-            <span className="text-base font-medium line-clamp-1 max-w-[300px] text-blue-300 hover:text-blue-400" title={prevChangelog.title}>{prevChangelog.title}</span>
+            <span
+              className="line-clamp-1 max-w-[300px] text-base font-medium text-blue-300 hover:text-blue-400"
+              title={prevChangelog.title}
+            >
+              {prevChangelog.title}
+            </span>
           </div>
         </button>
       )}
 
       {nextChangelog && (
-        <button 
+        <button
           onClick={() => {
             onChangelogSelect(nextChangelog.id.toString());
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="flex items-center gap-2 text-muted transition-colors text-right w-full sm:w-auto bg-transparent border border-blue-300 hover:border-blue-400 rounded-lg p-4 group"
+          className="text-muted group flex w-full items-center gap-2 rounded-lg border border-blue-300 bg-transparent p-4 text-right transition-colors hover:border-blue-400 sm:w-auto"
         >
           <div className="flex flex-col items-end">
             <span className="text-sm text-[#FFFFFF]">Next</span>
-            <span className="text-base font-medium line-clamp-1 max-w-[300px] text-blue-300 hover:text-blue-400" title={nextChangelog.title}>{nextChangelog.title}</span>
+            <span
+              className="line-clamp-1 max-w-[300px] text-base font-medium text-blue-300 hover:text-blue-400"
+              title={nextChangelog.title}
+            >
+              {nextChangelog.title}
+            </span>
           </div>
           <ChevronRightIcon className="h-5 w-5 text-blue-300 group-hover:text-blue-400" />
         </button>
@@ -49,4 +59,4 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
   );
 };
 
-export default ChangelogQuickNav; 
+export default ChangelogQuickNav;

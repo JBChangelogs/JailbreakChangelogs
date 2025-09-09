@@ -1,60 +1,61 @@
-import type { MetadataRoute } from 'next'
-import { fetchSeasonsList, Season, Reward } from '@/utils/api'
+import type { MetadataRoute } from "next";
+import { fetchSeasonsList, Season, Reward } from "@/utils/api";
 
-const BASE_URL = 'https://jailbreakchangelogs.xyz'
-const ASSETS_URL = 'https://assets.jailbreakchangelogs.xyz'
+const BASE_URL = "https://jailbreakchangelogs.xyz";
+const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const data = await fetchSeasonsList()
-  
+  const data = await fetchSeasonsList();
+
   const staticEntries: MetadataRoute.Sitemap = [
     {
       url: `${BASE_URL}/seasons`,
       lastModified: new Date().toISOString(),
       priority: 0.6,
-      changeFrequency: 'weekly',
+      changeFrequency: "weekly",
     },
     {
       url: `${BASE_URL}/seasons/will-i-make-it`,
       lastModified: new Date().toISOString(),
       priority: 0.6,
-      changeFrequency: 'weekly',
+      changeFrequency: "weekly",
     },
     {
       url: `${BASE_URL}/seasons/contracts`,
       lastModified: new Date().toISOString(),
       priority: 0.8,
-      changeFrequency: 'daily',
+      changeFrequency: "daily",
     },
-  ]
+  ];
 
   const dynamicSeasonEntries = data
-    .filter((season: Season) => 
-      Array.isArray(season.rewards) && season.rewards.length > 0
+    .filter(
+      (season: Season) =>
+        Array.isArray(season.rewards) && season.rewards.length > 0,
     )
     .map((season: Season) => {
       const entry: MetadataRoute.Sitemap[number] = {
         url: `${BASE_URL}/seasons/${season.season}`,
         lastModified: new Date().toISOString(),
         priority: 0.7,
-        changeFrequency: 'monthly',
-      }
+        changeFrequency: "monthly",
+      };
 
       // Find the level 10 reward
       const level10Reward = season.rewards.find(
-        (reward: Reward) => 
-          reward.requirement === "Level 10" && 
-          reward.link !== "N/A" && 
-          reward.link !== null
-      )
+        (reward: Reward) =>
+          reward.requirement === "Level 10" &&
+          reward.link !== "N/A" &&
+          reward.link !== null,
+      );
 
       // Add level 10 reward image if available
       if (level10Reward?.link) {
-        entry.images = [`${ASSETS_URL}${level10Reward.link}`]
+        entry.images = [`${ASSETS_URL}${level10Reward.link}`];
       }
 
-      return entry
-    })
+      return entry;
+    });
 
-  return [...staticEntries, ...dynamicSeasonEntries]
-} 
+  return [...staticEntries, ...dynamicSeasonEntries];
+}

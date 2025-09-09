@@ -1,8 +1,13 @@
-import type { MetadataRoute } from 'next'
-import { BASE_API_URL } from '@/utils/api'
-import { getItemImagePath, isVideoItem, getVideoThumbnailPath, getVideoPath } from '@/utils/images'
+import type { MetadataRoute } from "next";
+import { BASE_API_URL } from "@/utils/api";
+import {
+  getItemImagePath,
+  isVideoItem,
+  getVideoThumbnailPath,
+  getVideoPath,
+} from "@/utils/images";
 
-const BASE_URL = 'https://jailbreakchangelogs.xyz'
+const BASE_URL = "https://jailbreakchangelogs.xyz";
 
 interface Item {
   name: string;
@@ -11,41 +16,44 @@ interface Item {
   image_url?: string;
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> { 
-  const response = await fetch(`${BASE_API_URL}/items/list`)
-  const data = await response.json()
-  
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const response = await fetch(`${BASE_API_URL}/items/list`);
+  const data = await response.json();
+
   return data.map((item: Item) => {
     // Use current timestamp if last_updated is null, otherwise normalize the timestamp
-    const timestamp = item.last_updated === null 
-      ? Date.now()
-      : item.last_updated < 10000000000 
-        ? item.last_updated * 1000 
-        : item.last_updated
-    
+    const timestamp =
+      item.last_updated === null
+        ? Date.now()
+        : item.last_updated < 10000000000
+          ? item.last_updated * 1000
+          : item.last_updated;
+
     const entry: MetadataRoute.Sitemap[number] = {
       url: `${BASE_URL}/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`,
       lastModified: new Date(timestamp).toISOString(),
       priority: 0.8,
-      changeFrequency: 'daily',
-    }
+      changeFrequency: "daily",
+    };
 
     if (isVideoItem(item.name)) {
       // For video items, we use the video sitemap format
-      entry.videos = [{
-        title: `${item.name} - ${item.type}`,
-        thumbnail_loc: getVideoThumbnailPath(item.type, item.name),
-        description: `${item.name} - ${item.type} in Roblox Jailbreak`,
-        content_loc: getVideoPath(item.type, item.name),
-      }]
+      entry.videos = [
+        {
+          title: `${item.name} - ${item.type}`,
+          thumbnail_loc: getVideoThumbnailPath(item.type, item.name),
+          description: `${item.name} - ${item.type} in Roblox Jailbreak`,
+          content_loc: getVideoPath(item.type, item.name),
+        },
+      ];
     } else {
       // For regular items, use the image sitemap format
-      const imageUrl = getItemImagePath(item.type, item.name, true)
+      const imageUrl = getItemImagePath(item.type, item.name, true);
       if (imageUrl) {
-        entry.images = [imageUrl]
+        entry.images = [imageUrl];
       }
     }
 
-    return entry
-  })
-} 
+    return entry;
+  });
+}

@@ -1,25 +1,18 @@
 import { FilterSort, ValueSort } from "@/types";
 import { StarIcon } from "@heroicons/react/24/solid";
+import { CircleStackIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
 import {
-  CircleStackIcon,
-  RocketLaunchIcon,
-} from "@heroicons/react/24/outline";
-import { 
   FaCarAlt,
   FaFire,
   FaLayerGroup,
   FaHome,
   FaClock,
-  FaRegSnowflake
- } from "react-icons/fa";
+  FaRegSnowflake,
+} from "react-icons/fa";
 import { GiCarWheel } from "react-icons/gi";
 import { RiPaintFill } from "react-icons/ri";
 import { PiStickerFill } from "react-icons/pi";
-import { 
-  FaGun,
-  FaJar,
-  FaBullhorn
- } from "react-icons/fa6";
+import { FaGun, FaJar, FaBullhorn } from "react-icons/fa6";
 import { toast } from "react-hot-toast";
 
 interface CategoryIconsProps {
@@ -28,7 +21,11 @@ interface CategoryIconsProps {
   onValueSort: (sort: ValueSort) => void;
 }
 
-export default function CategoryIcons({ onSelect, selectedFilter, onValueSort }: CategoryIconsProps) {
+export default function CategoryIcons({
+  onSelect,
+  selectedFilter,
+  onValueSort,
+}: CategoryIconsProps) {
   const handleCategoryClick = (categoryId: string) => {
     onSelect(categoryId as FilterSort);
     onValueSort("cash-desc");
@@ -42,13 +39,13 @@ export default function CategoryIcons({ onSelect, selectedFilter, onValueSort }:
       bgColor: "rgba(255, 215, 0, 0.1)",
       iconColor: "#ffd700",
       onClick: () => {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem("user");
         if (!storedUser) {
-          toast.error('Please log in to view your favorites');
+          toast.error("Please log in to view your favorites");
           return;
         }
         handleCategoryClick("favorites");
-      }
+      },
     },
     {
       id: "name-limited-items",
@@ -152,7 +149,7 @@ export default function CategoryIcons({ onSelect, selectedFilter, onValueSort }:
 
   return (
     <div className="mb-8">
-      <h3 className="mb-4 text-xl font-semibold text-muted">Categories</h3>
+      <h3 className="text-muted mb-4 text-xl font-semibold">Categories</h3>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {categories.map((category) => {
           const Icon = category.icon;
@@ -160,18 +157,25 @@ export default function CategoryIcons({ onSelect, selectedFilter, onValueSort }:
           return (
             <button
               key={category.id}
-              onClick={category.onClick || (() => handleCategoryClick(category.id))}
-              className={`flex items-center gap-2 rounded-lg p-2 sm:p-3 transition-all hover:scale-105 ${
+              onClick={
+                category.onClick || (() => handleCategoryClick(category.id))
+              }
+              className={`flex items-center gap-2 rounded-lg p-2 transition-all hover:scale-105 sm:p-3 ${
                 isSelected ? "ring-2 ring-[#5865F2]" : ""
               }`}
               style={{ backgroundColor: category.bgColor }}
             >
-              <Icon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: category.iconColor }} />
-              <span className="text-xs sm:text-sm font-medium text-muted">{category.name}</span>
+              <Icon
+                className="h-4 w-4 sm:h-5 sm:w-5"
+                style={{ color: category.iconColor }}
+              />
+              <span className="text-muted text-xs font-medium sm:text-sm">
+                {category.name}
+              </span>
             </button>
           );
         })}
       </div>
     </div>
   );
-} 
+}

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { UserSettings } from '@/types/auth';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { UserSettings } from "@/types/auth";
 
 interface BannerProps {
   userId: string;
@@ -10,17 +10,19 @@ interface BannerProps {
   settings?: UserSettings;
 }
 
-const BACKGROUND_COUNT = 21;
+// Move static data outside component
+const BACKGROUND_COUNT = 19;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
-  (_, i) => `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${i + 1}.webp`
+  (_, i) =>
+    `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${i + 1}.webp`,
 );
 
 // Optimized seed calculation - converts string to number more efficiently
 const calculateSeed = (userId: string): number => {
   let seed = 0;
   for (let i = 0; i < userId.length; i++) {
-    seed = ((seed << 5) - seed) + userId.charCodeAt(i);
+    seed = (seed << 5) - seed + userId.charCodeAt(i);
     seed = seed & seed; // Convert to 32-bit integer
   }
   return Math.abs(seed);
@@ -30,7 +32,13 @@ const getBannerUrl = (userId: string, bannerHash: string) => {
   return `https://cdn.discordapp.com/banners/${userId}/${bannerHash}?size=4096`;
 };
 
-export const Banner = ({ userId, username, banner, customBanner, settings }: BannerProps) => {
+export const Banner = ({
+  userId,
+  username,
+  banner,
+  customBanner,
+  settings,
+}: BannerProps) => {
   const [fallbackBanner, setFallbackBanner] = useState<string | null>(null);
   const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
 
@@ -66,7 +74,7 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
         return {
           src: getBannerUrl(userId, banner),
           alt: "Profile banner",
-          onError: handleBannerError
+          onError: handleBannerError,
         };
       }
       // If no Discord banner available, use the calculated fallback
@@ -77,11 +85,15 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
     }
 
     // If user has explicitly chosen to use custom banner (Discord toggle off)
-    if (settings?.banner_discord === 0 && customBanner && customBanner !== "N/A") {
+    if (
+      settings?.banner_discord === 0 &&
+      customBanner &&
+      customBanner !== "N/A"
+    ) {
       return {
         src: customBanner,
         alt: "Profile banner",
-        onError: handleBannerError
+        onError: handleBannerError,
       };
     }
 
@@ -98,7 +110,7 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
   }, [userId]);
 
   return (
-    <div className="relative h-48 md:h-80 bg-[#2E3944]">
+    <div className="relative h-48 bg-[#2E3944] md:h-80">
       <Image
         {...getBannerSource()}
         fill
@@ -109,4 +121,4 @@ export const Banner = ({ userId, username, banner, customBanner, settings }: Ban
       />
     </div>
   );
-}; 
+};

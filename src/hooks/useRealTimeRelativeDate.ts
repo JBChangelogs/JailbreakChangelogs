@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { formatRelativeDate } from '@/utils/timestamp';
+import { useState, useEffect, useRef } from "react";
+import { formatRelativeDate } from "@/utils/timestamp";
 
 /**
  * React hook for real-time relative timestamp updates
  * @param timestamp Unix timestamp in seconds or milliseconds
  * @returns Real-time updating relative time string
  */
-export const useRealTimeRelativeDate = (timestamp: string | number | null | undefined) => {
-  const [relativeTime, setRelativeTime] = useState<string>('');
+export const useRealTimeRelativeDate = (
+  timestamp: string | number | null | undefined,
+) => {
+  const [relativeTime, setRelativeTime] = useState<string>("");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (!timestamp) {
-      setRelativeTime('');
+      setRelativeTime("");
       return;
     }
 
@@ -42,16 +44,16 @@ export const useRealTimeRelativeDate = (timestamp: string | number | null | unde
     intervalRef.current = setInterval(updateTime, 1000);
 
     // Listen for visibility changes
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [timestamp]);
 
   return relativeTime;
-}; 
+};

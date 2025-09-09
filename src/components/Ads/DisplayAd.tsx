@@ -56,9 +56,14 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         display: "block",
         width: "100%",
         height: "100%",
-        minHeight: adFormat === "auto" ? "250px" : (adFormat === "fluid" ? "450px" : undefined),
+        minHeight:
+          adFormat === "auto"
+            ? "250px"
+            : adFormat === "fluid"
+              ? "450px"
+              : undefined,
         maxHeight: adFormat === "fluid" ? "500px" : undefined,
-        ...style
+        ...style,
       }}
       data-ad-client="ca-pub-8152532464536367"
       data-ad-slot={adSlot}
@@ -69,4 +74,4 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   );
 };
 
-export default DisplayAd; 
+export default DisplayAd;

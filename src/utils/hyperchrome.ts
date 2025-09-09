@@ -5,7 +5,7 @@ export type HyperchromeLevel = 0 | 1 | 2 | 3 | 4;
 export function calculateRobberiesToLevelUp(
   currentLevel: HyperchromeLevel,
   currentPityPercent: number,
-  isPrivateServer: boolean
+  isPrivateServer: boolean,
 ): number {
   const boundedPity = Math.min(Math.max(currentPityPercent, 0), 100);
   const base = HYPERCHROME_PITY[currentLevel];
@@ -16,16 +16,14 @@ export function calculateRobberiesToLevelUp(
 
 export function calculateAllLevelPercentages(
   currentLevel: HyperchromeLevel,
-  currentPityPercent: number
+  currentPityPercent: number,
 ): string[] {
   const baseForLevel = HYPERCHROME_PITY[currentLevel];
   const currentProgressAbsolute = Math.floor(
-    (baseForLevel * Math.min(Math.max(currentPityPercent, 0), 100)) / 100
+    (baseForLevel * Math.min(Math.max(currentPityPercent, 0), 100)) / 100,
   );
 
   return HYPERCHROME_PITY.map((value) =>
-    ((currentProgressAbsolute / value) * 100).toFixed(2)
+    ((currentProgressAbsolute / value) * 100).toFixed(2),
   );
 }
-
-

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Metadata } from 'next';
-import { getMaintenanceMetadata } from '@/utils/maintenance';
+import React from "react";
+import { Metadata } from "next";
+import { getMaintenanceMetadata } from "@/utils/maintenance";
 
 interface Props {
   params: Promise<{
@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const { id } = await params;
-  
+
   return {
     title: `Trade #${id}`,
-    description: 'View and interact with this trade offer.',
+    description: "View and interact with this trade offer.",
     openGraph: {
       title: `Trade #${id}`,
-      description: 'View and interact with this trade offer.',
-      type: 'website',
+      description: "View and interact with this trade offer.",
+      type: "website",
       images: [
         {
           url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
@@ -36,8 +36,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `Trade #${id}`,
-      description: 'View and interact with this trade offer.',
-      images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp"],
+      description: "View and interact with this trade offer.",
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+      ],
     },
   };
 }
@@ -48,4 +50,4 @@ export default function TradeAdLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

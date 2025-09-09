@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 interface TimerSubscriber {
   id: string;
@@ -29,16 +29,16 @@ class SharedTimerService {
       this.isVisible = !document.hidden;
       if (this.isVisible) {
         // Update all subscribers immediately when becoming visible
-        this.subscribers.forEach(subscriber => subscriber.callback());
+        this.subscribers.forEach((subscriber) => subscriber.callback());
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
   }
 
   subscribe(id: string, callback: () => void): () => void {
     this.subscribers.set(id, { id, callback });
-    
+
     // Start timer if this is the first subscriber
     if (this.subscribers.size === 1) {
       this.startTimer();
@@ -47,7 +47,7 @@ class SharedTimerService {
     // Return unsubscribe function
     return () => {
       this.subscribers.delete(id);
-      
+
       // Stop timer if no more subscribers
       if (this.subscribers.size === 0) {
         this.stopTimer();
@@ -57,10 +57,10 @@ class SharedTimerService {
 
   private startTimer() {
     if (this.intervalId) return;
-    
+
     this.intervalId = setInterval(() => {
       if (this.isVisible) {
-        this.subscribers.forEach(subscriber => subscriber.callback());
+        this.subscribers.forEach((subscriber) => subscriber.callback());
       }
     }, 1000);
   }
@@ -101,13 +101,13 @@ export const useSharedTimer = (id: string, callback: () => void) => {
  */
 export const useOptimizedRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
-  id: string
+  id: string,
 ) => {
-  const [relativeTime, setRelativeTime] = useState<string>('');
+  const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
     if (!timestamp) {
-      setRelativeTime('');
+      setRelativeTime("");
       return;
     }
     setRelativeTime(formatRelativeDate(timestamp));
@@ -123,4 +123,4 @@ export const useOptimizedRealTimeRelativeDate = (
 };
 
 // Import formatRelativeDate for the optimized hook
-import { formatRelativeDate } from '@/utils/timestamp'; 
+import { formatRelativeDate } from "@/utils/timestamp";

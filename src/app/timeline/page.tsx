@@ -1,7 +1,7 @@
-import React from 'react';
-import Breadcrumb from '@/components/Layout/Breadcrumb';
-import TimelineClient from '@/components/Timeline/TimelineClient';
-import { fetchChangelogList } from '@/utils/api';
+import React from "react";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+import TimelineClient from "@/components/Timeline/TimelineClient";
+import { fetchChangelogList } from "@/utils/api";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -20,4 +20,4 @@ export default async function TimelinePage() {
       </div>
     </main>
   );
-} 
+}

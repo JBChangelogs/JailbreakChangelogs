@@ -2,20 +2,21 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz)
 [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1ofdv.svg)](https://status.jailbreakchangelogs.xyz)
-              
+
 > [!CAUTION]
 > The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
 > [!NOTE]
 > This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
-![Logo](<https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png>)
+![Logo](https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png)
 
 ## big numbers = jbcl happy
+
 Leave us a ⭐ if you like the Jailbreak Changelogs project.
 
 [![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%232e3944&axis=%23ffffff&line=%235bc0de)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
-                   
+
 # Roblox Jailbreak Changelogs
 
 Welcome to the Roblox Jailbreak Changelogs repository. Discover the latest updates, changes, and patches for the game in one convenient place.
@@ -54,7 +55,6 @@ Visit https://jailbreakchangelogs.xyz/faq
 ## Stay Connected
 
 - Follow the devs and official game account on Twitter/X for real-time update notifications:
-
   - [@asimo3089](https://x.com/asimo3089)
   - [@badcc](https://x.com/badccvoid)
   - [@badimo](https://x.com/badimo) (Official Jailbreak account)

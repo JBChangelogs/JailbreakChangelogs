@@ -68,7 +68,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #8B5CF6, #4F46E5)",
           color: "white",
         },
-      }
+      },
     );
   };
 
@@ -76,7 +76,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <SparklesIcon className="w-12 h-12 text-black" />
+          <SparklesIcon className="h-12 w-12 text-black" />
           <span>
             This badge is awarded to the first 100 people to sign up to
             Jailbreak Changelogs!
@@ -89,7 +89,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #FBBF24, #EAB308)",
           color: "black",
         },
-      }
+      },
     );
   };
 
@@ -98,7 +98,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <BugAntIcon className="w-5 h-5 text-black" />
+          <BugAntIcon className="h-5 w-5 text-black" />
           <span>
             {testerFlag?.description ||
               "This user is a trusted tester of Jailbreak Changelogs!"}
@@ -111,7 +111,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #8B5CF6, #6D28D9)",
           color: "black",
         },
-      }
+      },
     );
   };
 
@@ -120,7 +120,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <ChartBarIcon className="w-5 h-5 text-emerald-100" />
+          <ChartBarIcon className="h-5 w-5 text-emerald-100" />
           <span>
             {vtmFlag?.description ||
               "This user is a Trading Core Value Team Manager!"}
@@ -133,7 +133,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #059669, #047857)",
           color: "white",
         },
-      }
+      },
     );
   };
 
@@ -142,7 +142,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <UserGroupIcon className="w-5 h-5 text-blue-100" />
+          <UserGroupIcon className="h-5 w-5 text-blue-100" />
           <span>
             {vtFlag?.description ||
               "This user is a member of the Trading Core Value Team!"}
@@ -155,7 +155,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #3B82F6, #2563EB)",
           color: "white",
         },
-      }
+      },
     );
   };
 
@@ -164,7 +164,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <FaHandsHelping className="w-10 h-10 text-orange-100" />
+          <FaHandsHelping className="h-10 w-10 text-orange-100" />
           <span>
             {partnerFlag?.description ||
               "This user is a partner of Jailbreak Changelogs!"}
@@ -177,18 +177,18 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #F97316, #EA580C)",
           color: "white",
         },
-      }
+      },
     );
   };
 
   const handleContributorBadgeClick = () => {
     const contributorFlag = sortedFlags.find(
-      (f) => f.flag === "is_contributor"
+      (f) => f.flag === "is_contributor",
     );
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <FaWrench className="w-5 h-5 text-teal-100" />
+          <FaWrench className="h-5 w-5 text-teal-100" />
           <span>
             {contributorFlag?.description ||
               "This user contributed to Jailbreak Changelogs!"}
@@ -201,18 +201,16 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #0D9488, #0F766E)",
           color: "white",
         },
-      }
+      },
     );
   };
 
   const handleDeveloperBadgeClick = () => {
-    const developerFlag = sortedFlags.find(
-      (f) => f.flag === "is_developer"
-    );
+    const developerFlag = sortedFlags.find((f) => f.flag === "is_developer");
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <CgCodeSlash className="w-5 h-5 text-black" />
+          <CgCodeSlash className="h-5 w-5 text-black" />
           <span>
             {developerFlag?.description ||
               "This user is a developer for Jailbreak Changelogs!"}
@@ -225,7 +223,7 @@ export const UserBadges = ({
           background: "linear-gradient(to right, #84CC16, #65A30D)",
           color: "black",
         },
-      }
+      },
     );
   };
 
@@ -251,7 +249,7 @@ export const UserBadges = ({
     toast(
       () => (
         <div className="flex items-center gap-2">
-          <TrophyIcon className="w-5 h-5 text-black" />
+          <TrophyIcon className="h-5 w-5 text-black" />
           <span>
             {premiumMessages[premiumType as keyof typeof premiumMessages]}
           </span>
@@ -265,7 +263,7 @@ export const UserBadges = ({
           color:
             premiumTextColors[premiumType as keyof typeof premiumTextColors],
         },
-      }
+      },
     );
   };
 
@@ -297,7 +295,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:opacity-90 ${currentSize.container}`}
               onClick={handleOwnerBadgeClick}
             >
               <FaCrown className={currentSize.icon} />
@@ -329,7 +327,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-purple-400 text-black cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-purple-400 text-black hover:opacity-90 ${currentSize.container}`}
               onClick={handleTesterBadgeClick}
             >
               <BugAntIcon className={currentSize.icon} />
@@ -361,7 +359,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:opacity-90 ${currentSize.container}`}
               onClick={handleVTMBadgeClick}
             >
               <ChartBarIcon className={currentSize.icon} />
@@ -393,7 +391,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-blue-500 text-white cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-blue-500 text-white hover:opacity-90 ${currentSize.container}`}
               onClick={handleVTBadgeClick}
             >
               <UserGroupIcon className={currentSize.icon} />
@@ -425,7 +423,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-orange-500 text-white cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-orange-500 text-white hover:opacity-90 ${currentSize.container}`}
               onClick={handlePartnerBadgeClick}
             >
               <FaHandsHelping className={currentSize.icon} />
@@ -457,7 +455,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-teal-600 to-teal-700 text-white cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-teal-600 to-teal-700 text-white hover:opacity-90 ${currentSize.container}`}
               onClick={handleContributorBadgeClick}
             >
               <FaWrench className={currentSize.icon} />
@@ -489,7 +487,7 @@ export const UserBadges = ({
             }}
           >
             <div
-              className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-lime-500 to-lime-600 text-black cursor-help hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-lime-500 to-lime-600 text-black hover:opacity-90 ${currentSize.container}`}
               onClick={handleDeveloperBadgeClick}
             >
               <CgCodeSlash className={currentSize.icon} />
@@ -541,12 +539,12 @@ export const UserBadges = ({
         <div
           className={`inline-flex items-center justify-center rounded-full ${
             premiumStyles[premiumType as keyof typeof premiumStyles]
-          } text-black cursor-help hover:opacity-90 ${currentSize.container}`}
+          } cursor-help text-black hover:opacity-90 ${currentSize.container}`}
           onClick={handlePremiumBadgeClick}
         >
           <TrophyIcon className={currentSize.icon} />
         </div>
-      </Tooltip>
+      </Tooltip>,
     );
   }
 
@@ -575,28 +573,33 @@ export const UserBadges = ({
         }}
       >
         <div
-          className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black cursor-help hover:opacity-90 ${currentSize.container}`}
+          className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:opacity-90 ${currentSize.container}`}
           onClick={handleEarlyAdopterBadgeClick}
         >
           <SparklesIcon className={currentSize.icon} />
         </div>
-      </Tooltip>
+      </Tooltip>,
     );
   }
 
-  if (primary_guild && primary_guild.tag && primary_guild.badge && primary_guild.identity_guild_id) {
+  if (
+    primary_guild &&
+    primary_guild.tag &&
+    primary_guild.badge &&
+    primary_guild.identity_guild_id
+  ) {
     const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
     const isJBCLGuildId =
       primary_guild.identity_guild_id === "1286064050135896064";
     const badgeContent = (
       <div
-        className="inline-flex items-center gap-1 rounded-md bg-gray-700 text-white px-2.5 py-1 cursor-help"
+        className="inline-flex cursor-help items-center gap-1 rounded-md bg-gray-700 px-2.5 py-1 text-white"
         style={{ minWidth: 0 }}
       >
         <Image
           src={badgeUrl}
           alt={`${primary_guild.tag} guild badge`}
-          className="w-4 h-4 object-contain block"
+          className="block h-4 w-4 object-contain"
           width={16}
           height={16}
         />
@@ -639,7 +642,7 @@ export const UserBadges = ({
         ) : (
           badgeContent
         )}
-      </Tooltip>
+      </Tooltip>,
     );
   }
 

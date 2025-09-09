@@ -1,6 +1,6 @@
-import { Switch, FormControlLabel, Box, Typography } from '@mui/material';
-import { SettingConfigItem } from '@/config/settings';
-import { UserSettings } from '@/types/auth';
+import { Switch, FormControlLabel, Box, Typography } from "@mui/material";
+import { SettingConfigItem } from "@/config/settings";
+import { UserSettings } from "@/types/auth";
 
 interface SettingToggleProps {
   name: keyof UserSettings;
@@ -13,10 +13,19 @@ interface SettingToggleProps {
   };
 }
 
-export const SettingToggle = ({ name, value, config, onChange, disabled, userData }: SettingToggleProps) => {
-  const isPremiumFeature = (name === 'banner_discord' || name === 'avatar_discord');
-  const premiumRequired = isPremiumFeature && (!userData?.premiumtype || userData.premiumtype === 0);
-  const premiumTier = name === 'banner_discord' ? 2 : 1;
+export const SettingToggle = ({
+  name,
+  value,
+  config,
+  onChange,
+  disabled,
+  userData,
+}: SettingToggleProps) => {
+  const isPremiumFeature =
+    name === "banner_discord" || name === "avatar_discord";
+  const premiumRequired =
+    isPremiumFeature && (!userData?.premiumtype || userData.premiumtype === 0);
+  const premiumTier = name === "banner_discord" ? 2 : 1;
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -28,16 +37,16 @@ export const SettingToggle = ({ name, value, config, onChange, disabled, userDat
             name={name}
             disabled={disabled}
             sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': {
-                color: '#1d7da3',
+              "& .MuiSwitch-switchBase.Mui-checked": {
+                color: "#1d7da3",
               },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                backgroundColor: '#1d7da3',
+              "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                backgroundColor: "#1d7da3",
               },
-              '&.Mui-disabled': {
-                color: '#FFFFFF',
-                '& + .MuiSwitch-track': {
-                  backgroundColor: '#2E3944',
+              "&.Mui-disabled": {
+                color: "#FFFFFF",
+                "& + .MuiSwitch-track": {
+                  backgroundColor: "#2E3944",
                 },
               },
             }}
@@ -45,24 +54,29 @@ export const SettingToggle = ({ name, value, config, onChange, disabled, userDat
         }
         label={
           <Box>
-            <Typography variant="subtitle1" component="div" sx={{ color: '#D3D9D4' }}>
+            <Typography
+              variant="subtitle1"
+              component="div"
+              sx={{ color: "#D3D9D4" }}
+            >
               {config.displayName}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#FFFFFF' }}>
+            <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
               {config.description}
             </Typography>
             {premiumRequired && (
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#FF6B6B',
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#FF6B6B",
                   mt: 0.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
                 }}
               >
-                🔒 Upgrade to Premium Tier {premiumTier} to unlock custom {name === 'banner_discord' ? 'banners' : 'avatars'}
+                🔒 Upgrade to Premium Tier {premiumTier} to unlock custom{" "}
+                {name === "banner_discord" ? "banners" : "avatars"}
               </Typography>
             )}
           </Box>
@@ -70,4 +84,4 @@ export const SettingToggle = ({ name, value, config, onChange, disabled, userDat
       />
     </Box>
   );
-}; 
+};

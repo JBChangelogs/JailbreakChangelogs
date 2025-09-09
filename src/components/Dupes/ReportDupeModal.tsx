@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import Image from 'next/image';
-import { getItemImagePath, handleImageError } from '@/utils/images';
-import { getItemTypeColor } from '@/utils/badgeColors';
+import Image from "next/image";
+import { getItemImagePath, handleImageError } from "@/utils/images";
+import { getItemTypeColor } from "@/utils/badgeColors";
 import { PUBLIC_API_URL } from "@/utils/api";
-import toast from 'react-hot-toast';
-import { getToken } from '@/utils/auth';
+import toast from "react-hot-toast";
+import { getToken } from "@/utils/auth";
 
 interface ReportDupeModalProps {
   isOpen: boolean;
@@ -26,20 +26,20 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
   itemType,
   ownerName: initialOwnerName,
   itemId,
-  isOwnerNameReadOnly = false
+  isOwnerNameReadOnly = false,
 }) => {
-  const [proofUrls, setProofUrls] = useState<string[]>(['']);
+  const [proofUrls, setProofUrls] = useState<string[]>([""]);
   const [loading, setLoading] = useState(false);
   const [ownerName, setOwnerName] = useState(initialOwnerName);
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
@@ -51,7 +51,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
 
   const addProofUrl = () => {
     if (proofUrls.length < 5) {
-      setProofUrls([...proofUrls, '']);
+      setProofUrls([...proofUrls, ""]);
     }
   };
 
@@ -61,29 +61,33 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
   };
 
   const validateProofUrl = (url: string) => {
-    return url.match(/^https:\/\/(?:i\.)?(imgur\.com\/(?:a\/)?[a-zA-Z0-9]+(?:\.(?:jpg|jpeg|png|gif))?|postimg\.cc\/[a-zA-Z0-9]+(?:\/(?:[a-zA-Z0-9_-]+))?(?:\.(?:jpg|jpeg|png|gif))?|i\.postimg\.cc\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|gif))$/);
+    return url.match(
+      /^https:\/\/(?:i\.)?(imgur\.com\/(?:a\/)?[a-zA-Z0-9]+(?:\.(?:jpg|jpeg|png|gif))?|postimg\.cc\/[a-zA-Z0-9]+(?:\/(?:[a-zA-Z0-9_-]+))?(?:\.(?:jpg|jpeg|png|gif))?|i\.postimg\.cc\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|gif))$/,
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!ownerName.trim()) {
-      toast.error('Please enter the duper\'s username');
+      toast.error("Please enter the duper's username");
       return;
     }
 
     // Validate proof URLs
-    const invalidUrls = proofUrls.filter(url => url.trim() && !validateProofUrl(url));
+    const invalidUrls = proofUrls.filter(
+      (url) => url.trim() && !validateProofUrl(url),
+    );
     if (invalidUrls.length > 0) {
-      toast.error('Please enter valid Imgur or Postimg URLs');
+      toast.error("Please enter valid Imgur or Postimg URLs");
       return;
     }
 
     // Filter out empty URLs
-    const validProofUrls = proofUrls.filter(url => url.trim());
+    const validProofUrls = proofUrls.filter((url) => url.trim());
 
     if (validProofUrls.length === 0) {
-      toast.error('Please provide at least one proof URL');
+      toast.error("Please provide at least one proof URL");
       return;
     }
 
@@ -91,39 +95,42 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
     try {
       const token = getToken();
       if (!token) {
-        toast.error('Please log in to report dupes');
+        toast.error("Please log in to report dupes");
         return;
       }
 
       const response = await fetch(`${PUBLIC_API_URL}/dupes/report`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           owner: token,
           dupe_user: ownerName,
           item_id: itemId,
-          proof: validProofUrls.join(", ")
-        })
+          proof: validProofUrls.join(", "),
+        }),
       });
 
       if (!response.ok) {
         if (response.status === 409) {
-          throw new Error('Dupe report already exists');
+          throw new Error("Dupe report already exists");
         }
-        throw new Error('Failed to submit report');
+        throw new Error("Failed to submit report");
       }
 
-      toast.success('Dupe report submitted successfully');
+      toast.success("Dupe report submitted successfully");
       onClose();
     } catch (error) {
-      if (error instanceof Error && error.message === 'Dupe report already exists') {
-        toast.error('This dupe has already been reported');
+      if (
+        error instanceof Error &&
+        error.message === "Dupe report already exists"
+      ) {
+        toast.error("This dupe has already been reported");
       } else {
-        toast.error('Failed to submit report. Please try again.');
+        toast.error("Failed to submit report. Please try again.");
       }
-      console.error('Error submitting report:', error);
+      console.error("Error submitting report:", error);
     } finally {
       setLoading(false);
     }
@@ -134,12 +141,12 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/75" onClick={onClose} />
-      <div className="relative bg-[#212A31] rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-4 border-b border-[#2E3944]">
+      <div className="relative mx-4 w-full max-w-md rounded-lg bg-[#212A31] shadow-xl">
+        <div className="flex items-center justify-between border-b border-[#2E3944] p-4">
           <h2 className="text-xl font-semibold text-[#FFFFFF]">Report Dupe</h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-[#FFFFFF] transition-colors"
+            className="text-muted transition-colors hover:text-[#FFFFFF]"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -160,9 +167,11 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
                 />
               </div>
               <div className="text-center">
-                <h4 className="text-[#FFFFFF] font-medium text-lg">{itemName}</h4>
-                <span 
-                  className="inline-block px-2 py-0.5 mt-1 text-xs rounded-full"
+                <h4 className="text-lg font-medium text-[#FFFFFF]">
+                  {itemName}
+                </h4>
+                <span
+                  className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs"
                   style={{ backgroundColor: getItemTypeColor(itemType) }}
                 >
                   {itemType}
@@ -173,7 +182,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-muted mb-1">
+              <label className="text-muted mb-1 block text-sm font-medium">
                 Duper&apos;s Username <span className="text-red-500">*</span>
               </label>
               <input
@@ -182,33 +191,50 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
                 onChange={(e) => setOwnerName(e.target.value)}
                 placeholder="Enter duper's username"
                 readOnly={isOwnerNameReadOnly}
-                className={`w-full px-3 py-2 rounded-lg border border-[#2E3944] bg-[#37424D] text-muted ${isOwnerNameReadOnly ? 'cursor-not-allowed' : ''}`}
+                className={`text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2 ${isOwnerNameReadOnly ? "cursor-not-allowed" : ""}`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-muted mb-1">
-                Proof URLs (Imgur or Postimg, max 5) <span className="text-red-500">*</span>
+              <label className="text-muted mb-1 block text-sm font-medium">
+                Proof URLs (Imgur or Postimg, max 5){" "}
+                <span className="text-red-500">*</span>
               </label>
-              <span className="text-xs text-blue-300 mb-2 block">
-                <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">Upload to Imgur</a>
+              <span className="mb-2 block text-xs text-blue-300">
+                <a
+                  href="https://imgur.com/upload"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-400"
+                >
+                  Upload to Imgur
+                </a>
                 {" | "}
-                <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">Upload to Postimg</a>
+                <a
+                  href="https://postimages.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-400"
+                >
+                  Upload to Postimg
+                </a>
               </span>
               {proofUrls.map((url, index) => (
                 <div key={index} className="relative mb-2">
                   <input
                     type="text"
                     value={url}
-                    onChange={(e) => handleProofUrlChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleProofUrlChange(index, e.target.value)
+                    }
                     placeholder="Imgur URL or Postimg URL"
-                    className="w-full pl-3 pr-10 py-2 rounded-lg border border-[#2E3944] bg-[#37424D] text-muted"
+                    className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] py-2 pr-10 pl-3"
                   />
                   {index > 0 && (
                     <button
                       type="button"
                       onClick={() => removeProofUrl(index)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-red-500 hover:text-red-400"
                     >
                       <XMarkIcon className="h-5 w-5" />
                     </button>
@@ -219,7 +245,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
                 <button
                   type="button"
                   onClick={addProofUrl}
-                  className="text-blue-400 hover:text-blue-300 text-sm"
+                  className="text-sm text-blue-400 hover:text-blue-300"
                 >
                   + Add more proof
                 </button>
@@ -229,9 +255,9 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit Report'}
+              {loading ? "Submitting..." : "Submit Report"}
             </button>
           </form>
         </div>
@@ -240,4 +266,4 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
   );
 };
 
-export default ReportDupeModal; 
+export default ReportDupeModal;

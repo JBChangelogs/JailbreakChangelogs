@@ -1,17 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
-  description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
+  description:
+    "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
   alternates: {
-    canonical: '/faq',
+    canonical: "/faq",
   },
   openGraph: {
-    title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
-    description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
-    type: 'website',
-    url: 'https://jailbreakchangelogs.xyz/faq',
+    title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
+    description:
+      "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
+    type: "website",
+    url: "https://jailbreakchangelogs.xyz/faq",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -22,17 +24,16 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Jailbreak Changelogs FAQ - Frequently Asked Questions',
-    description: 'Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    card: "summary_large_image",
+    title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
+    description:
+      "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
-export default function FAQLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function FAQLayout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

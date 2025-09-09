@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { RobloxIcon } from '@/components/Icons/RobloxIcon';
-import { formatShortDate, formatCustomDate } from '@/utils/timestamp';
-import TradeAdsTab from './TradeAdsTab';
-import { CircularProgress, Tooltip } from '@mui/material';
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
+import TradeAdsTab from "./TradeAdsTab";
+import { CircularProgress, Tooltip } from "@mui/material";
 
 interface User {
   id: string;
@@ -28,26 +28,26 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
   return (
     <div className="space-y-6">
       {/* Roblox Profile Card */}
-      <div className="bg-[#2E3944] rounded-lg p-4 border border-[#5865F2]">
-        <div className="flex items-center gap-2 mb-4">
-          <RobloxIcon className="text-white h-6 w-6" />
-          <h2 className="text-lg font-semibold text-muted">Roblox Profile</h2>
+      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="mb-4 flex items-center gap-2">
+          <RobloxIcon className="h-6 w-6 text-white" />
+          <h2 className="text-muted text-lg font-semibold">Roblox Profile</h2>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
           {/* Roblox Avatar */}
-          <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-[#5865F2]">
+          <div className="relative h-32 w-32 overflow-hidden rounded-lg border-2 border-[#5865F2]">
             {!imageError && user.roblox_avatar ? (
               <>
                 {isLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#212A31]">
-                    <CircularProgress size={32} sx={{ color: '#5865F2' }} />
+                    <CircularProgress size={32} sx={{ color: "#5865F2" }} />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-[#212A31]">
                   <Image
                     src={user.roblox_avatar}
-                    alt={`${user.roblox_display_name || user.roblox_username || 'Roblox'} user's profile picture`}
+                    alt={`${user.roblox_display_name || user.roblox_username || "Roblox"} user's profile picture`}
                     fill
                     draggable={false}
                     className="object-cover"
@@ -57,8 +57,8 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-[#212A31] flex items-center justify-center">
-                <RobloxIcon className="text-white h-12 w-12" />
+              <div className="flex h-full w-full items-center justify-center bg-[#212A31]">
+                <RobloxIcon className="h-12 w-12 text-white" />
               </div>
             )}
           </div>
@@ -67,13 +67,15 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
           <div className="flex-1 text-center md:text-left">
             <div className="space-y-2">
               <div>
-                <h3 className="text-xl font-semibold text-muted">{user.roblox_display_name || user.roblox_username}</h3>
+                <h3 className="text-muted text-xl font-semibold">
+                  {user.roblox_display_name || user.roblox_username}
+                </h3>
                 <p className="text-[#FFFFFF]">@{user.roblox_username}</p>
               </div>
-              
+
               <div className="text-sm text-[#FFFFFF]">
                 {user.roblox_join_date && (
-                  <Tooltip 
+                  <Tooltip
                     title={formatCustomDate(user.roblox_join_date)}
                     placement="top"
                     arrow
@@ -82,21 +84,23 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
                     slotProps={{
                       tooltip: {
                         sx: {
-                          backgroundColor: '#0F1419',
-                          color: '#D3D9D4',
-                          fontSize: '0.75rem',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #2E3944',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                          '& .MuiTooltip-arrow': {
-                            color: '#0F1419',
-                          }
-                        }
-                      }
+                          backgroundColor: "#0F1419",
+                          color: "#D3D9D4",
+                          fontSize: "0.75rem",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #2E3944",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          "& .MuiTooltip-arrow": {
+                            color: "#0F1419",
+                          },
+                        },
+                      },
                     }}
                   >
-                    <span className="cursor-help inline-block">Member since {formatShortDate(user.roblox_join_date)}</span>
+                    <span className="inline-block cursor-help">
+                      Member since {formatShortDate(user.roblox_join_date)}
+                    </span>
                   </Tooltip>
                 )}
               </div>
@@ -107,7 +111,7 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
                     href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5865F2] text-white hover:bg-[#4752C4] transition-colors"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors hover:bg-[#4752C4]"
                   >
                     <RobloxIcon className="h-5 w-5" />
                     <span>View Roblox Profile</span>
@@ -123,4 +127,4 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
       <TradeAdsTab userId={user.id} />
     </div>
   );
-} 
+}

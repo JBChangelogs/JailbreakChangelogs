@@ -1,5 +1,5 @@
-import { Metadata } from 'next';
-import { defaultMetadata } from './metadata';
+import { Metadata } from "next";
+import { defaultMetadata } from "./metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return defaultMetadata;
@@ -10,9 +10,5 @@ export default function ChangelogsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-[#2E3944]">
-      {children}
-    </div>
-  );
-} 
+  return <div className="min-h-screen bg-[#2E3944]">{children}</div>;
+}

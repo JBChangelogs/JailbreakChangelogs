@@ -1,4 +1,4 @@
-import { TradeAdSkeleton } from '@/components/trading/TradeAdSkeleton';
+import { TradeAdSkeleton } from "@/components/trading/TradeAdSkeleton";
 
 export default function Loading() {
   return (
@@ -6,4 +6,4 @@ export default function Loading() {
       <TradeAdSkeleton />
     </div>
   );
-} 
+}

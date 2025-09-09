@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from '@/utils/auth';
-import Link from 'next/link';
-import Image from 'next/image';
-import { RobloxIcon } from '@/components/Icons/RobloxIcon';
+import { getToken } from "@/utils/auth";
+import Link from "next/link";
+import Image from "next/image";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 
 export default function RedeemPage() {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     // Get code from URL parameters without useSearchParams
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      const codeParam = urlParams.get('code');
+      const codeParam = urlParams.get("code");
       if (codeParam) {
         setCode(codeParam);
       }
@@ -25,15 +28,15 @@ export default function RedeemPage() {
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const token = getToken();
     if (!token) {
-      setMessage({ text: 'Please log in to redeem codes', type: 'error' });
+      setMessage({ text: "Please log in to redeem codes", type: "error" });
       return;
     }
 
     if (!code.trim()) {
-      setMessage({ text: 'Please enter a code', type: 'error' });
+      setMessage({ text: "Please enter a code", type: "error" });
       return;
     }
 
@@ -42,9 +45,9 @@ export default function RedeemPage() {
 
     try {
       const response = await fetch(`${PUBLIC_API_URL}/codes/redeem`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           code: code.trim(),
@@ -53,72 +56,89 @@ export default function RedeemPage() {
       });
 
       if (response.ok) {
-        setMessage({ text: 'Code redeemed successfully!', type: 'success' });
-        if (typeof window !== 'undefined') {
+        setMessage({ text: "Code redeemed successfully!", type: "success" });
+        if (typeof window !== "undefined") {
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('code')) {
-            urlParams.delete('code');
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
-            window.history.replaceState({}, '', newUrl);
+          if (urlParams.get("code")) {
+            urlParams.delete("code");
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
+            window.history.replaceState({}, "", newUrl);
           }
         }
       } else if (response.status === 400) {
         const data = await response.text();
         if (data === '"Code already redeemed"') {
-          setMessage({ text: 'This code has already been redeemed', type: 'error' });
+          setMessage({
+            text: "This code has already been redeemed",
+            type: "error",
+          });
         } else {
-          setMessage({ text: 'Invalid code format', type: 'error' });
+          setMessage({ text: "Invalid code format", type: "error" });
         }
-        
-        if (typeof window !== 'undefined') {
+
+        if (typeof window !== "undefined") {
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('code')) {
-            urlParams.delete('code');
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
-            window.history.replaceState({}, '', newUrl);
+          if (urlParams.get("code")) {
+            urlParams.delete("code");
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
+            window.history.replaceState({}, "", newUrl);
           }
         }
       } else if (response.status === 404) {
-        setMessage({ text: 'Invalid Code', type: 'error' });
-        if (typeof window !== 'undefined') {
+        setMessage({ text: "Invalid Code", type: "error" });
+        if (typeof window !== "undefined") {
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('code')) {
-            urlParams.delete('code');
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
-            window.history.replaceState({}, '', newUrl);
+          if (urlParams.get("code")) {
+            urlParams.delete("code");
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
+            window.history.replaceState({}, "", newUrl);
           }
         }
       } else if (response.status === 409) {
-        setMessage({ text: 'The code has already been redeemed', type: 'error' });
-        if (typeof window !== 'undefined') {
+        setMessage({
+          text: "The code has already been redeemed",
+          type: "error",
+        });
+        if (typeof window !== "undefined") {
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('code')) {
-            urlParams.delete('code');
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
-            window.history.replaceState({}, '', newUrl);
+          if (urlParams.get("code")) {
+            urlParams.delete("code");
+            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
+            window.history.replaceState({}, "", newUrl);
           }
         }
       } else {
-        setMessage({ text: 'An error occurred. Please try again.', type: 'error' });
+        setMessage({
+          text: "An error occurred. Please try again.",
+          type: "error",
+        });
       }
     } catch {
-      setMessage({ text: 'An error occurred. Please try again.', type: 'error' });
+      setMessage({
+        text: "An error occurred. Please try again.",
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-8 py-16 max-w-[1920px]">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-12 text-white text-center">Redeem Jailbreak Changelogs Code</h1>
-        
-        <div className="grid md:grid-cols-2 gap-16">
+    <div className="container mx-auto max-w-[1920px] px-8 py-16">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="mb-12 text-center text-4xl font-bold text-white">
+          Redeem Jailbreak Changelogs Code
+        </h1>
+
+        <div className="grid gap-16 md:grid-cols-2">
           {/* Left Column - Redemption Form */}
           <div className="space-y-8">
             <form onSubmit={handleRedeem} className="space-y-8">
               <div className="space-y-2">
-                <label htmlFor="code" className="block text-lg font-medium text-gray-300 mb-3">
+                <label
+                  htmlFor="code"
+                  className="mb-3 block text-lg font-medium text-gray-300"
+                >
                   Enter your code here
                 </label>
                 <input
@@ -126,77 +146,125 @@ export default function RedeemPage() {
                   id="code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`w-full px-6 py-3 bg-[#212a31] border rounded-lg text-white text-lg focus:outline-none focus:ring-2 transition-colors ${
-                    message?.type === 'error' 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : 'border-gray-700 focus:ring-[#1d7da3]'
+                  className={`w-full rounded-lg border bg-[#212a31] px-6 py-3 text-lg text-white transition-colors focus:ring-2 focus:outline-none ${
+                    message?.type === "error"
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-700 focus:ring-[#1d7da3]"
                   }`}
                   placeholder="Enter your code here"
                   disabled={isLoading}
                 />
                 {message && (
-                  <div className={`flex items-center space-x-2 text-sm ${
-                    message.type === 'success' ? 'text-blue-300' : 'text-red-400'
-                  }`}>
-                    {message.type === 'success' ? (
-                      <svg className="h-4 w-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <div
+                    className={`flex items-center space-x-2 text-sm ${
+                      message.type === "success"
+                        ? "text-blue-300"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {message.type === "success" ? (
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     ) : (
-                      <svg className="h-4 w-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
                         <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     )}
                     <span>{message.text}</span>
                   </div>
                 )}
-                <p className="text-sm text-gray-400 mt-4">
-                  By redeeming your code, you represent that you, and your parent or legal guardian if you are under age 18, agree to our{' '}
-                  <Link href="/tos" className="text-blue-300 hover:text-blue-400">
+                <p className="mt-4 text-sm text-gray-400">
+                  By redeeming your code, you represent that you, and your
+                  parent or legal guardian if you are under age 18, agree to our{" "}
+                  <Link
+                    href="/tos"
+                    className="text-blue-300 hover:text-blue-400"
+                  >
                     Terms of Use
-                  </Link>{' '}
-                  and acknowledge our{' '}
-                  <Link href="/privacy" className="text-blue-300 hover:text-blue-400">
+                  </Link>{" "}
+                  and acknowledge our{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-blue-300 hover:text-blue-400"
+                  >
                     Privacy Policy
-                  </Link>.
+                  </Link>
+                  .
                 </p>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading || !code.trim()}
-                className={`w-full py-4 px-6 rounded-lg font-semibold text-lg text-white transition-colors ${
+                className={`w-full rounded-lg px-6 py-4 text-lg font-semibold text-white transition-colors ${
                   isLoading || !code.trim()
-                    ? 'bg-[#1d7da3]/50'
-                    : 'bg-[#1d7da3] hover:bg-[#124e66]'
+                    ? "bg-[#1d7da3]/50"
+                    : "bg-[#1d7da3] hover:bg-[#124e66]"
                 }`}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Redeeming...
                   </div>
                 ) : (
-                  'Redeem'
+                  "Redeem"
                 )}
               </button>
             </form>
           </div>
 
           {/* Right Column - Instructions */}
-          <div className="bg-[#212a31] border border-gray-700/50 rounded-lg p-8">
-            <h2 className="text-2xl font-semibold text-white mb-6">How to Get a Code</h2>
+          <div className="rounded-lg border border-gray-700/50 bg-[#212a31] p-8">
+            <h2 className="mb-6 text-2xl font-semibold text-white">
+              How to Get a Code
+            </h2>
             <ol className="space-y-6 text-gray-300">
               <li className="flex items-start">
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">1</span>
+                <span className="mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white">
+                  1
+                </span>
                 <div className="text-lg">
                   <span>Purchase a Supporter Tier via:</span>
                   <ul className="mt-2 space-y-2 text-base">
                     <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
+                      <span className="mr-2 h-2 w-2 rounded-full bg-blue-300"></span>
                       <Image
                         src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
                         alt="Ko-fi Symbol"
@@ -204,48 +272,102 @@ export default function RedeemPage() {
                         height={16}
                         className="mr-2"
                       />
-                      <span><a href="https://ko-fi.com/jbchangelogs" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Ko-fi</a> (include Discord ID in message)</span>
+                      <span>
+                        <a
+                          href="https://ko-fi.com/jbchangelogs"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-300 hover:text-blue-400"
+                        >
+                          Ko-fi
+                        </a>{" "}
+                        (include Discord ID in message)
+                      </span>
                     </li>
-                    <li className="flex items-center justify-center text-gray-400 text-sm font-medium">
+                    <li className="flex items-center justify-center text-sm font-medium text-gray-400">
                       OR
                     </li>
                     <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
-                      <RobloxIcon className="w-4 h-4 mr-2" />
-                      <span>Our <a href="https://www.roblox.com/games/104188650191561/Support-Us" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Roblox game</a> (complete actions in-game)</span>
+                      <span className="mr-2 h-2 w-2 rounded-full bg-blue-300"></span>
+                      <RobloxIcon className="mr-2 h-4 w-4" />
+                      <span>
+                        Our{" "}
+                        <a
+                          href="https://www.roblox.com/games/104188650191561/Support-Us"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-300 hover:text-blue-400"
+                        >
+                          Roblox game
+                        </a>{" "}
+                        (complete actions in-game)
+                      </span>
                     </li>
                   </ul>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">2</span>
+                <span className="mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white">
+                  2
+                </span>
                 <div className="text-lg">
                   <span>Receive your unique code via Discord</span>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Your code will be sent to your Discord via our bot. Having issues? Join our <a href="https://discord.jailbreakchangelogs.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-400">Discord server</a> for support.
+                  <p className="mt-1 text-sm text-gray-400">
+                    Your code will be sent to your Discord via our bot. Having
+                    issues? Join our{" "}
+                    <a
+                      href="https://discord.jailbreakchangelogs.xyz/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-300 hover:text-blue-400"
+                    >
+                      Discord server
+                    </a>{" "}
+                    for support.
                   </p>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#1d7da3] rounded-full text-white font-semibold mr-4">3</span>
-                <span className="text-lg">Paste your code in the input field and click &quot;Redeem&quot; to get your benefits</span>
+                <span className="mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white">
+                  3
+                </span>
+                <span className="text-lg">
+                  Paste your code in the input field and click
+                  &quot;Redeem&quot; to get your benefits
+                </span>
               </li>
             </ol>
 
-            <div className="mt-8 p-4 bg-yellow-900/40 border-l-4 border-yellow-400 rounded">
-              <p className="text-yellow-200 text-base font-medium">
-                <strong>Ko-fi Supporters:</strong> When purchasing via Ko-fi, <span className="font-bold">ensure your Discord user ID is in parenthesis inside your message</span> (e.g., <code>Hello there! (1019539798383398946)</code>). This is required to receive your code!
+            <div className="mt-8 rounded border-l-4 border-yellow-400 bg-yellow-900/40 p-4">
+              <p className="text-base font-medium text-yellow-200">
+                <strong>Ko-fi Supporters:</strong> When purchasing via Ko-fi,{" "}
+                <span className="font-bold">
+                  ensure your Discord user ID is in parenthesis inside your
+                  message
+                </span>{" "}
+                (e.g., <code>Hello there! (1019539798383398946)</code>). This is
+                required to receive your code!
               </p>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-700/50">
-              <p className="text-gray-300 text-lg mb-6">Thank you for supporting us!</p>
-              <Link 
-                href="/supporting" 
-                className="inline-flex items-center text-blue-300 hover:text-blue-400 text-lg"
+            <div className="mt-4 border-t border-gray-700/50 pt-4">
+              <p className="mb-6 text-lg text-gray-300">
+                Thank you for supporting us!
+              </p>
+              <Link
+                href="/supporting"
+                className="inline-flex items-center text-lg text-blue-300 hover:text-blue-400"
               >
                 <span>View all supporter tiers and benefits</span>
-                <svg className="h-5 w-5 ml-2" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="ml-2 h-5 w-5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path d="M9 5l7 7-7 7"></path>
                 </svg>
               </Link>
@@ -255,4 +377,4 @@ export default function RedeemPage() {
       </div>
     </div>
   );
-} 
+}

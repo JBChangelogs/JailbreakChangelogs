@@ -1,38 +1,43 @@
-import Link from 'next/link';
-import { HomeIcon } from '@heroicons/react/24/outline';
+import Link from "next/link";
+import { HomeIcon } from "@heroicons/react/24/outline";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export default function CrewNotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#2e3944] text-[#D3D9D4] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-no-repeat bg-center relative">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#2e3944] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat text-[#D3D9D4]">
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/50 z-[1]" />
-      
-      <div className="text-center max-w-md mx-auto px-4 relative z-[2]">
-        <div className="px-8 py-8 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] bg-[rgba(30,30,30,0.35)] backdrop-blur-xl border border-white/[0.12]">
+      <div className="absolute inset-0 z-[1] bg-black/50" />
+
+      <div className="relative z-[2] mx-auto max-w-md px-4 text-center">
+        <div className="rounded-2xl border border-white/[0.12] bg-[rgba(30,30,30,0.35)] px-8 py-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] backdrop-blur-xl">
           <div className="mb-8">
-            <div className={`${inter.className} font-bold text-9xl text-[#5865F2]`}>
+            <div
+              className={`${inter.className} text-9xl font-bold text-[#5865F2]`}
+            >
               404
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Crew Not Found</h1>
+            <h1 className="mb-2 text-2xl font-bold text-white">
+              Crew Not Found
+            </h1>
             <p className="text-muted">
-              The crew you&apos;re looking for doesn&apos;t exist or may have been removed.
+              The crew you&apos;re looking for doesn&apos;t exist or may have
+              been removed.
             </p>
           </div>
           <div className="space-y-3">
             <Link
               href="/crews"
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors font-medium"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#5865F2] px-6 py-3 font-medium text-white transition-colors hover:bg-[#4752C4]"
             >
               Browse All Crews
             </Link>
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#212A31] text-muted rounded-lg transition-colors"
+              className="text-muted flex w-full items-center justify-center gap-2 rounded-lg bg-[#212A31] px-6 py-3 transition-colors"
             >
-              <HomeIcon className="w-5 h-5" />
+              <HomeIcon className="h-5 w-5" />
               Go Home
             </Link>
           </div>

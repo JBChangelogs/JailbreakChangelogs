@@ -26,7 +26,9 @@ export const TYPE_MAPPINGS: Record<string, string> = {
  * @returns boolean indicating if the item should use a video
  */
 export const isVideoItem = (name: string): boolean => {
-  return name === "HyperShift" || name === "Gamer TV Set" || name === "Arcade Racer";
+  return (
+    name === "HyperShift" || name === "Gamer TV Set" || name === "Arcade Racer"
+  );
 };
 
 /**
@@ -114,7 +116,13 @@ export const getVideoPath = (type: string, name: string): string => {
  * @param hornBackground - Background variant for horn thumbnails ("dark" | "light", default: "dark")
  * @returns The full path to the item's media
  */
-export const getItemImagePath = (type: string, name: string, isValuesPage: boolean = false, isSocialEmbed: boolean = false, hornBackground: "dark" | "light" = "dark"): string => {
+export const getItemImagePath = (
+  type: string,
+  name: string,
+  isValuesPage: boolean = false,
+  isSocialEmbed: boolean = false,
+  hornBackground: "dark" | "light" = "dark",
+): string => {
   if (isVideoItem(name)) {
     if (isSocialEmbed) {
       // Return different paths for social media embeds
@@ -133,7 +141,8 @@ export const getItemImagePath = (type: string, name: string, isValuesPage: boole
   }
 
   if (isHornItem(type)) {
-    const backgroundVariant = hornBackground === "light" ? "light_bg" : "dark_bg";
+    const backgroundVariant =
+      hornBackground === "light" ? "light_bg" : "dark_bg";
     return `https://assets.jailbreakchangelogs.xyz/assets/audios/horn_thumbnail_${backgroundVariant}.webp`;
   }
 

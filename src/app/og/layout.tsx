@@ -1,18 +1,20 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'OG Finder - Jailbreak Changelogs',
-  description: 'Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.',
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  title: "OG Finder - Jailbreak Changelogs",
+  description:
+    "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
   alternates: {
-    canonical: '/og',
+    canonical: "/og",
   },
   openGraph: {
-    title: 'OG Finder - Jailbreak Changelogs',
-    description: 'Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.',
-    type: 'website',
-    siteName: 'Jailbreak Changelogs',
-    url: 'https://jailbreakchangelogs.xyz/og',
+    title: "OG Finder - Jailbreak Changelogs",
+    description:
+      "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+    type: "website",
+    siteName: "Jailbreak Changelogs",
+    url: "https://jailbreakchangelogs.xyz/og",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -24,9 +26,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: 'OG Finder - Jailbreak Changelogs',
-    description: 'Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    title: "OG Finder - Jailbreak Changelogs",
+    description:
+      "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -35,9 +40,5 @@ export default function OGFinderLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="w-full">
-      {children}
-    </div>
-  );
+  return <div className="w-full">{children}</div>;
 }

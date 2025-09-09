@@ -1,7 +1,7 @@
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
-import { Tooltip } from '@mui/material';
+import { Tooltip } from "@mui/material";
 import {
   getItemImagePath,
   handleImageError,
@@ -25,7 +25,11 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import toast from "react-hot-toast";
 import { getToken } from "@/utils/auth";
 import { usePathname, useSearchParams } from "next/navigation";
-import { getItemTypeColor, getTrendColor, getDemandColor } from "@/utils/badgeColors";
+import {
+  getItemTypeColor,
+  getTrendColor,
+  getDemandColor,
+} from "@/utils/badgeColors";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 
 interface ItemCardProps {
@@ -58,7 +62,11 @@ interface SubItem {
   };
 }
 
-export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCardProps) {
+export default function ItemCard({
+  item,
+  isFavorited,
+  onFavoriteChange,
+}: ItemCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedSubItem, setSelectedSubItem] = useState<SubItem | null>(null);
@@ -74,17 +82,17 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
     // Don't navigate if clicking on interactive elements
     if (
       e.target instanceof HTMLElement &&
-      (e.target.closest('button') || 
-       e.target.closest('a') || 
-       e.target.closest('.dropdown'))
+      (e.target.closest("button") ||
+        e.target.closest("a") ||
+        e.target.closest(".dropdown"))
     ) {
       return;
     }
 
     // For horn items, show toast instead of navigating
     if (isHornItem(item.type)) {
-      toast('Click the item name to view details', {
-        icon: 'ℹ️',
+      toast("Click the item name to view details", {
+        icon: "ℹ️",
         duration: 3000,
       });
       return;
@@ -93,24 +101,34 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
 
   // Check for children and set initial state
   useEffect(() => {
-    if (item.children && Array.isArray(item.children) && item.children.length > 0) {
+    if (
+      item.children &&
+      Array.isArray(item.children) &&
+      item.children.length > 0
+    ) {
       setHasChildren(true);
-      
+
       // Check for variant in URL
-      const variant = searchParams.get('variant');
+      const variant = searchParams.get("variant");
       if (variant) {
         // Find the sub-item that matches the variant
-        const matchingSubItem = item.children.find(child => child.sub_name === variant);
+        const matchingSubItem = item.children.find(
+          (child) => child.sub_name === variant,
+        );
         if (matchingSubItem) {
           setSelectedSubItem(matchingSubItem);
         } else {
           // If variant doesn't exist, try to find 2023 variant or use the first child
-          const defaultVariant = item.children.find(child => child.sub_name === '2023') || item.children[0];
+          const defaultVariant =
+            item.children.find((child) => child.sub_name === "2023") ||
+            item.children[0];
           setSelectedSubItem(defaultVariant);
         }
       } else {
         // If no variant in URL, try to find 2023 variant or use the first child
-        const defaultVariant = item.children.find(child => child.sub_name === '2023') || item.children[0];
+        const defaultVariant =
+          item.children.find((child) => child.sub_name === "2023") ||
+          item.children[0];
         setSelectedSubItem(defaultVariant);
       }
     } else {
@@ -135,7 +153,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
         root: null,
         rootMargin: "0px",
         threshold: 0.1,
-      }
+      },
     );
 
     if (currentMediaRef) {
@@ -166,7 +184,9 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
 
     const token = getToken();
     if (!token) {
-      toast.error('You must be logged in to favorite items. Please log in and try again.');
+      toast.error(
+        "You must be logged in to favorite items. Please log in and try again.",
+      );
       return;
     }
 
@@ -183,18 +203,20 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
             item_id: String(item.id),
             owner: token,
           }),
-        }
+        },
       );
 
       if (response.ok) {
         onFavoriteChange(!isFavorited);
-        toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites');
+        toast.success(
+          isFavorited ? "Removed from favorites" : "Added to favorites",
+        );
       } else {
-        toast.error('Failed to update favorite status');
+        toast.error("Failed to update favorite status");
       }
     } catch (error) {
-      console.error('Error updating favorite status:', error);
-      toast.error('Failed to update favorite status');
+      console.error("Error updating favorite status:", error);
+      toast.error("Failed to update favorite status");
     }
   };
 
@@ -216,14 +238,14 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
       audioRef.current.currentTime = 0;
       // Use a promise to handle play() properly
       const playPromise = audioRef.current.play();
-      
+
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsPlaying(true);
           })
-          .catch(error => {
-            console.error('Error playing audio:', error);
+          .catch((error) => {
+            console.error("Error playing audio:", error);
             setIsPlaying(false);
           });
       }
@@ -247,7 +269,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     currentItemData.last_updated,
-    `item-${item.id}-${selectedSubItem?.id || 'parent'}`
+    `item-${item.id}-${selectedSubItem?.id || "parent"}`,
   );
 
   const formatLastUpdated = (timestamp: number | null): string => {
@@ -261,12 +283,12 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
   return (
     <div className="w-full">
       <div
-        className={`group relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
-          currentItemData.is_seasonal === 1 
-            ? 'border-2 border-[#40c0e7]' 
-            : currentItemData.is_limited === 1 
-              ? 'border-2 border-[#ffd700]' 
-              : ''
+        className={`group relative overflow-hidden rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+          currentItemData.is_seasonal === 1
+            ? "border-2 border-[#40c0e7]"
+            : currentItemData.is_limited === 1
+              ? "border-2 border-[#ffd700]"
+              : ""
         } bg-[#1a2127]`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -284,7 +306,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
         )}
         <div
           ref={mediaRef}
-          className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-t-lg bg-[#212A31] relative"
+          className="aspect-h-1 aspect-w-1 relative w-full overflow-hidden rounded-t-lg bg-[#212A31]"
         >
           <div className="absolute top-2 right-2 z-10 flex gap-2">
             <CategoryIconBadge
@@ -297,15 +319,15 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
           </div>
           <button
             onClick={handleFavoriteClick}
-            className={`absolute top-2 left-2 z-10 p-1.5 rounded-full bg-black/50 transition-opacity ${
-              isHovered ? 'opacity-100' : 'opacity-0'
+            className={`absolute top-2 left-2 z-10 rounded-full bg-black/50 p-1.5 transition-opacity ${
+              isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-black/70`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
           >
             {isFavorited ? (
-              <StarIconSolid className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" />
+              <StarIconSolid className="h-4 w-4 text-yellow-400 sm:h-5 sm:w-5" />
             ) : (
-              <StarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              <StarIcon className="h-4 w-4 text-white sm:h-5 sm:w-5" />
             )}
           </button>
           {isHornItem(item.type) ? (
@@ -315,25 +337,28 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                 alt={item.name}
                 width={854}
                 height={480}
-
                 className="h-full w-full object-cover"
                 onError={handleImageError}
               />
               <button
                 onClick={handleHornClick}
                 className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${
-                  isHovered || isPlaying ? 'opacity-100' : 'opacity-0'
+                  isHovered || isPlaying ? "opacity-100" : "opacity-0"
                 }`}
               >
                 {isPlaying ? (
-                  <PauseIcon className="h-8 w-8 sm:h-12 sm:w-12 text-white transition-transform" />
+                  <PauseIcon className="h-8 w-8 text-white transition-transform sm:h-12 sm:w-12" />
                 ) : (
-                  <PlayIcon className="h-8 w-8 sm:h-12 sm:w-12 text-white transition-transform" />
+                  <PlayIcon className="h-8 w-8 text-white transition-transform sm:h-12 sm:w-12" />
                 )}
               </button>
             </div>
           ) : (
-            <Link href={itemUrl} className="block h-full w-full" prefetch={false}>
+            <Link
+              href={itemUrl}
+              className="block h-full w-full"
+              prefetch={false}
+            >
               <div className="relative h-full w-full">
                 {isVideoItem(item.name) ? (
                   <video
@@ -362,7 +387,7 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
                       loop
                       muted
                       playsInline
-                      className={`absolute left-0 top-0 h-full w-full object-cover transition-opacity duration-300 ${
+                      className={`absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 ${
                         isHovered ? "opacity-100" : "opacity-0"
                       }`}
                     />
@@ -382,98 +407,112 @@ export default function ItemCard({ item, isFavorited, onFavoriteChange }: ItemCa
           )}
         </div>
         <Link href={itemUrl} className="block" prefetch={false}>
-          <div className="flex flex-1 flex-col space-y-2 sm:space-y-4 p-2 sm:p-4">
+          <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm min-[375px]:text-xs min-[425px]:text-sm sm:text-lg font-semibold text-muted hover:text-[#40c0e7] transition-colors">
+              <h3 className="text-muted text-sm font-semibold transition-colors hover:text-[#40c0e7] min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
                 {item.name}
               </h3>
             </div>
 
-            <div className="flex flex-wrap gap-1 sm:gap-2 pb-2">
-              <span 
-                className="flex items-center rounded-full px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs text-white bg-opacity-80"
+            <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
+              <span
+                className="bg-opacity-80 flex items-center rounded-full px-1.5 py-0.5 text-[10px] text-white sm:px-2 sm:py-1 sm:text-xs"
                 style={{ backgroundColor: getItemTypeColor(item.type) }}
               >
                 {item.type}
               </span>
-              {(currentItemData.tradable === 0 || currentItemData.tradable === false) && (
-                <span className="hidden sm:flex items-center rounded-full bg-red-600/80 px-2 py-0.5 sm:py-1 text-xs text-white">
+              {(currentItemData.tradable === 0 ||
+                currentItemData.tradable === false) && (
+                <span className="hidden items-center rounded-full bg-red-600/80 px-2 py-0.5 text-xs text-white sm:flex sm:py-1">
                   Non-Tradable
                 </span>
               )}
             </div>
 
-            <div className="space-y-1 sm:space-y-2 pb-2">
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+            <div className="space-y-1 pb-2 sm:space-y-2">
+              <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">
+                  <span className="text-muted text-xs font-medium whitespace-nowrap sm:text-xs">
                     <span className="sm:hidden">Cash</span>
                     <span className="hidden sm:inline">Cash Value</span>
                   </span>
                 </div>
-                <span className="bg-[#1d7da3] text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
+                <span className="rounded-lg bg-[#1d7da3] px-0.5 py-0.5 text-[9px] font-bold text-white shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
                   {formatFullValue(currentItemData.cash_value)}
                 </span>
               </div>
-              
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+
+              <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">
+                  <span className="text-muted text-xs font-medium whitespace-nowrap sm:text-xs">
                     <span className="sm:hidden">Duped</span>
                     <span className="hidden sm:inline">Duped Value</span>
                   </span>
                 </div>
-                <span className="bg-gray-600 text-white text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5">
+                <span className="rounded-lg bg-gray-600 px-0.5 py-0.5 text-[9px] font-bold text-white shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
                   {formatFullValue(currentItemData.duped_value)}
                 </span>
               </div>
-              
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+
+              <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Demand</span>
+                  <span className="text-muted text-xs font-medium whitespace-nowrap sm:text-xs">
+                    Demand
+                  </span>
                 </div>
-                <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${getDemandColor(currentItemData.demand)}`}>
-                  {currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand}
+                <span
+                  className={`rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5 ${getDemandColor(currentItemData.demand)}`}
+                >
+                  {currentItemData.demand === "N/A"
+                    ? "Unknown"
+                    : currentItemData.demand}
                 </span>
               </div>
 
               {isValuesPage && (
-                <div className="flex items-center justify-between bg-gradient-to-r from-[#2E3944] to-[#1a202c] rounded-lg p-1 sm:p-2.5">
+                <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1 sm:p-2.5">
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="text-xs sm:text-xs text-muted font-medium whitespace-nowrap">Trend</span>
+                    <span className="text-muted text-xs font-medium whitespace-nowrap sm:text-xs">
+                      Trend
+                    </span>
                   </div>
-                  <span className={`text-[9px] px-0.5 py-0.5 font-bold rounded-lg shadow-sm whitespace-nowrap min-[401px]:text-xs min-[401px]:px-2 min-[401px]:py-1 min-[480px]:px-3 min-[480px]:py-1.5 ${getTrendColor(item.trend === null || item.trend === 'N/A' ? 'Unknown' : item.trend)}`}>
-                    {item.trend === null || item.trend === 'N/A' ? 'Unknown' : item.trend}
+                  <span
+                    className={`rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5 ${getTrendColor(item.trend === null || item.trend === "N/A" ? "Unknown" : item.trend)}`}
+                  >
+                    {item.trend === null || item.trend === "N/A"
+                      ? "Unknown"
+                      : item.trend}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="mt-auto pt-1 sm:pt-2 text-[10px] sm:text-xs text-muted border-t border-[#2E3944]">
+            <div className="text-muted mt-auto border-t border-[#2E3944] pt-1 text-[10px] sm:pt-2 sm:text-xs">
               {currentItemData.last_updated ? (
-                <Tooltip 
+                <Tooltip
                   title={formatCustomDate(currentItemData.last_updated)}
                   placement="top"
                   arrow
                   slotProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: '#0F1419',
-                        color: '#D3D9D4',
-                        fontSize: '0.75rem',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #2E3944',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                        '& .MuiTooltip-arrow': {
-                          color: '#0F1419',
-                        }
-                      }
-                    }
+                        backgroundColor: "#0F1419",
+                        color: "#D3D9D4",
+                        fontSize: "0.75rem",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #2E3944",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        "& .MuiTooltip-arrow": {
+                          color: "#0F1419",
+                        },
+                      },
+                    },
                   }}
                 >
                   <span className="cursor-help">
-                    Last updated: {formatLastUpdated(currentItemData.last_updated)}
+                    Last updated:{" "}
+                    {formatLastUpdated(currentItemData.last_updated)}
                   </span>
                 </Tooltip>
               ) : (

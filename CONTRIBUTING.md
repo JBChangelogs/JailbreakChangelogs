@@ -24,6 +24,49 @@ At this point, you're ready to make your changes! Feel free to ask for help; eve
 
 Your patch should follow the same coding conventions & pass the same code quality checks as the rest of the project. Make sure all features work as intended before you make a Pull Request.
 
+## Formatting
+
+We enforce ESLint + Prettier via Git hooks (Husky + lint-staged).
+
+- On commit: staged files are auto-fixed and formatted
+  - Runs `eslint --fix` on staged JS/TS files, then `prettier --write` on all staged files
+  - If issues remain, the commit is blocked; fix and re-commit
+
+- On push: formatting is verified
+  - Runs `pnpm format:check`; push is blocked if any files are not formatted
+
+Manual commands (if needed):
+
+```
+pnpm format       # write formatting changes
+pnpm format:check # check formatting without writing
+```
+
+Notes:
+
+- After a fresh clone, run `pnpm install` once to set up Husky hooks.
+
+### Editor setup
+
+- Install Prettier and ESLint extensions in your editor.
+  - VS Code: "Prettier - Code Formatter" (esbenp.prettier-vscode) and "ESLint" (dbaeumer.vscode-eslint)
+- Add these to your VS Code User Settings (Settings JSON):
+
+```
+{
+  "editor.formatOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.format.enable": true
+}
+```
+
+- The Prettier extension will use the project-local Prettier version by default.
+
 ## Make a Pull Request
 
 At this point, you should switch back to your main branch and make sure it's up to date with JailbreakChangelogs' main branch:

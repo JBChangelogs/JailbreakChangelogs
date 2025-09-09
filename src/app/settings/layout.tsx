@@ -1,12 +1,12 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Settings',
-  description: 'Manage your account settings and preferences',
+  title: "Settings",
+  description: "Manage your account settings and preferences",
   openGraph: {
-    title: 'Settings',
-    description: 'Manage your account settings and preferences',
-    type: 'website',
+    title: "Settings",
+    description: "Manage your account settings and preferences",
+    type: "website",
   },
 };
 
@@ -16,4 +16,4 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

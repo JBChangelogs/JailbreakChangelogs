@@ -1,6 +1,5 @@
 import { Item, FilterSort, ValueSort } from "@/types";
 
-
 export const demandOrder = [
   "Close to none",
   "Very Low",
@@ -33,22 +32,36 @@ export const parseCashValue = (value: string | null): number => {
   return num;
 };
 
-export const sortByCashValue = (a: string, b: string, order: 'asc' | 'desc' = 'desc'): number => {
-  const aValue = a === "N/A" ? (order === 'desc' ? -1 : Infinity) : parseCashValue(a);
-  const bValue = b === "N/A" ? (order === 'desc' ? -1 : Infinity) : parseCashValue(b);
-  return order === 'desc' ? bValue - aValue : aValue - bValue;
+export const sortByCashValue = (
+  a: string,
+  b: string,
+  order: "asc" | "desc" = "desc",
+): number => {
+  const aValue =
+    a === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(a);
+  const bValue =
+    b === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(b);
+  return order === "desc" ? bValue - aValue : aValue - bValue;
 };
 
-export const sortByDemand = (a: string, b: string, order: 'asc' | 'desc' = 'desc'): number => {
-  const aIndex = demandOrder.indexOf(a as typeof demandOrder[number]);
-  const bIndex = demandOrder.indexOf(b as typeof demandOrder[number]);
-  return order === 'desc' ? bIndex - aIndex : aIndex - bIndex;
+export const sortByDemand = (
+  a: string,
+  b: string,
+  order: "asc" | "desc" = "desc",
+): number => {
+  const aIndex = demandOrder.indexOf(a as (typeof demandOrder)[number]);
+  const bIndex = demandOrder.indexOf(b as (typeof demandOrder)[number]);
+  return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 
-export const sortByTrend = (a: string | null, b: string | null, order: 'asc' | 'desc' = 'desc'): number => {
-  const aIndex = a ? trendOrder.indexOf(a as typeof trendOrder[number]) : -1;
-  const bIndex = b ? trendOrder.indexOf(b as typeof trendOrder[number]) : -1;
-  return order === 'desc' ? bIndex - aIndex : aIndex - bIndex;
+export const sortByTrend = (
+  a: string | null,
+  b: string | null,
+  order: "asc" | "desc" = "desc",
+): number => {
+  const aIndex = a ? trendOrder.indexOf(a as (typeof trendOrder)[number]) : -1;
+  const bIndex = b ? trendOrder.indexOf(b as (typeof trendOrder)[number]) : -1;
+  return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 
 // Helper function to get the effective cash value for an item (considering variants)
@@ -59,15 +72,17 @@ export const getEffectiveCashValue = (item: Item): string => {
     const sortedChildren = [...item.children].sort((a, b) => {
       return parseInt(b.sub_name) - parseInt(a.sub_name);
     });
-    
+
     // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant = sortedChildren.find(child => child.sub_name === '2023') || sortedChildren[0];
-    
+    const defaultVariant =
+      sortedChildren.find((child) => child.sub_name === "2023") ||
+      sortedChildren[0];
+
     if (defaultVariant) {
       return defaultVariant.data.cash_value;
     }
   }
-  
+
   // Fall back to parent item's cash value
   return item.cash_value;
 };
@@ -80,15 +95,17 @@ export const getEffectiveDupedValue = (item: Item): string => {
     const sortedChildren = [...item.children].sort((a, b) => {
       return parseInt(b.sub_name) - parseInt(a.sub_name);
     });
-    
+
     // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant = sortedChildren.find(child => child.sub_name === '2023') || sortedChildren[0];
-    
+    const defaultVariant =
+      sortedChildren.find((child) => child.sub_name === "2023") ||
+      sortedChildren[0];
+
     if (defaultVariant) {
       return defaultVariant.data.duped_value;
     }
   }
-  
+
   // Fall back to parent item's duped value
   return item.duped_value;
 };
@@ -101,15 +118,17 @@ export const getEffectiveDemand = (item: Item): string => {
     const sortedChildren = [...item.children].sort((a, b) => {
       return parseInt(b.sub_name) - parseInt(a.sub_name);
     });
-    
+
     // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant = sortedChildren.find(child => child.sub_name === '2023') || sortedChildren[0];
-    
+    const defaultVariant =
+      sortedChildren.find((child) => child.sub_name === "2023") ||
+      sortedChildren[0];
+
     if (defaultVariant) {
       return defaultVariant.data.demand;
     }
   }
-  
+
   // Fall back to parent item's demand
   return item.demand;
 };
@@ -122,20 +141,26 @@ export const getEffectiveTrend = (item: Item): string | null => {
     const sortedChildren = [...item.children].sort((a, b) => {
       return parseInt(b.sub_name) - parseInt(a.sub_name);
     });
-    
+
     // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant = sortedChildren.find(child => child.sub_name === '2023') || sortedChildren[0];
-    
+    const defaultVariant =
+      sortedChildren.find((child) => child.sub_name === "2023") ||
+      sortedChildren[0];
+
     if (defaultVariant) {
       return defaultVariant.data.trend || null;
     }
   }
-  
+
   // Fall back to parent item's trend
   return item.trend;
 };
 
-export const filterByType = async (items: Item[], filterSort: FilterSort, userFavorites?: Array<{ item_id: string }>): Promise<Item[]> => {
+export const filterByType = async (
+  items: Item[],
+  filterSort: FilterSort,
+  userFavorites?: Array<{ item_id: string }>,
+): Promise<Item[]> => {
   switch (filterSort) {
     case "name-limited-items":
       return items.filter((item) => item.is_limited === 1);
@@ -169,17 +194,19 @@ export const filterByType = async (items: Item[], filterSort: FilterSort, userFa
       if (userFavorites && Array.isArray(userFavorites)) {
         // Create a Set of both direct IDs and parent IDs from variants
         const favoriteIds = new Set(
-          userFavorites.map(fav => {
-            const itemId = String(fav.item_id);
-            // If it's a variant (contains hyphen), get both the full ID and parent ID
-            if (itemId.includes('-')) {
-              const [parentId] = itemId.split('-');
-              return [itemId, parentId];
-            }
-            return [itemId];
-          }).flat()
+          userFavorites
+            .map((fav) => {
+              const itemId = String(fav.item_id);
+              // If it's a variant (contains hyphen), get both the full ID and parent ID
+              if (itemId.includes("-")) {
+                const [parentId] = itemId.split("-");
+                return [itemId, parentId];
+              }
+              return [itemId];
+            })
+            .flat(),
         );
-        return items.filter(item => favoriteIds.has(String(item.id)));
+        return items.filter((item) => favoriteIds.has(String(item.id)));
       }
       return [];
     default:
@@ -192,7 +219,7 @@ export const sortAndFilterItems = async (
   filterSort: FilterSort,
   valueSort: ValueSort,
   searchTerm: string = "",
-  userFavorites?: Array<{ item_id: string }>
+  userFavorites?: Array<{ item_id: string }>,
 ): Promise<Item[]> => {
   let result = [...items];
 
@@ -203,25 +230,31 @@ export const sortAndFilterItems = async (
   if (searchTerm) {
     // Check if search term uses id: syntax (secret item ID search)
     const idMatch = searchTerm.trim().match(/^id:\s*(\d+)$/i);
-    
+
     if (idMatch) {
       // Secret item ID search - find item by exact ID match
       const searchId = parseInt(idMatch[1]);
-      result = result.filter(item => item.id === searchId);
+      result = result.filter((item) => item.id === searchId);
     } else {
       // Regular text search
-      const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const tokenize = (str: string) => str.toLowerCase().match(/[a-z0-9]+/g) || [];
+      const normalize = (str: string) =>
+        str.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const tokenize = (str: string) =>
+        str.toLowerCase().match(/[a-z0-9]+/g) || [];
       const splitAlphaNum = (str: string) => {
-        return (str.match(/[a-z]+|[0-9]+/gi) || []).map(s => s.toLowerCase());
+        return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
       };
 
       const searchNormalized = normalize(searchTerm);
       const searchTokens = tokenize(searchTerm);
       const searchAlphaNum = splitAlphaNum(searchTerm);
 
-      function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
-        let i = 0, j = 0;
+      function isTokenSubsequence(
+        searchTokens: string[],
+        nameTokens: string[],
+      ) {
+        let i = 0,
+          j = 0;
         while (i < searchTokens.length && j < nameTokens.length) {
           if (nameTokens[j].includes(searchTokens[i])) {
             i++;
@@ -231,61 +264,69 @@ export const sortAndFilterItems = async (
         return i === searchTokens.length;
       }
 
-      result = result.filter(
-        (item) => {
-          const nameNormalized = normalize(item.name);
-          const typeNormalized = normalize(item.type);
-          const nameTokens = tokenize(item.name);
-          const nameAlphaNum = splitAlphaNum(item.name);
+      result = result.filter((item) => {
+        const nameNormalized = normalize(item.name);
+        const typeNormalized = normalize(item.type);
+        const nameTokens = tokenize(item.name);
+        const nameAlphaNum = splitAlphaNum(item.name);
 
-          return (
-            nameNormalized.includes(searchNormalized) ||
-            typeNormalized.includes(searchNormalized) ||
-            isTokenSubsequence(searchTokens, nameTokens) ||
-            isTokenSubsequence(searchAlphaNum, nameAlphaNum)
-          );
-        }
-      );
+        return (
+          nameNormalized.includes(searchNormalized) ||
+          typeNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, nameTokens) ||
+          isTokenSubsequence(searchAlphaNum, nameAlphaNum)
+        );
+      });
     }
   }
 
   // Apply demand filtering if a specific demand level is selected
-  if (valueSort.startsWith('demand-') && valueSort !== 'demand-desc' && valueSort !== 'demand-asc' && valueSort !== 'demand-multiple-desc' && valueSort !== 'demand-multiple-asc') {
+  if (
+    valueSort.startsWith("demand-") &&
+    valueSort !== "demand-desc" &&
+    valueSort !== "demand-asc" &&
+    valueSort !== "demand-multiple-desc" &&
+    valueSort !== "demand-multiple-asc"
+  ) {
     // Map the valueSort to the exact demand string from demandOrder
     const demandMap: Record<string, string> = {
-      'demand-close-to-none': 'Close to none',
-      'demand-very-low': 'Very Low',
-      'demand-low': 'Low',
-      'demand-medium': 'Medium',
-      'demand-decent': 'Decent',
-      'demand-high': 'High',
-      'demand-very-high': 'Very High',
-      'demand-extremely-high': 'Extremely High'
+      "demand-close-to-none": "Close to none",
+      "demand-very-low": "Very Low",
+      "demand-low": "Low",
+      "demand-medium": "Medium",
+      "demand-decent": "Decent",
+      "demand-high": "High",
+      "demand-very-high": "Very High",
+      "demand-extremely-high": "Extremely High",
     };
-    
+
     const formattedDemand = demandMap[valueSort];
-    
-    result = result.filter(item => getEffectiveDemand(item) === formattedDemand);
+
+    result = result.filter(
+      (item) => getEffectiveDemand(item) === formattedDemand,
+    );
   }
 
   // Apply trend filtering if a specific trend level is selected
-  if (valueSort.startsWith('trend-')) {
+  if (valueSort.startsWith("trend-")) {
     // Map the valueSort to the exact trend string from trendOrder
     const trendMap: Record<string, string> = {
-      'trend-stable': 'Stable',
-      'trend-rising': 'Rising',
-      'trend-hyped': 'Hyped',
-      'trend-avoided': 'Avoided',
-      'trend-dropping': 'Dropping',
-      'trend-unstable': 'Unstable',
-      'trend-hoarded': 'Hoarded',
-      'trend-projected': 'Projected',
-      'trend-recovering': 'Recovering'
+      "trend-stable": "Stable",
+      "trend-rising": "Rising",
+      "trend-hyped": "Hyped",
+      "trend-avoided": "Avoided",
+      "trend-dropping": "Dropping",
+      "trend-unstable": "Unstable",
+      "trend-hoarded": "Hoarded",
+      "trend-projected": "Projected",
+      "trend-recovering": "Recovering",
     };
-    
+
     const formattedTrend = trendMap[valueSort];
-    
-    result = result.filter(item => getEffectiveTrend(item) === formattedTrend);
+
+    result = result.filter(
+      (item) => getEffectiveTrend(item) === formattedTrend,
+    );
   }
 
   // Apply value sorting
@@ -304,36 +345,68 @@ export const sortAndFilterItems = async (
       result = result.sort((a, b) => b.name.localeCompare(a.name));
       break;
     case "cash-desc":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'desc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveCashValue(a),
+          getEffectiveCashValue(b),
+          "desc",
+        ),
+      );
       break;
     case "cash-asc":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'asc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveCashValue(a),
+          getEffectiveCashValue(b),
+          "asc",
+        ),
+      );
       break;
     case "duped-desc":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveDupedValue(a), getEffectiveDupedValue(b), 'desc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveDupedValue(a),
+          getEffectiveDupedValue(b),
+          "desc",
+        ),
+      );
       break;
     case "duped-asc":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveDupedValue(a), getEffectiveDupedValue(b), 'asc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveDupedValue(a),
+          getEffectiveDupedValue(b),
+          "asc",
+        ),
+      );
       break;
     case "demand-desc":
-      result = result.sort((a, b) => sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), 'desc'));
+      result = result.sort((a, b) =>
+        sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), "desc"),
+      );
       break;
     case "demand-asc":
-      result = result.sort((a, b) => sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), 'asc'));
+      result = result.sort((a, b) =>
+        sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), "asc"),
+      );
       break;
     case "last-updated-desc":
       result = result.sort((a, b) => {
         // Normalize timestamps to milliseconds
-        const aTime = a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
-        const bTime = b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
+        const aTime =
+          a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
+        const bTime =
+          b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
         return bTime - aTime;
       });
       break;
     case "last-updated-asc":
       result = result.sort((a, b) => {
         // Normalize timestamps to milliseconds
-        const aTime = a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
-        const bTime = b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
+        const aTime =
+          a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
+        const bTime =
+          b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
         return aTime - bTime;
       });
       break;
@@ -388,7 +461,13 @@ export const sortAndFilterItems = async (
     case "demand-high":
     case "demand-very-high":
     case "demand-extremely-high":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'desc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveCashValue(a),
+          getEffectiveCashValue(b),
+          "desc",
+        ),
+      );
       break;
     // For trend filter cases, we already filtered above, so sort by cash value (high to low)
     case "trend-stable":
@@ -400,7 +479,13 @@ export const sortAndFilterItems = async (
     case "trend-hoarded":
     case "trend-projected":
     case "trend-recovering":
-      result = result.sort((a, b) => sortByCashValue(getEffectiveCashValue(a), getEffectiveCashValue(b), 'desc'));
+      result = result.sort((a, b) =>
+        sortByCashValue(
+          getEffectiveCashValue(a),
+          getEffectiveCashValue(b),
+          "desc",
+        ),
+      );
       break;
   }
 
@@ -414,33 +499,33 @@ export const sortAndFilterItems = async (
  */
 export const formatFullValue = (value: string | null): string => {
   if (value === null || value === "N/A") return "N/A";
-  
+
   // Remove any suffix (k, m, b, etc.) and convert to number
-  const numericPart = value.toLowerCase().replace(/[kmb]$/, '');
+  const numericPart = value.toLowerCase().replace(/[kmb]$/, "");
   const suffix = value.toLowerCase().slice(-1);
   const numericValue = parseFloat(numericPart);
-  
+
   if (isNaN(numericValue)) return value;
-  
+
   // Convert based on suffix
   let fullNumber: number;
   switch (suffix) {
-    case 'k':
+    case "k":
       fullNumber = numericValue * 1000;
       break;
-    case 'm':
+    case "m":
       fullNumber = numericValue * 1000000;
       break;
-    case 'b':
+    case "b":
       fullNumber = numericValue * 1000000000;
       break;
     default:
       fullNumber = numericValue;
   }
-  
+
   // Format with commas
   return fullNumber.toLocaleString();
-}; 
+};
 
 /**
  * Formats a price string (like "100k - 10m") to a full number with commas (like "100,000 - 10,000,000")
@@ -449,45 +534,45 @@ export const formatFullValue = (value: string | null): string => {
  */
 export const formatPrice = (price: string | null): string => {
   if (price === null || price === "N/A") return "N/A";
-  
+
   // Handle price ranges (e.g., "100k - 10m")
-  if (price.includes(' - ')) {
-    const [minPrice, maxPrice] = price.split(' - ');
+  if (price.includes(" - ")) {
+    const [minPrice, maxPrice] = price.split(" - ");
     const formattedMin = formatSinglePrice(minPrice);
     const formattedMax = formatSinglePrice(maxPrice);
     return `${formattedMin} - ${formattedMax}`;
   }
-  
+
   // Handle single prices
   return formatSinglePrice(price);
 };
 
 const formatSinglePrice = (price: string): string => {
   if (price === "N/A" || price === "Free") return price;
-  
+
   // Remove any suffix (k, m, b, etc.) and convert to number
-  const numericPart = price.toLowerCase().replace(/[kmb]$/, '');
+  const numericPart = price.toLowerCase().replace(/[kmb]$/, "");
   const suffix = price.toLowerCase().slice(-1);
   const numericValue = parseFloat(numericPart);
-  
+
   if (isNaN(numericValue)) return price;
-  
+
   // Convert based on suffix
   let fullNumber: number;
   switch (suffix) {
-    case 'k':
+    case "k":
       fullNumber = numericValue * 1000;
       break;
-    case 'm':
+    case "m":
       fullNumber = numericValue * 1000000;
       break;
-    case 'b':
+    case "b":
       fullNumber = numericValue * 1000000000;
       break;
     default:
       fullNumber = numericValue;
   }
-  
+
   // Format with commas
   return fullNumber.toLocaleString();
-}; 
+};

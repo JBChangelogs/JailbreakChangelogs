@@ -1,15 +1,17 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
   title: "Jailbreak Update Timeline | Complete History of Changes",
-  description: "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
+  description:
+    "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
   alternates: {
-    canonical: '/timeline',
+    canonical: "/timeline",
   },
   openGraph: {
     title: "Jailbreak Update Timeline | Complete History of Changes",
-    description: "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
+    description:
+      "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -18,14 +20,17 @@ export const metadata: Metadata = {
         alt: "Jailbreak Changelogs Timeline",
       },
     ],
-    siteName: 'Jailbreak Changelogs',
-    url: 'https://jailbreakchangelogs.xyz/timeline',
+    siteName: "Jailbreak Changelogs",
+    url: "https://jailbreakchangelogs.xyz/timeline",
   },
   twitter: {
     card: "summary_large_image",
     title: "Jailbreak Update Timeline | Complete History of Changes",
-    description: "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    description:
+      "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -35,4 +40,4 @@ export default function TimelineLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import DupeFinderResults from './DupeFinderResults';
-import type { DupeFinderItem, RobloxUser } from '@/types';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import DupeFinderResults from "./DupeFinderResults";
+import type { DupeFinderItem, RobloxUser } from "@/types";
 
 interface DupeFinderClientProps {
   initialData?: DupeFinderItem[];
@@ -15,18 +19,22 @@ interface DupeFinderClientProps {
   isLoading?: boolean;
 }
 
-export default function DupeFinderClient({ 
-  initialData, 
-  robloxId, 
-  robloxUsers: initialRobloxUsers, 
+export default function DupeFinderClient({
+  initialData,
+  robloxId,
+  robloxUsers: initialRobloxUsers,
   robloxAvatars: initialRobloxAvatars,
-  error, 
-  isLoading: externalIsLoading 
+  error,
+  isLoading: externalIsLoading,
 }: DupeFinderClientProps) {
-  const [searchId, setSearchId] = useState(robloxId || '');
+  const [searchId, setSearchId] = useState(robloxId || "");
   const [isLoading, setIsLoading] = useState(externalIsLoading || false);
-  const [localRobloxUsers, setLocalRobloxUsers] = useState<Record<string, RobloxUser>>(initialRobloxUsers || {});
-  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<Record<string, string>>(initialRobloxAvatars || {});
+  const [localRobloxUsers, setLocalRobloxUsers] = useState<
+    Record<string, RobloxUser>
+  >(initialRobloxUsers || {});
+  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<
+    Record<string, string>
+  >(initialRobloxAvatars || {});
   const router = useRouter();
 
   // Update local state when props change
@@ -56,10 +64,13 @@ export default function DupeFinderClient({
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
+      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
         <form onSubmit={handleSearch} className="space-y-4">
           <div>
-            <label htmlFor="searchId" className="block text-sm font-medium text-muted mb-2">
+            <label
+              htmlFor="searchId"
+              className="text-muted mb-2 block text-sm font-medium"
+            >
               Roblox ID or Username
             </label>
             <div className="relative">
@@ -69,15 +80,15 @@ export default function DupeFinderClient({
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 placeholder="Enter Roblox ID or username..."
-                className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pl-10 pr-10 text-muted placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+                className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
                 required
               />
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+              <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
               {searchId && (
                 <button
                   type="button"
                   onClick={() => setSearchId("")}
-                  className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
+                  className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
                   aria-label="Clear search"
                 >
                   <XMarkIcon />
@@ -85,13 +96,13 @@ export default function DupeFinderClient({
               )}
             </div>
           </div>
-          
+
           <button
             type="submit"
             disabled={isLoading || !searchId.trim()}
-            className="w-full px-4 py-3 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-[#5865F2] px-4 py-3 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoading ? 'Searching...' : 'Find Dupes'}
+            {isLoading ? "Searching..." : "Find Dupes"}
           </button>
         </form>
       </div>
@@ -109,14 +120,16 @@ export default function DupeFinderClient({
 
       {/* Error Display */}
       {error && !initialData && (
-        <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
+        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
           <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-red-500/10 rounded-full">
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-full bg-red-500/10 p-3">
                 <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-red-400 mb-2">User Not Found</h3>
+            <h3 className="mb-2 text-lg font-semibold text-red-400">
+              User Not Found
+            </h3>
             <p className="text-gray-300">{error}</p>
           </div>
         </div>

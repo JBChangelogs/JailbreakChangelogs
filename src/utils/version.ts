@@ -1,9 +1,9 @@
-import { formatFullDate } from './timestamp';
+import { formatFullDate } from "./timestamp";
 
 export async function getWebsiteVersion() {
   try {
     const response = await fetch(
-      "https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/main"
+      "https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/main",
     );
     const data = await response.json();
     return {

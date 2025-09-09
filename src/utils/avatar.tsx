@@ -1,42 +1,42 @@
-import Image from 'next/image';
-import { useState } from 'react';
-import { styled } from '@mui/material/styles';
-import Badge from '@mui/material/Badge';
-import { CircularProgress } from '@mui/material';
+import Image from "next/image";
+import { useState } from "react";
+import { styled } from "@mui/material/styles";
+import Badge from "@mui/material/Badge";
+import { CircularProgress } from "@mui/material";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-  '& .MuiBadge-badge': {
-    backgroundColor: '#44b700',
-    color: '#44b700',
+  "& .MuiBadge-badge": {
+    backgroundColor: "#44b700",
+    color: "#44b700",
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    '&::after': {
-      position: 'absolute',
+    "&::after": {
+      position: "absolute",
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
-      borderRadius: '50%',
-      animation: 'ripple 1.2s infinite ease-in-out',
-      border: '1px solid currentColor',
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
       content: '""',
     },
   },
-  '@keyframes ripple': {
-    '0%': {
-      transform: 'scale(.8)',
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
       opacity: 1,
     },
-    '100%': {
-      transform: 'scale(2.4)',
+    "100%": {
+      transform: "scale(2.4)",
       opacity: 0,
     },
   },
 }));
 
 const OfflineBadge = styled(Badge)(({ theme }) => ({
-  '& .MuiBadge-badge': {
-    backgroundColor: '#bdbdbd',
-    color: '#bdbdbd',
+  "& .MuiBadge-badge": {
+    backgroundColor: "#bdbdbd",
+    color: "#bdbdbd",
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
   },
 }));
@@ -53,7 +53,7 @@ interface UserAvatarProps {
   settings?: {
     avatar_discord: number;
   };
-  shape?: 'circle' | 'square';
+  shape?: "circle" | "square";
   showBorder?: boolean;
   premiumType?: number;
 }
@@ -68,15 +68,15 @@ function formatAccentColor(color: number | string | null | undefined): string {
   if (!color || color === "None" || color === "0") return "#124e66";
 
   // If it's a string, pad with zeros to 6 chars, then use first 6 chars
-  if (typeof color === 'string') {
-    const padded = (color + '000000').substring(0, 6);
+  if (typeof color === "string") {
+    const padded = (color + "000000").substring(0, 6);
     return `#${padded}`;
   }
 
   // If it's a number, convert to string, pad with zeros, then use first 6 chars
-  if (typeof color === 'number') {
+  if (typeof color === "number") {
     const colorStr = color.toString();
-    const padded = (colorStr + '000000').substring(0, 6);
+    const padded = (colorStr + "000000").substring(0, 6);
     return `#${padded}`;
   }
 
@@ -86,7 +86,7 @@ function formatAccentColor(color: number | string | null | undefined): string {
 
 export const DefaultAvatar = () => (
   <svg
-    className="w-full h-full text-muted"
+    className="text-muted h-full w-full"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -103,41 +103,49 @@ export const DefaultAvatar = () => (
   </svg>
 );
 
-const BadgeWrapper = ({ children, isOnline, showBadge, shape = 'circle' }: { children: React.ReactNode; isOnline?: boolean; showBadge?: boolean; shape?: 'circle' | 'square' }) => {
+const BadgeWrapper = ({
+  children,
+  isOnline,
+  showBadge,
+  shape = "circle",
+}: {
+  children: React.ReactNode;
+  isOnline?: boolean;
+  showBadge?: boolean;
+  shape?: "circle" | "square";
+}) => {
   if (!showBadge) return <>{children}</>;
-  
+
   const badgeProps = {
-    overlap: shape === 'circle' ? "circular" as const : "rectangular" as const,
-    anchorOrigin: shape === 'circle' 
-      ? { vertical: 'bottom' as const, horizontal: 'right' as const }
-      : { vertical: 'bottom' as const, horizontal: 'right' as const },
-    variant: "dot" as const
+    overlap:
+      shape === "circle" ? ("circular" as const) : ("rectangular" as const),
+    anchorOrigin:
+      shape === "circle"
+        ? { vertical: "bottom" as const, horizontal: "right" as const }
+        : { vertical: "bottom" as const, horizontal: "right" as const },
+    variant: "dot" as const,
   };
-  
+
   return isOnline ? (
-    <StyledBadge {...badgeProps}>
-      {children}
-    </StyledBadge>
+    <StyledBadge {...badgeProps}>{children}</StyledBadge>
   ) : (
-    <OfflineBadge {...badgeProps}>
-      {children}
-    </OfflineBadge>
+    <OfflineBadge {...badgeProps}>{children}</OfflineBadge>
   );
 };
 
-export const UserAvatar = ({ 
-  userId, 
-  avatarHash, 
-  username, 
-  size = 12, 
-  accent_color, 
-  custom_avatar, 
-  isOnline, 
+export const UserAvatar = ({
+  userId,
+  avatarHash,
+  username,
+  size = 12,
+  accent_color,
+  custom_avatar,
+  isOnline,
   showBadge = true,
   settings,
-  shape = 'circle',
+  shape = "circle",
   showBorder = true,
-  premiumType
+  premiumType,
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [customAvatarError, setCustomAvatarError] = useState(false);
@@ -145,10 +153,12 @@ export const UserAvatar = ({
 
   // Calculate the border style based on accent color and showBorder prop
   const formattedAccentColor = formatAccentColor(accent_color);
-  const borderStyle = showBorder ? { border: `3px solid ${formattedAccentColor}` } : {};
+  const borderStyle = showBorder
+    ? { border: `3px solid ${formattedAccentColor}` }
+    : {};
 
   // Determine the final shape: if premiumType is 3, use square, otherwise use the shape prop
-  const finalShape = premiumType === 3 ? 'square' : shape;
+  const finalShape = premiumType === 3 ? "square" : shape;
 
   const getAvatarSource = () => {
     // If user wants to use Discord avatar and we haven't had an error yet
@@ -158,18 +168,23 @@ export const UserAvatar = ({
         const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
         return {
           src: url,
-          alt: username ? `${username}'s profile picture` : 'User avatar',
-          onError: () => setImageError(true)
+          alt: username ? `${username}'s profile picture` : "User avatar",
+          onError: () => setImageError(true),
         };
       }
     }
 
     // If user has explicitly chosen to use custom avatar (Discord toggle off)
-    if (settings?.avatar_discord === 0 && custom_avatar && custom_avatar !== "N/A" && !customAvatarError) {
+    if (
+      settings?.avatar_discord === 0 &&
+      custom_avatar &&
+      custom_avatar !== "N/A" &&
+      !customAvatarError
+    ) {
       return {
         src: custom_avatar,
-        alt: username ? `${username}'s profile picture` : 'User avatar',
-        onError: () => setCustomAvatarError(true)
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setCustomAvatarError(true),
       };
     }
 
@@ -181,9 +196,13 @@ export const UserAvatar = ({
 
   if (!avatarSource) {
     return (
-      <BadgeWrapper isOnline={isOnline} showBadge={showBadge} shape={finalShape}>
-        <div 
-          className={`relative ${finalShape === 'circle' ? 'rounded-full' : finalShape === 'square' && premiumType === 3 ? 'rounded-sm' : finalShape === 'square' ? 'rounded-lg' : 'rounded-full'} overflow-hidden flex-shrink-0`}
+      <BadgeWrapper
+        isOnline={isOnline}
+        showBadge={showBadge}
+        shape={finalShape}
+      >
+        <div
+          className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} flex-shrink-0 overflow-hidden`}
           style={{
             ...borderStyle,
             width: size * 4,
@@ -192,7 +211,7 @@ export const UserAvatar = ({
             minHeight: size * 4,
           }}
         >
-          <div className="w-full h-full bg-[#2E3944] flex items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center bg-[#2E3944]">
             <DefaultAvatar />
           </div>
         </div>
@@ -202,8 +221,8 @@ export const UserAvatar = ({
 
   return (
     <BadgeWrapper isOnline={isOnline} showBadge={showBadge} shape={finalShape}>
-      <div 
-        className={`relative ${finalShape === 'circle' ? 'rounded-full' : finalShape === 'square' && premiumType === 3 ? 'rounded-sm' : finalShape === 'square' ? 'rounded-lg' : 'rounded-full'} overflow-hidden flex-shrink-0`}
+      <div
+        className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} flex-shrink-0 overflow-hidden`}
         style={{
           ...borderStyle,
           width: size * 4,
@@ -214,7 +233,7 @@ export const UserAvatar = ({
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#2E3944]">
-            <CircularProgress size={24} sx={{ color: '#5865F2' }} />
+            <CircularProgress size={24} sx={{ color: "#5865F2" }} />
           </div>
         )}
         <div className="absolute inset-0 bg-[#212A31]">
@@ -234,4 +253,4 @@ export const UserAvatar = ({
       </div>
     </BadgeWrapper>
   );
-}; 
+};

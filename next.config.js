@@ -5,13 +5,18 @@ const nextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   experimental: {
     webpackMemoryOptimizations: true,
-    optimizePackageImports: ['@mui/material', '@mui/icons-material', '@heroicons/react', 'react-icons'],
+    optimizePackageImports: [
+      "@mui/material",
+      "@mui/icons-material",
+      "@heroicons/react",
+      "react-icons",
+    ],
   },
   turbopack: {
     rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
   },

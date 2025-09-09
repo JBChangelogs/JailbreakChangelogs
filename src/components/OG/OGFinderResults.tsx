@@ -1,22 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { RobloxUser } from '@/types';
-import Image from 'next/image';
-import { Pagination } from '@mui/material';
-import { Dialog } from '@headlessui/react';
-import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from '@/app/inventories/actions';
-import { getItemImagePath, isVideoItem, isDriftItem, getDriftVideoPath, getVideoPath, handleImageError } from '@/utils/images';
-import localFont from 'next/font/local';
-import dynamic from 'next/dynamic';
-import SearchForm from './SearchForm';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { RobloxUser } from "@/types";
+import Image from "next/image";
+import { Pagination } from "@mui/material";
+import { Dialog } from "@headlessui/react";
+import {
+  XMarkIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import {
+  fetchMissingRobloxData,
+  fetchOriginalOwnerAvatars,
+} from "@/app/inventories/actions";
+import {
+  getItemImagePath,
+  isVideoItem,
+  isDriftItem,
+  getDriftVideoPath,
+  getVideoPath,
+  handleImageError,
+} from "@/utils/images";
+import localFont from "next/font/local";
+import dynamic from "next/dynamic";
+import SearchForm from "./SearchForm";
 
-const Select = dynamic(() => import('react-select'), { ssr: false });
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const bangers = localFont({
-  src: '../../../public/fonts/Bangers.ttf',
+  src: "../../../public/fonts/Bangers.ttf",
 });
 
 interface OGItem {
@@ -35,10 +48,12 @@ interface OGItem {
   isOriginalOwner: boolean;
   user_id: string;
   logged_at: number;
-  history: string | Array<{
-    UserId: number;
-    TradeTime: number;
-  }>;
+  history:
+    | string
+    | Array<{
+        UserId: number;
+        TradeTime: number;
+      }>;
 }
 
 interface OGSearchData {
@@ -54,21 +69,33 @@ interface OGFinderResultsProps {
   error?: string;
 }
 
-export default function OGFinderResults({ 
-  initialData, 
-  robloxId, 
-  robloxUsers: initialRobloxUsers, 
-  robloxAvatars: initialRobloxAvatars, 
-  error 
+export default function OGFinderResults({
+  initialData,
+  robloxId,
+  robloxUsers: initialRobloxUsers,
+  robloxAvatars: initialRobloxAvatars,
+  error,
 }: OGFinderResultsProps) {
-  const [searchId, setSearchId] = useState(robloxId || '');
+  const [searchId, setSearchId] = useState(robloxId || "");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortOrder, setSortOrder] = useState<'alpha-asc' | 'alpha-desc' | 'traded-desc' | 'unique-desc' | 'created-asc' | 'created-desc' | 'duplicates'>('created-desc');
+  const [sortOrder, setSortOrder] = useState<
+    | "alpha-asc"
+    | "alpha-desc"
+    | "traded-desc"
+    | "unique-desc"
+    | "created-asc"
+    | "created-desc"
+    | "duplicates"
+  >("created-desc");
   const [page, setPage] = useState(1);
-  const [localRobloxUsers, setLocalRobloxUsers] = useState<Record<string, RobloxUser>>(initialRobloxUsers || {});
-  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<Record<string, string>>(initialRobloxAvatars || {});
+  const [localRobloxUsers, setLocalRobloxUsers] = useState<
+    Record<string, RobloxUser>
+  >(initialRobloxUsers || {});
+  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<
+    Record<string, string>
+  >(initialRobloxAvatars || {});
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -81,7 +108,7 @@ export default function OGFinderResults({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchId.trim()) return;
-    
+
     setIsLoading(true);
     router.push(`/og/${searchId.trim()}`);
   };
@@ -110,50 +137,62 @@ export default function OGFinderResults({
     setLocalRobloxAvatars(initialRobloxAvatars || {});
   }, [initialRobloxAvatars]);
 
-
-
   const fetchMissingUserData = useCallback(async (userIds: string[]) => {
     try {
       const { userData, avatarData } = await fetchMissingRobloxData(userIds);
-      
+
       if (userData && Object.keys(userData).length > 0) {
-        setLocalRobloxUsers(prev => ({ ...prev, ...userData }));
+        setLocalRobloxUsers((prev) => ({ ...prev, ...userData }));
       }
-      
+
       if (avatarData && Object.keys(avatarData).length > 0) {
-        setLocalRobloxAvatars(prev => ({ ...prev, ...avatarData }));
+        setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
       }
     } catch (error) {
-      console.error('Failed to fetch missing user data:', error);
+      console.error("Failed to fetch missing user data:", error);
     }
   }, []);
 
-  const fetchOriginalOwnerAvatarsData = useCallback(async (userIds: string[]) => {
-    try {
-      const avatarData = await fetchOriginalOwnerAvatars(userIds);
-      
-      if (avatarData && Object.keys(avatarData).length > 0) {
-        setLocalRobloxAvatars(prev => ({ ...prev, ...avatarData }));
+  const fetchOriginalOwnerAvatarsData = useCallback(
+    async (userIds: string[]) => {
+      try {
+        const avatarData = await fetchOriginalOwnerAvatars(userIds);
+
+        if (avatarData && Object.keys(avatarData).length > 0) {
+          setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch original owner avatars:", error);
       }
-    } catch (error) {
-      console.error('Failed to fetch original owner avatars:', error);
-    }
-  }, []);
+    },
+    [],
+  );
 
-  const getUserDisplay = useCallback((userId: string): string => {
-    const user = localRobloxUsers[userId];
-    return user?.displayName || user?.name || userId;
-  }, [localRobloxUsers]);
+  const getUserDisplay = useCallback(
+    (userId: string): string => {
+      const user = localRobloxUsers[userId];
+      return user?.displayName || user?.name || userId;
+    },
+    [localRobloxUsers],
+  );
 
-  const getUsername = useCallback((userId: string): string => {
-    const user = localRobloxUsers[userId];
-    return user?.name || userId;
-  }, [localRobloxUsers]);
+  const getUsername = useCallback(
+    (userId: string): string => {
+      const user = localRobloxUsers[userId];
+      return user?.name || userId;
+    },
+    [localRobloxUsers],
+  );
 
-  const getUserAvatar = useCallback((userId: string): string | null => {
-    const avatar = localRobloxAvatars[userId];
-    return avatar && typeof avatar === 'string' && avatar.trim() !== '' ? avatar : null;
-  }, [localRobloxAvatars]);
+  const getUserAvatar = useCallback(
+    (userId: string): string | null => {
+      const avatar = localRobloxAvatars[userId];
+      return avatar && typeof avatar === "string" && avatar.trim() !== ""
+        ? avatar
+        : null;
+    },
+    [localRobloxAvatars],
+  );
 
   // Progressive loading for current page items (only current owners)
   useEffect(() => {
@@ -162,16 +201,16 @@ export default function OGFinderResults({
     const userIdsToLoad: string[] = [];
     const avatarIdsToLoad: string[] = [];
 
-    initialData.results.forEach(item => {
+    initialData.results.forEach((item) => {
       // Add current owner ID if missing
       if (item.user_id && /^\d+$/.test(item.user_id)) {
         const user = localRobloxUsers[item.user_id];
         if (!user?.displayName && !user?.name) {
           userIdsToLoad.push(item.user_id);
         }
-        
+
         const avatar = localRobloxAvatars[item.user_id];
-        if (!avatar || typeof avatar !== 'string' || avatar.trim() === '') {
+        if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
           avatarIdsToLoad.push(item.user_id);
         }
       }
@@ -182,12 +221,18 @@ export default function OGFinderResults({
       const uniqueUserIds = [...new Set(userIdsToLoad)];
       fetchMissingUserData(uniqueUserIds);
     }
-    
+
     if (avatarIdsToLoad.length > 0) {
       const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
       fetchOriginalOwnerAvatarsData(uniqueAvatarIds);
     }
-  }, [initialData?.results, fetchMissingUserData, fetchOriginalOwnerAvatarsData, localRobloxUsers, localRobloxAvatars]);
+  }, [
+    initialData?.results,
+    fetchMissingUserData,
+    fetchOriginalOwnerAvatarsData,
+    localRobloxUsers,
+    localRobloxAvatars,
+  ]);
 
   // Progressive loading for trade history modal
   useEffect(() => {
@@ -195,92 +240,103 @@ export default function OGFinderResults({
 
     const userIdsToLoad: string[] = [];
     const avatarIdsToLoad: string[] = [];
-    
+
     try {
       // Parse history if it's a JSON string
-      const historyData = typeof selectedItem.history === 'string' ? JSON.parse(selectedItem.history) : selectedItem.history;
-      
+      const historyData =
+        typeof selectedItem.history === "string"
+          ? JSON.parse(selectedItem.history)
+          : selectedItem.history;
+
       if (Array.isArray(historyData)) {
-        historyData.forEach(trade => {
+        historyData.forEach((trade) => {
           if (trade.UserId) {
             const tradeUserId = trade.UserId.toString();
             const user = localRobloxUsers[tradeUserId];
             if (!user?.displayName && !user?.name) {
               userIdsToLoad.push(tradeUserId);
             }
-            
+
             const avatar = localRobloxAvatars[tradeUserId];
-            if (!avatar || typeof avatar !== 'string' || avatar.trim() === '') {
+            if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
               avatarIdsToLoad.push(tradeUserId);
             }
           }
         });
       }
     } catch (error) {
-      console.error('Error parsing history data:', error);
+      console.error("Error parsing history data:", error);
     }
-    
+
     if (userIdsToLoad.length > 0) {
       const uniqueUserIds = [...new Set(userIdsToLoad)];
       fetchMissingUserData(uniqueUserIds);
     }
-    
+
     if (avatarIdsToLoad.length > 0) {
       const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
       fetchOriginalOwnerAvatarsData(uniqueAvatarIds);
     }
-  }, [selectedItem?.id, selectedItem?.history, fetchMissingUserData, fetchOriginalOwnerAvatarsData, localRobloxUsers, localRobloxAvatars]);
+  }, [
+    selectedItem?.id,
+    selectedItem?.history,
+    fetchMissingUserData,
+    fetchOriginalOwnerAvatarsData,
+    localRobloxUsers,
+    localRobloxAvatars,
+  ]);
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatDateOnly = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   // Filter and sort items
-  const filteredItems = initialData?.results?.filter(item => {
-    const matchesSearch = !searchTerm || 
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.categoryTitle.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategories.length === 0 || 
-      selectedCategories.includes(item.categoryTitle);
-    
-    return matchesSearch && matchesCategory;
-  }) || [];
+  const filteredItems =
+    initialData?.results?.filter((item) => {
+      const matchesSearch =
+        !searchTerm ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.categoryTitle.toLowerCase().includes(searchTerm.toLowerCase());
 
+      const matchesCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.categoryTitle);
 
+      return matchesSearch && matchesCategory;
+    }) || [];
 
   // Sort items
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOrder) {
-      case 'duplicates':
+      case "duplicates":
         const categoryCompare = a.categoryTitle.localeCompare(b.categoryTitle);
         if (categoryCompare !== 0) return categoryCompare;
         return a.title.localeCompare(b.title);
-      case 'alpha-asc':
+      case "alpha-asc":
         return a.title.localeCompare(b.title);
-      case 'alpha-desc':
+      case "alpha-desc":
         return b.title.localeCompare(a.title);
-      case 'traded-desc':
+      case "traded-desc":
         return b.timesTraded - a.timesTraded;
-      case 'unique-desc':
+      case "unique-desc":
         return b.uniqueCirculation - a.uniqueCirculation;
-      case 'created-asc':
+      case "created-asc":
         return a.logged_at - b.logged_at;
-      case 'created-desc':
+      case "created-desc":
         return b.logged_at - a.logged_at;
 
       default:
@@ -289,15 +345,23 @@ export default function OGFinderResults({
   });
 
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedItems = sortedItems.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedItems = sortedItems.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
   const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
     setPage(value);
   };
 
   // Get unique categories
-  const categories = [...new Set(initialData?.results?.map(item => item.categoryTitle) || [])];
+  const categories = [
+    ...new Set(initialData?.results?.map((item) => item.categoryTitle) || []),
+  ];
 
   return (
     <div className="space-y-6">
@@ -313,664 +377,907 @@ export default function OGFinderResults({
 
       {/* Error Display */}
       {error && (
-        <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
+        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
           <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-red-500/10 rounded-full">
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-full bg-red-500/10 p-3">
                 <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-red-400 mb-2">Search Error</h3>
+            <h3 className="mb-2 text-lg font-semibold text-red-400">
+              Search Error
+            </h3>
             <p className="text-gray-300">{error}</p>
           </div>
         </div>
       )}
 
       {/* No Items Found Display */}
-      {!error && (!initialData?.results || initialData.results.length === 0) && (
-        <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-red-500/10 rounded-full">
-                <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+      {!error &&
+        (!initialData?.results || initialData.results.length === 0) && (
+          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-red-500/10 p-3">
+                  <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+                </div>
               </div>
+              <h3 className="mb-2 text-lg font-semibold text-red-400">
+                No OG Items Found
+              </h3>
+              <p className="text-gray-300">
+                No original items found for this user.
+              </p>
             </div>
-            <h3 className="text-lg font-semibold text-red-400 mb-2">No OG Items Found</h3>
-            <p className="text-gray-300">This user doesn&apos;t have any original items in our database.</p>
           </div>
-        </div>
-      )}
+        )}
 
       {/* User Info and Results - Only show when no error and has data */}
       {!error && initialData?.results && initialData.results.length > 0 && (
         <>
           {/* User Info */}
-          <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
-        <h2 className="text-xl font-semibold mb-4 text-muted">User Information</h2>
-        
-        {/* Roblox User Profile */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 p-4 bg-[#2E3944] rounded-lg border border-[#37424D]">
-          {getUserAvatar(robloxId) ? (
-            <Image
-              src={getUserAvatar(robloxId)!}
-              alt="Roblox Avatar"
-              width={64}
-              height={64}
-              className="rounded-full bg-[#212A31] flex-shrink-0"
-            />
-          ) : (
-            <div className="w-16 h-16 bg-[#37424D] rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-muted break-words">
-              {getUserDisplay(robloxId)}
-            </h3>
-            <p className="text-sm text-muted opacity-75 break-words">
-              @{getUsername(robloxId)}
-            </p>
-            <a
-              href={`https://www.roblox.com/users/${robloxId}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-blue-300 hover:text-blue-400 text-sm mt-1 transition-colors"
-            >
-              View Roblox Profile
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
-        </div>
-        
-        {/* Stats */}
-        <div className="text-center">
-          <div className="text-sm text-muted">Original Items Found</div>
-          <div className="text-2xl font-bold text-[#4ade80]">{initialData.count?.toLocaleString()}</div>
-        </div>
-      </div>
+          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+            <h2 className="text-muted mb-4 text-xl font-semibold">
+              User Information
+            </h2>
 
-      {/* Results */}
-      <div className="bg-[#212A31] rounded-lg p-6 shadow-sm border border-[#2E3944]">
-        <h2 className="text-xl font-semibold text-muted mb-4">OG Items</h2>
-        
-        <div className="flex flex-col gap-4 mb-4">
-          {/* Search, Category, and Sort Filters - Side by Side */}
-          <div className="flex flex-col sm:flex-row gap-4 w-full">
-            {/* Search Bar - First */}
-            <div className="relative w-full sm:w-1/3">
-              <input
-                type="text"
-                placeholder="Search items..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                maxLength={MAX_SEARCH_LENGTH}
-                className="w-full px-3 py-2 pl-10 pr-10 border border-[#2E3944] bg-[#37424D] rounded-lg shadow-sm focus:outline-none focus:border-[#5865F2] text-muted placeholder-[#D3D9D4]"
-              />
-              <svg className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-muted"
-                  aria-label="Clear search"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            {/* Roblox User Profile */}
+            <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+              {getUserAvatar(robloxId) ? (
+                <Image
+                  src={getUserAvatar(robloxId)!}
+                  alt="Roblox Avatar"
+                  width={64}
+                  height={64}
+                  className="flex-shrink-0 rounded-full bg-[#212A31]"
+                />
+              ) : (
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+                  <svg
+                    className="text-muted h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
-                </button>
+                </div>
               )}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-muted text-lg font-bold break-words">
+                  {getUserDisplay(robloxId)}
+                </h3>
+                <p className="text-muted text-sm break-words opacity-75">
+                  @{getUsername(robloxId)}
+                </p>
+                <a
+                  href={`https://www.roblox.com/users/${robloxId}/profile`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 text-sm text-blue-300 transition-colors hover:text-blue-400"
+                >
+                  View Roblox Profile
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              </div>
             </div>
-            
-            {/* Category Filter - Second */}
-            <div className="w-full sm:w-1/3">
-              {selectLoaded ? (
-                <Select
-                  value={selectedCategories.length > 0 ? { value: selectedCategories[0], label: selectedCategories[0] } : null}
-                  onChange={(option) => {
-                    if (!option) {
-                      setSelectedCategories([]);
-                      return;
-                    }
-                    setSelectedCategories([(option as { value: string }).value]);
-                  }}
-                  options={categories.map(cat => ({ value: cat, label: cat }))}
-                  classNamePrefix="react-select"
-                  className="w-full"
-                  isMulti={false}
-                  isClearable={true}
-                  placeholder="Filter by category..."
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      backgroundColor: '#37424D',
-                      borderColor: '#2E3944',
-                      color: '#D3D9D4',
-                    }),
-                    singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                    menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                      color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
-                      '&:active': {
-                        backgroundColor: '#124E66',
-                        color: '#FFFFFF',
-                      },
-                    }),
-                    clearIndicator: (base) => ({
-                      ...base,
-                      color: '#D3D9D4',
-                      '&:hover': {
-                        color: '#FFFFFF',
-                      },
-                    }),
-                    placeholder: (base) => ({
-                      ...base,
-                      color: '#D3D9D4',
-                    }),
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
-              )}
+
+            {/* Stats */}
+            <div className="text-center">
+              <div className="text-muted text-sm">Original Items Found</div>
+              <div className="text-2xl font-bold text-[#4ade80]">
+                {initialData.count?.toLocaleString()}
+              </div>
             </div>
-            
-            {/* Sort Filter - Third */}
-            <div className="w-full sm:w-1/3">
-              {selectLoaded ? (
-                <Select
-                  value={{
-                    value: sortOrder,
-                    label: (() => {
-                      switch (sortOrder) {
-                        case 'duplicates': return 'Group Duplicates';
-                        case 'alpha-asc': return 'Name (A to Z)';
-                        case 'alpha-desc': return 'Name (Z to A)';
-                        case 'traded-desc': return 'Monthly Traded (High to Low)';
-                        case 'unique-desc': return 'Monthly Unique (High to Low)';
-                        case 'created-asc': return 'Logged On (Oldest to Newest)';
-                        case 'created-desc': return 'Logged On (Newest to Oldest)';
-                        default: return 'Random Order';
+          </div>
+
+          {/* Results */}
+          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+            <h2 className="text-muted mb-4 text-xl font-semibold">OG Items</h2>
+
+            <div className="mb-4 flex flex-col gap-4">
+              {/* Search, Category, and Sort Filters - Side by Side */}
+              <div className="flex w-full flex-col gap-4 sm:flex-row">
+                {/* Search Bar - First */}
+                <div className="relative w-full sm:w-1/3">
+                  <input
+                    type="text"
+                    placeholder="Search items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    maxLength={MAX_SEARCH_LENGTH}
+                    className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2 pr-10 pl-10 placeholder-[#D3D9D4] shadow-sm focus:border-[#5865F2] focus:outline-none"
+                  />
+                  <svg
+                    className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                      aria-label="Clear search"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Filter - Second */}
+                <div className="w-full sm:w-1/3">
+                  {selectLoaded ? (
+                    <Select
+                      value={
+                        selectedCategories.length > 0
+                          ? {
+                              value: selectedCategories[0],
+                              label: selectedCategories[0],
+                            }
+                          : null
                       }
-                    })()
-                  }}
-                  onChange={(option) => {
-                    if (!option) {
-                      setSortOrder('created-desc');
-                      return;
-                    }
-                    setSortOrder((option as { value: 'alpha-asc' | 'alpha-desc' | 'traded-desc' | 'unique-desc' | 'created-asc' | 'created-desc' | 'duplicates' }).value);
-                  }}
-                    options={[
-                    { label: 'Date', options: [
-                      { value: 'created-desc', label: 'Logged On (Newest to Oldest)' },
-                      { value: 'created-asc', label: 'Logged On (Oldest to Newest)' },
-                    ]},
-                    { label: 'Duplicates', options: [
-                      { value: 'duplicates', label: 'Group Duplicates' },
-                    ]},
-                    { label: 'Alphabetically', options: [
-                      { value: 'alpha-asc', label: 'Name (A to Z)' },
-                      { value: 'alpha-desc', label: 'Name (Z to A)' },
-                    ]},
-                    { label: 'Activity', options: [
-                      { value: 'traded-desc', label: 'Monthly Traded (High to Low)' },
-                      { value: 'unique-desc', label: 'Monthly Unique (High to Low)' },
-                    ]},
-                  ]}
-                  classNamePrefix="react-select"
-                  className="w-full"
-                  isMulti={false}
-                  isClearable={true}
-                  placeholder="Sort by..."
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      backgroundColor: '#37424D',
-                      borderColor: '#2E3944',
-                      color: '#D3D9D4',
-                    }),
-                    singleValue: (base) => ({ ...base, color: '#D3D9D4' }),
-                    menu: (base) => ({ ...base, backgroundColor: '#37424D', color: '#D3D9D4', zIndex: 3000 }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#5865F2' : state.isFocused ? '#2E3944' : '#37424D',
-                      color: state.isSelected || state.isFocused ? '#FFFFFF' : '#D3D9D4',
-                      '&:active': {
-                        backgroundColor: '#124E66',
-                        color: '#FFFFFF',
-                      },
-                    }),
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="w-full h-10 bg-[#37424D] border border-[#2E3944] rounded-md animate-pulse"></div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-300">
-            {filteredItems.length} items found
-          </h3>
-        </div>
-
-        {/* No Items Found Message */}
-        {filteredItems.length === 0 && (searchTerm || selectedCategories.length > 0) && (
-          <div className="text-center py-8 text-muted">
-            <p className="break-words">
-              No items found
-              {searchTerm && ` matching "${searchTerm}"`}
-              {selectedCategories.length > 0 && ` in selected categories`}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-2">
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="text-[#5865F2] hover:text-[#4752C4] hover:underline"
-                >
-                  Clear search
-                </button>
-              )}
-              {selectedCategories.length > 0 && (
-                <button
-                  onClick={() => setSelectedCategories([])}
-                  className="text-[#5865F2] hover:text-[#4752C4] hover:underline"
-                >
-                  Clear categories
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Filter Summary - Only show when there are items */}
-        {(searchTerm || selectedCategories.length > 0) && filteredItems.length > 0 && (
-          <div className="mb-4 p-3 bg-[#2E3944] rounded-lg border border-[#37424D]">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-              <span className="font-medium">Active filters:</span>
-              {selectedCategories.length > 0 && (
-                <span className="px-2 py-1 bg-[#5865F2] text-white rounded-md text-xs">
-                  Category: {selectedCategories[0]}
-                </span>
-              )}
-              {searchTerm && (
-                <span className="px-2 py-1 bg-[#5865F2] text-white rounded-md text-xs break-words">
-                  Search: &quot;{searchTerm}&quot;
-                </span>
-              )}
-              <span className="text-xs opacity-75">
-                Showing {filteredItems.length} of {initialData?.count || 0} items
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Top Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mb-6">
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={handlePageChange}
-              sx={{
-                '& .MuiPaginationItem-root': {
-                  color: '#D3D9D4',
-                  '&.Mui-selected': {
-                    backgroundColor: '#5865F2',
-                    '&:hover': {
-                      backgroundColor: '#4752C4',
-                    },
-                  },
-                  '&:hover': {
-                    backgroundColor: '#2E3944',
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {paginatedItems.map((item) => {
-            return (
-              <div
-                key={item.id}
-                className="text-white rounded-lg p-3 border-2 relative cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg min-h-[400px] flex flex-col bg-gray-700 border-gray-800"
-                onClick={() => handleItemClick(item)}
-              >
-                {/* Title */}
-                <div className="text-left mb-4">
-                  <p className={`${bangers.className} text-md text-gray-300 mb-1 tracking-wide`}>
-                    {item.categoryTitle}
-                  </p>
-                  <h2 className={`${bangers.className} text-2xl break-words tracking-wide`}>
-                    {item.title}
-                  </h2>
-                </div>
-                
-                {/* Item Image */}
-                <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden bg-[#212A31]">
-                  {!['Brakes'].includes(item.categoryTitle) ? (
-                    isVideoItem(item.title) ? (
-                      <video
-                        src={getVideoPath(item.categoryTitle, item.title)}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                        loop
-                        autoPlay
-                      />
-                    ) : isDriftItem(item.categoryTitle) ? (
-                      <div className="relative w-full h-full">
-                        <Image
-                          src={getItemImagePath(item.categoryTitle, item.title, true)}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                          onError={handleImageError}
-                        />
-                        <video
-                          src={getDriftVideoPath(item.title)}
-                          className="absolute inset-0 w-full h-full object-cover opacity-0 hover:opacity-100 transition-opacity duration-300"
-                          muted
-                          playsInline
-                          loop
-                        />
-                      </div>
-                    ) : (
-                      <Image
-                        src={getItemImagePath(item.categoryTitle, item.title, true)}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        onError={handleImageError}
-                      />
-                    )
+                      onChange={(option) => {
+                        if (!option) {
+                          setSelectedCategories([]);
+                          return;
+                        }
+                        setSelectedCategories([
+                          (option as { value: string }).value,
+                        ]);
+                      }}
+                      options={categories.map((cat) => ({
+                        value: cat,
+                        label: cat,
+                      }))}
+                      classNamePrefix="react-select"
+                      className="w-full"
+                      isMulti={false}
+                      isClearable={true}
+                      placeholder="Filter by category..."
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#37424D",
+                          borderColor: "#2E3944",
+                          color: "#D3D9D4",
+                        }),
+                        singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
+                        menu: (base) => ({
+                          ...base,
+                          backgroundColor: "#37424D",
+                          color: "#D3D9D4",
+                          zIndex: 3000,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? "#5865F2"
+                            : state.isFocused
+                              ? "#2E3944"
+                              : "#37424D",
+                          color:
+                            state.isSelected || state.isFocused
+                              ? "#FFFFFF"
+                              : "#D3D9D4",
+                          "&:active": {
+                            backgroundColor: "#124E66",
+                            color: "#FFFFFF",
+                          },
+                        }),
+                        clearIndicator: (base) => ({
+                          ...base,
+                          color: "#D3D9D4",
+                          "&:hover": {
+                            color: "#FFFFFF",
+                          },
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: "#D3D9D4",
+                        }),
+                      }}
+                      isSearchable={false}
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="text-center text-gray-400">
-                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p className="text-sm">No Image</p>
-                      </div>
-                    </div>
+                    <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
                   )}
                 </div>
-                
-                {/* Statistics */}
-                <div className="space-y-2 text-center flex-1 flex flex-col justify-center">
-                  <div>
-                    <div className="text-sm opacity-90">MONTHLY TRADED</div>
-                    <div className="text-xl font-bold">{item.timesTraded.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm opacity-90">MONTHLY UNIQUE</div>
-                    <div className="text-xl font-bold">{item.uniqueCirculation.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm opacity-90">CURRENT OWNER</div>
-                    <div className="text-xl font-bold italic">
-                      <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[#212A31] border border-[#2E3944] flex-shrink-0 flex items-center justify-center">
-                          {getUserAvatar(item.user_id) ? (
-                            <Image
-                              src={getUserAvatar(item.user_id)!}
-                              alt="Current Owner Avatar"
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          ) : (
-                            <svg className="w-3 h-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          )}
-                        </div>
-                        <a
-                          href={`https://www.roblox.com/users/${item.user_id}/profile`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-300 hover:text-blue-400 hover:underline transition-colors text-center break-words"
-                        >
-                          {getUserDisplay(item.user_id)}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm opacity-90">LOGGED ON</div>
-                    <div className="text-xl font-bold">{formatDateOnly(item.logged_at)}</div>
-                  </div>
-                </div>
-                
-                {/* Season and Level badges - always show container for consistent layout */}
-                <div className="flex justify-center gap-2 mt-3 pt-3 border-t border-white/20 min-h-[40px]">
-                  {item.season && (
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-400 shadow-lg">
-                      <span className="text-white text-xs font-bold">S{item.season}</span>
-                    </div>
-                  )}
-                  {item.level && (
-                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center border-2 border-green-400 shadow-lg">
-                      <span className="text-white text-xs font-bold">L{item.level}</span>
-                    </div>
+
+                {/* Sort Filter - Third */}
+                <div className="w-full sm:w-1/3">
+                  {selectLoaded ? (
+                    <Select
+                      value={{
+                        value: sortOrder,
+                        label: (() => {
+                          switch (sortOrder) {
+                            case "duplicates":
+                              return "Group Duplicates";
+                            case "alpha-asc":
+                              return "Name (A to Z)";
+                            case "alpha-desc":
+                              return "Name (Z to A)";
+                            case "traded-desc":
+                              return "Monthly Traded (High to Low)";
+                            case "unique-desc":
+                              return "Monthly Unique (High to Low)";
+                            case "created-asc":
+                              return "Logged On (Oldest to Newest)";
+                            case "created-desc":
+                              return "Logged On (Newest to Oldest)";
+                            default:
+                              return "Random Order";
+                          }
+                        })(),
+                      }}
+                      onChange={(option) => {
+                        if (!option) {
+                          setSortOrder("created-desc");
+                          return;
+                        }
+                        setSortOrder(
+                          (
+                            option as {
+                              value:
+                                | "alpha-asc"
+                                | "alpha-desc"
+                                | "traded-desc"
+                                | "unique-desc"
+                                | "created-asc"
+                                | "created-desc"
+                                | "duplicates";
+                            }
+                          ).value,
+                        );
+                      }}
+                      options={[
+                        {
+                          label: "Date",
+                          options: [
+                            {
+                              value: "created-desc",
+                              label: "Logged On (Newest to Oldest)",
+                            },
+                            {
+                              value: "created-asc",
+                              label: "Logged On (Oldest to Newest)",
+                            },
+                          ],
+                        },
+                        {
+                          label: "Duplicates",
+                          options: [
+                            { value: "duplicates", label: "Group Duplicates" },
+                          ],
+                        },
+                        {
+                          label: "Alphabetically",
+                          options: [
+                            { value: "alpha-asc", label: "Name (A to Z)" },
+                            { value: "alpha-desc", label: "Name (Z to A)" },
+                          ],
+                        },
+                        {
+                          label: "Activity",
+                          options: [
+                            {
+                              value: "traded-desc",
+                              label: "Monthly Traded (High to Low)",
+                            },
+                            {
+                              value: "unique-desc",
+                              label: "Monthly Unique (High to Low)",
+                            },
+                          ],
+                        },
+                      ]}
+                      classNamePrefix="react-select"
+                      className="w-full"
+                      isMulti={false}
+                      isClearable={true}
+                      placeholder="Sort by..."
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#37424D",
+                          borderColor: "#2E3944",
+                          color: "#D3D9D4",
+                        }),
+                        singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
+                        menu: (base) => ({
+                          ...base,
+                          backgroundColor: "#37424D",
+                          color: "#D3D9D4",
+                          zIndex: 3000,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? "#5865F2"
+                            : state.isFocused
+                              ? "#2E3944"
+                              : "#37424D",
+                          color:
+                            state.isSelected || state.isFocused
+                              ? "#FFFFFF"
+                              : "#D3D9D4",
+                          "&:active": {
+                            backgroundColor: "#124E66",
+                            color: "#FFFFFF",
+                          },
+                        }),
+                      }}
+                      isSearchable={false}
+                    />
+                  ) : (
+                    <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
                   )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-300">
+                {filteredItems.length} items found
+              </h3>
+            </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={handlePageChange}
-              sx={{
-                '& .MuiPaginationItem-root': {
-                  color: '#D3D9D4',
-                  '&.Mui-selected': {
-                    backgroundColor: '#5865F2',
-                    '&:hover': {
-                      backgroundColor: '#4752C4',
+            {/* No Items Found Message */}
+            {filteredItems.length === 0 &&
+              (searchTerm || selectedCategories.length > 0) && (
+                <div className="text-muted py-8 text-center">
+                  <p className="break-words">
+                    No items found
+                    {searchTerm && ` matching "${searchTerm}"`}
+                    {selectedCategories.length > 0 && ` in selected categories`}
+                  </p>
+                  <div className="mt-2 flex flex-wrap justify-center gap-2">
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="text-[#5865F2] hover:text-[#4752C4] hover:underline"
+                      >
+                        Clear search
+                      </button>
+                    )}
+                    {selectedCategories.length > 0 && (
+                      <button
+                        onClick={() => setSelectedCategories([])}
+                        className="text-[#5865F2] hover:text-[#4752C4] hover:underline"
+                      >
+                        Clear categories
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            {/* Filter Summary - Only show when there are items */}
+            {(searchTerm || selectedCategories.length > 0) &&
+              filteredItems.length > 0 && (
+                <div className="mb-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
+                  <div className="text-muted flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-medium">Active filters:</span>
+                    {selectedCategories.length > 0 && (
+                      <span className="rounded-md bg-[#5865F2] px-2 py-1 text-xs text-white">
+                        Category: {selectedCategories[0]}
+                      </span>
+                    )}
+                    {searchTerm && (
+                      <span className="rounded-md bg-[#5865F2] px-2 py-1 text-xs break-words text-white">
+                        Search: &quot;{searchTerm}&quot;
+                      </span>
+                    )}
+                    <span className="text-xs opacity-75">
+                      Showing {filteredItems.length} of{" "}
+                      {initialData?.count || 0} items
+                    </span>
+                  </div>
+                </div>
+              )}
+
+            {/* Top Pagination */}
+            {totalPages > 1 && (
+              <div className="mb-6 flex justify-center">
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: "#D3D9D4",
+                      "&.Mui-selected": {
+                        backgroundColor: "#5865F2",
+                        "&:hover": {
+                          backgroundColor: "#4752C4",
+                        },
+                      },
+                      "&:hover": {
+                        backgroundColor: "#2E3944",
+                      },
                     },
-                  },
-                  '&:hover': {
-                    backgroundColor: '#2E3944',
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {paginatedItems.map((item) => {
+                return (
+                  <div
+                    key={item.id}
+                    className="relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 border-gray-800 bg-gray-700 p-3 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    {/* Title */}
+                    <div className="mb-4 text-left">
+                      <p
+                        className={`${bangers.className} text-md mb-1 tracking-wide text-gray-300`}
+                      >
+                        {item.categoryTitle}
+                      </p>
+                      <h2
+                        className={`${bangers.className} text-2xl tracking-wide break-words`}
+                      >
+                        {item.title}
+                      </h2>
+                    </div>
+
+                    {/* Item Image */}
+                    <div className="relative mb-3 h-40 w-full overflow-hidden rounded-lg bg-[#212A31]">
+                      {!["Brakes"].includes(item.categoryTitle) ? (
+                        isVideoItem(item.title) ? (
+                          <video
+                            src={getVideoPath(item.categoryTitle, item.title)}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                          />
+                        ) : isDriftItem(item.categoryTitle) ? (
+                          <div className="relative h-full w-full">
+                            <Image
+                              src={getItemImagePath(
+                                item.categoryTitle,
+                                item.title,
+                                true,
+                              )}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                              onError={handleImageError}
+                            />
+                            <video
+                              src={getDriftVideoPath(item.title)}
+                              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 hover:opacity-100"
+                              muted
+                              playsInline
+                              loop
+                            />
+                          </div>
+                        ) : (
+                          <Image
+                            src={getItemImagePath(
+                              item.categoryTitle,
+                              item.title,
+                              true,
+                            )}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                            onError={handleImageError}
+                          />
+                        )
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <div className="text-center text-gray-400">
+                            <svg
+                              className="mx-auto mb-2 h-12 w-12"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            <p className="text-sm">No Image</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Statistics */}
+                    <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
+                      <div>
+                        <div className="text-sm opacity-90">MONTHLY TRADED</div>
+                        <div className="text-xl font-bold">
+                          {item.timesTraded.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm opacity-90">MONTHLY UNIQUE</div>
+                        <div className="text-xl font-bold">
+                          {item.uniqueCirculation.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm opacity-90">CURRENT OWNER</div>
+                        <div className="text-xl font-bold italic">
+                          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
+                            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
+                              {getUserAvatar(item.user_id) ? (
+                                <Image
+                                  src={getUserAvatar(item.user_id)!}
+                                  alt="Current Owner Avatar"
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full"
+                                />
+                              ) : (
+                                <svg
+                                  className="text-muted h-3 w-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                            <a
+                              href={`https://www.roblox.com/users/${item.user_id}/profile`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-center break-words text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                            >
+                              {getUserDisplay(item.user_id)}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm opacity-90">LOGGED ON</div>
+                        <div className="text-xl font-bold">
+                          {formatDateOnly(item.logged_at)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Season and Level badges - always show container for consistent layout */}
+                    <div className="mt-3 flex min-h-[40px] justify-center gap-2 border-t border-white/20 pt-3">
+                      {item.season && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-400 bg-blue-600 shadow-lg">
+                          <span className="text-xs font-bold text-white">
+                            S{item.season}
+                          </span>
+                        </div>
+                      )}
+                      {item.level && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-green-400 bg-green-600 shadow-lg">
+                          <span className="text-xs font-bold text-white">
+                            L{item.level}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: "#D3D9D4",
+                      "&.Mui-selected": {
+                        backgroundColor: "#5865F2",
+                        "&:hover": {
+                          backgroundColor: "#4752C4",
+                        },
+                      },
+                      "&:hover": {
+                        backgroundColor: "#2E3944",
+                      },
+                    },
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Trade History Modal */}
           {selectedItem && (
-                <Dialog open={showHistoryModal} onClose={closeHistoryModal} className="relative z-50">
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-        
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="mx-auto w-full max-w-2xl rounded-lg bg-[#212A31] border border-[#2E3944] max-h-[80vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-start sm:items-center justify-between p-4 sm:p-6 border-b border-[#2E3944] gap-4">
-              <div className="min-w-0 flex-1">
-                <Dialog.Title className="text-lg sm:text-xl font-semibold text-muted">Trade History</Dialog.Title>
-                <p className="text-sm text-muted opacity-75 truncate">{selectedItem.title}</p>
-              </div>
-              <button
-                onClick={closeHistoryModal}
-                className="rounded-full p-1 text-muted hover:bg-[#2E3944] hover:text-white"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
+            <Dialog
+              open={showHistoryModal}
+              onClose={closeHistoryModal}
+              className="relative z-50"
+            >
+              <div
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                aria-hidden="true"
+              />
 
-            {/* Modal Content */} 
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-                              {selectedItem.history && selectedItem.history.length > 0 ? (
-                <div className="space-y-4">
-                  {(() => {
-                    // Process history to show actual trades between users
-                    const history = typeof selectedItem.history === 'string' 
-                      ? JSON.parse(selectedItem.history) 
-                      : selectedItem.history;
-                    
-                    if (!Array.isArray(history) || history.length === 0) {
-                      return (
-                        <div className="text-center py-8">
-                          <p className="text-muted">This item has no trade history.</p>
-                        </div>
-                      );
-                    }
-                    
-                    // Reverse the history to match inventory modal
-                    const reversedHistory = history.slice().reverse();
-                    
-                    // If there's only one history entry, hide it (user obtained the item)
-                    if (reversedHistory.length === 1) {
-                      return (
-                        <div className="text-center py-8">
-                          <p className="text-muted">This item has no trade history.</p>
-                        </div>
-                      );
-                    }
-                    
-                    // Group history into trades between users
-                    const trades = [];
-                    for (let i = 0; i < reversedHistory.length - 1; i++) {
-                      const toUser = reversedHistory[i];
-                      const fromUser = reversedHistory[i + 1];
-                      
+              <div className="fixed inset-0 flex items-center justify-center p-4">
+                <div className="mx-auto max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31]">
+                  {/* Modal Header */}
+                  <div className="flex items-start justify-between gap-4 border-b border-[#2E3944] p-4 sm:items-center sm:p-6">
+                    <div className="min-w-0 flex-1">
+                      <Dialog.Title className="text-muted text-lg font-semibold sm:text-xl">
+                        Trade History
+                      </Dialog.Title>
+                      <p className="text-muted truncate text-sm opacity-75">
+                        {selectedItem.title}
+                      </p>
+                    </div>
+                    <button
+                      onClick={closeHistoryModal}
+                      className="text-muted rounded-full p-1 hover:bg-[#2E3944] hover:text-white"
+                    >
+                      <XMarkIcon className="h-6 w-6" />
+                    </button>
+                  </div>
 
-                      
-                      trades.push({
-                        fromUser,
-                        toUser,
-                        tradeNumber: reversedHistory.length - i - 1
-                      });
-                    }
-                    
-                    return (
-                      <>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-muted mb-4">
-                          <span>Total Trades: {trades.length}</span>
-                        </div>
-                        
-                                                <div className="space-y-3">
-                          {trades.map((trade, index) => {
+                  {/* Modal Content */}
+                  <div className="max-h-[60vh] overflow-y-auto p-6">
+                    {selectedItem.history && selectedItem.history.length > 0 ? (
+                      <div className="space-y-4">
+                        {(() => {
+                          // Process history to show actual trades between users
+                          const history =
+                            typeof selectedItem.history === "string"
+                              ? JSON.parse(selectedItem.history)
+                              : selectedItem.history;
+
+                          if (!Array.isArray(history) || history.length === 0) {
                             return (
-                              <div
-                                key={`${trade.fromUser.UserId}-${trade.toUser.UserId}-${trade.toUser.TradeTime}`}
-                                className={`p-3 rounded-lg border ${
-                                  index === trades.length - 1 
-                                    ? 'bg-[#1A5F7A] border-[#124E66] shadow-lg' 
-                                    : 'bg-[#2E3944] border-[#37424D]'
-                                }`}
-                              >
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      {/* From User */}
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-[#212A31] border border-[#2E3944] flex-shrink-0 flex items-center justify-center">
-                                          {getUserAvatar(trade.fromUser.UserId.toString()) ? (
-                                            <Image
-                                              src={getUserAvatar(trade.fromUser.UserId.toString())!}
-                                              alt="User Avatar"
-                                              width={24}
-                                              height={24}
-                                              className="rounded-full"
-                                            />
-                                          ) : (
-                                            <svg className="w-3 h-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                          )}
+                              <div className="py-8 text-center">
+                                <p className="text-muted">
+                                  This item has no trade history.
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          // Reverse the history to match inventory modal
+                          const reversedHistory = history.slice().reverse();
+
+                          // If there's only one history entry, hide it (user obtained the item)
+                          if (reversedHistory.length === 1) {
+                            return (
+                              <div className="py-8 text-center">
+                                <p className="text-muted">
+                                  This item has no trade history.
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          // Group history into trades between users
+                          const trades = [];
+                          for (let i = 0; i < reversedHistory.length - 1; i++) {
+                            const toUser = reversedHistory[i];
+                            const fromUser = reversedHistory[i + 1];
+
+                            trades.push({
+                              fromUser,
+                              toUser,
+                              tradeNumber: reversedHistory.length - i - 1,
+                            });
+                          }
+
+                          return (
+                            <>
+                              <div className="text-muted mb-4 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+                                <span>Total Trades: {trades.length}</span>
+                              </div>
+
+                              <div className="space-y-3">
+                                {trades.map((trade, index) => {
+                                  return (
+                                    <div
+                                      key={`${trade.fromUser.UserId}-${trade.toUser.UserId}-${trade.toUser.TradeTime}`}
+                                      className={`rounded-lg border p-3 ${
+                                        index === trades.length - 1
+                                          ? "border-[#124E66] bg-[#1A5F7A] shadow-lg"
+                                          : "border-[#37424D] bg-[#2E3944]"
+                                      }`}
+                                    >
+                                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex items-center gap-3">
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                              {/* From User */}
+                                              <div className="flex items-center gap-2">
+                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
+                                                  {getUserAvatar(
+                                                    trade.fromUser.UserId.toString(),
+                                                  ) ? (
+                                                    <Image
+                                                      src={
+                                                        getUserAvatar(
+                                                          trade.fromUser.UserId.toString(),
+                                                        )!
+                                                      }
+                                                      alt="User Avatar"
+                                                      width={24}
+                                                      height={24}
+                                                      className="rounded-full"
+                                                    />
+                                                  ) : (
+                                                    <svg
+                                                      className="text-muted h-3 w-3"
+                                                      fill="none"
+                                                      stroke="currentColor"
+                                                      viewBox="0 0 24 24"
+                                                    >
+                                                      <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                      />
+                                                    </svg>
+                                                  )}
+                                                </div>
+                                                <a
+                                                  href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                                                >
+                                                  {getUserDisplay(
+                                                    trade.fromUser.UserId.toString(),
+                                                  ) ||
+                                                    `User ${trade.fromUser.UserId}`}
+                                                </a>
+                                              </div>
+
+                                              {/* Arrow */}
+                                              <div className="text-muted flex items-center gap-1">
+                                                <svg
+                                                  className="h-4 w-4"
+                                                  fill="none"
+                                                  stroke="currentColor"
+                                                  viewBox="0 0 24 24"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                                  />
+                                                </svg>
+                                                <span className="text-xs">
+                                                  Trade #{trade.tradeNumber}
+                                                </span>
+                                              </div>
+
+                                              {/* To User */}
+                                              <div className="flex items-center gap-2">
+                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
+                                                  {getUserAvatar(
+                                                    trade.toUser.UserId.toString(),
+                                                  ) ? (
+                                                    <Image
+                                                      src={
+                                                        getUserAvatar(
+                                                          trade.toUser.UserId.toString(),
+                                                        )!
+                                                      }
+                                                      alt="User Avatar"
+                                                      width={24}
+                                                      height={24}
+                                                      className="rounded-full"
+                                                    />
+                                                  ) : (
+                                                    <svg
+                                                      className="text-muted h-3 w-3"
+                                                      fill="none"
+                                                      stroke="currentColor"
+                                                      viewBox="0 0 24 24"
+                                                    >
+                                                      <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                      />
+                                                    </svg>
+                                                  )}
+                                                </div>
+                                                <a
+                                                  href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                                                >
+                                                  {getUserDisplay(
+                                                    trade.toUser.UserId.toString(),
+                                                  ) ||
+                                                    `User ${trade.toUser.UserId}`}
+                                                </a>
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
-                                        <a
-                                          href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-300 hover:text-blue-400 hover:underline transition-colors font-medium truncate"
-                                        >
-                                          {getUserDisplay(trade.fromUser.UserId.toString()) || `User ${trade.fromUser.UserId}`}
-                                        </a>
-                                      </div>
-                                      
-                                      {/* Arrow */}
-                                      <div className="flex items-center gap-1 text-muted">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                        <span className="text-xs">Trade #{trade.tradeNumber}</span>
-                                      </div>
-                                      
-                                      {/* To User */}
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-[#212A31] border border-[#2E3944] flex-shrink-0 flex items-center justify-center">
-                                          {getUserAvatar(trade.toUser.UserId.toString()) ? (
-                                            <Image
-                                              src={getUserAvatar(trade.toUser.UserId.toString())!}
-                                              alt="User Avatar"
-                                              width={24}
-                                              height={24}
-                                              className="rounded-full"
-                                            />
-                                          ) : (
-                                            <svg className="w-3 h-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                          )}
+
+                                        {/* Trade Date */}
+                                        <div className="text-muted flex-shrink-0 text-sm">
+                                          {formatDate(trade.toUser.TradeTime)}
                                         </div>
-                                        <a
-                                          href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-300 hover:text-blue-400 hover:underline transition-colors font-medium truncate"
-                                        >
-                                          {getUserDisplay(trade.toUser.UserId.toString()) || `User ${trade.toUser.UserId}`}
-                                        </a>
                                       </div>
                                     </div>
-                                  </div>
-                                </div>
-                                
-                                {/* Trade Date */}
-                                <div className="text-sm text-muted flex-shrink-0">
-                                  {formatDate(trade.toUser.TradeTime)}
-                                </div>
+                                  );
+                                })}
                               </div>
-                            </div>
+                            </>
                           );
-                        })}
-                        </div>
-                      </>
-                    );
-                  })()}
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <p className="text-muted">
+                          This item has no trade history.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted">This item has no trade history.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        </Dialog>
-      )}
+              </div>
+            </Dialog>
+          )}
         </>
       )}
     </div>

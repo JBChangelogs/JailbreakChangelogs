@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getToken } from '@/utils/auth';
-import SurveyModal from './SurveyModal';
-import SurveyBanner from './SurveyBanner';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { getToken } from "@/utils/auth";
+import SurveyModal from "./SurveyModal";
+import SurveyBanner from "./SurveyBanner";
 import { PUBLIC_API_URL } from "@/utils/api";
 
 interface Survey {
@@ -29,12 +29,14 @@ const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 export const useSurvey = () => {
   const context = useContext(SurveyContext);
   if (!context) {
-    throw new Error('useSurvey must be used within a SurveyProvider');
+    throw new Error("useSurvey must be used within a SurveyProvider");
   }
   return context;
 };
 
-export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
@@ -45,7 +47,9 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const token = getToken();
       if (!token) return;
 
-      const response = await fetch(`${PUBLIC_API_URL}/surveys/request?user=${token}`);
+      const response = await fetch(
+        `${PUBLIC_API_URL}/surveys/request?user=${token}`,
+      );
       if (!response.ok) return;
 
       const data = await response.json();
@@ -54,7 +58,7 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsBannerVisible(true);
       }
     } catch (error) {
-      console.error('Error checking for survey:', error);
+      console.error("Error checking for survey:", error);
     } finally {
       setHasCheckedSurvey(true);
     }
@@ -92,14 +96,10 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         />
       )}
       {survey && (
-        <SurveyModal
-          open={isModalOpen}
-          onClose={handleClose}
-          survey={survey}
-        />
+        <SurveyModal open={isModalOpen} onClose={handleClose} survey={survey} />
       )}
     </SurveyContext.Provider>
   );
 };
 
-export default SurveyProvider; 
+export default SurveyProvider;

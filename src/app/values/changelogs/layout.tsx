@@ -1,17 +1,19 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'Roblox Jailbreak Values Changelogs & History',
-  description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  title: "Roblox Jailbreak Values Changelogs & History",
+  description:
+    "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
   alternates: {
-    canonical: '/values/changelogs',
+    canonical: "/values/changelogs",
   },
   openGraph: {
-    title: 'Roblox Jailbreak Values Changelogs & History',
-    description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
-    type: 'website',
-    url: 'https://jailbreakchangelogs.xyz/values/changelogs',
+    title: "Roblox Jailbreak Values Changelogs & History",
+    description:
+      "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
+    type: "website",
+    url: "https://jailbreakchangelogs.xyz/values/changelogs",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
@@ -23,9 +25,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: 'Roblox Jailbreak Values Changelogs & History',
-    description: 'Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp"],
+    title: "Roblox Jailbreak Values Changelogs & History",
+    description:
+      "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -35,4 +40,4 @@ export default function ChangelogsLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

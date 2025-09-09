@@ -26,39 +26,42 @@ interface BreadcrumbItem {
 
 // Mapping of singular item types to their plural filter sort values
 const itemTypeToFilterSort: Record<string, FilterSort> = {
-  'vehicle': 'name-vehicles',
-  'spoiler': 'name-spoilers',
-  'rim': 'name-rims',
-  'body color': 'name-body-colors',
-  'hyperchrome': 'name-hyperchromes',
-  'texture': 'name-textures',
-  'tire sticker': 'name-tire-stickers',
-  'tire style': 'name-tire-styles',
-  'drift': 'name-drifts',
-  'furniture': 'name-furnitures',
-  'horn': 'name-horns',
-  'weapon skin': 'name-weapon-skins'
+  vehicle: "name-vehicles",
+  spoiler: "name-spoilers",
+  rim: "name-rims",
+  "body color": "name-body-colors",
+  hyperchrome: "name-hyperchromes",
+  texture: "name-textures",
+  "tire sticker": "name-tire-stickers",
+  "tire style": "name-tire-styles",
+  drift: "name-drifts",
+  furniture: "name-furnitures",
+  horn: "name-horns",
+  "weapon skin": "name-weapon-skins",
 };
 
 export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   const pathname = usePathname();
   const [username, setUsername] = useState<string | null>(null);
-  
+
   // Check if we're on a user profile page
-  const isUserProfilePage = pathname.startsWith('/users/') && pathname.split('/').length === 3;
-  const userId = isUserProfilePage ? pathname.split('/')[2] : null;
-  
+  const isUserProfilePage =
+    pathname.startsWith("/users/") && pathname.split("/").length === 3;
+  const userId = isUserProfilePage ? pathname.split("/")[2] : null;
+
   // Set username if we're on a user profile page and have user data
   useEffect(() => {
     if (userId && userData) {
-      setUsername(userData.global_name && userData.global_name !== "None" 
-        ? `@${userData.global_name}` 
-        : `@${userData.username}`);
+      setUsername(
+        userData.global_name && userData.global_name !== "None"
+          ? `@${userData.global_name}`
+          : `@${userData.username}`,
+      );
     }
   }, [userId, userData]);
-  
+
   // Split the pathname and create breadcrumb items
-  const pathSegments = pathname.split('/').filter(Boolean);
+  const pathSegments = pathname.split("/").filter(Boolean);
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "", href: "/", isHome: true },
     ...pathSegments.map((segment, index) => {
@@ -66,141 +69,158 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
       if (index === 1 && isUserProfilePage && username) {
         return {
           label: username,
-          href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          href: `/${pathSegments.slice(0, index + 1).join("/")}`,
         };
       }
-      
+
       // Special handling for changelog pages
-      if (index === 1 && pathSegments[0] === 'changelogs' && pathSegments.length === 2) {
+      if (
+        index === 1 &&
+        pathSegments[0] === "changelogs" &&
+        pathSegments.length === 2
+      ) {
         return {
           label: `Changelog ${segment}`,
-          href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          href: `/${pathSegments.slice(0, index + 1).join("/")}`,
         };
       }
-      
+
       // Special handling for season pages
-      if (index === 1 && pathSegments[0] === 'seasons' && pathSegments.length === 2) {
+      if (
+        index === 1 &&
+        pathSegments[0] === "seasons" &&
+        pathSegments.length === 2
+      ) {
         // Special case for will-i-make-it page
-        if (segment === 'will-i-make-it') {
+        if (segment === "will-i-make-it") {
           return {
-            label: 'Will I Make It?',
-            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+            label: "Will I Make It?",
+            href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }
         return {
           label: `Season ${segment}`,
-          href: `/${pathSegments.slice(0, index + 1).join('/')}`
+          href: `/${pathSegments.slice(0, index + 1).join("/")}`,
         };
       }
-      
+
       // Special handling for item pages
-      if (pathSegments[0] === 'item') {
+      if (pathSegments[0] === "item") {
         if (index === 0) {
           return {
             label: "Values",
-            href: "/values"
+            href: "/values",
           };
         }
         if (index === 1) {
-          const itemType = decodeURIComponent(segment).replace(/-/g, ' ');
-          const filterSort = itemTypeToFilterSort[itemType] || 'name-all-items';
+          const itemType = decodeURIComponent(segment).replace(/-/g, " ");
+          const filterSort = itemTypeToFilterSort[itemType] || "name-all-items";
           return {
-            label: itemType.split(' ').map(word => 
-              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            ).join(' '),
-            href: `/values?filterSort=${filterSort}&valueSort=cash-desc`
+            label: itemType
+              .split(" ")
+              .map(
+                (word) =>
+                  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+              )
+              .join(" "),
+            href: `/values?filterSort=${filterSort}&valueSort=cash-desc`,
           };
         }
         if (index === 2) {
           return {
-            label: decodeURIComponent(segment).replace(/-/g, ' '),
-            href: '#'
+            label: decodeURIComponent(segment).replace(/-/g, " "),
+            href: "#",
           };
         }
       }
 
       // Special handling for trading routes
-      if (pathSegments[0] === 'trading') {
+      if (pathSegments[0] === "trading") {
         if (index === 0) {
           return {
             label: "Trading",
-            href: "/trading"
+            href: "/trading",
           };
         }
-        if (index === 1 && segment === 'ad') {
+        if (index === 1 && segment === "ad") {
           return {
             label: "Ad",
-            href: "/trading"
+            href: "/trading",
           };
         }
         if (index === 2) {
           return {
             label: segment,
-            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+            href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }
       }
 
       // Special handling for inventories route
-      if (pathSegments[0] === 'inventories') {
+      if (pathSegments[0] === "inventories") {
         if (index === 0) {
           return {
             label: "Inventory Checker",
-            href: "/inventories"
+            href: "/inventories",
           };
         }
         if (index === 1) {
           return {
             label: `User ${segment}`,
-            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+            href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }
       }
-      
+
       // Special handling for inventory-checker route (legacy)
-      if (pathSegments[0] === 'inventory-checker') {
+      if (pathSegments[0] === "inventory-checker") {
         if (index === 0) {
           return {
             label: "Inventory Checker",
-            href: "/inventories"
+            href: "/inventories",
           };
         }
       }
-      
+
       // Special handling for OG route
-      if (pathSegments[0] === 'og') {
+      if (pathSegments[0] === "og") {
         if (index === 0) {
           return {
             label: "OG Finder",
-            href: "/og"
+            href: "/og",
           };
         }
         if (index === 1) {
           return {
             label: `User ${segment}`,
-            href: `/${pathSegments.slice(0, index + 1).join('/')}`
+            href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }
       }
-      
+
       return {
         label: segment.charAt(0).toUpperCase() + segment.slice(1),
-        href: `/${pathSegments.slice(0, index + 1).join('/')}`
+        href: `/${pathSegments.slice(0, index + 1).join("/")}`,
       };
-    })
+    }),
   ];
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-4">
-        <div className="text-muted flex flex-wrap items-center min-w-0">
+        <div className="text-muted flex min-w-0 flex-wrap items-center">
           <div className="flex items-center">
-            <Skeleton variant="circular" width={20} height={20} sx={{ bgcolor: '#212A31' }} />
+            <Skeleton
+              variant="circular"
+              width={20}
+              height={20}
+              sx={{ bgcolor: "#212A31" }}
+            />
           </div>
           <div className="flex items-center">
-            <span className="mx-2 text-muted">
+            <span className="text-muted mx-2">
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -212,12 +232,17 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                 />
               </svg>
             </span>
-            <Skeleton variant="rounded" width={120} height={24} sx={{ bgcolor: '#212A31' }} />
+            <Skeleton
+              variant="rounded"
+              width={120}
+              height={24}
+              sx={{ bgcolor: "#212A31" }}
+            />
           </div>
           <div className="flex items-center">
-            <span className="mx-2 text-muted">
+            <span className="text-muted mx-2">
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -229,7 +254,12 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                 />
               </svg>
             </span>
-            <Skeleton variant="rounded" width={160} height={24} sx={{ bgcolor: '#212A31' }} />
+            <Skeleton
+              variant="rounded"
+              width={160}
+              height={24}
+              sx={{ bgcolor: "#212A31" }}
+            />
           </div>
         </div>
       </div>
@@ -238,16 +268,16 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <div className="text-muted flex flex-wrap items-center min-w-0 text-xs sm:text-sm">
+      <div className="text-muted flex min-w-0 flex-wrap items-center text-xs sm:text-sm">
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1;
-          
+
           return (
             <div key={`${index}-${item.href}`} className="flex items-center">
               {index > 0 && (
-                <span className="mx-2 text-muted">
+                <span className="text-muted mx-2">
                   <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4"
+                    className="h-3 w-3 sm:h-4 sm:w-4"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -260,24 +290,22 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   </svg>
                 </span>
               )}
-              
+
               {isLast ? (
-                <span 
-                  className="px-2 py-0.5 rounded-full bg-[#212a31] text-blue-300 text-xs sm:text-sm font-medium max-w-[200px] sm:max-w-[300px] truncate"
-                >
+                <span className="max-w-[200px] truncate rounded-full bg-[#212a31] px-2 py-0.5 text-xs font-medium text-blue-300 sm:max-w-[300px] sm:text-sm">
                   {item.isHome ? (
-                    <HomeIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <HomeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                   ) : (
                     item.label
                   )}
                 </span>
               ) : (
-                <Link 
+                <Link
                   href={item.href}
-                  className="text-muted hover:text-muted text-xs sm:text-sm max-w-[200px] sm:max-w-[300px] truncate"
+                  className="text-muted hover:text-muted max-w-[200px] truncate text-xs sm:max-w-[300px] sm:text-sm"
                 >
                   {item.isHome ? (
-                    <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <HomeIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
                     item.label
                   )}
@@ -289,4 +317,4 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
       </div>
     </div>
   );
-} 
+}

@@ -1,13 +1,13 @@
 export interface UserSettings {
-  profile_public: number;      // 0 = false, 1 = true
+  profile_public: number; // 0 = false, 1 = true
   show_recent_comments: number; // 0 = false, 1 = true
-  hide_following: number;      // 0 = false, 1 = true
-  hide_followers: number;      // 0 = false, 1 = true
-  hide_favorites: number;      // 0 = false, 1 = true
-  banner_discord: number;      // 0 = false, 1 = true
-  avatar_discord: number;      // 0 = false, 1 = true
-  hide_presence: number;       // 0 = false, 1 = true
-  dms_allowed: number;         // 0 = false, 1 = true
+  hide_following: number; // 0 = false, 1 = true
+  hide_followers: number; // 0 = false, 1 = true
+  hide_favorites: number; // 0 = false, 1 = true
+  banner_discord: number; // 0 = false, 1 = true
+  avatar_discord: number; // 0 = false, 1 = true
+  hide_presence: number; // 0 = false, 1 = true
+  dms_allowed: number; // 0 = false, 1 = true
   updated_at: number;
 }
 
@@ -21,17 +21,17 @@ export type CustomBanner = string;
 export interface User {
   id: string;
   username: string;
-  avatar: string;  // Discord avatar hash or "None"
-  banner: string | null;  // Discord banner hash, "None", or null
-  accent_color: string;  // Color code, "None", or null
-  global_name: string;  // Can be "None"
+  avatar: string; // Discord avatar hash or "None"
+  banner: string | null; // Discord banner hash, "None", or null
+  accent_color: string; // Color code, "None", or null
+  global_name: string; // Can be "None"
   locale: string;
   created_at: string;
   last_seen: number | null;
   last_updated: number;
   usernumber: number;
   is_following?: boolean;
-  custom_avatar?: string;  // Optional custom avatar URL
+  custom_avatar?: string; // Optional custom avatar URL
 }
 
 export interface UserFlag {
@@ -94,4 +94,4 @@ export interface Item {
   type: string;
   rarity: string;
   image?: string;
-} 
+}

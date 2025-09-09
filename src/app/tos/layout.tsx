@@ -1,17 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'Terms of Service',
-  description: 'Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.',
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  title: "Terms of Service",
+  description:
+    "Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.",
   alternates: {
-    canonical: '/tos',
+    canonical: "/tos",
   },
   openGraph: {
-    title: 'Terms of Service',
-    description: 'Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.',
-    type: 'website',
-    url: 'https://jailbreakchangelogs.xyz/tos',
+    title: "Terms of Service",
+    description:
+      "Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.",
+    type: "website",
+    url: "https://jailbreakchangelogs.xyz/tos",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -22,10 +24,13 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Terms of Service',
-    description: 'Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    card: "summary_large_image",
+    title: "Terms of Service",
+    description:
+      "Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -35,4 +40,4 @@ export default function TermsOfServiceLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

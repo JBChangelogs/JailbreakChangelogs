@@ -1,24 +1,28 @@
 import type { Viewport, Metadata } from "next";
 import { fetchUserByIdForMetadata } from "@/utils/api";
-import { getMaintenanceMetadata } from '@/utils/maintenance';
+import { getMaintenanceMetadata } from "@/utils/maintenance";
 
 function formatAccentColor(color: number | string | null | undefined): string {
   if (!color || color === "None" || color === "0") return "#124e66";
 
-  if (typeof color === 'string') {
+  if (typeof color === "string") {
     return `#${color.substring(0, 6)}`;
   }
 
-  if (typeof color === 'number') {
+  if (typeof color === "number") {
     return `#${color.toString().substring(0, 6)}`;
   }
 
   return "#124e66";
 }
 
-export async function generateViewport({ params }: { params: Promise<{ id: string }> }): Promise<Viewport> {
+export async function generateViewport({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Viewport> {
   const { id } = await params;
-  
+
   try {
     const user = await fetchUserByIdForMetadata(id);
     return {
@@ -26,13 +30,19 @@ export async function generateViewport({ params }: { params: Promise<{ id: strin
     };
   } catch (error: unknown) {
     // Handle banned user errors gracefully
-    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.startsWith('BANNED_USER:')) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("BANNED_USER:")
+    ) {
       // Return a default theme color for banned users
       return {
         themeColor: "#124e66",
       };
     }
-    
+
     // For other errors, return default theme color
     return {
       themeColor: "#124e66",
@@ -40,7 +50,11 @@ export async function generateViewport({ params }: { params: Promise<{ id: strin
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
@@ -49,21 +63,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const { id } = await params;
   const userId = id;
-  
+
   try {
     const user = await fetchUserByIdForMetadata(userId);
-    
+
     if (!user) {
       return {
-        metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
         title: "User Not Found | Changelogs",
-        description: "This user profile could not be found on Jailbreak Changelogs.",
+        description:
+          "This user profile could not be found on Jailbreak Changelogs.",
         alternates: {
           canonical: `/users/${userId}`,
         },
         openGraph: {
           title: "User Not Found | Changelogs",
-          description: "This user profile could not be found on Jailbreak Changelogs.",
+          description:
+            "This user profile could not be found on Jailbreak Changelogs.",
           type: "website",
           url: `/users/${userId}`,
           siteName: "Jailbreak Changelogs",
@@ -71,23 +87,25 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         twitter: {
           card: "summary",
           title: "User Not Found | Changelogs",
-          description: "This user profile could not be found on Jailbreak Changelogs.",
+          description:
+            "This user profile could not be found on Jailbreak Changelogs.",
         },
       };
     }
-    
-    const displayName = user.global_name && user.global_name !== "None" 
-      ? user.global_name 
-      : user.username;
-    
+
+    const displayName =
+      user.global_name && user.global_name !== "None"
+        ? user.global_name
+        : user.username;
+
     const username = user.username;
-    
-    const titleFormat = username 
+
+    const titleFormat = username
       ? `${displayName}'s (@${username}) Profile | Changelogs`
       : `${displayName}'s Profile | Changelogs`;
-    
+
     return {
-      metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
       title: titleFormat,
       description: `Check out ${displayName}'s profile on Jailbreak Changelogs. View their contributions and stay connected.`,
       alternates: {
@@ -104,7 +122,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             alt: `${displayName}'s banner`,
           },
         ],
-        siteName: username ? `@${username} | Changelogs` : "Jailbreak Changelogs Users",
+        siteName: username
+          ? `@${username} | Changelogs`
+          : "Jailbreak Changelogs Users",
         url: `/users/${userId}`,
       },
       twitter: {
@@ -116,10 +136,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
   } catch (error: unknown) {
     // Check if this is a banned user error
-    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.startsWith('BANNED_USER:')) {
-      const bannedMessage = error.message.replace('BANNED_USER:', '').trim();
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("BANNED_USER:")
+    ) {
+      const bannedMessage = error.message.replace("BANNED_USER:", "").trim();
       return {
-        metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
         title: "User Banned | Changelogs",
         description: bannedMessage,
         alternates: {
@@ -139,18 +165,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         },
       };
     }
-    
+
     // Fallback for other errors
     return {
-      metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
       title: "User Not Found | Changelogs",
-      description: "This user profile could not be found on Jailbreak Changelogs.",
+      description:
+        "This user profile could not be found on Jailbreak Changelogs.",
       alternates: {
         canonical: `/users/${userId}`,
       },
       openGraph: {
         title: "User Not Found | Changelogs",
-        description: "This user profile could not be found on Jailbreak Changelogs.",
+        description:
+          "This user profile could not be found on Jailbreak Changelogs.",
         type: "website",
         url: `/users/${userId}`,
         siteName: "Jailbreak Changelogs",
@@ -158,7 +186,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       twitter: {
         card: "summary",
         title: "User Not Found | Changelogs",
-        description: "This user profile could not be found on Jailbreak Changelogs.",
+        description:
+          "This user profile could not be found on Jailbreak Changelogs.",
       },
     };
   }

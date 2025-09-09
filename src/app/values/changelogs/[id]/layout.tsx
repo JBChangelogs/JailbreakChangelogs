@@ -1,7 +1,11 @@
-import { Metadata } from 'next';
-import { getMaintenanceMetadata } from '@/utils/maintenance';
+import { Metadata } from "next";
+import { getMaintenanceMetadata } from "@/utils/maintenance";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
@@ -9,9 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 
   const { id } = await params;
-  
+
   return {
-    metadataBase: new URL('https://jailbreakchangelogs.xyz'),
+    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
     title: `Value Changelog #${id}`,
     description: `View value changes in this Jailbreak Changelogs Value update.`,
     alternates: {
@@ -20,9 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     openGraph: {
       title: `Value Changelog #${id}`,
       description: `View value changes in this Jailbreak Changelogs Value update.`,
-      type: 'website',
+      type: "website",
       url: `https://jailbreakchangelogs.xyz/values/changelogs/${id}`,
-      siteName: 'Jailbreak Changelogs',
+      siteName: "Jailbreak Changelogs",
       images: [
         {
           url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
@@ -36,7 +40,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       card: "summary_large_image",
       title: `Value Changelog #${id}`,
       description: `View value changes in this Jailbreak Changelogs Value update.`,
-      images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp"],
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+      ],
     },
   };
 }
@@ -47,4 +53,4 @@ export default function ValueChangelogLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

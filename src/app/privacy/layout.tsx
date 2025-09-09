@@ -1,17 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jailbreakchangelogs.xyz'),
-  title: 'Jailbreak Changelogs Privacy Policy',
-  description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
+  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  title: "Jailbreak Changelogs Privacy Policy",
+  description:
+    "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
   alternates: {
-    canonical: '/privacy',
+    canonical: "/privacy",
   },
   openGraph: {
-    title: 'Jailbreak Changelogs Privacy Policy',
-    description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
-    type: 'website',
-    url: 'https://jailbreakchangelogs.xyz/privacy',
+    title: "Jailbreak Changelogs Privacy Policy",
+    description:
+      "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
+    type: "website",
+    url: "https://jailbreakchangelogs.xyz/privacy",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -22,10 +24,13 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Jailbreak Changelogs Privacy Policy',
-    description: 'Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    card: "summary_large_image",
+    title: "Jailbreak Changelogs Privacy Policy",
+    description:
+      "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -35,4 +40,4 @@ export default function PrivacyLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
-import {
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+import { SparklesIcon } from "@heroicons/react/24/outline";
 import { Item, FilterSort, ValueSort } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
@@ -23,13 +21,15 @@ interface ValuesClientProps {
   lastUpdatedPromise: Promise<number | null>;
 }
 
-export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: ValuesClientProps) {
+export default function ValuesClient({
+  itemsPromise,
+  lastUpdatedPromise,
+}: ValuesClientProps) {
   const router = useRouter();
-  
+
   // Use the use hook to resolve promises
   const items = use(itemsPromise);
   const lastUpdated = use(lastUpdatedPromise);
-  
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
@@ -41,29 +41,34 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
   const MAX_VALUE_RANGE = 100_000_000;
   const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
-  const [appliedMaxValue, setAppliedMaxValue] = useState<number>(MAX_VALUE_RANGE);
+  const [appliedMaxValue, setAppliedMaxValue] =
+    useState<number>(MAX_VALUE_RANGE);
   const [showHcModal, setShowHcModal] = useState(false);
 
   // Load saved preferences after mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const urlFilterSort = searchParams.get('filterSort');
-    const urlValueSort = searchParams.get('valueSort');
-    
+    const urlFilterSort = searchParams.get("filterSort");
+    const urlValueSort = searchParams.get("valueSort");
+
     if (urlFilterSort || urlValueSort) {
       if (urlFilterSort) {
-        localStorage.setItem('valuesFilterSort', urlFilterSort);
+        localStorage.setItem("valuesFilterSort", urlFilterSort);
         setFilterSort(urlFilterSort as FilterSort);
       }
       if (urlValueSort) {
-        localStorage.setItem('valuesValueSort', urlValueSort);
+        localStorage.setItem("valuesValueSort", urlValueSort);
         setValueSort(urlValueSort as ValueSort);
       }
     } else {
       // Only load from localStorage if there are no URL parameters
-      const savedFilterSort = localStorage.getItem('valuesFilterSort') as FilterSort;
-      const savedValueSort = localStorage.getItem('valuesValueSort') as ValueSort;
-      
+      const savedFilterSort = localStorage.getItem(
+        "valuesFilterSort",
+      ) as FilterSort;
+      const savedValueSort = localStorage.getItem(
+        "valuesValueSort",
+      ) as ValueSort;
+
       if (savedFilterSort) {
         setFilterSort(savedFilterSort);
       }
@@ -73,18 +78,16 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     }
   }, []);
 
-
-
   const handleRandomItem = async () => {
     try {
-      const loadingToast = toast.loading('Finding a random item...');
+      const loadingToast = toast.loading("Finding a random item...");
       const item = await fetchRandomItem();
       toast.dismiss(loadingToast);
       toast.success(`Redirecting to ${item.name} ${item.type}...`);
       router.push(`/item/${item.type.toLowerCase()}/${item.name}`);
     } catch (error) {
-      console.error('Error fetching random item:', error);
-      toast.error('Failed to fetch random item');
+      console.error("Error fetching random item:", error);
+      toast.error("Failed to fetch random item");
     }
   };
 
@@ -92,27 +95,28 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
     // If clicking the same category, reset to "All Items"
     if (filterSort === filter) {
       setFilterSort("name-all-items");
-      localStorage.setItem('valuesFilterSort', "name-all-items");
+      localStorage.setItem("valuesFilterSort", "name-all-items");
     } else {
       setFilterSort(filter);
-      localStorage.setItem('valuesFilterSort', filter);
+      localStorage.setItem("valuesFilterSort", filter);
     }
-    
+
     if (searchSectionRef.current) {
       const headerOffset = 80; // Value based on header height
-      const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
+      const elementPosition =
+        searchSectionRef.current.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };
 
   // Load favorites only when user selects favorites filter
   const loadFavorites = async () => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser);
@@ -123,88 +127,90 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           }
         }
       } catch (err) {
-        console.error('Error loading favorites:', err);
+        console.error("Error loading favorites:", err);
       }
     }
   };
 
   // Load favorites only when favorites filter is selected
   useEffect(() => {
-    if (filterSort === 'favorites') {
+    if (filterSort === "favorites") {
       loadFavorites();
     }
   }, [filterSort]);
 
   useEffect(() => {
     const updateSortedItems = async () => {
-      const favoritesData = favorites.map(id => ({ item_id: String(id) }));
-      const sorted = await sortAndFilterItems(items, filterSort, valueSort, debouncedSearchTerm, favoritesData);
+      const favoritesData = favorites.map((id) => ({ item_id: String(id) }));
+      const sorted = await sortAndFilterItems(
+        items,
+        filterSort,
+        valueSort,
+        debouncedSearchTerm,
+        favoritesData,
+      );
       setSortedItems(sorted);
     };
     updateSortedItems();
   }, [items, debouncedSearchTerm, filterSort, valueSort, favorites]);
 
-
-
-
-
-
   return (
     <>
       <Suspense fallback={null}>
-        <SearchParamsHandler 
-          setFilterSort={setFilterSort} 
-          setValueSort={setValueSort} 
+        <SearchParamsHandler
+          setFilterSort={setFilterSort}
+          setValueSort={setValueSort}
         />
       </Suspense>
-      
+
       <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-muted">
+          <h1 className="text-muted text-3xl font-bold">
             Roblox Jailbreak Value List
           </h1>
         </div>
-        <p className="mb-4 text-muted">
+        <p className="text-muted mb-4">
           Welcome to our Roblox Jailbreak trading values database. We&apos;ve
           partnered with{" "}
           <a
             href="https://discord.com/invite/jailbreaktrading"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-300 hover:text-blue-400 transition-colors"
+            className="text-blue-300 transition-colors hover:text-blue-400"
           >
             Trading Core
-          </a>
-          {" "}to bring you the most accurate
-          and up-to-date values for all tradeable items in Roblox Jailbreak,
-          from limited vehicles to rare cosmetics.
+          </a>{" "}
+          to bring you the most accurate and up-to-date values for all tradeable
+          items in Roblox Jailbreak, from limited vehicles to rare cosmetics.
         </p>
 
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={handleRandomItem}
-            className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-4 sm:px-6 py-2 sm:py-3 text-muted hover:bg-[#124E66] focus:outline-none"
+            className="text-muted flex items-center gap-1.5 rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 hover:bg-[#124E66] focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
             <SparklesIcon className="h-4 w-4 sm:h-6 sm:w-6" />
             <span className="text-sm sm:text-base">Random Item</span>
           </button>
           <button
             onClick={() => setShowHcModal(true)}
-            className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#2E3944] bg-[#5865F2] px-4 sm:px-6 py-2 sm:py-3 text-white hover:bg-[#4752C4] focus:outline-none"
+            className="flex items-center gap-1.5 rounded-lg border border-[#2E3944] bg-[#5865F2] px-4 py-2 text-white hover:bg-[#4752C4] focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
-            <span className="text-sm sm:text-base">Hyperchrome Pity Calculator</span>
+            <span className="text-sm sm:text-base">
+              Hyperchrome Pity Calculator
+            </span>
           </button>
         </div>
 
         {lastUpdated && (
-          <p className="mb-4 text-sm text-muted">
+          <p className="text-muted mb-4 text-sm">
             Last updated: {formatClientDate(lastUpdated)}
           </p>
         )}
 
-        <CategoryIcons 
-          onSelect={handleCategorySelect} 
-          selectedFilter={filterSort} 
+        <CategoryIcons
+          onSelect={handleCategorySelect}
+          selectedFilter={filterSort}
           onValueSort={setValueSort}
         />
 
@@ -214,18 +220,23 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           onScrollToSearch={() => {
             if (searchSectionRef.current) {
               const headerOffset = 80;
-              const elementPosition = searchSectionRef.current.getBoundingClientRect().top;
-              const offsetPosition = elementPosition + window.scrollY - headerOffset;
+              const elementPosition =
+                searchSectionRef.current.getBoundingClientRect().top;
+              const offsetPosition =
+                elementPosition + window.scrollY - headerOffset;
               window.scrollTo({
                 top: offsetPosition,
-                behavior: 'smooth'
+                behavior: "smooth",
               });
             }
           }}
         />
       </div>
 
-      <HyperchromeCalculatorModal open={showHcModal} onClose={() => setShowHcModal(false)} />
+      <HyperchromeCalculatorModal
+        open={showHcModal}
+        onClose={() => setShowHcModal(false)}
+      />
 
       <ValuesSearchControls
         searchTerm={searchTerm}
@@ -248,7 +259,7 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
           setFavorites((prev) =>
             isFavorited
               ? [...prev, itemId]
-              : prev.filter((id) => id !== itemId)
+              : prev.filter((id) => id !== itemId),
           );
         }}
         appliedMinValue={appliedMinValue}
@@ -271,30 +282,29 @@ export default function ValuesClient({ itemsPromise, lastUpdatedPromise }: Value
         valueSort={valueSort}
         debouncedSearchTerm={debouncedSearchTerm}
       />
-
     </>
   );
 }
 
 // Format the date client-side in the user's local timezone
 function formatClientDate(timestamp: number): string {
-  if (!timestamp) return '';
+  if (!timestamp) return "";
   const date = new Date(timestamp);
-  
+
   // Format date and time separately to avoid locale-specific "at" duplication
   const dateStr = date.toLocaleDateString(undefined, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
-  
+
   const timeStr = date.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
-  
+
   // Remove comma after weekday and combine with "at"
-  return dateStr.replace(',', '') + ' at ' + timeStr;
-}   
+  return dateStr.replace(",", "") + " at " + timeStr;
+}

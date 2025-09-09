@@ -1,25 +1,30 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { ItemDetails } from '@/types';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useSearchParams, useRouter } from "next/navigation";
+import { ItemDetails } from "@/types";
 
 interface ItemVariantDropdownProps {
   item: ItemDetails;
   onVariantSelect: (variant: ItemDetails) => void;
 }
 
-export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVariantDropdownProps) {
+export default function ItemVariantDropdown({
+  item,
+  onVariantSelect,
+}: ItemVariantDropdownProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<string>('2025');
+  const [selectedYear, setSelectedYear] = useState<string>("2025");
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    const variant = searchParams.get('variant');
-    
+    const variant = searchParams.get("variant");
+
     if (variant && item.children) {
-      const matchingChild = item.children.find(child => child.sub_name === variant);
+      const matchingChild = item.children.find(
+        (child) => child.sub_name === variant,
+      );
       if (matchingChild) {
         setSelectedYear(variant);
         const variantData = {
@@ -28,20 +33,20 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
           duped_value: matchingChild.data.duped_value,
           demand: matchingChild.data.demand,
           notes: matchingChild.data.notes,
-          last_updated: matchingChild.data.last_updated
+          last_updated: matchingChild.data.last_updated,
         };
         onVariantSelect(variantData);
       } else {
         // If variant doesn't exist, remove it from URL and show default item
         const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('variant');
+        newUrl.searchParams.delete("variant");
         router.replace(newUrl.pathname + newUrl.search);
-        setSelectedYear('2025');
+        setSelectedYear("2025");
         onVariantSelect(item);
       }
     } else if (!variant) {
       // Reset to base item when no variant in URL
-      setSelectedYear('2025');
+      setSelectedYear("2025");
       onVariantSelect(item);
     }
   }, [searchParams, item.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -54,10 +59,12 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
     <div className="relative">
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-muted hover:bg-[#124E66] focus:outline-none"
+        className="text-muted flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm hover:bg-[#124E66] focus:outline-none"
       >
         {selectedYear}
-        <ChevronDownIcon className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon
+          className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       <AnimatePresence>
@@ -67,21 +74,21 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg"
           >
             <button
               onClick={() => {
                 onVariantSelect(item);
-                setSelectedYear('2025');
+                setSelectedYear("2025");
                 setIsDropdownOpen(false);
                 // Remove variant from URL when selecting default
                 const newUrl = new URL(window.location.href);
-                newUrl.searchParams.delete('variant');
+                newUrl.searchParams.delete("variant");
                 router.replace(newUrl.pathname + newUrl.search);
               }}
-              className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
-                selectedYear === '2025' ? 'bg-[#124E66]' : ''
+              className={`text-muted w-full px-3 py-2 text-left text-sm hover:bg-[#124E66] ${
+                selectedYear === "2025" ? "bg-[#124E66]" : ""
               }`}
             >
               2025
@@ -96,7 +103,7 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
                     duped_value: child.data.duped_value,
                     demand: child.data.demand,
                     notes: child.data.notes,
-                    last_updated: child.data.last_updated
+                    last_updated: child.data.last_updated,
                   };
 
                   onVariantSelect(variantData);
@@ -104,11 +111,11 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
                   setIsDropdownOpen(false);
                   // Update URL with selected variant
                   const newUrl = new URL(window.location.href);
-                  newUrl.searchParams.set('variant', child.sub_name);
+                  newUrl.searchParams.set("variant", child.sub_name);
                   router.replace(newUrl.pathname + newUrl.search);
                 }}
-                className={`w-full px-3 py-2 text-left text-sm text-muted hover:bg-[#124E66] ${
-                  selectedYear === child.sub_name ? 'bg-[#124E66]' : ''
+                className={`text-muted w-full px-3 py-2 text-left text-sm hover:bg-[#124E66] ${
+                  selectedYear === child.sub_name ? "bg-[#124E66]" : ""
                 }`}
               >
                 {child.sub_name}
@@ -119,4 +126,4 @@ export default function ItemVariantDropdown({ item, onVariantSelect }: ItemVaria
       </AnimatePresence>
     </div>
   );
-} 
+}

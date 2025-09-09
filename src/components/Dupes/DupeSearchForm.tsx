@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import DupeResultsModal from './DupeResultsModal';
+import React, { useState, useEffect } from "react";
+import DupeResultsModal from "./DupeResultsModal";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import toast from 'react-hot-toast';
-import { findSimilarStrings, calculateSimilarity } from '@/utils/fuzzySearch';
-import ItemSelectionModal from './ItemSelectionModal';
-import ReportDupeModal from './ReportDupeModal';
-import { getToken } from '@/utils/auth';
-import LoginModalWrapper from '../Auth/LoginModalWrapper';
-import type { DupeResult, Item } from '@/types';
+import toast from "react-hot-toast";
+import { findSimilarStrings, calculateSimilarity } from "@/utils/fuzzySearch";
+import ItemSelectionModal from "./ItemSelectionModal";
+import ReportDupeModal from "./ReportDupeModal";
+import { getToken } from "@/utils/auth";
+import LoginModalWrapper from "../Auth/LoginModalWrapper";
+import type { DupeResult, Item } from "@/types";
 
 interface Suggestion {
   message: string;
@@ -18,37 +18,48 @@ interface Suggestion {
 }
 
 interface DupeSearchFormProps {
-  initialItems?: {id: number, name: string, type: string}[];
+  initialItems?: { id: number; name: string; type: string }[];
   initialDupes?: DupeResult[];
 }
 
-const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], initialDupes = [] }) => {
-  const [ownerName, setOwnerName] = useState('');
-  const [itemName, setItemName] = useState('');
+const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
+  initialItems = [],
+  initialDupes = [],
+}) => {
+  const [ownerName, setOwnerName] = useState("");
+  const [itemName, setItemName] = useState("");
   const [results, setResults] = useState<DupeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ownerSuggestions, setOwnerSuggestions] = useState<string[]>([]);
-  const [itemSuggestions, setItemSuggestions] = useState<{ name: string, type: string }[]>([]);
+  const [itemSuggestions, setItemSuggestions] = useState<
+    { name: string; type: string }[]
+  >([]);
   const [showOwnerSuggestions, setShowOwnerSuggestions] = useState(false);
   const [showItemSuggestions, setShowItemSuggestions] = useState(false);
   const [allDupes] = useState<DupeResult[]>(initialDupes);
-  const [allItems] = useState<{id: number, name: string, type: string}[]>(initialItems);
+  const [allItems] =
+    useState<{ id: number; name: string; type: string }[]>(initialItems);
   const [matchingItemId, setMatchingItemId] = useState<number>(0);
-  const [isItemSelectionModalOpen, setIsItemSelectionModalOpen] = useState(false);
+  const [isItemSelectionModalOpen, setIsItemSelectionModalOpen] =
+    useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<{ name: string; type: string; id: number } | null>(null);
-  const [duperName, setDuperName] = useState('');
+  const [selectedItem, setSelectedItem] = useState<{
+    name: string;
+    type: string;
+    id: number;
+  } | null>(null);
+  const [duperName, setDuperName] = useState("");
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   useEffect(() => {
     if (ownerName.trim()) {
-      const uniqueOwners = [...new Set(allDupes.map(dupe => dupe.owner))];
+      const uniqueOwners = [...new Set(allDupes.map((dupe) => dupe.owner))];
       const similarOwners = findSimilarStrings(ownerName, uniqueOwners, {
         minSimilarity: 0.6,
-        maxResults: 5
+        maxResults: 5,
       });
       setOwnerSuggestions(similarOwners);
       setShowOwnerSuggestions(true);
@@ -61,12 +72,14 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
   useEffect(() => {
     if (itemName.trim()) {
       // Extract just the name part before the [Type]
-      const itemNameOnly = itemName.split(' [')[0];
+      const itemNameOnly = itemName.split(" [")[0];
       const filteredItems = allItems
-        .filter(item => item.name.toLowerCase().includes(itemNameOnly.toLowerCase()))
-        .map(item => ({
+        .filter((item) =>
+          item.name.toLowerCase().includes(itemNameOnly.toLowerCase()),
+        )
+        .map((item) => ({
           name: item.name,
-          type: item.type
+          type: item.type,
         }));
       setItemSuggestions(filteredItems);
       setShowItemSuggestions(true);
@@ -81,7 +94,10 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
     setShowOwnerSuggestions(false);
   };
 
-  const handleItemSuggestionClick = (suggestion: { name: string, type: string }) => {
+  const handleItemSuggestionClick = (suggestion: {
+    name: string;
+    type: string;
+  }) => {
     setItemName(`${suggestion.name} [${suggestion.type}]`);
     setShowItemSuggestions(false);
   };
@@ -95,18 +111,18 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
 
     try {
       // First try exact match
-      let filteredResults = allDupes.filter(dupe => 
-        dupe.owner.toLowerCase() === ownerName.toLowerCase()
+      let filteredResults = allDupes.filter(
+        (dupe) => dupe.owner.toLowerCase() === ownerName.toLowerCase(),
       );
 
       // If no exact matches, try fuzzy matching
       if (filteredResults.length === 0) {
-        const uniqueOwners = [...new Set(allDupes.map(dupe => dupe.owner))];
+        const uniqueOwners = [...new Set(allDupes.map((dupe) => dupe.owner))];
         const similarOwners = findSimilarStrings(ownerName, uniqueOwners, {
           minSimilarity: 0.7,
-          maxResults: 1
+          maxResults: 1,
         });
-        
+
         if (similarOwners.length > 0) {
           const closestMatch = similarOwners[0];
           const similarity = calculateSimilarity(ownerName, closestMatch);
@@ -114,7 +130,7 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
           setSuggestion({
             message: `No dupes found for "${ownerName}"`,
             suggestedName: closestMatch,
-            similarity
+            similarity,
           });
           setLoading(false);
           return;
@@ -127,34 +143,39 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
         // Parse the item name and type from the input
         const match = itemName.match(/^(.*?)\s*\[(.*?)\]$/);
         if (!match) {
-          setError('Invalid item format. Please use format: "Item Name [Type]"');
+          setError(
+            'Invalid item format. Please use format: "Item Name [Type]"',
+          );
           setLoading(false);
           return;
         }
 
         const [, itemNameOnly, itemType] = match;
-        const matchingItem = allItems.find(item => 
-          item.name.toLowerCase() === itemNameOnly.toLowerCase() &&
-          item.type.toLowerCase() === itemType.toLowerCase()
+        const matchingItem = allItems.find(
+          (item) =>
+            item.name.toLowerCase() === itemNameOnly.toLowerCase() &&
+            item.type.toLowerCase() === itemType.toLowerCase(),
         );
 
         if (!matchingItem) {
-          setError('Item not found. Please select a valid item from the suggestions list.');
+          setError(
+            "Item not found. Please select a valid item from the suggestions list.",
+          );
           setLoading(false);
           return;
         }
 
         setMatchingItemId(matchingItem.id);
 
-        filteredResults = filteredResults.filter(dupe => 
-          dupe.item_id === matchingItem.id
+        filteredResults = filteredResults.filter(
+          (dupe) => dupe.item_id === matchingItem.id,
         );
       }
-      
+
       setResults(filteredResults);
     } catch (err) {
-      setError('Failed to fetch dupe data. Please try again.');
-      console.error('Error fetching dupe data:', err);
+      setError("Failed to fetch dupe data. Please try again.");
+      console.error("Error fetching dupe data:", err);
     } finally {
       setLoading(false);
     }
@@ -163,7 +184,7 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!ownerName.trim()) {
-      toast.error('Please enter an owner name to check for dupes');
+      toast.error("Please enter an owner name to check for dupes");
       return;
     }
     handleSearch();
@@ -172,14 +193,18 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
   const handleReportClick = () => {
     const token = getToken();
     if (!token) {
-      toast.error('Please log in to submit dupe reports');
+      toast.error("Please log in to submit dupe reports");
       setLoginModalOpen(true);
       return;
     }
     setIsItemSelectionModalOpen(true);
   };
 
-  const handleItemSelect = (item: { id: number; name: string; type: string }) => {
+  const handleItemSelect = (item: {
+    id: number;
+    name: string;
+    type: string;
+  }) => {
     setSelectedItem(item);
     setIsReportModalOpen(true);
   };
@@ -188,26 +213,37 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
-          <label htmlFor="ownerName" className="block text-sm font-medium text-muted mb-1">
+          <label
+            htmlFor="ownerName"
+            className="text-muted mb-1 block text-sm font-medium"
+          >
             Owner Name <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-4 w-4 text-muted" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <MagnifyingGlassIcon className="text-muted h-4 w-4" />
             </div>
             <input
               type="text"
               id="ownerName"
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
-              onBlur={() => setTimeout(() => setShowOwnerSuggestions(false), 200)}
+              onBlur={() =>
+                setTimeout(() => setShowOwnerSuggestions(false), 200)
+              }
               onFocus={() => {
                 if (ownerName.trim()) {
-                  const uniqueOwners = [...new Set(allDupes.map(dupe => dupe.owner))];
-                  const similarOwners = findSimilarStrings(ownerName, uniqueOwners, {
-                    minSimilarity: 0.6,
-                    maxResults: 5
-                  });
+                  const uniqueOwners = [
+                    ...new Set(allDupes.map((dupe) => dupe.owner)),
+                  ];
+                  const similarOwners = findSimilarStrings(
+                    ownerName,
+                    uniqueOwners,
+                    {
+                      minSimilarity: 0.6,
+                      maxResults: 5,
+                    },
+                  );
                   setOwnerSuggestions(similarOwners);
                   setShowOwnerSuggestions(true);
                 }
@@ -216,30 +252,30 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
               required
               autoComplete="off"
               autoCorrect="off"
-              className="w-full pl-9 pr-9 py-2 rounded-lg border border-[#2E3944] bg-[#37424D] text-muted placeholder-muted/50 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
+              className="text-muted placeholder-muted/50 w-full rounded-lg border border-[#2E3944] bg-[#37424D] py-2 pr-9 pl-9 focus:border-transparent focus:ring-2 focus:ring-[#5865F2] focus:outline-none"
             />
             {ownerName && (
               <button
                 type="button"
                 onClick={() => {
-                  setOwnerName('');
+                  setOwnerName("");
                   setOwnerSuggestions([]);
                   setShowOwnerSuggestions(false);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[#FFFFFF] transition-colors"
+                className="text-muted absolute top-1/2 right-3 -translate-y-1/2 transition-colors hover:text-[#FFFFFF]"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
             )}
           </div>
           {showOwnerSuggestions && ownerSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 rounded-lg border border-[#2E3944] bg-[#1A1F24] shadow-lg max-h-48 overflow-y-auto">
+            <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-[#2E3944] bg-[#1A1F24] shadow-lg">
               {ownerSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => handleOwnerSuggestionClick(suggestion)}
-                  className="w-full px-4 py-2 text-left text-muted hover:bg-[#37424D] transition-colors first:rounded-t-lg last:rounded-b-lg"
+                  className="text-muted w-full px-4 py-2 text-left transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-[#37424D]"
                 >
                   {suggestion}
                 </button>
@@ -249,28 +285,37 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
         </div>
 
         <div className="relative">
-          <label htmlFor="itemName" className="block text-sm font-medium text-muted mb-1">
+          <label
+            htmlFor="itemName"
+            className="text-muted mb-1 block text-sm font-medium"
+          >
             Item Name
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-4 w-4 text-muted" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <MagnifyingGlassIcon className="text-muted h-4 w-4" />
             </div>
             <input
               type="text"
               id="itemName"
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              onBlur={() => setTimeout(() => setShowItemSuggestions(false), 200)}
+              onBlur={() =>
+                setTimeout(() => setShowItemSuggestions(false), 200)
+              }
               onFocus={() => {
                 if (itemName.trim()) {
                   // Extract just the name part before the [Type]
-                  const itemNameOnly = itemName.split(' [')[0];
+                  const itemNameOnly = itemName.split(" [")[0];
                   const filteredItems = allItems
-                    .filter(item => item.name.toLowerCase().includes(itemNameOnly.toLowerCase()))
-                    .map(item => ({
+                    .filter((item) =>
+                      item.name
+                        .toLowerCase()
+                        .includes(itemNameOnly.toLowerCase()),
+                    )
+                    .map((item) => ({
                       name: item.name,
-                      type: item.type
+                      type: item.type,
                     }));
                   setItemSuggestions(filteredItems);
                   setShowItemSuggestions(true);
@@ -279,30 +324,30 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
               placeholder="Enter item name..."
               autoComplete="off"
               autoCorrect="off"
-              className="w-full pl-9 pr-9 py-2 rounded-lg border border-[#2E3944] bg-[#37424D] text-muted placeholder-muted/50 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
+              className="text-muted placeholder-muted/50 w-full rounded-lg border border-[#2E3944] bg-[#37424D] py-2 pr-9 pl-9 focus:border-transparent focus:ring-2 focus:ring-[#5865F2] focus:outline-none"
             />
             {itemName && (
               <button
                 type="button"
                 onClick={() => {
-                  setItemName('');
+                  setItemName("");
                   setItemSuggestions([]);
                   setShowItemSuggestions(false);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[#FFFFFF] transition-colors"
+                className="text-muted absolute top-1/2 right-3 -translate-y-1/2 transition-colors hover:text-[#FFFFFF]"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
             )}
           </div>
           {showItemSuggestions && itemSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 rounded-lg border border-[#2E3944] bg-[#1A1F24] shadow-lg max-h-48 overflow-y-auto">
+            <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-[#2E3944] bg-[#1A1F24] shadow-lg">
               {itemSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => handleItemSuggestionClick(suggestion)}
-                  className="w-full px-4 py-2 text-left text-muted hover:bg-[#37424D] transition-colors first:rounded-t-lg last:rounded-b-lg"
+                  className="text-muted w-full px-4 py-2 text-left transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-[#37424D]"
                 >
                   {suggestion.name} [{suggestion.type}]
                 </button>
@@ -311,18 +356,18 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? 'Checking...' : 'Check if Dupe'}
+            {loading ? "Checking..." : "Check if Dupe"}
           </button>
           <button
             type="button"
             onClick={handleReportClick}
-            className="w-full px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31]"
+            className="w-full rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none"
           >
             Report a Dupe
           </button>
@@ -354,7 +399,7 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
           onClose={() => {
             setIsReportModalOpen(false);
             setSelectedItem(null);
-            setDuperName('');
+            setDuperName("");
           }}
           itemName={selectedItem.name}
           itemType={selectedItem.type}
@@ -364,12 +409,12 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({ initialItems = [], init
         />
       )}
 
-      <LoginModalWrapper 
-        open={loginModalOpen} 
-        onClose={() => setLoginModalOpen(false)} 
+      <LoginModalWrapper
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
       />
     </>
   );
 };
 
-export default DupeSearchForm; 
+export default DupeSearchForm;

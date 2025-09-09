@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useEffect } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -18,19 +18,19 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  confirmButtonClass = 'bg-red-500 hover:bg-red-600'
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  confirmButtonClass = "bg-red-500 hover:bg-red-600",
 }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
@@ -39,31 +39,31 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Dialog */}
-      <div className="relative bg-[#212A31] rounded-lg border border-[#2E3944] w-full max-w-md mx-4 p-6 shadow-xl">
+      <div className="relative mx-4 w-full max-w-md rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-xl">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-muted hover:text-white transition-colors"
+          className="text-muted absolute top-4 right-4 transition-colors hover:text-white"
         >
-          <XMarkIcon className="w-5 h-5" />
+          <XMarkIcon className="h-5 w-5" />
         </button>
 
         {/* Content */}
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-muted">{title}</h3>
+          <h3 className="text-muted text-xl font-semibold">{title}</h3>
           <p className="text-muted">{message}</p>
-          
+
           {/* Buttons */}
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-muted hover:text-white transition-colors"
+              className="text-muted px-4 py-2 transition-colors hover:text-white"
             >
               {cancelText}
             </button>
@@ -72,7 +72,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 onConfirm();
                 onClose();
               }}
-              className={`px-4 py-2 text-white rounded-lg transition-colors ${confirmButtonClass}`}
+              className={`rounded-lg px-4 py-2 text-white transition-colors ${confirmButtonClass}`}
             >
               {confirmText}
             </button>
@@ -81,4 +81,4 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       </div>
     </div>
   );
-}; 
+};

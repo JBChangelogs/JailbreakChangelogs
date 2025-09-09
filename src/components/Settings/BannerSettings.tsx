@@ -1,24 +1,39 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Box, TextField, Button, Typography, Chip, Tooltip } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import { UserData } from '@/types/auth';
-import { updateBanner } from '@/services/settingsService';
-import toast from 'react-hot-toast';
-import { useSupporterModal } from '@/hooks/useSupporterModal';
-import SupporterModal from '../Modals/SupporterModal';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Chip,
+  Tooltip,
+} from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import { UserData } from "@/types/auth";
+import { updateBanner } from "@/services/settingsService";
+import toast from "react-hot-toast";
+import { useSupporterModal } from "@/hooks/useSupporterModal";
+import SupporterModal from "../Modals/SupporterModal";
 
 interface BannerSettingsProps {
   userData: UserData;
   onBannerUpdate: (newBannerUrl: string) => void;
 }
 
-export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps) => {
-  const [customBannerUrl, setCustomBannerUrl] = useState<string>('');
+export const BannerSettings = ({
+  userData,
+  onBannerUpdate,
+}: BannerSettingsProps) => {
+  const [customBannerUrl, setCustomBannerUrl] = useState<string>("");
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [isValidBanner, setIsValidBanner] = useState(false);
 
   // Supporter modal hook
-  const { modalState, closeModal, checkBannerAccess, checkAnimatedBannerAccess } = useSupporterModal();
+  const {
+    modalState,
+    closeModal,
+    checkBannerAccess,
+    checkAnimatedBannerAccess,
+  } = useSupporterModal();
 
   const validateBannerUrl = useCallback((url: string) => {
     setBannerError(null);
@@ -31,42 +46,48 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
       try {
         parsedUrl = new URL(url);
       } catch {
-        setBannerError('Please enter a valid URL');
+        setBannerError("Please enter a valid URL");
         return;
       }
 
-      const allowedExtensions = ['.jpeg', '.jpg', '.webp', '.gif', '.png'];
-      const fileExtension = parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf('.')).toLowerCase();
-      
+      const allowedExtensions = [".jpeg", ".jpg", ".webp", ".gif", ".png"];
+      const fileExtension = parsedUrl.pathname
+        .substring(parsedUrl.pathname.lastIndexOf("."))
+        .toLowerCase();
+
       if (!allowedExtensions.includes(fileExtension)) {
-        setBannerError(`URL must end with ${allowedExtensions.join(', ')}`);
+        setBannerError(`URL must end with ${allowedExtensions.join(", ")}`);
         return;
       }
 
       const allowedHosts = [
-        'imgbb.com',
-        'i.ibb.co',
-        'postimg.cc',
-        'i.postimg.cc',
-        'tenor.com',
-        'cdn.discordapp.com',
-        'imgur.com',
-        'i.imgur.com'
+        "imgbb.com",
+        "i.ibb.co",
+        "postimg.cc",
+        "i.postimg.cc",
+        "tenor.com",
+        "cdn.discordapp.com",
+        "imgur.com",
+        "i.imgur.com",
       ];
-      
-      const isAllowedHost = allowedHosts.some(host => 
-        parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
+
+      const isAllowedHost = allowedHosts.some(
+        (host) =>
+          parsedUrl.hostname === host ||
+          parsedUrl.hostname.endsWith("." + host),
       );
 
       if (!isAllowedHost) {
-        setBannerError(`Only images from ${allowedHosts.filter(host => !host.startsWith('i.')).join(', ')} are allowed`);
+        setBannerError(
+          `Only images from ${allowedHosts.filter((host) => !host.startsWith("i.")).join(", ")} are allowed`,
+        );
         return;
       }
 
       setIsValidBanner(true);
     } catch (error) {
-      console.error('Error validating banner:', error);
-      setBannerError('Invalid banner URL');
+      console.error("Error validating banner:", error);
+      setBannerError("Invalid banner URL");
     }
   }, []);
 
@@ -77,7 +98,9 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
     }
   }, [userData, validateBannerUrl]);
 
-  const handleCustomBannerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomBannerChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const newUrl = event.target.value.trim();
     setCustomBannerUrl(newUrl);
     validateBannerUrl(newUrl);
@@ -92,7 +115,7 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
     }
 
     // Check for animated banner access if it's a GIF
-    if (customBannerUrl.toLowerCase().includes('.gif')) {
+    if (customBannerUrl.toLowerCase().includes(".gif")) {
       if (!checkAnimatedBannerAccess(userData.premiumtype || 0)) {
         return; // Modal will be shown by the hook
       }
@@ -101,68 +124,84 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
     if (!isValidBanner) return;
 
     try {
-      const cookies = document.cookie.split(';');
-      const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
-      const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-      
+      const cookies = document.cookie.split(";");
+      const tokenCookie = cookies.find((cookie) =>
+        cookie.trim().startsWith("token="),
+      );
+      const token = tokenCookie ? tokenCookie.split("=")[1] : null;
+
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error("No authentication token found");
       }
 
       // Update the banner URL
       const newBannerUrl = await updateBanner(customBannerUrl, token);
       onBannerUpdate(newBannerUrl);
-      toast.success('Custom banner updated successfully');
+      toast.success("Custom banner updated successfully");
     } catch (error) {
-      console.error('Error updating banner:', error);
-      setBannerError(error instanceof Error ? error.message : 'Failed to update banner');
-      toast.error('Failed to update banner');
+      console.error("Error updating banner:", error);
+      setBannerError(
+        error instanceof Error ? error.message : "Failed to update banner",
+      );
+      toast.error("Failed to update banner");
     }
   };
 
   return (
     <>
       <Box sx={{ mt: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Typography variant="subtitle1" component="div" sx={{ color: '#D3D9D4' }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Typography
+            variant="subtitle1"
+            component="div"
+            sx={{ color: "#D3D9D4" }}
+          >
             Custom Banner URL
           </Typography>
           <Tooltip title="Premium Feature">
             <Chip
-              icon={<StarIcon sx={{ color: '#FFD700' }} />}
+              icon={<StarIcon sx={{ color: "#FFD700" }} />}
               label="Premium"
               size="small"
               sx={{
-                backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                border: '1px solid rgba(255, 215, 0, 0.3)',
-                color: '#FFD700',
-                '& .MuiChip-label': {
-                  fontWeight: 600
-                }
+                backgroundColor: "rgba(255, 215, 0, 0.1)",
+                border: "1px solid rgba(255, 215, 0, 0.3)",
+                color: "#FFD700",
+                "& .MuiChip-label": {
+                  fontWeight: 600,
+                },
               }}
             />
           </Tooltip>
         </Box>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            mb: 1, 
-            color: userData?.premiumtype && userData.premiumtype >= 2 ? '#FFFFFF' : '#FF6B6B',
-            fontWeight: userData?.premiumtype && userData.premiumtype >= 2 ? 'normal' : 500
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 1,
+            color:
+              userData?.premiumtype && userData.premiumtype >= 2
+                ? "#FFFFFF"
+                : "#FF6B6B",
+            fontWeight:
+              userData?.premiumtype && userData.premiumtype >= 2
+                ? "normal"
+                : 500,
           }}
         >
-          {userData?.premiumtype && userData.premiumtype >= 2 
+          {userData?.premiumtype && userData.premiumtype >= 2
             ? "Enter a direct link to your custom banner image (ImgBB, PostImg, or Tenor only)"
             : "🔒 Upgrade to Premium Tier 2 to unlock custom banners"}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
           <Box sx={{ flex: 1 }}>
             <TextField
               fullWidth
               size="small"
-              placeholder={userData?.premiumtype && userData.premiumtype >= 2 
-                ? "https://example.com/your-banner.jpg"
-                : "Premium feature - Upgrade to unlock"}
+              placeholder={
+                userData?.premiumtype && userData.premiumtype >= 2
+                  ? "https://example.com/your-banner.jpg"
+                  : "Premium feature - Upgrade to unlock"
+              }
               value={customBannerUrl}
               onChange={handleCustomBannerChange}
               variant="outlined"
@@ -170,26 +209,26 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
               error={!!bannerError}
               helperText={bannerError}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#2E3944',
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#2E3944",
                   },
-                  '&:hover fieldset': {
-                    borderColor: '#124E66',
+                  "&:hover fieldset": {
+                    borderColor: "#124E66",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#124E66',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#124E66",
                   },
-                  backgroundColor: 'rgba(46, 57, 68, 0.5)',
-                  height: '40px'
+                  backgroundColor: "rgba(46, 57, 68, 0.5)",
+                  height: "40px",
                 },
-                '& .MuiInputBase-input': {
-                  color: '#D3D9D4',
+                "& .MuiInputBase-input": {
+                  color: "#D3D9D4",
                 },
-                '& .MuiFormHelperText-root': {
-                  position: 'absolute',
-                  bottom: '-20px'
-                }
+                "& .MuiFormHelperText-root": {
+                  position: "absolute",
+                  bottom: "-20px",
+                },
               }}
             />
           </Box>
@@ -197,24 +236,28 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
             variant="contained"
             size="small"
             onClick={handleUpdateBanner}
-            disabled={!isValidBanner || !userData?.premiumtype || userData.premiumtype < 2}
+            disabled={
+              !isValidBanner ||
+              !userData?.premiumtype ||
+              userData.premiumtype < 2
+            }
             sx={{
-              backgroundColor: '#124E66',
-              '&:hover': {
-                backgroundColor: '#0D3A4D',
+              backgroundColor: "#124E66",
+              "&:hover": {
+                backgroundColor: "#0D3A4D",
               },
-              '&.Mui-disabled': {
-                backgroundColor: '#2E3944',
-                color: '#FFFFFF'
+              "&.Mui-disabled": {
+                backgroundColor: "#2E3944",
+                color: "#FFFFFF",
               },
-              height: '40px',
-              minWidth: '100px'
+              height: "40px",
+              minWidth: "100px",
             }}
           >
             Update
           </Button>
         </Box>
-        <Box sx={{ height: '40px' }} />
+        <Box sx={{ height: "40px" }} />
       </Box>
 
       {/* Supporter Modal */}
@@ -229,4 +272,4 @@ export const BannerSettings = ({ userData, onBannerUpdate }: BannerSettingsProps
       />
     </>
   );
-}; 
+};

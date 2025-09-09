@@ -21,7 +21,7 @@ const validFilterSorts = [
   "name-furnitures",
   "name-horns",
   "name-weapon-skins",
-  "favorites"
+  "favorites",
 ] as const;
 
 const validValueSorts = [
@@ -60,25 +60,25 @@ const validValueSorts = [
   "trend-unstable",
   "trend-hoarded",
   "trend-projected",
-  "trend-recovering"
+  "trend-recovering",
 ] as const;
 
-export default function SearchParamsHandler({ 
-  setFilterSort, 
-  setValueSort 
-}: { 
-  setFilterSort: (value: FilterSort) => void, 
-  setValueSort: (value: ValueSort) => void 
+export default function SearchParamsHandler({
+  setFilterSort,
+  setValueSort,
+}: {
+  setFilterSort: (value: FilterSort) => void;
+  setValueSort: (value: ValueSort) => void;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const filterSort = searchParams.get('filterSort');
-    const valueSort = searchParams.get('valueSort');
-    
+    const filterSort = searchParams.get("filterSort");
+    const valueSort = searchParams.get("valueSort");
+
     let hasChanges = false;
-    
+
     if (filterSort && validFilterSorts.includes(filterSort as FilterSort)) {
       setFilterSort(filterSort as FilterSort);
       hasChanges = true;
@@ -92,10 +92,10 @@ export default function SearchParamsHandler({
     if (hasChanges) {
       // Use setTimeout to ensure the state updates have been processed
       setTimeout(() => {
-        router.replace('/values', { scroll: false });
+        router.replace("/values", { scroll: false });
       }, 0);
     }
   }, [searchParams, router, setFilterSort, setValueSort]);
 
   return null; // This component doesn't render anything
-} 
+}

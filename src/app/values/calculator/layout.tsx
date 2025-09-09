@@ -1,12 +1,13 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Value Calculator',
-  description: 'Calculate the value of your Roblox Jailbreak items and trades',
+  title: "Value Calculator",
+  description: "Calculate the value of your Roblox Jailbreak items and trades",
   openGraph: {
-    title: 'Value Calculator',
-    description: 'Calculate the value of your Roblox Jailbreak items and trades',
-    type: 'website',
+    title: "Value Calculator",
+    description:
+      "Calculate the value of your Roblox Jailbreak items and trades",
+    type: "website",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
@@ -18,9 +19,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: 'Value Calculator',
-    description: 'Calculate the value of your Roblox Jailbreak items and trades',
-    images: ["https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp"],
+    title: "Value Calculator",
+    description:
+      "Calculate the value of your Roblox Jailbreak items and trades",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 
@@ -30,4 +34,4 @@ export default function CalculatorLayout({
   children: React.ReactNode;
 }) {
   return children;
-} 
+}

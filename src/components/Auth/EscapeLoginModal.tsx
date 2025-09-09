@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useEscapeLogin } from '@/utils/escapeLogin';
+import { useState } from "react";
+import { useEscapeLogin } from "@/utils/escapeLogin";
 
 export default function EscapeLoginModal() {
   const { showModal, setShowModal, handleTokenSubmit } = useEscapeLogin();
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     const result = await handleTokenSubmit(token);
     if (!result.success) {
-      setError('Invalid token. Please try again.');
+      setError("Invalid token. Please try again.");
     }
   };
 
@@ -22,17 +22,17 @@ export default function EscapeLoginModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
+      <div
         className="fixed inset-0 bg-black/50"
         onClick={() => setShowModal(false)}
       />
       <div className="relative w-full max-w-md rounded-lg bg-[#212A31] p-6 shadow-xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between border-b border-[#2E3944] pb-4">
-          <h2 className="text-xl font-semibold text-muted">Login with Token</h2>
+          <h2 className="text-muted text-xl font-semibold">Login with Token</h2>
           <button
             onClick={() => setShowModal(false)}
-            className="rounded-md p-1 text-muted hover:bg-[#2E3944]"
+            className="text-muted rounded-md p-1 hover:bg-[#2E3944]"
           >
             <svg
               className="h-5 w-5"
@@ -52,7 +52,10 @@ export default function EscapeLoginModal() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="token" className="mb-2 block text-sm font-medium text-muted">
+            <label
+              htmlFor="token"
+              className="text-muted mb-2 block text-sm font-medium"
+            >
               Enter your token
             </label>
             <input
@@ -60,12 +63,10 @@ export default function EscapeLoginModal() {
               id="token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              className="w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 text-muted placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
+              className="text-muted w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
               placeholder="Enter your token"
             />
-            {error && (
-              <p className="mt-2 text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
           </div>
 
           {/* Actions */}
@@ -73,7 +74,7 @@ export default function EscapeLoginModal() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="rounded-md px-4 py-2 text-sm font-medium text-muted hover:bg-[#2E3944]"
+              className="text-muted rounded-md px-4 py-2 text-sm font-medium hover:bg-[#2E3944]"
             >
               Cancel
             </button>
@@ -88,4 +89,4 @@ export default function EscapeLoginModal() {
       </div>
     </div>
   );
-} 
+}
