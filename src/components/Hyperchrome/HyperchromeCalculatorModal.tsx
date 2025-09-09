@@ -39,8 +39,8 @@ export default function HyperchromeCalculatorModal({
   const robberiesNeeded = useMemo(() => {
     const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
     const pityPercent = Math.min(Math.max(pity, 0), 100);
-    return calculateRobberiesToLevelUp(lvl, pityPercent, false);
-  }, [level, pity]);
+    return calculateRobberiesToLevelUp(lvl, pityPercent, isPrivate);
+  }, [level, pity, isPrivate]);
 
   return (
     <Dialog
