@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Dialog, DialogContent, Checkbox } from "@mui/material";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { calculateRobberiesToLevelUp } from "@/utils/hyperchrome";
+import {
+  calculateRobberiesToLevelUp,
+  calculateAllLevelPercentages,
+} from "@/utils/hyperchrome";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -19,7 +22,7 @@ export default function HyperchromeCalculatorModal({
 }: HyperchromeCalculatorModalProps) {
   const [level, setLevel] = useState(0);
   const [pity, setPity] = useState(0);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
@@ -30,7 +33,7 @@ export default function HyperchromeCalculatorModal({
       // reset when closing
       setLevel(0);
       setPity(0);
-      setIsPrivate(false);
+      setShowAll(false);
       setStep(1);
       setHasCalculated(false);
     }
@@ -39,8 +42,14 @@ export default function HyperchromeCalculatorModal({
   const robberiesNeeded = useMemo(() => {
     const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
     const pityPercent = Math.min(Math.max(pity, 0), 100);
-    return calculateRobberiesToLevelUp(lvl, pityPercent, isPrivate);
-  }, [level, pity, isPrivate]);
+    return calculateRobberiesToLevelUp(lvl, pityPercent);
+  }, [level, pity]);
+
+  const otherPity = useMemo(() => {
+    const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
+    const pityPercent = Math.min(Math.max(pity, 0), 100);
+    return calculateAllLevelPercentages(lvl, pityPercent);
+  }, [level, pity]);
 
   return (
     <Dialog
@@ -173,20 +182,16 @@ export default function HyperchromeCalculatorModal({
               </label>
               <div>
                 <div className="mb-1 text-sm font-medium text-white">
-                  Private server
+                  Show all cases for upgrade/downgrading hyperchrome
                 </div>
                 <Checkbox
-                  checked={isPrivate}
-                  onChange={(e) => setIsPrivate(e.target.checked)}
+                  checked={showAll}
+                  onChange={(e) => setShowAll(e.target.checked)}
                   sx={{
                     color: "#5865F2",
                     "&.Mui-checked": { color: "#5865F2" },
                   }}
                 />
-                <div className="text-sm text-[#A0A7AC]">
-                  Enabling private server increases the required robberies by
-                  50%.
-                </div>
               </div>
             </div>
           )}
@@ -231,8 +236,31 @@ export default function HyperchromeCalculatorModal({
                 </div>
               </div>
               <div className="mt-2 text-xs text-[#A0A7AC]">
-                Based on Level {level}, {pity}% pity
-                {isPrivate ? ", private server" : ""}.
+                💡Pro tip: After {robberiesNeeded} robberies, pity reaches 66.6%
+                in private servers. Robbing in a public server at that point
+                guarantees an instant level-up
+              </div>
+              <div className="mt-2 text-xs text-[#A0A7AC]">
+                Based on Level {level}, {pity}% pity.
+              </div>
+            </div>
+          )}
+          {hasCalculated && step === 3 && showAll && (
+            <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+              <div className="text-base text-[#D3D9D4]">
+                Level 1: {otherPity[0]}%
+              </div>
+              <div className="text-base text-[#D3D9D4]">
+                Level 2: {otherPity[1]}%
+              </div>
+              <div className="text-base text-[#D3D9D4]">
+                Level 3: {otherPity[2]}%
+              </div>
+              <div className="text-base text-[#D3D9D4]">
+                Level 4: {otherPity[3]}%
+              </div>
+              <div className="text-base text-[#D3D9D4]">
+                Level 5: {otherPity[4]}%
               </div>
             </div>
           )}
