@@ -235,12 +235,6 @@ export default function HyperchromeCalculatorModal({
                 If you trade to a different level, here&apos;s what your pity
                 would be for each level-up.
               </div>
-              {level !== 0 && parseFloat(otherPity[0]) <= 100 && (
-                <div className="text-base text-[#D3D9D4]">
-                  Level 0 <FaArrowRight className="mx-1 inline" /> Level 1:{" "}
-                  {otherPity[0]}%
-                </div>
-              )}
               {parseFloat(otherPity[1]) <= 100 && (
                 <div className="text-base text-[#D3D9D4]">
                   Level 1 <FaArrowRight className="mx-1 inline" /> Level 2:{" "}
