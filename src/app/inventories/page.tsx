@@ -5,6 +5,7 @@ import {
   fetchUserScansLeaderboard,
   fetchRobloxUsersBatchLeaderboard,
   fetchRobloxAvatars,
+  fetchOfficialScanBots,
   UserScan,
 } from "@/utils/api";
 import Image from "next/image";
@@ -177,13 +178,17 @@ async function StatsSection() {
 
 // Component for official scan bots section
 async function OfficialBotsSection() {
-  const botIds = ["9256688389", "9256079769", "9256380025"];
+  const bots = await fetchOfficialScanBots();
+  const sortedBots = [...bots].sort((a, b) => {
+    const aName = (a.username || "").toLowerCase();
+    const bName = (b.username || "").toLowerCase();
+    return aName.localeCompare(bName);
+  });
+  const botIds = sortedBots.map((b) => String(b.userId));
 
-  // Fetch bot data from the API
-  const [botUserData, botAvatarData] = await Promise.all([
-    fetchRobloxUsersBatchLeaderboard(botIds),
-    fetchRobloxAvatars(botIds),
-  ]);
+  // Fetch avatar data for bots
+  const botAvatarData =
+    botIds.length > 0 ? await fetchRobloxAvatars(botIds) : {};
 
   return (
     <div className="mt-8">
@@ -198,18 +203,11 @@ async function OfficialBotsSection() {
           </p>
         </div>
         <div className="space-y-3">
-          {botIds.map((botId, index) => {
-            // Get bot user data
-            const botUser =
-              botUserData && typeof botUserData === "object"
-                ? Object.values(botUserData).find(
-                    (user): user is BotUserData =>
-                      typeof user === "object" &&
-                      user !== null &&
-                      "id" in user &&
-                      user.id?.toString() === botId,
-                  )
-                : null;
+          {sortedBots.map((bot, index) => {
+            const botId = String(bot.userId);
+            const displayName =
+              bot.displayName || bot.username || `Bot ${index + 1}`;
+            const username = bot.username || botId;
 
             // Get bot avatar data
             const botAvatar =
@@ -223,9 +221,6 @@ async function OfficialBotsSection() {
                   )
                 : null;
 
-            const displayName =
-              botUser?.displayName || botUser?.name || `Bot ${index + 1}`;
-            const username = botUser?.name || botId;
             const avatarUrl = botAvatar?.imageUrl || null;
 
             return (

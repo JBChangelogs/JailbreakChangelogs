@@ -1244,6 +1244,48 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
   }
 }
 
+// Official scan bots
+export interface OfficialBotUser {
+  userId: number;
+  username: string;
+  displayName: string;
+  hasVerifiedBadge: boolean;
+}
+
+export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
+  try {
+    if (!INVENTORY_API_URL) {
+      throw new Error("Missing INVENTORY_API_URL");
+    }
+
+    const response = await fetch(`${INVENTORY_API_URL}/proxy/users/bots`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        `[SERVER] fetchOfficialScanBots: Failed with status ${response.status} ${response.statusText}`,
+      );
+      return [];
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return data as OfficialBotUser[];
+    }
+    console.warn(
+      "[SERVER] fetchOfficialScanBots: Unexpected response shape:",
+      data,
+    );
+    return [];
+  } catch (err) {
+    console.error("[SERVER] fetchOfficialScanBots: Unexpected error:", err);
+    return [];
+  }
+}
+
 export interface CrewLeaderboardEntry {
   ClanId?: string; // Make ClanId optional since older seasons don't have it
   ClanName: string;
