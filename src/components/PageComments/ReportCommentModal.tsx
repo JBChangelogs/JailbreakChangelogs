@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getToken } from "@/utils/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 
@@ -27,11 +27,11 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   commentId,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuthenticated } = useAuthContext();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const handleSubmit = async () => {
-    const token = getToken();
-    if (!token) {
+    if (!isAuthenticated) {
       toast.error("You must be logged in to report comments");
       setLoginModalOpen(true);
       return;

@@ -11,12 +11,14 @@ import UserTypeTabs from "@/components/Users/UserTypeTabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Tooltip } from "@mui/material";
 import { UserDetailsTooltip } from "./UserDetailsTooltip";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface UserSearchProps {
   initialUsers: UserData[];
 }
 
 export default function UserSearch({ initialUsers }: UserSearchProps) {
+  const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -26,31 +28,12 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
-    const checkAuthStatus = () => {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const userData = JSON.parse(storedUser);
-          setCurrentUserId(userData.id);
-        } catch (error) {
-          console.error("Error parsing user data:", error);
-          setCurrentUserId(null);
-        }
-      } else {
-        setCurrentUserId(null);
-      }
-    };
-
-    checkAuthStatus();
-    window.addEventListener("storage", checkAuthStatus);
-    const handleAuthChange = () => checkAuthStatus();
-    window.addEventListener("authStateChanged", handleAuthChange);
-
-    return () => {
-      window.removeEventListener("storage", checkAuthStatus);
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
+    if (user) {
+      setCurrentUserId(user.id);
+    } else {
+      setCurrentUserId(null);
+    }
+  }, [user]);
 
   const filteredUsers = initialUsers.filter((user) => {
     const searchLower = debouncedSearchQuery.trim().toLowerCase();

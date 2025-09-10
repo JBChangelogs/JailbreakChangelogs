@@ -21,9 +21,8 @@ import { StarIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { PauseIcon } from "@heroicons/react/24/solid";
 import SubItemsDropdown from "./SubItemsDropdown";
-import { PUBLIC_API_URL } from "@/utils/api";
 import toast from "react-hot-toast";
-import { getToken } from "@/utils/auth";
+import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   getItemTypeColor,
@@ -77,6 +76,7 @@ export default function ItemCard({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isValuesPage = pathname === "/values";
+  const isAuthenticated = useIsAuthenticated();
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -182,8 +182,7 @@ export default function ItemCard({
     e.preventDefault();
     e.stopPropagation();
 
-    const token = getToken();
-    if (!token) {
+    if (!isAuthenticated) {
       toast.error(
         "You must be logged in to favorite items. Please log in and try again.",
       );
@@ -192,16 +191,14 @@ export default function ItemCard({
 
     try {
       const response = await fetch(
-        `${PUBLIC_API_URL}/favorites/${isFavorited ? "remove" : "add"}`,
+        `/api/favorites/${isFavorited ? "remove" : "add"}`,
         {
           method: isFavorited ? "DELETE" : "POST",
           headers: {
             "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
           },
           body: JSON.stringify({
             item_id: String(item.id),
-            owner: token,
           }),
         },
       );

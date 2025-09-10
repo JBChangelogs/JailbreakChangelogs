@@ -21,10 +21,12 @@ import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import { OpenInNew } from "@mui/icons-material";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
-import { getToken } from "@/utils/auth";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { useAuthContext } from "@/contexts/AuthContext";
+// import { getToken } from '@/utils/auth';
+// import { PUBLIC_API_URL } from '@/utils/api';
 
 export default function SettingsPage() {
+  const { user, isLoading } = useAuthContext();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -60,57 +62,14 @@ export default function SettingsPage() {
   } = useSettings(userData);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = getToken();
-        if (!token) {
-          router.push("/");
-          return;
-        }
-
-        const response = await fetch(
-          `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const userData = await response.json();
-        setUserData(userData);
-
-        // Update localStorage with fresh data
-        localStorage.setItem("user", JSON.stringify(userData));
-        window.dispatchEvent(
-          new CustomEvent("authStateChanged", { detail: userData }),
-        );
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        router.push("/");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-
-    // Add event listener for auth changes
-    const handleAuthChange = (event: CustomEvent) => {
-      const userData = event.detail;
-      setUserData(userData || null);
-    };
-
-    window.addEventListener(
-      "authStateChanged",
-      handleAuthChange as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "authStateChanged",
-        handleAuthChange as EventListener,
-      );
-    };
-  }, [router]);
+    if (user) {
+      setUserData(user);
+      setLoading(false);
+    } else if (!isLoading) {
+      // User is not authenticated and auth is not loading
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     if (!loading && !userData) {

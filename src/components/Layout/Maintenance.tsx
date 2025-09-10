@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { canBypassMaintenance } from "@/utils/maintenance";
 import Image from "next/image";
 import localFont from "next/font/local";
@@ -11,7 +11,7 @@ const bangers = localFont({
 });
 
 export default function Maintenance() {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuthContext();
   const [shouldShowMaintenance, setShouldShowMaintenance] = useState(true);
 
   useEffect(() => {

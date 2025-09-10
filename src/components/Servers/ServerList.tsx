@@ -10,7 +10,7 @@ import {
   ClipboardIcon,
 } from "@heroicons/react/24/outline";
 import { formatProfileDate } from "@/utils/timestamp";
-import { getToken } from "@/utils/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import AddServerModal from "./AddServerModal";
@@ -30,6 +30,7 @@ interface Server {
 }
 
 const ServerList: React.FC = () => {
+  const { isAuthenticated, user } = useAuthContext();
   const [servers, setServers] = React.useState<Server[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -56,27 +57,10 @@ const ServerList: React.FC = () => {
     const fetchServersAndUser = async () => {
       setLoading(true);
       setError(null);
-      const token = getToken();
 
-      let userId: string | null = null;
-      if (token) {
-        try {
-          const userResponse = await fetch(
-            `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-          );
-          if (userResponse.ok) {
-            const userData = (await userResponse.json()) as UserData;
-            userId = userData.id;
-            setLoggedInUserId(userId);
-          } else {
-            console.error("Failed to fetch user data for token validation");
-            setLoggedInUserId(null);
-          }
-        } catch (userErr) {
-          console.error("Error fetching user data:", userErr);
-          setLoggedInUserId(null);
-        }
-      }
+      // Use centralized auth state instead of direct API call
+      const userId = user?.id || null;
+      setLoggedInUserId(userId);
 
       try {
         const serversResponse = await fetch(
@@ -148,7 +132,7 @@ const ServerList: React.FC = () => {
         handleAuthChange as EventListener,
       );
     };
-  }, []);
+  }, [user]);
 
   const handleServerAdded = async () => {
     // Fetch updated server list
@@ -202,22 +186,20 @@ const ServerList: React.FC = () => {
 
   const confirmDeleteServer = async () => {
     if (!serverToDelete) return;
-    const token = getToken();
-    if (!token) {
+    if (!isAuthenticated) {
       toast.error("You must be logged in to delete a server.");
       setDeleteModalOpen(false);
       setServerToDelete(null);
       return;
     }
     try {
-      const response = await fetch(`${PUBLIC_API_URL}/servers/delete`, {
+      const response = await fetch(`/api/servers/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           link: serverToDelete.link,
-          owner: token,
         }),
       });
       if (response.ok) {

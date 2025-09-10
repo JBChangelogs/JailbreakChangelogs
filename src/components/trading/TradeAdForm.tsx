@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from "@/utils/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem, TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
@@ -64,6 +63,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { isAuthenticated, user } = useAuthContext();
 
   const parseValueString = (valStr: string | number | undefined): number => {
     if (valStr === undefined || valStr === null) return 0;
@@ -107,9 +107,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     requesting: TradeItem[],
   ) => {
     if (editMode) return; // Don't save to localStorage when editing
-
-    const token = getToken();
-    if (token) {
+    if (isAuthenticated) {
       localStorage.setItem(
         "tradeAdFormItems",
         JSON.stringify({ offering, requesting }),
@@ -118,34 +116,15 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = getToken();
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(
-          `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-        );
-        if (response.ok) {
-          const userData = await response.json();
-          setUserData(userData);
-          const tier =
-            PREMIUM_TIERS.find((t) => t.tier === userData.premiumtype) ||
-            PREMIUM_TIERS[0];
-          setUserPremiumTier(tier);
-        }
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (user) {
+      setUserData(user);
+      const tier =
+        PREMIUM_TIERS.find((t) => t.tier === user.premiumtype) ||
+        PREMIUM_TIERS[0];
+      setUserPremiumTier(tier);
+    }
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
     if (editMode && tradeAd) {
@@ -161,8 +140,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       setRequestingItems([]);
       setExpirationHours(null); // <-- explicitly clear in create mode
 
-      const token = getToken();
-      if (!token) return;
+      if (!isAuthenticated) return;
 
       try {
         const storedItems = localStorage.getItem("tradeAdFormItems");
@@ -177,7 +155,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         localStorage.removeItem("tradeAdFormItems");
       }
     }
-  }, [editMode, tradeAd, userPremiumTier.durations]);
+  }, [editMode, tradeAd, userPremiumTier.durations, isAuthenticated]);
 
   const handleRestoreItems = () => {
     try {
@@ -337,15 +315,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
     try {
       setSubmitting(true);
-      const token = getToken();
-      if (!token) {
+      if (!isAuthenticated) {
         toast.error("You must be logged in to create a trade ad");
         return;
       }
 
       const endpoint = editMode
-        ? `${PUBLIC_API_URL}/trades/update?id=${tradeAd?.id}`
-        : `${PUBLIC_API_URL}/trades/add`;
+        ? `/api/trades/update?id=${tradeAd?.id}`
+        : `/api/trades/add`;
       const method = "POST";
 
       const response = await fetch(endpoint, {
@@ -376,7 +353,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               return String(item.id);
             })
             .join(","),
-          owner: token,
+          // owner injected by BFF via cookie
           ...(editMode ? {} : { expiration: expirationHours! }),
           ...(editMode && selectedTradeAd
             ? { status: selectedTradeAd.status }
@@ -541,8 +518,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     );
   }
 
-  const token = getToken();
-  if (!token) {
+  if (!isAuthenticated) {
     return (
       <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 text-center">
         <h3 className="text-muted mb-4 text-lg font-medium">

@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { UserData, AuthResponse } from "../types/auth";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { setCookie, getCookie, hasValidToken, removeCookie } from "./cookies";
+// import { PUBLIC_API_URL } from '@/utils/api';
+import { getCookie, hasValidToken, removeCookie } from "./cookies";
 
 let lastLogoutSource: string = "Unknown";
 
@@ -10,73 +10,30 @@ export function trackLogoutSource(source: string) {
 }
 
 export async function logout() {
-  // Get token from cookie
-  const token = getCookie("token");
   const source = lastLogoutSource || "Direct API Call";
-
-  // Only try to invalidate token if we have one
-  if (token && token !== "undefined") {
-    try {
-      console.group("🔐 Token Invalidation Process");
-      console.log("📝 Logout Details:", {
-        Source: source,
-        "Token Length": token.length,
-        Timestamp: new Date().toISOString(),
-      });
-
-      // Invalidate token on server
-      const response = await fetch(
-        `${PUBLIC_API_URL}/users/token/invalidate?session_token=${token}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (response.ok) {
-        console.log("✅ Token Successfully Invalidated:", {
-          Source: source,
-          Timestamp: new Date().toISOString(),
-          "Response Status": response.status,
-        });
-        // Only clear data if token invalidation was successful
-        clearAuthData("user-initiated logout");
-      } else {
-        const errorData = await response.json().catch(() => null);
-        console.error("❌ Token Invalidation Failed:", {
-          Source: source,
-          Timestamp: new Date().toISOString(),
-          Status: response.status,
-          "Status Text": response.statusText,
-          "Error Details": errorData || "No error details available",
-          "Token Length": token.length,
-        });
-        throw new Error("Failed to invalidate token");
-      }
-      console.groupEnd();
-    } catch (error) {
-      console.error("❌ Error During Logout:", {
-        Source: source,
-        Timestamp: new Date().toISOString(),
-        "Error Message":
-          error instanceof Error ? error.message : "Unknown error",
-        "Stack Trace": error instanceof Error ? error.stack : undefined,
-        "Token Length": token.length,
-      });
-      console.groupEnd();
-      throw error;
-    }
-  } else {
-    console.group("🔐 Token Invalidation Process");
-    console.log("⚠️ No Token Found:", {
+  try {
+    console.group("🔐 Logout Process");
+    console.log("📝 Logout Details:", {
       Source: source,
       Timestamp: new Date().toISOString(),
     });
+
+    const response = await fetch("/api/auth/logout", { method: "POST" });
+    if (!response.ok) {
+      throw new Error("Failed to clear session");
+    }
+
+    clearAuthData("user-initiated logout");
     console.groupEnd();
-    // If no token exists, just clear the data
-    clearAuthData("no token found");
+  } catch (error) {
+    console.error("❌ Error During Logout:", {
+      Source: source,
+      Timestamp: new Date().toISOString(),
+      "Error Message": error instanceof Error ? error.message : "Unknown error",
+      "Stack Trace": error instanceof Error ? error.stack : undefined,
+    });
+    console.groupEnd();
+    throw error;
   }
 }
 
@@ -92,123 +49,59 @@ function clearAuthData(reason: string) {
   window.dispatchEvent(new CustomEvent("authStateChanged"));
 }
 
+// Cache for ongoing auth validation to prevent multiple simultaneous calls
+let authValidationPromise: Promise<boolean> | null = null;
+let lastAuthValidation = 0;
+const AUTH_VALIDATION_COOLDOWN = 10000; // 10 seconds cooldown between validations
+
 export async function validateAuth(): Promise<boolean> {
-  // Check if token exists in cookie
-  const token = getCookie("token");
+  const now = Date.now();
 
-  if (!token || token === "undefined") {
-    console.log("Auth validation failed: No valid token found in cookies");
-    clearAuthData("auth validation failed");
-    return false;
+  // If there's already a validation in progress, return that promise
+  if (authValidationPromise) {
+    return authValidationPromise;
   }
 
-  let attempts = 0;
-  const maxAttempts = 3;
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  // If we validated recently, return cached result
+  if (now - lastAuthValidation < AUTH_VALIDATION_COOLDOWN) {
+    const hasToken = hasValidToken();
+    return hasToken;
+  }
 
-  while (attempts < maxAttempts) {
-    try {
-      console.log(
-        `Attempting authentication (${attempts + 1}/${maxAttempts})...`,
-      );
+  // Start new validation
+  authValidationPromise = performAuthValidation();
 
-      // Validate token with server
-      const response = await fetch(
-        `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
+  try {
+    const result = await authValidationPromise;
+    lastAuthValidation = now;
+    return result;
+  } finally {
+    authValidationPromise = null;
+  }
+}
 
-      if (response.ok) {
-        console.log("Authentication successful!");
-        const userData = await response.json();
-
-        // Update localStorage with fresh data
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("userid", userData.id);
-
-        // Set avatar if available
-        if (userData.avatar) {
-          const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-          localStorage.setItem("avatar", avatarURL);
-        }
-
-        // Dispatch custom event for components to listen to
-        window.dispatchEvent(
-          new CustomEvent("authStateChanged", { detail: userData }),
-        );
-
-        return true;
+async function performAuthValidation(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/session", { cache: "no-store" });
+    const { user } = (await response.json()) as { user: UserData | null };
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userid", user.id);
+      if (user.avatar) {
+        const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`;
+        localStorage.setItem("avatar", avatarURL);
       }
-
-      // Only clear auth data if we get an auth-related error
-      if (response.status === 403) {
-        const errorData = await response.json().catch(() => null);
-        console.error("Auth validation failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData || "No error details available",
-          timestamp: new Date().toISOString(),
-        });
-        clearAuthData("auth validation failed - token expired or invalid");
-        return false;
-      }
-
-      // For other status codes, increment attempts and retry
-      attempts++;
-      const errorData = await response.json().catch(() => null);
-      console.warn(
-        `Auth validation attempt ${attempts}/${maxAttempts} failed:`,
-        {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData || "No error details available",
-        },
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: user }),
       );
-
-      if (attempts < maxAttempts) {
-        const nextDelay = 1000 * attempts;
-        console.log(`Retrying in ${nextDelay}ms...`);
-        await delay(nextDelay);
-      }
-    } catch (error) {
-      // Network or other errors - don't clear auth data
-      attempts++;
-      console.error(
-        `Auth validation error (attempt ${attempts}/${maxAttempts}):`,
-        {
-          error: error instanceof Error ? error.message : "Unknown error",
-          stack: error instanceof Error ? error.stack : undefined,
-        },
-      );
-
-      if (attempts < maxAttempts) {
-        const nextDelay = 1000 * attempts;
-        console.log(`Retrying in ${nextDelay}ms...`);
-        await delay(nextDelay);
-      }
+      return true;
     }
-  }
-
-  // If we've exhausted all attempts but it was due to network errors,
-  // keep the user logged in and return true to maintain their session
-  if (navigator && !navigator.onLine) {
-    console.log(
-      "Auth validation failed due to being offline - keeping user logged in",
-    );
+    clearAuthData("session not found");
+    return false;
+  } catch {
+    // On errors, do not log out; keep previous state
     return true;
   }
-
-  // If we're online and exhausted all attempts, something is wrong with the API
-  console.error(
-    "Auth validation failed after all retry attempts, but keeping user logged in since it may be an API issue",
-  );
-  return true;
 }
 
 export async function handleTokenAuth(token: string): Promise<AuthResponse> {
@@ -221,25 +114,18 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
       position: "bottom-right",
     });
 
-    // Validate token with server
-    const response = await fetch(
-      `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    // Validate token and set cookie via server route
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to validate token");
     }
 
     const userData: UserData = await response.json();
-
-    // Set cookie with proper attributes
-    setCookie("token", token);
 
     // Set local storage
     localStorage.setItem("user", JSON.stringify(userData));

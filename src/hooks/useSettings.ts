@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { UserData, UserSettings } from "@/types/auth";
 import { updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
-import { getToken } from "@/utils/auth";
 
 export const useSettings = (userData: UserData | null) => {
   const [settings, setSettings] = useState<UserSettings | null>(null);
@@ -22,11 +21,6 @@ export const useSettings = (userData: UserData | null) => {
     if (!settings || !userData) return;
 
     try {
-      const token = getToken();
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
       // Update local state immediately for better UX
       const newSettings = { ...settings, [name]: value };
       setSettings(newSettings);
@@ -53,7 +47,7 @@ export const useSettings = (userData: UserData | null) => {
       };
 
       // Make API call to persist the change
-      const serverSettings = await updateSettings(updatedSettings, token);
+      const serverSettings = await updateSettings(updatedSettings);
 
       // Update state with server response
       setSettings(serverSettings);

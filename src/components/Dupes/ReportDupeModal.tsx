@@ -5,9 +5,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
 import { getItemTypeColor } from "@/utils/badgeColors";
-import { PUBLIC_API_URL } from "@/utils/api";
 import toast from "react-hot-toast";
-import { getToken } from "@/utils/auth";
 
 interface ReportDupeModalProps {
   isOpen: boolean;
@@ -93,19 +91,15 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
 
     setLoading(true);
     try {
-      const token = getToken();
-      if (!token) {
-        toast.error("Please log in to report dupes");
-        return;
-      }
+      // gate via auth hook
+      // The server BFF reads cookie; client only ensures UX gating
 
-      const response = await fetch(`${PUBLIC_API_URL}/dupes/report`, {
+      const response = await fetch("/api/dupes/report", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          owner: token,
           dupe_user: ownerName,
           item_id: itemId,
           proof: validProofUrls.join(", "),

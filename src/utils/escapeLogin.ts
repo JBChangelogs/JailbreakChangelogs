@@ -1,22 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
+// import { PUBLIC_API_URL } from '@/utils/api';
 
 const ESCAPE_COUNT_THRESHOLD = 5;
 const ESCAPE_TIMEOUT = 2000; // 2 seconds
 
 async function validateToken(token: string) {
   try {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to validate token");
@@ -73,8 +69,7 @@ export function useEscapeLogin() {
       localStorage.setItem("userid", userData.id);
       localStorage.setItem("avatar", userData.avatar);
 
-      // Set token cookie
-      document.cookie = `token=${token}; path=/`;
+      // Cookie is set by server route
 
       // Set avatar if available
       if (userData.avatar) {

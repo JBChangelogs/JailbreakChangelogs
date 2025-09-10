@@ -14,6 +14,7 @@ import { RiPaintFill } from "react-icons/ri";
 import { PiStickerFill } from "react-icons/pi";
 import { FaGun, FaJar, FaBullhorn } from "react-icons/fa6";
 import { toast } from "react-hot-toast";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface CategoryIconsProps {
   onSelect: (filter: FilterSort) => void;
@@ -26,6 +27,7 @@ export default function CategoryIcons({
   selectedFilter,
   onValueSort,
 }: CategoryIconsProps) {
+  const { isAuthenticated } = useAuthContext();
   const handleCategoryClick = (categoryId: string) => {
     onSelect(categoryId as FilterSort);
     onValueSort("cash-desc");
@@ -39,8 +41,7 @@ export default function CategoryIcons({
       bgColor: "rgba(255, 215, 0, 0.1)",
       iconColor: "#ffd700",
       onClick: () => {
-        const storedUser = localStorage.getItem("user");
-        if (!storedUser) {
+        if (!isAuthenticated) {
           toast.error("Please log in to view your favorites");
           return;
         }

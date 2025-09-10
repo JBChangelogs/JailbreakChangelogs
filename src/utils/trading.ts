@@ -1,21 +1,16 @@
-import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from "@/utils/auth";
-
 export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
-  const token = getToken();
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
-
   try {
     const response = await fetch(
-      `${PUBLIC_API_URL}/trades/delete?id=${tradeId}&token=${token}`,
+      `/api/trades/delete?id=${encodeURIComponent(String(tradeId))}`,
       {
         method: "DELETE",
       },
     );
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized");
+      }
       throw new Error("Failed to delete trade ad");
     }
 

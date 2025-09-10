@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface ProtectedOGWrapperProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface ProtectedOGWrapperProps {
 export default function ProtectedOGWrapper({
   children,
 }: ProtectedOGWrapperProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   // Show loading state while checking authentication
   if (isLoading) {

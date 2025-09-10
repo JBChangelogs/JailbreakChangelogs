@@ -26,7 +26,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState, useEffect } from "react";
-import { getToken, logout, trackLogoutSource } from "@/utils/auth";
+import { logout, trackLogoutSource } from "@/utils/auth";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
@@ -34,13 +34,17 @@ import { useEscapeLogin } from "@/utils/escapeLogin";
 import { UserData } from "../../types/auth";
 import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { PUBLIC_API_URL } from "@/utils/api";
+// import { PUBLIC_API_URL } from '@/utils/api';
 import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { isFeatureEnabled } from "@/utils/featureFlags";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
-export default function Header() {
+export default function Header({
+  initialUser,
+}: {
+  initialUser?: UserData | null;
+}) {
   const pathname = usePathname();
   const isCollabPage =
     pathname === "/values" ||
@@ -51,10 +55,15 @@ export default function Header() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const {
+    showLoginModal,
+    setShowLoginModal,
+    user: authUser,
+    isAuthenticated,
+  } = useAuthContext();
+  const userData = isAuthenticated ? authUser : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
-  const { showLoginModal, setShowLoginModal } = useAuth();
   const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<null | HTMLElement>(
     null,
   );
@@ -77,72 +86,6 @@ export default function Header() {
 
   useEffect(() => {
     setMounted(true);
-
-    const validateAndUpdateUserData = async () => {
-      const token = getToken();
-      if (!token) {
-        setUserData(null);
-        return;
-      }
-
-      // First check if we have cached user data
-      const cachedUserData = localStorage.getItem("user");
-      if (cachedUserData) {
-        try {
-          const parsedUserData = JSON.parse(cachedUserData);
-          setUserData(parsedUserData);
-        } catch (error) {
-          console.error("Error parsing cached user data:", error);
-        }
-      }
-
-      // If we're offline, just use the cached data
-      if (navigator && !navigator.onLine) {
-        console.log("Offline: Using cached user data");
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`,
-        );
-        if (!response.ok) {
-          // Only clear data if it's an auth error
-          if (response.status === 403) {
-            localStorage.removeItem("user");
-            setUserData(null);
-          }
-          return;
-        }
-
-        const userData = await response.json();
-        localStorage.setItem("user", JSON.stringify(userData));
-        setUserData(userData);
-      } catch (error) {
-        // On network error, keep existing data
-        console.error("Error validating token:", error);
-      }
-    };
-
-    validateAndUpdateUserData();
-
-    const handleAuthChange = (event: CustomEvent) => {
-      const userData = event.detail;
-      setUserData(userData);
-    };
-
-    // Listen for auth changes
-    window.addEventListener(
-      "authStateChanged",
-      handleAuthChange as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "authStateChanged",
-        handleAuthChange as EventListener,
-      );
-    };
   }, []);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -165,7 +108,6 @@ export default function Header() {
 
       trackLogoutSource("Header Component");
       await logout();
-      setUserData(null);
       handleMenuClose();
 
       // Dismiss loading toast and show success

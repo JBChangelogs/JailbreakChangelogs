@@ -6,7 +6,8 @@ import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/hooks/useAuth";
+import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
+import { useIsAuthenticated } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
@@ -45,6 +46,7 @@ export default function ValuesSearchControls({
   setAppliedMaxValue,
   searchSectionRef,
 }: ValuesSearchControlsProps) {
+  const isAuthenticated = useIsAuthenticated();
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
@@ -116,41 +118,27 @@ export default function ValuesSearchControls({
     <div ref={searchSectionRef} className="mb-8">
       <div
         className={
-          !premiumStatusLoaded
-            ? "flex flex-col items-start gap-6 lg:flex-row"
-            : currentUserPremiumType !== 0
-              ? "flex flex-col items-start gap-4 lg:flex-row"
-              : "flex flex-col items-start gap-6 lg:flex-row"
+          currentUserPremiumType !== 0 && premiumStatusLoaded
+            ? "flex flex-col items-start gap-4 lg:flex-row"
+            : "flex flex-col items-start gap-6 lg:flex-row"
         }
       >
         {/* Controls: horizontal row for premium, vertical stack for non-premium */}
-        <div
-          className={
-            !premiumStatusLoaded
-              ? "flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1"
-              : currentUserPremiumType !== 0
-                ? "flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1"
-                : "flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1"
-          }
-        >
+        <div className="flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1">
           {/* Top controls row: Search + Filter + Sort */}
           <div
             className={
-              !premiumStatusLoaded
-                ? "flex w-full flex-col gap-4"
-                : currentUserPremiumType !== 0
-                  ? "flex w-full flex-col lg:flex-row lg:items-center lg:gap-4"
-                  : "flex w-full flex-col gap-4"
+              currentUserPremiumType !== 0 && premiumStatusLoaded
+                ? "flex w-full flex-col lg:flex-row lg:items-center lg:gap-4"
+                : "flex w-full flex-col gap-4"
             }
           >
             {/* Search input - takes 50% width for premium users */}
             <div
               className={`relative ${
-                !premiumStatusLoaded
-                  ? "w-full"
-                  : currentUserPremiumType !== 0
-                    ? "w-full lg:w-1/2"
-                    : "w-full"
+                currentUserPremiumType !== 0 && premiumStatusLoaded
+                  ? "w-full lg:w-1/2"
+                  : "w-full"
               }`}
             >
               <input
@@ -179,24 +167,20 @@ export default function ValuesSearchControls({
               )}
             </div>
 
-            {/* Filter and Sort dropdowns container - takes remaining 50% width for premium users */}
+            {/* Filter and Sort dropdowns container - responsive layout for premium users */}
             <div
               className={`flex gap-4 ${
-                !premiumStatusLoaded
-                  ? "w-full flex-col"
-                  : currentUserPremiumType !== 0
-                    ? "w-full lg:w-1/2 lg:flex-row"
-                    : "w-full flex-col"
+                currentUserPremiumType !== 0 && premiumStatusLoaded
+                  ? "w-full flex-col lg:w-1/2 lg:flex-row"
+                  : "w-full flex-col"
               }`}
             >
               {/* Filter dropdown */}
               <div
                 className={`${
-                  !premiumStatusLoaded
-                    ? "w-full"
-                    : currentUserPremiumType !== 0
-                      ? "w-full lg:w-1/2"
-                      : "w-full"
+                  currentUserPremiumType !== 0 && premiumStatusLoaded
+                    ? "w-full lg:w-1/2"
+                    : "w-full"
                 }`}
               >
                 {selectLoaded ? (
@@ -254,8 +238,7 @@ export default function ValuesSearchControls({
                       }
                       const newValue = (option as { value: FilterSort }).value;
                       if (newValue === "favorites") {
-                        const storedUser = localStorage.getItem("user");
-                        if (!storedUser) {
+                        if (!isAuthenticated) {
                           toast.error("Please log in to view your favorites");
                           return;
                         }
@@ -332,11 +315,9 @@ export default function ValuesSearchControls({
               {/* Sort dropdown */}
               <div
                 className={`${
-                  !premiumStatusLoaded
-                    ? "w-full"
-                    : currentUserPremiumType !== 0
-                      ? "w-full lg:w-1/2"
-                      : "w-full"
+                  currentUserPremiumType !== 0 && premiumStatusLoaded
+                    ? "w-full lg:w-1/2"
+                    : "w-full"
                 }`}
               >
                 {selectLoaded ? (

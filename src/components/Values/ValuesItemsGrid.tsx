@@ -7,7 +7,7 @@ import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/hooks/useAuth";
+import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import React from "react";
 
 interface ValuesItemsGridProps {

@@ -15,7 +15,6 @@ import {
   Link,
 } from "@mui/material";
 import toast from "react-hot-toast";
-import { PUBLIC_API_URL } from "@/utils/api";
 import WarningIcon from "@mui/icons-material/Warning";
 import LaunchIcon from "@mui/icons-material/Launch";
 import LoginIcon from "@mui/icons-material/Login";
@@ -41,26 +40,12 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
   const handleDisconnect = async () => {
     try {
-      const cookies = document.cookie.split(";");
-      const tokenCookie = cookies.find((cookie) =>
-        cookie.trim().startsWith("token="),
-      );
-      const token = tokenCookie ? tokenCookie.split("=")[1] : null;
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await fetch(
-        `${PUBLIC_API_URL}/oauth/roblox/disconnect`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ owner: token }),
+      const response = await fetch("/api/oauth/roblox/disconnect", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

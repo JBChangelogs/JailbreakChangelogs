@@ -32,7 +32,7 @@ import ReactMarkdown from "react-markdown";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/hooks/useAuth";
+import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { FaCircleMinus } from "react-icons/fa6";
 import { FaPlusCircle } from "react-icons/fa";

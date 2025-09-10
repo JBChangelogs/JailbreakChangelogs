@@ -12,7 +12,7 @@ import { Inter } from "next/font/google";
 import { formatProfileDate } from "@/utils/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/hooks/useAuth";
+import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { Season, CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 

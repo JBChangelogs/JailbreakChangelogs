@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,7 +14,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { PUBLIC_API_URL } from "@/utils/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { storeCampaign } from "@/utils/campaign";
 import { useSearchParams } from "next/navigation";
 
@@ -38,12 +38,12 @@ interface LoginModalProps {
   onClose: () => void;
 }
 
-export default function LoginModal({ open, onClose }: LoginModalProps) {
+function LoginModalInner({ open, onClose }: LoginModalProps) {
   const [tabValue, setTabValue] = useState(0);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [joinDiscord, setJoinDiscord] = useState(false);
   const tokenProcessedRef = useRef(false);
-  const { login, showLoginModal, setShowLoginModal } = useAuth();
+  const { login, showLoginModal, setShowLoginModal } = useAuthContext();
   const searchParams = useSearchParams();
   const campaign = searchParams.get("campaign");
 
@@ -504,5 +504,13 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         </Dialog>
       )}
     </AnimatePresence>
+  );
+}
+
+export default function LoginModal(props: LoginModalProps) {
+  return (
+    <Suspense fallback={null}>
+      <LoginModalInner {...props} />
+    </Suspense>
   );
 }

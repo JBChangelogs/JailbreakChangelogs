@@ -13,7 +13,6 @@ import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
-import { getToken } from "@/utils/auth";
 import { toast } from "react-hot-toast";
 import { UserSettings } from "@/types/auth";
 
@@ -182,19 +181,18 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
     setLoadingFollow((prev) => ({ ...prev, [followingId]: true }));
     try {
-      const token = getToken();
-      if (!token) {
+      if (!currentUserId) {
         toast.error("You need to be logged in to follow users");
         return;
       }
 
       const isCurrentlyFollowing = followingStatus[followingId];
       const response = await fetch(
-        `${PUBLIC_API_URL}/users/followers/${isCurrentlyFollowing ? "remove" : "add"}`,
+        `/api/users/followers/${isCurrentlyFollowing ? "remove" : "add"}`,
         {
-          method: isCurrentlyFollowing ? "DELETE" : "POST",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ follower: token, following: followingId }),
+          body: JSON.stringify({ following: followingId }),
         },
       );
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PUBLIC_API_URL, CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import Link from "next/link";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
@@ -13,7 +13,6 @@ import {
 } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
-import { getToken } from "@/utils/auth";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import TradeItemsImages from "@/components/trading/TradeItemsImages";
@@ -23,6 +22,7 @@ import { TradeAd } from "@/types/trading";
 import TradeUserProfile from "@/components/trading/TradeUserProfile";
 import TradeAdMetadata from "@/components/trading/TradeAdMetadata";
 import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
+import { useAuthContext } from "@/contexts/AuthContext";
 // Removed MUI Tabs in favor of calculator-style tabs
 
 interface TradeDetailsClientProps {
@@ -39,7 +39,8 @@ export default function TradeDetailsClient({
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
   const router = useRouter();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { user } = useAuthContext();
+  const currentUserId = user?.id || null;
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOfferConfirm, setShowOfferConfirm] = useState(false);
@@ -56,32 +57,11 @@ export default function TradeDetailsClient({
     "items",
   );
 
-  // Get current user ID on component mount
-  React.useEffect(() => {
-    const token = getToken();
-    if (token) {
-      fetch(`${PUBLIC_API_URL}/users/get/token?token=${token}&nocache=true`)
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
-          throw new Error("Failed to fetch user data");
-        })
-        .then((userData) => {
-          setCurrentUserId(userData.id);
-        })
-        .catch((err) => {
-          console.error("Error fetching current user data:", err);
-        });
-    }
-  }, []);
-
   const handleMakeOffer = async () => {
     try {
       setOfferStatus({ loading: true, error: null, success: false });
 
-      const token = getToken();
-      if (!token) {
+      if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
           position: "bottom-right",
@@ -94,14 +74,13 @@ export default function TradeDetailsClient({
         return;
       }
 
-      const response = await fetch(`${PUBLIC_API_URL}/trades/offer`, {
+      const response = await fetch(`/api/trades/offer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: trade?.id,
-          owner: token,
         }),
       });
 

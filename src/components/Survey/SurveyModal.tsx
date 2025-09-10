@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { getToken } from "@/utils/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { PUBLIC_API_URL } from "@/utils/api";
 
 interface Survey {
   id: string;
@@ -28,6 +27,7 @@ interface SurveyModalProps {
 const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { isAuthenticated } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +38,11 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
 
     setSubmitting(true);
     try {
-      const token = getToken();
-      const response = await fetch(`${PUBLIC_API_URL}/surveys/submit`, {
+      if (!isAuthenticated) {
+        toast.error("You must be logged in to submit surveys");
+        return;
+      }
+      const response = await fetch(`/api/surveys/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +50,6 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
         body: JSON.stringify({
           id: survey.id,
           answer: answer,
-          owner: token,
         }),
       });
 

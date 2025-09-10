@@ -126,18 +126,8 @@ export const AvatarSettings = ({
     if (!isValidAvatar) return;
 
     try {
-      const cookies = document.cookie.split(";");
-      const tokenCookie = cookies.find((cookie) =>
-        cookie.trim().startsWith("token="),
-      );
-      const token = tokenCookie ? tokenCookie.split("=")[1] : null;
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
       // Update the avatar URL - this endpoint should handle both the URL update and settings change
-      const newAvatarUrl = await updateAvatar(customAvatarUrl, token);
+      const newAvatarUrl = await updateAvatar(customAvatarUrl);
       onAvatarUpdate(newAvatarUrl);
       toast.success("Custom avatar updated successfully");
     } catch (error) {

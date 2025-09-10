@@ -12,7 +12,6 @@ import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
-import { getToken } from "@/utils/auth";
 import { toast } from "react-hot-toast";
 import { UserSettings } from "@/types/auth";
 
@@ -205,16 +204,15 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
     setLoadingFollow((prev) => ({ ...prev, [followerId]: true }));
     try {
-      const token = getToken();
-      if (!token) {
+      if (!currentUserId) {
         toast.error("You need to be logged in to follow users");
         return;
       }
 
-      const response = await fetch(`${PUBLIC_API_URL}/users/followers/add`, {
+      const response = await fetch("/api/users/followers/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ follower: token, following: followerId }),
+        body: JSON.stringify({ following: followerId }),
       });
 
       if (!response.ok) {

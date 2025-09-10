@@ -14,7 +14,6 @@ import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData, FollowerData } from "@/types/auth";
 import { toast } from "react-hot-toast";
 import { Tooltip } from "@mui/material";
-import { getToken } from "@/utils/auth";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
@@ -23,6 +22,7 @@ import {
   formatCustomDate,
 } from "@/utils/timestamp";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import FollowersModal from "@/components/Users/FollowersModal";
@@ -139,6 +139,7 @@ interface Server {
 export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
+  const { user: currentUser } = useAuthContext();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,36 +165,14 @@ export default function UserProfilePage() {
   };
 
   useEffect(() => {
-    const checkAuthStatus = () => {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const userData = JSON.parse(storedUser);
-          setCurrentUserId(userData.id);
-          setIsAuthenticatedUser(true);
-        } catch (error) {
-          console.error("Error parsing user data:", error);
-          setCurrentUserId(null);
-          setIsAuthenticatedUser(false);
-        }
-      } else {
-        setCurrentUserId(null);
-        setIsAuthenticatedUser(false);
-      }
-    };
-
-    checkAuthStatus();
-
-    window.addEventListener("storage", checkAuthStatus);
-
-    const handleAuthChange = () => checkAuthStatus();
-    window.addEventListener("authStateChanged", handleAuthChange);
-
-    return () => {
-      window.removeEventListener("storage", checkAuthStatus);
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
+    if (currentUser) {
+      setCurrentUserId(currentUser.id);
+      setIsAuthenticatedUser(true);
+    } else {
+      setCurrentUserId(null);
+      setIsAuthenticatedUser(false);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -340,9 +319,7 @@ export default function UserProfilePage() {
 
     setIsLoadingFollow(true);
     try {
-      const token = getToken();
-
-      if (!token) {
+      if (!currentUserId) {
         toast.error("You need to be logged in to follow users");
         setIsLoadingFollow(false);
         return;
@@ -351,16 +328,16 @@ export default function UserProfilePage() {
       let response;
 
       if (isFollowing) {
-        response = await fetch(`${PUBLIC_API_URL}/users/followers/remove`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ follower: token, following: userId }),
-        });
-      } else {
-        response = await fetch(`${PUBLIC_API_URL}/users/followers/add`, {
+        response = await fetch(`/api/users/followers/remove`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ follower: token, following: userId }),
+          body: JSON.stringify({ following: userId }),
+        });
+      } else {
+        response = await fetch(`/api/users/followers/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ following: userId }),
         });
       }
 

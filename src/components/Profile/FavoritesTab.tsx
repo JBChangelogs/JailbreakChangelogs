@@ -23,24 +23,7 @@ import {
 } from "@/utils/images";
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import { getItemTypeColor } from "@/utils/badgeColors";
-import { ItemDetails } from "@/types";
-
-interface FavoriteItem {
-  item_id: string;
-  created_at: number;
-  author: string;
-  item?: {
-    id: number;
-    name?: string;
-    type?: string;
-    parent?: number;
-    sub_name?: string;
-    data?: {
-      name: string;
-      type: string;
-    };
-  };
-}
+import { ItemDetails, FavoriteItem } from "@/types";
 
 interface FavoriteWithDetails extends FavoriteItem {
   details?: {

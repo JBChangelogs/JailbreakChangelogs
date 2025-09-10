@@ -1,30 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BugAntIcon } from "@heroicons/react/24/outline";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
-import { getToken } from "@/utils/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 
 export default function ReportIssueButton() {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuthContext();
 
-  const handleOpenModal = () => {
-    const token = getToken();
-    if (!token) {
+  const handleOpenModal = useCallback(() => {
+    if (!isAuthenticated) {
       toast.error("You must be logged in to report an issue");
       return;
     }
     setIsOpen(true);
-  };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (searchParams.get("report-issue") === "true") {
       handleOpenModal();
     }
-  }, [searchParams]);
+  }, [searchParams, handleOpenModal]);
 
   return (
     <>

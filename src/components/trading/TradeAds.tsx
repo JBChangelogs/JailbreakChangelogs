@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
+// import { PUBLIC_API_URL } from '@/utils/api';
 import { TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
@@ -10,12 +10,11 @@ import { TradeAdTabs } from "./TradeAdTabs";
 import { Pagination, Button } from "@mui/material";
 import { Masonry } from "@mui/lab";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
-import { getToken } from "@/utils/auth";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import { TradeAdForm } from "./TradeAdForm";
 import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface TradeAdsProps {
   initialTradeAds: (TradeAd & { user: UserData | null })[];
@@ -26,7 +25,7 @@ export default function TradeAds({
   initialTradeAds,
   initialItems = [],
 }: TradeAdsProps) {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [tradeAds, setTradeAds] =
     useState<(TradeAd & { user: UserData | null })[]>(initialTradeAds);
   const [items] = useState<TradeItem[]>(initialItems);
@@ -123,8 +122,7 @@ export default function TradeAds({
         [tradeId]: { loading: true, error: null, success: false },
       }));
 
-      const token = getToken();
-      if (!token) {
+      if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
           position: "bottom-right",
@@ -140,15 +138,12 @@ export default function TradeAds({
         return;
       }
 
-      const response = await fetch(`${PUBLIC_API_URL}/trades/offer`, {
+      const response = await fetch("/api/trades/offer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          id: tradeId,
-          owner: token,
-        }),
+        body: JSON.stringify({ id: tradeId }),
       });
 
       if (response.status === 409) {

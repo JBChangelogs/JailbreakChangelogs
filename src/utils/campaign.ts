@@ -1,5 +1,3 @@
-import { PUBLIC_API_URL } from "@/utils/api";
-
 export function storeCampaign(campaign: string): void {
   if (typeof window === "undefined") return;
   sessionStorage.setItem("campaign", campaign);
@@ -20,15 +18,16 @@ export async function countCampaignVisit(
   token: string,
 ): Promise<void> {
   try {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/campaigns/count?campaign=${campaign}&token=${token}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const response = await fetch("/api/campaigns/count", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        campaign,
+        token,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to count campaign visit");

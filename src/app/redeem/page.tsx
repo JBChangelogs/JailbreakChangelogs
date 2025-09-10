@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from "@/utils/auth";
+// import { PUBLIC_API_URL } from '@/utils/api';
+import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -14,6 +14,7 @@ export default function RedeemPage() {
     text: string;
     type: "success" | "error";
   } | null>(null);
+  const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
     // Get code from URL parameters without useSearchParams
@@ -29,8 +30,7 @@ export default function RedeemPage() {
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = getToken();
-    if (!token) {
+    if (!isAuthenticated) {
       setMessage({ text: "Please log in to redeem codes", type: "error" });
       return;
     }
@@ -44,14 +44,13 @@ export default function RedeemPage() {
     setMessage(null);
 
     try {
-      const response = await fetch(`${PUBLIC_API_URL}/codes/redeem`, {
+      const response = await fetch("/api/codes/redeem", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           code: code.trim(),
-          owner: token,
         }),
       });
 

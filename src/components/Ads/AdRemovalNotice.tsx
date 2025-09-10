@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 
 interface AdRemovalNoticeProps {
@@ -11,7 +11,7 @@ interface AdRemovalNoticeProps {
 const AdRemovalNotice: React.FC<AdRemovalNoticeProps> = ({
   className = "",
 }) => {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const isSupporter = user?.premiumtype && user.premiumtype > 0;
 
   // Don't show the notice if user is already a supporter

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { hasValidToken } from "@/utils/cookies";
 import toast from "react-hot-toast";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
@@ -67,7 +67,7 @@ export default function OGFinderClient({
     Record<string, string>
   >(initialRobloxAvatars || {});
   const router = useRouter();
-  const { isAuthenticated, setShowLoginModal } = useAuth();
+  const { isAuthenticated, setShowLoginModal } = useAuthContext();
 
   // Update local state when props change
   useEffect(() => {

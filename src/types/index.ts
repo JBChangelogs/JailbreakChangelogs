@@ -190,6 +190,23 @@ export interface DupeResult {
   created_at: number;
 }
 
+export interface FavoriteItem {
+  item_id: string;
+  created_at: number;
+  author: string;
+  item?: {
+    id: number;
+    name?: string;
+    type?: string;
+    parent?: number;
+    sub_name?: string;
+    data?: {
+      name: string;
+      type: string;
+    };
+  };
+}
+
 export interface DupeFinderHistoryEntry {
   UserId: number;
   TradeTime: number;

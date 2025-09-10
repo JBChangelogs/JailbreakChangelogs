@@ -7,8 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { toast } from "react-hot-toast";
-import { isAuthenticated, getToken } from "@/utils/auth";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 
 interface AboutTabProps {
@@ -53,6 +52,7 @@ export default function AboutTab({
 
   // Use real-time relative date
   const realTimeRelativeDate = useRealTimeRelativeDate(localBioLastUpdated);
+  const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
     // Initialize bio from props
@@ -62,7 +62,7 @@ export default function AboutTab({
   }, [bio, bioLastUpdated]);
 
   const handleSaveBio = async () => {
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       toast.error("You need to be logged in to update your bio");
       return;
     }
@@ -75,22 +75,11 @@ export default function AboutTab({
 
     setIsSavingBio(true);
     try {
-      const token = getToken();
-
-      if (!token) {
-        toast.error("You need to be logged in to update your bio");
-        setIsSavingBio(false);
-        return;
-      }
-
-      const response = await fetch(
-        `${PUBLIC_API_URL}/users/description/update`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user: token, description: cleanedBio }),
-        },
-      );
+      const response = await fetch(`/api/users/description/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: cleanedBio }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update bio");

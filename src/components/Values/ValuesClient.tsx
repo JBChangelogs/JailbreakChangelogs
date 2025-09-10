@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { use } from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import { Item, FilterSort, ValueSort } from "@/types";
+import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
 import toast from "react-hot-toast";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
@@ -11,6 +11,7 @@ import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
 import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorModal";
 import ValuesSearchControls from "./ValuesSearchControls";
@@ -26,6 +27,7 @@ export default function ValuesClient({
   lastUpdatedPromise,
 }: ValuesClientProps) {
   const router = useRouter();
+  const { user } = useAuthContext();
 
   // Use the use hook to resolve promises
   const items = use(itemsPromise);
@@ -114,30 +116,30 @@ export default function ValuesClient({
     }
   };
 
-  // Load favorites only when user selects favorites filter
-  const loadFavorites = async () => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+  // Load favorites when user is authenticated
+  const loadFavorites = useCallback(async () => {
+    if (user && user.id) {
       try {
-        const userData = JSON.parse(storedUser);
-        if (userData && userData.id) {
-          const favoritesData = await fetchUserFavorites(userData.id);
-          if (favoritesData !== null && Array.isArray(favoritesData)) {
-            setFavorites(favoritesData);
-          }
+        const favoritesData = await fetchUserFavorites(user.id);
+        if (favoritesData !== null && Array.isArray(favoritesData)) {
+          // Extract item_id values and convert to numbers
+          const favoriteIds = favoritesData.map((fav: FavoriteItem) =>
+            parseInt(fav.item_id, 10),
+          );
+          setFavorites(favoriteIds);
         }
       } catch (err) {
         console.error("Error loading favorites:", err);
       }
     }
-  };
+  }, [user]);
 
-  // Load favorites only when favorites filter is selected
+  // Load favorites when user is authenticated
   useEffect(() => {
-    if (filterSort === "favorites") {
+    if (user && user.id) {
       loadFavorites();
     }
-  }, [filterSort]);
+  }, [user, loadFavorites]);
 
   useEffect(() => {
     const updateSortedItems = async () => {

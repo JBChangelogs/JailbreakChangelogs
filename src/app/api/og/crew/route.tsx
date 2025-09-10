@@ -38,12 +38,16 @@ const BACKGROUNDS = Array.from(
  * @returns number - Index of the background to use
  */
 const calculateSeed = (rank: string): number => {
-  let seed = 0;
+  // FNV-1a 32-bit hash for stable, well-distributed seed
+  let hash = 0x811c9dc5;
   for (let i = 0; i < rank.length; i++) {
-    seed = (seed << 5) - seed + rank.charCodeAt(i);
-    seed = seed & seed; // Convert to 32-bit integer
+    hash ^= rank.charCodeAt(i);
+    // hash *= 16777619 (with 32-bit overflow using shifts/adds)
+    hash +=
+      (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
   }
-  return Math.abs(seed);
+  // Ensure unsigned 32-bit and return as number
+  return hash >>> 0;
 };
 
 /**

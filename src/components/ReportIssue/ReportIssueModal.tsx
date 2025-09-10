@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from "@/utils/auth";
+// import { PUBLIC_API_URL } from '@/utils/api';
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
@@ -22,6 +22,7 @@ export default function ReportIssueModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuthenticated } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,22 +42,17 @@ export default function ReportIssueModal({
     setIsSubmitting(true);
 
     try {
-      const token = getToken();
-      if (!token) {
+      if (!isAuthenticated) {
         toast.error("You must be logged in to report an issue");
         return;
       }
 
-      const response = await fetch(`${PUBLIC_API_URL}/issues/add`, {
+      const response = await fetch("/api/issues/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          title,
-          description,
-          user: token,
-        }),
+        body: JSON.stringify({ title, description }),
       });
 
       if (!response.ok) {

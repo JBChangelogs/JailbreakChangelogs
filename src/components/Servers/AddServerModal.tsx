@@ -1,11 +1,10 @@
 import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { getToken } from "@/utils/auth";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface AddServerModalProps {
   isOpen: boolean;
@@ -26,6 +25,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   onServerAdded,
   editingServer,
 }) => {
+  const { isAuthenticated } = useAuthContext();
   const [link, setLink] = React.useState("");
   const [rules, setRules] = React.useState("");
   const [expires, setExpires] = React.useState<Date | null>(null);
@@ -68,8 +68,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   // Reset form when modal opens/closes or editingServer changes
   React.useEffect(() => {
     if (isOpen) {
-      const token = getToken();
-      if (!token) {
+      // gate via auth hook
+      if (!isAuthenticated) {
         toast.error("Please log in to add a server");
         onClose();
         return;
@@ -99,7 +99,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
         setNeverExpires(false);
       }
     }
-  }, [isOpen, editingServer, onClose]);
+  }, [isOpen, editingServer, onClose, isAuthenticated]);
 
   const handleSubmit = async () => {
     if (!link.trim()) {
@@ -134,11 +134,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       }
     }
 
-    const token = getToken();
-    if (!token) {
-      toast.error("You must be logged in to add a server");
-      return;
-    }
+    // auth enforced server-side via cookie; client just gates UX
 
     setLoading(true);
     try {
@@ -147,8 +143,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
       const endpoint = editingServer
-        ? `${PUBLIC_API_URL}/servers/update?id=${editingServer.id}&token=${token}`
-        : `${PUBLIC_API_URL}/servers/add`;
+        ? `/api/servers/update?id=${editingServer.id}`
+        : `/api/servers/add`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -164,7 +160,6 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
               : expires
                 ? String(Math.floor(expires.getTime() / 1000))
                 : null,
-          owner: token,
         }),
       });
 
