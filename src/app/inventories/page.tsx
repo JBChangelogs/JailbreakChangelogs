@@ -17,14 +17,6 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { MdOutlineSecurity } from "react-icons/md";
 import { RiVerifiedBadgeFill } from "react-icons/ri";
 
-// Type definitions for bot data
-interface BotUserData {
-  id: number;
-  name: string;
-  displayName: string;
-  hasVerifiedBadge: boolean;
-}
-
 interface BotAvatarData {
   targetId: number;
   state: string;
