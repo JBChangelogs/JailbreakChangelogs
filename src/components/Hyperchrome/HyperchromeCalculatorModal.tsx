@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Dialog, DialogContent, Checkbox } from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
+import { FaArrowRight } from "react-icons/fa";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   calculateRobberiesToLevelUp,
@@ -22,7 +23,6 @@ export default function HyperchromeCalculatorModal({
 }: HyperchromeCalculatorModalProps) {
   const [level, setLevel] = useState(0);
   const [pity, setPity] = useState(0);
-  const [showAll, setShowAll] = useState(false);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
@@ -33,7 +33,6 @@ export default function HyperchromeCalculatorModal({
       // reset when closing
       setLevel(0);
       setPity(0);
-      setShowAll(false);
       setStep(1);
       setHasCalculated(false);
     }
@@ -87,7 +86,7 @@ export default function HyperchromeCalculatorModal({
             </p>
           </div>
 
-          <div className="text-sm text-neutral-400">Step {step} of 3</div>
+          <div className="text-sm text-neutral-400">Step {step} of 2</div>
 
           {step === 1 && (
             <div className="space-y-2">
@@ -175,42 +174,26 @@ export default function HyperchromeCalculatorModal({
             </div>
           )}
 
-          {step === 3 && (
-            <div className="space-y-3">
-              <label className="block text-sm font-medium text-white">
-                Which modifiers apply to your current session?
-              </label>
-              <div>
-                <div className="mb-1 text-sm font-medium text-white">
-                  Show all cases for upgrade/downgrading hyperchrome
-                </div>
-                <Checkbox
-                  checked={showAll}
-                  onChange={(e) => setShowAll(e.target.checked)}
-                  sx={{
-                    color: "#5865F2",
-                    "&.Mui-checked": { color: "#5865F2" },
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          {/* Step 3 removed; advanced info is shown in results */}
 
-          <div className="flex items-center justify-between pt-2">
-            <button
-              className="rounded-md border border-[#2E3944] bg-[#37424D] px-4 py-2 text-sm font-medium text-white hover:bg-[#2E394D] disabled:opacity-50"
-              onClick={() => {
-                setHasCalculated(false);
-                setStep((s) => Math.max(1, s - 1));
-              }}
-              disabled={step === 1}
-            >
-              Back
-            </button>
-            {step < 3 ? (
+          <div
+            className={`flex items-center pt-2 ${step === 1 ? "justify-end" : "justify-between"}`}
+          >
+            {step > 1 && (
+              <button
+                className="rounded-md border border-[#2E3944] bg-[#37424D] px-4 py-2 text-sm font-medium text-white hover:bg-[#2E394D]"
+                onClick={() => {
+                  setHasCalculated(false);
+                  setStep((s) => Math.max(1, s - 1));
+                }}
+              >
+                Back
+              </button>
+            )}
+            {step < 2 ? (
               <button
                 className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4752C4] disabled:opacity-50"
-                onClick={() => setStep((s) => Math.min(3, s + 1))}
+                onClick={() => setStep((s) => Math.min(2, s + 1))}
               >
                 Next
               </button>
@@ -224,8 +207,8 @@ export default function HyperchromeCalculatorModal({
             )}
           </div>
 
-          {hasCalculated && step === 3 && (
-            <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+          {hasCalculated && step === 2 && (
+            <div className="rounded-lg border border-[#5865F2] bg-[#212A31] p-4">
               <div className="mb-1 text-sm text-[#A0A7AC]">Result</div>
               <div className="flex items-baseline gap-2">
                 <div className="text-3xl font-extrabold text-white">
@@ -236,7 +219,8 @@ export default function HyperchromeCalculatorModal({
                 </div>
               </div>
               <div className="mt-2 text-xs text-[#A0A7AC]">
-                💡Pro tip: After {robberiesNeeded} robberies, pity reaches 66.6%
+                💡Pro tip: After {robberiesNeeded} robberies, pity reaches
+                <span className="px-1 font-semibold text-white">66.6%</span>
                 in private servers. Robbing in a public server at that point
                 guarantees an instant level-up
               </div>
@@ -245,23 +229,42 @@ export default function HyperchromeCalculatorModal({
               </div>
             </div>
           )}
-          {hasCalculated && step === 3 && showAll && (
-            <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
-              <div className="text-base text-[#D3D9D4]">
-                Level 1: {otherPity[0]}%
+          {hasCalculated && step === 2 && (
+            <div className="rounded-lg border border-[#5865F2] bg-[#212A31] p-4">
+              <div className="mb-2 text-xs text-[#A0A7AC]">
+                If you trade to a different level, here&apos;s what your pity
+                would be for each level-up.
               </div>
-              <div className="text-base text-[#D3D9D4]">
-                Level 2: {otherPity[1]}%
-              </div>
-              <div className="text-base text-[#D3D9D4]">
-                Level 3: {otherPity[2]}%
-              </div>
-              <div className="text-base text-[#D3D9D4]">
-                Level 4: {otherPity[3]}%
-              </div>
-              <div className="text-base text-[#D3D9D4]">
-                Level 5: {otherPity[4]}%
-              </div>
+              {level !== 0 && parseFloat(otherPity[0]) <= 100 && (
+                <div className="text-base text-[#D3D9D4]">
+                  Level 0 <FaArrowRight className="mx-1 inline" /> Level 1:{" "}
+                  {otherPity[0]}%
+                </div>
+              )}
+              {parseFloat(otherPity[1]) <= 100 && (
+                <div className="text-base text-[#D3D9D4]">
+                  Level 1 <FaArrowRight className="mx-1 inline" /> Level 2:{" "}
+                  {otherPity[1]}%
+                </div>
+              )}
+              {parseFloat(otherPity[2]) <= 100 && (
+                <div className="text-base text-[#D3D9D4]">
+                  Level 2 <FaArrowRight className="mx-1 inline" /> Level 3:{" "}
+                  {otherPity[2]}%
+                </div>
+              )}
+              {parseFloat(otherPity[3]) <= 100 && (
+                <div className="text-base text-[#D3D9D4]">
+                  Level 3 <FaArrowRight className="mx-1 inline" /> Level 4:{" "}
+                  {otherPity[3]}%
+                </div>
+              )}
+              {parseFloat(otherPity[4]) <= 100 && (
+                <div className="text-base text-[#D3D9D4]">
+                  Level 4 <FaArrowRight className="mx-1 inline" /> Level 5:{" "}
+                  {otherPity[4]}%
+                </div>
+              )}
             </div>
           )}
         </div>
