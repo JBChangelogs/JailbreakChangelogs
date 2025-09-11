@@ -29,7 +29,7 @@ export function setCookie(name: string, value: string): void {
 }
 
 /**
- * Gets a cookie value by name
+ * Gets a cookie value by name (only works for non-HttpOnly cookies)
  * @param name - Cookie name
  * @returns Cookie value or null if not found
  */
@@ -44,11 +44,15 @@ export function getCookie(name: string): string | null {
 
 /**
  * Checks if a token cookie exists and is valid
+ * NOTE: This function is deprecated because the token cookie is HttpOnly.
+ * Use the session API or auth context instead.
  * @returns true if token exists and is not 'undefined'
+ * @deprecated Use session API or auth context for authentication checks
  */
 export function hasValidToken(): boolean {
-  const token = getCookie("token");
-  return !!token && token !== "undefined";
+  // Token cookie is HttpOnly, so we can't access it from client-side
+  // This function always returns false to prevent false positives
+  return false;
 }
 
 /**

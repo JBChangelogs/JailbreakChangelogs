@@ -151,7 +151,7 @@ async function StatsSection() {
   }
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-2">
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
         <div className="text-2xl font-bold text-blue-400">
           {stats.item_count_str}
@@ -194,7 +194,7 @@ async function OfficialBotsSection() {
             are authorized to scan inventories on our behalf.
           </p>
         </div>
-        <div className="space-y-3">
+        <div className="max-h-80 space-y-3 overflow-y-auto">
           {sortedBots.map((bot, index) => {
             const botId = String(bot.userId);
             const displayName =

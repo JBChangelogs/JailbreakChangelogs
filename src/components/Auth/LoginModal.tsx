@@ -17,6 +17,10 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { storeCampaign } from "@/utils/campaign";
 import { useSearchParams } from "next/navigation";
+import {
+  showProcessingAuthToast,
+  dismissProcessingAuthToast,
+} from "@/utils/auth";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,10 +74,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
         tokenProcessedRef.current = true;
         // Only show loading toast if we're not already redirecting
         if (!isRedirecting) {
-          const loadingToast = toast.loading("Processing authentication...", {
-            duration: Infinity,
-            position: "bottom-right",
-          });
+          const loadingToast = showProcessingAuthToast();
 
           login(token)
             .then((response) => {
@@ -124,7 +125,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
               tokenProcessedRef.current = false;
             })
             .finally(() => {
-              toast.dismiss(loadingToast);
+              dismissProcessingAuthToast(loadingToast);
             });
         }
       }
@@ -204,41 +205,41 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
             className="relative z-10"
           >
             <DialogContent sx={{ p: 3, backgroundColor: "#212A31 !important" }}>
-              {!campaign && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                >
-                  <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-                    <Tabs
-                      value={tabValue}
-                      onChange={handleTabChange}
-                      variant="fullWidth"
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+                  <Tabs
+                    value={campaign ? 0 : tabValue}
+                    onChange={campaign ? undefined : handleTabChange}
+                    variant="fullWidth"
+                    sx={{
+                      "& .MuiTabs-indicator": { backgroundColor: "#5865F2" },
+                      "& .Mui-selected": { color: "#5865F2 !important" },
+                      "& .MuiTab-root": { color: "#D3D9D4" },
+                    }}
+                  >
+                    <Tab
+                      icon={
+                        <Image
+                          src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
+                          alt="Discord"
+                          width={120}
+                          height={36}
+                          draggable={false}
+                          className="opacity-70 transition-opacity"
+                        />
+                      }
+                      iconPosition="top"
                       sx={{
-                        "& .MuiTabs-indicator": { backgroundColor: "#5865F2" },
-                        "& .Mui-selected": { color: "#5865F2 !important" },
-                        "& .MuiTab-root": { color: "#D3D9D4" },
+                        "&.Mui-selected .opacity-70": {
+                          opacity: 1,
+                        },
                       }}
-                    >
-                      <Tab
-                        icon={
-                          <Image
-                            src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
-                            alt="Discord"
-                            width={120}
-                            height={36}
-                            draggable={false}
-                            className="opacity-70 transition-opacity"
-                          />
-                        }
-                        iconPosition="top"
-                        sx={{
-                          "&.Mui-selected .opacity-70": {
-                            opacity: 1,
-                          },
-                        }}
-                      />
+                    />
+                    {!campaign && (
                       <Tab
                         icon={
                           <Image
@@ -257,20 +258,26 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           },
                         }}
                       />
-                    </Tabs>
-                  </Box>
-                </motion.div>
-              )}
+                    )}
+                  </Tabs>
+                </Box>
+              </motion.div>
 
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={tabValue}
-                  initial={{ opacity: 0, x: tabValue === 0 ? -20 : 20 }}
+                  key={campaign ? 0 : tabValue}
+                  initial={{
+                    opacity: 0,
+                    x: (campaign ? 0 : tabValue) === 0 ? -20 : 20,
+                  }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: tabValue === 0 ? 20 : -20 }}
+                  exit={{
+                    opacity: 0,
+                    x: (campaign ? 0 : tabValue) === 0 ? 20 : -20,
+                  }}
                   transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <TabPanel value={tabValue} index={0}>
+                  <TabPanel value={campaign ? 0 : tabValue} index={0}>
                     <motion.div
                       className="mb-8 flex flex-col items-center gap-6"
                       initial={{ opacity: 0, y: 20 }}

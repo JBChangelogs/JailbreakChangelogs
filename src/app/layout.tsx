@@ -4,7 +4,6 @@ import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
-import { getCurrentUser } from "@/utils/serverSession";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import OfflineDetector from "@/components/OfflineDetector";
 import {
@@ -87,7 +86,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const currentUser = await getCurrentUser();
   const { isMaintenanceMode } = await checkMaintenanceMode();
 
   if (isMaintenanceMode) {
@@ -166,7 +164,7 @@ export default async function RootLayout({
                       <div className="h-16 border-b border-[#2E3944] bg-[#212A31]" />
                     }
                   >
-                    <Header initialUser={currentUser} />
+                    <Header />
                   </Suspense>
                   <main className="flex-1">{children}</main>
 
@@ -563,7 +561,7 @@ export default async function RootLayout({
                   <div className="h-16 border-b border-[#2E3944] bg-[#212A31]" />
                 }
               >
-                <Header initialUser={currentUser} />
+                <Header />
               </Suspense>
               <main className="flex-1">{children}</main>
 

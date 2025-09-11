@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { hasValidToken } from "@/utils/cookies";
+// Removed hasValidToken import - using auth context instead
 import toast from "react-hot-toast";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import {
@@ -90,7 +90,7 @@ export default function OGFinderClient({
     if (!searchId.trim()) return;
 
     // Check if user is authenticated
-    if (!isAuthenticated || !hasValidToken()) {
+    if (!isAuthenticated) {
       toast.error("You need to be logged in to use the OG Finder feature.", {
         duration: 4000,
         position: "bottom-right",
