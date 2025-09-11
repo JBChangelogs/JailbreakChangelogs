@@ -1503,3 +1503,29 @@ export async function fetchOGSearchData(robloxId: string) {
     };
   }
 }
+
+export interface Supporter {
+  id: string;
+  username: string;
+  global_name: string;
+  avatar: string;
+  created_at: string;
+  premiumtype: number;
+  usernumber: number;
+}
+
+export async function fetchSupporters(): Promise<Supporter[]> {
+  try {
+    const response = await fetch(`${BASE_API_URL}/users/list/supporters`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch supporters");
+    }
+
+    const data = await response.json();
+    return data as Supporter[];
+  } catch (err) {
+    console.error("[SERVER] Error fetching supporters:", err);
+    return [];
+  }
+}

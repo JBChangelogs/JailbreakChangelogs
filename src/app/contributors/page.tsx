@@ -1,12 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
-import { fetchUsersWithFlags, UserWithFlags } from "@/utils/api";
+import {
+  fetchUsersWithFlags,
+  UserWithFlags,
+  fetchSupporters,
+} from "@/utils/api";
 import UserAvatar from "@/components/Users/UserAvatarClient";
+import SupportersSection from "@/components/Support/SupportersSection";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function ContributorsPage() {
-  const usersWithFlags = await fetchUsersWithFlags();
+  const [usersWithFlags, supporters] = await Promise.all([
+    fetchUsersWithFlags(),
+    fetchSupporters(),
+  ]);
 
   // Filter out excluded users
   const filteredUsers = usersWithFlags.filter(
@@ -83,14 +91,13 @@ export default async function ContributorsPage() {
       <div className="mt-4">
         <Link
           href={`/users/${user.id}`}
-          className="text-lg font-bold text-white hover:text-blue-300"
+          className="text-lg font-bold text-blue-300 hover:text-blue-200"
         >
           {user.global_name && user.global_name !== "None"
             ? user.global_name
             : user.username}
         </Link>
         <div className="mt-1 text-sm text-gray-300">{role}</div>
-        <div className="text-xs text-blue-300">@{user.username}</div>
       </div>
     </div>
   );
@@ -164,24 +171,16 @@ export default async function ContributorsPage() {
                 href={contrib.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-lg font-bold text-white hover:text-blue-300"
+                className="text-lg font-bold text-blue-300 hover:text-blue-200"
               >
                 {contrib.name}
               </a>
               <div className="mt-1 text-sm text-gray-300">{contrib.role}</div>
-              <div className="text-xs text-blue-300">@{contrib.username}</div>
             </div>
           </div>
         ))}
       </div>
-      <div className="mt-16 text-center">
-        <Link
-          href="/supporting"
-          className="text-xl font-semibold text-blue-300 hover:text-blue-400"
-        >
-          And our supporters!
-        </Link>
-      </div>
+      <SupportersSection supporters={supporters} />
     </div>
   );
 }

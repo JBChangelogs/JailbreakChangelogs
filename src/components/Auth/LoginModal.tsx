@@ -471,31 +471,57 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            // Get token from cookie
-                            const token = document.cookie
-                              .split("; ")
-                              .find((row) => row.startsWith("token="))
-                              ?.split("=")[1];
+                          onClick={async () => {
+                            try {
+                              // Check if user is authenticated via AuthContext
+                              if (!login) {
+                                toast.error("Authentication not available", {
+                                  duration: 3000,
+                                  position: "bottom-right",
+                                });
+                                return;
+                              }
 
-                            if (!token) {
-                              toast.error("Please log in with Discord first", {
-                                duration: 3000,
+                              // Get current session to verify authentication
+                              const sessionResponse =
+                                await fetch("/api/session");
+                              const sessionData = await sessionResponse.json();
+
+                              if (!sessionData.user) {
+                                toast.error(
+                                  "Please log in with Discord first",
+                                  {
+                                    duration: 3000,
+                                    position: "bottom-right",
+                                  },
+                                );
+                                return;
+                              }
+
+                              setIsRedirecting(true);
+                              const currentURL = window.location.href;
+                              const oauthRedirect = `/api/oauth/roblox/redirect?redirect=${encodeURIComponent(currentURL)}`;
+
+                              toast.loading("Redirecting to Roblox...", {
+                                duration: 2000,
                                 position: "bottom-right",
                               });
-                              return;
+
+                              window.location.href = oauthRedirect;
+                            } catch (error) {
+                              console.error(
+                                "Error initiating Roblox OAuth:",
+                                error,
+                              );
+                              toast.error(
+                                "Failed to start Roblox authentication",
+                                {
+                                  duration: 3000,
+                                  position: "bottom-right",
+                                },
+                              );
+                              setIsRedirecting(false);
                             }
-
-                            setIsRedirecting(true);
-                            const currentURL = window.location.href;
-                            const oauthRedirect = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL)}&owner=${encodeURIComponent(token)}`;
-
-                            toast.loading("Redirecting to Roblox...", {
-                              duration: 2000,
-                              position: "bottom-right",
-                            });
-
-                            window.location.href = oauthRedirect;
                           }}
                           className={`flex w-full items-center justify-center gap-2 rounded-md bg-[#FF5630] px-4 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#E54B2C] hover:shadow-[#E54B2C]/25`}
                         >

@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
+import { useAuthContext } from "@/contexts/AuthContext";
 import WarningIcon from "@mui/icons-material/Warning";
 import toast from "react-hot-toast";
 
@@ -24,6 +25,7 @@ export const DeleteAccount = () => {
   const [showFinalWarning, setShowFinalWarning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10);
   const router = useRouter();
+  const { logout } = useAuthContext();
 
   useEffect(() => {
     if (open && timeLeft > 0) {
@@ -55,11 +57,7 @@ export const DeleteAccount = () => {
 
     try {
       await deleteAccount();
-
-      // Clear user data and redirect to home
-      localStorage.removeItem("user");
-      document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      await logout();
 
       // Show success message before redirecting
       toast.success("Account successfully deleted", {

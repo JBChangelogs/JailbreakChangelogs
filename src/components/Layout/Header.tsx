@@ -662,7 +662,7 @@ export default function Header() {
         onClick={handleDrawerToggle}
         sx={{ pl: 4 }}
       >
-        <ListItemText primary="Contributors" />
+        <ListItemText primary="Meet the team" />
       </ListItem>
     </List>
   );
@@ -1244,7 +1244,7 @@ export default function Header() {
                               className="block rounded-lg px-4 py-2 text-base font-bold text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
                               onClick={handleCommunityMenuClose}
                             >
-                              Contributors
+                              Meet the team
                             </Link>
                           </motion.div>
                         </motion.div>
@@ -1255,27 +1255,25 @@ export default function Header() {
               </Box>
 
               <Box className="ml-auto flex items-center gap-2">
-                <IconButton
-                  component="a"
-                  href="https://ko-fi.com/jailbreakchangelogs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: "#FFFFFF",
-                    "&:hover": {
-                      backgroundColor: "rgba(29, 125, 163, 0.1)",
-                    },
-                  }}
-                  aria-label="Support us on Ko-fi"
-                >
-                  <Image
-                    src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-                    alt="Ko-fi"
-                    width={22}
-                    height={22}
-                    style={{ display: "block" }}
-                  />
-                </IconButton>
+                <Link href="/supporting">
+                  <IconButton
+                    sx={{
+                      color: "#FFFFFF",
+                      "&:hover": {
+                        backgroundColor: "rgba(29, 125, 163, 0.1)",
+                      },
+                    }}
+                    aria-label="Support us"
+                  >
+                    <Image
+                      src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                      alt="Ko-fi"
+                      width={22}
+                      height={22}
+                      style={{ display: "block" }}
+                    />
+                  </IconButton>
+                </Link>
                 <Tooltip title="Join our Discord">
                   <IconButton
                     onClick={() => setIsDiscordModalOpen(true)}
@@ -1514,27 +1512,25 @@ export default function Header() {
           )}
           {mounted && isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton
-                component="a"
-                href="https://ko-fi.com/jbchangelogs"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  color: "#FFFFFF",
-                  "&:hover": {
-                    backgroundColor: "rgba(29, 125, 163, 0.1)",
-                  },
-                }}
-                aria-label="Support us on Ko-fi"
-              >
-                <Image
-                  src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-                  alt="Ko-fi"
-                  width={22}
-                  height={22}
-                  style={{ display: "block" }}
-                />
-              </IconButton>
+              <Link href="/supporting">
+                <IconButton
+                  sx={{
+                    color: "#FFFFFF",
+                    "&:hover": {
+                      backgroundColor: "rgba(29, 125, 163, 0.1)",
+                    },
+                  }}
+                  aria-label="Support us"
+                >
+                  <Image
+                    src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                    alt="Ko-fi"
+                    width={22}
+                    height={22}
+                    style={{ display: "block" }}
+                  />
+                </IconButton>
+              </Link>
               <Tooltip title="Join our Discord">
                 <IconButton
                   onClick={() => setIsDiscordModalOpen(true)}
