@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { BASE_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,10 +20,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Construct the Roblox OAuth URL with the token as owner
-    const oauthUrl = `${BASE_API_URL}/oauth/roblox?redirect=${encodeURIComponent(redirect)}&owner=${encodeURIComponent(token)}`;
+    const oauthUrl = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(redirect)}&owner=${encodeURIComponent(token)}`;
 
-    // Redirect to the Roblox OAuth URL
     return NextResponse.redirect(oauthUrl);
   } catch (error) {
     console.error("Error in Roblox OAuth redirect BFF:", error);
