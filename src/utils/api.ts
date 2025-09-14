@@ -234,6 +234,55 @@ export async function fetchUserByIdForMetadata(id: string) {
   }
 }
 
+export async function fetchUserByRobloxId(robloxId: string) {
+  try {
+    const response = await fetch(
+      `${BASE_API_URL}/users/get/roblox?id=${robloxId}&nocache=true`,
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle banned users specifically without logging the error response
+      if (response.status === 403) {
+        const errorMessage =
+          data.detail || "This user is banned from Jailbreak Changelogs.";
+        throw new Error(`BANNED_USER: ${errorMessage}`);
+      }
+
+      // Log error response for other types of errors
+      console.error("Error response:", {
+        status: response.status,
+        statusText: response.statusText,
+        data: JSON.stringify(data, null, 2),
+      });
+
+      if (data.detail) {
+        throw new Error(
+          `Failed to fetch user: ${response.status} - ${JSON.stringify(data.detail)}`,
+        );
+      }
+      throw new Error(`Failed to fetch user: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching user by Roblox ID:", error);
+
+    // Re-throw BANNED_USER errors so calling code can handle them
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("BANNED_USER:")
+    ) {
+      throw error;
+    }
+
+    return null;
+  }
+}
+
 export const fetchUsersForList = async () => {
   const fields = [
     "id",
@@ -507,6 +556,22 @@ export async function fetchDupeFinderData(userId: string) {
   } catch (err) {
     console.error("[SERVER] Error fetching dupe finder data:", err);
     return { error: "Failed to fetch dupe finder data. Please try again." };
+  }
+}
+
+export async function fetchDuplicatesCount() {
+  try {
+    const url = `${INVENTORY_API_URL}/items/duplicates/count`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch duplicates count");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[SERVER] Error fetching duplicates count:", err);
+    return { total_duplicates: 0, total_duplicates_str: "0" };
   }
 }
 
@@ -786,7 +851,7 @@ export async function fetchInventoryData(robloxId: string) {
           console.log(
             `[WS] Connecting to ${INVENTORY_WS_URL} for user ${robloxId}`,
           );
-          const socket = new WS(INVENTORY_WS_URL, {
+          const socket = new WS(`${INVENTORY_WS_URL}/socket`, {
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
             },

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Pagination } from "@mui/material";
+import { Pagination, Tooltip } from "@mui/material";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import localFont from "next/font/local";
@@ -14,12 +14,9 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/images";
-import {
-  fetchMissingRobloxData,
-  fetchOriginalOwnerAvatars,
-} from "@/app/inventories/actions";
 import { RobloxUser, Item } from "@/types";
 import { formatCurrencyValue, parseCurrencyValue } from "@/utils/currency";
+import ItemActionModal from "@/components/Modals/ItemActionModal";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -72,6 +69,7 @@ interface InventoryItemsProps {
   robloxAvatars: Record<string, string>;
   onItemClick: (item: InventoryItem) => void;
   itemsData?: Item[];
+  onPageChange?: (page: number) => void;
 }
 
 export default function InventoryItems({
@@ -80,6 +78,7 @@ export default function InventoryItems({
   robloxAvatars,
   onItemClick,
   itemsData: propItemsData,
+  onPageChange,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -107,8 +106,30 @@ export default function InventoryItems({
   const [localRobloxAvatars, setLocalRobloxAvatars] =
     useState<Record<string, string>>(robloxAvatars);
   const [itemsData, setItemsData] = useState<Item[]>(propItemsData || []);
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [selectedItemForAction, setSelectedItemForAction] =
+    useState<InventoryItem | null>(null);
 
   const MAX_SEARCH_LENGTH = 50;
+
+  // Handler for card click - show action modal
+  const handleCardClick = (item: InventoryItem) => {
+    setSelectedItemForAction(item);
+    setShowActionModal(true);
+  };
+
+  // Handler for viewing trade history from modal
+  const handleViewTradeHistory = () => {
+    if (selectedItemForAction) {
+      onItemClick(selectedItemForAction);
+    }
+  };
+
+  // Handler for closing action modal
+  const closeActionModal = () => {
+    setShowActionModal(false);
+    setSelectedItemForAction(null);
+  };
   const itemsPerPage = 20;
 
   // Helper function to parse cash value strings for totals (returns 0 for N/A)
@@ -169,57 +190,6 @@ export default function InventoryItems({
     [localRobloxAvatars],
   );
 
-  // Progressive loading of missing user data
-  const fetchMissingUserData = useCallback(
-    async (userIds: string[]) => {
-      const missingIds = userIds.filter(
-        (id) => !localRobloxUsers[id] && !robloxUsers[id],
-      );
-
-      if (missingIds.length === 0) return;
-
-      try {
-        const result = await fetchMissingRobloxData(missingIds);
-
-        // Update state with new user data
-        if (result.userData && typeof result.userData === "object") {
-          setLocalRobloxUsers((prev) => ({ ...prev, ...result.userData }));
-        }
-
-        // Update state with new avatar data
-        if (result.avatarData && typeof result.avatarData === "object") {
-          setLocalRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch missing user data:", error);
-      }
-    },
-    [localRobloxUsers, robloxUsers],
-  );
-
-  // Fetch avatars for original owners separately
-  const fetchOriginalOwnerAvatarsData = useCallback(
-    async (userIds: string[]) => {
-      const missingIds = userIds.filter(
-        (id) => !localRobloxAvatars[id] && !robloxAvatars[id],
-      );
-
-      if (missingIds.length === 0) return;
-
-      try {
-        const avatarData = await fetchOriginalOwnerAvatars(missingIds);
-
-        // Update state with new avatar data
-        if (avatarData && typeof avatarData === "object") {
-          setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch original owner avatars:", error);
-      }
-    },
-    [localRobloxAvatars, robloxAvatars],
-  );
-
   // Helper function to get Roblox user display name
   const getRobloxUserDisplay = (robloxId: string) => {
     return getUserDisplay(robloxId);
@@ -244,6 +214,43 @@ export default function InventoryItems({
   useEffect(() => {
     setPage(1);
   }, [searchTerm, showOnlyOriginal, selectedCategories, sortOrder]);
+
+  // Helper function to get duped value for an item using DupeFinder logic
+  const getDupedValueForItem = useCallback(
+    (itemData: Item, inventoryItem: InventoryItem): number => {
+      let dupedValue = parseDupedValueForTotal(itemData.duped_value);
+
+      // If main item doesn't have duped value, check children/variants based on created date
+      if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
+        // Get the year from the created date (from item info)
+        const createdAtInfo = inventoryItem.info.find(
+          (info) => info.title === "Created At",
+        );
+        const createdYear = createdAtInfo
+          ? new Date(createdAtInfo.value).getFullYear().toString()
+          : null;
+
+        // Find the child variant that matches the created year
+        const matchingChild = createdYear
+          ? itemData.children.find(
+              (child) =>
+                child.sub_name === createdYear &&
+                child.data &&
+                child.data.duped_value &&
+                child.data.duped_value !== "N/A" &&
+                child.data.duped_value !== null,
+            )
+          : null;
+
+        if (matchingChild) {
+          dupedValue = parseDupedValueForTotal(matchingChild.data.duped_value);
+        }
+      }
+
+      return isNaN(dupedValue) ? 0 : dupedValue;
+    },
+    [],
+  );
 
   // Filter inventory items based on search term, original owner filter, and category filter
   const filteredItems = useMemo(() => {
@@ -299,6 +306,23 @@ export default function InventoryItems({
         case "random":
           return Math.random() - 0.5;
         case "duplicates":
+          // Group duplicates together and sort by creation date
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+
+          // Count how many of each item exist
+          const aCount = items.filter(
+            (item) => `${item.categoryTitle}-${item.title}` === aKey,
+          ).length;
+          const bCount = items.filter(
+            (item) => `${item.categoryTitle}-${item.title}` === bKey,
+          ).length;
+
+          // Prioritize duplicates (items with count > 1) over singles
+          if (aCount > 1 && bCount === 1) return -1; // a is duplicate, b is single
+          if (aCount === 1 && bCount > 1) return 1; // a is single, b is duplicate
+
+          // If both are duplicates or both are singles, sort by category then title
           const categoryCompare = a.categoryTitle.localeCompare(
             b.categoryTitle,
           );
@@ -363,10 +387,10 @@ export default function InventoryItems({
             (item) => item.id === b.item_id,
           );
           const aDupedValueDesc = aItemDataDupedDesc
-            ? parseDupedValueForTotal(aItemDataDupedDesc.duped_value)
+            ? getDupedValueForItem(aItemDataDupedDesc, a)
             : 0;
           const bDupedValueDesc = bItemDataDupedDesc
-            ? parseDupedValueForTotal(bItemDataDupedDesc.duped_value)
+            ? getDupedValueForItem(bItemDataDupedDesc, b)
             : 0;
           return bDupedValueDesc - aDupedValueDesc;
         case "duped-asc":
@@ -377,10 +401,10 @@ export default function InventoryItems({
             (item) => item.id === b.item_id,
           );
           const aDupedValueAsc = aItemDataDupedAsc
-            ? parseDupedValueForTotal(aItemDataDupedAsc.duped_value)
+            ? getDupedValueForItem(aItemDataDupedAsc, a)
             : 0;
           const bDupedValueAsc = bItemDataDupedAsc
-            ? parseDupedValueForTotal(bItemDataDupedAsc.duped_value)
+            ? getDupedValueForItem(bItemDataDupedAsc, b)
             : 0;
           return aDupedValueAsc - bDupedValueAsc;
 
@@ -397,6 +421,7 @@ export default function InventoryItems({
     selectedCategories,
     sortOrder,
     itemsData,
+    getDupedValueForItem,
   ]);
 
   // Get unique categories from the data
@@ -416,76 +441,73 @@ export default function InventoryItems({
     startIndex + itemsPerPage,
   );
 
-  // Progressive loading for current page items
-  useEffect(() => {
-    if (!paginatedItems || paginatedItems.length === 0) return;
-
-    const userIdsToLoad: string[] = [];
-    const avatarIdsToLoad: string[] = [];
-
+  // Create a map to track duplicate items
+  const itemCounts = useMemo(() => {
+    const counts = new Map<string, number>();
     paginatedItems.forEach((item) => {
-      const originalOwnerInfo = item.info.find(
-        (info) => info.title === "Original Owner",
-      );
+      const key = `${item.categoryTitle}-${item.title}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return counts;
+  }, [paginatedItems]);
 
-      // Add original owner ID if missing
-      if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
-        const ownerId = originalOwnerInfo.value;
-        if (!getUserDisplay(ownerId) || getUserDisplay(ownerId) === ownerId) {
-          userIdsToLoad.push(ownerId);
-        }
+  // Create a map to track the order of duplicates based on creation date
+  const duplicateOrders = useMemo(() => {
+    const orders = new Map<string, number>();
 
-        // Fetch avatars for original owners as well
-        if (!getUserAvatar(ownerId)) {
-          avatarIdsToLoad.push(ownerId);
-        }
+    // Group items by name
+    const itemGroups = new Map<string, InventoryItem[]>();
+    paginatedItems.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      if (!itemGroups.has(key)) {
+        itemGroups.set(key, []);
       }
+      itemGroups.get(key)!.push(item);
+    });
 
-      // Add trade history user IDs if missing
-      if (item.history && item.history.length > 0) {
-        item.history.forEach((trade) => {
-          if (trade.UserId) {
-            const tradeUserId = trade.UserId.toString();
-            if (
-              !getUserDisplay(tradeUserId) ||
-              getUserDisplay(tradeUserId) === tradeUserId
-            ) {
-              userIdsToLoad.push(tradeUserId);
-            }
+    // Sort each group by creation date (oldest first) and assign numbers
+    itemGroups.forEach((items) => {
+      if (items.length > 1) {
+        // Sort by creation date (oldest first)
+        const sortedItems = items.sort((a, b) => {
+          const aCreated = a.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          const bCreated = b.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
 
-            // Fetch avatars for all trade history users
-            if (!getUserAvatar(tradeUserId)) {
-              avatarIdsToLoad.push(tradeUserId);
-            }
-          }
+          if (!aCreated || !bCreated) return 0;
+
+          // Parse dates in format "Nov 6, 2022"
+          const aDate = new Date(aCreated);
+          const bDate = new Date(bCreated);
+
+          // Check if dates are valid
+          if (isNaN(aDate.getTime()) || isNaN(bDate.getTime())) return 0;
+
+          return aDate.getTime() - bDate.getTime();
+        });
+
+        // Assign numbers starting from 1
+        sortedItems.forEach((item, index) => {
+          orders.set(item.id, index + 1);
         });
       }
     });
 
-    // Fetch missing user data if any
-    if (userIdsToLoad.length > 0) {
-      fetchMissingUserData(userIdsToLoad);
-    }
-
-    // Fetch avatars for original owners and trade history users
-    if (avatarIdsToLoad.length > 0) {
-      fetchOriginalOwnerAvatarsData(avatarIdsToLoad);
-    }
-  }, [
-    paginatedItems,
-    initialData?.item_count,
-    fetchMissingUserData,
-    fetchOriginalOwnerAvatarsData,
-    getUserDisplay,
-    getUserAvatar,
-    initialData,
-  ]);
+    return orders;
+  }, [paginatedItems]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
     setPage(value);
+    // Notify parent component about page change for progressive loading
+    if (onPageChange) {
+      onPageChange(value);
+    }
   };
 
   // Empty state: no inventory items
@@ -710,12 +732,7 @@ export default function InventoryItems({
                     label: "Random",
                     options: [{ value: "random", label: "Random Order" }],
                   },
-                  {
-                    label: "Duplicates",
-                    options: [
-                      { value: "duplicates", label: "Group Duplicates" },
-                    ],
-                  },
+                  { value: "duplicates", label: "Group Duplicates" },
                   {
                     label: "Alphabetically",
                     options: [
@@ -941,17 +958,28 @@ export default function InventoryItems({
             const originalOwnerInfo = item.info.find(
               (info) => info.title === "Original Owner",
             );
+            const itemKey = `${item.categoryTitle}-${item.title}`;
+            const duplicateCount = itemCounts.get(itemKey) || 1;
+            const duplicateOrder = duplicateOrders.get(item.id) || 1;
+            const isDuplicate = duplicateCount > 1;
 
             return (
               <div
                 key={item.id}
-                className={`relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 p-3 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg ${
+                className={`relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 p-3 text-white transition-all duration-200 hover:shadow-lg ${
                   isOriginalOwner
-                    ? "border-yellow-400 bg-yellow-600/30 backdrop-blur-sm"
-                    : "border-gray-800 bg-gray-700"
+                    ? "border-yellow-400 bg-yellow-600/30 backdrop-blur-sm hover:border-yellow-300"
+                    : "border-gray-800 bg-gray-700 hover:border-gray-600"
                 }`}
-                onClick={() => onItemClick(item)}
+                onClick={() => handleCardClick(item)}
               >
+                {/* Duplicate Indicator */}
+                {isDuplicate && (
+                  <div className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg">
+                    #{duplicateOrder}
+                  </div>
+                )}
+
                 {/* Title */}
                 <div className="mb-4 text-left">
                   <p
@@ -1112,27 +1140,154 @@ export default function InventoryItems({
                         <>
                           <div>
                             <div className="text-sm opacity-90">CASH VALUE</div>
-                            <div className="text-xl font-bold text-white">
-                              {itemData.cash_value === null ||
-                              itemData.cash_value === "N/A"
-                                ? "N/A"
-                                : formatCurrencyValue(
-                                    parseCurrencyValue(itemData.cash_value),
-                                  )}
-                            </div>
+                            <Tooltip
+                              title={
+                                itemData.cash_value === null ||
+                                itemData.cash_value === "N/A"
+                                  ? "N/A"
+                                  : `$${parseCurrencyValue(itemData.cash_value).toLocaleString()}`
+                              }
+                              placement="top"
+                              arrow
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    backgroundColor: "#0F1419",
+                                    color: "#D3D9D4",
+                                    fontSize: "0.75rem",
+                                    padding: "8px 12px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #2E3944",
+                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                    "& .MuiTooltip-arrow": {
+                                      color: "#0F1419",
+                                    },
+                                  },
+                                },
+                              }}
+                            >
+                              <div className="cursor-help text-xl font-bold text-white">
+                                {itemData.cash_value === null ||
+                                itemData.cash_value === "N/A"
+                                  ? "N/A"
+                                  : formatCurrencyValue(
+                                      parseCurrencyValue(itemData.cash_value),
+                                    )}
+                              </div>
+                            </Tooltip>
                           </div>
                           <div>
                             <div className="text-sm opacity-90">
                               DUPED VALUE
                             </div>
-                            <div className="text-xl font-bold text-white">
-                              {itemData.duped_value === null ||
-                              itemData.duped_value === "N/A"
-                                ? "N/A"
-                                : formatCurrencyValue(
-                                    parseCurrencyValue(itemData.duped_value),
-                                  )}
-                            </div>
+                            <Tooltip
+                              title={(() => {
+                                let dupedValue = itemData.duped_value;
+
+                                // If main item doesn't have duped value, check children/variants based on created date
+                                if (
+                                  (dupedValue === null ||
+                                    dupedValue === "N/A") &&
+                                  itemData.children
+                                ) {
+                                  // Get the year from the created date (from item info)
+                                  const createdAtInfo = item.info.find(
+                                    (info) => info.title === "Created At",
+                                  );
+                                  const createdYear = createdAtInfo
+                                    ? new Date(createdAtInfo.value)
+                                        .getFullYear()
+                                        .toString()
+                                    : null;
+
+                                  // Find the child variant that matches the created year
+                                  const matchingChild = createdYear
+                                    ? itemData.children.find(
+                                        (child) =>
+                                          child.sub_name === createdYear &&
+                                          child.data &&
+                                          child.data.duped_value &&
+                                          child.data.duped_value !== "N/A" &&
+                                          child.data.duped_value !== null,
+                                      )
+                                    : null;
+
+                                  if (matchingChild) {
+                                    dupedValue = matchingChild.data.duped_value;
+                                  }
+                                }
+
+                                return dupedValue === null ||
+                                  dupedValue === "N/A"
+                                  ? "N/A"
+                                  : `$${parseCurrencyValue(dupedValue).toLocaleString()}`;
+                              })()}
+                              placement="top"
+                              arrow
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    backgroundColor: "#0F1419",
+                                    color: "#D3D9D4",
+                                    fontSize: "0.75rem",
+                                    padding: "8px 12px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #2E3944",
+                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                    "& .MuiTooltip-arrow": {
+                                      color: "#0F1419",
+                                    },
+                                  },
+                                },
+                              }}
+                            >
+                              <div className="cursor-help text-xl font-bold text-white">
+                                {(() => {
+                                  let dupedValue = itemData.duped_value;
+
+                                  // If main item doesn't have duped value, check children/variants based on created date
+                                  if (
+                                    (dupedValue === null ||
+                                      dupedValue === "N/A") &&
+                                    itemData.children
+                                  ) {
+                                    // Get the year from the created date (from item info)
+                                    const createdAtInfo = item.info.find(
+                                      (info) => info.title === "Created At",
+                                    );
+                                    const createdYear = createdAtInfo
+                                      ? new Date(createdAtInfo.value)
+                                          .getFullYear()
+                                          .toString()
+                                      : null;
+
+                                    // Find the child variant that matches the created year
+                                    const matchingChild = createdYear
+                                      ? itemData.children.find(
+                                          (child) =>
+                                            child.sub_name === createdYear &&
+                                            child.data &&
+                                            child.data.duped_value &&
+                                            child.data.duped_value !== "N/A" &&
+                                            child.data.duped_value !== null,
+                                        )
+                                      : null;
+
+                                    if (matchingChild) {
+                                      dupedValue =
+                                        matchingChild.data.duped_value;
+                                    }
+                                  }
+
+                                  return dupedValue === null ||
+                                    dupedValue === "N/A"
+                                    ? "N/A"
+                                    : formatCurrencyValue(
+                                        parseCurrencyValue(dupedValue),
+                                      );
+                                })()}
+                              </div>
+                            </Tooltip>
                           </div>
                         </>
                       );
@@ -1195,6 +1350,14 @@ export default function InventoryItems({
           />
         </div>
       )}
+
+      {/* Item Action Modal */}
+      <ItemActionModal
+        isOpen={showActionModal}
+        onClose={closeActionModal}
+        item={selectedItemForAction}
+        onViewTradeHistory={handleViewTradeHistory}
+      />
     </div>
   );
 }

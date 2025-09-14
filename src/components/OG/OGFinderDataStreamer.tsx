@@ -4,6 +4,7 @@ import {
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
+  fetchUserByRobloxId,
 } from "@/utils/api";
 import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
@@ -85,7 +86,7 @@ function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
           <div className="flex items-end">
             <button
               disabled
-              className="flex h-10 min-w-[100px] cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#2E3944] px-6 text-sm font-medium text-white"
+              className="flex h-10 min-w-[100px] cursor-progress items-center justify-center gap-2 rounded-lg bg-[#2E3944] px-6 text-sm font-medium text-white"
             >
               <svg
                 className="h-4 w-4 animate-spin"
@@ -191,20 +192,21 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  // Get the main user's data
-  const mainUserData = await fetchRobloxUsersBatch([actualRobloxId]).catch(
-    (error) => {
+  // Get the main user's data (the one being searched) and connection data
+  const [mainUserData, mainUserAvatar, userConnectionData] = await Promise.all([
+    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user data:", error);
       return {};
-    },
-  );
-
-  const mainUserAvatar = await fetchRobloxAvatars([actualRobloxId]).catch(
-    (error) => {
+    }),
+    fetchRobloxAvatars([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user avatar:", error);
       return {};
-    },
-  );
+    }),
+    fetchUserByRobloxId(actualRobloxId).catch((error) => {
+      console.error("Failed to fetch user connection data:", error);
+      return null;
+    }),
+  ]);
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, RobloxUser> = {};
@@ -259,6 +261,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       robloxId={actualRobloxId}
       robloxUsers={robloxUsers}
       robloxAvatars={robloxAvatars}
+      userConnectionData={userConnectionData}
     />
   );
 }

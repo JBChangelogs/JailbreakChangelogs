@@ -47,7 +47,11 @@ export default function SearchForm({
         <button
           type="submit"
           disabled={isLoading || externalIsLoading}
-          className="flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg bg-[#5865F2] px-6 text-sm font-medium text-white transition-all duration-200 hover:bg-[#4752C4] disabled:cursor-not-allowed disabled:bg-[#2E3944]"
+          className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white transition-all duration-200 ${
+            isLoading || externalIsLoading
+              ? "cursor-progress bg-[#212A31]"
+              : "bg-[#5865F2] hover:bg-[#4752C4]"
+          }`}
         >
           {(isLoading || externalIsLoading) && (
             <svg

@@ -192,7 +192,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         }
         if (index === 1) {
           return {
-            label: `User ${segment}`,
+            label: segment,
             href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }

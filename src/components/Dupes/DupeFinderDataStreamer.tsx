@@ -4,9 +4,10 @@ import {
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
+  fetchUserByRobloxId,
 } from "@/utils/api";
-import DupeFinderClient from "./DupeFinderClient";
 import type { RobloxUser } from "@/types";
+import DupeFinderClient from "./DupeFinderClient";
 
 interface DupeFinderDataStreamerProps {
   robloxId: string;
@@ -92,20 +93,21 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  // Get the main user's data (the one being searched)
-  const mainUserData = await fetchRobloxUsersBatch([actualRobloxId]).catch(
-    (error) => {
+  // Get the main user's data (the one being searched) and connection data
+  const [mainUserData, mainUserAvatar, userConnectionData] = await Promise.all([
+    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user data:", error);
       return {};
-    },
-  );
-
-  const mainUserAvatar = await fetchRobloxAvatars([actualRobloxId]).catch(
-    (error) => {
+    }),
+    fetchRobloxAvatars([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user avatar:", error);
       return {};
-    },
-  );
+    }),
+    fetchUserByRobloxId(actualRobloxId).catch((error) => {
+      console.error("Failed to fetch user connection data:", error);
+      return null;
+    }),
+  ]);
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, RobloxUser> = {};
@@ -155,22 +157,13 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
   }
 
   return (
-    <Suspense
-      fallback={
-        <DupeFinderClient
-          robloxId={actualRobloxId}
-          initialData={result}
-          isLoading={true}
-        />
-      }
-    >
-      <DupeFinderClient
-        robloxId={actualRobloxId}
-        initialData={result}
-        robloxUsers={robloxUsers}
-        robloxAvatars={robloxAvatars}
-      />
-    </Suspense>
+    <DupeFinderClient
+      robloxId={actualRobloxId}
+      initialData={result}
+      robloxUsers={robloxUsers}
+      robloxAvatars={robloxAvatars}
+      userConnectionData={userConnectionData}
+    />
   );
 }
 

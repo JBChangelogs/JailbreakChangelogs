@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
 
     const oauthUrl = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(redirect)}&owner=${encodeURIComponent(token)}`;
 
+    // Redirect to the Roblox OAuth URL
     return NextResponse.redirect(oauthUrl);
   } catch (error) {
     console.error("Error in Roblox OAuth redirect BFF:", error);

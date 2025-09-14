@@ -20,15 +20,9 @@ export default function SearchForm({
   error,
 }: SearchFormProps) {
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+    <>
       <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
-          <label
-            htmlFor="searchInput"
-            className="text-muted mb-2 block text-sm font-medium"
-          >
-            Username or Roblox ID
-          </label>
           <div className="relative">
             <input
               type="text"
@@ -93,6 +87,6 @@ export default function SearchForm({
           <p className="text-sm text-red-300">{error}</p>
         </div>
       )}
-    </div>
+    </>
   );
 }

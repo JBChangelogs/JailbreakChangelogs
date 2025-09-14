@@ -5,7 +5,7 @@ export default function InventoryCheckerLoading() {
     <div className="container mx-auto px-4 py-8">
       <Breadcrumb />
       <h1 className="mb-6 text-3xl font-bold">Inventory Checker</h1>
-      <p className="mb-4 text-gray-600 dark:text-gray-400">
+      <p className="mb-4 text-white">
         Enter a Roblox ID or username to check their Jailbreak inventory.
       </p>
 

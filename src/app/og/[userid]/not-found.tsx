@@ -7,7 +7,7 @@ export default function NotFound() {
       <Breadcrumb />
       <div className="py-12 text-center">
         <h1 className="mb-4 text-3xl font-bold">User Not Found</h1>
-        <p className="mb-6 text-gray-600 dark:text-gray-400">
+        <p className="mb-6 text-white">
           The Roblox user ID you&apos;re looking for doesn&apos;t exist or is
           invalid.
         </p>

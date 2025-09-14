@@ -280,12 +280,12 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className={`group relative overflow-hidden rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+        className={`group relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg ${
           currentItemData.is_seasonal === 1
-            ? "border-2 border-[#40c0e7]"
+            ? "border-2 border-[#40c0e7] hover:border-[#60d0f7]"
             : currentItemData.is_limited === 1
-              ? "border-2 border-[#ffd700]"
-              : ""
+              ? "border-2 border-[#ffd700] hover:border-[#ffed4e]"
+              : "border-2 border-transparent hover:border-gray-600"
         } bg-[#1a2127]`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

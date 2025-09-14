@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Dialog } from "@headlessui/react";
-import {
-  XMarkIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
-import { fetchItems } from "@/utils/api";
+import { fetchItems, fetchDupeFinderData } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
+import { UserConnectionData } from "./UserDataStreamer";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
+import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -60,6 +60,7 @@ interface InventoryCheckerClientProps {
   originalSearchTerm?: string;
   robloxUsers?: Record<string, RobloxUser>;
   robloxAvatars?: Record<string, string>;
+  userConnectionData?: UserConnectionData | null;
   error?: string;
   isLoading?: boolean;
 }
@@ -70,6 +71,7 @@ export default function InventoryCheckerClient({
   originalSearchTerm,
   robloxUsers: initialRobloxUsers,
   robloxAvatars: initialRobloxAvatars,
+  userConnectionData,
   error,
   isLoading: externalIsLoading,
 }: InventoryCheckerClientProps) {
@@ -79,6 +81,9 @@ export default function InventoryCheckerClient({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const progressiveLoadingRef = useRef<Set<string>>(new Set());
+  const loadedPagesRef = useRef<Set<number>>(new Set());
+  const preloadingPagesRef = useRef<Set<number>>(new Set());
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
   );
@@ -86,8 +91,68 @@ export default function InventoryCheckerClient({
     initialRobloxAvatars || {},
   );
   const [itemsData, setItemsData] = useState<Item[]>([]);
+  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
+  const [dupedItems, setDupedItems] = useState<unknown[]>([]);
+  const [isLoadingDupes, setIsLoadingDupes] = useState(false);
 
   const router = useRouter();
+
+  // Auth context and scan functionality
+  const { user, isAuthenticated } = useAuthContext();
+  const scanWebSocket = useScanWebSocket(robloxId || "");
+
+  // Check if current user is viewing their own inventory
+  const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
+
+  // Show toast notifications for scan status
+  useEffect(() => {
+    if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("You will be scanned when you join")
+    ) {
+      toast.success("You will be scanned when you join a trading server", {
+        duration: 4000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("User found in game")
+    ) {
+      toast.success("User found in game - scan in progress!", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Bot joined server")
+    ) {
+      toast.success("Bot joined server, scanning...", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.status === "completed" &&
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Added to queue")
+    ) {
+      toast.success(scanWebSocket.message, {
+        duration: 5000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.status === "error" &&
+      scanWebSocket.error &&
+      scanWebSocket.error.includes("No bots available")
+    ) {
+      toast.error(
+        "No scan bots are currently online. Please try again later.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+    }
+  }, [scanWebSocket.message, scanWebSocket.status, scanWebSocket.error]);
 
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
@@ -109,52 +174,115 @@ export default function InventoryCheckerClient({
     [robloxAvatars, initialRobloxAvatars],
   );
 
-  // Progressive loading of missing user data
+  // Progressive loading of missing user data (only for trade history users)
   const fetchMissingUserData = useCallback(
     async (userIds: string[]) => {
       const missingIds = userIds.filter(
         (id) => !robloxUsers[id] && !initialRobloxUsers?.[id],
       );
 
-      if (missingIds.length === 0) return;
+      if (missingIds.length === 0) {
+        return;
+      }
+
+      // Check if we're already loading these IDs
+      const newIds = missingIds.filter(
+        (id) => !progressiveLoadingRef.current.has(id),
+      );
+      if (newIds.length === 0) {
+        return;
+      }
+
+      // Mark as loading
+      newIds.forEach((id) => progressiveLoadingRef.current.add(id));
+
+      // Update loading state for UI
+      setLoadingUserIds((prev) => {
+        const newSet = new Set(prev);
+        newIds.forEach((id) => newSet.add(id));
+        return newSet;
+      });
 
       try {
-        const result = await fetchMissingRobloxData(missingIds);
+        const result = await fetchMissingRobloxData(newIds);
 
-        // Update state with new user data
+        // Update state with new user data immediately
         if (result.userData && typeof result.userData === "object") {
           setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
         }
 
-        // Update state with new avatar data
+        // Update state with new avatar data immediately
         if (result.avatarData && typeof result.avatarData === "object") {
           setRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
         }
       } catch (error) {
-        console.error("Failed to fetch missing user data:", error);
+        console.error("[INVENTORY] Failed to fetch missing user data:", error);
+      } finally {
+        // Remove from loading set
+        newIds.forEach((id) => progressiveLoadingRef.current.delete(id));
+
+        // Update loading state for UI
+        setLoadingUserIds((prev) => {
+          const newSet = new Set(prev);
+          newIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
       }
     },
     [robloxUsers, initialRobloxUsers, setRobloxUsers, setRobloxAvatars],
   );
 
-  // Fetch avatars for original owners separately (for inventories with 1000 items or less)
-  const fetchOriginalOwnerAvatarsData = useCallback(
+  // Fetch avatars for trade history users (not original owners since they're loaded server-side)
+  const fetchTradeHistoryAvatarsData = useCallback(
     async (userIds: string[]) => {
       const missingIds = userIds.filter(
         (id) => !robloxAvatars[id] && !initialRobloxAvatars?.[id],
       );
 
-      if (missingIds.length === 0) return;
+      if (missingIds.length === 0) {
+        return;
+      }
+
+      // Check if we're already loading these IDs
+      const newIds = missingIds.filter(
+        (id) => !progressiveLoadingRef.current.has(id),
+      );
+      if (newIds.length === 0) {
+        return;
+      }
+
+      // Mark as loading
+      newIds.forEach((id) => progressiveLoadingRef.current.add(id));
+
+      // Update loading state for UI
+      setLoadingUserIds((prev) => {
+        const newSet = new Set(prev);
+        newIds.forEach((id) => newSet.add(id));
+        return newSet;
+      });
 
       try {
-        const avatarData = await fetchOriginalOwnerAvatars(missingIds);
+        const avatarData = await fetchOriginalOwnerAvatars(newIds);
 
         // Update state with new avatar data
         if (avatarData && typeof avatarData === "object") {
           setRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
         }
       } catch (error) {
-        console.error("Failed to fetch original owner avatars:", error);
+        console.error(
+          "[INVENTORY] Failed to fetch trade history avatars:",
+          error,
+        );
+      } finally {
+        // Remove from loading set
+        newIds.forEach((id) => progressiveLoadingRef.current.delete(id));
+
+        // Update loading state for UI
+        setLoadingUserIds((prev) => {
+          const newSet = new Set(prev);
+          newIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
       }
     },
     [robloxAvatars, initialRobloxAvatars, setRobloxAvatars],
@@ -176,44 +304,183 @@ export default function InventoryCheckerClient({
     }
   }, [initialData]);
 
-  // Progressive loading for trade history modal
+  // Load duped items data
   useEffect(() => {
-    if (!selectedItem?.history || selectedItem.history.length === 0) return;
+    const loadDupedItems = async () => {
+      if (!robloxId) return;
 
-    const userIdsToLoad: string[] = [];
-    const avatarIdsToLoad: string[] = [];
+      try {
+        setIsLoadingDupes(true);
+        const dupeData = await fetchDupeFinderData(robloxId);
 
-    selectedItem.history.forEach((trade) => {
-      if (trade.UserId) {
-        const tradeUserId = trade.UserId.toString();
-        if (
-          !getUserDisplay(tradeUserId) ||
-          getUserDisplay(tradeUserId) === tradeUserId
-        ) {
-          userIdsToLoad.push(tradeUserId);
+        if (dupeData && !dupeData.error && Array.isArray(dupeData)) {
+          setDupedItems(dupeData);
+        } else {
+          setDupedItems([]);
         }
-
-        if (!getUserAvatar(tradeUserId)) {
-          avatarIdsToLoad.push(tradeUserId);
-        }
+      } catch (error) {
+        console.error("Failed to fetch duped items:", error);
+        setDupedItems([]);
+      } finally {
+        setIsLoadingDupes(false);
       }
-    });
+    };
 
-    if (userIdsToLoad.length > 0) {
-      fetchMissingUserData(userIdsToLoad);
-    }
+    loadDupedItems();
+  }, [robloxId]);
 
-    if (avatarIdsToLoad.length > 0) {
-      fetchOriginalOwnerAvatarsData(avatarIdsToLoad);
+  // Progressive loading for trade history users and missing original owners
+  const loadPageData = useCallback(
+    (pageNumber: number, isPreload = false) => {
+      if (!initialData?.data || initialData.data.length === 0) return;
+
+      // Check if we've already loaded this page
+      if (loadedPagesRef.current.has(pageNumber)) {
+        return;
+      }
+
+      // Check if we're already preloading this page
+      if (isPreload && preloadingPagesRef.current.has(pageNumber)) {
+        return;
+      }
+
+      const itemsPerPage = 20;
+
+      // Calculate which items are on the current page
+      const startIndex = (pageNumber - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const currentPageItems = initialData.data.slice(startIndex, endIndex);
+
+      const userIdsToLoad: string[] = [];
+      const avatarIdsToLoad: string[] = [];
+
+      // Collect user IDs from both trade history and original owners
+      currentPageItems.forEach((item) => {
+        // Check original owner data
+        const originalOwnerInfo = item.info.find(
+          (info) => info.title === "Original Owner",
+        );
+        if (
+          originalOwnerInfo &&
+          originalOwnerInfo.value &&
+          /^\d+$/.test(originalOwnerInfo.value)
+        ) {
+          const originalOwnerId = originalOwnerInfo.value;
+          const hasUserData =
+            robloxUsers[originalOwnerId] ||
+            initialRobloxUsers?.[originalOwnerId];
+          const hasAvatarData =
+            robloxAvatars[originalOwnerId] ||
+            initialRobloxAvatars?.[originalOwnerId];
+
+          if (!hasUserData) {
+            userIdsToLoad.push(originalOwnerId);
+          }
+          if (!hasAvatarData) {
+            avatarIdsToLoad.push(originalOwnerId);
+          }
+        }
+
+        // Check trade history users
+        if (item.history && item.history.length > 0) {
+          item.history.forEach((trade) => {
+            if (trade.UserId) {
+              const tradeUserId = trade.UserId.toString();
+              // Check if we already have this user's data
+              const hasUserData =
+                robloxUsers[tradeUserId] || initialRobloxUsers?.[tradeUserId];
+              const hasAvatarData =
+                robloxAvatars[tradeUserId] ||
+                initialRobloxAvatars?.[tradeUserId];
+
+              if (!hasUserData) {
+                userIdsToLoad.push(tradeUserId);
+              }
+
+              if (!hasAvatarData) {
+                avatarIdsToLoad.push(tradeUserId);
+              }
+            }
+          });
+        }
+      });
+
+      // Remove duplicates
+      const uniqueUserIds = [...new Set(userIdsToLoad)];
+      const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
+
+      // Mark this page as loaded or preloading
+      if (isPreload) {
+        preloadingPagesRef.current.add(pageNumber);
+      } else {
+        loadedPagesRef.current.add(pageNumber);
+      }
+
+      // Only fetch if we have IDs to load
+      if (uniqueUserIds.length > 0) {
+        fetchMissingUserData(uniqueUserIds);
+      }
+
+      if (uniqueAvatarIds.length > 0) {
+        fetchTradeHistoryAvatarsData(uniqueAvatarIds);
+      }
+    },
+    [
+      initialData?.data,
+      robloxUsers,
+      initialRobloxUsers,
+      robloxAvatars,
+      initialRobloxAvatars,
+      fetchMissingUserData,
+      fetchTradeHistoryAvatarsData,
+    ],
+  );
+
+  // Preload next page for smoother experience
+  const preloadNextPage = useCallback(
+    (currentPage: number) => {
+      if (!initialData?.data || initialData.data.length === 0) return;
+
+      const itemsPerPage = 20;
+      const totalPages = Math.ceil(initialData.data.length / itemsPerPage);
+      const nextPage = currentPage + 1;
+
+      // Only preload if next page exists and we haven't loaded it yet
+      if (
+        nextPage <= totalPages &&
+        !loadedPagesRef.current.has(nextPage) &&
+        !preloadingPagesRef.current.has(nextPage)
+      ) {
+        loadPageData(nextPage, true);
+      }
+    },
+    [initialData?.data, loadPageData],
+  );
+
+  // Load data for page 1 initially and preload page 2 - but only after itemsData is loaded for sorting
+  useEffect(() => {
+    if (
+      initialData?.data &&
+      initialData.data.length > 0 &&
+      itemsData.length > 0
+    ) {
+      loadPageData(1);
+      // Preload page 2 for smoother experience
+      setTimeout(() => preloadNextPage(1), 1000);
     }
-  }, [
-    selectedItem?.id,
-    selectedItem?.history,
-    fetchMissingUserData,
-    fetchOriginalOwnerAvatarsData,
-    getUserDisplay,
-    getUserAvatar,
-  ]);
+  }, [initialData?.data, itemsData, loadPageData, preloadNextPage]);
+
+  // Enhanced page change handler with preloading
+  const handlePageChangeWithPreload = useCallback(
+    (pageNumber: number) => {
+      // Load current page data
+      loadPageData(pageNumber);
+
+      // Preload next page for smoother experience
+      setTimeout(() => preloadNextPage(pageNumber), 500);
+    },
+    [loadPageData, preloadNextPage],
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,7 +495,12 @@ export default function InventoryCheckerClient({
     if (initialData || error) {
       setIsLoading(false);
     }
-  }, [initialData, error, externalIsLoading]);
+  }, [initialData, error]);
+
+  // Sync with external loading state
+  useEffect(() => {
+    setIsLoading(externalIsLoading || false);
+  }, [externalIsLoading]);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -243,6 +515,45 @@ export default function InventoryCheckerClient({
   const handleItemClick = (item: InventoryItem) => {
     setSelectedItem(item);
     setShowHistoryModal(true);
+
+    // Load Roblox data for history users if not already loaded
+    if (item.history && item.history.length > 0) {
+      const historyUserIds: string[] = [];
+      const historyAvatarIds: string[] = [];
+
+      item.history.forEach((trade) => {
+        if (trade.UserId) {
+          const tradeUserId = trade.UserId.toString();
+
+          // Check if we need user data
+          const hasUserData =
+            robloxUsers[tradeUserId] || initialRobloxUsers?.[tradeUserId];
+          if (!hasUserData) {
+            historyUserIds.push(tradeUserId);
+          }
+
+          // Check if we need avatar data
+          const hasAvatarData =
+            robloxAvatars[tradeUserId] || initialRobloxAvatars?.[tradeUserId];
+          if (!hasAvatarData) {
+            historyAvatarIds.push(tradeUserId);
+          }
+        }
+      });
+
+      // Remove duplicates
+      const uniqueUserIds = [...new Set(historyUserIds)];
+      const uniqueAvatarIds = [...new Set(historyAvatarIds)];
+
+      // Load missing data
+      if (uniqueUserIds.length > 0) {
+        fetchMissingUserData(uniqueUserIds);
+      }
+
+      if (uniqueAvatarIds.length > 0) {
+        fetchTradeHistoryAvatarsData(uniqueAvatarIds);
+      }
+    }
   };
 
   const closeHistoryModal = () => {
@@ -252,13 +563,37 @@ export default function InventoryCheckerClient({
 
   if (isLoading || externalIsLoading) {
     return (
-      <SearchForm
-        searchId={searchId}
-        setSearchId={setSearchId}
-        handleSearch={handleSearch}
-        isLoading={isLoading}
-        externalIsLoading={externalIsLoading || false}
-      />
+      <div className="space-y-6">
+        {/* Search Form */}
+        <SearchForm
+          searchId={searchId}
+          setSearchId={setSearchId}
+          handleSearch={handleSearch}
+          isLoading={isLoading}
+          externalIsLoading={externalIsLoading || false}
+        />
+
+        {/* Loading Skeleton for User Data */}
+        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+          <div className="animate-pulse space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-gray-600"></div>
+              <div className="flex-1">
+                <div className="mb-2 h-6 w-32 rounded bg-gray-600"></div>
+                <div className="h-4 w-24 rounded bg-gray-600"></div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="text-center">
+                  <div className="mb-2 h-8 animate-pulse rounded bg-gray-600"></div>
+                  <div className="mx-auto h-4 w-16 animate-pulse rounded bg-gray-600"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -285,7 +620,183 @@ export default function InventoryCheckerClient({
             <h3 className="mb-2 text-lg font-semibold text-red-400">
               Unable to Fetch Inventory Data
             </h3>
-            <p className="text-gray-300">{error}</p>
+            <p className="mb-4 break-words text-gray-300">{error}</p>
+
+            {/* Show scan request button if it's the user's own inventory */}
+            {isOwnInventory ? (
+              <div className="mt-4">
+                <button
+                  onClick={() => scanWebSocket.startScan()}
+                  disabled={
+                    scanWebSocket.status === "scanning" ||
+                    scanWebSocket.status === "connecting" ||
+                    scanWebSocket.isSlowmode
+                  }
+                  className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                    scanWebSocket.status === "scanning" ||
+                    scanWebSocket.status === "connecting" ||
+                    scanWebSocket.isSlowmode
+                      ? "cursor-progress bg-gray-600 text-gray-400"
+                      : "bg-green-600 text-white hover:bg-green-700"
+                  }`}
+                >
+                  {scanWebSocket.status === "connecting" ? (
+                    <>
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Connecting...
+                    </>
+                  ) : scanWebSocket.isSlowmode ? (
+                    <>
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Cooldown ({scanWebSocket.slowmodeTimeLeft}s)
+                    </>
+                  ) : scanWebSocket.status === "scanning" ? (
+                    <>
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      {scanWebSocket.message &&
+                      scanWebSocket.message.includes("Bot joined server")
+                        ? "Scanning..."
+                        : scanWebSocket.message &&
+                            scanWebSocket.message.includes("Retrying")
+                          ? "Retrying..."
+                          : scanWebSocket.message &&
+                              scanWebSocket.message.includes(
+                                "You will be scanned when you join",
+                              )
+                            ? "Processing..."
+                            : scanWebSocket.message || "Processing..."}
+                    </>
+                  ) : scanWebSocket.status === "completed" ? (
+                    <>
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Scan Complete
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Scan Inventory
+                    </>
+                  )}
+                </button>
+
+                {/* Progress Bar - Only show when progress is defined and scanning */}
+                {scanWebSocket.progress !== undefined &&
+                  scanWebSocket.status === "scanning" && (
+                    <div className="mt-2">
+                      <div className="mb-1 flex justify-between text-xs text-gray-400">
+                        <span>Progress</span>
+                        <span>{scanWebSocket.progress}%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-gray-700">
+                        <div
+                          className="h-2 rounded-full bg-green-600 transition-all duration-300"
+                          style={{ width: `${scanWebSocket.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                {/* OR section with alternative option */}
+                <div className="mt-4 flex items-center">
+                  <div className="flex-1 border-t border-gray-600"></div>
+                  <span className="mx-4 text-sm text-gray-400">OR</span>
+                  <div className="flex-1 border-t border-gray-600"></div>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-sm font-medium text-white">
+                    Wait for an automatic scan
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    Join any trading server and our bots will automatically scan
+                    you when they join. No manual request needed.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* Show login prompt for potential profile owner */
+              <div className="mt-4 rounded-lg bg-[#2E3944] p-4">
+                <p className="text-muted mb-1 text-sm font-medium">
+                  Are you the owner of this profile?
+                </p>
+                <p className="text-sm text-[#FFFFFF]">
+                  Login to request an inventory scan. Your inventory will be
+                  automatically scanned when you join a trading server.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -298,7 +809,10 @@ export default function InventoryCheckerClient({
             initialData={initialData}
             robloxUsers={robloxUsers}
             robloxAvatars={robloxAvatars}
+            userConnectionData={userConnectionData}
             itemsData={itemsData}
+            dupedItems={dupedItems}
+            isLoadingDupes={isLoadingDupes}
           />
 
           {/* Inventory Items */}
@@ -308,232 +822,19 @@ export default function InventoryCheckerClient({
             robloxAvatars={robloxAvatars}
             onItemClick={handleItemClick}
             itemsData={itemsData}
+            onPageChange={handlePageChangeWithPreload}
           />
 
           {/* Trade History Modal */}
-          {selectedItem && (
-            <Dialog
-              open={showHistoryModal}
-              onClose={closeHistoryModal}
-              className="relative z-50"
-            >
-              <div
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-                aria-hidden="true"
-              />
-
-              <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="mx-auto max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31]">
-                  {/* Modal Header */}
-                  <div className="flex items-start justify-between gap-4 border-b border-[#2E3944] p-4 sm:items-center sm:p-6">
-                    <div className="min-w-0 flex-1">
-                      <Dialog.Title className="text-muted text-lg font-semibold sm:text-xl">
-                        Trade History
-                      </Dialog.Title>
-                      <p className="text-muted truncate text-sm opacity-75">
-                        {selectedItem.title}
-                      </p>
-                    </div>
-                    <button
-                      onClick={closeHistoryModal}
-                      className="text-muted rounded-full p-1 hover:bg-[#2E3944] hover:text-white"
-                    >
-                      <XMarkIcon className="h-6 w-6" />
-                    </button>
-                  </div>
-
-                  {/* Modal Content */}
-                  <div className="max-h-[60vh] overflow-y-auto p-6">
-                    {selectedItem.history && selectedItem.history.length > 0 ? (
-                      <div className="space-y-4">
-                        {(() => {
-                          // Process history to show actual trades between users
-                          const history = selectedItem.history
-                            .slice()
-                            .reverse();
-
-                          // If there's only one history entry, hide it (user obtained the item)
-                          if (history.length === 1) {
-                            return (
-                              <div className="py-8 text-center">
-                                <p className="text-muted">
-                                  This item has no trade history.
-                                </p>
-                              </div>
-                            );
-                          }
-
-                          // Group history into trades between users
-                          const trades = [];
-                          for (let i = 0; i < history.length - 1; i++) {
-                            const toUser = history[i];
-                            const fromUser = history[i + 1];
-                            trades.push({
-                              fromUser,
-                              toUser,
-                              tradeNumber: history.length - i - 1,
-                            });
-                          }
-
-                          return (
-                            <>
-                              <div className="text-muted mb-4 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-                                <span>Total Trades: {trades.length}</span>
-                              </div>
-
-                              <div className="space-y-3">
-                                {trades.map((trade, index) => {
-                                  return (
-                                    <div
-                                      key={`${trade.fromUser.UserId}-${trade.toUser.UserId}-${trade.toUser.TradeTime}`}
-                                      className={`rounded-lg border p-3 ${
-                                        index === trades.length - 1
-                                          ? "border-[#124E66] bg-[#1A5F7A] shadow-lg"
-                                          : "border-[#37424D] bg-[#2E3944]"
-                                      }`}
-                                    >
-                                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex items-center gap-3">
-                                          <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                              {/* From User */}
-                                              <div className="flex items-center gap-2">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
-                                                  {getUserAvatar(
-                                                    trade.fromUser.UserId.toString(),
-                                                  ) ? (
-                                                    <Image
-                                                      src={
-                                                        getUserAvatar(
-                                                          trade.fromUser.UserId.toString(),
-                                                        )!
-                                                      }
-                                                      alt="User Avatar"
-                                                      width={24}
-                                                      height={24}
-                                                      className="rounded-full"
-                                                    />
-                                                  ) : (
-                                                    <svg
-                                                      className="text-muted h-3 w-3"
-                                                      fill="none"
-                                                      stroke="currentColor"
-                                                      viewBox="0 0 24 24"
-                                                    >
-                                                      <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                      />
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <a
-                                                  href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
-                                                >
-                                                  {getUserDisplay(
-                                                    trade.fromUser.UserId.toString(),
-                                                  )}
-                                                </a>
-                                              </div>
-
-                                              {/* Arrow */}
-                                              <div className="text-muted flex items-center gap-1">
-                                                <svg
-                                                  className="h-4 w-4"
-                                                  fill="none"
-                                                  stroke="currentColor"
-                                                  viewBox="0 0 24 24"
-                                                >
-                                                  <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                                  />
-                                                </svg>
-                                                <span className="text-xs">
-                                                  Trade #{trade.tradeNumber}
-                                                </span>
-                                              </div>
-
-                                              {/* To User */}
-                                              <div className="flex items-center gap-2">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
-                                                  {getUserAvatar(
-                                                    trade.toUser.UserId.toString(),
-                                                  ) ? (
-                                                    <Image
-                                                      src={
-                                                        getUserAvatar(
-                                                          trade.toUser.UserId.toString(),
-                                                        )!
-                                                      }
-                                                      alt="User Avatar"
-                                                      width={24}
-                                                      height={24}
-                                                      className="rounded-full"
-                                                    />
-                                                  ) : (
-                                                    <svg
-                                                      className="text-muted h-3 w-3"
-                                                      fill="none"
-                                                      stroke="currentColor"
-                                                      viewBox="0 0 24 24"
-                                                    >
-                                                      <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                      />
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <a
-                                                  href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
-                                                >
-                                                  {getUserDisplay(
-                                                    trade.toUser.UserId.toString(),
-                                                  )}
-                                                </a>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Trade Date */}
-                                        <div className="text-muted flex-shrink-0 text-sm">
-                                          {formatDate(trade.toUser.TradeTime)}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    ) : (
-                      <div className="py-8 text-center">
-                        <p className="text-muted">
-                          This item has no trade history.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Dialog>
-          )}
+          <TradeHistoryModal
+            isOpen={showHistoryModal}
+            onClose={closeHistoryModal}
+            item={selectedItem}
+            getUserAvatar={getUserAvatar}
+            getUserDisplay={getUserDisplay}
+            formatDate={formatDate}
+            loadingUserIds={loadingUserIds}
+          />
         </>
       )}
     </div>

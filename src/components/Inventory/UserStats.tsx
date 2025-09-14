@@ -1,9 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { UserConnectionData } from "@/app/inventories/UserDataStreamer";
+import toast from "react-hot-toast";
 
 // Helper function to parse cash value strings for totals (returns 0 for N/A)
 const parseCashValueForTotal = (value: string | null): number => {
@@ -56,7 +64,10 @@ interface UserStatsProps {
   initialData: InventoryData;
   robloxUsers: Record<string, RobloxUser>;
   robloxAvatars: Record<string, string>;
+  userConnectionData?: UserConnectionData | null;
   itemsData?: Item[];
+  dupedItems?: unknown[];
+  isLoadingDupes?: boolean;
 }
 
 // Gamepass mapping with links and image names
@@ -159,11 +170,76 @@ export default function UserStats({
   initialData,
   robloxUsers,
   robloxAvatars,
+  userConnectionData,
   itemsData: propItemsData,
+  dupedItems = [],
+  isLoadingDupes = false,
 }: UserStatsProps) {
   const [totalCashValue, setTotalCashValue] = useState<number>(0);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
+
+  // Auth context and scan functionality
+  const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
+  const scanWebSocket = useScanWebSocket(initialData.user_id);
+
+  // Check if current user is viewing their own inventory
+  const isOwnInventory =
+    isAuthenticated && user?.roblox_id === initialData.user_id;
+
+  // Real-time relative timestamps
+  const createdRelativeTime = useRealTimeRelativeDate(initialData.created_at);
+  const updatedRelativeTime = useRealTimeRelativeDate(initialData.updated_at);
+
+  // Show toast notifications for scan status
+  useEffect(() => {
+    if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("You will be scanned when you join")
+    ) {
+      toast.success("You will be scanned when you join a trading server", {
+        duration: 4000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("User found in game")
+    ) {
+      toast.success("User found in game - scan in progress!", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Bot joined server")
+    ) {
+      toast.success("Bot joined server, scanning...", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.status === "completed" &&
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Added to queue")
+    ) {
+      toast.success(scanWebSocket.message, {
+        duration: 5000,
+        position: "bottom-right",
+      });
+    } else if (
+      scanWebSocket.status === "error" &&
+      scanWebSocket.error &&
+      scanWebSocket.error.includes("No bots available")
+    ) {
+      toast.error(
+        "No scan bots are currently online. Please try again later.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+    }
+  }, [scanWebSocket.message, scanWebSocket.status, scanWebSocket.error]);
 
   // Helper function to get user display name
   const getUserDisplay = (userId: string) => {
@@ -199,7 +275,6 @@ export default function UserStats({
         setIsLoadingValues(true);
 
         let totalCash = 0;
-        let totalDuped = 0;
 
         // Create a map of item_id to item data for quick lookup
         const itemMap = new Map();
@@ -207,19 +282,16 @@ export default function UserStats({
           itemMap.set(item.id, item);
         });
 
-        // Calculate totals for each inventory item
+        // Calculate cash value from inventory items
         initialData.data.forEach((inventoryItem) => {
           const itemData = itemMap.get(inventoryItem.item_id);
           if (itemData) {
             const cashValue = parseCashValueForTotal(itemData.cash_value);
-            const dupedValue = parseCashValueForTotal(itemData.duped_value);
             totalCash += cashValue;
-            totalDuped += dupedValue;
           }
         });
 
         setTotalCashValue(totalCash);
-        setTotalDupedValue(totalDuped);
       } catch {
       } finally {
         setIsLoadingValues(false);
@@ -235,6 +307,85 @@ export default function UserStats({
     calculateTotalValues();
   }, [initialData, propItemsData]);
 
+  // Calculate total duped value from actual duped items
+  useEffect(() => {
+    const calculateDupedValue = () => {
+      if (
+        !propItemsData ||
+        propItemsData.length === 0 ||
+        !dupedItems ||
+        dupedItems.length === 0
+      ) {
+        setTotalDupedValue(0);
+        return;
+      }
+
+      try {
+        let totalDuped = 0;
+
+        // Create a map of item_id to item data for quick lookup
+        const itemMap = new Map();
+        propItemsData.forEach((item) => {
+          itemMap.set(item.id, item);
+        });
+
+        // Calculate duped value from actual duped items using DupeFinder logic
+        dupedItems.forEach((dupeItem) => {
+          const itemData = itemMap.get(
+            (dupeItem as { item_id: number }).item_id,
+          );
+          if (itemData) {
+            let dupedValue = parseCashValueForTotal(itemData.duped_value);
+
+            // If main item doesn't have duped value, check children/variants based on created date
+            if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
+              // Get the year from the created date (from item info)
+              const createdAtInfo = (
+                dupeItem as { info: Array<{ title: string; value: string }> }
+              ).info.find((info) => info.title === "Created At");
+              const createdYear = createdAtInfo
+                ? new Date(createdAtInfo.value).getFullYear().toString()
+                : null;
+
+              // Find the child variant that matches the created year
+              const matchingChild = createdYear
+                ? itemData.children.find(
+                    (child: {
+                      sub_name: string;
+                      data: { duped_value: string | null };
+                    }) =>
+                      child.sub_name === createdYear &&
+                      child.data &&
+                      child.data.duped_value &&
+                      child.data.duped_value !== "N/A" &&
+                      child.data.duped_value !== null,
+                  )
+                : null;
+
+              if (matchingChild) {
+                dupedValue = parseCashValueForTotal(
+                  matchingChild.data.duped_value,
+                );
+              }
+            }
+
+            // Only use duped values, ignore cash values
+            if (!isNaN(dupedValue) && dupedValue > 0) {
+              totalDuped += dupedValue;
+            }
+          }
+        });
+
+        setTotalDupedValue(totalDuped);
+      } catch (error) {
+        console.error("Error calculating duped value:", error);
+        setTotalDupedValue(0);
+      }
+    };
+
+    calculateDupedValue();
+  }, [dupedItems, propItemsData]);
+
   return (
     <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
       <h2 className="text-muted mb-4 text-xl font-semibold">
@@ -243,17 +394,17 @@ export default function UserStats({
 
       {/* Roblox User Profile */}
       {initialData?.user_id && (
-        <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+        <div className="mb-6 flex flex-col gap-4 rounded-lg p-4 sm:flex-row sm:items-center">
           {getUserAvatar(initialData.user_id) ? (
             <Image
               src={getUserAvatar(initialData.user_id)!}
               alt="Roblox Avatar"
               width={64}
               height={64}
-              className="flex-shrink-0 rounded-full bg-[#212A31]"
+              className="flex-shrink-0 rounded-full bg-[#2E3944]"
             />
           ) : (
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#2E3944]">
               <svg
                 className="text-muted h-8 w-8"
                 fill="none"
@@ -276,28 +427,336 @@ export default function UserStats({
             <p className="text-muted text-sm break-words opacity-75">
               @{getUsername(initialData.user_id)}
             </p>
-            <a
-              href={`https://www.roblox.com/users/${initialData.user_id}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-sm text-blue-300 transition-colors hover:text-blue-400"
-            >
-              View Roblox Profile
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+
+            {/* Connection Icons */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {/* Discord Profile - Only show if userConnectionData exists */}
+              {userConnectionData && (
+                <Tooltip
+                  title="Visit Discord Profile"
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "#0F1419",
+                        color: "#D3D9D4",
+                        fontSize: "0.75rem",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #2E3944",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        "& .MuiTooltip-arrow": {
+                          color: "#0F1419",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <a
+                    href={`https://discord.com/users/${userConnectionData.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                  >
+                    <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
+                    <span className="text-sm font-medium">Discord</span>
+                  </a>
+                </Tooltip>
+              )}
+
+              {/* Roblox Profile - Always show since we have Roblox data */}
+              <Tooltip
+                title="Visit Roblox Profile"
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "#0F1419",
+                      color: "#D3D9D4",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid #2E3944",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      "& .MuiTooltip-arrow": {
+                        color: "#0F1419",
+                      },
+                    },
+                  },
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </a>
+                <a
+                  href={`https://www.roblox.com/users/${initialData.user_id}/profile`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                >
+                  <RobloxIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">Roblox</span>
+                </a>
+              </Tooltip>
+
+              {/* Website Profile - Only show if userConnectionData exists */}
+              {userConnectionData && (
+                <Tooltip
+                  title="Visit Website Profile"
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "#0F1419",
+                        color: "#D3D9D4",
+                        fontSize: "0.75rem",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #2E3944",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        "& .MuiTooltip-arrow": {
+                          color: "#0F1419",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <Link
+                    href={`/users/${userConnectionData.id}`}
+                    className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                  >
+                    <Image
+                      src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                      alt="JBCL Logo"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4 flex-shrink-0"
+                    />
+                    <span className="text-sm font-medium">Website Profile</span>
+                  </Link>
+                </Tooltip>
+              )}
+            </div>
           </div>
+
+          {/* Scan Button or Login Prompt */}
+          {isOwnInventory ? (
+            <div className="mt-4">
+              <button
+                onClick={scanWebSocket.startScan}
+                disabled={
+                  scanWebSocket.status === "scanning" ||
+                  scanWebSocket.status === "connecting" ||
+                  scanWebSocket.isSlowmode
+                }
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  scanWebSocket.status === "scanning" ||
+                  scanWebSocket.status === "connecting" ||
+                  scanWebSocket.isSlowmode
+                    ? "cursor-progress bg-gray-600 text-gray-400"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
+              >
+                {scanWebSocket.status === "connecting" ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Connecting...
+                  </>
+                ) : scanWebSocket.isSlowmode ? (
+                  <>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Cooldown ({scanWebSocket.slowmodeTimeLeft}s)
+                  </>
+                ) : scanWebSocket.status === "scanning" ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    {scanWebSocket.message &&
+                    scanWebSocket.message.includes("Bot joined server")
+                      ? "Scanning..."
+                      : scanWebSocket.message &&
+                          scanWebSocket.message.includes("Retrying")
+                        ? "Retrying..."
+                        : scanWebSocket.message &&
+                            scanWebSocket.message.includes(
+                              "You will be scanned when you join",
+                            )
+                          ? "Processing..."
+                          : scanWebSocket.message || "Processing..."}
+                  </>
+                ) : scanWebSocket.status === "completed" ? (
+                  <>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Scan Complete
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Scan Inventory
+                  </>
+                )}
+              </button>
+
+              {/* Progress Bar - Only show when progress is defined */}
+              {scanWebSocket.progress !== undefined &&
+                scanWebSocket.status === "scanning" && (
+                  <div className="mt-2">
+                    <div className="mb-1 flex justify-between text-xs text-gray-400">
+                      <span>Progress</span>
+                      <span>{scanWebSocket.progress}%</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-700">
+                      <div
+                        className="h-2 rounded-full bg-green-600 transition-all duration-300"
+                        style={{ width: `${scanWebSocket.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+              {/* Error Message */}
+              {scanWebSocket.error && (
+                <div className="mt-2 text-sm text-red-400">
+                  Error: {scanWebSocket.error}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="mt-0.5 h-5 w-5 text-blue-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="mb-1 text-sm font-medium text-white">
+                      Want on-demand scans?
+                    </h4>
+                    <p className="mb-3 text-sm text-gray-400">
+                      {!isAuthenticated
+                        ? "Login and connect your Roblox account to request instant inventory scans anytime."
+                        : user?.roblox_id
+                          ? "You can request instant inventory scans anytime from your own inventory page."
+                          : "Connect your Roblox account to request instant inventory scans anytime."}
+                    </p>
+                    <div className="flex gap-2">
+                      {!isAuthenticated ? (
+                        <Link
+                          href="/faq"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-[#5865F2] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#4752C4]"
+                        >
+                          Learn More
+                        </Link>
+                      ) : user?.roblox_id ? (
+                        <Link
+                          href={`/inventories/${user.roblox_id}`}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-[#5865F2] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#4752C4]"
+                        >
+                          View My Inventory
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setShowLoginModal(true);
+                            const event = new CustomEvent("setLoginTab", {
+                              detail: 1,
+                            });
+                            window.dispatchEvent(event);
+                          }}
+                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-[#FF5630] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#E54B2C]"
+                        >
+                          Connect Roblox Account
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -507,7 +966,7 @@ export default function UserStats({
         </div>
         <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
           <div className="text-muted mb-2 text-sm">Total Duped Value</div>
-          {isLoadingValues ? (
+          {isLoadingValues || isLoadingDupes ? (
             <div className="animate-pulse text-2xl font-bold text-gray-400">
               Loading...
             </div>
@@ -546,52 +1005,80 @@ export default function UserStats({
         <div className="mt-6">
           <h3 className="text-muted mb-2 text-lg font-medium">Gamepasses</h3>
           <div className="flex flex-wrap gap-3">
-            {[...new Set(initialData.gamepasses)].map((gamepass) => {
-              const gamepassInfo =
-                gamepassData[gamepass as keyof typeof gamepassData];
-              if (!gamepassInfo) return null;
+            {(() => {
+              const gamepassOrder = [
+                "VIP",
+                "PremiumGarage",
+                "BOSS",
+                "SWAT",
+                "TradingVIP",
+                "DuffelBag",
+                "Stereo",
+                "Walmart",
+              ];
 
-              const GamepassContent = () => (
-                <div className="text-muted flex items-center gap-2 rounded-lg border border-[#5865F2] bg-[#2B2F4C] px-3 py-2 text-sm transition-colors hover:bg-[#32365A]">
-                  <div className="relative h-6 w-6">
-                    <Image
-                      src={`/assets/images/gamepasses/${gamepassInfo.image}.webp`}
-                      alt={gamepass}
-                      width={24}
-                      height={24}
-                      className="object-contain"
-                      onError={handleImageError}
-                    />
+              // Get unique gamepasses and sort them according to the specified order
+              const uniqueGamepasses = [...new Set(initialData.gamepasses)];
+              const orderedGamepasses = gamepassOrder.filter((gamepass) =>
+                uniqueGamepasses.includes(gamepass),
+              );
+
+              return orderedGamepasses.map((gamepass) => {
+                const gamepassInfo =
+                  gamepassData[gamepass as keyof typeof gamepassData];
+                if (!gamepassInfo) return null;
+
+                const GamepassContent = () => (
+                  <div className="text-muted flex items-center gap-2 rounded-lg border border-[#5865F2] bg-[#2B2F4C] px-3 py-2 text-sm transition-colors hover:bg-[#32365A]">
+                    <div className="relative h-6 w-6">
+                      <Image
+                        src={`/assets/images/gamepasses/${gamepassInfo.image}.webp`}
+                        alt={gamepass}
+                        width={24}
+                        height={24}
+                        className="object-contain"
+                        onError={handleImageError}
+                      />
+                    </div>
+                    <span>{gamepass}</span>
                   </div>
-                  <span>{gamepass}</span>
-                </div>
-              );
+                );
 
-              return gamepassInfo.link ? (
-                <a
-                  key={gamepass}
-                  href={gamepassInfo.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <GamepassContent />
-                </a>
-              ) : (
-                <div key={gamepass}>
-                  <GamepassContent />
-                </div>
-              );
-            })}
+                return gamepassInfo.link ? (
+                  <a
+                    key={gamepass}
+                    href={gamepassInfo.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <GamepassContent />
+                  </a>
+                ) : (
+                  <div key={gamepass}>
+                    <GamepassContent />
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       )}
 
       {/* Metadata */}
       <div className="text-muted mt-4 space-y-1 text-sm">
-        <p>Scan Count: {initialData.scan_count}</p>
-        <p>Created: {formatDate(initialData.created_at)}</p>
-        <p>Last Updated: {formatDate(initialData.updated_at)}</p>
+        <p>
+          <span className="font-semibold text-white">Scan Count:</span>{" "}
+          {initialData.scan_count}
+        </p>
+        <p>
+          <span className="font-semibold text-white">First Scanned:</span>{" "}
+          {formatDate(initialData.created_at)} ({createdRelativeTime})
+        </p>
+        <p>
+          <span className="font-semibold text-white">Last Scanned:</span>{" "}
+          {formatDate(initialData.updated_at)} ({updatedRelativeTime})
+        </p>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import {
   fetchRobloxUsersBatchLeaderboard,
   fetchRobloxAvatars,
   fetchOfficialScanBots,
+  fetchDuplicatesCount,
   UserScan,
 } from "@/utils/api";
 import Image from "next/image";
@@ -44,7 +45,7 @@ export default function InventoriesPage() {
 
       <ExperimentalFeatureBanner className="mb-6" />
 
-      <p className="mb-4 text-gray-600 dark:text-gray-400">
+      <p className="mb-4 text-white">
         Enter a username or Roblox ID to check their Jailbreak inventory.
       </p>
 
@@ -68,7 +69,11 @@ export default function InventoriesPage() {
 // Skeleton loader for stats section
 function StatsSkeleton() {
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
+      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="mb-2 h-8 animate-pulse rounded bg-[#37424D]"></div>
+        <div className="h-4 w-24 animate-pulse rounded bg-[#37424D]"></div>
+      </div>
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
         <div className="mb-2 h-8 animate-pulse rounded bg-[#37424D]"></div>
         <div className="h-4 w-24 animate-pulse rounded bg-[#37424D]"></div>
@@ -145,13 +150,14 @@ function LeaderboardSkeleton() {
 // Component for stats that loads immediately
 async function StatsSection() {
   const stats = await fetchItemCountStats();
+  const duplicatesStats = await fetchDuplicatesCount();
 
   if (!stats) {
     return null;
   }
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-2">
+    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
         <div className="text-2xl font-bold text-blue-400">
           {stats.item_count_str}
@@ -163,6 +169,12 @@ async function StatsSection() {
           {stats.user_count_str}
         </div>
         <div className="text-sm text-gray-400">Users Scanned</div>
+      </div>
+      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="text-2xl font-bold text-[#ef4444]">
+          {duplicatesStats.total_duplicates_str}
+        </div>
+        <div className="text-sm text-gray-400">Total Duplicates</div>
       </div>
     </div>
   );
@@ -314,11 +326,11 @@ async function LeaderboardSection() {
   return (
     <div className="mt-8">
       <h2 className="mb-4 text-xl font-bold text-gray-300">
-        Most Scanned Players ({leaderboard.slice(3).length})
+        Most Scanned Players ({leaderboard.length})
       </h2>
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
         <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2">
-          {leaderboard.slice(3).map((user, index) => (
+          {leaderboard.map((user, index) => (
             <Suspense
               key={user.user_id}
               fallback={<BasicLeaderboardUser user={user} index={index} />}

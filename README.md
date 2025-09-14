@@ -7,7 +7,7 @@
 > The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
 > [!NOTE]
-> This is a fan-made project and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
+> This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
 ![Logo](https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png)
 
@@ -41,6 +41,8 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 
 - [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
 - [Jakobiis](https://github.com/Jakobiis/) - Co-founder, Lead Back-end Developer & API Architect
+
+**Jailbreak Changelogs LLC** - The legal entity operating this platform
 
 ## Contributing
 

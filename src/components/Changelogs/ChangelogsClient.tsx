@@ -72,8 +72,8 @@ export default function ChangelogsClient({
       <div className="mb-8">
         <h1 className="mb-4 text-4xl font-bold text-white">Changelogs</h1>
         <p className="mb-6 text-gray-300">
-          Stay updated with the latest changes and improvements to Jailbreak
-          Changelogs.
+          Stay updated with the latest changes, fixes and improvements to Roblox
+          Jailbreak.
         </p>
 
         <button

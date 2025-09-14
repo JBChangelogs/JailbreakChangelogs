@@ -527,33 +527,17 @@ export default function ItemChangelogs({
               />
             )}
           </div>
-          <Button
-            variant="outlined"
+          <button
             onClick={toggleSortOrder}
-            startIcon={
-              sortOrder === "newest" ? (
-                <ArrowDownIcon className="h-4 w-4" />
-              ) : (
-                <ArrowUpIcon className="h-4 w-4" />
-              )
-            }
-            size="small"
-            fullWidth
-            sx={{
-              borderColor: "#5865F2",
-              color: "#5865F2",
-              backgroundColor: "#212A31",
-              "&:hover": {
-                borderColor: "#4752C4",
-                backgroundColor: "#2B2F4C",
-              },
-              "@media (min-width: 640px)": {
-                width: "auto",
-              },
-            }}
+            className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944] sm:w-auto"
           >
+            {sortOrder === "newest" ? (
+              <ArrowDownIcon className="h-4 w-4" />
+            ) : (
+              <ArrowUpIcon className="h-4 w-4" />
+            )}
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </Button>
+          </button>
         </div>
       </div>
 

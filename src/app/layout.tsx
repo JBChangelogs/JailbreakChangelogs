@@ -4,6 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
+import NewsTicker from "@/components/Layout/NewsTicker";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import OfflineDetector from "@/components/OfflineDetector";
 import {
@@ -166,6 +167,7 @@ export default async function RootLayout({
                   >
                     <Header />
                   </Suspense>
+                  <NewsTicker />
                   <main className="flex-1">{children}</main>
 
                   <footer className="bg-[#212A31] py-8">
@@ -382,7 +384,8 @@ export default async function RootLayout({
                             </p>
 
                             <p className="text-muted">
-                              Maintained by{" "}
+                              Operated by Jailbreak Changelogs LLC, maintained
+                              by{" "}
                               <a
                                 href="https://github.com/Jakobiis"
                                 target="_blank"
@@ -563,6 +566,7 @@ export default async function RootLayout({
               >
                 <Header />
               </Suspense>
+              <NewsTicker />
               <main className="flex-1">{children}</main>
 
               <footer className="bg-[#212A31] py-8">
@@ -832,29 +836,31 @@ export default async function RootLayout({
                   </div>
 
                   <div className="mt-12 border-t border-[#2E3944] pt-8">
-                    <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
-                      <p className="text-muted">
-                        &copy; {new Date().getFullYear()} Jailbreak Changelogs.
-                        All rights reserved.
+                    <div className="flex flex-col gap-6">
+                      <p className="text-muted text-sm leading-relaxed">
+                        &copy; {new Date().getFullYear()} Jailbreak Changelogs
+                        LLC. Jailbreak Changelogs, JBCL, and any associated
+                        logos are trademarks, service marks, and/or registered
+                        trademarks of Jailbreak Changelogs LLC.
                       </p>
-                      <div className="flex flex-col gap-4 md:flex-row">
+                      <div className="flex flex-wrap gap-6">
                         <Link
                           href="/privacy"
-                          className="text-muted flex items-center gap-2 hover:text-[#FFFFFF]"
+                          className="text-muted flex items-center gap-2 transition-colors hover:text-[#FFFFFF]"
                         >
                           <ShieldCheckIcon className="h-5 w-5" />
                           Privacy Policy
                         </Link>
                         <Link
                           href="/tos"
-                          className="text-muted flex items-center gap-2 hover:text-[#FFFFFF]"
+                          className="text-muted flex items-center gap-2 transition-colors hover:text-[#FFFFFF]"
                         >
                           <DocumentTextIcon className="h-5 w-5" />
                           Terms of Service
                         </Link>
                         <a
                           href="mailto:support@jailbreakchangelogs.xyz"
-                          className="text-muted flex items-center gap-2 hover:text-[#FFFFFF]"
+                          className="text-muted flex items-center gap-2 transition-colors hover:text-[#FFFFFF]"
                         >
                           <EnvelopeIcon className="h-5 w-5" />
                           Contact Us

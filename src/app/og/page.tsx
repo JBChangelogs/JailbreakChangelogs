@@ -1,7 +1,9 @@
 import OGFinderClient from "@/components/OG/OGFinderClient";
+import OGFinderDescription from "@/components/OG/OGFinderDescription";
+import OGFinderFAQ from "@/components/OG/OGFinderFAQ";
+import OGConfetti from "@/components/OG/OGConfetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
-import ProtectedOGWrapper from "@/components/OG/ProtectedOGWrapper";
 import ComingSoon from "@/components/UI/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 
@@ -14,25 +16,18 @@ export default function OGFinderPage() {
   }
 
   return (
-    <ProtectedOGWrapper>
-      <div className="container mx-auto px-4 py-8">
-        <Breadcrumb />
-        <div className="mb-6 flex items-center gap-3">
-          <h1 className="text-3xl font-bold">OG Finder</h1>
-          <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-            New
-          </span>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <OGConfetti />
 
-        <ExperimentalFeatureBanner className="mb-6" />
+      <Breadcrumb />
 
-        <p className="mb-4 text-gray-600 dark:text-gray-400">
-          Enter a Roblox ID or username to find items that were originally owned
-          by them.
-        </p>
+      <ExperimentalFeatureBanner className="mb-6" />
 
-        <OGFinderClient />
-      </div>
-    </ProtectedOGWrapper>
+      <OGFinderDescription />
+
+      <OGFinderClient />
+
+      <OGFinderFAQ />
+    </div>
   );
 }

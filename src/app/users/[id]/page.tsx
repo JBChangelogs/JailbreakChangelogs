@@ -892,31 +892,71 @@ export default function UserProfilePage() {
                         </>
                       ) : (
                         <>
-                          <Tooltip title="Visit Discord Profile">
+                          <Tooltip
+                            title="Visit Discord Profile"
+                            placement="top"
+                            arrow
+                            slotProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: "#0F1419",
+                                  color: "#D3D9D4",
+                                  fontSize: "0.75rem",
+                                  padding: "8px 12px",
+                                  borderRadius: "8px",
+                                  border: "1px solid #2E3944",
+                                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                  "& .MuiTooltip-arrow": {
+                                    color: "#0F1419",
+                                  },
+                                },
+                              },
+                            }}
+                          >
                             <Link
                               href={`https://discord.com/users/${user.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex max-w-[320px] items-center gap-2 rounded-full border border-[#5865F2]/20 bg-[#5865F2]/10 px-3 py-1.5 transition-colors hover:bg-[#5865F2]/20 sm:max-w-none"
+                              className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
                             >
-                              <DiscordIcon className="h-5 w-5 flex-shrink-0 text-[#5865F2]" />
-                              <span className="text-muted truncate text-sm font-medium">
-                                {user.username}
+                              <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
+                              <span className="text-sm font-medium">
+                                Discord
                               </span>
                             </Link>
                           </Tooltip>
 
                           {user.roblox_id && (
-                            <Tooltip title="Visit Roblox Profile">
+                            <Tooltip
+                              title="Visit Roblox Profile"
+                              placement="top"
+                              arrow
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    backgroundColor: "#0F1419",
+                                    color: "#D3D9D4",
+                                    fontSize: "0.75rem",
+                                    padding: "8px 12px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #2E3944",
+                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                    "& .MuiTooltip-arrow": {
+                                      color: "#0F1419",
+                                    },
+                                  },
+                                },
+                              }}
+                            >
                               <Link
                                 href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted flex max-w-[320px] items-center gap-2 rounded-full border border-[#37424D] bg-[#2E3944] px-3 py-1.5 transition-colors hover:bg-[#37424D] sm:max-w-none"
+                                className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
                               >
-                                <RobloxIcon className="h-5 w-5 flex-shrink-0" />
-                                <span className="truncate text-sm font-medium">
-                                  {user.roblox_username}
+                                <RobloxIcon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-sm font-medium">
+                                  Roblox
                                 </span>
                               </Link>
                             </Tooltip>

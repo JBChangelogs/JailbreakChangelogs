@@ -5,7 +5,6 @@ import {
   Box,
   Pagination,
   Chip,
-  Button,
   Skeleton,
   Divider,
   Tooltip,
@@ -426,31 +425,19 @@ export default function FavoritesTab({
               Favorited Items [{favorites.length}]
             </h2>
           </div>
-          <Button
-            variant="outlined"
+          <button
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            startIcon={
-              sortOrder === "newest" ? (
-                <ArrowDownIcon className="h-4 w-4" />
-              ) : (
-                <ArrowUpIcon className="h-4 w-4" />
-              )
-            }
-            size="small"
-            sx={{
-              borderColor: "#5865F2",
-              color: "#5865F2",
-              backgroundColor: "#212A31",
-              "&:hover": {
-                borderColor: "#4752C4",
-                backgroundColor: "#2B2F4C",
-              },
-            }}
+            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
           >
+            {sortOrder === "newest" ? (
+              <ArrowDownIcon className="h-4 w-4" />
+            ) : (
+              <ArrowUpIcon className="h-4 w-4" />
+            )}
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </Button>
+          </button>
         </div>
 
         {favorites.length === 0 ? (

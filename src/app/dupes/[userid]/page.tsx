@@ -42,7 +42,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         </span>
       </div>
       <ExperimentalFeatureBanner className="mb-6" />
-      <p className="mb-4 text-gray-600 dark:text-gray-400">
+      <p className="mb-4 text-white">
         Enter a Roblox ID or username to check for any duped items associated
         with that name.
       </p>

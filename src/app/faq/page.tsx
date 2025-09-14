@@ -69,7 +69,7 @@ const faqs = [
   {
     question: "How do I report issues with the website?",
     answer:
-      "To report website issues:<br>1. Visit the <a href='/?report-issue=true' class=\"text-blue-400 hover:text-blue-300  underline\">report issue modal</a> or use the Report An Issue button at the bottom of any page<br>2. You must be logged in with Discord to submit issues<br>3. Follow these requirements:<br>&nbsp;&nbsp;• Issue Title must be at least 10 characters<br>&nbsp;&nbsp;• Description must be at least 25 characters<br>4. After submission, your issue will appear in our <a href='https://discord.gg/invite/kAuxDntHG9' target='_blank' rel='noopener noreferrer' class=\"text-blue-400 hover:text-blue-300  underline\">Discord server</a>'s issues channel",
+      "To report website issues:<br>1. Visit the <a href='/?report-issue=true' class=\"text-blue-400 hover:text-blue-300  underline\">report issue modal</a> or use the Report An Issue button at the bottom of any page<br>2. You must be logged in with Discord to submit issues<br>3. Follow these requirements:<br>&nbsp;&nbsp;• Issue Title must be at least 10 characters<br>&nbsp;&nbsp;• Description must be at least 25 characters<br>4. After submission, your issue will appear in our <a href='https://discord.jailbreakchangelogs.xyz' target='_blank' rel='noopener noreferrer' class=\"text-blue-400 hover:text-blue-300  underline\">Discord server</a>'s issues channel",
   },
   {
     question: "How can I create trade ads?",
@@ -84,7 +84,7 @@ const faqs = [
   {
     question: "How can I connect with JBChangelogs?",
     answer:
-      'There are several ways to connect with us:<br>1. Join our Discord server at <a href="https://discord.gg/invite/kAuxDntHG9" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">discord.gg/invite/kAuxDntHG9</a> to trade, hang out, and discuss the website<br>2. Follow us on X (Twitter) at <a href="https://x.com/JBChangelogs" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">@JBChangelogs</a> for website updates and announcements<br>3. Join our Roblox group at <a href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">Jailbreak Changelogs Group</a><br>4. Follow us on Bluesky at <a href="https://bsky.app/profile/jbchangelogs.bsky.social" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">@jbchangelogs.bsky.social</a>',
+      'There are several ways to connect with us:<br>1. Join our Discord server at <a href="https://discord.jailbreakchangelogs.xyz" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">discord.jailbreakchangelogs.xyz</a> to trade, hang out, and discuss the website<br>2. Follow us on X (Twitter) at <a href="https://x.com/JBChangelogs" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">@JBChangelogs</a> for website updates and announcements<br>3. Join our Roblox group at <a href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">Jailbreak Changelogs Group</a><br>4. Follow us on Bluesky at <a href="https://bsky.app/profile/jbchangelogs.bsky.social" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300  underline">@jbchangelogs.bsky.social</a>',
   },
   {
     question: "Who can I contact if I have questions or need assistance?",
@@ -95,6 +95,26 @@ const faqs = [
     question: "What data is collected when I log in with Discord or Roblox?",
     answer:
       "We only collect data when you choose to authenticate:<br><br><strong>Discord Authentication:</strong><br>• Discord User ID<br>• Discord Avatar<br>• Discord Username and Global Name<br>• Discord Banner<br><br><strong>Roblox Authentication:</strong><br>• Roblox Username<br>• Roblox Player ID<br>• Roblox Display Name<br>• Roblox Avatar<br>• Roblox Join Date<br><br>Important: We only collect publicly available information, and only when you choose to log in. Users who browse without authentication have no personal data stored.",
+  },
+  {
+    question: "What are on-demand inventory scans?",
+    answer:
+      "On-demand inventory scans allow you to request instant scans of your Roblox inventory at any time. Instead of waiting for automatic scans, you can trigger a scan manually to get the most up-to-date information about your items, including their current values and whether they are duped.<br><br>This feature is available to users who have logged in with Discord and connected their Roblox account. You can request scans from your own inventory page.",
+  },
+  {
+    question: "How do I request an on-demand inventory scan?",
+    answer:
+      'To request an on-demand scan:<br>1. Log in with Discord by clicking the Login button in the top right<br>2. Connect your Roblox account by clicking your avatar and selecting "Connect with Roblox"<br>3. Visit your own inventory page (you can find it by searching your Roblox username or Roblox ID)<br>4. Click the "Scan Inventory" button<br>5. Wait for the scan to complete - you\'ll see progress updates<br><br>Note: There\'s a 30-second cooldown between scans to prevent spam and abuse.',
+  },
+  {
+    question: "Why can't I request a scan on someone else's inventory?",
+    answer:
+      "On-demand scans are only available for your own inventory to prevent abuse and ensure fair usage of our scanning resources. When viewing someone else's inventory, you'll see an informational notice about the feature, but the scan button will only appear on your own inventory page.",
+  },
+  {
+    question: 'What if a scan fails or shows "No bots available"?',
+    answer:
+      'If you see "No bots available" or the scan fails:<br>• This means all our scanning bots are currently busy or offline<br>• Wait a few minutes and try again<br>• Make sure you\'re in a trading server in Roblox Jailbreak<br><br>If the issue persists, you can report it through our <a href="https://discord.jailbreakchangelogs.xyz" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline">Discord server</a>.',
   },
 ];
 
@@ -121,7 +141,9 @@ export default function FAQPage() {
           Find answers to common questions about Roblox Jailbreak and our
           Website
         </p>
-        <p className="text-muted mb-6 text-xs">Last updated: June 19th, 2025</p>
+        <p className="text-muted mb-6 text-xs">
+          Last updated: September 13th, 2025
+        </p>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
@@ -136,6 +158,7 @@ export default function FAQPage() {
                 },
                 border: "1px solid #2E3944",
                 "& .MuiAccordionSummary-root": {
+                  backgroundColor: "#1A2025",
                   "&:hover": {
                     backgroundColor: "#1A2025",
                   },

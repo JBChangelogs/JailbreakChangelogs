@@ -5,10 +5,8 @@ export default function NotFound() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
-          User Not Found
-        </h1>
-        <p className="mb-8 text-gray-600 dark:text-gray-400">
+        <h1 className="mb-4 text-4xl font-bold text-white">User Not Found</h1>
+        <p className="mb-8 text-white">
           The user you&apos;re looking for doesn&apos;t exist or has no dupe
           data available.
         </p>

@@ -10,6 +10,7 @@ import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import {
   MagnifyingGlassIcon,
   ExclamationTriangleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 interface OGSearchData {
@@ -83,7 +84,12 @@ export default function OGFinderClient({
     if (initialData || error) {
       setIsLoading(false);
     }
-  }, [initialData, error, externalIsLoading]);
+  }, [initialData, error]);
+
+  // Sync with external loading state
+  useEffect(() => {
+    setIsLoading(externalIsLoading || false);
+  }, [externalIsLoading]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,8 +113,11 @@ export default function OGFinderClient({
     <div className="space-y-6">
       {/* Search Form */}
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div>
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-col gap-3 sm:flex-row"
+        >
+          <div className="flex-1">
             <label
               htmlFor="searchId"
               className="text-muted mb-2 block text-sm font-medium"
@@ -116,28 +125,66 @@ export default function OGFinderClient({
               Roblox ID or Username
             </label>
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <MagnifyingGlassIcon className="text-muted h-5 w-5" />
-              </div>
               <input
                 type="text"
                 id="searchId"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 placeholder="Enter Roblox ID or username..."
-                className="text-muted placeholder-muted/50 w-full rounded-lg border border-[#2E3944] bg-[#37424D] py-3 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#5865F2] focus:outline-none"
+                className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
                 disabled={isLoading}
+                required
               />
+              <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+              {searchId && (
+                <button
+                  type="button"
+                  onClick={() => setSearchId("")}
+                  className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                  aria-label="Clear search"
+                >
+                  <XMarkIcon />
+                </button>
+              )}
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading || !searchId.trim()}
-            className="w-full rounded-lg bg-[#5865F2] px-4 py-3 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? "Searching..." : "Search"}
-          </button>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={isLoading || !searchId.trim()}
+              className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white transition-all duration-200 focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none ${
+                isLoading
+                  ? "cursor-progress bg-[#2E3944]"
+                  : "bg-[#5865F2] hover:bg-[#4752C4]"
+              }`}
+            >
+              {isLoading && (
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              )}
+              <span className="whitespace-nowrap">
+                {isLoading ? "Searching..." : "Search"}
+              </span>
+            </button>
+          </div>
         </form>
       </div>
 

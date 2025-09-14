@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { RobloxUser } from "@/types";
 import Image from "next/image";
-import { Pagination } from "@mui/material";
-import { Dialog } from "@headlessui/react";
-import {
-  XMarkIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
-import {
-  fetchMissingRobloxData,
-  fetchOriginalOwnerAvatars,
-} from "@/app/inventories/actions";
+import { Pagination, Tooltip } from "@mui/material";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import DisplayAd from "@/components/Ads/DisplayAd";
+import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
+import { useAuthContext } from "@/contexts/AuthContext";
+import OGFinderFAQ from "./OGFinderFAQ";
 import {
   getItemImagePath,
   isVideoItem,
@@ -25,6 +25,8 @@ import {
 import localFont from "next/font/local";
 import dynamic from "next/dynamic";
 import SearchForm from "./SearchForm";
+import ItemActionModal from "@/components/Modals/ItemActionModal";
+import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -61,11 +63,20 @@ interface OGSearchData {
   count: number;
 }
 
+interface UserConnectionData {
+  id: string;
+  username: string;
+  global_name: string;
+  roblox_id: string | null;
+  roblox_username?: string;
+}
+
 interface OGFinderResultsProps {
   initialData?: OGSearchData;
   robloxId: string;
   robloxUsers?: Record<string, RobloxUser>;
   robloxAvatars?: Record<string, string>;
+  userConnectionData?: UserConnectionData | null;
   error?: string;
 }
 
@@ -74,6 +85,7 @@ export default function OGFinderResults({
   robloxId,
   robloxUsers: initialRobloxUsers,
   robloxAvatars: initialRobloxAvatars,
+  userConnectionData,
   error,
 }: OGFinderResultsProps) {
   const [searchId, setSearchId] = useState(robloxId || "");
@@ -96,11 +108,23 @@ export default function OGFinderResults({
   const [localRobloxAvatars, setLocalRobloxAvatars] = useState<
     Record<string, string>
   >(initialRobloxAvatars || {});
+
+  // Use refs to access current values without causing dependency cycles
+  const localRobloxUsersRef = useRef(localRobloxUsers);
+  const localRobloxAvatarsRef = useRef(localRobloxAvatars);
   const [selectLoaded, setSelectLoaded] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [selectedItemForAction, setSelectedItemForAction] =
+    useState<OGItem | null>(null);
 
   const router = useRouter();
+
+  // Auth context for premium status
+  const { user } = useAuthContext();
+  const currentUserPremiumType = user?.premiumtype || 0;
 
   const itemsPerPage = 20;
   const MAX_SEARCH_LENGTH = 50;
@@ -123,6 +147,25 @@ export default function OGFinderResults({
     setSelectedItem(null);
   };
 
+  // Handler for card click - show action modal
+  const handleCardClick = (item: OGItem) => {
+    setSelectedItemForAction(item);
+    setShowActionModal(true);
+  };
+
+  // Handler for viewing trade history from modal
+  const handleViewTradeHistory = () => {
+    if (selectedItemForAction) {
+      handleItemClick(selectedItemForAction);
+    }
+  };
+
+  // Handler for closing action modal
+  const closeActionModal = () => {
+    setShowActionModal(false);
+    setSelectedItemForAction(null);
+  };
+
   // Load Select component
   useEffect(() => {
     setSelectLoaded(true);
@@ -137,36 +180,59 @@ export default function OGFinderResults({
     setLocalRobloxAvatars(initialRobloxAvatars || {});
   }, [initialRobloxAvatars]);
 
-  const fetchMissingUserData = useCallback(async (userIds: string[]) => {
-    try {
-      const { userData, avatarData } = await fetchMissingRobloxData(userIds);
+  // Update refs when state changes
+  useEffect(() => {
+    localRobloxUsersRef.current = localRobloxUsers;
+  }, [localRobloxUsers]);
 
-      if (userData && Object.keys(userData).length > 0) {
-        setLocalRobloxUsers((prev) => ({ ...prev, ...userData }));
-      }
+  useEffect(() => {
+    localRobloxAvatarsRef.current = localRobloxAvatars;
+  }, [localRobloxAvatars]);
 
-      if (avatarData && Object.keys(avatarData).length > 0) {
-        setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch missing user data:", error);
-    }
-  }, []);
-
-  const fetchOriginalOwnerAvatarsData = useCallback(
+  const fetchMissingUserData = useCallback(
     async (userIds: string[]) => {
+      // Filter out users that are already available
+      const missingIds = userIds.filter(
+        (id) => !localRobloxUsersRef.current[id] && !initialRobloxUsers?.[id],
+      );
+
+      if (missingIds.length === 0) {
+        return;
+      }
+
       try {
-        const avatarData = await fetchOriginalOwnerAvatars(userIds);
+        // Add only missing user IDs to loading state
+        setLoadingUserIds((prev) => {
+          const newSet = new Set(prev);
+          missingIds.forEach((id) => newSet.add(id));
+          return newSet;
+        });
+
+        const { userData, avatarData } =
+          await fetchMissingRobloxData(missingIds);
+
+        if (userData && Object.keys(userData).length > 0) {
+          setLocalRobloxUsers((prev) => ({ ...prev, ...userData }));
+        }
 
         if (avatarData && Object.keys(avatarData).length > 0) {
           setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
         }
       } catch (error) {
-        console.error("Failed to fetch original owner avatars:", error);
+        console.error("Failed to fetch missing user data:", error);
+      } finally {
+        // Remove user IDs from loading state
+        setLoadingUserIds((prev) => {
+          const newSet = new Set(prev);
+          missingIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
       }
     },
-    [],
+    [initialRobloxUsers],
   );
+
+  // Note: fetchOriginalOwnerAvatarsData removed - avatar data is now fetched by fetchMissingUserData
 
   const getUserDisplay = useCallback(
     (userId: string): string => {
@@ -193,46 +259,6 @@ export default function OGFinderResults({
     },
     [localRobloxAvatars],
   );
-
-  // Progressive loading for current page items (only current owners)
-  useEffect(() => {
-    if (!initialData?.results || initialData.results.length === 0) return;
-
-    const userIdsToLoad: string[] = [];
-    const avatarIdsToLoad: string[] = [];
-
-    initialData.results.forEach((item) => {
-      // Add current owner ID if missing
-      if (item.user_id && /^\d+$/.test(item.user_id)) {
-        const user = localRobloxUsers[item.user_id];
-        if (!user?.displayName && !user?.name) {
-          userIdsToLoad.push(item.user_id);
-        }
-
-        const avatar = localRobloxAvatars[item.user_id];
-        if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
-          avatarIdsToLoad.push(item.user_id);
-        }
-      }
-    });
-
-    // Fetch missing user data if any (deduplicate arrays)
-    if (userIdsToLoad.length > 0) {
-      const uniqueUserIds = [...new Set(userIdsToLoad)];
-      fetchMissingUserData(uniqueUserIds);
-    }
-
-    if (avatarIdsToLoad.length > 0) {
-      const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
-      fetchOriginalOwnerAvatarsData(uniqueAvatarIds);
-    }
-  }, [
-    initialData?.results,
-    fetchMissingUserData,
-    fetchOriginalOwnerAvatarsData,
-    localRobloxUsers,
-    localRobloxAvatars,
-  ]);
 
   // Progressive loading for trade history modal
   useEffect(() => {
@@ -272,16 +298,10 @@ export default function OGFinderResults({
       const uniqueUserIds = [...new Set(userIdsToLoad)];
       fetchMissingUserData(uniqueUserIds);
     }
-
-    if (avatarIdsToLoad.length > 0) {
-      const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
-      fetchOriginalOwnerAvatarsData(uniqueAvatarIds);
-    }
   }, [
     selectedItem?.id,
     selectedItem?.history,
     fetchMissingUserData,
-    fetchOriginalOwnerAvatarsData,
     localRobloxUsers,
     localRobloxAvatars,
   ]);
@@ -305,51 +325,145 @@ export default function OGFinderResults({
   };
 
   // Filter and sort items
-  const filteredItems =
-    initialData?.results?.filter((item) => {
-      const matchesSearch =
-        !searchTerm ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.categoryTitle.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(item.categoryTitle);
-
-      return matchesSearch && matchesCategory;
-    }) || [];
-
-  // Sort items
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    switch (sortOrder) {
-      case "duplicates":
-        const categoryCompare = a.categoryTitle.localeCompare(b.categoryTitle);
-        if (categoryCompare !== 0) return categoryCompare;
-        return a.title.localeCompare(b.title);
-      case "alpha-asc":
-        return a.title.localeCompare(b.title);
-      case "alpha-desc":
-        return b.title.localeCompare(a.title);
-      case "traded-desc":
-        return b.timesTraded - a.timesTraded;
-      case "unique-desc":
-        return b.uniqueCirculation - a.uniqueCirculation;
-      case "created-asc":
-        return a.logged_at - b.logged_at;
-      case "created-desc":
-        return b.logged_at - a.logged_at;
-
-      default:
-        return 0;
+  const filteredItems: OGItem[] = useMemo(() => {
+    if (!initialData?.results) {
+      return [];
     }
-  });
+
+    let items = initialData.results;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      items = items.filter((item) => {
+        // Search in item title
+        if (item.title.toLowerCase().includes(searchLower)) return true;
+
+        // Search in category title
+        if (item.categoryTitle.toLowerCase().includes(searchLower)) return true;
+
+        return false;
+      });
+    }
+
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      items = items.filter((item) =>
+        selectedCategories.includes(item.categoryTitle),
+      );
+    }
+
+    // Apply sorting
+    items = items.sort((a, b) => {
+      switch (sortOrder) {
+        case "duplicates":
+          // Group duplicates together and sort by creation date
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+
+          // Count how many of each item exist
+          const aCount = items.filter(
+            (item) => `${item.categoryTitle}-${item.title}` === aKey,
+          ).length;
+          const bCount = items.filter(
+            (item) => `${item.categoryTitle}-${item.title}` === bKey,
+          ).length;
+
+          // Prioritize duplicates (items with count > 1) over singles
+          if (aCount > 1 && bCount === 1) return -1; // a is duplicate, b is single
+          if (aCount === 1 && bCount > 1) return 1; // a is single, b is duplicate
+
+          // If both are duplicates or both are singles, sort by category then title
+          const categoryCompare = a.categoryTitle.localeCompare(
+            b.categoryTitle,
+          );
+          if (categoryCompare !== 0) return categoryCompare;
+          return a.title.localeCompare(b.title);
+        case "alpha-asc":
+          return a.title.localeCompare(b.title);
+        case "alpha-desc":
+          return b.title.localeCompare(a.title);
+        case "traded-desc":
+          return b.timesTraded - a.timesTraded;
+        case "unique-desc":
+          return b.uniqueCirculation - a.uniqueCirculation;
+        case "created-asc":
+          return a.logged_at - b.logged_at;
+        case "created-desc":
+          return b.logged_at - a.logged_at;
+
+        default:
+          return 0;
+      }
+    });
+
+    return items;
+  }, [initialData?.results, searchTerm, selectedCategories, sortOrder]);
 
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedItems = sortedItems.slice(
+  const paginatedItems = filteredItems.slice(
     startIndex,
     startIndex + itemsPerPage,
   );
-  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  // Create a map to track duplicate items
+  const itemCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    paginatedItems.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return counts;
+  }, [paginatedItems]);
+
+  // Create a map to track the order of duplicates based on creation date
+  const duplicateOrders = useMemo(() => {
+    const orders = new Map<string, number>();
+
+    // Group items by name
+    const itemGroups = new Map<string, OGItem[]>();
+    paginatedItems.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      if (!itemGroups.has(key)) {
+        itemGroups.set(key, []);
+      }
+      itemGroups.get(key)!.push(item);
+    });
+
+    // Sort each group by creation date (oldest first) and assign numbers
+    itemGroups.forEach((items) => {
+      if (items.length > 1) {
+        // Sort by creation date (oldest first)
+        const sortedItems = items.sort((a, b) => {
+          const aCreated = a.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          const bCreated = b.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+
+          if (!aCreated || !bCreated) return 0;
+
+          // Parse dates in format "Nov 6, 2022"
+          const aDate = new Date(aCreated);
+          const bDate = new Date(bCreated);
+
+          // Check if dates are valid
+          if (isNaN(aDate.getTime()) || isNaN(bDate.getTime())) return 0;
+
+          return aDate.getTime() - bDate.getTime();
+        });
+
+        // Assign numbers starting from 1
+        sortedItems.forEach((item, index) => {
+          orders.set(item.id, index + 1);
+        });
+      }
+    });
+
+    return orders;
+  }, [paginatedItems]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -357,6 +471,52 @@ export default function OGFinderResults({
   ) => {
     setPage(value);
   };
+
+  // Progressive loading for current page items (only current owners)
+  useEffect(() => {
+    if (!initialData?.results || initialData.results.length === 0) return;
+
+    const userIdsToLoad: string[] = [];
+    const avatarIdsToLoad: string[] = [];
+
+    // Only load users for items on the current page
+    const currentPageStartIndex = (page - 1) * itemsPerPage;
+    const currentPageItems = filteredItems.slice(
+      currentPageStartIndex,
+      currentPageStartIndex + itemsPerPage,
+    );
+
+    currentPageItems.forEach((item) => {
+      // Add current owner ID if missing
+      if (item.user_id && /^\d+$/.test(item.user_id)) {
+        const user = localRobloxUsers[item.user_id];
+        if (!user?.displayName && !user?.name) {
+          userIdsToLoad.push(item.user_id);
+        }
+
+        const avatar = localRobloxAvatars[item.user_id];
+        if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
+          avatarIdsToLoad.push(item.user_id);
+        }
+      }
+    });
+
+    // Fetch missing user data if any (deduplicate arrays)
+    if (userIdsToLoad.length > 0) {
+      const uniqueUserIds = [...new Set(userIdsToLoad)];
+      fetchMissingUserData(uniqueUserIds);
+    }
+
+    // Note: Avatar data is already fetched by fetchMissingUserData above
+  }, [
+    initialData?.results,
+    page,
+    itemsPerPage,
+    filteredItems,
+    fetchMissingUserData,
+    localRobloxUsers,
+    localRobloxAvatars,
+  ]);
 
   // Get unique categories
   const categories = [
@@ -395,97 +555,220 @@ export default function OGFinderResults({
       {/* No Items Found Display */}
       {!error &&
         (!initialData?.results || initialData.results.length === 0) && (
-          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="rounded-full bg-red-500/10 p-3">
-                  <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+          <>
+            <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+              <div className="text-center">
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-full bg-red-500/10 p-3">
+                    <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+                  </div>
                 </div>
+                <h3 className="mb-2 text-lg font-semibold text-red-400">
+                  No OG Items Found
+                </h3>
+                <p className="text-gray-300">
+                  No original items found for this user.
+                </p>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-red-400">
-                No OG Items Found
-              </h3>
-              <p className="text-gray-300">
-                No original items found for this user.
-              </p>
             </div>
-          </div>
+            <OGFinderFAQ />
+          </>
         )}
 
       {/* User Info and Results - Only show when no error and has data */}
       {!error && initialData?.results && initialData.results.length > 0 && (
         <>
-          {/* User Info */}
-          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-            <h2 className="text-muted mb-4 text-xl font-semibold">
-              User Information
-            </h2>
+          {/* User Info with Side-by-Side Layout */}
+          <div
+            className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
+          >
+            {/* User Information - Takes up full width for premium users, 2/3 for non-premium */}
+            <div
+              className={`${currentUserPremiumType === 0 ? "lg:col-span-2" : ""}`}
+            >
+              <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+                <h2 className="text-muted mb-4 text-xl font-semibold">
+                  User Information
+                </h2>
 
-            {/* Roblox User Profile */}
-            <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
-              {getUserAvatar(robloxId) ? (
-                <Image
-                  src={getUserAvatar(robloxId)!}
-                  alt="Roblox Avatar"
-                  width={64}
-                  height={64}
-                  className="flex-shrink-0 rounded-full bg-[#212A31]"
-                />
-              ) : (
-                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
-                  <svg
-                    className="text-muted h-8 w-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                {/* Roblox User Profile */}
+                <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+                  {getUserAvatar(robloxId) ? (
+                    <Image
+                      src={getUserAvatar(robloxId)!}
+                      alt="Roblox Avatar"
+                      width={64}
+                      height={64}
+                      className="flex-shrink-0 rounded-full bg-[#212A31]"
                     />
-                  </svg>
+                  ) : (
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+                      <svg
+                        className="text-muted h-8 w-8"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-muted text-lg font-bold break-words">
+                      {getUserDisplay(robloxId)}
+                    </h3>
+                    <p className="text-muted text-sm break-words opacity-75">
+                      @{getUsername(robloxId)}
+                    </p>
+
+                    {/* Connection Icons */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {/* Discord Profile - Only show if userConnectionData exists */}
+                      {userConnectionData && (
+                        <Tooltip
+                          title="Visit Discord Profile"
+                          placement="top"
+                          arrow
+                          slotProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#0F1419",
+                                color: "#D3D9D4",
+                                fontSize: "0.75rem",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                border: "1px solid #2E3944",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                "& .MuiTooltip-arrow": {
+                                  color: "#0F1419",
+                                },
+                              },
+                            },
+                          }}
+                        >
+                          <a
+                            href={`https://discord.com/users/${userConnectionData.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                          >
+                            <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
+                            <span className="text-sm font-medium">Discord</span>
+                          </a>
+                        </Tooltip>
+                      )}
+
+                      {/* Roblox Profile - Always show since we have Roblox data */}
+                      <Tooltip
+                        title="Visit Roblox Profile"
+                        placement="top"
+                        arrow
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "#0F1419",
+                              color: "#D3D9D4",
+                              fontSize: "0.75rem",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              border: "1px solid #2E3944",
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                              "& .MuiTooltip-arrow": {
+                                color: "#0F1419",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <a
+                          href={`https://www.roblox.com/users/${robloxId}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                        >
+                          <RobloxIcon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm font-medium">Roblox</span>
+                        </a>
+                      </Tooltip>
+
+                      {/* Website Profile - Only show if userConnectionData exists */}
+                      {userConnectionData && (
+                        <Tooltip
+                          title="Visit Website Profile"
+                          placement="top"
+                          arrow
+                          slotProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#0F1419",
+                                color: "#D3D9D4",
+                                fontSize: "0.75rem",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                border: "1px solid #2E3944",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                "& .MuiTooltip-arrow": {
+                                  color: "#0F1419",
+                                },
+                              },
+                            },
+                          }}
+                        >
+                          <Link
+                            href={`/users/${userConnectionData.id}`}
+                            className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                          >
+                            <Image
+                              src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                              alt="JBCL Logo"
+                              width={16}
+                              height={16}
+                              className="h-4 w-4 flex-shrink-0"
+                            />
+                            <span className="text-sm font-medium">
+                              Website Profile
+                            </span>
+                          </Link>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <h3 className="text-muted text-lg font-bold break-words">
-                  {getUserDisplay(robloxId)}
-                </h3>
-                <p className="text-muted text-sm break-words opacity-75">
-                  @{getUsername(robloxId)}
-                </p>
-                <a
-                  href={`https://www.roblox.com/users/${robloxId}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 inline-flex items-center gap-1 text-sm text-blue-300 transition-colors hover:text-blue-400"
-                >
-                  View Roblox Profile
-                  <svg
-                    className="h-3 w-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                </a>
+
+                {/* Stats */}
+                <div className="text-center">
+                  <div className="text-muted text-sm">Original Items Found</div>
+                  <div className="text-2xl font-bold text-[#4ade80]">
+                    {initialData.count?.toLocaleString()}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="text-center">
-              <div className="text-muted text-sm">Original Items Found</div>
-              <div className="text-2xl font-bold text-[#4ade80]">
-                {initialData.count?.toLocaleString()}
+            {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
+            {currentUserPremiumType === 0 && (
+              <div className="flex flex-col lg:col-span-1">
+                <div
+                  className="relative h-full overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+                  style={{ minHeight: "250px" }}
+                >
+                  <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
+                    Advertisement
+                  </span>
+                  <DisplayAd
+                    adSlot="2726163589"
+                    adFormat="auto"
+                    style={{ display: "block", width: "100%", height: "100%" }}
+                  />
+                </div>
+                <AdRemovalNotice className="mt-2" />
               </div>
-            </div>
+            )}
           </div>
 
           {/* Results */}
@@ -681,12 +964,7 @@ export default function OGFinderResults({
                             },
                           ],
                         },
-                        {
-                          label: "Duplicates",
-                          options: [
-                            { value: "duplicates", label: "Group Duplicates" },
-                          ],
-                        },
+                        { value: "duplicates", label: "Group Duplicates" },
                         {
                           label: "Alphabetically",
                           options: [
@@ -839,12 +1117,24 @@ export default function OGFinderResults({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedItems.map((item) => {
+                const itemKey = `${item.categoryTitle}-${item.title}`;
+                const duplicateCount = itemCounts.get(itemKey) || 1;
+                const duplicateOrder = duplicateOrders.get(item.id) || 1;
+                const isDuplicate = duplicateCount > 1;
+
                 return (
                   <div
                     key={item.id}
-                    className="relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 border-gray-800 bg-gray-700 p-3 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                    onClick={() => handleItemClick(item)}
+                    className="relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 border-gray-800 bg-gray-700 p-3 text-white transition-all duration-200 hover:border-gray-600 hover:shadow-lg"
+                    onClick={() => handleCardClick(item)}
                   >
+                    {/* Duplicate Indicator */}
+                    {isDuplicate && (
+                      <div className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg">
+                        #{duplicateOrder}
+                      </div>
+                    )}
+
                     {/* Title */}
                     <div className="mb-4 text-left">
                       <p
@@ -931,15 +1221,59 @@ export default function OGFinderResults({
                     <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
                       <div>
                         <div className="text-sm opacity-90">MONTHLY TRADED</div>
-                        <div className="text-xl font-bold">
-                          {item.timesTraded.toLocaleString()}
-                        </div>
+                        <Tooltip
+                          title={item.timesTraded.toLocaleString()}
+                          placement="top"
+                          arrow
+                          slotProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#0F1419",
+                                color: "#D3D9D4",
+                                fontSize: "0.75rem",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                border: "1px solid #2E3944",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                "& .MuiTooltip-arrow": {
+                                  color: "#0F1419",
+                                },
+                              },
+                            },
+                          }}
+                        >
+                          <div className="cursor-help text-xl font-bold">
+                            {item.timesTraded.toLocaleString()}
+                          </div>
+                        </Tooltip>
                       </div>
                       <div>
                         <div className="text-sm opacity-90">MONTHLY UNIQUE</div>
-                        <div className="text-xl font-bold">
-                          {item.uniqueCirculation.toLocaleString()}
-                        </div>
+                        <Tooltip
+                          title={item.uniqueCirculation.toLocaleString()}
+                          placement="top"
+                          arrow
+                          slotProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#0F1419",
+                                color: "#D3D9D4",
+                                fontSize: "0.75rem",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                border: "1px solid #2E3944",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                "& .MuiTooltip-arrow": {
+                                  color: "#0F1419",
+                                },
+                              },
+                            },
+                          }}
+                        >
+                          <div className="cursor-help text-xl font-bold">
+                            {item.uniqueCirculation.toLocaleString()}
+                          </div>
+                        </Tooltip>
                       </div>
                       <div>
                         <div className="text-sm opacity-90">CURRENT OWNER</div>
@@ -1038,246 +1372,23 @@ export default function OGFinderResults({
           </div>
 
           {/* Trade History Modal */}
-          {selectedItem && (
-            <Dialog
-              open={showHistoryModal}
-              onClose={closeHistoryModal}
-              className="relative z-50"
-            >
-              <div
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-                aria-hidden="true"
-              />
+          <TradeHistoryModal
+            isOpen={showHistoryModal}
+            onClose={closeHistoryModal}
+            item={selectedItem}
+            getUserAvatar={getUserAvatar}
+            getUserDisplay={getUserDisplay}
+            formatDate={formatDate}
+            loadingUserIds={loadingUserIds}
+          />
 
-              <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="mx-auto max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31]">
-                  {/* Modal Header */}
-                  <div className="flex items-start justify-between gap-4 border-b border-[#2E3944] p-4 sm:items-center sm:p-6">
-                    <div className="min-w-0 flex-1">
-                      <Dialog.Title className="text-muted text-lg font-semibold sm:text-xl">
-                        Trade History
-                      </Dialog.Title>
-                      <p className="text-muted truncate text-sm opacity-75">
-                        {selectedItem.title}
-                      </p>
-                    </div>
-                    <button
-                      onClick={closeHistoryModal}
-                      className="text-muted rounded-full p-1 hover:bg-[#2E3944] hover:text-white"
-                    >
-                      <XMarkIcon className="h-6 w-6" />
-                    </button>
-                  </div>
-
-                  {/* Modal Content */}
-                  <div className="max-h-[60vh] overflow-y-auto p-6">
-                    {selectedItem.history && selectedItem.history.length > 0 ? (
-                      <div className="space-y-4">
-                        {(() => {
-                          // Process history to show actual trades between users
-                          const history =
-                            typeof selectedItem.history === "string"
-                              ? JSON.parse(selectedItem.history)
-                              : selectedItem.history;
-
-                          if (!Array.isArray(history) || history.length === 0) {
-                            return (
-                              <div className="py-8 text-center">
-                                <p className="text-muted">
-                                  This item has no trade history.
-                                </p>
-                              </div>
-                            );
-                          }
-
-                          // Reverse the history to match inventory modal
-                          const reversedHistory = history.slice().reverse();
-
-                          // If there's only one history entry, hide it (user obtained the item)
-                          if (reversedHistory.length === 1) {
-                            return (
-                              <div className="py-8 text-center">
-                                <p className="text-muted">
-                                  This item has no trade history.
-                                </p>
-                              </div>
-                            );
-                          }
-
-                          // Group history into trades between users
-                          const trades = [];
-                          for (let i = 0; i < reversedHistory.length - 1; i++) {
-                            const toUser = reversedHistory[i];
-                            const fromUser = reversedHistory[i + 1];
-
-                            trades.push({
-                              fromUser,
-                              toUser,
-                              tradeNumber: reversedHistory.length - i - 1,
-                            });
-                          }
-
-                          return (
-                            <>
-                              <div className="text-muted mb-4 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-                                <span>Total Trades: {trades.length}</span>
-                              </div>
-
-                              <div className="space-y-3">
-                                {trades.map((trade, index) => {
-                                  return (
-                                    <div
-                                      key={`${trade.fromUser.UserId}-${trade.toUser.UserId}-${trade.toUser.TradeTime}`}
-                                      className={`rounded-lg border p-3 ${
-                                        index === trades.length - 1
-                                          ? "border-[#124E66] bg-[#1A5F7A] shadow-lg"
-                                          : "border-[#37424D] bg-[#2E3944]"
-                                      }`}
-                                    >
-                                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex items-center gap-3">
-                                          <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                              {/* From User */}
-                                              <div className="flex items-center gap-2">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
-                                                  {getUserAvatar(
-                                                    trade.fromUser.UserId.toString(),
-                                                  ) ? (
-                                                    <Image
-                                                      src={
-                                                        getUserAvatar(
-                                                          trade.fromUser.UserId.toString(),
-                                                        )!
-                                                      }
-                                                      alt="User Avatar"
-                                                      width={24}
-                                                      height={24}
-                                                      className="rounded-full"
-                                                    />
-                                                  ) : (
-                                                    <svg
-                                                      className="text-muted h-3 w-3"
-                                                      fill="none"
-                                                      stroke="currentColor"
-                                                      viewBox="0 0 24 24"
-                                                    >
-                                                      <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                      />
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <a
-                                                  href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
-                                                >
-                                                  {getUserDisplay(
-                                                    trade.fromUser.UserId.toString(),
-                                                  ) ||
-                                                    `User ${trade.fromUser.UserId}`}
-                                                </a>
-                                              </div>
-
-                                              {/* Arrow */}
-                                              <div className="text-muted flex items-center gap-1">
-                                                <svg
-                                                  className="h-4 w-4"
-                                                  fill="none"
-                                                  stroke="currentColor"
-                                                  viewBox="0 0 24 24"
-                                                >
-                                                  <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                                  />
-                                                </svg>
-                                                <span className="text-xs">
-                                                  Trade #{trade.tradeNumber}
-                                                </span>
-                                              </div>
-
-                                              {/* To User */}
-                                              <div className="flex items-center gap-2">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
-                                                  {getUserAvatar(
-                                                    trade.toUser.UserId.toString(),
-                                                  ) ? (
-                                                    <Image
-                                                      src={
-                                                        getUserAvatar(
-                                                          trade.toUser.UserId.toString(),
-                                                        )!
-                                                      }
-                                                      alt="User Avatar"
-                                                      width={24}
-                                                      height={24}
-                                                      className="rounded-full"
-                                                    />
-                                                  ) : (
-                                                    <svg
-                                                      className="text-muted h-3 w-3"
-                                                      fill="none"
-                                                      stroke="currentColor"
-                                                      viewBox="0 0 24 24"
-                                                    >
-                                                      <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                      />
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <a
-                                                  href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
-                                                >
-                                                  {getUserDisplay(
-                                                    trade.toUser.UserId.toString(),
-                                                  ) ||
-                                                    `User ${trade.toUser.UserId}`}
-                                                </a>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Trade Date */}
-                                        <div className="text-muted flex-shrink-0 text-sm">
-                                          {formatDate(trade.toUser.TradeTime)}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    ) : (
-                      <div className="py-8 text-center">
-                        <p className="text-muted">
-                          This item has no trade history.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Dialog>
-          )}
+          {/* Item Action Modal */}
+          <ItemActionModal
+            isOpen={showActionModal}
+            onClose={closeActionModal}
+            item={selectedItemForAction}
+            onViewTradeHistory={handleViewTradeHistory}
+          />
         </>
       )}
     </div>
