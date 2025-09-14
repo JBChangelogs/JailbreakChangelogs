@@ -1,4 +1,7 @@
-import { Box, Typography, Divider, Chip, Tooltip } from "@mui/material";
+import { Box, Typography, Divider, Chip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import Link from "next/link";
 import Image from "next/image";

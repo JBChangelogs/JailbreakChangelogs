@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Tooltip } from "@mui/material";
+import { Button } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
@@ -116,7 +119,27 @@ export default function AboutTab({
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-muted text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (
-            <Tooltip title="Edit bio" placement="top">
+            <Tooltip
+              title="Edit bio"
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "#0F1419",
+                    color: "#D3D9D4",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid #2E3944",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiTooltip-arrow": {
+                      color: "#0F1419",
+                    },
+                  },
+                },
+              }}
+            >
               <Button
                 variant="text"
                 onClick={() => setIsEditingBio(true)}

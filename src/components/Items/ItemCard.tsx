@@ -1,7 +1,9 @@
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import {
   getItemImagePath,
   handleImageError,

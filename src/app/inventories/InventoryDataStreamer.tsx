@@ -50,15 +50,12 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
     (result && typeof result === "object" && "error" in result) ||
     typeof result === "string"
   ) {
+    const errorMessage =
+      typeof result === "string"
+        ? result
+        : (result as { message?: string }).message;
     return (
-      <InventoryCheckerClient
-        robloxId={actualRobloxId}
-        error={
-          typeof result === "string"
-            ? result
-            : (result as { message?: string }).message
-        }
-      />
+      <InventoryCheckerClient robloxId={actualRobloxId} error={errorMessage} />
     );
   }
 

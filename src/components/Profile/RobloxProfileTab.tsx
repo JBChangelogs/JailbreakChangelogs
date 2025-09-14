@@ -6,7 +6,10 @@ import Link from "next/link";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
-import { CircularProgress, Tooltip } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
 interface User {
   id: string;

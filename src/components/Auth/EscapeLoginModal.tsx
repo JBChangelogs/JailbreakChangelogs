@@ -7,14 +7,17 @@ export default function EscapeLoginModal() {
   const { showModal, setShowModal, handleTokenSubmit } = useEscapeLogin();
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     const result = await handleTokenSubmit(token);
     if (!result.success) {
       setError("Invalid token. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -80,9 +83,14 @@ export default function EscapeLoginModal() {
             </button>
             <button
               type="submit"
-              className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4]"
+              disabled={isLoading}
+              className={`cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition-all duration-200 ${
+                isLoading
+                  ? "cursor-progress bg-[#37424D]"
+                  : "bg-[#5865F2] hover:bg-[#4752C4]"
+              }`}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>

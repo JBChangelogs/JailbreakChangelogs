@@ -64,9 +64,13 @@ const ConfettiComponent = forwardRef<ConfettiRef, Props>((props, ref) => {
   );
 
   const fire = useCallback(
-    async (opts = {}) => {
+    async (opts: ConfettiOptions = {}) => {
       try {
-        await instanceRef.current?.({ ...options, ...opts });
+        await instanceRef.current?.({
+          ...options,
+          ...opts,
+          zIndex: opts.zIndex || options?.zIndex || 1300, // Higher than header's z-index of 1200
+        });
       } catch (error) {
         console.error("Confetti error:", error);
       }
@@ -131,6 +135,7 @@ const ConfettiButtonComponent = ({
           x: x / window.innerWidth,
           y: y / window.innerHeight,
         },
+        zIndex: options?.zIndex || 1300, // Higher than header's z-index of 1200
       });
     } catch (error) {
       console.error("Confetti button error:", error);

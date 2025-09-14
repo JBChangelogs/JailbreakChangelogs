@@ -28,6 +28,7 @@ export default function OGConfetti() {
           origin: { x: 0, y: 0.5 },
           colors: colors,
           scalar: 2,
+          zIndex: 1300, // Higher than header's z-index of 1200
         });
         confetti({
           particleCount: 2,
@@ -37,6 +38,7 @@ export default function OGConfetti() {
           origin: { x: 1, y: 0.5 },
           colors: colors,
           scalar: 2,
+          zIndex: 1300, // Higher than header's z-index of 1200
         });
 
         requestAnimationFrame(frame);

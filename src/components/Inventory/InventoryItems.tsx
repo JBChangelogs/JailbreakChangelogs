@@ -2,9 +2,11 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Pagination, Tooltip } from "@mui/material";
-import Image from "next/image";
+import { Pagination } from "@mui/material";
 import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import Image from "next/image";
 import localFont from "next/font/local";
 import {
   getItemImagePath,

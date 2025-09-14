@@ -239,10 +239,6 @@ async function UserDataFetcher({
   let finalUserIdsArray = userIdsArray;
 
   if (isLargeInventory) {
-    console.log(
-      `[INVENTORY] Large inventory detected: ${userIdsArray.length} unique original owners. Implementing fallback strategy.`,
-    );
-
     // For large inventories, prioritize:
     // 1. Main user (always included)
     // 2. Most common original owners (by frequency in inventory)
@@ -273,10 +269,6 @@ async function UserDataFetcher({
 
     // Always include main user + top original owners
     finalUserIdsArray = [robloxId, ...sortedOwners];
-
-    console.log(
-      `[INVENTORY] Reduced from ${userIdsArray.length} to ${finalUserIdsArray.length} original owners for performance.`,
-    );
   }
 
   // Fetch all user data, avatars, and main user connection data in parallel

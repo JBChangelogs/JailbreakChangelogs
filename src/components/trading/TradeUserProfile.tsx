@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { UserAvatar } from "@/utils/avatar";
 import { TradeUserTooltip } from "./TradeUserTooltip";
 import RobloxTradeUser from "./RobloxTradeUser";

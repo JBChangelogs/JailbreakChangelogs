@@ -4,14 +4,10 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  ThemeProvider,
-  Tabs,
-  Tab,
-  Box,
-  Pagination,
-  Tooltip,
-} from "@mui/material";
+import { ThemeProvider, Tabs, Tab, Box, Pagination } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { darkTheme } from "@/theme/darkTheme";
 
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
@@ -29,7 +25,6 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
 import ItemVariantDropdown from "@/components/Items/ItemVariantDropdown";
-import dynamic from "next/dynamic";
 import { Change as ItemChange } from "@/components/Items/ItemChangelogs";
 
 const ItemValueChart = dynamic(

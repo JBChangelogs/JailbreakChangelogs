@@ -14,7 +14,10 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import AddServerModal from "./AddServerModal";
-import { Skeleton, Tooltip, Pagination } from "@mui/material";
+import { Skeleton, Pagination } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";

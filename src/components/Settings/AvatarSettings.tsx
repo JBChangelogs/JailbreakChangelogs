@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Chip,
-  Tooltip,
-} from "@mui/material";
+import { Box, TextField, Button, Typography, Chip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import StarIcon from "@mui/icons-material/Star";
 import { UserData } from "@/types/auth";
 import { updateAvatar } from "@/services/settingsService";
@@ -150,7 +146,27 @@ export const AvatarSettings = ({
           >
             Custom Avatar URL
           </Typography>
-          <Tooltip title="Premium Feature">
+          <Tooltip
+            title="Premium Feature"
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "#0F1419",
+                  color: "#D3D9D4",
+                  fontSize: "0.75rem",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid #2E3944",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  "& .MuiTooltip-arrow": {
+                    color: "#0F1419",
+                  },
+                },
+              },
+            }}
+          >
             <Chip
               icon={<StarIcon sx={{ color: "#FFD700" }} />}
               label="Premium"

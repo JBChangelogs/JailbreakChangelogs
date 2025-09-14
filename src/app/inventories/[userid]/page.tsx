@@ -38,7 +38,12 @@ export default async function InventoryCheckerPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <Breadcrumb />
-      <h1 className="mb-6 text-3xl font-bold">Inventory Checker</h1>
+      <div className="mb-6 flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-white">Inventory Checker</h1>
+        <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+          New
+        </span>
+      </div>
       <ExperimentalFeatureBanner className="mb-6" />
       <Suspense
         fallback={<InventoryCheckerClient robloxId={userid} isLoading={true} />}

@@ -1,14 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Pagination,
-  Chip,
-  Skeleton,
-  Divider,
-  Tooltip,
-} from "@mui/material";
+import { Box, Pagination, Chip, Skeleton, Divider } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import StarIcon from "@mui/icons-material/Star";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import { PUBLIC_API_URL } from "@/utils/api";

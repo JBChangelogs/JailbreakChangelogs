@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RobloxUser } from "@/types";
 import Image from "next/image";
-import { Pagination, Tooltip } from "@mui/material";
+import { Pagination } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -23,7 +26,6 @@ import {
   handleImageError,
 } from "@/utils/images";
 import localFont from "next/font/local";
-import dynamic from "next/dynamic";
 import SearchForm from "./SearchForm";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -136,6 +138,22 @@ export default function OGFinderResults({
     setIsLoading(true);
     router.push(`/og/${searchId.trim()}`);
   };
+
+  // Reset loading state when new data is received or when there's an error
+  useEffect(() => {
+    if (initialData || error) {
+      setIsLoading(false);
+    }
+  }, [initialData, error]);
+
+  // Reset loading state when robloxId changes (navigation to same URL)
+  useEffect(() => {
+    // If we're loading and the robloxId matches our search, reset loading state
+    // This handles the case where user searches for the same user again
+    if (isLoading && robloxId === searchId.trim()) {
+      setIsLoading(false);
+    }
+  }, [robloxId, isLoading, searchId]);
 
   const handleItemClick = (item: OGItem) => {
     setSelectedItem(item);
@@ -532,7 +550,6 @@ export default function OGFinderResults({
         handleSearch={handleSearch}
         isLoading={isLoading}
         externalIsLoading={false}
-        error={error}
       />
 
       {/* Error Display */}
@@ -567,7 +584,8 @@ export default function OGFinderResults({
                   No OG Items Found
                 </h3>
                 <p className="text-gray-300">
-                  No original items found for this user.
+                  No original items found for this user. Their items may not yet
+                  have been logged by our bots.
                 </p>
               </div>
             </div>
@@ -1391,6 +1409,9 @@ export default function OGFinderResults({
           />
         </>
       )}
+
+      {/* FAQ Section */}
+      <OGFinderFAQ />
     </div>
   );
 }

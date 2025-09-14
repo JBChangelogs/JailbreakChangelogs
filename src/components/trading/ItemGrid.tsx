@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { TradeItem } from "@/types/trading";
 import {
   getItemImagePath,

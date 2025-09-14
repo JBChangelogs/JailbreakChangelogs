@@ -1,6 +1,8 @@
 import { UserAvatar } from "@/utils/avatar";
 import { UserSettings } from "@/types/auth";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { TrophyIcon } from "@heroicons/react/24/solid";
 
 interface DiscordUserCardProps {
@@ -76,7 +78,27 @@ export default function DiscordUserCard({
               : user.username}
           </h2>
           {user.premiumtype ? (
-            <Tooltip title={`Supporter Type ${user.premiumtype}`}>
+            <Tooltip
+              title={`Supporter Type ${user.premiumtype}`}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "#0F1419",
+                    color: "#D3D9D4",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid #2E3944",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiTooltip-arrow": {
+                      color: "#0F1419",
+                    },
+                  },
+                },
+              }}
+            >
               <div
                 className={`inline-flex items-center justify-center rounded-full ${user.premiumtype === 1 ? "bg-gradient-to-r from-[#CD7F32] to-[#B87333]" : user.premiumtype === 2 ? "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9]" : "bg-gradient-to-r from-[#FFD700] to-[#DAA520]"} h-4 w-4 cursor-pointer text-black hover:opacity-90`}
                 style={{ minWidth: "1rem", minHeight: "1rem" }}

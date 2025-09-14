@@ -249,12 +249,14 @@ export async function fetchUserByRobloxId(robloxId: string) {
         throw new Error(`BANNED_USER: ${errorMessage}`);
       }
 
-      // Log error response for other types of errors
-      console.error("Error response:", {
-        status: response.status,
-        statusText: response.statusText,
-        data: JSON.stringify(data, null, 2),
-      });
+      // Log error response for other types of errors (skip 404s as they're expected)
+      if (response.status !== 404) {
+        console.error("Error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: JSON.stringify(data, null, 2),
+        });
+      }
 
       if (data.detail) {
         throw new Error(
@@ -266,7 +268,10 @@ export async function fetchUserByRobloxId(robloxId: string) {
 
     return data;
   } catch (error) {
-    console.error("Error fetching user by Roblox ID:", error);
+    // Only log non-404 errors as 404 means user doesn't exist in our database (expected)
+    if (error instanceof Error && !error.message.includes("404")) {
+      console.error("Error fetching user by Roblox ID:", error);
+    }
 
     // Re-throw BANNED_USER errors so calling code can handle them
     if (
@@ -1532,17 +1537,26 @@ export async function fetchUsersWithFlags(): Promise<UserWithFlags[]> {
   }
 }
 
-export async function fetchOGSearchData(robloxId: string) {
+export async function fetchOGSearchData(
+  robloxId: string,
+  timeoutMs: number = 30000,
+) {
   console.log("[SERVER] fetchOGSearchData called with robloxId:", robloxId);
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     const response = await fetch(
       `${INVENTORY_API_URL}/search?username=${robloxId}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-OGFinder/1.0",
         },
+        signal: controller.signal,
       },
     );
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(
@@ -1562,6 +1576,14 @@ export async function fetchOGSearchData(robloxId: string) {
     return data;
   } catch (err) {
     console.error("[SERVER] Error fetching OG search data:", err);
+
+    if (err instanceof Error && err.name === "AbortError") {
+      return {
+        error: "timeout",
+        message: `Request timed out after ${timeoutMs}ms. The user's data may be too large to process quickly.`,
+      };
+    }
+
     return {
       error: "fetch_error",
       message: "Failed to fetch OG search data. Please try again.",

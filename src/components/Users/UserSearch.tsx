@@ -9,7 +9,9 @@ import RobloxUserCard from "@/components/Users/RobloxUserCard";
 import DiscordUserCard from "@/components/Users/DiscordUserCard";
 import UserTypeTabs from "@/components/Users/UserTypeTabs";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { UserDetailsTooltip } from "./UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 

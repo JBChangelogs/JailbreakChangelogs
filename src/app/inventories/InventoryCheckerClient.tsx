@@ -502,6 +502,15 @@ export default function InventoryCheckerClient({
     setIsLoading(externalIsLoading || false);
   }, [externalIsLoading]);
 
+  // Reset loading state when robloxId changes (navigation to same URL)
+  useEffect(() => {
+    // If we're loading and the robloxId matches our search, reset loading state
+    // This handles the case where user searches for the same user again
+    if (isLoading && robloxId === searchId.trim()) {
+      setIsLoading(false);
+    }
+  }, [robloxId, isLoading, searchId]);
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
       year: "numeric",

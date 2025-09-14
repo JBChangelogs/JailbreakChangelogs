@@ -19,7 +19,9 @@ import VersionInfo from "@/components/Layout/VersionInfo";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import AuthCheck from "@/components/Auth/AuthCheck";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 import SurveyProvider from "@/components/Survey/SurveyProvider";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
 import { AuthProvider } from "@/contexts/AuthContext";

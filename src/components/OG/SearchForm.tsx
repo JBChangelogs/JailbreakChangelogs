@@ -8,7 +8,6 @@ interface SearchFormProps {
   handleSearch: (e: React.FormEvent) => void;
   isLoading: boolean;
   externalIsLoading: boolean;
-  error?: string;
 }
 
 export default function SearchForm({
@@ -17,7 +16,6 @@ export default function SearchForm({
   handleSearch,
   isLoading,
   externalIsLoading,
-  error,
 }: SearchFormProps) {
   return (
     <>
@@ -50,7 +48,11 @@ export default function SearchForm({
           <button
             type="submit"
             disabled={isLoading || externalIsLoading}
-            className="flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg bg-[#5865F2] px-6 text-sm font-medium text-white transition-all duration-200 hover:bg-[#4752C4] disabled:cursor-not-allowed disabled:bg-[#2E3944]"
+            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white transition-all duration-200 ${
+              isLoading || externalIsLoading
+                ? "cursor-progress bg-[#212A31]"
+                : "bg-[#5865F2] hover:bg-[#4752C4]"
+            }`}
           >
             {(isLoading || externalIsLoading) && (
               <svg
@@ -80,13 +82,6 @@ export default function SearchForm({
           </button>
         </div>
       </form>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mt-4 rounded-lg border border-red-500/50 bg-red-900/30 p-3">
-          <p className="text-sm text-red-300">{error}</p>
-        </div>
-      )}
     </>
   );
 }

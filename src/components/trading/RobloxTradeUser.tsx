@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { TradeUserTooltip } from "./TradeUserTooltip";
 

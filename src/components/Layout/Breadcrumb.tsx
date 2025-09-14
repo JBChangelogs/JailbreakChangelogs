@@ -1,6 +1,9 @@
 "use client";
 
-import { Skeleton } from "@mui/material";
+import dynamic from "next/dynamic";
+const Skeleton = dynamic(() => import("@mui/material/Skeleton"), {
+  ssr: false,
+});
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -166,7 +169,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         }
         if (index === 1) {
           return {
-            label: `User ${segment}`,
+            label: segment,
             href: `/${pathSegments.slice(0, index + 1).join("/")}`,
           };
         }

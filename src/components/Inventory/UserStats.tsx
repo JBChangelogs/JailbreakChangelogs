@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { useEffect, useState } from "react";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { useAuthContext } from "@/contexts/AuthContext";

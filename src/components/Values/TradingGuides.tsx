@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Tooltip, Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { demandOrder, trendOrder } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";

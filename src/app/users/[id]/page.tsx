@@ -13,7 +13,9 @@ import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData, FollowerData } from "@/types/auth";
 import { toast } from "react-hot-toast";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { PUBLIC_API_URL } from "@/utils/api";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {

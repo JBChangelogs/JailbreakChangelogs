@@ -9,7 +9,9 @@ import {
   TrashIcon,
   EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
-import Tooltip from "@mui/material/Tooltip";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
 import { Checkbox, FormGroup, FormControlLabel } from "@mui/material";
 import Image from "next/image";

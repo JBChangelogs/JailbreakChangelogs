@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { Pagination, Tooltip } from "@mui/material";
+import { Pagination } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import {
   fetchMissingRobloxData,
