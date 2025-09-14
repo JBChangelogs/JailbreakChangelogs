@@ -27,12 +27,6 @@ export default async function OGFinderUserPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <Breadcrumb />
-      <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-3xl font-bold">OG Finder</h1>
-        <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-          New
-        </span>
-      </div>
 
       <ExperimentalFeatureBanner className="mb-6" />
 
