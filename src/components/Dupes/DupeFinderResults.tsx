@@ -26,6 +26,9 @@ import {
 import type { DupeFinderItem, RobloxUser, Item } from "@/types";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
+import DisplayAd from "@/components/Ads/DisplayAd";
+import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -102,6 +105,9 @@ export default function DupeFinderResults({
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<DupeFinderItem | null>(null);
+
+  const { user } = useAuthContext();
+  const currentUserPremiumType = user?.premiumtype || 0;
 
   const itemsPerPage = 20;
   const MAX_SEARCH_LENGTH = 50;
@@ -627,223 +633,253 @@ export default function DupeFinderResults({
   return (
     <div className="space-y-6">
       {/* User Info */}
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-        <h2 className="text-muted mb-4 text-xl font-semibold">
-          User Information
-        </h2>
+      <div
+        className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
+      >
+        <div
+          className={`${currentUserPremiumType === 0 ? "lg:col-span-2" : ""}`}
+        >
+          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+            <h2 className="text-muted mb-4 text-xl font-semibold">
+              User Information
+            </h2>
 
-        {/* Roblox User Profile */}
-        <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
-          {getUserAvatar(robloxId || "") ? (
-            <Image
-              src={getUserAvatar(robloxId || "")!}
-              alt="Roblox Avatar"
-              width={64}
-              height={64}
-              className="flex-shrink-0 rounded-full bg-[#212A31]"
-            />
-          ) : (
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
-              <svg
-                className="text-muted h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            {/* Roblox User Profile */}
+            <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+              {getUserAvatar(robloxId || "") ? (
+                <Image
+                  src={getUserAvatar(robloxId || "")!}
+                  alt="Roblox Avatar"
+                  width={64}
+                  height={64}
+                  className="flex-shrink-0 rounded-full bg-[#212A31]"
                 />
-              </svg>
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="text-muted text-lg font-bold break-words">
-              {getUserDisplay(robloxId || "")}
-            </h3>
-            <p className="text-muted text-sm break-words opacity-75">
-              @{getUsername(robloxId || "")}
-            </p>
-
-            {/* Connection Icons */}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {/* Discord Profile - Only show if userConnectionData exists */}
-              {userConnectionData && (
-                <Tooltip
-                  title="Visit Discord Profile"
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "#0F1419",
-                        color: "#D3D9D4",
-                        fontSize: "0.75rem",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid #2E3944",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        "& .MuiTooltip-arrow": {
-                          color: "#0F1419",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <a
-                    href={`https://discord.com/users/${userConnectionData.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+              ) : (
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+                  <svg
+                    className="text-muted h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
-                    <span className="text-sm font-medium">Discord</span>
-                  </a>
-                </Tooltip>
-              )}
-
-              {/* Roblox Profile - Always show since we have Roblox data */}
-              <Tooltip
-                title="Visit Roblox Profile"
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      border: "1px solid #2E3944",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
-                      },
-                    },
-                  },
-                }}
-              >
-                <a
-                  href={`https://www.roblox.com/users/${robloxId}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
-                >
-                  <RobloxIcon className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">Roblox</span>
-                </a>
-              </Tooltip>
-
-              {/* Website Profile - Only show if userConnectionData exists */}
-              {userConnectionData && (
-                <Tooltip
-                  title="Visit Website Profile"
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "#0F1419",
-                        color: "#D3D9D4",
-                        fontSize: "0.75rem",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid #2E3944",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        "& .MuiTooltip-arrow": {
-                          color: "#0F1419",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <Link
-                    href={`/users/${userConnectionData.id}`}
-                    className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
-                  >
-                    <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
-                      alt="JBCL Logo"
-                      width={16}
-                      height={16}
-                      className="h-4 w-4 flex-shrink-0"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
-                    <span className="text-sm font-medium">Website Profile</span>
-                  </Link>
-                </Tooltip>
+                  </svg>
+                </div>
               )}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-muted text-lg font-bold break-words">
+                  {getUserDisplay(robloxId || "")}
+                </h3>
+                <p className="text-muted text-sm break-words opacity-75">
+                  @{getUsername(robloxId || "")}
+                </p>
+
+                {/* Connection Icons */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {/* Discord Profile - Only show if userConnectionData exists */}
+                  {userConnectionData && (
+                    <Tooltip
+                      title="Visit Discord Profile"
+                      placement="top"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: "#0F1419",
+                            color: "#D3D9D4",
+                            fontSize: "0.75rem",
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "1px solid #2E3944",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                            "& .MuiTooltip-arrow": {
+                              color: "#0F1419",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <a
+                        href={`https://discord.com/users/${userConnectionData.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                      >
+                        <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
+                        <span className="text-sm font-medium">Discord</span>
+                      </a>
+                    </Tooltip>
+                  )}
+
+                  {/* Roblox Profile - Always show since we have Roblox data */}
+                  <Tooltip
+                    title="Visit Roblox Profile"
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "#0F1419",
+                          color: "#D3D9D4",
+                          fontSize: "0.75rem",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #2E3944",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          "& .MuiTooltip-arrow": {
+                            color: "#0F1419",
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <a
+                      href={`https://www.roblox.com/users/${robloxId}/profile`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                    >
+                      <RobloxIcon className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">Roblox</span>
+                    </a>
+                  </Tooltip>
+
+                  {/* Website Profile - Only show if userConnectionData exists */}
+                  {userConnectionData && (
+                    <Tooltip
+                      title="Visit Website Profile"
+                      placement="top"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: "#0F1419",
+                            color: "#D3D9D4",
+                            fontSize: "0.75rem",
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "1px solid #2E3944",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                            "& .MuiTooltip-arrow": {
+                              color: "#0F1419",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <Link
+                        href={`/users/${userConnectionData.id}`}
+                        className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5 transition-colors hover:bg-gray-500"
+                      >
+                        <Image
+                          src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                          alt="JBCL Logo"
+                          width={16}
+                          height={16}
+                          className="h-4 w-4 flex-shrink-0"
+                        />
+                        <span className="text-sm font-medium">
+                          Website Profile
+                        </span>
+                      </Link>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
+                <div className="text-muted mb-2 text-sm">Dupe Items Found</div>
+                <Tooltip
+                  title={`${initialData.length?.toLocaleString()}`}
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "#0F1419",
+                        color: "#D3D9D4",
+                        fontSize: "0.75rem",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #2E3944",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        "& .MuiTooltip-arrow": {
+                          color: "#0F1419",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <div className="cursor-help text-2xl font-bold text-[#ef4444]">
+                    {initialData.length?.toLocaleString()}
+                  </div>
+                </Tooltip>
+              </div>
+              <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
+                <div className="text-muted mb-2 text-sm">Total Duped Value</div>
+                {!isClient || isLoadingValues ? (
+                  <div className="animate-pulse text-2xl font-bold text-gray-400">
+                    Loading...
+                  </div>
+                ) : (
+                  <Tooltip
+                    title={`$${totalDupedValue.toLocaleString()}`}
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "#0F1419",
+                          color: "#D3D9D4",
+                          fontSize: "0.75rem",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #2E3944",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          "& .MuiTooltip-arrow": {
+                            color: "#0F1419",
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <div className="cursor-help text-2xl font-bold text-white">
+                      {formatPreciseMoney(totalDupedValue)}
+                    </div>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-            <div className="text-muted mb-2 text-sm">Dupe Items Found</div>
-            <Tooltip
-              title={`${initialData.length?.toLocaleString()}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    border: "1px solid #2E3944",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
-                    },
-                  },
-                },
-              }}
+        {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
+        {currentUserPremiumType === 0 && (
+          <div className="flex flex-col lg:col-span-1">
+            <div
+              className="relative h-full overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+              style={{ minHeight: "250px" }}
             >
-              <div className="cursor-help text-2xl font-bold text-[#ef4444]">
-                {initialData.length?.toLocaleString()}
-              </div>
-            </Tooltip>
+              <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
+                Advertisement
+              </span>
+              <DisplayAd
+                adSlot="9566904102"
+                adFormat="auto"
+                style={{ display: "block", width: "100%", height: "100%" }}
+              />
+            </div>
+            <AdRemovalNotice className="mt-2" />
           </div>
-          <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-            <div className="text-muted mb-2 text-sm">Total Duped Value</div>
-            {!isClient || isLoadingValues ? (
-              <div className="animate-pulse text-2xl font-bold text-gray-400">
-                Loading...
-              </div>
-            ) : (
-              <Tooltip
-                title={`$${totalDupedValue.toLocaleString()}`}
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      border: "1px solid #2E3944",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
-                      },
-                    },
-                  },
-                }}
-              >
-                <div className="cursor-help text-2xl font-bold text-white">
-                  {formatPreciseMoney(totalDupedValue)}
-                </div>
-              </Tooltip>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Results */}

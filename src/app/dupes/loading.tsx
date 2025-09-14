@@ -7,10 +7,8 @@ export default function DupeFinderLoading() {
 
       {/* Header */}
       <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-3xl font-bold text-white">Dupe Finder</h1>
-        <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-          New
-        </span>
+        <div className="h-9 w-48 animate-pulse rounded bg-gray-600"></div>
+        <div className="h-6 w-12 animate-pulse rounded bg-gray-600"></div>
       </div>
 
       {/* Experimental Feature Banner */}
