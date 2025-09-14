@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { findSimilarStrings, calculateSimilarity } from "@/utils/fuzzySearch";
 import ItemSelectionModal from "./ItemSelectionModal";
 import ReportDupeModal from "./ReportDupeModal";
-import { useAuthContext } from "@/contexts/AuthContext";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import type { DupeResult, Item } from "@/types";
 
@@ -53,7 +52,6 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
   } | null>(null);
   const [duperName, setDuperName] = useState("");
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
     if (ownerName.trim()) {
@@ -189,15 +187,6 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
       return;
     }
     handleSearch();
-  };
-
-  const handleReportClick = () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in to submit dupe reports");
-      setLoginModalOpen(true);
-      return;
-    }
-    setIsItemSelectionModalOpen(true);
   };
 
   const handleItemSelect = (item: {
@@ -366,10 +355,10 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
           </button>
           <button
             type="button"
-            onClick={handleReportClick}
-            className="w-full rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none"
+            disabled
+            className="w-full cursor-not-allowed rounded-lg bg-gray-600 px-4 py-2 text-gray-400"
           >
-            Report a Dupe
+            Report a Dupe (Disabled)
           </button>
         </div>
       </form>

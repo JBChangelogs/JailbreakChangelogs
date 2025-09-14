@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const DupeReportHeader: React.FC = () => {
   return (
@@ -8,11 +9,7 @@ const DupeReportHeader: React.FC = () => {
           Roblox Jailbreak Dupe Calculator
         </h1>
       </div>
-      <p className="text-muted mb-4">
-        Check if a specific Jailbreak item is duped by entering the duper&apos;s
-        name and the item name.
-      </p>
-      <div className="mb-6 rounded-lg border-2 border-yellow-600 bg-[#3a3200] p-4 text-base font-bold text-yellow-200 shadow-lg">
+      <div className="mb-6 rounded-lg border-2 border-orange-600 bg-[#3a2a00] p-4 text-base font-bold text-orange-200 shadow-lg">
         <div className="mb-2 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,30 +25,27 @@ const DupeReportHeader: React.FC = () => {
               d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span className="font-bold">Disclaimer:</span>
+          <span className="font-bold">Important Notice:</span>
         </div>
-        <ul className="mt-2 list-disc space-y-1 pl-8 font-bold">
-          <li>
-            Our calculator may not have every duper name. Do not fully rely on
-            it.
-          </li>
-          <li>
-            For the most accurate results, please use all available dupe
-            calculators to fully confirm before making any decisions.
-          </li>
-          <li>
-            We advise you to check other dupe calculators, such as{" "}
-            <a
-              href="https://www.jailbreaktradingnetwork.com/dupe-calculator"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-extrabold text-yellow-200 underline hover:text-yellow-100"
+        <div className="mt-2 space-y-2 font-bold">
+          <p>
+            This dupe calculator is{" "}
+            <span className="text-orange-100">
+              deprecated and no longer maintained
+            </span>
+            . It may contain outdated or inaccurate information.
+          </p>
+          <p>
+            For the most accurate and up-to-date dupe detection, please use our
+            new{" "}
+            <Link
+              href="/dupes"
+              className="font-extrabold text-orange-100 underline hover:text-orange-50"
             >
-              this one
-            </a>
-            .
-          </li>
-        </ul>
+              Dupe Finder
+            </Link>{" "}
+          </p>
+        </div>
       </div>
     </div>
   );

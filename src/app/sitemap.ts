@@ -91,12 +91,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
     },
     {
-      url: `${BASE_URL}/dupes/calculator`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "daily" as const,
-    },
-    {
       url: `${BASE_URL}/users`,
       lastModified: new Date().toISOString(),
       priority: 0.7,

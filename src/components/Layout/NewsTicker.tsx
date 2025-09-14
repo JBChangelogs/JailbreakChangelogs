@@ -49,28 +49,50 @@ export default function NewsTicker() {
 
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
             <span className="text-center text-xs text-white sm:text-sm">
-              Introducing our <strong>OG Finder</strong> - Track down your
-              original items!
+              Introducing our <strong>OG Finder</strong> &{" "}
+              <strong>Dupe Finder</strong> - Track down your original items and
+              detect dupes accurately!
             </span>
-            <Link
-              href="/og"
-              className="inline-flex items-center gap-1 rounded-md bg-[#5865F2] px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-[#4752C4] sm:px-3"
-            >
-              Try it now
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="flex gap-2">
+              <Link
+                href="/og"
+                className="inline-flex items-center gap-1 rounded-md bg-[#5865F2] px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-[#4752C4] sm:px-3"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Link>
+                OG Finder
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+              <Link
+                href="/dupes"
+                className="inline-flex items-center gap-1 rounded-md bg-[#5865F2] px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-[#4752C4] sm:px-3"
+              >
+                Dupe Finder
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            </div>
           </div>
 
           <button

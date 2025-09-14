@@ -464,6 +464,42 @@ export default function Header() {
       </ListItem>
       <ListItem
         component={Link}
+        href="/dupes"
+        onClick={handleDrawerToggle}
+        sx={{
+          pl: 4,
+          cursor: "pointer",
+          "&:hover": {
+            backgroundColor: "#2E3944",
+          },
+        }}
+      >
+        <ListItemText
+          primary={
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              <span>Dupe Finder</span>
+              {isFeatureEnabled("DUPE_FINDER") ? (
+                <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+                  New
+                </span>
+              ) : (
+                <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+                  Coming Soon
+                </span>
+              )}
+            </Box>
+          }
+        />
+      </ListItem>
+      <ListItem
+        component={Link}
         href="/dupes/calculator"
         onClick={handleDrawerToggle}
         sx={{ pl: 4 }}
@@ -538,42 +574,6 @@ export default function Header() {
             >
               <span>OG Finder</span>
               {isFeatureEnabled("OG_FINDER") ? (
-                <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-                  New
-                </span>
-              ) : (
-                <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-                  Coming Soon
-                </span>
-              )}
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem
-        component={Link}
-        href="/dupes"
-        onClick={handleDrawerToggle}
-        sx={{
-          pl: 4,
-          cursor: "pointer",
-          "&:hover": {
-            backgroundColor: "#2E3944",
-          },
-        }}
-      >
-        <ListItemText
-          primary={
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                flexWrap: "wrap",
-              }}
-            >
-              <span>Dupe Finder</span>
-              {isFeatureEnabled("DUPE_FINDER") ? (
                 <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
                   New
                 </span>
@@ -972,6 +972,32 @@ export default function Header() {
                               hidden: { opacity: 0, x: -10 },
                               visible: { opacity: 1, x: 0 },
                             }}
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                          >
+                            <Link
+                              href="/dupes"
+                              className="block rounded-lg px-4 py-2 text-base font-bold text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
+                              onClick={handleNavMenuClose}
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span>Dupe Finder</span>
+                                {isFeatureEnabled("DUPE_FINDER") ? (
+                                  <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+                                    New
+                                  </span>
+                                ) : (
+                                  <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+                                    Coming Soon
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 },
+                            }}
                             transition={{ duration: 0.2, delay: 0.15 }}
                           >
                             <Link
@@ -1038,32 +1064,6 @@ export default function Header() {
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>OG Finder</span>
                                 {isFeatureEnabled("OG_FINDER") ? (
-                                  <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-                                    New
-                                  </span>
-                                ) : (
-                                  <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-                                    Coming Soon
-                                  </span>
-                                )}
-                              </div>
-                            </Link>
-                          </motion.div>
-                          <motion.div
-                            variants={{
-                              hidden: { opacity: 0, x: -10 },
-                              visible: { opacity: 1, x: 0 },
-                            }}
-                            transition={{ duration: 0.2, delay: 0.35 }}
-                          >
-                            <Link
-                              href="/dupes"
-                              className="block rounded-lg px-4 py-2 text-base font-bold text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
-                              onClick={handleNavMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Dupe Finder</span>
-                                {isFeatureEnabled("DUPE_FINDER") ? (
                                   <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
                                     New
                                   </span>

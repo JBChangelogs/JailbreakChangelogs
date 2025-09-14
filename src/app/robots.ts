@@ -5,7 +5,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        disallow: ["/*?page=", "/*?filter=", "/api/", "/cdn-cgi/"],
+        disallow: [
+          "/*?page=",
+          "/*?filter=",
+          "/api/",
+          "/cdn-cgi/",
+          "/dupes/calculator",
+        ],
       },
     ],
     sitemap: [

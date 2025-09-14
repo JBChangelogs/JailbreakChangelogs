@@ -13,8 +13,6 @@ import { getItemImagePath, handleImageError } from "@/utils/images";
 import { getItemTypeColor } from "@/utils/badgeColors";
 import { formatTimestamp } from "@/utils/timestamp";
 import ReportDupeModal from "./ReportDupeModal";
-import toast from "react-hot-toast";
-import { useAuthContext } from "@/contexts/AuthContext";
 
 interface DupeResult {
   item_id: number;
@@ -99,7 +97,6 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const uniqueItemsCount = [...new Set(results.map((result) => result.item_id))]
     .length;
-  const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
     if (isOpen) {
@@ -139,14 +136,6 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
 
     fetchItemDetails();
   }, [results]);
-
-  const handleReportClick = () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in to report dupes");
-      return;
-    }
-    setIsReportModalOpen(true);
-  };
 
   if (!isOpen) return null;
 
@@ -213,10 +202,10 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                 {itemName && (
                   <div className="flex justify-center">
                     <button
-                      onClick={handleReportClick}
-                      className="rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none"
+                      disabled
+                      className="cursor-not-allowed rounded-lg bg-gray-600 px-4 py-2 text-gray-400"
                     >
-                      Report {itemName} as duped
+                      Report {itemName} as duped (Disabled)
                     </button>
                   </div>
                 )}

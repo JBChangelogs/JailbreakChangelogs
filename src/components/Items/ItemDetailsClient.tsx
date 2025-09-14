@@ -882,10 +882,10 @@ export default function ItemDetailsClient({
                           reported yet. This item appears to be clean and
                           legitimate.
                         </p>
-                        <div className="rounded-lg border border-green-500/20 bg-gradient-to-r from-green-500/10 to-green-600/10 p-4">
+                        <div className="rounded-lg border border-blue-500/20 bg-gradient-to-r from-blue-500/10 to-blue-600/10 p-4">
                           <div className="flex items-start gap-3">
                             <svg
-                              className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-400"
+                              className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -894,23 +894,21 @@ export default function ItemDetailsClient({
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
                             <div className="text-left">
                               <h4 className="mb-1 font-medium text-white">
-                                Know of a dupe?
+                                Want to check for dupes?
                               </h4>
                               <p className="text-sm leading-relaxed text-[#D3D9D4]">
-                                If you know of someone who owns a duped version,
-                                you can help by{" "}
+                                Use our new{" "}
                                 <Link
-                                  href="/dupes/calculator"
-                                  className="font-medium text-green-400 transition-colors hover:text-green-300 hover:underline"
+                                  href="/dupes"
+                                  className="font-medium text-blue-400 transition-colors hover:text-blue-300 hover:underline"
                                 >
-                                  reporting it
+                                  Dupe Finder
                                 </Link>{" "}
-                                to keep our database accurate.
                               </p>
                             </div>
                           </div>
