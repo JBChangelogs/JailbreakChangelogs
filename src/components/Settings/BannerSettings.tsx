@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Box, TextField, Button, Typography, Chip } from "@mui/material";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import StarIcon from "@mui/icons-material/Star";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
 import { updateBanner } from "@/services/settingsService";
 import toast from "react-hot-toast";
@@ -22,6 +23,8 @@ export const BannerSettings = ({
   const [customBannerUrl, setCustomBannerUrl] = useState<string>("");
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [isValidBanner, setIsValidBanner] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Supporter modal hook
   const {
@@ -65,6 +68,8 @@ export const BannerSettings = ({
         "cdn.discordapp.com",
         "imgur.com",
         "i.imgur.com",
+        "vgy.me",
+        "i.vgy.me",
       ];
 
       const isAllowedHost = allowedHosts.some(
@@ -100,6 +105,69 @@ export const BannerSettings = ({
     const newUrl = event.target.value.trim();
     setCustomBannerUrl(newUrl);
     validateBannerUrl(newUrl);
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check supporter tier access before proceeding
+    if (!checkBannerAccess(userData.premiumtype || 0)) {
+      return; // Modal will be shown by the hook
+    }
+
+    // Check for animated banner access if it's a GIF
+    if (file.type === "image/gif") {
+      if (!checkAnimatedBannerAccess(userData.premiumtype || 0)) {
+        return; // Modal will be shown by the hook
+      }
+    }
+
+    setIsUploading(true);
+    setBannerError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload/vgy", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // If it's an authentication error, suggest using direct URLs
+        if (response.status === 401) {
+          throw new Error(
+            "File upload is not available. Please use a direct image URL from ImgBB, PostImg, or other image hosting services.",
+          );
+        }
+        throw new Error(result.message || "Upload failed");
+      }
+
+      // Copy the image URL to clipboard and set it in the form
+      await navigator.clipboard.writeText(result.imageUrl);
+      setCustomBannerUrl(result.imageUrl);
+      validateBannerUrl(result.imageUrl);
+      toast.success(
+        'Image uploaded! URL copied to clipboard and added to form. Click "Update" to set as banner.',
+        {
+          duration: 6000, // 6 seconds
+        },
+      );
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setBannerError(
+        error instanceof Error ? error.message : "Failed to upload file",
+      );
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleUpdateBanner = async () => {
@@ -145,7 +213,7 @@ export const BannerSettings = ({
             Custom Banner URL
           </Typography>
           <Tooltip
-            title="Premium Feature"
+            title="Supporter 2 Feature"
             placement="top"
             arrow
             slotProps={{
@@ -167,7 +235,7 @@ export const BannerSettings = ({
           >
             <Chip
               icon={<StarIcon sx={{ color: "#FFD700" }} />}
-              label="Premium"
+              label="Supporter 2"
               size="small"
               sx={{
                 backgroundColor: "rgba(255, 215, 0, 0.1)",
@@ -195,18 +263,25 @@ export const BannerSettings = ({
           }}
         >
           {userData?.premiumtype && userData.premiumtype >= 2
-            ? "Enter a direct link to your custom banner image (ImgBB, PostImg, or Tenor only)"
-            : "🔒 Upgrade to Premium Tier 2 to unlock custom banners"}
+            ? "Upload an image file or enter a direct link to your image"
+            : "🔒 Upgrade to Supporter Tier 2 to unlock custom banners"}
         </Typography>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
-          <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            alignItems: { xs: "stretch", sm: "flex-start" },
+          }}
+        >
+          <Box sx={{ flex: 1, mb: { xs: 1, sm: 0 } }}>
             <TextField
               fullWidth
               size="small"
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 2
                   ? "https://example.com/your-banner.jpg"
-                  : "Premium feature - Upgrade to unlock"
+                  : "Suppoter 2 feature - Upgrade to unlock"
               }
               value={customBannerUrl}
               onChange={handleCustomBannerChange}
@@ -238,30 +313,75 @@ export const BannerSettings = ({
               }}
             />
           </Box>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleUpdateBanner}
-            disabled={
-              !isValidBanner ||
-              !userData?.premiumtype ||
-              userData.premiumtype < 2
-            }
+          <Box
             sx={{
-              backgroundColor: "#124E66",
-              "&:hover": {
-                backgroundColor: "#0D3A4D",
-              },
-              "&.Mui-disabled": {
-                backgroundColor: "#2E3944",
-                color: "#FFFFFF",
-              },
-              height: "40px",
-              minWidth: "100px",
+              display: "flex",
+              gap: 1,
+              flexDirection: { xs: "column", sm: "row" },
+              width: { xs: "100%", sm: "auto" },
             }}
           >
-            Update
-          </Button>
+            <Button
+              variant="contained"
+              size="small"
+              component="label"
+              startIcon={<CloudUploadIcon />}
+              disabled={
+                !userData?.premiumtype ||
+                userData.premiumtype < 2 ||
+                isUploading
+              }
+              className={isUploading ? "cursor-progress" : "cursor-pointer"}
+              sx={{
+                backgroundColor: "#124E66",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#0D3A4D",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#2E3944",
+                  color: "#FFFFFF",
+                },
+                height: "40px",
+                minWidth: { xs: "100%", sm: "120px" },
+                flex: { xs: 1, sm: "none" },
+              }}
+            >
+              {isUploading ? "Uploading..." : "Upload File"}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleFileUpload}
+                style={{ display: "none" }}
+              />
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleUpdateBanner}
+              disabled={
+                !isValidBanner ||
+                !userData?.premiumtype ||
+                userData.premiumtype < 2
+              }
+              sx={{
+                backgroundColor: "#124E66",
+                "&:hover": {
+                  backgroundColor: "#0D3A4D",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#2E3944",
+                  color: "#FFFFFF",
+                },
+                height: "40px",
+                minWidth: { xs: "100%", sm: "100px" },
+                flex: { xs: 1, sm: "none" },
+              }}
+            >
+              Update
+            </Button>
+          </Box>
         </Box>
         <Box sx={{ height: "40px" }} />
       </Box>

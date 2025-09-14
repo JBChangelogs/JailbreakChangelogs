@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Box, TextField, Button, Typography, Chip } from "@mui/material";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import StarIcon from "@mui/icons-material/Star";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
 import { updateAvatar } from "@/services/settingsService";
 import toast from "react-hot-toast";
@@ -22,6 +23,8 @@ export const AvatarSettings = ({
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string>("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isValidAvatar, setIsValidAvatar] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Supporter modal hook
   const {
@@ -55,6 +58,8 @@ export const AvatarSettings = ({
         "cdn.discordapp.com",
         "imgur.com",
         "i.imgur.com",
+        "vgy.me",
+        "i.vgy.me",
       ];
 
       const isAllowedHost = allowedHosts.some(
@@ -104,6 +109,69 @@ export const AvatarSettings = ({
     validateAvatarUrl(newUrl);
   };
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check supporter tier access before proceeding
+    if (!checkAvatarAccess(userData.premiumtype || 0)) {
+      return; // Modal will be shown by the hook
+    }
+
+    // Check for animated avatar access if it's a GIF
+    if (file.type === "image/gif") {
+      if (!checkAnimatedAvatarAccess(userData.premiumtype || 0)) {
+        return; // Modal will be shown by the hook
+      }
+    }
+
+    setIsUploading(true);
+    setAvatarError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload/vgy", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // If it's an authentication error, suggest using direct URLs
+        if (response.status === 401) {
+          throw new Error(
+            "File upload is not available. Please use a direct image URL from ImgBB, PostImg, or other image hosting services.",
+          );
+        }
+        throw new Error(result.message || "Upload failed");
+      }
+
+      // Copy the image URL to clipboard and set it in the form
+      await navigator.clipboard.writeText(result.imageUrl);
+      setCustomAvatarUrl(result.imageUrl);
+      validateAvatarUrl(result.imageUrl);
+      toast.success(
+        'Image uploaded! URL copied to clipboard and added to form. Click "Update" to set as avatar.',
+        {
+          duration: 6000, // 6 seconds
+        },
+      );
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setAvatarError(
+        error instanceof Error ? error.message : "Failed to upload file",
+      );
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleUpdateAvatar = async () => {
     if (!customAvatarUrl) return;
 
@@ -147,7 +215,7 @@ export const AvatarSettings = ({
             Custom Avatar URL
           </Typography>
           <Tooltip
-            title="Premium Feature"
+            title="Supporter 1 Feature"
             placement="top"
             arrow
             slotProps={{
@@ -169,7 +237,7 @@ export const AvatarSettings = ({
           >
             <Chip
               icon={<StarIcon sx={{ color: "#FFD700" }} />}
-              label="Premium"
+              label="Supporter 1"
               size="small"
               sx={{
                 backgroundColor: "rgba(255, 215, 0, 0.1)",
@@ -197,18 +265,25 @@ export const AvatarSettings = ({
           }}
         >
           {userData?.premiumtype && userData.premiumtype >= 1
-            ? "Enter a direct link to your custom avatar image (ImgBB, PostImg, or Tenor only)"
-            : "🔒 Upgrade to Premium to unlock custom avatars"}
+            ? "Upload an image file or enter a direct link to your image"
+            : "🔒 Upgrade to Supporter 1 to unlock custom avatars"}
         </Typography>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
-          <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            alignItems: { xs: "stretch", sm: "flex-start" },
+          }}
+        >
+          <Box sx={{ flex: 1, mb: { xs: 1, sm: 0 } }}>
             <TextField
               fullWidth
               size="small"
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 1
                   ? "https://example.com/your-avatar.jpg"
-                  : "Premium feature - Upgrade to unlock"
+                  : "Supporter 1 feature - Upgrade to unlock"
               }
               value={customAvatarUrl}
               onChange={handleCustomAvatarChange}
@@ -240,30 +315,75 @@ export const AvatarSettings = ({
               }}
             />
           </Box>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleUpdateAvatar}
-            disabled={
-              !isValidAvatar ||
-              !userData?.premiumtype ||
-              userData.premiumtype < 1
-            }
+          <Box
             sx={{
-              backgroundColor: "#124E66",
-              "&:hover": {
-                backgroundColor: "#0D3A4D",
-              },
-              "&.Mui-disabled": {
-                backgroundColor: "#2E3944",
-                color: "#FFFFFF",
-              },
-              height: "40px",
-              minWidth: "100px",
+              display: "flex",
+              gap: 1,
+              flexDirection: { xs: "column", sm: "row" },
+              width: { xs: "100%", sm: "auto" },
             }}
           >
-            Update
-          </Button>
+            <Button
+              variant="contained"
+              size="small"
+              component="label"
+              startIcon={<CloudUploadIcon />}
+              disabled={
+                !userData?.premiumtype ||
+                userData.premiumtype < 1 ||
+                isUploading
+              }
+              className={isUploading ? "cursor-progress" : "cursor-pointer"}
+              sx={{
+                backgroundColor: "#124E66",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#0D3A4D",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#2E3944",
+                  color: "#FFFFFF",
+                },
+                height: "40px",
+                minWidth: { xs: "100%", sm: "120px" },
+                flex: { xs: 1, sm: "none" },
+              }}
+            >
+              {isUploading ? "Uploading..." : "Upload File"}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleFileUpload}
+                style={{ display: "none" }}
+              />
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleUpdateAvatar}
+              disabled={
+                !isValidAvatar ||
+                !userData?.premiumtype ||
+                userData.premiumtype < 1
+              }
+              sx={{
+                backgroundColor: "#124E66",
+                "&:hover": {
+                  backgroundColor: "#0D3A4D",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#2E3944",
+                  color: "#FFFFFF",
+                },
+                height: "40px",
+                minWidth: { xs: "100%", sm: "100px" },
+                flex: { xs: 1, sm: "none" },
+              }}
+            >
+              Update
+            </Button>
+          </Box>
         </Box>
       </Box>
 

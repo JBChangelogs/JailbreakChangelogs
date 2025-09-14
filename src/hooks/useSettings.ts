@@ -34,16 +34,15 @@ export const useSettings = (userData: UserData | null) => {
 
       // Prepare all settings for the API call
       const updatedSettings = {
-        profile_public: settings.profile_public,
-        show_recent_comments: settings.show_recent_comments,
-        hide_following: settings.hide_following,
-        hide_followers: settings.hide_followers,
-        hide_favorites: settings.hide_favorites,
-        banner_discord: settings.banner_discord,
-        avatar_discord: settings.avatar_discord,
-        hide_presence: settings.hide_presence,
-        dms_allowed: settings.dms_allowed,
-        [name]: value, // Override the changed setting
+        profile_public: newSettings.profile_public,
+        show_recent_comments: newSettings.show_recent_comments,
+        hide_following: newSettings.hide_following,
+        hide_followers: newSettings.hide_followers,
+        hide_favorites: newSettings.hide_favorites,
+        banner_discord: newSettings.banner_discord,
+        avatar_discord: newSettings.avatar_discord,
+        hide_presence: newSettings.hide_presence,
+        dms_allowed: newSettings.dms_allowed,
       };
 
       // Make API call to persist the change

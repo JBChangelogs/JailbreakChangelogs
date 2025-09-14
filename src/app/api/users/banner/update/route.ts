@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const resp = await fetch(`${BASE_API_URL}/users/banner/update`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ user: token, ...requestBody }),
+      body: JSON.stringify({ owner: token, ...requestBody }),
       cache: "no-store",
     });
 

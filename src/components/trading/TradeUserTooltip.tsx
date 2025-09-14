@@ -36,7 +36,7 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
           custom_avatar={user.custom_avatar}
           showBadge={false}
           settings={user.settings}
-          showBorder={false}
+          showBorder={true}
           premiumType={user.premiumtype as unknown as number}
         />
 

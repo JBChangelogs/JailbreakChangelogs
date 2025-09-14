@@ -59,7 +59,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
           custom_avatar={user.custom_avatar}
           showBadge={false}
           settings={user.settings}
-          showBorder={false}
+          showBorder={true}
           premiumType={user.premiumtype}
         />
 

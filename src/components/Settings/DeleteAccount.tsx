@@ -80,7 +80,6 @@ export const DeleteAccount = () => {
     <Box
       sx={{
         p: 3,
-        bgcolor: "#2e3944",
       }}
     >
       <Box sx={{ mb: 3 }}>

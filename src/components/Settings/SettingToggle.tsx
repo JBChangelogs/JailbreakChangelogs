@@ -75,7 +75,7 @@ export const SettingToggle = ({
                   gap: 0.5,
                 }}
               >
-                🔒 Upgrade to Premium Tier {premiumTier} to unlock custom{" "}
+                🔒 Upgrade to Supporter Tier {premiumTier} to unlock custom{" "}
                 {name === "banner_discord" ? "banners" : "avatars"}
               </Typography>
             )}

@@ -69,6 +69,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #8B5CF6, #4F46E5)",
           color: "white",
+          fontWeight: "600",
         },
       },
     );
@@ -90,6 +91,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #FBBF24, #EAB308)",
           color: "black",
+          fontWeight: "600",
         },
       },
     );
@@ -112,6 +114,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #8B5CF6, #6D28D9)",
           color: "black",
+          fontWeight: "600",
         },
       },
     );
@@ -134,6 +137,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #059669, #047857)",
           color: "white",
+          fontWeight: "600",
         },
       },
     );
@@ -156,6 +160,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #3B82F6, #2563EB)",
           color: "white",
+          fontWeight: "600",
         },
       },
     );
@@ -178,6 +183,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #F97316, #EA580C)",
           color: "white",
+          fontWeight: "600",
         },
       },
     );
@@ -202,6 +208,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #0D9488, #0F766E)",
           color: "white",
+          fontWeight: "600",
         },
       },
     );
@@ -224,6 +231,7 @@ export const UserBadges = ({
         style: {
           background: "linear-gradient(to right, #84CC16, #65A30D)",
           color: "black",
+          fontWeight: "600",
         },
       },
     );
@@ -264,6 +272,7 @@ export const UserBadges = ({
             premiumToastStyles[premiumType as keyof typeof premiumToastStyles],
           color:
             premiumTextColors[premiumType as keyof typeof premiumTextColors],
+          fontWeight: "600",
         },
       },
     );
