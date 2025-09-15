@@ -653,7 +653,7 @@ export default function ValuesSearchControls({
           </div>
 
           {/* Pro tip about Ctrl+F */}
-          <div className="mt-2 flex items-center gap-1 text-xs text-[#D3D9D4]">
+          <div className="mt-2 hidden items-center gap-1 text-xs text-[#D3D9D4] lg:flex">
             💡 Pro tip: Press Ctrl+F to quickly focus the search
           </div>
         </div>

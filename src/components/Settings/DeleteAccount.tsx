@@ -79,18 +79,22 @@ export const DeleteAccount = () => {
   return (
     <Box
       sx={{
-        p: 3,
+        mt: 2,
+        p: 2,
+        border: "1px solid rgba(255, 107, 107, 0.3)",
+        borderRadius: 1,
+        backgroundColor: "rgba(255, 107, 107, 0.05)",
       }}
     >
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2 }}>
         <Typography
           variant="h6"
-          sx={{ color: "#D3D9D4", fontWeight: "bold", mb: 1 }}
+          sx={{ color: "#FF6B6B", fontWeight: "bold", mb: 1 }}
         >
           Account Deletion
         </Typography>
-        <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
-          Permanently delete your account and all associated data
+        <Typography variant="body2" sx={{ color: "#FFB3B3" }}>
+          Delete your account and all associated data
         </Typography>
       </Box>
 

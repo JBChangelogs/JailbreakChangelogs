@@ -515,17 +515,35 @@ export default function SettingsPage() {
           p: 3,
           bgcolor: "#212A31",
           color: "#D3D9D4",
+          border: "2px solid #FF6B6B",
+          borderRadius: 2,
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "4px",
+            background:
+              "linear-gradient(90deg, #FF6B6B 0%, #FF5252 50%, #FF1744 100%)",
+            borderRadius: "2px 2px 0 0",
+          },
         }}
       >
         <Typography
           variant="h6"
           component="h2"
           gutterBottom
-          sx={{ fontWeight: "bold", color: "#D3D9D4" }}
+          sx={{
+            fontWeight: "bold",
+            color: "#FF6B6B",
+            mb: 2,
+          }}
         >
-          Account Management
+          Danger Zone
         </Typography>
-        <Divider sx={{ mb: 2, bgcolor: "#d3d9d4" }} />
+        <Divider sx={{ mb: 2, bgcolor: "#FF6B6B", opacity: 0.3 }} />
         <RobloxConnection userData={userData} />
         <DeleteAccount />
       </Paper>

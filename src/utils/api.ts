@@ -1282,6 +1282,11 @@ export interface UserScan {
   upsert_count: number;
 }
 
+export interface MoneyLeaderboardEntry {
+  user_id: string;
+  money: number;
+}
+
 export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
   try {
     const response = await fetch(`${INVENTORY_API_URL}/items/count`);
@@ -1311,6 +1316,42 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
   } catch (err) {
     console.error("[SERVER] Error fetching user scans leaderboard:", err);
     return [];
+  }
+}
+
+export async function fetchMoneyLeaderboard(): Promise<
+  MoneyLeaderboardEntry[]
+> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/money/leaderboard`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch money leaderboard");
+    }
+
+    const data = await response.json();
+    return data as MoneyLeaderboardEntry[];
+  } catch (err) {
+    console.error("[SERVER] Error fetching money leaderboard:", err);
+    return [];
+  }
+}
+
+export async function fetchUserMoneyRank(robloxId: string) {
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/money/rank?user_id=${robloxId}`,
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user money rank");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[SERVER] Error fetching user money rank:", err);
+    return null;
   }
 }
 

@@ -634,6 +634,19 @@ export default function Header() {
       </ListItem>
       <ListItem
         component={Link}
+        href="/leaderboard/money"
+        onClick={handleDrawerToggle}
+        sx={{ pl: 4 }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <span>Money Leaderboard</span>
+          <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+            New
+          </span>
+        </Box>
+      </ListItem>
+      <ListItem
+        component={Link}
         href="/servers"
         onClick={handleDrawerToggle}
         sx={{ pl: 4 }}
@@ -1195,6 +1208,26 @@ export default function Header() {
                             transition={{ duration: 0.2, delay: 0.1 }}
                           >
                             <Link
+                              href="/leaderboard/money"
+                              className="block rounded-lg px-4 py-2 text-base font-bold text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
+                              onClick={handleCommunityMenuClose}
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span>Money Leaderboard</span>
+                                <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+                                  New
+                                </span>
+                              </div>
+                            </Link>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              visible: { opacity: 1, x: 0 },
+                            }}
+                            transition={{ duration: 0.2, delay: 0.15 }}
+                          >
+                            <Link
                               href="/servers"
                               className="block rounded-lg px-4 py-2 text-base font-bold text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
                               onClick={handleCommunityMenuClose}
@@ -1207,7 +1240,7 @@ export default function Header() {
                               hidden: { opacity: 0, x: -10 },
                               visible: { opacity: 1, x: 0 },
                             }}
-                            transition={{ duration: 0.2, delay: 0.15 }}
+                            transition={{ duration: 0.2, delay: 0.2 }}
                           >
                             <Link
                               href="/bot"
@@ -1222,7 +1255,7 @@ export default function Header() {
                               hidden: { opacity: 0, x: -10 },
                               visible: { opacity: 1, x: 0 },
                             }}
-                            transition={{ duration: 0.2, delay: 0.2 }}
+                            transition={{ duration: 0.2, delay: 0.25 }}
                           >
                             <Link
                               href="/faq"
@@ -1237,7 +1270,7 @@ export default function Header() {
                               hidden: { opacity: 0, x: -10 },
                               visible: { opacity: 1, x: 0 },
                             }}
-                            transition={{ duration: 0.2, delay: 0.25 }}
+                            transition={{ duration: 0.2, delay: 0.3 }}
                           >
                             <Link
                               href="/contributors"

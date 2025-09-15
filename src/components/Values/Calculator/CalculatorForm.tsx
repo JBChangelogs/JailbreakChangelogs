@@ -1361,7 +1361,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
         {/* Pro tip about Shift+Clear */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-xs text-[#D3D9D4]">
+          <div className="hidden items-center justify-center gap-1 text-xs text-[#D3D9D4] lg:flex">
             💡 Pro tip: Hold Shift while clicking Clear to clear both sides
             instantly without confirmation
           </div>

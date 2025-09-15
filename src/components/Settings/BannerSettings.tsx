@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, Chip } from "@mui/material";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import StarIcon from "@mui/icons-material/Star";
+import { TrophyIcon } from "@heroicons/react/24/solid";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
 import { updateBanner } from "@/services/settingsService";
@@ -161,10 +161,10 @@ export const BannerSettings = ({
       );
     } catch (error) {
       console.error("Error uploading file:", error);
-      setBannerError(
-        error instanceof Error ? error.message : "Failed to upload file",
-      );
-      toast.error("Failed to upload file");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload file";
+      setBannerError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -234,13 +234,15 @@ export const BannerSettings = ({
             }}
           >
             <Chip
-              icon={<StarIcon sx={{ color: "#FFD700" }} />}
-              label="Supporter 2"
+              icon={
+                <TrophyIcon className="h-4 w-4" style={{ color: "#C0C0C0" }} />
+              }
+              label="Supporter II"
               size="small"
               sx={{
-                backgroundColor: "rgba(255, 215, 0, 0.1)",
-                border: "1px solid rgba(255, 215, 0, 0.3)",
-                color: "#FFD700",
+                backgroundColor: "rgba(192, 192, 192, 0.1)",
+                border: "1px solid rgba(192, 192, 192, 0.3)",
+                color: "#C0C0C0",
                 "& .MuiChip-label": {
                   fontWeight: 600,
                 },
@@ -307,8 +309,8 @@ export const BannerSettings = ({
                   color: "#D3D9D4",
                 },
                 "& .MuiFormHelperText-root": {
-                  position: "absolute",
-                  bottom: "-20px",
+                  marginTop: "4px",
+                  color: "#ff6b6b !important",
                 },
               }}
             />
@@ -351,7 +353,7 @@ export const BannerSettings = ({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                accept="image/jpeg,image/jpg,image/png,image/gif"
                 onChange={handleFileUpload}
                 style={{ display: "none" }}
               />
