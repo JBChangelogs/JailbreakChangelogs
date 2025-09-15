@@ -46,15 +46,16 @@ export const useSettings = (userData: UserData | null) => {
       };
 
       // Make API call to persist the change
-      const serverSettings = await updateSettings(updatedSettings);
+      await updateSettings(updatedSettings);
 
-      // Update state with server response
-      setSettings(serverSettings);
+      // Don't overwrite with server response since backend returns stale data
+      // Keep the optimistic update instead
+      // setSettings(serverSettings);
 
-      // Update local storage with server response
+      // Update local storage with our optimistic update (not server response)
       const finalUser = {
         ...userData,
-        settings: serverSettings,
+        settings: newSettings,
       };
       localStorage.setItem("user", JSON.stringify(finalUser));
 

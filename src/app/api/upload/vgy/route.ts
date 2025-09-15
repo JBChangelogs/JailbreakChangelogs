@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
 
 export async function POST(request: Request) {
   try {
@@ -13,22 +14,25 @@ export async function POST(request: Request) {
     }
 
     // Validate file type (vgy.me doesn't support WebP)
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
+    if (
+      !UPLOAD_CONFIG.ALLOWED_FILE_TYPES.includes(
+        file.type as (typeof UPLOAD_CONFIG.ALLOWED_FILE_TYPES)[number],
+      )
+    ) {
       return NextResponse.json(
         {
-          message:
-            "Invalid file type. Only JPEG, PNG, and GIF files are allowed for upload.",
+          message: `Invalid file type. Only ${getAllowedFileExtensions()} files are allowed for upload.`,
         },
         { status: 400 },
       );
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
+    // Validate file size
+    if (file.size > UPLOAD_CONFIG.MAX_FILE_SIZE) {
       return NextResponse.json(
-        { message: "File too large. Maximum size is 10MB." },
+        {
+          message: `File too large. Maximum size is ${UPLOAD_CONFIG.MAX_FILE_SIZE_MB}MB.`,
+        },
         { status: 400 },
       );
     }

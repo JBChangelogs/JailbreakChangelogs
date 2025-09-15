@@ -49,8 +49,8 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
     return text
       .split(/\r?\n/)
       .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .join("\n");
+      .join("\n")
+      .replace(/\n\n+/g, "\n\n"); // Collapse multiple consecutive newlines to just two
   };
 
   // Prevent background scrolling when modal is open

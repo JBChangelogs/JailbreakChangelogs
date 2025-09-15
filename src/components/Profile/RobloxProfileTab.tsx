@@ -6,10 +6,9 @@ import Link from "next/link";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
-import { CircularProgress } from "@mui/material";
-import dynamic from "next/dynamic";
+import { CircularProgress, Skeleton } from "@mui/material";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip } from "@mui/material";
 
 interface User {
   id: string;
@@ -20,11 +19,47 @@ interface User {
   roblox_join_date?: number;
 }
 
-interface RobloxProfileTabProps {
-  user: User;
+interface TradeItem {
+  id: number;
+  name: string;
+  type: string;
+  creator: string;
+  is_seasonal: number;
+  cash_value: string;
+  duped_value: string;
+  price: string;
+  is_limited: number;
+  duped_owners: string;
+  notes: string;
+  demand: string;
+  description: string;
+  health: number;
+  tradable: number;
+  last_updated: number;
 }
 
-export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
+interface TradeAd {
+  id: number;
+  requesting: TradeItem[];
+  offering: TradeItem[];
+  author: string;
+  created_at: number;
+  expires: number | null;
+  expired: number;
+  status: string;
+}
+
+interface RobloxProfileTabProps {
+  user: User;
+  tradeAds?: TradeAd[];
+  isLoadingAdditionalData?: boolean;
+}
+
+export default function RobloxProfileTab({
+  user,
+  tradeAds = [],
+  isLoadingAdditionalData = false,
+}: RobloxProfileTabProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,41 +105,69 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
           <div className="flex-1 text-center md:text-left">
             <div className="space-y-2">
               <div>
-                <h3 className="text-muted text-xl font-semibold">
-                  {user.roblox_display_name || user.roblox_username}
-                </h3>
-                <p className="text-[#FFFFFF]">@{user.roblox_username}</p>
+                {isLoadingAdditionalData ? (
+                  <>
+                    <Skeleton
+                      variant="text"
+                      width="60%"
+                      height={28}
+                      sx={{ bgcolor: "#2E3944", mb: 1 }}
+                    />
+                    <Skeleton
+                      variant="text"
+                      width="40%"
+                      height={20}
+                      sx={{ bgcolor: "#2E3944" }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-muted text-xl font-semibold">
+                      {user.roblox_display_name || user.roblox_username}
+                    </h3>
+                    <p className="text-[#FFFFFF]">@{user.roblox_username}</p>
+                  </>
+                )}
               </div>
 
               <div className="text-sm text-[#FFFFFF]">
-                {user.roblox_join_date && (
-                  <Tooltip
-                    title={formatCustomDate(user.roblox_join_date)}
-                    placement="top"
-                    arrow
-                    enterDelay={200}
-                    leaveDelay={0}
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "#0F1419",
-                          color: "#D3D9D4",
-                          fontSize: "0.75rem",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          border: "1px solid #2E3944",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                          "& .MuiTooltip-arrow": {
-                            color: "#0F1419",
+                {isLoadingAdditionalData ? (
+                  <Skeleton
+                    variant="text"
+                    width="50%"
+                    height={16}
+                    sx={{ bgcolor: "#2E3944" }}
+                  />
+                ) : (
+                  user.roblox_join_date && (
+                    <Tooltip
+                      title={formatCustomDate(user.roblox_join_date)}
+                      placement="top"
+                      arrow
+                      enterDelay={200}
+                      leaveDelay={0}
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: "#0F1419",
+                            color: "#D3D9D4",
+                            fontSize: "0.75rem",
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "1px solid #2E3944",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                            "& .MuiTooltip-arrow": {
+                              color: "#0F1419",
+                            },
                           },
                         },
-                      },
-                    }}
-                  >
-                    <span className="inline-block cursor-help">
-                      Member since {formatShortDate(user.roblox_join_date)}
-                    </span>
-                  </Tooltip>
+                      }}
+                    >
+                      <span className="inline-block cursor-help">
+                        Member since {formatShortDate(user.roblox_join_date)}
+                      </span>
+                    </Tooltip>
+                  )
                 )}
               </div>
 
@@ -127,7 +190,11 @@ export default function RobloxProfileTab({ user }: RobloxProfileTabProps) {
       </div>
 
       {/* Trade Ads Section */}
-      <TradeAdsTab userId={user.id} />
+      <TradeAdsTab
+        userId={user.id}
+        tradeAds={tradeAds}
+        isLoadingAdditionalData={isLoadingAdditionalData}
+      />
     </div>
   );
 }

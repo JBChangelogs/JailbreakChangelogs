@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Box, Pagination, Chip, Skeleton, Divider } from "@mui/material";
-import dynamic from "next/dynamic";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
-import { PUBLIC_API_URL } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -32,15 +30,25 @@ interface FavoritesTabProps {
   settings?: {
     hide_favorites?: number;
   };
+  favorites?: FavoriteItem[];
+  favoriteItemDetails?: Record<string, unknown>;
+  isLoadingAdditionalData?: boolean;
+  sharedItemDetails?: Record<string, unknown>;
 }
 
 export default function FavoritesTab({
   userId,
   currentUserId,
   settings,
+  favorites: serverFavorites = [],
+  favoriteItemDetails = {},
+  isLoadingAdditionalData = false,
+  sharedItemDetails = {},
 }: FavoritesTabProps) {
   const [favorites, setFavorites] = useState<FavoriteWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    !serverFavorites.length && isLoadingAdditionalData,
+  );
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
@@ -51,94 +59,53 @@ export default function FavoritesTab({
     settings?.hide_favorites === 1 && currentUserId !== userId;
 
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const processFavorites = () => {
       try {
-        setLoading(true);
-        // Don't fetch favorites if they should be hidden
+        setLoading(false);
+
+        // Don't show favorites if they should be hidden
         if (shouldHideFavorites) {
           setFavorites([]);
-          setLoading(false);
           return;
         }
 
-        const response = await fetch(
-          `${PUBLIC_API_URL}/favorites/get?user=${userId}`,
-        );
-
-        if (!response.ok) {
-          // Check if this is a 404 "No favorites found" response
-          if (response.status === 404) {
-            // This is not an actual error, just means the user has no favorites
-            setFavorites([]);
-            setLoading(false);
-            return;
-          }
-
-          throw new Error(`Failed to fetch favorites: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (Array.isArray(data)) {
-          // Sort by most recently favorited first
-          const sortedFavorites = data.sort(
-            (a, b) => b.created_at - a.created_at,
-          );
-
-          // Fetch details for each favorited item
-          const favoritesWithDetails = await Promise.all(
-            sortedFavorites.map(async (favorite) => {
-              try {
-                // Check if this is a sub-item (contains a hyphen)
-                const isSubItem = favorite.item_id.includes("-");
-                let itemResponse;
-
-                if (isSubItem) {
-                  // For sub-items, use the sub-items endpoint
-                  const [parentId] = favorite.item_id.split("-");
-                  itemResponse = await fetch(
-                    `${PUBLIC_API_URL}/items/get/sub?parent_id=${parentId}`,
-                  );
-                } else {
-                  // For regular items, use the normal endpoint
-                  itemResponse = await fetch(
-                    `${PUBLIC_API_URL}/items/get?id=${favorite.item_id}`,
-                  );
-                }
-
-                if (itemResponse.ok) {
-                  const itemDetails: ItemDetails = await itemResponse.json();
-                  return { ...favorite, details: { item: itemDetails } };
-                }
-                return favorite;
-              } catch (err) {
-                console.error(
-                  `Error fetching details for item ${favorite.item_id}:`,
-                  err,
-                );
-                return favorite;
-              }
-            }),
-          );
+        if (Array.isArray(serverFavorites) && serverFavorites.length > 0) {
+          // Process server-side favorites with item details
+          // Use shared cache first, then fall back to favoriteItemDetails
+          const favoritesWithDetails = serverFavorites.map((favorite) => {
+            const itemDetails =
+              sharedItemDetails[favorite.item_id] ||
+              favoriteItemDetails[favorite.item_id];
+            return {
+              ...favorite,
+              details: itemDetails
+                ? { item: itemDetails as ItemDetails }
+                : undefined,
+            };
+          });
 
           setFavorites(favoritesWithDetails);
         } else {
           setFavorites([]);
         }
       } catch (err) {
-        console.error("Error fetching favorites:", err);
+        console.error("Error processing favorites:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch favorites",
+          err instanceof Error ? err.message : "Failed to process favorites",
         );
-      } finally {
-        setLoading(false);
       }
     };
 
     if (userId) {
-      fetchFavorites();
+      processFavorites();
     }
-  }, [userId, shouldHideFavorites]);
+  }, [
+    userId,
+    shouldHideFavorites,
+    serverFavorites,
+    favoriteItemDetails,
+    sharedItemDetails,
+  ]);
 
   // Sort favorites based on selected order
   const sortedFavorites = [...favorites].sort((a, b) => {
@@ -173,6 +140,7 @@ export default function FavoritesTab({
     let itemType = "";
     let imageName = "";
     let itemUrl = "";
+    let isLoadingItem = false;
 
     if (isSubItem) {
       // For sub-items, use the data directly from favorite.item
@@ -191,18 +159,28 @@ export default function FavoritesTab({
       // For regular items, use the details.item data
       const itemData = favorite.details?.item;
       if (!itemData?.name || !itemData?.type) {
-        return null;
+        // Check if we're still loading additional data
+        if (isLoadingAdditionalData) {
+          isLoadingItem = true;
+          itemName = ""; // Will show skeleton
+          itemType = "Loading...";
+          imageName = "";
+          itemUrl = "#";
+        } else {
+          return null;
+        }
+      } else {
+        itemName = itemData.name;
+        itemType = itemData.type;
+        imageName = itemName;
+        // Create URL for regular item
+        const baseName = itemName;
+        itemUrl = `/item/${itemType.toLowerCase()}/${baseName}`;
       }
-      itemName = itemData.name;
-      itemType = itemData.type;
-      imageName = itemName;
-      // Create URL for regular item
-      const baseName = itemName;
-      itemUrl = `/item/${itemType.toLowerCase()}/${baseName}`;
     }
 
-    // If we don't have a name or type, don't render the card
-    if (!itemName || !itemType) {
+    // If we don't have a name or type and we're not loading, don't render the card
+    if (!itemName && !isLoadingItem) {
       return null;
     }
 
@@ -245,23 +223,41 @@ export default function FavoritesTab({
             </div>
             <div className="flex-1">
               <div className="flex items-start justify-between">
-                <span className="text-muted font-medium transition-colors group-hover:text-blue-300">
-                  {itemName}
-                </span>
+                {isLoadingItem ? (
+                  <Skeleton
+                    variant="text"
+                    width="80%"
+                    height={20}
+                    sx={{ bgcolor: "#2E3944" }}
+                  />
+                ) : (
+                  <span className="text-muted font-medium transition-colors group-hover:text-blue-300">
+                    {itemName}
+                  </span>
+                )}
               </div>
               <div className="text-xs text-[#FFFFFF]">
                 {itemType && (
                   <div className="mb-1">
-                    <Chip
-                      label={itemType}
-                      size="small"
-                      sx={{
-                        backgroundColor: typeColor,
-                        color: "#fff",
-                        fontSize: "0.65rem",
-                        height: "20px",
-                      }}
-                    />
+                    {isLoadingItem ? (
+                      <Skeleton
+                        variant="rounded"
+                        width={80}
+                        height={20}
+                        sx={{ bgcolor: "#2E3944" }}
+                      />
+                    ) : (
+                      <Chip
+                        label={itemType}
+                        size="small"
+                        sx={{
+                          backgroundColor: typeColor,
+                          color: "#fff",
+                          fontSize: "0.65rem",
+                          height: "20px",
+                        }}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -425,7 +421,7 @@ export default function FavoritesTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
+            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#475569]"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, Chip } from "@mui/material";
+import { Box, Typography, Divider, Chip, Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
@@ -6,7 +6,6 @@ import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
 import {
   getItemImagePath,
   isVideoItem,
@@ -27,6 +26,11 @@ interface CommentProps {
   user_id: string;
   edited_at: number | null;
   owner: string;
+  changelogDetails?: unknown;
+  itemDetails?: unknown;
+  seasonDetails?: unknown;
+  tradeDetails?: unknown;
+  isLoading?: boolean;
 }
 
 interface ChangelogDetails {
@@ -45,96 +49,40 @@ export default function Comment({
   item_type,
   item_id,
   edited_at,
+  changelogDetails: propChangelogDetails,
+  itemDetails: propItemDetails,
+  seasonDetails: propSeasonDetails,
+  isLoading: propIsLoading,
 }: CommentProps) {
-  const [itemDetails, setItemDetails] = useState<ItemDetails | null>(null);
-  const [changelogDetails, setChangelogDetails] =
-    useState<ChangelogDetails | null>(null);
-  const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(
-    null,
+  const [itemDetails, setItemDetails] = useState<ItemDetails | null>(
+    (propItemDetails as ItemDetails) || null,
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [changelogDetails, setChangelogDetails] =
+    useState<ChangelogDetails | null>(
+      (propChangelogDetails as ChangelogDetails) || null,
+    );
+  const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(
+    (propSeasonDetails as SeasonDetails) || null,
+  );
+  const [isLoading, setIsLoading] = useState(propIsLoading || false);
 
   const formattedDate = formatRelativeDate(parseInt(date));
   const contentType = item_type.charAt(0).toUpperCase() + item_type.slice(1);
   const typeColor = getItemTypeColor(item_type);
 
   useEffect(() => {
-    // Fetch changelog details if the item type is changelog
-    if (item_type.toLowerCase() === "changelog" && item_id) {
-      fetch(`${PUBLIC_API_URL}/changelogs/get?id=${item_id}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `API request failed with status ${response.status}`,
-            );
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setChangelogDetails(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching changelog details:", error);
-        });
+    // Update state when props change
+    if (propChangelogDetails) {
+      setChangelogDetails(propChangelogDetails as ChangelogDetails);
     }
-
-    // Fetch season details if the item type is season
-    if (item_type.toLowerCase() === "season" && item_id) {
-      fetch(`${PUBLIC_API_URL}/seasons/get?season=${item_id}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `API request failed with status ${response.status}`,
-            );
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setSeasonDetails(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching season details:", error);
-        });
+    if (propItemDetails) {
+      setItemDetails(propItemDetails as ItemDetails);
     }
-
-    // Fetch item details if it's one of the item types that needs it
-    const needsItemDetails = [
-      "vehicle",
-      "spoiler",
-      "rim",
-      "body color",
-      "hyperchrome",
-      "texture",
-      "tire sticker",
-      "tire style",
-      "drift",
-      "furniture",
-      "horn",
-      "weapon skin",
-    ].includes(item_type.toLowerCase());
-
-    if (needsItemDetails && item_id) {
-      setIsLoading(true);
-
-      fetch(`${PUBLIC_API_URL}/items/get?id=${item_id}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `API request failed with status ${response.status}`,
-            );
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setItemDetails(data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching item details:", error);
-          setIsLoading(false);
-        });
+    if (propSeasonDetails) {
+      setSeasonDetails(propSeasonDetails as SeasonDetails);
     }
-  }, [item_type, item_id]);
+    setIsLoading(propIsLoading || false);
+  }, [propChangelogDetails, propItemDetails, propSeasonDetails, propIsLoading]);
 
   const renderThumbnail = () => {
     if (item_type.toLowerCase() === "changelog") {
@@ -271,8 +219,35 @@ export default function Comment({
       return `Season ${item_id}`;
     }
 
+    if (item_type.toLowerCase() === "trade") {
+      return `Trade #${item_id}`;
+    }
+
     if (itemDetails?.name) {
       return itemDetails.name;
+    }
+
+    // Show skeleton loading for item types that need details
+    const itemTypesNeedingDetails = [
+      "vehicle",
+      "spoiler",
+      "rim",
+      "body color",
+      "hyperchrome",
+      "texture",
+      "tire sticker",
+      "tire style",
+      "drift",
+      "furniture",
+      "horn",
+      "weapon skin",
+    ];
+
+    if (
+      itemTypesNeedingDetails.includes(item_type.toLowerCase()) &&
+      isLoading
+    ) {
+      return null; // Will be handled by skeleton in render
     }
 
     return `${contentType} #${item_id}`;
@@ -296,20 +271,29 @@ export default function Comment({
           {renderThumbnail()}
           <div className="min-w-0 flex-1">
             {/* Item Title/Name First */}
-            <Typography
-              variant="body2"
-              className="text-muted mb-1 font-medium transition-colors group-hover:text-blue-300"
-              sx={{
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
-              {getItemName()}
-            </Typography>
+            {getItemName() ? (
+              <Typography
+                variant="body2"
+                className="text-muted mb-1 font-medium transition-colors group-hover:text-blue-300"
+                sx={{
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
+                {getItemName()}
+              </Typography>
+            ) : (
+              <Skeleton
+                variant="text"
+                width="80%"
+                height={20}
+                sx={{ bgcolor: "#2E3944", mb: 1 }}
+              />
+            )}
 
             {/* Badge Second */}
             <div className="mb-2">

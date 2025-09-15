@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CircularProgress, Box, Pagination, Chip } from "@mui/material";
 import Comment from "../ProfileComments/Comments";
 import CommentIcon from "@mui/icons-material/Comment";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
+import { fetchCommentDetails } from "@/app/users/[id]/actions";
 
 interface CommentData {
   id: number;
@@ -27,6 +28,7 @@ interface CommentsTabProps {
   settings?: {
     show_recent_comments?: number;
   };
+  sharedItemDetails?: Record<string, unknown>;
 }
 
 // Main filter categories
@@ -39,15 +41,65 @@ export default function CommentsTab({
   currentUserId,
   userId,
   settings,
+  sharedItemDetails = {},
 }: CommentsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [commentDetails, setCommentDetails] = useState<{
+    changelogs: Record<string, unknown>;
+    items: Record<string, unknown>;
+    seasons: Record<string, unknown>;
+    trades: Record<string, unknown>;
+  }>({ changelogs: {}, items: {}, seasons: {}, trades: {} });
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const commentsPerPage = 6;
 
   // Check if comments should be hidden
   const shouldHideComments =
     settings?.show_recent_comments === 0 && currentUserId !== userId;
+
+  // Fetch comment details when comments are loaded
+  useEffect(() => {
+    if (
+      comments.length > 0 &&
+      Object.keys(commentDetails.changelogs).length === 0 &&
+      Object.keys(commentDetails.items).length === 0 &&
+      Object.keys(commentDetails.seasons).length === 0 &&
+      Object.keys(commentDetails.trades).length === 0
+    ) {
+      setDetailsLoading(true);
+
+      // Check if we already have some item details from shared cache
+      const commentsNeedingDetails = comments.filter((comment) => {
+        const itemId = comment.item_id.toString();
+        return !sharedItemDetails[itemId];
+      });
+
+      if (commentsNeedingDetails.length === 0) {
+        // All items are already in shared cache, no need to fetch
+        setDetailsLoading(false);
+        return;
+      }
+
+      fetchCommentDetails(commentsNeedingDetails)
+        .then((details) => {
+          // Merge with shared cache
+          const mergedDetails = {
+            changelogs: { ...sharedItemDetails, ...details.changelogs },
+            items: { ...sharedItemDetails, ...details.items },
+            seasons: { ...sharedItemDetails, ...details.seasons },
+            trades: { ...sharedItemDetails, ...details.trades },
+          };
+          setCommentDetails(mergedDetails);
+          setDetailsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching comment details:", error);
+          setDetailsLoading(false);
+        });
+    }
+  }, [comments, commentDetails, sharedItemDetails]);
 
   // Sort comments based on selected order
   const sortedComments = [...comments].sort((a, b) => {
@@ -176,7 +228,7 @@ export default function CommentsTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
+            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#475569]"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -240,7 +292,23 @@ export default function CommentsTab({
               ) : (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {currentComments.map((comment) => (
-                    <Comment key={comment.id} {...comment} />
+                    <Comment
+                      key={comment.id}
+                      {...comment}
+                      changelogDetails={
+                        commentDetails.changelogs[comment.item_id.toString()]
+                      }
+                      itemDetails={
+                        commentDetails.items[comment.item_id.toString()]
+                      }
+                      seasonDetails={
+                        commentDetails.seasons[comment.item_id.toString()]
+                      }
+                      tradeDetails={
+                        commentDetails.trades[comment.item_id.toString()]
+                      }
+                      isLoading={detailsLoading}
+                    />
                   ))}
                 </div>
               )}

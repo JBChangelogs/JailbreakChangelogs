@@ -10,6 +10,7 @@ import { updateBanner } from "@/services/settingsService";
 import toast from "react-hot-toast";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
+import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
 
 interface BannerSettingsProps {
   userData: UserData;
@@ -123,6 +124,26 @@ export const BannerSettings = ({
       if (!checkAnimatedBannerAccess(userData.premiumtype || 0)) {
         return; // Modal will be shown by the hook
       }
+    }
+
+    // Client-side file validation before upload
+    if (
+      !UPLOAD_CONFIG.ALLOWED_FILE_TYPES.includes(
+        file.type as (typeof UPLOAD_CONFIG.ALLOWED_FILE_TYPES)[number],
+      )
+    ) {
+      setBannerError(
+        `Invalid file type. Only ${getAllowedFileExtensions()} files are allowed for upload.`,
+      );
+      return;
+    }
+
+    // Validate file size
+    if (file.size > UPLOAD_CONFIG.MAX_FILE_SIZE) {
+      setBannerError(
+        `File too large. Maximum size is ${UPLOAD_CONFIG.MAX_FILE_SIZE_MB}MB.`,
+      );
+      return;
     }
 
     setIsUploading(true);
@@ -353,7 +374,7 @@ export const BannerSettings = ({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/jpg,image/png,image/gif"
+                accept={UPLOAD_CONFIG.ALLOWED_FILE_TYPES.join(",")}
                 onChange={handleFileUpload}
                 style={{ display: "none" }}
               />

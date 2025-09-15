@@ -399,6 +399,23 @@ export async function fetchItem(
   }
 }
 
+export async function fetchItemById(id: string): Promise<ItemDetails | null> {
+  try {
+    const response = await fetch(`${BASE_API_URL}/items/get?id=${id}`);
+
+    if (!response.ok) {
+      console.log("[SERVER] Item not found:", { id });
+      return null;
+    }
+
+    const data = await response.json();
+    return data as ItemDetails;
+  } catch (err) {
+    console.error("[SERVER] Error fetching item by ID:", err);
+    return null;
+  }
+}
+
 export async function fetchChangelogList(): Promise<Changelog[]> {
   const response = await fetch(`${BASE_API_URL}/changelogs/list`);
   if (!response.ok) throw new Error("Failed to fetch changelog list");
@@ -650,7 +667,8 @@ export async function fetchSeason(id: string) {
     const response = await fetch(`${BASE_API_URL}/seasons/get?id=${id}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch season");
+      console.log("[SERVER] Season not found:", { id });
+      return null;
     }
 
     const data = await response.json();

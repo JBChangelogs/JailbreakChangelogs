@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrophyIcon, CheckIcon } from "@heroicons/react/24/solid";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { getAllowedFileExtensions } from "@/config/settings";
 
 interface SupporterTier {
   name: string;
@@ -44,8 +45,8 @@ const supporterTiers: SupporterTier[] = [
     features: [
       "Post Comments up to 800 characters",
       "Trade Ad Duration: +12 Hours (24 Hours total)",
-      "Upload and Use Custom Banners (JPEG, JPG, PNG, GIF)",
-      "Upload and Use Custom Avatars (JPEG, JPG, PNG, GIF)",
+      `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
+      `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
       "Comments highlighted with Silver border and badge",
       "All Supporter I benefits",
     ],

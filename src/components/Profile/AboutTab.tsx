@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip } from "@mui/material";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
@@ -32,8 +30,8 @@ const cleanBioText = (text: string): string => {
   return text
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .join("\n");
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n"); // Collapse multiple consecutive newlines to just two
 };
 
 export default function AboutTab({
@@ -73,6 +71,13 @@ export default function AboutTab({
     const cleanedBio = cleanBioText(newBio);
     if (cleanedBio.length > MAX_BIO_LENGTH) {
       toast.error(`Bio cannot exceed ${MAX_BIO_LENGTH} characters`);
+      return;
+    }
+
+    // Check if bio hasn't changed
+    const originalBio = cleanBioText(bio || "");
+    if (cleanedBio === originalBio) {
+      setIsEditingBio(false);
       return;
     }
 
@@ -176,44 +181,26 @@ export default function AboutTab({
                 {newBio.length}/{MAX_BIO_LENGTH} characters
               </span>
               <div className="flex gap-2">
-                <Button
-                  variant="outlined"
+                <button
                   onClick={() => {
                     setIsEditingBio(false);
                     setNewBio(bio || "");
                   }}
-                  sx={{
-                    color: "#D3D9D4",
-                    borderColor: "#5865F2",
-                    padding: "6px 16px",
-                    "&:hover": {
-                      borderColor: "#4752C4",
-                      backgroundColor: "rgba(88, 101, 242, 0.1)",
-                    },
-                  }}
+                  className="cursor-pointer rounded bg-gray-600 px-4 py-1.5 text-sm font-medium text-[#D3D9D4] transition-colors hover:bg-gray-500"
                 >
                   Cancel
-                </Button>
-                <Button
-                  variant="contained"
+                </button>
+                <button
                   onClick={handleSaveBio}
                   disabled={isSavingBio}
-                  sx={{
-                    backgroundColor: "#5865F2",
-                    color: "#D3D9D4",
-                    padding: "6px 16px",
-                    "&:hover": {
-                      backgroundColor: "#4752C4",
-                    },
-                    "&.Mui-disabled": {
-                      backgroundColor: "#5865F2",
-                      color: "#D3D9D4",
-                      opacity: 0.7,
-                    },
-                  }}
+                  className={`rounded px-4 py-1.5 text-sm font-medium transition-colors ${
+                    isSavingBio
+                      ? "cursor-wait bg-[#5865F2] text-[#D3D9D4] opacity-70"
+                      : "cursor-pointer bg-[#5865F2] text-[#D3D9D4] hover:bg-[#4752C4]"
+                  } disabled:cursor-wait disabled:opacity-70`}
                 >
                   {isSavingBio ? "Saving..." : "Save"}
-                </Button>
+                </button>
               </div>
             </div>
           </div>

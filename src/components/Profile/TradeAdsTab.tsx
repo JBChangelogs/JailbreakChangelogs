@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CircularProgress, Box, Pagination, Chip } from "@mui/material";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { useState } from "react";
+import {
+  CircularProgress,
+  Box,
+  Pagination,
+  Chip,
+  Skeleton,
+} from "@mui/material";
 import { formatRelativeDate } from "@/utils/timestamp";
 import { getItemTypeColor } from "@/utils/badgeColors";
 import Image from "next/image";
@@ -47,49 +52,21 @@ interface TradeAd {
 
 interface TradeAdsTabProps {
   userId: string;
+  tradeAds?: TradeAd[];
+  isLoadingAdditionalData?: boolean;
 }
 
-export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
-  const [tradeAds, setTradeAds] = useState<TradeAd[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function TradeAdsTab({
+  tradeAds: propTradeAds = [],
+  isLoadingAdditionalData = false,
+}: TradeAdsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const adsPerPage = 3;
 
-  useEffect(() => {
-    const fetchUserTradeAds = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `${PUBLIC_API_URL}/trades/get?user=${userId}`,
-        );
-
-        if (response.status === 404) {
-          // Handle case where user has no trade ads
-          setTradeAds([]);
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user trade ads: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setTradeAds(Array.isArray(data) ? data : [data]);
-      } catch (err) {
-        console.error("Error fetching user trade ads:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch user trade ads",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-      fetchUserTradeAds();
-    }
-  }, [userId]);
+  // Use props data instead of fetching client-side
+  const tradeAds = propTradeAds;
+  const loading = false; // No loading state needed since data comes from props
+  const error = null; // No error state needed since data comes from props
 
   // Change page
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -146,25 +123,43 @@ export default function TradeAdsTab({ userId }: TradeAdsTabProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between">
-              <Link
-                href={itemUrl}
-                className="text-muted font-medium transition-colors hover:text-blue-400"
-              >
-                {displayName}
-              </Link>
+              {isLoadingAdditionalData ? (
+                <Skeleton
+                  variant="text"
+                  width="80%"
+                  height={20}
+                  sx={{ bgcolor: "#2E3944" }}
+                />
+              ) : (
+                <Link
+                  href={itemUrl}
+                  className="text-muted font-medium transition-colors hover:text-blue-400"
+                >
+                  {displayName}
+                </Link>
+              )}
             </div>
             <div className="text-xs text-[#FFFFFF]">
               <div className="mb-1">
-                <Chip
-                  label={itemData.type}
-                  size="small"
-                  sx={{
-                    backgroundColor: typeColor,
-                    color: "#fff",
-                    fontSize: "0.65rem",
-                    height: "20px",
-                  }}
-                />
+                {isLoadingAdditionalData ? (
+                  <Skeleton
+                    variant="rounded"
+                    width={80}
+                    height={20}
+                    sx={{ bgcolor: "#2E3944" }}
+                  />
+                ) : (
+                  <Chip
+                    label={itemData.type}
+                    size="small"
+                    sx={{
+                      backgroundColor: typeColor,
+                      color: "#fff",
+                      fontSize: "0.65rem",
+                      height: "20px",
+                    }}
+                  />
+                )}
               </div>
               <div className="space-y-1">
                 <p>

@@ -1,45 +1,15 @@
 import Image from "next/image";
 import { useState } from "react";
-import { styled } from "@mui/material/styles";
-import Badge from "@mui/material/Badge";
-import { CircularProgress } from "@mui/material";
+import dynamic from "next/dynamic";
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
-  "& .MuiBadge-badge": {
-    backgroundColor: "#44b700",
-    color: "#44b700",
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    "&::after": {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      borderRadius: "50%",
-      animation: "ripple 1.2s infinite ease-in-out",
-      border: "1px solid currentColor",
-      content: '""',
-    },
-  },
-  "@keyframes ripple": {
-    "0%": {
-      transform: "scale(.8)",
-      opacity: 1,
-    },
-    "100%": {
-      transform: "scale(2.4)",
-      opacity: 0,
-    },
-  },
-}));
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+const CircularProgress = dynamic(
+  () => import("@mui/material/CircularProgress"),
+  { ssr: false },
+);
 
-const OfflineBadge = styled(Badge)(({ theme }) => ({
-  "& .MuiBadge-badge": {
-    backgroundColor: "#bdbdbd",
-    color: "#bdbdbd",
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-  },
-}));
+// Removed dynamic Badge import and styled components to prevent layout shifts
+// Now using simple CSS badges for better performance and no hydration issues
 
 interface UserAvatarProps {
   userId: string;
@@ -52,6 +22,7 @@ interface UserAvatarProps {
   showBadge?: boolean;
   settings?: {
     avatar_discord: number;
+    hide_presence?: number;
   };
   shape?: "circle" | "square";
   showBorder?: boolean;
@@ -107,29 +78,47 @@ const BadgeWrapper = ({
   children,
   isOnline,
   showBadge,
-  shape = "circle",
+  isHidden = false,
 }: {
   children: React.ReactNode;
   isOnline?: boolean;
   showBadge?: boolean;
-  shape?: "circle" | "square";
+  isHidden?: boolean;
 }) => {
   if (!showBadge) return <>{children}</>;
 
-  const badgeProps = {
-    overlap:
-      shape === "circle" ? ("circular" as const) : ("rectangular" as const),
-    anchorOrigin:
-      shape === "circle"
-        ? { vertical: "bottom" as const, horizontal: "right" as const }
-        : { vertical: "bottom" as const, horizontal: "right" as const },
-    variant: "dot" as const,
-  };
-
-  return isOnline ? (
-    <StyledBadge {...badgeProps}>{children}</StyledBadge>
-  ) : (
-    <OfflineBadge {...badgeProps}>{children}</OfflineBadge>
+  // Show placeholder badge immediately to prevent layout shift
+  return (
+    <div className="relative">
+      {children}
+      <Tooltip
+        title={isHidden ? "Hidden" : isOnline ? "Online" : "Offline"}
+        placement="top"
+        arrow
+        slotProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: "#0F1419",
+              color: "#D3D9D4",
+              fontSize: "0.75rem",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: "1px solid #2E3944",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              "& .MuiTooltip-arrow": {
+                color: "#0F1419",
+              },
+            },
+          },
+        }}
+      >
+        <div
+          className={`absolute right-0 bottom-0 h-4 w-4 translate-x-1 translate-y-1 transform cursor-help rounded-full border-2 border-[#212A31] ${
+            isOnline ? "bg-[#44b700]" : "bg-[#bdbdbd]"
+          }`}
+        />
+      </Tooltip>
+    </div>
   );
 };
 
@@ -199,7 +188,7 @@ export const UserAvatar = ({
       <BadgeWrapper
         isOnline={isOnline}
         showBadge={showBadge}
-        shape={finalShape}
+        isHidden={settings?.hide_presence === 1}
       >
         <div
           className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} flex-shrink-0 overflow-hidden`}
@@ -220,7 +209,11 @@ export const UserAvatar = ({
   }
 
   return (
-    <BadgeWrapper isOnline={isOnline} showBadge={showBadge} shape={finalShape}>
+    <BadgeWrapper
+      isOnline={isOnline}
+      showBadge={showBadge}
+      isHidden={settings?.hide_presence === 1}
+    >
       <div
         className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} flex-shrink-0 overflow-hidden`}
         style={{
