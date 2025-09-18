@@ -1,5 +1,9 @@
 import { Suspense } from "react";
-import { fetchInventoryData, fetchRobloxUserByUsername } from "@/utils/api";
+import {
+  fetchInventoryData,
+  fetchRobloxUserByUsername,
+  fetchLatestSeason,
+} from "@/utils/api";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import UserDataStreamer from "./UserDataStreamer";
 
@@ -43,7 +47,10 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
     }
   }
 
-  const result = await fetchInventoryData(actualRobloxId);
+  const [result, currentSeason] = await Promise.all([
+    fetchInventoryData(actualRobloxId),
+    fetchLatestSeason(),
+  ]);
 
   // Check if the result contains an error
   if (
@@ -79,7 +86,11 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
         />
       }
     >
-      <UserDataStreamer robloxId={actualRobloxId} inventoryData={result} />
+      <UserDataStreamer
+        robloxId={actualRobloxId}
+        inventoryData={result}
+        currentSeason={currentSeason}
+      />
     </Suspense>
   );
 }

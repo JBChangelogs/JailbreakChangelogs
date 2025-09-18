@@ -79,7 +79,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
 
   if (filteredRewards.length === 0) {
     return (
-      <div className="flex aspect-video items-center justify-center rounded-lg bg-[#212A31]">
+      <div className="flex aspect-video items-center justify-center rounded-lg">
         <p className="text-muted">No images available</p>
       </div>
     );
@@ -91,7 +91,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-[#212A31]">
+      <div className="relative aspect-video overflow-hidden rounded-lg">
         <Image
           src={`https://assets.jailbreakchangelogs.xyz${filteredRewards[currentImageIndex].link}`}
           alt={filteredRewards[currentImageIndex].item}

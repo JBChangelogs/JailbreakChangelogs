@@ -11,10 +11,23 @@ import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
 import { toast } from "react-hot-toast";
-
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
-import { UserBadges } from "@/components/Profile/UserBadges";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
+  ssr: false,
+});
+
+const UserBadges = dynamic(
+  () =>
+    import("@/components/Profile/UserBadges").then((mod) => ({
+      default: mod.UserBadges,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="h-6 w-6" />, // Placeholder with same size as lg badge
+  },
+);
 import {
   formatRelativeDate,
   formatShortDate,
@@ -24,8 +37,19 @@ import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import FollowersModal from "@/components/Users/FollowersModal";
-import FollowingModal from "@/components/Users/FollowingModal";
+const FollowersModal = dynamic(
+  () => import("@/components/Users/FollowersModal"),
+  {
+    ssr: false,
+  },
+);
+
+const FollowingModal = dynamic(
+  () => import("@/components/Users/FollowingModal"),
+  {
+    ssr: false,
+  },
+);
 import type { UserFlag } from "@/types/auth";
 import { BsMusicNoteBeamed } from "react-icons/bs";
 
@@ -637,6 +661,7 @@ export default function UserProfileClient({
             banner={user.banner}
             customBanner={user.custom_banner}
             settings={user.settings}
+            premiumType={user.premiumtype}
           />
 
           {/* Profile Content */}

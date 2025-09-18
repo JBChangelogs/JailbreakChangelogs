@@ -28,12 +28,7 @@ export const AvatarSettings = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Supporter modal hook
-  const {
-    modalState,
-    closeModal,
-    checkAvatarAccess,
-    checkAnimatedAvatarAccess,
-  } = useSupporterModal();
+  const { modalState, closeModal, checkAvatarAccess } = useSupporterModal();
 
   const validateAvatarUrl = useCallback((url: string) => {
     setAvatarError(null);
@@ -121,13 +116,6 @@ export const AvatarSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Check for animated avatar access if it's a GIF
-    if (file.type === "image/gif") {
-      if (!checkAnimatedAvatarAccess(userData.premiumtype || 0)) {
-        return; // Modal will be shown by the hook
-      }
-    }
-
     // Client-side file validation before upload
     if (
       !UPLOAD_CONFIG.ALLOWED_FILE_TYPES.includes(
@@ -201,13 +189,6 @@ export const AvatarSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Check for animated avatar access if it's a GIF
-    if (customAvatarUrl.toLowerCase().includes(".gif")) {
-      if (!checkAnimatedAvatarAccess(userData.premiumtype || 0)) {
-        return; // Modal will be shown by the hook
-      }
-    }
-
     if (!isValidAvatar) return;
 
     try {
@@ -236,7 +217,7 @@ export const AvatarSettings = ({
             Custom Avatar URL
           </Typography>
           <Tooltip
-            title="Supporter II Feature"
+            title="Supporter Tier 2 Feature"
             placement="top"
             arrow
             slotProps={{
@@ -260,7 +241,7 @@ export const AvatarSettings = ({
               icon={
                 <TrophyIcon className="h-4 w-4" style={{ color: "#C0C0C0" }} />
               }
-              label="Supporter II"
+              label="Supporter Tier 2"
               size="small"
               sx={{
                 backgroundColor: "rgba(192, 192, 192, 0.1)",
@@ -289,7 +270,7 @@ export const AvatarSettings = ({
         >
           {userData?.premiumtype && userData.premiumtype >= 2
             ? "Upload an image file or enter a direct link to your image"
-            : "🔒 Upgrade to Supporter II to unlock custom avatars"}
+            : "🔒 Upgrade to Supporter Tier 2 to unlock custom avatars"}
         </Typography>
         <Box
           sx={{
@@ -306,7 +287,7 @@ export const AvatarSettings = ({
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 2
                   ? "https://example.com/your-avatar.jpg"
-                  : "Supporter II feature - Upgrade to unlock"
+                  : "Supporter Tier 2 feature - Upgrade to unlock"
               }
               value={customAvatarUrl}
               onChange={handleCustomAvatarChange}
@@ -330,6 +311,11 @@ export const AvatarSettings = ({
                 },
                 "& .MuiInputBase-input": {
                   color: "#D3D9D4",
+                },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#D3D9D4 !important",
+                  WebkitTextFillColor: "#D3D9D4 !important",
+                  cursor: "not-allowed",
                 },
                 "& .MuiFormHelperText-root": {
                   marginTop: "4px",

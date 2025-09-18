@@ -2,14 +2,14 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Support Us",
+  title: "Support Us - Jailbreak Changelogs",
   description:
     "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
   alternates: {
     canonical: "/supporting",
   },
   openGraph: {
-    title: "Support Us",
+    title: "Support Us - Jailbreak Changelogs",
     description:
       "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
     type: "website",

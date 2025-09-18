@@ -185,7 +185,7 @@ export default function SeasonDetailsClient({
             )}
 
             {/* Weekly Contracts Promo */}
-            <div className="mb-6 rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
+            <div className="mb-6 rounded-lg border border-[#124E66] bg-[#124E66]/10 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1">
                   <h3 className="mb-2 text-lg font-semibold text-[#FFFFFF]">
@@ -198,7 +198,7 @@ export default function SeasonDetailsClient({
                 <div className="flex-shrink-0">
                   <Link
                     href="/seasons/contracts"
-                    className="inline-block w-full rounded-lg bg-[#5865F2] px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-[#4752C4] lg:w-auto"
+                    className="inline-block w-full rounded-lg bg-[#124E66] px-6 py-3 text-center font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] lg:w-auto"
                   >
                     View Contracts
                   </Link>

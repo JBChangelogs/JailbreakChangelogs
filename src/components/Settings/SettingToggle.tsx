@@ -19,14 +19,7 @@ export const SettingToggle = ({
   config,
   onChange,
   disabled,
-  userData,
 }: SettingToggleProps) => {
-  const isPremiumFeature =
-    name === "banner_discord" || name === "avatar_discord";
-  const premiumRequired =
-    isPremiumFeature && (!userData?.premiumtype || userData.premiumtype === 0);
-  const premiumTier = name === "banner_discord" ? 2 : 1;
-
   return (
     <Box sx={{ mb: 2 }}>
       <FormControlLabel
@@ -64,21 +57,6 @@ export const SettingToggle = ({
             <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
               {config.description}
             </Typography>
-            {premiumRequired && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "#FF6B6B",
-                  mt: 0.5,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                }}
-              >
-                🔒 Upgrade to Supporter Tier {premiumTier} to unlock custom{" "}
-                {name === "banner_discord" ? "banners" : "avatars"}
-              </Typography>
-            )}
           </Box>
         }
       />

@@ -131,6 +131,11 @@ export interface RobloxUser {
   username: string;
 }
 
+export interface RobloxAvatar {
+  targetId: number;
+  imageUrl: string;
+}
+
 export interface ItemsResponse {
   items: Item[];
   total: number;

@@ -133,6 +133,12 @@ const StyledTabs = dynamic(
         "& .MuiTabs-indicator": {
           backgroundColor: "#5865F2",
         },
+        "& .MuiTabs-scrollButtons": {
+          color: "#FFFFFF",
+          "&.Mui-disabled": {
+            opacity: 0.3,
+          },
+        },
       }));
     }),
   { ssr: false },

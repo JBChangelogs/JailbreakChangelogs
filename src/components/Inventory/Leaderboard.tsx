@@ -203,6 +203,7 @@ export default function Leaderboard({ leaderboard }: LeaderboardProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-medium break-words text-blue-400 transition-colors hover:text-blue-300"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {displayName}
                       </a>

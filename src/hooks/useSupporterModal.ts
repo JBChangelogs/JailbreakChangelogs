@@ -101,13 +101,13 @@ export const useSupporterModal = () => {
 
   const checkAvatarAccess = useCallback(
     (userTier: number) => {
-      if (userTier < 1) {
+      if (userTier < 2) {
         openModal({
           feature: "custom_avatar",
           currentTier: userTier,
-          requiredTier: 1,
+          requiredTier: 2,
           currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
-          requiredLimit: "Supporter I",
+          requiredLimit: "Supporter II",
         });
         return false; // Access denied
       }
@@ -125,40 +125,6 @@ export const useSupporterModal = () => {
           requiredTier: 2,
           currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
           requiredLimit: "Supporter II",
-        });
-        return false; // Access denied
-      }
-      return true; // Access granted
-    },
-    [openModal],
-  );
-
-  const checkAnimatedAvatarAccess = useCallback(
-    (userTier: number) => {
-      if (userTier < 3) {
-        openModal({
-          feature: "animated_avatar",
-          currentTier: userTier,
-          requiredTier: 3,
-          currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
-          requiredLimit: "Supporter III",
-        });
-        return false; // Access denied
-      }
-      return true; // Access granted
-    },
-    [openModal],
-  );
-
-  const checkAnimatedBannerAccess = useCallback(
-    (userTier: number) => {
-      if (userTier < 3) {
-        openModal({
-          feature: "animated_banner",
-          currentTier: userTier,
-          requiredTier: 3,
-          currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
-          requiredLimit: "Supporter III",
         });
         return false; // Access denied
       }
@@ -212,8 +178,6 @@ export const useSupporterModal = () => {
     checkCommentLength,
     checkAvatarAccess,
     checkBannerAccess,
-    checkAnimatedAvatarAccess,
-    checkAnimatedBannerAccess,
     checkTradeAdDuration,
     COMMENT_CHAR_LIMITS,
   };

@@ -4,6 +4,7 @@ import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/UI/ComingSoon";
+import ConnectedBotsPolling from "@/components/UI/ConnectedBotsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { Suspense } from "react";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
@@ -39,6 +40,8 @@ export default function DupeFinderPage() {
       <Suspense fallback={<StatsSkeleton />}>
         <StatsSection />
       </Suspense>
+
+      <ConnectedBotsPolling />
 
       <DupeFinderFAQ />
     </div>

@@ -404,7 +404,6 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
     const response = await fetch(`${BASE_API_URL}/items/get?id=${id}`);
 
     if (!response.ok) {
-      console.log("[SERVER] Item not found:", { id });
       return null;
     }
 
@@ -860,7 +859,6 @@ export async function fetchComments(
 }
 
 export async function fetchInventoryData(robloxId: string) {
-  console.log("[SERVER] fetchInventoryData called with robloxId:", robloxId);
   try {
     const wsResult = await (async () => {
       try {
@@ -871,9 +869,6 @@ export async function fetchInventoryData(robloxId: string) {
           (wsModule as { WebSocket?: typeof WebSocket }).WebSocket ||
           (wsModule as unknown as typeof WebSocket);
         return await new Promise((resolve) => {
-          console.log(
-            `[WS] Connecting to ${INVENTORY_WS_URL} for user ${robloxId}`,
-          );
           const socket = new WS(`${INVENTORY_WS_URL}/socket`, {
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
@@ -897,12 +892,10 @@ export async function fetchInventoryData(robloxId: string) {
           }, 10000);
 
           socket.on("open", () => {
-            console.log(`[WS] Connected for user ${robloxId}`);
             try {
               socket.send(
                 JSON.stringify({ action: "get_data", user_id: robloxId }),
               );
-              console.log(`[WS] Sent get_data for user ${robloxId}`);
             } catch (e) {
               // If send fails, resolve with error and close
               if (!settled) {
@@ -920,23 +913,12 @@ export async function fetchInventoryData(robloxId: string) {
             }
           });
 
-          socket.on("message", (data: Buffer | string) => {
+          socket.on("message", (data: string) => {
             if (settled) return;
             settled = true;
             clearTimeout(timeout);
             try {
-              const text =
-                typeof data === "string" ? data : data.toString("utf-8");
-              console.log(
-                `[WS] Received message for user ${robloxId} (${text.length} bytes)`,
-              );
-              const parsed = JSON.parse(text);
-              if (parsed && typeof parsed === "object" && "action" in parsed) {
-                const action = (parsed as Record<string, unknown>).action;
-                if (typeof action === "string") {
-                  console.log(`[WS] Payload action: ${action}`);
-                }
-              }
+              const parsed = JSON.parse(data);
               resolve(parsed);
             } catch (e) {
               console.error(`[WS] Parse error for user ${robloxId}:`, e);
@@ -965,21 +947,11 @@ export async function fetchInventoryData(robloxId: string) {
             });
           });
 
-          socket.on("close", (code: number, reason: Buffer) => {
+          socket.on("close", () => {
             // If closed before message and not settled, treat as error
             if (!settled) {
               settled = true;
               clearTimeout(timeout);
-              const reasonText = (() => {
-                try {
-                  return reason?.toString?.("utf-8") || "";
-                } catch {
-                  return "";
-                }
-              })();
-              console.warn(
-                `[WS] Closed before data for user ${robloxId} (code=${code}${reasonText ? `, reason=${reasonText}` : ""})`,
-              );
               resolve({
                 error: "ws_closed",
                 message: "WebSocket closed before receiving data.",
@@ -1107,11 +1079,7 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
           // If the API returns the object directly (not wrapped in data array)
           allData.push(data);
         }
-      } catch (err) {
-        console.error(
-          "[SERVER] fetchRobloxUsersBatch: Error fetching chunk:",
-          err,
-        );
+      } catch {
         continue;
       }
     }
@@ -1199,11 +1167,7 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
         );
         return {};
       }
-    } catch (err) {
-      console.error(
-        "[SERVER] fetchRobloxUsersBatchLeaderboard: Error fetching users:",
-        err,
-      );
+    } catch {
       return {};
     }
   } catch (err) {
@@ -1272,11 +1236,7 @@ export async function fetchRobloxAvatars(userIds: string[]) {
         if (data && typeof data === "object") {
           Object.assign(allData, data);
         }
-      } catch (err) {
-        console.error(
-          "[SERVER] fetchRobloxAvatars: Error fetching chunk:",
-          err,
-        );
+      } catch {
         continue;
       }
     }
@@ -1412,6 +1372,100 @@ export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
   } catch (err) {
     console.error("[SERVER] fetchOfficialScanBots: Unexpected error:", err);
     return [];
+  }
+}
+
+export interface ConnectedBot {
+  id: string;
+  connected: boolean;
+  last_heartbeat: number;
+  current_job: string;
+}
+
+export interface ConnectedBotsResponse {
+  bots: ConnectedBot[];
+  recent_heartbeats: ConnectedBot[];
+}
+
+export async function fetchConnectedBots(): Promise<ConnectedBotsResponse | null> {
+  try {
+    if (!INVENTORY_API_URL) {
+      throw new Error("Missing INVENTORY_API_URL");
+    }
+
+    const response = await fetch(`${INVENTORY_API_URL}/bots/connected`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        `[SERVER] fetchConnectedBots: Failed with status ${response.status} ${response.statusText}`,
+      );
+      return null;
+    }
+
+    const data = await response.json();
+    return data as ConnectedBotsResponse;
+  } catch (err) {
+    console.error("[SERVER] fetchConnectedBots: Unexpected error:", err);
+    return null;
+  }
+}
+
+interface InventoryItem {
+  id: string;
+  title: string;
+  price: number;
+  categoryName: string;
+  itemType: string;
+}
+
+export interface QueueInfo {
+  queue_length: number;
+  current_delay: number;
+  last_dequeue: {
+    user_id: string;
+    data: {
+      job_id: string;
+      money: number;
+      data: InventoryItem[];
+      user_id: string;
+      last_updated: number;
+      has_season_pass: boolean;
+      gamepasses: string[];
+      level: number;
+      xp: number;
+      bot_id: string;
+    };
+  };
+}
+
+export async function fetchQueueInfo(): Promise<QueueInfo | null> {
+  try {
+    if (!INVENTORY_API_URL) {
+      throw new Error("Missing INVENTORY_API_URL");
+    }
+
+    const response = await fetch(`${INVENTORY_API_URL}/queue/info`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        `[SERVER] fetchQueueInfo: Failed with status ${response.status} ${response.statusText}`,
+      );
+      return null;
+    }
+
+    const data = await response.json();
+    return data as QueueInfo;
+  } catch (err) {
+    console.error("[SERVER] fetchQueueInfo: Unexpected error:", err);
+    return null;
   }
 }
 
@@ -1555,10 +1609,6 @@ export async function fetchRobloxUserByUsername(username: string) {
     if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
       return data.data[0];
     } else {
-      console.warn(
-        "[SERVER] fetchRobloxUserByUsername: No user found for username:",
-        username,
-      );
       return null;
     }
   } catch (err) {
@@ -1600,7 +1650,6 @@ export async function fetchOGSearchData(
   robloxId: string,
   timeoutMs: number = 30000,
 ) {
-  console.log("[SERVER] fetchOGSearchData called with robloxId:", robloxId);
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -1646,6 +1695,57 @@ export async function fetchOGSearchData(
     return {
       error: "fetch_error",
       message: "Failed to fetch OG search data. Please try again.",
+    };
+  }
+}
+
+export async function fetchInventoryDataRefresh(robloxId: string) {
+  console.log(
+    "[SERVER] fetchInventoryDataRefresh called with robloxId:",
+    robloxId,
+  );
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/user?id=${robloxId}&nocache=true`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.error(
+        `[SERVER] Inventory refresh API returned ${response.status} for ID: ${robloxId}`,
+      );
+
+      if (response.status === 404) {
+        return {
+          error: "not_found",
+          message: "Inventory not found for this user.",
+        };
+      }
+
+      throw new Error(
+        `Failed to fetch refreshed inventory data: ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[SERVER] Error fetching refreshed inventory data:", err);
+
+    if (err instanceof Error) {
+      return {
+        error: "fetch_error",
+        message: `Failed to refresh inventory data: ${err.message}`,
+      };
+    }
+
+    return {
+      error: "fetch_error",
+      message: "Failed to refresh inventory data. Please try again.",
     };
   }
 }

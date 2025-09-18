@@ -1,18 +1,81 @@
-import { CalculationResults } from "@/types/seasons";
+import { CalculationResults, Season } from "@/types/seasons";
 import { FaCheck, FaTimes } from "react-icons/fa";
-import { BsCalendar2Date } from "react-icons/bs";
+import { IoTime } from "react-icons/io5";
+import XpProgressBar from "@/components/Inventory/XpProgressBar";
 
 interface XpResultsSummaryProps {
   results: CalculationResults;
+  season: Season;
 }
 
-export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
+export default function XpResultsSummary({
+  results,
+  season,
+}: XpResultsSummaryProps) {
   const getStatusIcon = (achievable: boolean) =>
     achievable ? (
       <FaCheck className="text-green-400" />
     ) : (
       <FaTimes className="text-red-400" />
     );
+
+  // Helper function to calculate XP within current level
+  const getXpWithinCurrentLevel = () => {
+    const xpData = season.xp_data;
+
+    // Constants from the season data
+    const constants = {
+      MAX_DAILY_EXP: xpData.xp_rates.maxDailyXp,
+      MAX_DAILY_EXP_SEASON_PASS: xpData.xp_rates.maxDailyXpWithPass,
+      AVG_EXP_PER_CONTRACT: xpData.xp_rates.avgXpPerContract,
+      TOTAL_DAYS: xpData.xp_rates.totalDays,
+      CONTRACTS_PER_DAY: xpData.xp_rates.contractsPerDay,
+      EFFICIENCY: xpData.xp_rates.efficiency,
+      CURVE_K: xpData.xp_rates.curveK,
+    };
+
+    // Calculate total possible XP
+    const totalPossibleExp =
+      constants.EFFICIENCY *
+      (constants.AVG_EXP_PER_CONTRACT *
+        constants.CONTRACTS_PER_DAY *
+        constants.TOTAL_DAYS +
+        constants.MAX_DAILY_EXP * constants.TOTAL_DAYS);
+
+    // Function to get XP required for a level
+    function getExpFromLevel(targetLevel: number) {
+      if (targetLevel <= 0) return 0;
+
+      const curveK = constants.CURVE_K;
+      let result;
+
+      if (curveK === 1) {
+        result = totalPossibleExp / (xpData.targetLevel - 1);
+      } else {
+        result =
+          (totalPossibleExp * (1 - curveK)) /
+          (1 - Math.pow(curveK, xpData.targetLevel - 1));
+      }
+
+      let calculatedExp;
+      if (curveK === 1) {
+        calculatedExp = result * (targetLevel - 1);
+      } else {
+        calculatedExp =
+          (result * (1 - Math.pow(curveK, targetLevel - 1))) / (1 - curveK);
+      }
+
+      let roundedExp = Math.floor(calculatedExp);
+      if (0.5 <= calculatedExp - roundedExp) {
+        roundedExp += 1;
+      }
+      return roundedExp;
+    }
+
+    // Calculate XP within current level
+    const totalXpForCurrentLevel = getExpFromLevel(results.currentLevel);
+    return results.currentXp - totalXpForCurrentLevel;
+  };
 
   const getRecommendation = () => {
     if (results.achievableWithPass && results.achievableNoPass) {
@@ -127,12 +190,22 @@ export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
           </div>
         </div>
 
+        {/* XP Progress Bar */}
+        <div className="mb-6">
+          <XpProgressBar
+            currentLevel={results.currentLevel}
+            currentXp={getXpWithinCurrentLevel()}
+            season={season}
+          />
+        </div>
+
         {/* Time Estimates */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-lg bg-[#2E3944] p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h4 className="font-semibold text-[#FFFFFF]">
-                ⏱️ Without Season Pass
+              <h4 className="flex items-center gap-2 font-semibold text-[#FFFFFF]">
+                <IoTime className="text-blue-400" />
+                Without Season Pass
               </h4>
               <span className="text-lg">
                 {getStatusIcon(results.achievableNoPass)}
@@ -142,7 +215,9 @@ export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
               <div className="text-2xl font-bold text-[#FFFFFF]">
                 {results.timeNoPass.days}
               </div>
-              <div className="text-muted text-sm">days</div>
+              <div className="text-muted text-sm">
+                {results.timeNoPass.days === 1 ? "day" : "days"}
+              </div>
               {results.achievableNoPass ? (
                 <div className="text-muted mt-1 text-xs">
                   {results.timeNoPass.completionDate}
@@ -161,8 +236,9 @@ export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
 
           <div className="rounded-lg bg-[#2E3944] p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h4 className="font-semibold text-[#FFFFFF]">
-                🚀 With Season Pass
+              <h4 className="flex items-center gap-2 font-semibold text-[#FFFFFF]">
+                <IoTime className="text-green-400" />
+                With Season Pass
               </h4>
               <span className="text-lg">
                 {getStatusIcon(results.achievableWithPass)}
@@ -172,7 +248,9 @@ export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
               <div className="text-2xl font-bold text-[#FFFFFF]">
                 {results.timeWithPass.days}
               </div>
-              <div className="text-muted text-sm">days</div>
+              <div className="text-muted text-sm">
+                {results.timeWithPass.days === 1 ? "day" : "days"}
+              </div>
               {results.achievableWithPass ? (
                 <div className="text-muted mt-1 text-xs">
                   {results.timeWithPass.completionDate}
@@ -191,118 +269,168 @@ export default function XpResultsSummary({ results }: XpResultsSummaryProps) {
         </div>
       </div>
 
-      {/* Double XP Analysis */}
-      {results.doubleXpResults && (
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
-          <h3 className="mb-4 text-xl font-semibold text-[#FFFFFF]">
-            🔄 Double XP Analysis
-          </h3>
+      {/* XP Options Analysis */}
+      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+        <h3 className="mb-4 text-xl font-semibold text-[#FFFFFF]">
+          XP Options Analysis
+        </h3>
+        {new Date() < new Date(results.importantDates.doubleXpStart) && (
+          <div className="mb-4 text-sm text-gray-400 italic">
+            💡 Double XP analysis will be available starting{" "}
+            {results.importantDates.doubleXpStart}
+          </div>
+        )}
 
-          {/* Without Game Pass Double XP Check */}
-          <div className="mb-6">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="text-lg">
-                {results.achievableNoPass ? (
-                  <FaCheck className="text-green-400" />
-                ) : (
-                  <FaTimes className="text-red-400" />
-                )}
-              </span>
-              <span className="text-[#FFFFFF]">
-                Without Season Pass:{" "}
-                {results.achievableNoPass
-                  ? "Achievable with normal XP"
-                  : "Not achievable with normal XP"}
-              </span>
-            </div>
-            {!results.achievableNoPass && results.doubleXpResults?.noPass && (
-              <div className="ml-6 rounded-lg bg-[#2E3944] p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#FFFFFF]">
-                    Without Season Pass + Double XP:
+        <div className="space-y-4">
+          {/* Without Season Pass Analysis */}
+          <div className="rounded-lg bg-[#2E3944] p-4">
+            <h4 className="mb-3 font-semibold text-[#FFFFFF]">
+              Without Season Pass
+            </h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">
+                  {results.achievableNoPass ? (
+                    <FaCheck className="text-green-400" />
+                  ) : (
+                    <FaTimes className="text-red-400" />
+                  )}
+                </span>
+                <span className="text-[#FFFFFF]">
+                  Normal XP:{" "}
+                  {results.achievableNoPass ? "Achievable" : "Not achievable"}
+                </span>
+                {results.achievableNoPass && (
+                  <span className="text-sm text-green-400">
+                    ({results.timeNoPass.days}{" "}
+                    {results.timeNoPass.days === 1 ? "day" : "days"} - Complete
+                    by: {results.timeNoPass.completionDate})
                   </span>
-                  <span className="text-lg">
-                    {results.doubleXpResults.noPass &&
-                      getStatusIcon(results.doubleXpResults.noPass.achievable)}
-                  </span>
-                </div>
-                {results.doubleXpResults.noPass &&
-                results.doubleXpResults.noPass.achievable ? (
-                  <div className="mt-2 text-center">
-                    <div className="font-medium text-green-400">
-                      Achievable with Double XP
-                    </div>
-                    <div className="text-muted mt-1 text-sm">
-                      Complete by:{" "}
-                      {results.doubleXpResults.noPass.completionDate}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-2 text-center text-red-400">
-                    Not achievable even with Double XP
-                  </div>
                 )}
               </div>
-            )}
+              {/* Double XP option - only show after Double XP starts */}
+              {results.doubleXpResults?.noPass &&
+                new Date() >=
+                  new Date(results.importantDates.doubleXpStart) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {results.doubleXpResults.noPass.achievable ? (
+                        <FaCheck className="text-green-400" />
+                      ) : (
+                        <FaTimes className="text-red-400" />
+                      )}
+                    </span>
+                    <span className="text-[#FFFFFF]">
+                      With Double XP:{" "}
+                      {results.doubleXpResults.noPass.achievable
+                        ? "Achievable (faster completion)"
+                        : "Still not achievable"}
+                    </span>
+                    {results.doubleXpResults.noPass.achievable && (
+                      <span className="text-sm text-green-400">
+                        (
+                        {Math.ceil(
+                          (new Date(
+                            results.doubleXpResults.noPass.completionDate,
+                          ).getTime() -
+                            Date.now()) /
+                            (1000 * 60 * 60 * 24),
+                        )}{" "}
+                        {Math.ceil(
+                          (new Date(
+                            results.doubleXpResults.noPass.completionDate,
+                          ).getTime() -
+                            Date.now()) /
+                            (1000 * 60 * 60 * 24),
+                        ) === 1
+                          ? "day"
+                          : "days"}{" "}
+                        - Complete by:{" "}
+                        {results.doubleXpResults.noPass.completionDate})
+                      </span>
+                    )}
+                  </div>
+                )}
+            </div>
           </div>
 
-          {/* With Game Pass Double XP Check */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="text-lg">
-                {results.achievableWithPass ? (
-                  <FaCheck className="text-green-400" />
-                ) : (
-                  <FaTimes className="text-red-400" />
-                )}
-              </span>
-              <span className="text-[#FFFFFF]">
-                With Season Pass:{" "}
-                {results.achievableWithPass
-                  ? "Achievable with normal XP"
-                  : "Not achievable with normal XP"}
-              </span>
-            </div>
-            {!results.achievableWithPass &&
-              results.doubleXpResults?.withPass && (
-                <div className="ml-6 rounded-lg bg-[#2E3944] p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#FFFFFF]">
-                      With Season Pass + Double XP:
-                    </span>
-                    <span className="text-lg">
-                      {results.doubleXpResults.withPass &&
-                        getStatusIcon(
-                          results.doubleXpResults.withPass.achievable,
-                        )}
-                    </span>
-                  </div>
-                  {results.doubleXpResults.withPass &&
-                  results.doubleXpResults.withPass.achievable ? (
-                    <div className="mt-2 text-center">
-                      <div className="font-medium text-green-400">
-                        Achievable with Double XP
-                      </div>
-                      <div className="text-muted mt-1 text-sm">
-                        Complete by:{" "}
-                        {results.doubleXpResults.withPass.completionDate}
-                      </div>
-                    </div>
+          {/* With Season Pass Analysis */}
+          <div className="rounded-lg bg-[#2E3944] p-4">
+            <h4 className="mb-3 font-semibold text-[#FFFFFF]">
+              With Season Pass
+            </h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">
+                  {results.achievableWithPass ? (
+                    <FaCheck className="text-green-400" />
                   ) : (
-                    <div className="mt-2 text-center text-red-400">
-                      Not achievable even with Double XP
-                    </div>
+                    <FaTimes className="text-red-400" />
                   )}
-                </div>
-              )}
+                </span>
+                <span className="text-[#FFFFFF]">
+                  Normal XP:{" "}
+                  {results.achievableWithPass ? "Achievable" : "Not achievable"}
+                </span>
+                {results.achievableWithPass && (
+                  <span className="text-sm text-green-400">
+                    ({results.timeWithPass.days}{" "}
+                    {results.timeWithPass.days === 1 ? "day" : "days"} -
+                    Complete by: {results.timeWithPass.completionDate})
+                  </span>
+                )}
+              </div>
+              {/* Double XP option - only show after Double XP starts */}
+              {results.doubleXpResults?.withPass &&
+                new Date() >=
+                  new Date(results.importantDates.doubleXpStart) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {results.doubleXpResults.withPass.achievable ? (
+                        <FaCheck className="text-green-400" />
+                      ) : (
+                        <FaTimes className="text-red-400" />
+                      )}
+                    </span>
+                    <span className="text-[#FFFFFF]">
+                      With Double XP:{" "}
+                      {results.doubleXpResults.withPass.achievable
+                        ? "Achievable (faster completion)"
+                        : "Still not achievable"}
+                    </span>
+                    {results.doubleXpResults.withPass.achievable && (
+                      <span className="text-sm text-green-400">
+                        (
+                        {Math.ceil(
+                          (new Date(
+                            results.doubleXpResults.withPass.completionDate,
+                          ).getTime() -
+                            Date.now()) /
+                            (1000 * 60 * 60 * 24),
+                        )}{" "}
+                        {Math.ceil(
+                          (new Date(
+                            results.doubleXpResults.withPass.completionDate,
+                          ).getTime() -
+                            Date.now()) /
+                            (1000 * 60 * 60 * 24),
+                        ) === 1
+                          ? "day"
+                          : "days"}{" "}
+                        - Complete by:{" "}
+                        {results.doubleXpResults.withPass.completionDate})
+                      </span>
+                    )}
+                  </div>
+                )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Important Dates */}
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
-        <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#FFFFFF]">
-          <BsCalendar2Date className="text-blue-400" />
+        <h3 className="mb-4 text-xl font-semibold text-[#FFFFFF]">
           Important Season Dates
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

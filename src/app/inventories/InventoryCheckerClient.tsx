@@ -4,55 +4,17 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
-import { fetchItems, fetchDupeFinderData } from "@/utils/api";
+import { fetchItems } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
-import { UserConnectionData } from "./UserDataStreamer";
+import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Season } from "@/types/seasons";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-
-interface TradeHistoryEntry {
-  UserId: number;
-  TradeTime: number;
-}
-
-interface InventoryItem {
-  tradePopularMetric: number | null;
-  item_id: number;
-  level: number | null;
-  timesTraded: number;
-  id: string;
-  categoryTitle: string;
-  info: Array<{
-    title: string;
-    value: string;
-  }>;
-  uniqueCirculation: number;
-  season: number | null;
-  title: string;
-  isOriginalOwner: boolean;
-  history?: TradeHistoryEntry[];
-}
-
-interface InventoryData {
-  user_id: string;
-  data: InventoryItem[];
-  item_count: number;
-  level: number;
-  money: number;
-  xp: number;
-  gamepasses: string[];
-  has_season_pass: boolean;
-  job_id: string;
-  bot_id: string;
-  scan_count: number;
-  created_at: number;
-  updated_at: number;
-}
 
 interface InventoryCheckerClientProps {
   initialData?: InventoryData;
@@ -61,6 +23,8 @@ interface InventoryCheckerClientProps {
   robloxUsers?: Record<string, RobloxUser>;
   robloxAvatars?: Record<string, string>;
   userConnectionData?: UserConnectionData | null;
+  initialDupeData?: unknown;
+  currentSeason?: Season | null;
   error?: string;
   isLoading?: boolean;
 }
@@ -72,6 +36,8 @@ export default function InventoryCheckerClient({
   robloxUsers: initialRobloxUsers,
   robloxAvatars: initialRobloxAvatars,
   userConnectionData,
+  initialDupeData,
+  currentSeason = null,
   error,
   isLoading: externalIsLoading,
 }: InventoryCheckerClientProps) {
@@ -92,8 +58,12 @@ export default function InventoryCheckerClient({
   );
   const [itemsData, setItemsData] = useState<Item[]>([]);
   const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
-  const [dupedItems, setDupedItems] = useState<unknown[]>([]);
-  const [isLoadingDupes, setIsLoadingDupes] = useState(false);
+  const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
+    null,
+  );
+  const dupedItems =
+    initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
+  const isLoadingDupes = false;
 
   const router = useRouter();
 
@@ -104,16 +74,27 @@ export default function InventoryCheckerClient({
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
 
+  // Use refreshed data if available, otherwise use initial data
+  const currentData = refreshedData || initialData;
+
+  // Function to handle data refresh
+  const handleDataRefresh = (newData: InventoryData) => {
+    setRefreshedData(newData);
+  };
+
   // Show toast notifications for scan status
   useEffect(() => {
     if (
       scanWebSocket.message &&
-      scanWebSocket.message.includes("You will be scanned when you join")
+      scanWebSocket.message.includes("User not found in game")
     ) {
-      toast.success("You will be scanned when you join a trading server", {
-        duration: 4000,
-        position: "bottom-right",
-      });
+      toast.error(
+        "User not found in game. Please join a trade server and try again.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
     } else if (
       scanWebSocket.message &&
       scanWebSocket.message.includes("User found in game")
@@ -303,31 +284,6 @@ export default function InventoryCheckerClient({
       loadItemsData();
     }
   }, [initialData]);
-
-  // Load duped items data
-  useEffect(() => {
-    const loadDupedItems = async () => {
-      if (!robloxId) return;
-
-      try {
-        setIsLoadingDupes(true);
-        const dupeData = await fetchDupeFinderData(robloxId);
-
-        if (dupeData && !dupeData.error && Array.isArray(dupeData)) {
-          setDupedItems(dupeData);
-        } else {
-          setDupedItems([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch duped items:", error);
-        setDupedItems([]);
-      } finally {
-        setIsLoadingDupes(false);
-      }
-    };
-
-    loadDupedItems();
-  }, [robloxId]);
 
   // Progressive loading for trade history users and missing original owners
   const loadPageData = useCallback(
@@ -811,22 +767,24 @@ export default function InventoryCheckerClient({
       )}
 
       {/* User Stats and Inventory Items - Only show when no error and has data */}
-      {!error && initialData && (
+      {!error && initialData && currentData && (
         <>
           {/* User Stats */}
           <UserStats
-            initialData={initialData}
+            initialData={currentData}
             robloxUsers={robloxUsers}
             robloxAvatars={robloxAvatars}
             userConnectionData={userConnectionData}
             itemsData={itemsData}
             dupedItems={dupedItems}
             isLoadingDupes={isLoadingDupes}
+            onDataRefresh={handleDataRefresh}
+            currentSeason={currentSeason}
           />
 
           {/* Inventory Items */}
           <InventoryItems
-            initialData={initialData}
+            initialData={currentData}
             robloxUsers={robloxUsers}
             robloxAvatars={robloxAvatars}
             onItemClick={handleItemClick}

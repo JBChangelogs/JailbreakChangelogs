@@ -22,14 +22,14 @@ export default function XpTimeResults({
         <div className="rounded bg-[#2E3944] p-3 text-center">
           <div className="text-muted mb-1 text-sm">Without Season Pass</div>
           <div className="text-lg font-medium text-[#FFFFFF]">
-            {timeNoPass.days} days
+            {timeNoPass.days} {timeNoPass.days === 1 ? "day" : "days"}
           </div>
           <div className="text-muted text-sm">{timeNoPass.completionDate}</div>
         </div>
         <div className="rounded bg-[#2E3944] p-3 text-center">
           <div className="text-muted mb-1 text-sm">With Season Pass</div>
           <div className="text-lg font-medium text-[#FFFFFF]">
-            {timeWithPass.days} days
+            {timeWithPass.days} {timeWithPass.days === 1 ? "day" : "days"}
           </div>
           <div className="text-muted text-sm">
             {timeWithPass.completionDate}

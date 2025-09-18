@@ -232,9 +232,13 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               data.message.toLowerCase().includes("not found")
             ) {
               setMessage(
-                "You will be scanned when you join a trading server to be scanned.",
+                "User not found in game. Please join a trade server and try again.",
               );
               setProgress(undefined);
+              setError(
+                "User not found in game. Please join a trade server and try again.",
+              );
+              setStatus("error");
 
               setTimeout(() => {
                 if (

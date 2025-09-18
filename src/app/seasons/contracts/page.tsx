@@ -40,20 +40,10 @@ export default async function SeasonContractsPage() {
         <Breadcrumb />
 
         <div className="mt-8">
-          <div className="mb-4 flex items-center gap-3">
-            <h1 className="text-4xl font-bold text-white">Weekly Contracts</h1>
-            {!seasonEnded && (
-              <span className="rounded bg-[#5865F2] px-2 py-1 text-[12px] font-semibold text-white uppercase">
-                New
-              </span>
-            )}
-          </div>
-          <p className="mb-8 text-lg text-gray-300">
-            Quickly check your current weekly contracts for Roblox Jailbreak.
-          </p>
+          {/* Countdown Section */}
           {!seasonEnded && (
-            <div className="mb-8">
-              <WeeklyContractsCountdown />
+            <div className="mb-12">
+              <WeeklyContractsCountdown season={latestSeason} />
             </div>
           )}
         </div>

@@ -22,12 +22,15 @@ import { OpenInNew } from "@mui/icons-material";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { useAuthContext } from "@/contexts/AuthContext";
+import SupporterModal from "@/components/Modals/SupporterModal";
+import { useSupporterModal } from "@/hooks/useSupporterModal";
 // import { getToken } from '@/utils/auth';
 // import { PUBLIC_API_URL } from '@/utils/api';
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
   const [userData, setUserData] = useState<UserData | null>(null);
+  const { modalState, closeModal, openModal } = useSupporterModal();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [showHighlight, setShowHighlight] = useState(false);
@@ -59,7 +62,7 @@ export default function SettingsPage() {
     settings,
     loading: settingsLoading,
     handleSettingChange,
-  } = useSettings(userData);
+  } = useSettings(userData, openModal);
 
   useEffect(() => {
     if (user) {
@@ -351,12 +354,7 @@ export default function SettingsPage() {
                       value={settings[typedKey]}
                       config={settingsConfig[key as SettingKey]}
                       onChange={handleSettingChange}
-                      disabled={
-                        (key === "banner_discord" ||
-                          key === "avatar_discord") &&
-                        userData.premiumtype === 0 &&
-                        settings[typedKey] === 1
-                      }
+                      disabled={false}
                       userData={userData}
                     />
                     {category === "Appearance Settings" &&
@@ -547,6 +545,17 @@ export default function SettingsPage() {
         <RobloxConnection userData={userData} />
         <DeleteAccount />
       </Paper>
+
+      {/* Supporter Modal */}
+      <SupporterModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        feature={modalState.feature}
+        currentTier={modalState.currentTier}
+        requiredTier={modalState.requiredTier}
+        currentLimit={modalState.currentLimit}
+        requiredLimit={modalState.requiredLimit}
+      />
     </Container>
   );
 }

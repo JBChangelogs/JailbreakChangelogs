@@ -13,7 +13,14 @@ export const updateBanner = async (url: string): Promise<string> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update banner");
+    let errorMessage = errorData.message || "Failed to update banner";
+
+    // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
+    if (response.status === 403 && errorMessage.includes("premium tier")) {
+      errorMessage = errorMessage.replace(/premium tier/gi, "Supporter Tier");
+    }
+
+    throw new Error(errorMessage);
   }
 
   return url;
@@ -32,7 +39,14 @@ export const updateAvatar = async (url: string): Promise<string> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update avatar");
+    let errorMessage = errorData.message || "Failed to update avatar";
+
+    // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
+    if (response.status === 403 && errorMessage.includes("premium tier")) {
+      errorMessage = errorMessage.replace(/premium tier/gi, "Supporter Tier");
+    }
+
+    throw new Error(errorMessage);
   }
 
   return url;
@@ -74,7 +88,14 @@ export const updateSettings = async (
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update settings");
+    let errorMessage = errorData.message || "Failed to update settings";
+
+    // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
+    if (response.status === 403 && errorMessage.includes("premium tier")) {
+      errorMessage = errorMessage.replace(/premium tier/gi, "Supporter Tier");
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json();

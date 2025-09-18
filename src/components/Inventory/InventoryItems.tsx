@@ -18,6 +18,7 @@ import {
 } from "@/utils/images";
 import { RobloxUser, Item } from "@/types";
 import { formatCurrencyValue, parseCurrencyValue } from "@/utils/currency";
+import { DefaultAvatar } from "@/utils/avatar";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
@@ -308,7 +309,7 @@ export default function InventoryItems({
         case "random":
           return Math.random() - 0.5;
         case "duplicates":
-          // Group duplicates together and sort by creation date
+          // Group duplicates together and sort alphabetically by item name, then by duplicate number
           const aKey = `${a.categoryTitle}-${a.title}`;
           const bKey = `${b.categoryTitle}-${b.title}`;
 
@@ -324,12 +325,25 @@ export default function InventoryItems({
           if (aCount > 1 && bCount === 1) return -1; // a is duplicate, b is single
           if (aCount === 1 && bCount > 1) return 1; // a is single, b is duplicate
 
-          // If both are duplicates or both are singles, sort by category then title
-          const categoryCompare = a.categoryTitle.localeCompare(
-            b.categoryTitle,
-          );
-          if (categoryCompare !== 0) return categoryCompare;
-          return a.title.localeCompare(b.title);
+          // If both are duplicates or both are singles, sort by item name alphabetically
+          const itemNameCompare = a.title.localeCompare(b.title);
+          if (itemNameCompare !== 0) return itemNameCompare;
+
+          // If same item name, sort by creation date (oldest first) to match duplicate numbering
+          const aCreated = a.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          const bCreated = b.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          if (aCreated && bCreated) {
+            const aDate = new Date(aCreated);
+            const bDate = new Date(bCreated);
+            if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+              return aDate.getTime() - bDate.getTime();
+            }
+          }
+          return 0;
         case "alpha-asc":
           return a.title.localeCompare(b.title);
         case "alpha-desc":
@@ -426,6 +440,23 @@ export default function InventoryItems({
     getDupedValueForItem,
   ]);
 
+  // Check if there are any duplicates in the filtered data
+  const hasDuplicates = useMemo(() => {
+    const itemCounts = new Map<string, number>();
+    filteredItems.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
+    });
+    return Array.from(itemCounts.values()).some((count) => count > 1);
+  }, [filteredItems]);
+
+  // Reset sort order if duplicates option is selected but no duplicates exist
+  useEffect(() => {
+    if (sortOrder === "duplicates" && !hasDuplicates) {
+      setSortOrder("cash-desc");
+    }
+  }, [sortOrder, hasDuplicates]);
+
   // Get unique categories from the data
   const availableCategories = useMemo(() => {
     if (!initialData) return [];
@@ -493,7 +524,9 @@ export default function InventoryItems({
 
         // Assign numbers starting from 1
         sortedItems.forEach((item, index) => {
-          orders.set(item.id, index + 1);
+          // Use a unique key that combines id and other unique properties to handle items with same id
+          const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
+          orders.set(uniqueKey, index + 1);
         });
       }
     });
@@ -734,7 +767,9 @@ export default function InventoryItems({
                     label: "Random",
                     options: [{ value: "random", label: "Random Order" }],
                   },
-                  { value: "duplicates", label: "Group Duplicates" },
+                  ...(hasDuplicates
+                    ? [{ value: "duplicates", label: "Group Duplicates" }]
+                    : []),
                   {
                     label: "Alphabetically",
                     options: [
@@ -952,6 +987,17 @@ export default function InventoryItems({
         </div>
       )}
 
+      {/* Pro Tip - Only show when there are results and not filtering */}
+      {!isFiltering && filteredItems.length > 0 && (
+        <div className="mb-4 rounded-lg border border-[#5865F2] bg-[#5865F2]/10 p-3">
+          <div className="flex items-center gap-2 text-sm text-[#FFFFFF]">
+            <span className="text-[#5865F2]">💡</span>
+            <span className="font-medium">Pro Tip:</span>
+            <span>Click on any item card to view its trading history.</span>
+          </div>
+        </div>
+      )}
+
       {/* Items Grid - Only show when not filtering */}
       {!isFiltering && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -962,7 +1008,8 @@ export default function InventoryItems({
             );
             const itemKey = `${item.categoryTitle}-${item.title}`;
             const duplicateCount = itemCounts.get(itemKey) || 1;
-            const duplicateOrder = duplicateOrders.get(item.id) || 1;
+            const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
+            const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
             const isDuplicate = duplicateCount > 1;
 
             return (
@@ -997,7 +1044,7 @@ export default function InventoryItems({
                 </div>
 
                 {/* Item Image - Always show container for consistent layout */}
-                <div className="relative mb-3 h-40 w-full overflow-hidden rounded-lg bg-[#212A31]">
+                <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg bg-[#212A31]">
                   {!["Brakes"].includes(item.categoryTitle) ? (
                     isVideoItem(item.title) ? (
                       <video
@@ -1101,19 +1148,7 @@ export default function InventoryItems({
                                 className="rounded-full"
                               />
                             ) : (
-                              <svg
-                                className="text-muted h-3 w-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                />
-                              </svg>
+                              <DefaultAvatar />
                             )}
                           </div>
                           <a
@@ -1121,6 +1156,7 @@ export default function InventoryItems({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-center break-words text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             {isOriginalOwner
                               ? getRobloxUserDisplay(initialData?.user_id || "")

@@ -3,7 +3,16 @@ import { UserData, UserSettings } from "@/types/auth";
 import { updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
 
-export const useSettings = (userData: UserData | null) => {
+export const useSettings = (
+  userData: UserData | null,
+  openModal?: (state: {
+    feature: string;
+    currentTier: number;
+    requiredTier: number;
+    currentLimit?: string | number;
+    requiredLimit?: string | number;
+  }) => void,
+) => {
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,6 +28,27 @@ export const useSettings = (userData: UserData | null) => {
     value: number,
   ) => {
     if (!settings || !userData) return;
+
+    // Check if user is trying to enable custom avatar/banner but doesn't have Tier 2+
+    if (
+      (name === "avatar_discord" || name === "banner_discord") &&
+      value === 0
+    ) {
+      if (!userData.premiumtype || userData.premiumtype < 2) {
+        // Show supporter modal instead of making API call
+        if (openModal) {
+          openModal({
+            feature:
+              name === "avatar_discord" ? "custom_avatar" : "custom_banner",
+            currentTier: userData.premiumtype || 0,
+            requiredTier: 2,
+            currentLimit: userData.premiumtype || 0,
+            requiredLimit: "Supporter Tier 2",
+          });
+        }
+        return; // Don't proceed with the API call
+      }
+    }
 
     try {
       // Update local state immediately for better UX
@@ -68,7 +98,9 @@ export const useSettings = (userData: UserData | null) => {
       toast.success("Setting updated successfully");
     } catch (error) {
       console.error("Error updating settings:", error);
-      toast.error("Failed to update settings");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update settings";
+      toast.error(errorMessage);
 
       // Revert local state on error
       setSettings(settings);

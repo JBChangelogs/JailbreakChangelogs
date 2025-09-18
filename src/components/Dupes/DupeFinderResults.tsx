@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { DefaultAvatar } from "@/utils/avatar";
 import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
@@ -430,7 +431,7 @@ export default function DupeFinderResults({
     return [...filteredData].sort((a, b) => {
       switch (sortOrder) {
         case "duplicates":
-          // Group duplicates together and sort by creation date
+          // Group duplicates together and sort alphabetically by item name, then by duplicate number
           const aKey = `${a.categoryTitle}-${a.title}`;
           const bKey = `${b.categoryTitle}-${b.title}`;
 
@@ -446,12 +447,25 @@ export default function DupeFinderResults({
           if (aCount > 1 && bCount === 1) return -1; // a is duplicate, b is single
           if (aCount === 1 && bCount > 1) return 1; // a is single, b is duplicate
 
-          // If both are duplicates or both are singles, sort by category then title
-          const categoryCompare = a.categoryTitle.localeCompare(
-            b.categoryTitle,
-          );
-          if (categoryCompare !== 0) return categoryCompare;
-          return a.title.localeCompare(b.title);
+          // If both are duplicates or both are singles, sort by item name alphabetically
+          const itemNameCompare = a.title.localeCompare(b.title);
+          if (itemNameCompare !== 0) return itemNameCompare;
+
+          // If same item name, sort by creation date (oldest first) to match duplicate numbering
+          const aCreated = a.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          const bCreated = b.info.find(
+            (info) => info.title === "Created At",
+          )?.value;
+          if (aCreated && bCreated) {
+            const aDate = new Date(aCreated);
+            const bDate = new Date(bCreated);
+            if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+              return aDate.getTime() - bDate.getTime();
+            }
+          }
+          return 0;
         case "alpha-asc":
           return a.title.localeCompare(b.title);
         case "alpha-desc":
@@ -478,6 +492,23 @@ export default function DupeFinderResults({
   const totalPages = useMemo(() => {
     return Math.ceil(sortedData.length / itemsPerPage);
   }, [sortedData.length, itemsPerPage]);
+
+  // Check if there are any duplicates in the filtered data
+  const hasDuplicates = useMemo(() => {
+    const itemCounts = new Map<string, number>();
+    filteredData.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
+    });
+    return Array.from(itemCounts.values()).some((count) => count > 1);
+  }, [filteredData]);
+
+  // Reset sort order if duplicates option is selected but no duplicates exist
+  useEffect(() => {
+    if (sortOrder === "duplicates" && !hasDuplicates) {
+      setSortOrder("created-desc");
+    }
+  }, [sortOrder, hasDuplicates]);
 
   // Create a map to track duplicate items
   const itemCounts = useMemo(() => {
@@ -658,19 +689,7 @@ export default function DupeFinderResults({
                 />
               ) : (
                 <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
-                  <svg
-                    className="text-muted h-8 w-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+                  <DefaultAvatar />
                 </div>
               )}
               <div className="min-w-0 flex-1">
@@ -1036,6 +1055,8 @@ export default function DupeFinderResults({
                           return "Logged On (Oldest to Newest)";
                         case "created-desc":
                           return "Logged On (Newest to Oldest)";
+                        case "duplicates":
+                          return "Group Duplicates";
                         default:
                           return "Random Order";
                       }
@@ -1075,6 +1096,14 @@ export default function DupeFinderResults({
                         },
                       ],
                     },
+                    ...(hasDuplicates
+                      ? [
+                          {
+                            value: "duplicates",
+                            label: "Group Duplicates",
+                          },
+                        ]
+                      : []),
                     {
                       label: "Alphabetically",
                       options: [
@@ -1094,10 +1123,6 @@ export default function DupeFinderResults({
                           label: "Monthly Unique (High to Low)",
                         },
                       ],
-                    },
-                    {
-                      value: "duplicates",
-                      label: "Group Duplicates",
                     },
                   ]}
                   classNamePrefix="react-select"
@@ -1228,6 +1253,17 @@ export default function DupeFinderResults({
           </div>
         )}
 
+        {/* Pro Tip - Only show when there are results */}
+        {filteredData.length > 0 && (
+          <div className="mb-4 rounded-lg border border-[#5865F2] bg-[#5865F2]/10 p-3">
+            <div className="flex items-center gap-2 text-sm text-[#FFFFFF]">
+              <span className="text-[#5865F2]">💡</span>
+              <span className="font-medium">Pro Tip:</span>
+              <span>Click on any item card to view its trading history.</span>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {paginatedData.map((item) => {
             const itemKey = `${item.categoryTitle}-${item.title}`;
@@ -1263,7 +1299,7 @@ export default function DupeFinderResults({
                 </div>
 
                 {/* Item Image */}
-                <div className="relative mb-3 h-40 w-full overflow-hidden rounded-lg bg-[#212A31]">
+                <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg bg-[#212A31]">
                   {!["Brakes"].includes(item.categoryTitle) ? (
                     isVideoItem(item.title) ? (
                       <video
@@ -1358,19 +1394,7 @@ export default function DupeFinderResults({
                               className="rounded-full"
                             />
                           ) : (
-                            <svg
-                              className="text-muted h-3 w-3"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                              />
-                            </svg>
+                            <DefaultAvatar />
                           )}
                         </div>
                         <a
@@ -1378,6 +1402,7 @@ export default function DupeFinderResults({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-center break-words text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {getUserDisplay(item.latest_owner)}
                         </a>

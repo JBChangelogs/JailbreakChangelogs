@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
+import { DefaultAvatar } from "@/utils/avatar";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -75,6 +76,32 @@ export default function TradeHistoryModal({
                       Total Trades: {item.history.length - 1}
                     </p>
                   )}
+                {/* Loading indicator in header */}
+                {loadingUserIds.size > 0 && (
+                  <div className="mt-2 flex items-center gap-2 text-blue-400">
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span className="text-sm">Loading user profiles...</span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={onClose}
@@ -104,35 +131,6 @@ export default function TradeHistoryModal({
                 </div>
               )}
           </div>
-
-          {/* Loading indicator - sticky at top */}
-          {loadingUserIds.size > 0 && (
-            <div className="sticky top-0 z-10 border-b border-[#2E3944] bg-[#212A31] p-4">
-              <div className="flex items-center justify-center gap-2 text-blue-400">
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span className="text-sm">Loading user profiles...</span>
-              </div>
-            </div>
-          )}
 
           {/* Modal Content */}
           <div className="max-h-[60vh] overflow-y-auto bg-[#2E3944] p-6">
@@ -215,19 +213,7 @@ export default function TradeHistoryModal({
                                             className="rounded-full"
                                           />
                                         ) : (
-                                          <svg
-                                            className="text-muted h-3 w-3"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                            />
-                                          </svg>
+                                          <DefaultAvatar />
                                         )}
                                       </div>
                                       <a
@@ -280,19 +266,7 @@ export default function TradeHistoryModal({
                                             className="rounded-full"
                                           />
                                         ) : (
-                                          <svg
-                                            className="text-muted h-3 w-3"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                            />
-                                          </svg>
+                                          <DefaultAvatar />
                                         )}
                                       </div>
                                       <a

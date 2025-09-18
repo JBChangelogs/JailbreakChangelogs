@@ -92,12 +92,26 @@ function getUserBannerUrl(user: UserData): string | null {
   }
 
   // If user has explicitly chosen to use custom banner (Discord toggle off)
+  // BUT only if they have Tier 2+ (custom banners require Tier 2+)
   if (
     user.settings?.banner_discord === 0 &&
+    user.premiumtype &&
+    user.premiumtype >= 2 &&
     user.custom_banner &&
     user.custom_banner !== "N/A"
   ) {
     return user.custom_banner;
+  }
+
+  // If user is Tier 1 or below but has custom banner setting, fall back to Discord banner
+  if (
+    user.settings?.banner_discord === 0 &&
+    (!user.premiumtype || user.premiumtype < 2)
+  ) {
+    // Only use Discord banner if it exists and is not "None"
+    if (user.banner && user.banner !== "None") {
+      return `https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=4096`;
+    }
   }
 
   // Default to null to use fallback
@@ -259,11 +273,26 @@ export async function GET(request: Request) {
       useDefaultAvatar = true;
     }
   } else if (
+    user.settings?.avatar_discord === 0 &&
+    user.premiumtype &&
+    user.premiumtype >= 2 &&
     user.custom_avatar &&
     user.custom_avatar !== "N/A" &&
     user.custom_avatar !== null
   ) {
+    // User has explicitly chosen custom avatar AND has Tier 2+
     avatarUrl = user.custom_avatar;
+  } else if (
+    user.settings?.avatar_discord === 0 &&
+    (!user.premiumtype || user.premiumtype < 2)
+  ) {
+    // User is Tier 1 or below but has custom avatar setting, fall back to Discord avatar
+    if (user.avatar && user.avatar !== "None") {
+      const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`;
+      avatarUrl = discordAvatarUrl;
+    } else {
+      useDefaultAvatar = true;
+    }
   } else {
     useDefaultAvatar = true;
   }

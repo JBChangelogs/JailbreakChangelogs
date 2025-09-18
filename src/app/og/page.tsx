@@ -5,6 +5,7 @@ import OGConfetti from "@/components/OG/OGConfetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/UI/ComingSoon";
+import ConnectedBotsPolling from "@/components/UI/ConnectedBotsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { Suspense } from "react";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
@@ -32,6 +33,8 @@ export default function OGFinderPage() {
       <Suspense fallback={<StatsSkeleton />}>
         <StatsSection />
       </Suspense>
+
+      <ConnectedBotsPolling />
 
       <OGFinderFAQ />
     </div>

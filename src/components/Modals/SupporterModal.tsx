@@ -6,6 +6,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { getAllowedFileExtensions } from "@/config/settings";
 
 interface SupporterModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ const SUPPORTER_TIERS = [
     name: "Supporter I",
     price: "75R$",
     priceAlt: "or $1 on Ko-fi",
-    features: ["Post Comments up to 400 characters", "Custom Regular Avatar"],
+    features: ["Post Comments up to 400 characters"],
     color: "border-[#CD7F32]",
     badgeColor: "from-[#CD7F32] to-[#B87333]",
   },
@@ -36,7 +37,12 @@ const SUPPORTER_TIERS = [
     name: "Supporter II",
     price: "200R$",
     priceAlt: "or $3 on Ko-fi",
-    features: ["Post Comments up to 800 characters", "Custom Regular Banner"],
+    features: [
+      "Post Comments up to 800 characters",
+      `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
+      `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
+      "On-Demand Inventory Refresh",
+    ],
     color: "border-[#C0C0C0]",
     badgeColor: "from-[#C0C0C0] to-[#A9A9A9]",
     recommended: true,
@@ -46,9 +52,9 @@ const SUPPORTER_TIERS = [
     price: "400R$",
     priceAlt: "or $5 on Ko-fi",
     features: [
-      "Post Comments up to 2000 characters",
-      "Custom Animated Avatar",
-      "Custom Animated Banner",
+      "Post Comments up to 2,000 characters",
+      "Square Avatar Border",
+      "On-Demand Inventory Refresh",
     ],
     color: "border-[#FFD700]",
     badgeColor: "from-[#FFD700] to-[#DAA520]",
@@ -74,7 +80,7 @@ const getFeatureDescription = (
       return {
         title: "Unlock Custom Avatars",
         description:
-          "You're trying to set a custom avatar, but this feature requires a higher supporter tier. Upgrade to unlock custom avatar functionality!",
+          "You're trying to upload and use a custom avatar, but this feature requires Supporter II or higher. Upgrade to unlock custom avatar functionality!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -82,23 +88,7 @@ const getFeatureDescription = (
       return {
         title: "Unlock Custom Banners",
         description:
-          "You're trying to set a custom banner, but this feature requires a higher supporter tier. Upgrade to unlock custom banner functionality!",
-        current: `Current tier: ${currentLimit}`,
-        required: `Required: ${requiredLimit}`,
-      };
-    case "animated_avatar":
-      return {
-        title: "Unlock Animated Avatars",
-        description:
-          "You're trying to set an animated avatar (GIF), but this feature requires the highest supporter tier. Upgrade to unlock animated avatar functionality!",
-        current: `Current tier: ${currentLimit}`,
-        required: `Required: ${requiredLimit}`,
-      };
-    case "animated_banner":
-      return {
-        title: "Unlock Animated Banners",
-        description:
-          "You're trying to set an animated banner (GIF), but this feature requires the highest supporter tier. Upgrade to unlock animated banner functionality!",
+          "You're trying to upload and use a custom banner, but this feature requires Supporter II or higher. Upgrade to unlock custom banner functionality!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -107,6 +97,14 @@ const getFeatureDescription = (
         title: "Unlock Longer Trade Ad Durations",
         description:
           "You're trying to create a trade ad with a duration above your current tier. Upgrade to unlock longer expiration times!",
+        current: `Current tier: ${currentLimit}`,
+        required: `Required: ${requiredLimit}`,
+      };
+    case "inventory_refresh":
+      return {
+        title: "Unlock On-Demand Inventory Refresh",
+        description:
+          "You're trying to refresh inventory data on-demand, but this feature requires Supporter II or higher. Upgrade to unlock instant inventory refreshes anytime!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -171,7 +169,7 @@ export default function SupporterModal({
 
               {featureInfo.current && (
                 <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4">
-                  <span className="text-sm text-[#748D92]">
+                  <span className="text-sm font-medium text-white">
                     {featureInfo.current}
                   </span>
                 </div>
@@ -263,25 +261,21 @@ export default function SupporterModal({
                           } else if (feature === "custom_avatar") {
                             return (
                               <span className="block text-gray-300">
-                                Custom Regular Avatar
+                                Upload and Use Custom Avatars (
+                                {getAllowedFileExtensions()})
                               </span>
                             );
                           } else if (feature === "custom_banner") {
                             return (
                               <span className="block text-gray-300">
-                                Custom Regular Banner
+                                Upload and Use Custom Banners (
+                                {getAllowedFileExtensions()})
                               </span>
                             );
-                          } else if (feature === "animated_avatar") {
+                          } else if (feature === "inventory_refresh") {
                             return (
                               <span className="block text-gray-300">
-                                Custom Animated Avatar
-                              </span>
-                            );
-                          } else if (feature === "animated_banner") {
-                            return (
-                              <span className="block text-gray-300">
-                                Custom Animated Banner
+                                On-Demand Inventory Refresh
                               </span>
                             );
                           } else {
@@ -311,7 +305,7 @@ export default function SupporterModal({
               </Link>
               <button
                 onClick={onClose}
-                className="rounded-lg border border-[#37424D] px-6 py-3 text-[#D3D9D4] transition-colors hover:bg-[#2E3944] hover:text-white"
+                className="cursor-pointer rounded-lg border border-[#37424D] bg-[#2E3944] px-6 py-3 text-[#D3D9D4] transition-colors hover:bg-[#37424D] hover:text-white"
               >
                 Maybe Later
               </button>
@@ -319,10 +313,10 @@ export default function SupporterModal({
 
             {/* Footer Note */}
             <div className="mt-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-              <p className="text-center text-xs text-[#748D92]">
-                💡 <strong>Pro tip:</strong> All supporter purchases are
-                one-time only and non-refundable! Once you purchase, you keep
-                the perks forever.
+              <p className="text-center text-xs text-[#B8C5CA]">
+                💡 <strong className="text-[#D3D9D4]">Pro tip:</strong> All
+                supporter purchases are one-time only and non-refundable! Once
+                you purchase, you keep the perks forever.
               </p>
             </div>
           </div>

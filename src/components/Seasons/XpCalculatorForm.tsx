@@ -11,8 +11,6 @@ interface XpCalculatorFormProps {
   targetLevel: number;
   onLevelChange: (level: number) => void;
   onXpChange: (xp: number) => void;
-  onCalculate: () => void;
-  isCalculating?: boolean;
   season: Season; // Add season prop to access XP data
 }
 
@@ -22,8 +20,6 @@ export default function XpCalculatorForm({
   targetLevel,
   onLevelChange,
   onXpChange,
-  onCalculate,
-  isCalculating = false,
   season,
 }: XpCalculatorFormProps) {
   const [selectLoaded, setSelectLoaded] = useState(false);
@@ -128,10 +124,12 @@ export default function XpCalculatorForm({
               onChange={(option: unknown) => {
                 if (!option) {
                   onLevelChange(1);
+                  onXpChange(0); // Reset XP when level changes
                   return;
                 }
                 const newLevel = (option as { value: number }).value;
                 onLevelChange(newLevel);
+                onXpChange(0); // Reset XP when level changes
               }}
               options={Array.from({ length: targetLevel - 1 }, (_, i) => ({
                 value: i + 1,
@@ -210,14 +208,6 @@ export default function XpCalculatorForm({
           </div>
         </div>
       </div>
-
-      <button
-        onClick={onCalculate}
-        disabled={isCalculating}
-        className="w-full rounded-lg bg-[#124E66] px-6 py-3 font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isCalculating ? "Calculating…" : "🚀 Calculate My Progress"}
-      </button>
     </div>
   );
 }

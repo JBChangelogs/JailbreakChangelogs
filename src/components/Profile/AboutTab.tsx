@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
-import { Tooltip } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
+  ssr: false,
+});
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";

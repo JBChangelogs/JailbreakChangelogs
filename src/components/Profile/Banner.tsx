@@ -8,6 +8,7 @@ interface BannerProps {
   banner?: string;
   customBanner?: string;
   settings?: UserSettings;
+  premiumType?: number;
 }
 
 // Move static data outside component
@@ -38,6 +39,7 @@ export const Banner = ({
   banner,
   customBanner,
   settings,
+  premiumType,
 }: BannerProps) => {
   const [fallbackBanner, setFallbackBanner] = useState<string | null>(null);
   const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
@@ -85,8 +87,11 @@ export const Banner = ({
     }
 
     // If user has explicitly chosen to use custom banner (Discord toggle off)
+    // BUT only if they have Tier 2+ (custom banners require Tier 2+)
     if (
       settings?.banner_discord === 0 &&
+      premiumType &&
+      premiumType >= 2 &&
       customBanner &&
       customBanner !== "N/A"
     ) {
@@ -95,6 +100,18 @@ export const Banner = ({
         alt: "Profile banner",
         onError: handleBannerError,
       };
+    }
+
+    // If user is Tier 1 or below but has custom banner setting, fall back to Discord banner
+    if (settings?.banner_discord === 0 && (!premiumType || premiumType < 2)) {
+      // Only show Discord banner if it exists and is not "None"
+      if (banner && banner !== "None") {
+        return {
+          src: getBannerUrl(userId, banner),
+          alt: "Profile banner",
+          onError: handleBannerError,
+        };
+      }
     }
 
     // Default to the calculated fallback

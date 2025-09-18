@@ -164,8 +164,11 @@ export const UserAvatar = ({
     }
 
     // If user has explicitly chosen to use custom avatar (Discord toggle off)
+    // BUT only if they have Tier 2+ (custom avatars require Tier 2+)
     if (
       settings?.avatar_discord === 0 &&
+      premiumType &&
+      premiumType >= 2 &&
       custom_avatar &&
       custom_avatar !== "N/A" &&
       !customAvatarError
@@ -175,6 +178,23 @@ export const UserAvatar = ({
         alt: username ? `${username}'s profile picture` : "User avatar",
         onError: () => setCustomAvatarError(true),
       };
+    }
+
+    // If user is Tier 1 or below but has custom avatar setting, fall back to Discord avatar
+    if (
+      settings?.avatar_discord === 0 &&
+      (!premiumType || premiumType < 2) &&
+      !imageError
+    ) {
+      // Only show Discord avatar if it exists and is not "None"
+      if (avatarHash && avatarHash !== "None") {
+        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
+        return {
+          src: url,
+          alt: username ? `${username}'s profile picture` : "User avatar",
+          onError: () => setImageError(true),
+        };
+      }
     }
 
     // Default fallback to placeholder avatar

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import XpCalculatorForm from "./XpCalculatorForm";
 import XpCalculatorInfo from "./XpCalculatorInfo";
 import XpResultsSummary from "./XpResultsSummary";
 import { Season, CalculationResults, DoubleXpResult } from "@/types/seasons";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface XpCalculatorProps {
   season: Season;
@@ -15,45 +16,19 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentXp, setCurrentXp] = useState(0);
   const [results, setResults] = useState<CalculationResults | null>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
   const resultsRef = useRef<HTMLDivElement | null>(null);
+  const debouncedXp = useDebounce(currentXp, 800);
 
   // Check if season has ended
   const currentTime = Math.floor(Date.now() / 1000);
   const seasonHasEnded = currentTime >= season.end_date;
 
-  useEffect(() => {
-    if (results) {
-      const el = document.getElementById("season-progress-summary");
-      if (el) {
-        const yOffset = -80; // adjust offset for fixed header
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      } else if (resultsRef.current) {
-        // fallback
-        resultsRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    }
-  }, [results]);
-
-  const calculateXp = () => {
-    setIsCalculating(true);
-    // Validate current level input
+  const calculateXp = useCallback(() => {
     if (!currentLevel) {
-      toast.error("Please enter your current level.");
-      setIsCalculating(false);
       return;
     }
 
-    // Prevent calculation if user is already at or above target level
     if (currentLevel >= season.xp_data.targetLevel) {
-      toast.error(
-        `You cannot calculate progress for level ${currentLevel}. Please enter a level below ${season.xp_data.targetLevel}.`,
-      );
-      setIsCalculating(false);
       return;
     }
 
@@ -135,7 +110,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     };
 
     // Current progress
-    const myExp = getExpFromLevel(currentLevel) + currentXp;
+    const myExp = getExpFromLevel(currentLevel) + debouncedXp;
     const targetLevelExp = getExpFromLevel(season.xp_data.targetLevel);
     const xpNeeded = targetLevelExp - myExp;
 
@@ -158,48 +133,46 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     const achievableWithPass =
       targetLevelDateWithGamePass < constants.SEASON_ENDS;
 
-    // Double XP calculations if needed
+    // Double XP calculations (always calculate for comparison)
     let doubleXpResults: {
       noPass: DoubleXpResult;
       withPass: DoubleXpResult;
     } | null = null;
-    if (!achievableNoPass || !achievableWithPass) {
-      const newDaysNoPass =
-        (targetLevelExp - myExp) / expPerWeek(false) -
-        1 +
-        (targetLevelExp - myExp) / expPerWeekDouble(false);
-      const newLvlDateNoPass = Math.ceil(newDaysNoPass * 7) * 86400;
-      const newDaysWithPass =
-        (targetLevelExp - myExp) / expPerWeek(true) -
-        1 +
-        (targetLevelExp - myExp) / expPerWeekDouble(true);
-      const newLvlDateWithPass = Math.ceil(newDaysWithPass * 7) * 86400;
+    const newDaysNoPass =
+      (targetLevelExp - myExp) / expPerWeek(false) -
+      1 +
+      (targetLevelExp - myExp) / expPerWeekDouble(false);
+    const newLvlDateNoPass = Math.ceil(newDaysNoPass * 7) * 86400;
+    const newDaysWithPass =
+      (targetLevelExp - myExp) / expPerWeek(true) -
+      1 +
+      (targetLevelExp - myExp) / expPerWeekDouble(true);
+    const newLvlDateWithPass = Math.ceil(newDaysWithPass * 7) * 86400;
 
-      doubleXpResults = {
-        noPass: {
-          achievable: currentTime + newLvlDateNoPass < constants.SEASON_ENDS,
-          completionDate: new Date(
-            (currentTime + newLvlDateNoPass) * 1000,
-          ).toLocaleDateString("en-US", {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          }),
-        },
-        withPass: {
-          achievable: currentTime + newLvlDateWithPass < constants.SEASON_ENDS,
-          completionDate: new Date(
-            (currentTime + newLvlDateWithPass) * 1000,
-          ).toLocaleDateString("en-US", {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          }),
-        },
-      };
-    }
+    doubleXpResults = {
+      noPass: {
+        achievable: currentTime + newLvlDateNoPass < constants.SEASON_ENDS,
+        completionDate: new Date(
+          (currentTime + newLvlDateNoPass) * 1000,
+        ).toLocaleDateString("en-US", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      },
+      withPass: {
+        achievable: currentTime + newLvlDateWithPass < constants.SEASON_ENDS,
+        completionDate: new Date(
+          (currentTime + newLvlDateWithPass) * 1000,
+        ).toLocaleDateString("en-US", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      },
+    };
 
     setResults({
       currentLevel,
@@ -260,8 +233,31 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     });
 
     toast.success("Results updated below.");
-    setIsCalculating(false);
-  };
+  }, [currentLevel, debouncedXp, season]);
+
+  // Auto-calculate when inputs change (using debounced XP)
+  useEffect(() => {
+    if (currentLevel && currentLevel < season.xp_data.targetLevel) {
+      calculateXp();
+    }
+  }, [currentLevel, debouncedXp, calculateXp, season.xp_data.targetLevel]);
+
+  useEffect(() => {
+    if (results) {
+      const el = document.getElementById("season-progress-summary");
+      if (el) {
+        const yOffset = -80; // adjust offset for fixed header
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      } else if (resultsRef.current) {
+        // fallback
+        resultsRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }
+  }, [results]);
 
   // If season has ended, show a different UI
   if (seasonHasEnded) {
@@ -330,13 +326,11 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
         targetLevel={season.xp_data.targetLevel}
         onLevelChange={setCurrentLevel}
         onXpChange={setCurrentXp}
-        onCalculate={calculateXp}
-        isCalculating={isCalculating}
         season={season}
       />
 
       <div ref={resultsRef}>
-        {results && <XpResultsSummary results={results} />}
+        {results && <XpResultsSummary results={results} season={season} />}
       </div>
     </>
   );

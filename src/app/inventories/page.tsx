@@ -14,9 +14,11 @@ import CopyButton from "./CopyButton";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/UI/ComingSoon";
+import ConnectedBotsPolling from "@/components/UI/ConnectedBotsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { MdOutlineSecurity } from "react-icons/md";
 import { RiVerifiedBadgeFill } from "react-icons/ri";
+import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
 
 interface BotAvatarData {
   targetId: number;
@@ -46,14 +48,20 @@ export default function InventoriesPage() {
       <ExperimentalFeatureBanner className="mb-6" />
 
       <p className="mb-4 text-white">
-        Enter a username or Roblox ID to check their Jailbreak inventory.
+        Enter a username or Roblox ID to check their Jailbreak inventory, or use
+        the option below to view your own inventory.
       </p>
+
+      {/* Want on-demand scans section */}
+      <ScanOptionSection />
 
       <InventoryCheckerClient />
 
       <Suspense fallback={<StatsSkeleton />}>
         <StatsSection />
       </Suspense>
+
+      <ConnectedBotsPolling />
 
       <Suspense fallback={<OfficialBotsSkeleton />}>
         <OfficialBotsSection />
