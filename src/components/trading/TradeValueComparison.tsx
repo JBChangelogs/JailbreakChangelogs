@@ -1,6 +1,13 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
+import {
+  FaArrowUp,
+  FaArrowDown,
+  FaArrowUp as FaTrendingUp,
+  FaArrowDown as FaTrendingDown,
+  FaMinus,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 import Link from "next/link";
 import {
   getItemTypeColor,
@@ -130,16 +137,23 @@ export default function TradeValueComparison({
                       <span
                         className="rounded-full px-2 py-0.5 text-xs text-white"
                         style={{ backgroundColor: getItemTypeColor(item.type) }}
+                        aria-label={`Item type: ${item.type}`}
                       >
                         {item.type}
                       </span>
                       {item.is_limited === 1 && (
-                        <span className="ml-2 inline-block rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500">
+                        <span
+                          className="ml-2 inline-flex items-center gap-1 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500"
+                          aria-label="Limited item"
+                        >
                           Limited
                         </span>
                       )}
                       {item.is_seasonal === 1 && (
-                        <span className="ml-2 inline-block rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs text-cyan-400">
+                        <span
+                          className="ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs text-cyan-400"
+                          aria-label="Seasonal item"
+                        >
                           Seasonal
                         </span>
                       )}
@@ -147,7 +161,8 @@ export default function TradeValueComparison({
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-muted text-xs">Demand:</span>
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getDemandColor(item.demand ?? "N/A")}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getDemandColor(item.demand ?? "N/A")}`}
+                        aria-label={`Demand level: ${(item.demand ?? "N/A") === "N/A" ? "Unknown" : (item.demand as string)}`}
                       >
                         {(item.demand ?? "N/A") === "N/A"
                           ? "Unknown"
@@ -157,13 +172,51 @@ export default function TradeValueComparison({
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-muted text-xs">Trend:</span>
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getTrendColor(item.trend || "Unknown")}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getTrendColor(item.trend || "Unknown")}`}
+                        aria-label={`Price trend: ${
+                          !("trend" in item) ||
+                          item.trend === null ||
+                          item.trend === "N/A"
+                            ? "Unknown"
+                            : (item.trend as string)
+                        }`}
                       >
-                        {!("trend" in item) ||
-                        item.trend === null ||
-                        item.trend === "N/A"
-                          ? "Unknown"
-                          : (item.trend as string)}
+                        {(() => {
+                          const trend =
+                            !("trend" in item) ||
+                            item.trend === null ||
+                            item.trend === "N/A"
+                              ? "Unknown"
+                              : (item.trend as string);
+
+                          // Add trend icon based on trend type
+                          if (trend === "Rising" || trend === "Hyped")
+                            return (
+                              <>
+                                <FaTrendingUp className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Dropping" || trend === "Avoided")
+                            return (
+                              <>
+                                <FaTrendingDown className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Stable")
+                            return (
+                              <>
+                                <FaMinus className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Unstable")
+                            return (
+                              <>
+                                <FaExclamationTriangle className="text-xs" />{" "}
+                                {trend}
+                              </>
+                            );
+                          return trend;
+                        })()}
                       </span>
                     </div>
                   </div>
@@ -261,16 +314,23 @@ export default function TradeValueComparison({
                       <span
                         className="rounded-full px-2 py-0.5 text-xs text-white"
                         style={{ backgroundColor: getItemTypeColor(item.type) }}
+                        aria-label={`Item type: ${item.type}`}
                       >
                         {item.type}
                       </span>
                       {item.is_limited === 1 && (
-                        <span className="ml-2 inline-block rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500">
+                        <span
+                          className="ml-2 inline-flex items-center gap-1 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500"
+                          aria-label="Limited item"
+                        >
                           Limited
                         </span>
                       )}
                       {item.is_seasonal === 1 && (
-                        <span className="ml-2 inline-block rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs text-cyan-400">
+                        <span
+                          className="ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs text-cyan-400"
+                          aria-label="Seasonal item"
+                        >
                           Seasonal
                         </span>
                       )}
@@ -278,7 +338,8 @@ export default function TradeValueComparison({
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-muted text-xs">Demand:</span>
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getDemandColor(item.demand ?? "N/A")}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getDemandColor(item.demand ?? "N/A")}`}
+                        aria-label={`Demand level: ${(item.demand ?? "N/A") === "N/A" ? "Unknown" : (item.demand as string)}`}
                       >
                         {(item.demand ?? "N/A") === "N/A"
                           ? "Unknown"
@@ -288,13 +349,51 @@ export default function TradeValueComparison({
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-muted text-xs">Trend:</span>
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getTrendColor(item.trend || "Unknown")}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getTrendColor(item.trend || "Unknown")}`}
+                        aria-label={`Price trend: ${
+                          !("trend" in item) ||
+                          item.trend === null ||
+                          item.trend === "N/A"
+                            ? "Unknown"
+                            : (item.trend as string)
+                        }`}
                       >
-                        {!("trend" in item) ||
-                        item.trend === null ||
-                        item.trend === "N/A"
-                          ? "Unknown"
-                          : (item.trend as string)}
+                        {(() => {
+                          const trend =
+                            !("trend" in item) ||
+                            item.trend === null ||
+                            item.trend === "N/A"
+                              ? "Unknown"
+                              : (item.trend as string);
+
+                          // Add trend icon based on trend type
+                          if (trend === "Rising" || trend === "Hyped")
+                            return (
+                              <>
+                                <FaTrendingUp className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Dropping" || trend === "Avoided")
+                            return (
+                              <>
+                                <FaTrendingDown className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Stable")
+                            return (
+                              <>
+                                <FaMinus className="text-xs" /> {trend}
+                              </>
+                            );
+                          if (trend === "Unstable")
+                            return (
+                              <>
+                                <FaExclamationTriangle className="text-xs" />{" "}
+                                {trend}
+                              </>
+                            );
+                          return trend;
+                        })()}
                       </span>
                     </div>
                   </div>

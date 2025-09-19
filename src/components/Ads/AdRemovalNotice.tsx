@@ -14,7 +14,6 @@ const AdRemovalNotice: React.FC<AdRemovalNoticeProps> = ({
   const { user } = useAuthContext();
   const isSupporter = user?.premiumtype && user.premiumtype > 0;
 
-  // Don't show the notice if user is already a supporter
   if (isSupporter) {
     return null;
   }

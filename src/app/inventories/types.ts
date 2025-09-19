@@ -7,6 +7,7 @@ export interface InventoryItem {
   tradePopularMetric: number | null;
   item_id: number;
   level: number | null;
+  history: TradeHistoryEntry[];
   timesTraded: number;
   id: string;
   categoryTitle: string;
@@ -18,7 +19,8 @@ export interface InventoryItem {
   season: number | null;
   title: string;
   isOriginalOwner: boolean;
-  history?: TradeHistoryEntry[];
+  scan_id: string;
+  is_duplicated: boolean;
 }
 
 export interface InventoryData {
@@ -33,6 +35,7 @@ export interface InventoryData {
   job_id: string;
   bot_id: string;
   scan_count: number;
+  scan_id: string;
   created_at: number;
   updated_at: number;
 }

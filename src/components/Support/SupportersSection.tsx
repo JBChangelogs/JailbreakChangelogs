@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 import { Supporter } from "@/utils/api";
@@ -10,26 +13,32 @@ interface SupportersSectionProps {
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
-  // Filter out excluded users
-  const excludedIds = [
-    "1019539798383398946",
-    "659865209741246514",
-    "1327206739665489930",
-  ];
-  const filteredSupporters = supporters.filter(
-    (supporter) => !excludedIds.includes(supporter.id),
-  );
+  const [sortedSupporters, setSortedSupporters] = useState<Supporter[]>([]);
 
-  const shuffledSupporters = [...filteredSupporters];
-  for (let i = shuffledSupporters.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffledSupporters[i], shuffledSupporters[j]] = [
-      shuffledSupporters[j],
-      shuffledSupporters[i],
+  useEffect(() => {
+    // Filter out excluded users
+    const excludedIds = [
+      "1019539798383398946",
+      "659865209741246514",
+      "1327206739665489930",
     ];
-  }
+    const filteredSupporters = supporters.filter(
+      (supporter) => !excludedIds.includes(supporter.id),
+    );
 
-  if (filteredSupporters.length === 0) {
+    // Sort by tier in descending order (3, 2, 1) then by username for consistency
+    const sorted = [...filteredSupporters].sort((a, b) => {
+      // First sort by premiumtype (tier) in descending order
+      if (b.premiumtype !== a.premiumtype) {
+        return b.premiumtype - a.premiumtype;
+      }
+      // Then sort by username alphabetically for consistency
+      return a.username.localeCompare(b.username);
+    });
+    setSortedSupporters(sorted);
+  }, [supporters]);
+
+  if (sortedSupporters.length === 0) {
     return null;
   }
 
@@ -41,7 +50,7 @@ export default function SupportersSection({
       </h2>
       <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
         <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-          {shuffledSupporters.map((supporter) => (
+          {sortedSupporters.map((supporter) => (
             <div key={supporter.id} className="group">
               <div className="rounded-lg p-4 transition-all duration-200 hover:bg-[#2E3944]">
                 <div className="flex flex-col items-center space-y-3 [@media(min-width:375px)]:flex-row [@media(min-width:375px)]:items-center [@media(min-width:375px)]:space-y-0 [@media(min-width:375px)]:space-x-3">

@@ -139,6 +139,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="mt-4 flex items-center justify-between">
           <span
             className={`rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(trade.status)}`}
+            aria-label={`Trade status: ${trade.status}`}
           >
             {trade.status}
           </span>

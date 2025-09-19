@@ -32,6 +32,7 @@ export default function TradeAdMetadata({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <span
         className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(status)}`}
+        aria-label={`Trade status: ${status}`}
       >
         {status}
       </span>

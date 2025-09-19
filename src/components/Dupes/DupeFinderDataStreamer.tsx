@@ -4,10 +4,10 @@ import {
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
-  fetchUserByRobloxId,
 } from "@/utils/api";
 import type { RobloxUser } from "@/types";
 import DupeFinderClient from "./DupeFinderClient";
+import DupeUserDataStreamer from "./DupeUserDataStreamer";
 
 interface DupeFinderDataStreamerProps {
   robloxId: string;
@@ -94,7 +94,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
   }
 
   // Get the main user's data (the one being searched) and connection data
-  const [mainUserData, mainUserAvatar, userConnectionData] = await Promise.all([
+  const [mainUserData, mainUserAvatar] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user data:", error);
       return {};
@@ -102,10 +102,6 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     fetchRobloxAvatars([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user avatar:", error);
       return {};
-    }),
-    fetchUserByRobloxId(actualRobloxId).catch((error) => {
-      console.error("Failed to fetch user connection data:", error);
-      return null;
     }),
   ]);
 
@@ -156,15 +152,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     });
   }
 
-  return (
-    <DupeFinderClient
-      robloxId={actualRobloxId}
-      initialData={result}
-      robloxUsers={robloxUsers}
-      robloxAvatars={robloxAvatars}
-      userConnectionData={userConnectionData}
-    />
-  );
+  return <DupeUserDataStreamer robloxId={actualRobloxId} dupeData={result} />;
 }
 
 export default function DupeFinderDataStreamer({

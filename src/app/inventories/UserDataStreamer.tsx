@@ -1,14 +1,10 @@
 import { Suspense } from "react";
-import {
-  fetchRobloxUsersBatch,
-  fetchRobloxAvatars,
-  fetchUserByRobloxId,
-  fetchDupeFinderData,
-} from "@/utils/api";
 import InventoryCheckerClient from "./InventoryCheckerClient";
-import { RobloxUser } from "@/types";
 import { InventoryData } from "./types";
 import { Season } from "@/types/seasons";
+import { UserDataService } from "@/services/userDataService";
+import { fetchUserByRobloxId } from "@/utils/api";
+import { logError } from "@/services/logger";
 
 interface UserDataStreamerProps {
   robloxId: string;
@@ -40,142 +36,48 @@ async function UserDataFetcher({
   inventoryData,
   currentSeason,
 }: UserDataStreamerProps) {
-  // Collect all unique user IDs that need to be fetched
-  const userIdsToFetch = new Set<string>();
-
-  // Add the main user ID
-  userIdsToFetch.add(robloxId);
-
-  // Add all original owner IDs from the inventory
-  inventoryData.data.forEach((item) => {
-    const originalOwnerInfo = item.info.find(
-      (info) => info.title === "Original Owner",
-    );
-    if (originalOwnerInfo && originalOwnerInfo.value) {
-      userIdsToFetch.add(originalOwnerInfo.value);
-    }
-  });
-
-  // Convert to array and filter out invalid IDs
-  const userIdsArray = Array.from(userIdsToFetch).filter((id) =>
-    /^\d+$/.test(id),
+  // Extract user IDs from inventory data
+  const userIds = UserDataService.extractUserIdsFromInventory(
+    inventoryData,
+    robloxId,
   );
 
-  // For very large inventories (1000+ unique original owners), implement a fallback strategy
+  // Apply frequency-based prioritization for large inventories
   const MAX_ORIGINAL_OWNERS_TO_FETCH = 1000;
-  const isLargeInventory = userIdsArray.length > MAX_ORIGINAL_OWNERS_TO_FETCH;
+  const finalUserIds = UserDataService.prioritizeInventoryUsers(
+    userIds,
+    inventoryData,
+    MAX_ORIGINAL_OWNERS_TO_FETCH,
+    "INVENTORY",
+  );
 
-  let finalUserIdsArray = userIdsArray;
+  // Fetch user data using the shared service (without connection data)
+  const userDataResult = await UserDataService.fetchUserData(finalUserIds, {
+    maxUsers: MAX_ORIGINAL_OWNERS_TO_FETCH,
+    includeUserConnection: false,
+    includeDupeData: true,
+    context: "INVENTORY",
+  });
 
-  if (isLargeInventory) {
-    // For large inventories, prioritize:
-    // 1. Main user (always included)
-    // 2. Most common original owners (by frequency in inventory)
-    // 3. Limit to MAX_ORIGINAL_OWNERS_TO_FETCH to prevent performance issues
-
-    const originalOwnerCounts = new Map<string, number>();
-
-    // Count frequency of each original owner
-    inventoryData.data.forEach((item) => {
-      const originalOwnerInfo = item.info.find(
-        (info) => info.title === "Original Owner",
-      );
-      if (
-        originalOwnerInfo &&
-        originalOwnerInfo.value &&
-        /^\d+$/.test(originalOwnerInfo.value)
-      ) {
-        const count = originalOwnerCounts.get(originalOwnerInfo.value) || 0;
-        originalOwnerCounts.set(originalOwnerInfo.value, count + 1);
-      }
-    });
-
-    // Sort by frequency (most common first) and take top N
-    const sortedOwners = Array.from(originalOwnerCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, MAX_ORIGINAL_OWNERS_TO_FETCH - 1) // -1 to account for main user
-      .map(([userId]) => userId);
-
-    // Always include main user + top original owners
-    finalUserIdsArray = [robloxId, ...sortedOwners];
-  }
-
-  // Fetch all user data, avatars, main user connection data, and dupe data in parallel
-  const [allUserData, allAvatarData, userConnectionData, dupeData] =
-    await Promise.all([
-      fetchRobloxUsersBatch(finalUserIdsArray).catch((error) => {
-        console.error("Failed to fetch user data:", error);
-        return {};
-      }),
-      fetchRobloxAvatars(finalUserIdsArray).catch((error) => {
-        console.error("Failed to fetch avatar data:", error);
-        return {};
-      }),
-      fetchUserByRobloxId(robloxId).catch((error) => {
-        console.error("Failed to fetch user connection data:", error);
-        return null;
-      }),
-      fetchDupeFinderData(robloxId).catch((error) => {
-        console.error("Failed to fetch dupe data:", error);
-        return { error: "Failed to fetch dupe data" };
-      }),
-    ]);
-
-  // Build the user data objects
-  const robloxUsers: Record<string, RobloxUser> = {};
-  const robloxAvatars: Record<string, string> = {};
-
-  // Add all user data
-  if (allUserData && typeof allUserData === "object") {
-    Object.values(allUserData).forEach((userData) => {
-      const user = userData as {
-        id: number;
-        name: string;
-        displayName: string;
-        username: string;
-        hasVerifiedBadge: boolean;
-      };
-      if (user && user.id) {
-        robloxUsers[user.id.toString()] = {
-          id: user.id,
-          name: user.name,
-          displayName: user.displayName,
-          username: user.username,
-        };
-      }
-    });
-  }
-
-  // Add all avatar data
-  if (allAvatarData && typeof allAvatarData === "object") {
-    Object.values(allAvatarData).forEach((avatar) => {
-      const avatarData = avatar as {
-        targetId: number;
-        state: string;
-        imageUrl?: string;
-        version: string;
-      };
-      if (
-        avatarData &&
-        avatarData.targetId &&
-        avatarData.state === "Completed" &&
-        avatarData.imageUrl
-      ) {
-        // Only add completed avatars to the data
-        robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
-      }
-      // For blocked avatars, don't add them to the data so components can use their own fallback
-    });
-  }
+  // Fetch connection data directly for the main user (like OG finder does)
+  const userConnectionData = await fetchUserByRobloxId(robloxId).catch(
+    (error) => {
+      logError("Failed to fetch user connection data", error, {
+        component: "INVENTORY",
+        action: "fetch_connection",
+      });
+      return null;
+    },
+  );
 
   return (
     <InventoryCheckerClient
       initialData={inventoryData}
       robloxId={robloxId}
-      robloxUsers={robloxUsers}
-      robloxAvatars={robloxAvatars}
+      robloxUsers={userDataResult.robloxUsers}
+      robloxAvatars={userDataResult.robloxAvatars}
       userConnectionData={userConnectionData}
-      initialDupeData={dupeData}
+      initialDupeData={userDataResult.dupeData}
       currentSeason={currentSeason}
     />
   );

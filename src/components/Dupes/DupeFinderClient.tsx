@@ -157,11 +157,10 @@ export default function DupeFinderClient({
       {initialData && (
         <DupeFinderResults
           initialData={initialData}
-          robloxId={robloxId}
+          robloxId={robloxId || ""}
           robloxUsers={localRobloxUsers}
           robloxAvatars={localRobloxAvatars}
-          userConnectionData={userConnectionData}
-          error={error}
+          userConnectionData={userConnectionData || null}
         />
       )}
 

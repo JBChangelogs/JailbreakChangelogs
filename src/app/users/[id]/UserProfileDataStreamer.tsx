@@ -1,13 +1,9 @@
 import { Suspense } from "react";
-import { fetchUserById, BASE_API_URL } from "@/utils/api";
+import { fetchUserById } from "@/utils/api";
 import UserProfileClient from "./UserProfileClient";
-import {
-  FollowingData,
-  FollowerData,
-  UserSettings,
-  UserFlag,
-} from "@/types/auth";
-import { fetchFavoritesData, fetchFavoriteItemDetails } from "./actions";
+import { UserSettings, UserFlag } from "@/types/auth";
+import { ProfileDataService } from "@/services/profileDataService";
+import { logError } from "@/services/logger";
 
 interface CommentData {
   id: number;
@@ -161,69 +157,12 @@ async function AdditionalDataFetcher({
   user: User;
 }) {
   try {
-    // Fetch additional data in parallel
-    const [
-      followersResponse,
-      followingResponse,
-      bioResponse,
-      commentsResponse,
-      serversResponse,
-      favoritesData,
-      tradeAdsResponse,
-    ] = await Promise.all([
-      fetch(`${BASE_API_URL}/users/followers/get?user=${userId}`),
-      fetch(`${BASE_API_URL}/users/following/get?user=${userId}`),
-      fetch(
-        `${BASE_API_URL}/users/description/get?user=${userId}&nocache=true`,
-      ),
-      fetch(`${BASE_API_URL}/users/comments/get?author=${userId}`),
-      fetch(`${BASE_API_URL}/servers/get?owner=${userId}`),
-      fetchFavoritesData(userId),
-      fetch(`${BASE_API_URL}/trades/get?user=${userId}`),
-    ]);
-
-    // Process responses
-    const followersData: FollowerData[] | string =
-      await followersResponse.json();
-    const followingData: FollowingData[] | string =
-      await followingResponse.json();
-    const bioData = await bioResponse.json();
-    const commentsData = await commentsResponse.json();
-    const serversData = serversResponse.ok ? await serversResponse.json() : [];
-
-    // Process trade ads response
-    let tradeAdsData: TradeAd[] = [];
-    if (tradeAdsResponse.ok) {
-      try {
-        const tradeAdsResponseData = await tradeAdsResponse.json();
-        tradeAdsData = Array.isArray(tradeAdsResponseData)
-          ? tradeAdsResponseData
-          : [tradeAdsResponseData];
-      } catch (error) {
-        console.error("Error parsing trade ads response:", error);
-        tradeAdsData = [];
-      }
-    } else if (tradeAdsResponse.status !== 404) {
-      console.error("Error fetching trade ads:", tradeAdsResponse.status);
-    }
-
-    // Fetch item details for favorites (only if we have favorites data)
-    const favoriteItemDetails =
-      Array.isArray(favoritesData) && favoritesData.length > 0
-        ? await fetchFavoriteItemDetails(favoritesData)
-        : {};
+    // Fetch additional data using the shared service
+    const profileData = await ProfileDataService.fetchProfileData(userId);
 
     const additionalData: UserProfileData = {
       user,
-      followerCount: Array.isArray(followersData) ? followersData.length : 0,
-      followingCount: Array.isArray(followingData) ? followingData.length : 0,
-      bio: bioData?.description || null,
-      bioLastUpdated: bioData?.last_updated || null,
-      comments: Array.isArray(commentsData) ? commentsData : [],
-      privateServers: Array.isArray(serversData) ? serversData : [],
-      favorites: Array.isArray(favoritesData) ? favoritesData : [],
-      favoriteItemDetails,
-      tradeAds: tradeAdsData,
+      ...profileData,
     };
 
     return (
@@ -234,23 +173,19 @@ async function AdditionalDataFetcher({
       />
     );
   } catch (error: unknown) {
-    console.error("Error fetching additional user data:", error);
+    logError("Error fetching additional user data", error, {
+      component: "UserProfileDataStreamer",
+      action: "fetch_additional_data",
+    });
 
     // Return with basic data if additional data fails
+    const defaultProfileData = ProfileDataService.getDefaultProfileData();
     return (
       <UserProfileClient
         userId={userId}
         initialData={{
           user,
-          followerCount: 0,
-          followingCount: 0,
-          bio: null,
-          bioLastUpdated: null,
-          comments: [],
-          privateServers: [],
-          favorites: [],
-          favoriteItemDetails: {},
-          tradeAds: [],
+          ...defaultProfileData,
         }}
         isLoadingAdditionalData={false}
         additionalDataError="Failed to load some profile data"
@@ -279,7 +214,10 @@ async function UserProfileDataFetcher({ userId }: { userId: string }) {
       </Suspense>
     );
   } catch (error: unknown) {
-    console.error("Error fetching user profile data:", error);
+    logError("Error fetching user profile data", error, {
+      component: "UserProfileDataStreamer",
+      action: "fetch_user_profile",
+    });
 
     // Handle banned user errors
     if (
