@@ -14,6 +14,7 @@ import { logError } from "@/services/logger";
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
+import DupeSearchInput from "./DupeSearchInput";
 
 interface DupeFinderResultsProps {
   initialData: DupeFinderItem[];
@@ -362,6 +363,9 @@ export default function DupeFinderResults({
 
   return (
     <div className="space-y-6">
+      {/* Search Form */}
+      <DupeSearchInput />
+
       {/* User Info */}
       <div
         className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}

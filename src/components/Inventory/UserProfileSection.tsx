@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -10,6 +11,13 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
+import {
+  showScanLoadingToast,
+  updateScanLoadingToast,
+  dismissScanLoadingToast,
+  showScanSuccessToast,
+  showScanErrorToast,
+} from "@/utils/scanToasts";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -22,7 +30,6 @@ interface UserProfileSectionProps {
   currentData: InventoryData;
   isRefreshing: boolean;
   onRefresh: () => void;
-  refreshedData: InventoryData | null;
 }
 
 export default function UserProfileSection({
@@ -34,11 +41,11 @@ export default function UserProfileSection({
   currentData,
   isRefreshing,
   onRefresh,
-  refreshedData,
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
   const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
+  const scanCompletedRef = useRef(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
@@ -81,6 +88,73 @@ export default function UserProfileSection({
 
     onRefresh();
   };
+
+  useEffect(() => {
+    if (scanWebSocket.status === "connecting") {
+      scanCompletedRef.current = false;
+      showScanLoadingToast("Connecting to scan service...");
+    }
+
+    if (scanWebSocket.status === "scanning" && !scanCompletedRef.current) {
+      if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("User found in game")
+      ) {
+        updateScanLoadingToast("User found in game - scan in progress!");
+      } else if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("Bot joined server")
+      ) {
+        updateScanLoadingToast("Bot joined server, scanning...");
+      } else if (scanWebSocket.progress !== undefined) {
+        updateScanLoadingToast(`Scanning... ${scanWebSocket.progress}%`);
+      } else if (scanWebSocket.message) {
+        updateScanLoadingToast(`Scanning: ${scanWebSocket.message}`);
+      }
+    }
+
+    if (
+      scanWebSocket.status === "completed" &&
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Added to queue") &&
+      !scanCompletedRef.current
+    ) {
+      scanCompletedRef.current = true;
+      showScanSuccessToast(scanWebSocket.message);
+    }
+
+    if (scanWebSocket.status === "error") {
+      scanCompletedRef.current = true;
+      if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("No bots available")
+      ) {
+        showScanErrorToast(
+          "No scan bots are currently online. Please try again later.",
+        );
+      } else if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("User not found in game")
+      ) {
+        showScanErrorToast(
+          "User not found in game. Please join a trade server and try again.",
+        );
+      } else if (scanWebSocket.error) {
+        showScanErrorToast(`Scan error: ${scanWebSocket.error}`);
+      }
+    }
+
+    if (scanWebSocket.status === "idle") {
+      dismissScanLoadingToast();
+      scanCompletedRef.current = false;
+    }
+  }, [
+    scanWebSocket.message,
+    scanWebSocket.status,
+    scanWebSocket.error,
+    scanWebSocket.progress,
+  ]);
+
   return (
     <div className="mb-6 flex flex-col gap-4 rounded-lg p-4 sm:flex-row sm:items-center">
       {/* Avatar */}
@@ -450,14 +524,6 @@ export default function UserProfileSection({
                 </div>
               </div>
             )}
-
-          {/* Error Message - but not for "user not found" since that gets a toast */}
-          {scanWebSocket.error &&
-            !scanWebSocket.error.includes("User not found in game") && (
-              <div className="mt-2 text-sm text-red-400">
-                Error: {scanWebSocket.error}
-              </div>
-            )}
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
@@ -523,21 +589,6 @@ export default function UserProfileSection({
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Refresh Success Message */}
-      {refreshedData && (
-        <div className="rounded-lg border border-green-500/20 bg-green-900/20 p-4">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-400"></div>
-            <span className="text-sm font-medium text-green-400">
-              Data refreshed successfully!
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-green-300">
-            Updated {refreshedData.item_count} items
-          </p>
         </div>
       )}
 

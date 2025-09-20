@@ -10,6 +10,7 @@ import {
 } from "@/app/inventories/types";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { logError } from "@/services/logger";
+import toast from "react-hot-toast";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 
@@ -49,9 +50,6 @@ export default function UserStats({
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
-    null,
-  );
 
   // WebSocket for real-time updates
   useScanWebSocket(initialData.user_id);
@@ -182,12 +180,41 @@ export default function UserStats({
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      await onRefresh(initialData);
-      setRefreshedData(initialData);
+      // Make API call to refresh inventory data
+      const response = await fetch("/api/inventories/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ robloxId: initialData.user_id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Failed to refresh inventory data",
+        );
+      }
+
+      const refreshedData = await response.json();
+
+      // Update the parent component with new data
+      await onRefresh(refreshedData);
     } catch (error) {
       logError("Error refreshing data", error, {
         component: "UserStats",
         action: "handleRefresh",
+      });
+      console.error("Refresh failed:", error);
+
+      // Show error toast to user
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to refresh inventory data";
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: "bottom-right",
       });
     } finally {
       setIsRefreshing(false);
@@ -216,7 +243,6 @@ export default function UserStats({
           currentData={initialData}
           isRefreshing={isRefreshing}
           onRefresh={handleRefresh}
-          refreshedData={refreshedData}
         />
       )}
 

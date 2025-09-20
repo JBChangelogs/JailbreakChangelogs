@@ -81,58 +81,17 @@ export default function InventoryCheckerClient({
     setRefreshedData(newData);
   };
 
-  // Show toast notifications for scan status
   useEffect(() => {
-    if (
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("User not found in game")
-    ) {
-      toast.error(
-        "User not found in game. Please join a trade server and try again.",
+    if (refreshedData) {
+      toast.success(
+        `Data refreshed successfully! Updated ${refreshedData.item_count} items`,
         {
-          duration: 5000,
-          position: "bottom-right",
-        },
-      );
-    } else if (
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("User found in game")
-    ) {
-      toast.success("User found in game - scan in progress!", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-    } else if (
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("Bot joined server")
-    ) {
-      toast.success("Bot joined server, scanning...", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-    } else if (
-      scanWebSocket.status === "completed" &&
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("Added to queue")
-    ) {
-      toast.success(scanWebSocket.message, {
-        duration: 5000,
-        position: "bottom-right",
-      });
-    } else if (
-      scanWebSocket.status === "error" &&
-      scanWebSocket.error &&
-      scanWebSocket.error.includes("No bots available")
-    ) {
-      toast.error(
-        "No scan bots are currently online. Please try again later.",
-        {
-          duration: 5000,
+          duration: 4000,
           position: "bottom-right",
         },
       );
     }
-  }, [scanWebSocket.message, scanWebSocket.status, scanWebSocket.error]);
+  }, [refreshedData]);
 
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
