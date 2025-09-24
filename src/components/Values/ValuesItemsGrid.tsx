@@ -175,6 +175,32 @@ export default function ValuesItemsGrid({
 
   return (
     <>
+      <style jsx>{`
+        .responsive-ad-container-values {
+          width: 320px;
+          height: 100px;
+          border: 1px solid var(--color-border-stroke);
+          background-color: var(--color-secondary-bg);
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        @media (min-width: 500px) {
+          .responsive-ad-container-values {
+            width: 468px;
+            height: 60px;
+          }
+        }
+
+        @media (min-width: 800px) {
+          .responsive-ad-container-values {
+            width: 728px;
+            height: 90px;
+          }
+        }
+      `}</style>
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {debouncedSearchTerm
@@ -253,10 +279,7 @@ export default function ValuesItemsGrid({
                       <span className="text-secondary-text mb-2 block text-center text-xs">
                         ADVERTISEMENT
                       </span>
-                      <div
-                        className="border-stroke bg-secondary-bg relative overflow-hidden rounded-lg border shadow transition-all duration-300"
-                        style={{ minHeight: "450px", maxHeight: "500px" }}
-                      >
+                      <div className="responsive-ad-container-values">
                         <DisplayAd
                           adSlot="4358721799"
                           adFormat="fluid"

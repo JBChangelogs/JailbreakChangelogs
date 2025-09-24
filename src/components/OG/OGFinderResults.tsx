@@ -500,7 +500,7 @@ export default function OGFinderResults({
                   <span className="text-button-info">💡</span>
                   <span className="font-medium">Pro Tip:</span>
                   <span>
-                    Click on any item card to view its trading history.
+                    Click on any item card to view its ownership history.
                   </span>
                 </div>
               </div>

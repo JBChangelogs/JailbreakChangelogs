@@ -190,7 +190,7 @@ export default function ValuesChangelogPage() {
                         className={`rounded-lg border p-4 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg ${
                           isLatest
                             ? "border-button-info from-button-info/10 to-button-info-hover/10 shadow-button-info/20 bg-gradient-to-r shadow-lg"
-                            : "border-border-primary hover:border-button-info"
+                            : "border-border-primary bg-secondary-bg hover:border-button-info"
                         }`}
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">

@@ -109,106 +109,133 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
-      {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-      <div className="sm:col-span-12 xl:col-span-8">
-        <h1
-          className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
-        >
-          {title}
-        </h1>
-        <div className="prose prose-invert max-w-none">
-          {parsedSections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="mb-8">
-              {section.title && (
-                <h2
-                  className={`${inter.className} text-primary-text mb-4 text-2xl font-bold tracking-tighter sm:text-3xl`}
-                >
-                  {section.title}
-                </h2>
-              )}
-              <ul className="text-secondary-text space-y-2">
-                {section.items.map((item, itemIndex) => (
-                  <li
-                    key={itemIndex}
-                    className={`flex items-start gap-2 ${item.isNested ? "ml-6" : ""}`}
+    <>
+      <style jsx>{`
+        .sidebar-ad-container-changelog {
+          width: 320px;
+          height: 100px;
+          border: 1px solid var(--color-border-stroke);
+          background-color: var(--color-secondary-bg);
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+          .sidebar-ad-container-changelog {
+            width: 300px;
+            height: 600px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .sidebar-ad-container-changelog {
+            width: 160px;
+            height: 600px;
+          }
+        }
+      `}</style>
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
+        {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
+        <div className="sm:col-span-12 xl:col-span-8">
+          <h1
+            className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
+          >
+            {title}
+          </h1>
+          <div className="prose prose-invert max-w-none">
+            {parsedSections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="mb-8">
+                {section.title && (
+                  <h2
+                    className={`${inter.className} text-primary-text mb-4 text-2xl font-bold tracking-tighter sm:text-3xl`}
                   >
-                    {item.type === "media" ? (
-                      <ChangelogMediaEmbed
-                        type={item.mediaType}
-                        url={item.url}
-                      />
-                    ) : (
-                      <>
-                        {item.isNested ? (
-                          <ArrowTurnDownRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
-                        ) : (
-                          <ArrowRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
-                        )}
-                        <span dangerouslySetInnerHTML={{ __html: item.text }} />
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation Buttons */}
-        <ChangelogQuickNav
-          prevChangelog={prevChangelog}
-          nextChangelog={nextChangelog}
-          onChangelogSelect={onChangelogSelect}
-        />
-      </div>
-
-      {/* Image Section - 4/12 columns on desktop, full width on tablet and mobile */}
-      <div className="space-y-8 sm:col-span-12 xl:col-span-4">
-        {imageUrl && (
-          <div>
-            <div className={`relative w-full ${imageAspectRatio}`}>
-              <Image
-                src={`https://assets.jailbreakchangelogs.xyz${imageUrl}`}
-                alt={title}
-                fill
-                className="rounded-lg object-contain"
-                onLoad={handleImageLoad}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Comments Section */}
-        <div>
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="my-8 flex flex-col items-center">
-              <span className="text-secondary-text mb-2 block text-center text-xs">
-                ADVERTISEMENT
-              </span>
-              <div
-                className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
-                style={{ minHeight: "250px" }}
-              >
-                <DisplayAd
-                  adSlot="4408799044"
-                  adFormat="auto"
-                  style={{ display: "block", width: "100%", height: "100%" }}
-                />
+                    {section.title}
+                  </h2>
+                )}
+                <ul className="text-secondary-text space-y-2">
+                  {section.items.map((item, itemIndex) => (
+                    <li
+                      key={itemIndex}
+                      className={`flex items-start gap-2 ${item.isNested ? "ml-6" : ""}`}
+                    >
+                      {item.type === "media" ? (
+                        <ChangelogMediaEmbed
+                          type={item.mediaType}
+                          url={item.url}
+                        />
+                      ) : (
+                        <>
+                          {item.isNested ? (
+                            <ArrowTurnDownRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
+                          ) : (
+                            <ArrowRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
+                          )}
+                          <span
+                            dangerouslySetInnerHTML={{ __html: item.text }}
+                          />
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <AdRemovalNotice className="mt-2" />
-            </div>
-          )}
-          <ChangelogComments
-            changelogId={changelogId}
-            changelogTitle={title}
-            type="changelog"
-            initialComments={initialComments}
-            initialUserMap={initialUserMap}
+            ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          <ChangelogQuickNav
+            prevChangelog={prevChangelog}
+            nextChangelog={nextChangelog}
+            onChangelogSelect={onChangelogSelect}
           />
         </div>
+
+        {/* Image Section - 4/12 columns on desktop, full width on tablet and mobile */}
+        <div className="space-y-8 sm:col-span-12 xl:col-span-4">
+          {imageUrl && (
+            <div>
+              <div className={`relative w-full ${imageAspectRatio}`}>
+                <Image
+                  src={`https://assets.jailbreakchangelogs.xyz${imageUrl}`}
+                  alt={title}
+                  fill
+                  className="rounded-lg object-contain"
+                  onLoad={handleImageLoad}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Comments Section */}
+          <div>
+            {premiumStatusLoaded && currentUserPremiumType === 0 && (
+              <div className="my-8 flex flex-col items-center">
+                <span className="text-secondary-text mb-2 block text-center text-xs">
+                  ADVERTISEMENT
+                </span>
+                <div className="sidebar-ad-container-changelog">
+                  <DisplayAd
+                    adSlot="4408799044"
+                    adFormat="auto"
+                    style={{ display: "block", width: "100%", height: "100%" }}
+                  />
+                </div>
+                <AdRemovalNotice className="mt-2" />
+              </div>
+            )}
+            <ChangelogComments
+              changelogId={changelogId}
+              changelogTitle={title}
+              type="changelog"
+              initialComments={initialComments}
+              initialUserMap={initialUserMap}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -134,208 +134,237 @@ export default function SeasonDetailsClient({
   const endDate = season.end_date > 0 ? new Date(season.end_date * 1000) : null;
 
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto mb-8 px-4 sm:px-6">
-        <Breadcrumb />
-        <SeasonHeader
-          currentSeason={currentSeasonForHeader}
-          nextSeason={nextSeasonForHeader}
-        />
-        <SeasonNavigation
-          seasonList={filteredSeasonList}
-          fullSeasonList={seasonList}
-          selectedId={season.season.toString()}
-          onSeasonSelect={handleSeasonSelect}
-          onGoToLatestSeason={handleGoToLatestSeason}
-        />
+    <>
+      <style jsx>{`
+        .sidebar-ad-container-season {
+          width: 320px;
+          height: 100px;
+          border: 1px solid var(--color-border-stroke);
+          background-color: var(--color-secondary-bg);
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
-          {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-          <div className="sm:col-span-12 xl:col-span-8">
-            <h1
-              className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
-            >
-              Season {season.season} / {season.title}
-            </h1>
-            <p className="text-secondary-text mb-4">{season.description}</p>
+        @media (min-width: 768px) {
+          .sidebar-ad-container-season {
+            width: 300px;
+            height: 600px;
+          }
+        }
 
-            {/* XP Calculator Button - Only show for highest season */}
-            {season.season === latestSeasonNumber && (
+        @media (min-width: 1024px) {
+          .sidebar-ad-container-season {
+            width: 160px;
+            height: 600px;
+          }
+        }
+      `}</style>
+      <main className="min-h-screen">
+        <div className="container mx-auto mb-8 px-4 sm:px-6">
+          <Breadcrumb />
+          <SeasonHeader
+            currentSeason={currentSeasonForHeader}
+            nextSeason={nextSeasonForHeader}
+          />
+          <SeasonNavigation
+            seasonList={filteredSeasonList}
+            fullSeasonList={seasonList}
+            selectedId={season.season.toString()}
+            onSeasonSelect={handleSeasonSelect}
+            onGoToLatestSeason={handleGoToLatestSeason}
+          />
+
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
+            {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
+            <div className="sm:col-span-12 xl:col-span-8">
+              <h1
+                className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
+              >
+                Season {season.season} / {season.title}
+              </h1>
+              <p className="text-secondary-text mb-4">{season.description}</p>
+
+              {/* XP Calculator Button - Only show for highest season */}
+              {season.season === latestSeasonNumber && (
+                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
+                        🎯 XP Progress Calculator
+                      </h3>
+                      <p className="text-secondary-text text-sm">
+                        Calculate how long it will take to reach your target
+                        level and see if you can complete the season on time.
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Link
+                        href="/seasons/will-i-make-it"
+                        className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
+                      >
+                        Calculate My Progress
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Weekly Contracts Promo */}
               <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex-1">
                     <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                      🎯 XP Progress Calculator
+                      📋 Weekly Contracts
                     </h3>
                     <p className="text-secondary-text text-sm">
-                      Calculate how long it will take to reach your target level
-                      and see if you can complete the season on time.
+                      View your weekly contracts and their xp rewards.
                     </p>
                   </div>
                   <div className="flex-shrink-0">
                     <Link
-                      href="/seasons/will-i-make-it"
+                      href="/seasons/contracts"
                       className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
                     >
-                      Calculate My Progress
+                      View Contracts
                     </Link>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Weekly Contracts Promo */}
-            <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1">
-                  <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                    📋 Weekly Contracts
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                  <h3 className="text-primary-text mb-2 font-semibold">
+                    Start Date
                   </h3>
-                  <p className="text-secondary-text text-sm">
-                    View your weekly contracts and their xp rewards.
+                  <p className="text-secondary-text">
+                    {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
                   </p>
                 </div>
-                <div className="flex-shrink-0">
-                  <Link
-                    href="/seasons/contracts"
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
-                  >
-                    View Contracts
-                  </Link>
+                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                  <h3 className="text-primary-text mb-2 font-semibold">
+                    End Date
+                  </h3>
+                  <p className="text-secondary-text">
+                    {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
+                  </p>
+                </div>
+                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                  <h3 className="text-primary-text mb-2 font-semibold">
+                    Duration
+                  </h3>
+                  <p className="text-secondary-text">
+                    {startDate && endDate
+                      ? `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
+                      : "TBD"}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
-                <h3 className="text-primary-text mb-2 font-semibold">
-                  Start Date
-                </h3>
-                <p className="text-secondary-text">
-                  {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
-                </p>
-              </div>
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
-                <h3 className="text-primary-text mb-2 font-semibold">
-                  End Date
-                </h3>
-                <p className="text-secondary-text">
-                  {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
-                </p>
-              </div>
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
-                <h3 className="text-primary-text mb-2 font-semibold">
-                  Duration
-                </h3>
-                <p className="text-secondary-text">
-                  {startDate && endDate
-                    ? `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
-                    : "TBD"}
-                </p>
-              </div>
-            </div>
+              <h2
+                className={`text-primary-text border-secondary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight ${inter.className}`}
+              >
+                Season Rewards
+              </h2>
+              <div className="space-y-4">
+                {season.rewards
+                  .sort((a, b) => {
+                    // Check if requirements are percentage-based
+                    const isPercentageA = a.requirement
+                      .toLowerCase()
+                      .includes("%");
+                    const isPercentageB = b.requirement
+                      .toLowerCase()
+                      .includes("%");
 
-            <h2
-              className={`text-primary-text border-secondary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight ${inter.className}`}
-            >
-              Season Rewards
-            </h2>
-            <div className="space-y-4">
-              {season.rewards
-                .sort((a, b) => {
-                  // Check if requirements are percentage-based
-                  const isPercentageA = a.requirement
-                    .toLowerCase()
-                    .includes("%");
-                  const isPercentageB = b.requirement
-                    .toLowerCase()
-                    .includes("%");
+                    // If one is percentage and other isn't, percentage goes last
+                    if (isPercentageA && !isPercentageB) return 1;
+                    if (!isPercentageA && isPercentageB) return -1;
 
-                  // If one is percentage and other isn't, percentage goes last
-                  if (isPercentageA && !isPercentageB) return 1;
-                  if (!isPercentageA && isPercentageB) return -1;
+                    // If both are percentages, sort by the percentage number
+                    if (isPercentageA && isPercentageB) {
+                      const percentA = parseInt(
+                        a.requirement.match(/\d+/)?.[0] || "0",
+                      );
+                      const percentB = parseInt(
+                        b.requirement.match(/\d+/)?.[0] || "0",
+                      );
+                      return percentA - percentB;
+                    }
 
-                  // If both are percentages, sort by the percentage number
-                  if (isPercentageA && isPercentageB) {
-                    const percentA = parseInt(
+                    // If both are level-based, sort by level number
+                    const levelA = parseInt(
                       a.requirement.match(/\d+/)?.[0] || "0",
                     );
-                    const percentB = parseInt(
+                    const levelB = parseInt(
                       b.requirement.match(/\d+/)?.[0] || "0",
                     );
-                    return percentA - percentB;
-                  }
-
-                  // If both are level-based, sort by level number
-                  const levelA = parseInt(
-                    a.requirement.match(/\d+/)?.[0] || "0",
-                  );
-                  const levelB = parseInt(
-                    b.requirement.match(/\d+/)?.[0] || "0",
-                  );
-                  return levelA - levelB;
-                })
-                .map((reward) => (
-                  <div
-                    key={reward.id}
-                    className="border-stroke bg-secondary-bg rounded-lg border p-4"
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <h3 className="text-primary-text font-semibold">
-                        {reward.item}
-                      </h3>
-                      <div className="flex gap-2">
-                        {reward.bonus === "True" && (
-                          <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
-                            Bonus
-                          </span>
-                        )}
-                        {reward.exclusive === "True" && (
-                          <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
-                            Exclusive
-                          </span>
-                        )}
+                    return levelA - levelB;
+                  })
+                  .map((reward) => (
+                    <div
+                      key={reward.id}
+                      className="border-stroke bg-secondary-bg rounded-lg border p-4"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <h3 className="text-primary-text font-semibold">
+                          {reward.item}
+                        </h3>
+                        <div className="flex gap-2">
+                          {reward.bonus === "True" && (
+                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                              Bonus
+                            </span>
+                          )}
+                          {reward.exclusive === "True" && (
+                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                              Exclusive
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <p className="text-secondary-text text-sm">
+                        Requirement: {reward.requirement}
+                      </p>
                     </div>
-                    <p className="text-secondary-text text-sm">
-                      Requirement: {reward.requirement}
-                    </p>
+                  ))}
+              </div>
+            </div>
+
+            {/* Right side - Image Gallery and Comments */}
+            <div className="space-y-8 sm:col-span-12 xl:col-span-4">
+              <ImageGallery rewards={season.rewards} />
+              {premiumStatusLoaded && currentUserPremiumType === 0 && (
+                <div className="my-8 flex flex-col items-center">
+                  <span className="text-secondary-text mb-2 block text-center text-xs">
+                    ADVERTISEMENT
+                  </span>
+                  <div className="sidebar-ad-container-season">
+                    <DisplayAd
+                      adSlot="2909908750"
+                      adFormat="auto"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
                   </div>
-                ))}
+                  <AdRemovalNotice className="mt-2" />
+                </div>
+              )}
+              <ChangelogComments
+                changelogId={season.season}
+                changelogTitle={season.title}
+                type="season"
+                initialComments={initialComments}
+                initialUserMap={initialUserMap}
+              />
             </div>
           </div>
-
-          {/* Right side - Image Gallery and Comments */}
-          <div className="space-y-8 sm:col-span-12 xl:col-span-4">
-            <ImageGallery rewards={season.rewards} />
-            {premiumStatusLoaded && currentUserPremiumType === 0 && (
-              <div className="my-8 flex flex-col items-center">
-                <span className="text-secondary-text mb-2 block text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div
-                  className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
-                  style={{ minHeight: "250px" }}
-                >
-                  <DisplayAd
-                    adSlot="2909908750"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            )}
-            <ChangelogComments
-              changelogId={season.season}
-              changelogTitle={season.title}
-              type="season"
-              initialComments={initialComments}
-              initialUserMap={initialUserMap}
-            />
-          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

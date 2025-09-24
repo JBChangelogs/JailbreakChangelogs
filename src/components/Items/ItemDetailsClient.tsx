@@ -648,7 +648,7 @@ export default function ItemDetailsClient({
                                     (prev) => prev + INITIAL_DESCRIPTION_LENGTH,
                                   )
                                 }
-                                className="text-button-info hover:text-button-info-hover ml-1 inline-flex items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                               >
                                 <ChevronDownIcon className="h-4 w-4" />
                                 Read More
@@ -665,7 +665,7 @@ export default function ItemDetailsClient({
                               onClick={() =>
                                 setVisibleLength(INITIAL_DESCRIPTION_LENGTH)
                               }
-                              className="text-button-info hover:text-button-info-hover mt-2 flex items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                              className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                             >
                               <ChevronUpIcon className="h-4 w-4" />
                               Show Less

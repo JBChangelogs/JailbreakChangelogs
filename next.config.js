@@ -93,7 +93,7 @@ const nextConfig = {
           },
           {
             key: "X-Built-By",
-            value: "jalenzz",
+            value: "JailbreakChangelogs",
           },
         ],
       },

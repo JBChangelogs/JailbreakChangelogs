@@ -364,6 +364,32 @@ export default function ChangelogDetailsClient({
 
   return (
     <ThemeProvider theme={darkTheme}>
+      <style jsx>{`
+        .sidebar-ad-container {
+          width: 320px;
+          height: 100px;
+          border: 1px solid var(--color-border-stroke);
+          background-color: var(--color-secondary-bg);
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+          .sidebar-ad-container {
+            width: 300px;
+            height: 600px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .sidebar-ad-container {
+            width: 160px;
+            height: 600px;
+          }
+        }
+      `}</style>
       <div className="space-y-6">
         {/* Header with Side-by-Side Layout */}
         <div
@@ -382,10 +408,7 @@ export default function ChangelogDetailsClient({
               <span className="text-secondary-text mb-2 block text-center text-xs">
                 ADVERTISEMENT
               </span>
-              <div
-                className="border-stroke bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
-                style={{ minHeight: "250px" }}
-              >
+              <div className="sidebar-ad-container">
                 <DisplayAd
                   adSlot="8162235433"
                   adFormat="auto"

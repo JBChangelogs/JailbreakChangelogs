@@ -1,0 +1,120 @@
+# JailbreakChangelogs - LLMs.txt
+
+This file provides guidance for AI systems to understand and navigate the JailbreakChangelogs platform effectively.
+
+## About JailbreakChangelogs
+
+JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz16 for Roblox Jailbreak players, providing changelog archives, item values, trading systems, and community features. It's operated by Jailbreak Changelogs LLC and is not affiliated with Badimo (the official Jailbreak development team).
+
+**Website**: https://jailbreakchangelogs.xyz/
+
+## Core Features & Pages
+
+### Main Navigation
+- **Home** (`/`) - Landing page with feature overview and quick access to Jailbreak game
+- **Changelogs** (`/changelogs`) - Complete archive of Jailbreak updates since 2017
+- **Seasons** (`/seasons`) - Seasonal content, rewards, and progression tracking
+- **Values** (`/values`) - Item value database with price tracking and history
+- **Trading** (`/trading`) - Trade advertisements and marketplace
+- **Servers** (`/servers`) - Private server listings and community servers
+- **Users** (`/users`) - User profiles and community features
+
+### Specialized Tools
+- **Values Calculator** (`/values/calculator`) - Calculate item values and trading worth
+- **Inventory Checker** (`/inventories`) - Check player inventories and item ownership
+- **OG Finder** (`/og`) - Find original owners of rare items
+- **Dupe Finder** (`/dupes`) - Report and detect duplicated items
+- **Money Leaderboard** (`/leaderboard/money`) - Top players by in-game money
+
+### Community Features
+- **Comments System** - OAuth-protected commenting on changelogs, seasons, items, and trades
+- **User Profiles** - Customizable profiles with avatars, banners, and bios
+- **Favorites** - Save favorite items and track their values
+- **Trade Analytics** - Official trading statistics from Badimo
+
+## Content Structure
+
+### Changelogs
+- Individual changelog pages: `/changelogs/[id]`
+- Timeline view: `/changelogs/timeline`
+- Each changelog contains sections, items, media embeds, and community comments
+
+### Seasons
+- Individual season pages: `/seasons/[id]`
+- Season contracts: `/seasons/contracts`
+- XP calculator: `/seasons/will-i-make-it`
+- Each season shows rewards, requirements, dates, and progression info
+
+### Items & Values
+- Item details: `/item/[type]`
+- Value changelogs: `/values/changelogs`
+- Trading guides and calculators available
+
+### User Profiles
+- User pages: `/users/[id]`
+- Profile customization with avatars, banners, descriptions
+- Activity tracking and community engagement
+
+## Key Data Types
+
+### Items
+- Vehicles, customizations, weapons, and accessories
+- Value tracking with historical data
+- Trading statistics and circulation numbers
+- Rarity classifications and exclusivity status
+
+### Seasons
+- Seasonal rewards and requirements
+- XP progression and level requirements
+- Start/end dates and duration tracking
+- Bonus and exclusive item classifications
+
+### Trades
+- Trade advertisements with offers and requests
+- Item value calculations
+- User reputation and trading history
+- Dupe detection and reporting system
+
+## Authentication & Security
+
+- OAuth-based authentication system
+- Secure session management
+- Comment moderation and reporting
+- Dupe detection and item verification
+- User privacy controls
+
+## Technical Details
+
+- Built with Next.js 15 and React 19
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Real-time features with WebSocket connections
+- Responsive design for mobile and desktop
+- Open source under GPL v3.0 license
+
+## Community & Support
+
+- **Discord**: https://discord.jailbreakchangelogs.xyz
+- **Support Email**: support@jailbreakchangelogs.xyz
+- **GitHub**: https://github.com/JBChangelogs/JailbreakChangelogs
+- **Contributing**: See CONTRIBUTING.md for development guidelines
+
+## Important Notes
+
+- This is a fan-made project by Jalenzz16 and Jakobiis, not officially affiliated with Badimo
+- All game data is sourced from official Badimo APIs and community contributions
+- The platform focuses on accurate, up-to-date information about Jailbreak
+- Community features require authentication to prevent spam and abuse
+- Trading data comes from official Badimo statistics when available
+
+## Usage Guidelines for AI
+
+When helping users with JailbreakChangelogs:
+1. Reference specific pages and features when relevant
+2. Explain the difference between official Badimo content and fan-made features
+3. Guide users to appropriate tools (calculators, finders, etc.)
+4. Mention authentication requirements for community features
+5. Provide accurate information about item values and trading
+6. Direct users to official Discord for community support
+
+This platform serves as the definitive resource for Roblox Jailbreak changelogs, values, and community features.
