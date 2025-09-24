@@ -2,7 +2,7 @@ import React from "react";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { formatFullValue, formatPrice } from "@/utils/values";
-import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
+import { getDemandColor } from "@/utils/badgeColors";
 
 interface ItemValuesProps {
   cashValue: string | null;
@@ -30,39 +30,43 @@ export default function ItemValues({
   const hasNoPrice = price === "N/A";
 
   return (
-    <div className="mb-8 space-y-6 rounded-xl border border-gray-700 bg-[#212a31] p-6">
+    <div className="bg-secondary-bg border-border-primary hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20">
-          <BanknotesIcon className="h-5 w-5 text-blue-400" />
+        <div className="bg-button-info/20 flex h-10 w-10 items-center justify-center rounded-lg">
+          <BanknotesIcon className="text-button-info h-6 w-6" />
         </div>
-        <h3 className="text-xl font-semibold text-white">Item Values</h3>
+        <h3 className="text-primary-text text-2xl font-bold">Item Values</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Cash Value */}
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">Cash Value</h4>
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              Cash Value
+            </h4>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(cashValue)}
           </p>
         </div>
 
         {/* Duped Value */}
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">Duped Value</h4>
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              Duped Value
+            </h4>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(dupedValue)}
           </p>
         </div>
 
         {/* Original Price */}
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
               Original Price
             </h4>
           </div>
@@ -79,10 +83,10 @@ export default function ItemValues({
               ) : (
                 !isUSDPrice &&
                 price.toLowerCase() !== "free" && (
-                  <BanknotesIcon className="h-6 w-6 text-white" />
+                  <BanknotesIcon className="text-primary-text h-6 w-6" />
                 )
               ))}
-            <p className="text-2xl font-bold text-white">
+            <p className="text-primary-text text-3xl font-bold">
               {formatPrice(price)}
             </p>
           </div>
@@ -90,52 +94,54 @@ export default function ItemValues({
 
         {/* Vehicle Health - Only show for vehicles */}
         {type.toLowerCase() === "vehicle" && (
-          <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+          <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
             <div className="mb-2 flex items-center gap-2">
-              <h4 className="text-sm font-medium text-gray-300">
+              <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
                 Vehicle Health
               </h4>
             </div>
-            <p className="text-2xl font-bold text-white">{health || "???"}</p>
+            <p className="text-primary-text text-3xl font-bold">
+              {health || "???"}
+            </p>
           </div>
         )}
 
         {/* Item Demand */}
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">Item Demand</h4>
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              Item Demand
+            </h4>
           </div>
-          <div
-            className={`flex items-center gap-2 rounded-lg p-3 ${getDemandColor(demand)}`}
+          <span
+            className={`${getDemandColor(demand)} inline-block rounded-lg px-3 py-2 text-lg font-bold`}
           >
-            <p className="text-2xl font-bold text-white">
-              {demand === "N/A" ? "Unknown" : demand}
-            </p>
-          </div>
+            {demand === "N/A" ? "Unknown" : demand}
+          </span>
         </div>
 
         {/* Item Trend */}
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">Trend</h4>
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              Trend
+            </h4>
           </div>
-          <div
-            className={`flex items-center gap-2 rounded-lg p-3 ${getTrendColor(trend || "Unknown")}`}
-          >
-            <span className="text-2xl font-bold text-white">
-              {!trend || trend === "Unknown" ? "Unknown" : trend}
-            </span>
-          </div>
+          <p className="text-primary-text text-3xl font-bold">
+            {!trend || trend === "Unknown" ? "Unknown" : trend}
+          </p>
         </div>
       </div>
 
       {/* Item Notes - Full width */}
       {notes && notes.trim() !== "" && (
-        <div className="rounded-lg border border-gray-700/50 bg-[#2e3944] p-4">
+        <div className="bg-primary-bg border-border-primary rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-300">Item Notes</h4>
+            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              Item Notes
+            </h4>
           </div>
-          <p className="text-2xl font-bold text-white">{notes}</p>
+          <p className="text-primary-text text-3xl font-bold">{notes}</p>
         </div>
       )}
     </div>

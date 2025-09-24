@@ -30,13 +30,13 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
   nextSeason,
 }) => {
   return (
-    <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+    <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
       <div className="mb-4">
-        <h1 className="text-muted text-2xl font-semibold">
+        <h2 className="text-secondary-text text-2xl font-semibold">
           Roblox Jailbreak Season Archives
-        </h1>
+        </h2>
       </div>
-      <p className="text-muted mb-4">
+      <p className="text-secondary-text mb-4">
         Explore every season of Roblox Jailbreak! Each season brings exciting
         limited-time rewards, exclusive vehicles, and unique customization
         items. Level up, earn XP, and unlock special prizes during these

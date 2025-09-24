@@ -129,15 +129,31 @@ const StyledTabs = dynamic(
     import("@mui/material/Tabs").then(async (TabsModule) => {
       const { styled } = await import("@mui/material/styles");
       return styled(TabsModule.default)(() => ({
-        borderBottom: "1px solid #2E3944",
         "& .MuiTabs-indicator": {
-          backgroundColor: "#5865F2",
+          backgroundColor: "var(--color-button-info)",
         },
         "& .MuiTabs-scrollButtons": {
-          color: "#FFFFFF",
+          color: "var(--color-primary-text) !important",
+          "&:hover": {
+            backgroundColor: "var(--color-quaternary-bg)",
+          },
           "&.Mui-disabled": {
             opacity: 0.3,
+            color: "var(--color-primary-text) !important",
           },
+        },
+        "& .MuiTabScrollButton-root": {
+          color: "var(--color-primary-text) !important",
+          "&:hover": {
+            backgroundColor: "var(--color-quaternary-bg)",
+          },
+          "&.Mui-disabled": {
+            opacity: 0.3,
+            color: "var(--color-primary-text) !important",
+          },
+        },
+        "& .MuiSvgIcon-root": {
+          color: "var(--color-primary-text) !important",
         },
       }));
     }),
@@ -150,9 +166,9 @@ const StyledTab = dynamic(
       const { styled } = await import("@mui/material/styles");
       return styled(TabModule.default)(() => ({
         textTransform: "none",
-        color: "#FFFFFF",
+        color: "var(--color-secondary-text)",
         "&.Mui-selected": {
-          color: "#D3D9D4",
+          color: "var(--color-primary-text)",
         },
       }));
     }),
@@ -272,6 +288,7 @@ export default function ProfileTabs({
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
+          className="[&_.MuiTab-root]:text-secondary-text [&_.MuiTab-root:hover]:text-primary-text [&_.MuiTab-root:hover]:bg-button-info/10 [&_.MuiTab-root.Mui-selected]:text-button-info [&_.MuiTab-root.Mui-selected]:border-button-info [&_.MuiTabs-indicator]:bg-button-info [&_.MuiTabs-scrollButtons]:text-secondary-text [&_.MuiTabs-scrollButtons:hover]:bg-button-info/10 [&_.MuiTabs-scrollButtons:hover]:text-primary-text [&_.MuiTab-root]:mr-1 [&_.MuiTab-root]:min-h-12 [&_.MuiTab-root]:rounded-t-lg [&_.MuiTab-root]:px-5 [&_.MuiTab-root]:py-3 [&_.MuiTab-root]:text-sm [&_.MuiTab-root]:font-medium [&_.MuiTab-root]:normal-case [&_.MuiTab-root]:transition-all [&_.MuiTab-root]:duration-200 [&_.MuiTab-root.Mui-selected]:border-b-2 [&_.MuiTab-root.Mui-selected]:font-semibold [&_.MuiTabs-indicator]:h-1 [&_.MuiTabs-indicator]:rounded-sm [&_.MuiTabs-scrollButtons.Mui-disabled]:opacity-30"
         >
           <StyledTab label="About" />
           <StyledTab label="Comments" />
@@ -323,6 +340,7 @@ export default function ProfileTabs({
             user={user}
             tradeAds={tradeAds}
             isLoadingAdditionalData={isLoadingAdditionalData}
+            isOwnProfile={currentUserId === user.id}
           />
         </TabPanel>
       )}

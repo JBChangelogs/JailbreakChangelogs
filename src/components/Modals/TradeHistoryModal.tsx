@@ -9,6 +9,7 @@ import {
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
 import { DefaultAvatar } from "@/utils/avatar";
+import { getCategoryColor } from "@/utils/categoryIcons";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -58,27 +59,34 @@ export default function TradeHistoryModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="mx-auto max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31]">
+        <div className="border-border-primary bg-secondary-bg mx-auto max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg border">
           {/* Modal Header */}
-          <div className="border-b border-[#2E3944] bg-[#212A31] p-4 sm:p-6">
+          <div className="border-border-primary border-b p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
-                <Dialog.Title className="text-muted text-lg font-semibold sm:text-xl">
-                  Trade History
+                <Dialog.Title className="text-primary-text text-lg font-semibold sm:text-xl">
+                  Ownership History
                 </Dialog.Title>
-                <p className="text-muted truncate text-sm opacity-75">
-                  {item.title} {item.categoryTitle && `(${item.categoryTitle})`}
-                </p>
-                {item.history &&
-                  Array.isArray(item.history) &&
-                  item.history.length > 1 && (
-                    <p className="text-muted mt-1 text-xs opacity-75">
-                      Total Trades: {item.history.length - 1}
-                    </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-primary-text truncate text-sm">
+                    {item.title}
+                  </p>
+                  {item.categoryTitle && (
+                    <span
+                      className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      style={{
+                        borderColor: getCategoryColor(item.categoryTitle),
+                        backgroundColor:
+                          getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
+                      }}
+                    >
+                      {item.categoryTitle}
+                    </span>
                   )}
+                </div>
                 {/* Loading indicator in header */}
                 {loadingUserIds.size > 0 && (
-                  <div className="mt-2 flex items-center gap-2 text-blue-400">
+                  <div className="text-button-info mt-2 flex items-center gap-2">
                     <svg
                       className="h-4 w-4 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +113,7 @@ export default function TradeHistoryModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-muted rounded-full p-1 hover:bg-[#2E3944] hover:text-white"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
@@ -117,7 +125,7 @@ export default function TradeHistoryModal({
                 <div className="mt-3 flex justify-start">
                   <button
                     onClick={toggleTradeSortOrder}
-                    className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
+                    className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                   >
                     {tradeSortOrder === "newest" ? (
                       <ArrowDownIcon className="h-4 w-4" />
@@ -133,7 +141,7 @@ export default function TradeHistoryModal({
           </div>
 
           {/* Modal Content */}
-          <div className="max-h-[60vh] overflow-y-auto bg-[#2E3944] p-6">
+          <div className="max-h-[60vh] overflow-y-auto p-6">
             {item.history &&
             Array.isArray(item.history) &&
             item.history.length > 0 ? (
@@ -146,8 +154,8 @@ export default function TradeHistoryModal({
                   if (history.length === 1) {
                     return (
                       <div className="py-8 text-center">
-                        <p className="text-muted">
-                          This item has no trade history.
+                        <p className="text-secondary-text">
+                          This item has no ownership history.
                         </p>
                       </div>
                     );
@@ -187,8 +195,8 @@ export default function TradeHistoryModal({
                             key={`${trade.fromUser.UserId}-${trade.toUser.UserId}-${trade.toUser.TradeTime}`}
                             className={`rounded-lg border p-3 ${
                               trade.tradeNumber === firstTradeNumber
-                                ? "border-[#37424D] bg-[#1A2332] shadow-lg"
-                                : "border-[#37424D] bg-[#212A31]"
+                                ? "border-border-primary bg-primary-bg shadow-lg"
+                                : "border-border-primary bg-tertiary-bg"
                             }`}
                           >
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -197,7 +205,7 @@ export default function TradeHistoryModal({
                                   <div className="flex flex-wrap items-center gap-2">
                                     {/* From User */}
                                     <div className="flex items-center gap-2">
-                                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#2E3944]">
+                                      <div className="border-border-primary flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
                                         {getUserAvatar(
                                           trade.fromUser.UserId.toString(),
                                         ) ? (
@@ -220,7 +228,7 @@ export default function TradeHistoryModal({
                                         href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                                        className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
                                       >
                                         {getUserDisplay(
                                           trade.fromUser.UserId.toString(),
@@ -229,7 +237,7 @@ export default function TradeHistoryModal({
                                     </div>
 
                                     {/* Arrow */}
-                                    <div className="text-muted flex items-center gap-1">
+                                    <div className="text-secondary-text flex items-center gap-1">
                                       <svg
                                         className="h-4 w-4"
                                         fill="none"
@@ -250,7 +258,7 @@ export default function TradeHistoryModal({
 
                                     {/* To User */}
                                     <div className="flex items-center gap-2">
-                                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#2E3944]">
+                                      <div className="border-border-primary flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
                                         {getUserAvatar(
                                           trade.toUser.UserId.toString(),
                                         ) ? (
@@ -273,7 +281,7 @@ export default function TradeHistoryModal({
                                         href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="truncate font-medium text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                                        className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
                                       >
                                         {getUserDisplay(
                                           trade.toUser.UserId.toString(),
@@ -285,7 +293,7 @@ export default function TradeHistoryModal({
                               </div>
 
                               {/* Trade Date */}
-                              <div className="text-muted flex-shrink-0 text-sm">
+                              <div className="text-secondary-text flex-shrink-0 text-sm">
                                 {formatDate(trade.toUser.TradeTime)}
                               </div>
                             </div>
@@ -298,7 +306,9 @@ export default function TradeHistoryModal({
               </div>
             ) : (
               <div className="py-8 text-center">
-                <p className="text-muted">This item has no trade history.</p>
+                <p className="text-secondary-text">
+                  This item has no ownership history.
+                </p>
               </div>
             )}
           </div>

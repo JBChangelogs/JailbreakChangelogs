@@ -61,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
     },
     {
-      url: `${BASE_URL}/timeline`,
+      url: `${BASE_URL}/changelogs/timeline`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
       changeFrequency: "daily" as const,

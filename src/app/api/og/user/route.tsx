@@ -13,6 +13,17 @@ import type { UserData } from "@/types/auth";
  */
 async function isImageAccessible(url: string): Promise<boolean> {
   try {
+    // For GIF URLs (like Tenor), try a GET request instead of HEAD
+    if (url.includes(".gif") || url.includes("tenor.com")) {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; JailbreakChangelogs-OG/1.0)",
+        },
+      });
+      return response.ok;
+    }
+
     const response = await fetch(url, { method: "HEAD" });
     const contentType = response.headers.get("content-type");
     return response.ok && contentType
@@ -46,33 +57,6 @@ const calculateSeed = (userId: string): number => {
   }
   return Math.abs(seed);
 };
-
-/**
- * Converts various color formats to a valid hex color string
- * Handles Discord's color format (numbers) and string formats
- * @param color - The color value from Discord API or user settings
- * @returns string - Valid hex color with # prefix, or default blue
- */
-function formatAccentColor(color: number | string | null | undefined): string {
-  // Return default color if color is falsy, "None", or "0"
-  if (!color || color === "None" || color === "0") return "#124e66";
-
-  // If it's a string, pad with zeros to 6 chars, then use first 6 chars
-  if (typeof color === "string") {
-    const padded = (color + "000000").substring(0, 6);
-    return `#${padded}`;
-  }
-
-  // If it's a number, convert to string, pad with zeros, then use first 6 chars
-  if (typeof color === "number") {
-    const colorStr = color.toString();
-    const padded = (colorStr + "000000").substring(0, 6);
-    return `#${padded}`;
-  }
-
-  // If all else fails, return the default color
-  return "#124e66";
-}
 
 /**
  * Determines which banner URL to use for the user's profile
@@ -173,7 +157,7 @@ export async function GET(request: Request) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+              background: "linear-gradient(135deg, #16161a 0%, #242629 100%)",
               padding: "40px",
             }}
           >
@@ -187,8 +171,8 @@ export async function GET(request: Request) {
                 textAlign: "center",
                 padding: "32px 48px",
                 borderRadius: "16px",
-                backgroundColor: "rgba(239, 68, 68, 0.1)",
-                border: "2px solid rgba(239, 68, 68, 0.3)",
+                backgroundColor: "rgba(237, 79, 79, 0.1)",
+                border: "2px solid rgba(237, 79, 79, 0.3)",
                 maxWidth: "800px",
               }}
             >
@@ -199,7 +183,7 @@ export async function GET(request: Request) {
                   justifyContent: "center",
                   fontSize: 64,
                   fontFamily: "LuckiestGuy",
-                  color: "#ef4444",
+                  color: "#ed4f4f",
                   marginBottom: "16px",
                 }}
               >
@@ -211,7 +195,7 @@ export async function GET(request: Request) {
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 24,
-                  color: "#d1d5db",
+                  color: "#94a1b2",
                   lineHeight: "1.5",
                 }}
               >
@@ -261,6 +245,25 @@ export async function GET(request: Request) {
 
   const userNumber = user.usernumber || "Unknown";
 
+  // Determine avatar shape: square for premiumType 3, circle otherwise
+  const avatarShape = user.premiumtype === 3 ? "square" : "circle";
+
+  // Get premium tier display info
+  const getPremiumTierInfo = (premiumType: number) => {
+    switch (premiumType) {
+      case 1:
+        return { name: "Supporter 1", color: "#cd7f32" };
+      case 2:
+        return { name: "Supporter 2", color: "#c0c0c0" };
+      case 3:
+        return { name: "Supporter 3", color: "#ffd700" };
+      default:
+        return null;
+    }
+  };
+
+  const premiumTier = getPremiumTierInfo(user.premiumtype);
+
   // Determine avatar image: user's Discord avatar, custom avatar, or default
   let avatarUrl: string = "";
   let useDefaultAvatar = false;
@@ -305,10 +308,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Apply user's accent color as avatar border for personalization
-  const formattedAccentColor = formatAccentColor(user.accent_color);
-  const borderStyle = `3px solid ${formattedAccentColor}`;
-
   return new ImageResponse(
     (
       <div
@@ -346,10 +345,9 @@ export async function GET(request: Request) {
             justifyContent: "center",
             width: "250px",
             height: "250px",
-            borderRadius: "50%",
+            borderRadius: avatarShape === "square" ? "4px" : "50%",
             overflow: "hidden",
-            backgroundColor: "#2E3944",
-            border: borderStyle,
+            backgroundColor: "#0f1012",
           }}
         >
           {useDefaultAvatar ? (
@@ -361,11 +359,11 @@ export async function GET(request: Request) {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <circle cx="125" cy="125" r="125" fill="#2E3944" />
-              <circle cx="125" cy="100" r="37.5" fill="#d3d9d4" />
+              <circle cx="125" cy="125" r="125" fill="#0f1012" />
+              <circle cx="125" cy="100" r="37.5" fill="#fffffe" />
               <path
                 d="M125 150C162.5 150 193.75 181.25 193.75 218.75H56.25C56.25 181.25 87.5 150 125 150Z"
-                fill="#d3d9d4"
+                fill="#fffffe"
               />
             </svg>
           ) : (
@@ -376,7 +374,7 @@ export async function GET(request: Request) {
               style={{
                 width: "100%",
                 height: "100%",
-                borderRadius: "50%",
+                borderRadius: avatarShape === "square" ? "4px" : "50%",
                 objectFit: "cover",
               }}
             />
@@ -394,7 +392,7 @@ export async function GET(request: Request) {
             textAlign: "center",
             padding: "16px 24px",
             borderRadius: "12px",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            backgroundColor: "rgba(15, 16, 18, 0.8)",
             border: "1px solid rgba(255, 255, 255, 0.1)",
             minWidth: "400px",
             marginTop: "20px",
@@ -421,7 +419,7 @@ export async function GET(request: Request) {
               alignItems: "center",
               justifyContent: "center",
               fontSize: 36,
-              color: "#a0a0a0",
+              color: "#94a1b2",
             }}
           >
             @{user.username}
@@ -432,11 +430,35 @@ export async function GET(request: Request) {
               alignItems: "center",
               justifyContent: "center",
               fontSize: 24,
-              color: "#808080",
+              color: "#72757e",
             }}
           >
             User #{userNumber}
           </div>
+          {premiumTier && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "8px",
+                padding: "4px 12px",
+                borderRadius: "20px",
+                backgroundColor: premiumTier.color,
+                color:
+                  premiumTier.name === "Supporter 3" ? "#000000" : "#ffffff",
+                fontSize: 18,
+                fontFamily: "LuckiestGuy",
+                fontWeight: "bold",
+                textShadow:
+                  premiumTier.name === "Supporter 3"
+                    ? "none"
+                    : "1px 1px 2px rgba(0, 0, 0, 0.8)",
+              }}
+            >
+              {premiumTier.name}
+            </div>
+          )}
         </div>
 
         {/* Call-to-Action Section - Promotes the website */}
@@ -450,7 +472,7 @@ export async function GET(request: Request) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backgroundColor: "rgba(15, 16, 18, 0.9)",
             backdropFilter: "blur(10px)",
             padding: "20px",
             borderTop: "1px solid rgba(255, 255, 255, 0.1)",
@@ -479,13 +501,13 @@ export async function GET(request: Request) {
             <p
               style={{
                 fontSize: 18,
-                color: "#a0a0a0",
+                color: "#94a1b2",
                 margin: "0 0 16px 0",
                 textShadow: "1px 1px 2px rgba(0, 0, 0, 0.8)",
               }}
             >
               Visit{" "}
-              <span style={{ color: "#6366f1", fontWeight: "bold" }}>
+              <span style={{ color: "#2462cd", fontWeight: "bold" }}>
                 jailbreakchangelogs.xyz
               </span>
             </p>

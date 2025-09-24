@@ -30,35 +30,35 @@ export default function DupeUserInfo({
   totalDupedValue,
 }: DupeUserInfoProps) {
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-      <h2 className="text-muted mb-4 text-xl font-semibold">
+    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+      <h2 className="text-primary-text mb-4 text-xl font-semibold">
         User Information
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+      <div className="border-border-primary bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
         {getUserAvatar(robloxId) ? (
           <Image
             src={getUserAvatar(robloxId)!}
             alt="Roblox Avatar"
             width={64}
             height={64}
-            className="flex-shrink-0 rounded-full bg-[#212A31]"
+            className="flex-shrink-0 rounded-full"
           />
         ) : (
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+          <div className="bg-surface-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
             <DefaultAvatar />
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="text-muted text-lg font-bold break-words">
+          <h3 className="text-primary-text text-lg font-bold break-words">
             {getUserDisplay(robloxId)}
           </h3>
-          <p className="text-muted text-sm break-words opacity-75">
+          <p className="text-primary-text text-sm break-words opacity-75">
             @{getUsername(robloxId)}
           </p>
 
-          {/* Connection Icons */}
+          {/* Connection Badges */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {/* Discord Profile */}
             {userConnectionData && (
@@ -69,15 +69,10 @@ export default function DupeUserInfo({
                 slotProps={{
                   tooltip: {
                     sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      border: "1px solid #2E3944",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
                       "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
+                        color: "var(--color-secondary-bg)",
                       },
                     },
                   },
@@ -87,10 +82,10 @@ export default function DupeUserInfo({
                   href={`https://discord.com/users/${userConnectionData.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
-                  <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
-                  <span className="text-sm font-medium">Discord</span>
+                  <DiscordIcon className="h-3 w-3" />
+                  Discord
                 </a>
               </Tooltip>
             )}
@@ -103,15 +98,10 @@ export default function DupeUserInfo({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    border: "1px solid #2E3944",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
@@ -121,10 +111,10 @@ export default function DupeUserInfo({
                 href={`https://www.roblox.com/users/${robloxId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
-                <RobloxIcon className="h-4 w-4 flex-shrink-0" />
-                <span className="text-sm font-medium">Roblox</span>
+                <RobloxIcon className="h-3 w-3" />
+                Roblox
               </a>
             </Tooltip>
 
@@ -137,15 +127,10 @@ export default function DupeUserInfo({
                 slotProps={{
                   tooltip: {
                     sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      border: "1px solid #2E3944",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
                       "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
+                        color: "var(--color-secondary-bg)",
                       },
                     },
                   },
@@ -153,16 +138,16 @@ export default function DupeUserInfo({
               >
                 <Link
                   href={`/users/${userConnectionData.id}`}
-                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <Image
                     src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
                     alt="JBCL Logo"
-                    width={16}
-                    height={16}
-                    className="h-4 w-4 flex-shrink-0"
+                    width={12}
+                    height={12}
+                    className="h-3 w-3 flex-shrink-0"
                   />
-                  <span className="text-sm font-medium">Website Profile</span>
+                  Website
                 </Link>
               </Tooltip>
             )}
@@ -172,8 +157,10 @@ export default function DupeUserInfo({
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-          <div className="text-muted mb-2 text-sm">Dupe Items Found</div>
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4 text-center">
+          <div className="text-secondary-text mb-2 text-sm">
+            Dupe Items Found
+          </div>
           <Tooltip
             title={`${dupeItemsCount.toLocaleString()}`}
             placement="top"
@@ -181,27 +168,24 @@ export default function DupeUserInfo({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <div className="cursor-help text-2xl font-bold text-red-400">
+            <div className="text-primary-text cursor-help text-2xl font-bold">
               {dupeItemsCount.toLocaleString()}
             </div>
           </Tooltip>
         </div>
-        <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-          <div className="text-muted mb-2 text-sm">Total Duped Value</div>
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4 text-center">
+          <div className="text-secondary-text mb-2 text-sm">
+            Total Duped Value
+          </div>
           <Tooltip
             title={`$${totalDupedValue.toLocaleString()}`}
             placement="top"
@@ -209,21 +193,16 @@ export default function DupeUserInfo({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <div className="cursor-help text-2xl font-bold text-red-400">
+            <div className="text-primary-text cursor-help text-2xl font-bold">
               $
               {totalDupedValue >= 1000000000
                 ? `${(totalDupedValue / 1000000000).toFixed(1)}B`

@@ -13,19 +13,19 @@ interface UserTypeTabsProps {
 const StyledTabs = styled(Tabs)(() => ({
   minHeight: "unset",
   "& .MuiTabs-indicator": {
-    backgroundColor: "#5865F2",
+    backgroundColor: "var(--color-button-info)",
     height: "2px",
   },
 }));
 
 const StyledTab = styled(Tab)(() => ({
   textTransform: "none",
-  color: "#FFFFFF",
+  color: "var(--color-secondary-text)",
   minHeight: "unset",
   padding: "6px 12px",
   fontSize: "0.875rem",
   "&.Mui-selected": {
-    color: "#D3D9D4",
+    color: "var(--color-primary-text)",
   },
   "& .MuiSvgIcon-root": {
     marginRight: "4px",

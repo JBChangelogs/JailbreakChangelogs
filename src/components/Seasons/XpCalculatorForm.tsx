@@ -92,8 +92,8 @@ export default function XpCalculatorForm({
 
   const maxXpForCurrentLevel = getMaxXpForLevel(currentLevel);
   return (
-    <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
-      <h2 className="mb-6 text-2xl font-semibold text-[#FFFFFF]">
+    <div className="border-stroke bg-secondary-bg mb-8 rounded-lg border p-6">
+      <h2 className="text-primary-text mb-6 text-2xl font-semibold">
         🎯 XP Progress Calculator
       </h2>
 
@@ -107,7 +107,7 @@ export default function XpCalculatorForm({
           className="mx-auto w-full max-w-sm"
           priority
         />
-        <p className="text-muted mt-2 text-sm">
+        <p className="text-secondary-text mt-2 text-sm">
           💡 Use this image as a reference to find your current level and XP
           progress
         </p>
@@ -115,7 +115,7 @@ export default function XpCalculatorForm({
 
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className="mb-2 block text-sm font-medium text-[#FFFFFF]">
+          <label className="text-primary-text mb-2 block text-sm font-medium">
             Current Level
           </label>
           {selectLoaded ? (
@@ -135,56 +135,41 @@ export default function XpCalculatorForm({
                 value: i + 1,
                 label: `Level ${i + 1}`,
               }))}
-              classNamePrefix="react-select"
               className="w-full"
               isClearable={false}
               isSearchable={false}
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#2E3944",
-                  borderColor: "#2E3944",
-                  color: "#FFFFFF",
-                  "&:hover": {
-                    borderColor: "#124E66",
-                  },
-                  "&:focus-within": {
-                    borderColor: "#124E66",
-                  },
-                }),
-                singleValue: (base) => ({ ...base, color: "#FFFFFF" }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  color: "#D3D9D4",
-                  zIndex: 3000,
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#5865F2"
-                    : state.isFocused
-                      ? "#2E3944"
-                      : "#37424D",
-                  color:
-                    state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                  "&:active": {
-                    backgroundColor: "#124E66",
-                    color: "#FFFFFF",
-                  },
-                }),
+              unstyled
+              classNames={{
+                control: () =>
+                  "text-secondary-text flex items-center justify-between rounded-lg border border-button-info bg-primary-bg px-3 py-3 h-[56px] hover:cursor-pointer min-h-[56px]",
+                singleValue: () => "text-secondary-text",
+                placeholder: () => "text-secondary-text",
+                menu: () =>
+                  "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                option: ({ isSelected, isFocused }) =>
+                  `px-4 py-3 cursor-pointer ${
+                    isSelected
+                      ? "bg-button-info text-primary-text"
+                      : isFocused
+                        ? "bg-quaternary-bg text-primary-text"
+                        : "bg-secondary-bg text-secondary-text"
+                  }`,
+                clearIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
+                dropdownIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
               }}
             />
           ) : (
-            <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#2E3944]"></div>
+            <div className="h-10 w-full animate-pulse rounded-md border"></div>
           )}
-          <div className="text-muted mt-1 text-xs">
+          <div className="text-secondary-text mt-1 text-xs">
             Select your current level (1-{targetLevel - 1})
           </div>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-[#FFFFFF]">
+          <label className="text-primary-text mb-2 block text-sm font-medium">
             XP in Current Level
           </label>
           <input
@@ -198,10 +183,10 @@ export default function XpCalculatorForm({
               const clampedValue = Math.min(value, maxXpForCurrentLevel);
               onXpChange(clampedValue);
             }}
-            className="w-full rounded border border-[#2E3944] bg-[#2E3944] px-3 py-2 text-[#FFFFFF] focus:border-[#124E66] focus:outline-none"
+            className="border-button-info bg-form-input text-primary-text h-[56px] min-h-[56px] w-full rounded-lg border px-3 py-3 focus:outline-none"
             placeholder={`0-${maxXpForCurrentLevel}`}
           />
-          <div className="text-muted mt-1 text-xs">
+          <div className="text-secondary-text mt-1 text-xs">
             XP progress within Level {currentLevel} (0-
             {maxXpForCurrentLevel.toLocaleString()} XP needed to reach Level{" "}
             {currentLevel + 1})

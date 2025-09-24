@@ -34,7 +34,9 @@ export default function DupeItemsGrid({
   if (paginatedData.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-muted">No items found matching your criteria.</p>
+        <p className="text-secondary-text">
+          No items found matching your criteria.
+        </p>
       </div>
     );
   }
@@ -79,17 +81,20 @@ export default function DupeItemsGrid({
             color="primary"
             sx={{
               "& .MuiPaginationItem-root": {
-                color: "#D3D9D4",
+                color: "var(--color-primary-text)",
                 "&.Mui-selected": {
-                  backgroundColor: "#5865F2",
-                  color: "#FFFFFF",
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-button-info-hover)",
+                  },
                 },
                 "&:hover": {
-                  backgroundColor: "#2E3944",
+                  backgroundColor: "var(--color-quaternary-bg)",
                 },
               },
-              "& .MuiPaginationItem-ellipsis": {
-                color: "#D3D9D4",
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
               },
             }}
           />

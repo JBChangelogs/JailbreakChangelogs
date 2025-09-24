@@ -9,19 +9,19 @@ export default async function MoneyLeaderboardPage() {
   const leaderboard = await fetchMoneyLeaderboard();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4">
       <Breadcrumb />
 
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-200">
+          <h1 className="text-primary-text text-3xl font-bold">
             Money Leaderboard
           </h1>
-          <span className="rounded bg-[#5865F2] px-2 py-1 text-xs font-semibold text-white uppercase">
+          <span className="bg-button-info text-form-button-text rounded px-2 py-1 text-xs font-semibold uppercase">
             New
           </span>
         </div>
-        <p className="mt-2 text-gray-400">
+        <p className="text-secondary-text mt-2">
           Top players ranked by their total money in Jailbreak
         </p>
       </div>

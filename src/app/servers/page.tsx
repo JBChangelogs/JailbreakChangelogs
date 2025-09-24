@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { ThemeProvider } from "@mui/material";
-import { darkTheme } from "@/theme/darkTheme";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ServerHeader from "@/components/Servers/ServerHeader";
 import ServerList from "@/components/Servers/ServerList";
@@ -28,24 +26,22 @@ export default function ServersPage() {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <main className="min-h-screen bg-[#2E3944]">
-        <div className="container mx-auto mb-8">
-          <Breadcrumb />
-          <ServerHeader />
-          <ServerList />
-        </div>
+    <main className="text-primary-text min-h-screen">
+      <div className="container mx-auto mb-8">
+        <Breadcrumb />
+        <ServerHeader />
+        <ServerList />
+      </div>
 
-        {showBackToTop && (
-          <button
-            onClick={scrollToTop}
-            className="text-muted fixed right-8 bottom-8 z-[2000] rounded-full bg-[#124E66] p-3 shadow-lg hover:bg-[#1A5F7A] focus:outline-none"
-            aria-label="Back to top"
-          >
-            <ArrowUpIcon className="h-6 w-6" />
-          </button>
-        )}
-      </main>
-    </ThemeProvider>
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
+          aria-label="Back to top"
+        >
+          <ArrowUpIcon className="h-6 w-6" />
+        </button>
+      )}
+    </main>
   );
 }

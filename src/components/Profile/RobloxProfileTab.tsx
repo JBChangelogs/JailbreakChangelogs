@@ -53,12 +53,14 @@ interface RobloxProfileTabProps {
   user: User;
   tradeAds?: TradeAd[];
   isLoadingAdditionalData?: boolean;
+  isOwnProfile?: boolean;
 }
 
 export default function RobloxProfileTab({
   user,
   tradeAds = [],
   isLoadingAdditionalData = false,
+  isOwnProfile = false,
 }: RobloxProfileTabProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,23 +68,28 @@ export default function RobloxProfileTab({
   return (
     <div className="space-y-6">
       {/* Roblox Profile Card */}
-      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-4 flex items-center gap-2">
-          <RobloxIcon className="h-6 w-6 text-white" />
-          <h2 className="text-muted text-lg font-semibold">Roblox Profile</h2>
+          <RobloxIcon className="text-button-info h-6 w-6" />
+          <h2 className="text-primary-text text-lg font-semibold">
+            Roblox Profile
+          </h2>
         </div>
 
         <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
           {/* Roblox Avatar */}
-          <div className="relative h-32 w-32 overflow-hidden rounded-lg border-2 border-[#5865F2]">
+          <div className="border-button-info bg-primary-bg relative h-32 w-32 overflow-hidden rounded-lg border-2">
             {!imageError && user.roblox_avatar ? (
               <>
                 {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#212A31]">
-                    <CircularProgress size={32} sx={{ color: "#5865F2" }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <CircularProgress
+                      size={32}
+                      sx={{ color: "var(--color-button-info)" }}
+                    />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-[#212A31]">
+                <div className="absolute inset-0">
                   <Image
                     src={user.roblox_avatar}
                     alt={`${user.roblox_display_name || user.roblox_username || "Roblox"} user's profile picture`}
@@ -95,8 +102,8 @@ export default function RobloxProfileTab({
                 </div>
               </>
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[#212A31]">
-                <RobloxIcon className="h-12 w-12 text-white" />
+              <div className="flex h-full w-full items-center justify-center">
+                <RobloxIcon className="text-primary-text h-12 w-12" />
               </div>
             )}
           </div>
@@ -111,62 +118,54 @@ export default function RobloxProfileTab({
                       variant="text"
                       width="60%"
                       height={28}
-                      sx={{ bgcolor: "#2E3944", mb: 1 }}
+                      sx={{ mb: 1 }}
                     />
-                    <Skeleton
-                      variant="text"
-                      width="40%"
-                      height={20}
-                      sx={{ bgcolor: "#2E3944" }}
-                    />
+                    <Skeleton variant="text" width="40%" height={20} />
                   </>
                 ) : (
                   <>
-                    <h3 className="text-muted text-xl font-semibold">
+                    <h3 className="text-primary-text text-xl font-semibold">
                       {user.roblox_display_name || user.roblox_username}
                     </h3>
-                    <p className="text-[#FFFFFF]">@{user.roblox_username}</p>
+                    <p className="text-secondary-text">
+                      @{user.roblox_username}
+                    </p>
                   </>
                 )}
               </div>
 
-              <div className="text-sm text-[#FFFFFF]">
+              <div className="text-secondary-text text-sm">
                 {isLoadingAdditionalData ? (
-                  <Skeleton
-                    variant="text"
-                    width="50%"
-                    height={16}
-                    sx={{ bgcolor: "#2E3944" }}
-                  />
+                  <Skeleton variant="text" width="50%" height={16} />
                 ) : (
                   user.roblox_join_date && (
-                    <Tooltip
-                      title={formatCustomDate(user.roblox_join_date)}
-                      placement="top"
-                      arrow
-                      enterDelay={200}
-                      leaveDelay={0}
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "#0F1419",
-                            color: "#D3D9D4",
-                            fontSize: "0.75rem",
-                            padding: "8px 12px",
-                            borderRadius: "8px",
-                            border: "1px solid #2E3944",
-                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                            "& .MuiTooltip-arrow": {
-                              color: "#0F1419",
+                    <span className="text-secondary-text">
+                      <span className="text-primary-text">Member since</span>{" "}
+                      <Tooltip
+                        title={formatCustomDate(user.roblox_join_date)}
+                        placement="top"
+                        arrow
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "var(--color-secondary-bg)",
+                              color: "var(--color-primary-text)",
+                              fontSize: "0.75rem",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              boxShadow: "0 4px 12px var(--color-card-shadow)",
+                              "& .MuiTooltip-arrow": {
+                                color: "var(--color-secondary-bg)",
+                              },
                             },
                           },
-                        },
-                      }}
-                    >
-                      <span className="inline-block cursor-help">
-                        Member since {formatShortDate(user.roblox_join_date)}
-                      </span>
-                    </Tooltip>
+                        }}
+                      >
+                        <span className="cursor-help">
+                          {formatShortDate(user.roblox_join_date)}
+                        </span>
+                      </Tooltip>
+                    </span>
                   )
                 )}
               </div>
@@ -177,9 +176,8 @@ export default function RobloxProfileTab({
                     href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors hover:bg-[#4752C4]"
+                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-colors"
                   >
-                    <RobloxIcon className="h-5 w-5" />
                     <span>View Roblox Profile</span>
                   </Link>
                 </div>
@@ -194,6 +192,7 @@ export default function RobloxProfileTab({
         userId={user.id}
         tradeAds={tradeAds}
         isLoadingAdditionalData={isLoadingAdditionalData}
+        isOwnProfile={isOwnProfile}
       />
     </div>
   );

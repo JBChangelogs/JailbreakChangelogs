@@ -29,13 +29,13 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
     <>
       <button
         onClick={handleCopy}
-        className={`rounded p-1 transition-colors hover:bg-[#37424D] ${className}`}
+        className={`hover:bg-quaternary-bg rounded p-1 transition-colors ${className}`}
         title="Copy Roblox ID"
       >
         {copied ? (
-          <CheckIcon className="h-4 w-4 text-green-400" />
+          <CheckIcon className="text-status-success h-4 w-4" />
         ) : (
-          <ClipboardIcon className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+          <ClipboardIcon className="text-tertiary-text hover:text-secondary-text h-4 w-4" />
         )}
       </button>
 
@@ -50,12 +50,7 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
           elevation={6}
           variant="filled"
           severity="success"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #5865F2",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
         >
           Roblox ID copied to clipboard!
         </MuiAlert>

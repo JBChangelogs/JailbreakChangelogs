@@ -12,15 +12,17 @@ export default async function UsersPage() {
   const online: OnlineUser[] = await fetchOnlineUsers();
 
   return (
-    <div className="min-h-screen bg-[#2E3944] px-4 pb-8">
+    <div className="min-h-screen px-4 pb-8">
       <div className="mx-auto max-w-7xl">
         <Breadcrumb />
 
         <div className="mb-2 flex items-center gap-2">
-          <UserGroupIcon className="text-muted h-6 w-6" />
-          <h1 className="text-muted text-2xl font-bold">User Search</h1>
+          <UserGroupIcon className="text-secondary-text h-6 w-6" />
+          <h1 className="text-secondary-text text-2xl font-bold">
+            User Search
+          </h1>
         </div>
-        <p className="mb-6 text-sm text-[#FFFFFF]">
+        <p className="text-secondary-text mb-6 text-sm">
           Find users by their username or display name
         </p>
 

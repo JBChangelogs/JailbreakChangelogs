@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-  Button,
-} from "@mui/material";
+import { Dialog, CircularProgress, Button } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
@@ -87,6 +78,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
         const response = await fetch(
           `${PUBLIC_API_URL}/users/following/get?user=${userId}`,
+          {
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Following/1.0",
+            },
+          },
         );
 
         if (response.status === 404) {
@@ -134,6 +130,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           if (idsToFetch.length > 0) {
             const userResponse = await fetch(
               `${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(",")}&nocache=true`,
+              {
+                headers: {
+                  "User-Agent": "JailbreakChangelogs-Following/1.0",
+                },
+              },
             );
             if (userResponse.ok) {
               const userDataArray = await userResponse.json();
@@ -242,238 +243,168 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
     <Dialog
       open={isOpen}
       onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        paper: {
-          style: {
-            backgroundColor: "#212A31",
-            color: "#D3D9D4",
-            maxHeight: "70vh",
-            margin: "8px",
-            width: "calc(100% - 16px)",
-          },
-        },
-      }}
+      className="relative z-50"
+      disableAutoFocus
+      disableEnforceFocus
+      disableRestoreFocus
     >
-      <DialogTitle className="flex items-center justify-between border-b border-[#2E3944] p-2 sm:p-4">
-        <span className="text-muted w-full text-center text-sm font-semibold sm:text-base">
-          Following
-        </span>
-        <IconButton
-          onClick={onClose}
-          className="text-muted hover:text-[#FFFFFF]"
-          size="small"
-          sx={{ position: "absolute", right: 4, top: 4 }}
-        >
-          <XMarkIcon className="h-4 w-4 text-[#FFFFFF] sm:h-5 sm:w-5" />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ padding: "12px !important", overflowY: "auto" }}>
-        {loading ? (
-          <div className="flex justify-center py-4 sm:py-8">
-            <CircularProgress sx={{ color: "#5865F2" }} />
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        aria-hidden="true"
+      />
+
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <div className="modal-container bg-primary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
+            <span>Following ({following.length})</span>
+            <button
+              onClick={onClose}
+              className="text-primary-text hover:text-primary-text transition-colors"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
           </div>
-        ) : isPrivate ? (
-          <div className="py-4 text-center text-sm text-[#FFFFFF] sm:py-8">
-            This user has hidden their following
-          </div>
-        ) : (
-          <>
-            <div className="mb-2 sm:mb-4">
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MagnifyingGlassIcon className="h-4 w-4 text-[#FFFFFF] sm:h-5 sm:w-5" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchQuery && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setSearchQuery("")}
-                        size="small"
-                        className="text-muted hover:text-[#FFFFFF]"
-                      >
-                        <XMarkIcon className="h-3 w-3 text-[#FFFFFF] sm:h-4 sm:w-4" />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    color: "#D3D9D4",
-                    backgroundColor: "#1A2228",
-                    "& fieldset": {
-                      borderColor: "#2E3944",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#FFFFFF",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#5865F2",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: "#D3D9D4",
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                  },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: "#FFFFFF",
-                    opacity: 1,
-                  },
-                }}
-              />
-            </div>
-            {error ? (
-              <div className="py-4 text-center text-sm text-[#FF6B6B] sm:py-8">
-                {error}
+
+          <div className="modal-content max-h-[400px] overflow-y-auto p-6">
+            {loading ? (
+              <div className="flex justify-center py-4 sm:py-8">
+                <CircularProgress sx={{ color: "var(--color-button-info)" }} />
               </div>
-            ) : filteredFollowing.length === 0 ? (
-              <div className="py-4 text-center text-sm text-[#FFFFFF] sm:py-8">
-                {searchQuery ? "No results found" : "Not following anyone yet"}
+            ) : isPrivate ? (
+              <div className="text-primary-text py-4 text-center text-sm sm:py-8">
+                This user has hidden their following
               </div>
             ) : (
-              <div className="space-y-1 sm:space-y-4">
-                {filteredFollowing.map((following) => {
-                  const user = followingDetails[following.following_id];
-                  if (!user) return null;
-
-                  const isCurrentUser = currentUserId === user.id;
-                  const isPrivateProfile =
-                    user.settings?.profile_public === 0 && !isCurrentUser;
-
-                  return (
-                    <div
-                      key={following.following_id}
-                      className="flex items-center justify-between"
-                    >
-                      <Link
-                        href={isPrivateProfile ? "#" : `/users/${user.id}`}
-                        prefetch={false}
-                        className={`block flex-1 rounded-lg p-1.5 transition-colors sm:p-3 ${
-                          isPrivateProfile
-                            ? "cursor-not-allowed opacity-75"
-                            : "hover:bg-[#2E3944]"
-                        }`}
-                        onClick={(e) => {
-                          if (isPrivateProfile) {
-                            e.preventDefault();
-                          }
-                        }}
-                        title={
-                          isPrivateProfile
-                            ? "This profile is private"
-                            : undefined
-                        }
+              <>
+                <div className="mb-2 sm:mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search following..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                    />
+                    <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                        aria-label="Clear search"
                       >
-                        <div className="flex items-center space-x-1.5 sm:space-x-3">
-                          {isPrivateProfile ? (
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2E3944] bg-[#1E2328]">
-                              <svg
-                                className="h-5 w-5 text-[#FFFFFF]"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                />
-                              </svg>
-                            </div>
-                          ) : (
-                            <UserAvatar
-                              userId={user.id}
-                              avatarHash={user.avatar}
-                              username={user.username}
-                              size={10}
-                              accent_color={user.accent_color}
-                              custom_avatar={user.custom_avatar}
-                              showBadge={false}
-                              settings={user.settings}
-                              premiumType={user.premiumtype}
-                            />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1 sm:gap-2">
-                              <h3 className="text-muted max-w-[180px] truncate text-sm font-semibold sm:max-w-[250px] sm:text-base">
-                                {isPrivateProfile
-                                  ? "Hidden User"
-                                  : user.global_name &&
-                                      user.global_name !== "None"
-                                    ? user.global_name
-                                    : user.username}
-                              </h3>
-                            </div>
-                            <p className="max-w-[180px] truncate text-[10px] text-[#FFFFFF] sm:max-w-[250px] sm:text-sm">
-                              {isPrivateProfile
-                                ? "Private Profile"
-                                : `@${user.username}`}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                      {isOwnProfile && (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleFollowToggle(user.id);
-                          }}
-                          disabled={loadingFollow[user.id]}
-                          sx={{
-                            ml: 0.5,
-                            minWidth: "auto",
-                            px: 0.5,
-                            py: 0.5,
-                            borderColor: "#5865F2",
-                            color: "#5865F2",
-                            fontSize: "0.75rem",
-                            "&:hover": {
-                              borderColor: "#4752C4",
-                              backgroundColor: "rgba(88, 101, 242, 0.1)",
-                            },
-                            "&.Mui-disabled": {
-                              borderColor: "#2E3944",
-                              color: "#FFFFFF",
-                            },
-                          }}
+                        <XMarkIcon />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {error ? (
+                  <div className="text-status-error py-4 text-center text-sm sm:py-8">
+                    {error}
+                  </div>
+                ) : filteredFollowing.length === 0 ? (
+                  <div className="text-primary-text py-4 text-center text-sm sm:py-8">
+                    {searchQuery
+                      ? "No results found"
+                      : "Not following anyone yet"}
+                  </div>
+                ) : (
+                  <div className="space-y-1 sm:space-y-4">
+                    {filteredFollowing.map((following) => {
+                      const user = followingDetails[following.following_id];
+                      if (!user) return null;
+
+                      return (
+                        <div
+                          key={following.following_id}
+                          className="group hover:bg-secondary-bg flex items-center justify-between rounded-lg p-1.5 transition-colors sm:p-3"
                         >
-                          {loadingFollow[user.id] ? (
-                            <div
-                              className="flex items-center justify-center"
-                              style={{ width: "80px" }}
-                            >
-                              <CircularProgress
-                                size={16}
-                                sx={{ color: "#5865F2" }}
+                          <Link
+                            href={`/users/${user.id}`}
+                            prefetch={false}
+                            className="block flex-1"
+                          >
+                            <div className="flex items-center space-x-1.5 sm:space-x-3">
+                              <UserAvatar
+                                userId={user.id}
+                                avatarHash={user.avatar}
+                                username={user.username}
+                                size={10}
+                                custom_avatar={user.custom_avatar}
+                                showBadge={false}
+                                settings={user.settings}
+                                premiumType={user.premiumtype}
                               />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <h3 className="text-primary-text group-hover:text-link-hover max-w-[180px] truncate text-sm font-semibold transition-colors sm:max-w-[250px] sm:text-base">
+                                    {user.global_name &&
+                                    user.global_name !== "None"
+                                      ? user.global_name
+                                      : user.username}
+                                  </h3>
+                                </div>
+                                <p className="text-secondary-text max-w-[180px] truncate text-[10px] sm:max-w-[250px] sm:text-sm">
+                                  @{user.username}
+                                </p>
+                              </div>
                             </div>
-                          ) : (
-                            <div style={{ width: "80px" }}>
-                              {followingStatus[user.id] ? "Unfollow" : "Follow"}
-                            </div>
+                          </Link>
+                          {isOwnProfile && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={(e: React.MouseEvent) => {
+                                e.preventDefault();
+                                handleFollowToggle(user.id);
+                              }}
+                              disabled={loadingFollow[user.id]}
+                              sx={{
+                                ml: 0.5,
+                                minWidth: "auto",
+                                px: 0.5,
+                                py: 0.5,
+                                borderColor: "var(--color-button-info)",
+                                color: "var(--color-button-info)",
+                                fontSize: "0.75rem",
+                                "&:hover": {
+                                  borderColor: "var(--color-button-info-hover)",
+                                  backgroundColor:
+                                    "var(--color-button-info-hover)",
+                                },
+                                "&.Mui-disabled": {
+                                  color: "var(--color-form-button-text)",
+                                },
+                              }}
+                            >
+                              {loadingFollow[user.id] ? (
+                                <div
+                                  className="flex items-center justify-center"
+                                  style={{ width: "80px" }}
+                                >
+                                  <CircularProgress
+                                    size={16}
+                                    sx={{ color: "var(--color-button-info)" }}
+                                  />
+                                </div>
+                              ) : (
+                                <div style={{ width: "80px" }}>
+                                  {followingStatus[user.id]
+                                    ? "Unfollow"
+                                    : "Follow"}
+                                </div>
+                              )}
+                            </Button>
                           )}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
-      </DialogContent>
+          </div>
+        </div>
+      </div>
     </Dialog>
   );
 };

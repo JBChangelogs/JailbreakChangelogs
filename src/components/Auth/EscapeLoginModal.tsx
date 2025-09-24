@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Dialog } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 
 export default function EscapeLoginModal() {
@@ -21,80 +22,67 @@ export default function EscapeLoginModal() {
     }
   };
 
-  if (!showModal) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <Dialog
+      open={showModal}
+      onClose={() => setShowModal(false)}
+      className="relative z-50"
+    >
       <div
-        className="fixed inset-0 bg-black/50"
-        onClick={() => setShowModal(false)}
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        aria-hidden="true"
       />
-      <div className="relative w-full max-w-md rounded-lg bg-[#212A31] p-6 shadow-xl">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between border-b border-[#2E3944] pb-4">
-          <h2 className="text-muted text-xl font-semibold">Login with Token</h2>
-          <button
-            onClick={() => setShowModal(false)}
-            className="text-muted rounded-md p-1 hover:bg-[#2E3944]"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="token"
-              className="text-muted mb-2 block text-sm font-medium"
-            >
-              Enter your token
-            </label>
-            <input
-              type="text"
-              id="token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="text-muted w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
-              placeholder="Enter your token"
-            />
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+            Login with Token
           </div>
 
-          {/* Actions */}
-          <div className="mt-6 flex justify-end gap-2 border-t border-[#2E3944] pt-4">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="text-muted rounded-md px-4 py-2 text-sm font-medium hover:bg-[#2E3944]"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition-all duration-200 ${
-                isLoading
-                  ? "cursor-progress bg-[#37424D]"
-                  : "bg-[#5865F2] hover:bg-[#4752C4]"
-              }`}
-            >
-              {isLoading ? "Logging in..." : "Login"}
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="modal-content p-6">
+              <div className="mb-4">
+                <label
+                  htmlFor="token"
+                  className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
+                >
+                  Token
+                </label>
+                <input
+                  type="text"
+                  id="token"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
+                  placeholder="Enter your authentication token"
+                  required
+                />
+                {error && (
+                  <p className="text-button-danger mt-1 text-xs">{error}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                disabled={isLoading}
+                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!token.trim() || isLoading}
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLoading ? "Logging in..." : "Login"}
+              </button>
+            </div>
+          </form>
+        </Dialog.Panel>
       </div>
-    </div>
+    </Dialog>
   );
 }

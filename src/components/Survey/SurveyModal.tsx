@@ -73,81 +73,60 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
   if (!open) return null;
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={onClose}
-      style={{
-        display: "flex",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        zIndex: 1000,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="modal-container"
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div
+        className="modal-container bg-secondary-bg border-button-info relative w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
-        style={{
-          backgroundColor: "#212A31",
-          border: "1px solid #2E3944",
-          borderRadius: "8px",
-          minWidth: "400px",
-          maxWidth: "600px",
-          width: "100%",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        }}
       >
-        <div
-          className="modal-header"
-          style={{
-            color: "#D3D9D4",
-            borderBottom: "1px solid #2E3944",
-            padding: "16px 24px",
-            fontSize: "1.25rem",
-            fontWeight: 600,
-          }}
-        >
+        <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
           Survey
         </div>
-        <div
-          className="modal-body"
-          style={{
-            padding: "24px",
-            color: "#D3D9D4",
-          }}
-        >
-          <p className="mb-4">{survey.question}</p>
-          <form onSubmit={handleSubmit}>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              className="w-full rounded border border-[#37424D] bg-[#2E3944] p-2 text-white"
-              rows={4}
-              placeholder="Type your answer here..."
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded bg-[#37424D] px-4 py-2 text-white transition-colors hover:bg-[#2E3944]"
+
+        <form onSubmit={handleSubmit}>
+          <div className="modal-content p-6">
+            <div className="mb-4">
+              <p className="text-primary-text mb-4">{survey.question}</p>
+              <label
+                htmlFor="answer"
+                className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
               >
-                Skip
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="rounded bg-[#1A5F7A] px-4 py-2 text-white transition-colors hover:bg-[#124e66] disabled:opacity-50"
-              >
-                {submitting ? "Submitting..." : "Submit"}
-              </button>
+                Your Answer
+              </label>
+              <textarea
+                id="answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                rows={4}
+                placeholder="Type your answer here..."
+                required
+              />
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
+            >
+              Skip
+            </button>
+            <button
+              type="submit"
+              disabled={!answer.trim() || submitting}
+              className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

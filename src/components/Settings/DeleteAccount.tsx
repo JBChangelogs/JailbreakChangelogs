@@ -8,10 +8,6 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
@@ -81,33 +77,36 @@ export const DeleteAccount = () => {
       sx={{
         mt: 2,
         p: 2,
-        border: "1px solid rgba(255, 107, 107, 0.3)",
         borderRadius: 1,
-        backgroundColor: "rgba(255, 107, 107, 0.05)",
       }}
     >
       <Box sx={{ mb: 2 }}>
         <Typography
           variant="h6"
-          sx={{ color: "#FF6B6B", fontWeight: "bold", mb: 1 }}
+          sx={{
+            color: "var(--color-button-danger)",
+            fontWeight: "bold",
+            mb: 1,
+          }}
         >
           Account Deletion
         </Typography>
-        <Typography variant="body2" sx={{ color: "#FFB3B3" }}>
+        <Typography variant="body2" sx={{ color: "var(--color-primary-text)" }}>
           Delete your account and all associated data
         </Typography>
       </Box>
 
       <Button
-        variant="outlined"
+        variant="contained"
         color="error"
         onClick={handleOpen}
         sx={{
-          borderColor: "#FF6B6B",
-          color: "#FF6B6B",
+          backgroundColor: "var(--color-button-danger)",
+          color: "var(--color-form-button-text)",
+          border: "none",
           "&:hover": {
-            borderColor: "#FF5252",
-            backgroundColor: "rgba(255, 82, 82, 0.1)",
+            backgroundColor: "var(--color-button-danger-hover)",
+            color: "var(--color-form-button-text)",
           },
         }}
       >
@@ -120,9 +119,11 @@ export const DeleteAccount = () => {
         slotProps={{
           paper: {
             sx: {
-              bgcolor: "#212A31",
-              color: "#D3D9D4",
-              border: "1px solid #2E3944",
+              backgroundColor: "var(--color-primary-bg)",
+              border: "1px solid var(--color-button-info)",
+              borderRadius: "8px",
+              boxShadow: "var(--color-card-shadow)",
+              color: "var(--color-primary-text)",
               maxWidth: "500px",
               width: "100%",
             },
@@ -131,71 +132,37 @@ export const DeleteAccount = () => {
       >
         <DialogTitle
           sx={{
-            color: "#FF6B6B",
-            borderBottom: "1px solid #2E3944",
+            color: "var(--color-button-danger)",
+            backgroundColor: "var(--color-primary-bg)",
             pb: 2,
             display: "flex",
             alignItems: "center",
             gap: 1,
+            fontSize: "1.25rem",
+            fontWeight: 600,
+            px: 3,
+            py: 2,
           }}
         >
-          <WarningIcon />
+          <WarningIcon sx={{ color: "var(--color-button-danger)" }} />
           Delete Account
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
+        <DialogContent
+          sx={{
+            pt: 3,
+            px: 3,
+            py: 2,
+            backgroundColor: "var(--color-primary-bg)",
+          }}
+        >
           {!showFinalWarning ? (
             <>
-              <Typography variant="body1" sx={{ mb: 3, color: "#D3D9D4" }}>
+              <Typography
+                variant="body1"
+                sx={{ mb: 3, color: "var(--color-primary-text)" }}
+              >
                 Are you sure you want to delete your account?
               </Typography>
-
-              <List>
-                <ListItem sx={{ py: 1 }}>
-                  <ListItemIcon>
-                    <WarningIcon sx={{ color: "#FF6B6B" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Permanently delete all your data"
-                    sx={{ color: "#D3D9D4" }}
-                  />
-                </ListItem>
-                <ListItem sx={{ py: 1 }}>
-                  <ListItemIcon>
-                    <WarningIcon sx={{ color: "#FF6B6B" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Remove all your favorites"
-                    sx={{ color: "#D3D9D4" }}
-                  />
-                </ListItem>
-                <ListItem sx={{ py: 1 }}>
-                  <ListItemIcon>
-                    <WarningIcon sx={{ color: "#FF6B6B" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Delete your profile and settings"
-                    sx={{ color: "#D3D9D4" }}
-                  />
-                </ListItem>
-                <ListItem sx={{ py: 1 }}>
-                  <ListItemIcon>
-                    <WarningIcon sx={{ color: "#FF6B6B" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Remove your following/follower relationships"
-                    sx={{ color: "#D3D9D4" }}
-                  />
-                </ListItem>
-                <ListItem sx={{ py: 1 }}>
-                  <ListItemIcon>
-                    <WarningIcon sx={{ color: "#FF6B6B" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="This action cannot be undone"
-                    sx={{ color: "#FF6B6B", fontWeight: "bold" }}
-                  />
-                </ListItem>
-              </List>
 
               {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -205,11 +172,23 @@ export const DeleteAccount = () => {
             </>
           ) : (
             <Box sx={{ textAlign: "center", py: 2 }}>
-              <WarningIcon sx={{ fontSize: 48, color: "#FF6B6B", mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#FF6B6B", mb: 2 }}>
+              <WarningIcon
+                sx={{
+                  fontSize: 48,
+                  color: "var(--color-button-danger)",
+                  mb: 2,
+                }}
+              />
+              <Typography
+                variant="h6"
+                sx={{ color: "var(--color-button-danger)", mb: 2 }}
+              >
                 Final Warning
               </Typography>
-              <Typography variant="body1" sx={{ color: "#D3D9D4" }}>
+              <Typography
+                variant="body1"
+                sx={{ color: "var(--color-primary-text)" }}
+              >
                 This is your last chance to cancel. Once you click delete, your
                 account will be permanently removed.
               </Typography>
@@ -218,35 +197,56 @@ export const DeleteAccount = () => {
         </DialogContent>
         <DialogActions
           sx={{
-            borderTop: "1px solid #2E3944",
+            backgroundColor: "var(--color-primary-bg)",
             p: 2,
+            px: 3,
+            py: 2,
           }}
         >
           <Button
             onClick={handleClose}
             sx={{
-              color: "#D3D9D4",
+              color: "var(--color-secondary-text)",
+              backgroundColor: "transparent",
+              border: "none",
+              borderRadius: "4px",
+              px: 2,
+              py: 1,
+              fontSize: "0.875rem",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                backgroundColor: "transparent",
+                color: "var(--color-primary-text)",
               },
             }}
           >
             Cancel
           </Button>
-          <Button
+          <button
             onClick={handleDelete}
-            color="error"
-            variant="contained"
             disabled={!showFinalWarning && timeLeft > 0}
-            sx={{
-              bgcolor: "#FF6B6B",
-              "&:hover": {
-                bgcolor: "#FF5252",
-              },
-              "&.Mui-disabled": {
-                bgcolor: "#2E3944",
-                color: "#FFFFFF",
-              },
+            style={{
+              backgroundColor: "var(--color-button-danger)",
+              color: "var(--color-form-button-text)",
+              border: "none",
+              borderRadius: "4px",
+              padding: "8px 16px",
+              fontSize: "0.875rem",
+              minWidth: "100px",
+              cursor:
+                !showFinalWarning && timeLeft > 0 ? "not-allowed" : "pointer",
+              opacity: !showFinalWarning && timeLeft > 0 ? 0.7 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!(!showFinalWarning && timeLeft > 0)) {
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-button-danger-hover)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!(!showFinalWarning && timeLeft > 0)) {
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-button-danger)";
+              }
             }}
           >
             {!showFinalWarning
@@ -254,7 +254,7 @@ export const DeleteAccount = () => {
                 ? `Please wait ${timeLeft}s`
                 : "Delete Account"
               : "Confirm Delete"}
-          </Button>
+          </button>
         </DialogActions>
       </Dialog>
     </Box>

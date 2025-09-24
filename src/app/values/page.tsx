@@ -13,7 +13,7 @@ export default async function ValuesPage() {
   );
 
   return (
-    <main className="mb-8 min-h-screen bg-[#2E3944]">
+    <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <Breadcrumb />
         <Suspense fallback={<Loading />}>

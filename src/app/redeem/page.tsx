@@ -193,7 +193,7 @@ export default function RedeemPage() {
     <div className="container mx-auto max-w-[1920px] px-4 py-16 sm:px-8">
       <Breadcrumb />
       <div className="mx-auto max-w-5xl">
-        <h1 className="mb-12 text-center text-4xl font-bold text-white">
+        <h1 className="text-primary-text mb-12 text-center text-4xl font-bold">
           Redeem Jailbreak Changelogs Code
         </h1>
 
@@ -204,7 +204,7 @@ export default function RedeemPage() {
               <div className="space-y-2">
                 <label
                   htmlFor="code"
-                  className="mb-3 block text-lg font-medium text-gray-300"
+                  className="text-secondary-text mb-3 block text-lg font-medium"
                 >
                   Enter your code here
                 </label>
@@ -213,10 +213,10 @@ export default function RedeemPage() {
                   id="code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`w-full rounded-lg border bg-[#212a31] px-6 py-3 text-lg text-white transition-colors focus:ring-2 focus:outline-none ${
+                  className={`bg-secondary-bg border-stroke text-primary-text w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
                     message?.type === "error"
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-700 focus:ring-[#1d7da3]"
+                      ? "border-button-danger focus:ring-button-danger"
+                      : "focus:border-button-info focus:ring-button-info"
                   }`}
                   placeholder="Enter your code here"
                   disabled={isLoading}
@@ -225,8 +225,8 @@ export default function RedeemPage() {
                   <div
                     className={`flex items-center space-x-2 text-sm ${
                       message.type === "success"
-                        ? "text-blue-300"
-                        : "text-red-400"
+                        ? "text-button-info"
+                        : "text-button-danger"
                     }`}
                   >
                     {message.type === "success" ? (
@@ -257,19 +257,16 @@ export default function RedeemPage() {
                     <span>{message.text}</span>
                   </div>
                 )}
-                <p className="mt-4 text-sm text-gray-400">
+                <p className="text-tertiary-text mt-4 text-sm">
                   By redeeming your code, you represent that you, and your
                   parent or legal guardian if you are under age 18, agree to our{" "}
-                  <Link
-                    href="/tos"
-                    className="text-blue-300 hover:text-blue-400"
-                  >
+                  <Link href="/tos" className="text-link hover:text-link-hover">
                     Terms of Use
                   </Link>{" "}
                   and acknowledge our{" "}
                   <Link
                     href="/privacy"
-                    className="text-blue-300 hover:text-blue-400"
+                    className="text-link hover:text-link-hover"
                   >
                     Privacy Policy
                   </Link>
@@ -280,16 +277,16 @@ export default function RedeemPage() {
               <button
                 type="submit"
                 disabled={isLoading || !code.trim()}
-                className={`w-full rounded-lg px-6 py-4 text-lg font-semibold text-white transition-colors ${
+                className={`w-full rounded-lg px-6 py-4 text-lg font-semibold transition-colors ${
                   isLoading || !code.trim()
-                    ? "bg-[#1d7da3]/50"
-                    : "bg-[#1d7da3] hover:bg-[#124e66]"
+                    ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-not-allowed"
+                    : "bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer"
                 }`}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <svg
-                      className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                      className="text-form-button-text mr-3 -ml-1 h-5 w-5 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -318,13 +315,13 @@ export default function RedeemPage() {
           </div>
 
           {/* Right Column - Instructions */}
-          <div className="rounded-lg border border-gray-700/50 bg-[#212a31] p-4 sm:p-8">
-            <h2 className="mb-6 text-2xl font-semibold text-white">
+          <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 sm:p-8">
+            <h2 className="text-primary-text mb-6 text-2xl font-semibold">
               How to Get a Code
             </h2>
-            <ol className="space-y-6 text-gray-300">
+            <ol className="text-secondary-text space-y-6">
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   1
                 </span>
                 <div className="text-lg">
@@ -345,14 +342,14 @@ export default function RedeemPage() {
                           href="https://ko-fi.com/jbchangelogs"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-300 hover:text-blue-400"
+                          className="text-link hover:text-link-hover"
                         >
                           Ko-fi
                         </a>{" "}
                         (include Discord ID in message)
                       </span>
                     </li>
-                    <li className="flex items-center justify-center text-sm font-medium text-gray-400">
+                    <li className="text-tertiary-text flex items-center justify-center text-sm font-medium">
                       OR
                     </li>
                     <li className="flex flex-col items-center sm:flex-row sm:items-center">
@@ -365,7 +362,7 @@ export default function RedeemPage() {
                           href="https://www.roblox.com/games/104188650191561/Support-Us"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-300 hover:text-blue-400"
+                          className="text-link hover:text-link-hover"
                         >
                           Roblox game
                         </a>{" "}
@@ -376,19 +373,19 @@ export default function RedeemPage() {
                 </div>
               </li>
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   2
                 </span>
                 <div className="text-lg">
                   <span>Receive your unique code via Discord</span>
-                  <p className="mt-1 text-sm text-gray-400">
+                  <p className="text-tertiary-text mt-1 text-sm">
                     Your code will be sent to your Discord via our bot. Having
                     issues? Join our{" "}
                     <a
                       href="https://discord.jailbreakchangelogs.xyz/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-300 hover:text-blue-400"
+                      className="text-link hover:text-link-hover"
                     >
                       Discord server
                     </a>{" "}
@@ -397,7 +394,7 @@ export default function RedeemPage() {
                 </div>
               </li>
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1d7da3] font-semibold text-white sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   3
                 </span>
                 <span className="text-lg">
@@ -407,25 +404,32 @@ export default function RedeemPage() {
               </li>
             </ol>
 
-            <div className="mt-8 rounded border-l-4 border-yellow-400 bg-yellow-900/40 p-4">
-              <p className="text-base font-medium text-yellow-200">
-                <strong>Ko-fi Supporters:</strong> When purchasing via Ko-fi,{" "}
-                <span className="font-bold">
-                  ensure your Discord user ID is in parenthesis inside your
-                  message
-                </span>{" "}
-                (e.g., <code>Hello there! (1019539798383398946)</code>). This is
-                required to receive your code!
-              </p>
+            <div className="border-border-primary bg-button-info/10 mt-8 rounded border p-4 shadow-sm">
+              <div className="mb-2 flex items-start gap-4">
+                <div className="relative z-10">
+                  <span className="text-primary-text text-base font-bold">
+                    Ko-fi Supporters
+                  </span>
+                  <div className="text-secondary-text mt-1">
+                    When purchasing via Ko-fi,{" "}
+                    <span className="font-bold">
+                      ensure your Discord user ID is in parenthesis inside your
+                      message
+                    </span>{" "}
+                    (e.g., <code>Hello there! (1019539798383398946)</code>).
+                    This is required to receive your code!
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4 border-t border-gray-700/50 pt-4">
-              <p className="mb-6 text-lg text-gray-300">
+            <div className="border-border-primary mt-4 border-t pt-4">
+              <p className="text-secondary-text mb-6 text-lg">
                 Thank you for supporting us!
               </p>
               <Link
                 href="/supporting"
-                className="inline-flex items-center text-lg text-blue-300 hover:text-blue-400"
+                className="text-link hover:text-link-hover inline-flex items-center text-lg"
               >
                 <span>View all supporter tiers and benefits</span>
                 <svg
@@ -451,25 +455,25 @@ export default function RedeemPage() {
         className="relative z-50"
       >
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+          className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
           aria-hidden="true"
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="mx-auto w-full max-w-md rounded-lg bg-[#212A31] p-4 sm:p-6">
+          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
             <div className="mb-4">
-              <Dialog.Title className="text-xl font-semibold text-white">
+              <Dialog.Title className="text-primary-text text-xl font-semibold">
                 Confirm Code Redemption
               </Dialog.Title>
-              <p className="mt-2 text-sm text-gray-400">
+              <p className="text-secondary-text mt-2 text-sm">
                 Are you sure you want to redeem this code?
               </p>
             </div>
 
-            <div className="mb-6 rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-              <p className="text-sm text-gray-300">
+            <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
+              <p className="text-secondary-text text-sm">
                 <span className="font-medium">Code:</span>{" "}
-                <code className="block max-w-full truncate text-blue-300">
+                <code className="text-primary-text block max-w-full truncate">
                   {code}
                 </code>
               </p>
@@ -478,13 +482,13 @@ export default function RedeemPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="w-full rounded-lg border border-[#37424D] bg-[#2E3944] px-4 py-2 text-white transition-colors hover:bg-[#2E3944] hover:text-white sm:flex-1"
+                className="text-secondary-text hover:text-primary-text border-border-primary hover:bg-tertiary-bg w-full rounded-lg border px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmRedeem}
-                className="w-full rounded-lg bg-[#1d7da3] px-4 py-2 text-white transition-colors hover:bg-[#124e66] sm:flex-1"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
               >
                 Redeem Code
               </button>
@@ -499,12 +503,12 @@ export default function RedeemPage() {
         className="relative z-50"
       >
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+          className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
           aria-hidden="true"
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="mx-auto w-full max-w-lg rounded-lg bg-[#212A31] p-4 sm:p-8">
+          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
             <div className="absolute inset-0 overflow-hidden rounded-lg">
               <div
                 className="absolute -top-4 left-1/4 h-2 w-2 animate-bounce rounded-full bg-yellow-400"
@@ -533,29 +537,29 @@ export default function RedeemPage() {
                 <TrophyIcon className="h-10 w-10 text-white" />
               </div>
 
-              <Dialog.Title className="mb-4 text-3xl font-bold text-white">
+              <Dialog.Title className="text-primary-text mb-4 text-3xl font-bold">
                 Code Redeemed Successfully!
               </Dialog.Title>
 
-              <p className="mb-4 text-lg text-gray-300">
+              <p className="text-secondary-text mb-4 text-lg">
                 Your supporter code has been successfully redeemed! You now have
                 access to your new benefits.
               </p>
 
-              <p className="mb-6 text-base font-medium text-blue-300">
+              <p className="text-button-info mb-6 text-base font-medium">
                 Thank you for your support!
               </p>
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/supporting"
-                  className="w-full rounded-lg border border-[#37424D] bg-[#2E3944] px-4 py-2 text-white transition-colors hover:bg-[#2E3944] hover:text-white sm:flex-1"
+                  className="text-secondary-text hover:text-primary-text border-border-primary hover:bg-tertiary-bg w-full rounded-lg border px-4 py-2 transition-colors sm:flex-1"
                 >
                   View All Benefits
                 </Link>
                 <Link
                   href="/"
-                  className="w-full rounded-lg bg-gradient-to-r from-[#5865F2] to-[#4752C4] px-4 py-2 text-white transition-colors hover:from-[#4752C4] hover:to-[#3C45A5] sm:flex-1"
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors sm:flex-1"
                 >
                   Get Started
                 </Link>

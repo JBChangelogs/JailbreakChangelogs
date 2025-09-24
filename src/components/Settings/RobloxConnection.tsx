@@ -94,11 +94,14 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         <Box>
           <Typography
             variant="h6"
-            sx={{ color: "#D3D9D4", fontWeight: "bold" }}
+            sx={{ color: "var(--color-primary-text)", fontWeight: "bold" }}
           >
             Roblox Connection
           </Typography>
-          <Typography variant="body1" sx={{ color: "#D3D9D4" }}>
+          <Typography
+            variant="body1"
+            sx={{ color: "var(--color-primary-text)" }}
+          >
             {userData.roblox_username ? (
               <>
                 Currently linked to{" "}
@@ -108,19 +111,19 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{
-                      color: "#93C5FD",
+                      color: "var(--color-button-info)",
                       fontWeight: "bold",
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 0.5,
                       "&:hover": {
-                        color: "#60A5FA",
+                        color: "var(--color-button-info-hover)",
                         textDecoration: "underline",
                       },
                     }}
                   >
                     {userData.roblox_username}
-                    <LaunchIcon sx={{ fontSize: 16 }} />
+                    <LaunchIcon sx={{ fontSize: 16, color: "inherit" }} />
                   </Link>
                 ) : (
                   <span style={{ fontWeight: "bold" }}>
@@ -137,15 +140,15 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
       {userData.roblox_username ? (
         <Button
-          variant="outlined"
-          color="error"
+          variant="contained"
           onClick={handleOpen}
           sx={{
-            borderColor: "#FF6B6B",
-            color: "#FF6B6B",
+            backgroundColor: "var(--color-button-info)",
+            color: "var(--color-form-button-text)",
+            border: "none",
             "&:hover": {
-              borderColor: "#FF5252",
-              backgroundColor: "rgba(255, 82, 82, 0.1)",
+              backgroundColor: "var(--color-button-info-hover)",
+              color: "var(--color-form-button-text)",
             },
           }}
         >
@@ -160,9 +163,10 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
           }}
           startIcon={<LoginIcon />}
           sx={{
-            bgcolor: "#FF5630",
+            bgcolor: "var(--color-button-info)",
+            color: "var(--color-form-button-text)",
             "&:hover": {
-              bgcolor: "#E54B2C",
+              bgcolor: "var(--color-button-info-hover)",
             },
           }}
         >
@@ -181,9 +185,8 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         slotProps={{
           paper: {
             style: {
-              backgroundColor: "#212A31",
-              color: "#D3D9D4",
-              border: "1px solid #2E3944",
+              color: "var(--color-primary-text)",
+
               maxWidth: "500px",
               width: "100%",
             },
@@ -192,44 +195,47 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       >
         <DialogTitle
           sx={{
-            color: "#FF6B6B",
-            borderBottom: "1px solid #2E3944",
+            color: "var(--color-button-danger)",
+
             pb: 2,
           }}
         >
           Disconnect Roblox Account
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
-          <Typography variant="body1" sx={{ mb: 3, color: "#D3D9D4" }}>
+          <Typography
+            variant="body1"
+            sx={{ mb: 3, color: "var(--color-primary-text)" }}
+          >
             Are you sure you want to disconnect your Roblox account?
           </Typography>
 
           <List>
             <ListItem sx={{ py: 1 }}>
               <ListItemIcon>
-                <WarningIcon sx={{ color: "#FF6B6B" }} />
+                <WarningIcon sx={{ color: "var(--color-button-danger)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Remove your Roblox profile from your account"
-                sx={{ color: "#D3D9D4" }}
+                sx={{ color: "var(--color-primary-text)" }}
               />
             </ListItem>
             <ListItem sx={{ py: 1 }}>
               <ListItemIcon>
-                <WarningIcon sx={{ color: "#FF6B6B" }} />
+                <WarningIcon sx={{ color: "var(--color-button-danger)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Disable trading features and delete all existing trade ads"
-                sx={{ color: "#D3D9D4" }}
+                sx={{ color: "var(--color-primary-text)" }}
               />
             </ListItem>
             <ListItem sx={{ py: 1 }}>
               <ListItemIcon>
-                <WarningIcon sx={{ color: "#FF6B6B" }} />
+                <WarningIcon sx={{ color: "var(--color-button-danger)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Require re-authentication to use Trading features again"
-                sx={{ color: "#D3D9D4" }}
+                sx={{ color: "var(--color-primary-text)" }}
               />
             </ListItem>
           </List>
@@ -242,14 +248,14 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         </DialogContent>
         <DialogActions
           sx={{
-            borderTop: "1px solid #2E3944",
+            borderTop: "1px solid var(--color-border-primary)",
             p: 2,
           }}
         >
           <Button
             onClick={handleClose}
             sx={{
-              color: "#D3D9D4",
+              color: "var(--color-primary-text)",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.1)",
               },
@@ -262,9 +268,9 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             color="error"
             variant="contained"
             sx={{
-              bgcolor: "#FF6B6B",
+              bgcolor: "var(--color-button-danger)",
               "&:hover": {
-                bgcolor: "#FF5252",
+                bgcolor: "var(--color-button-danger-hover)",
               },
             }}
           >

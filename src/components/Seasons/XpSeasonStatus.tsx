@@ -8,37 +8,47 @@ export default function XpSeasonStatus({
   achievableWithPass,
 }: XpSeasonStatusProps) {
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
-      <h3 className="text-muted mb-3 text-xl font-semibold">
+    <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+      <h3 className="text-secondary-text mb-3 text-xl font-semibold">
         📅 Season Status
       </h3>
       <div className="space-y-3">
         <div className="flex items-center">
           <span
-            className={`mr-2 text-lg ${achievableNoPass ? "text-green-400" : "text-red-400"}`}
+            className={`mr-2 text-lg ${achievableNoPass ? "text-button-success" : "text-button-danger"}`}
             aria-label={achievableNoPass ? "Achievable" : "Not achievable"}
           >
             {achievableNoPass ? "✓" : "✗"}
           </span>
-          <span className="text-[#FFFFFF]">
+          <span className="text-primary-text">
             Without Season Pass:{" "}
-            {achievableNoPass
-              ? "Achievable before season ends"
-              : "Not achievable with normal XP"}
+            {achievableNoPass ? (
+              "Achievable before season ends"
+            ) : (
+              <>
+                <span className="text-button-danger">Not achievable</span> with
+                normal XP
+              </>
+            )}
           </span>
         </div>
         <div className="flex items-center">
           <span
-            className={`mr-2 text-lg ${achievableWithPass ? "text-green-400" : "text-red-400"}`}
+            className={`mr-2 text-lg ${achievableWithPass ? "text-button-success" : "text-button-danger"}`}
             aria-label={achievableWithPass ? "Achievable" : "Not achievable"}
           >
             {achievableWithPass ? "✓" : "✗"}
           </span>
-          <span className="text-[#FFFFFF]">
+          <span className="text-primary-text">
             With Season Pass:{" "}
-            {achievableWithPass
-              ? "Achievable before season ends"
-              : "Not achievable with normal XP"}
+            {achievableWithPass ? (
+              "Achievable before season ends"
+            ) : (
+              <>
+                <span className="text-button-danger">Not achievable</span> with
+                normal XP
+              </>
+            )}
           </span>
         </div>
       </div>

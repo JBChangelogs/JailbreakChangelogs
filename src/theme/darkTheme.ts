@@ -4,30 +4,36 @@ export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#5865F2",
+      main: "hsl(210, 99%, 50%)", // --color-button-info
+    },
+    secondary: {
+      main: "hsl(155, 61%, 44%)", // --color-tertiary
     },
     background: {
-      paper: "#212A31",
-      default: "#212A31",
+      paper: "hsl(216, 6%, 15%)", // --color-secondary-bg
+      default: "hsl(240, 8%, 9%)", // --color-primary-bg
     },
     text: {
-      primary: "#D3D9D4",
-      secondary: "#FFFFFF",
+      primary: "hsl(60, 100%, 100%)", // --color-primary-text
+      secondary: "hsl(214, 16%, 64%)", // --color-secondary-text
+    },
+    error: {
+      main: "hsl(0, 81%, 62%)", // --color-button-danger
     },
   },
   components: {
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          color: "#D3D9D4",
+          color: "hsl(60, 100%, 100%)", // --color-primary-text
           "& fieldset": {
-            borderColor: "#2E3944",
+            borderColor: "hsl(0, 0%, 0%)", // --color-stroke
           },
           "&:hover fieldset": {
-            borderColor: "#5865F2",
+            borderColor: "hsl(210, 99%, 50%)", // --color-button-info
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#5865F2",
+            borderColor: "hsl(210, 99%, 50%)", // --color-button-info
           },
         },
       },
@@ -35,9 +41,9 @@ export const darkTheme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: "#FFFFFF",
+          color: "hsl(60, 100%, 100%)", // --color-primary-text
           "&.Mui-focused": {
-            color: "#5865F2",
+            color: "hsl(210, 99%, 50%)", // --color-button-info
           },
         },
       },
@@ -45,12 +51,12 @@ export const darkTheme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          color: "#D3D9D4",
+          color: "hsl(60, 100%, 100%)", // --color-primary-text
         },
         input: {
-          color: "#D3D9D4",
+          color: "hsl(60, 100%, 100%)", // --color-primary-text
           "&::placeholder": {
-            color: "#FFFFFF",
+            color: "hsl(60, 100%, 100%)", // --color-primary-text
             opacity: 1,
           },
         },
@@ -59,7 +65,23 @@ export const darkTheme = createTheme({
     MuiSvgIcon: {
       styleOverrides: {
         root: {
-          color: "#FFFFFF",
+          color: "hsl(60, 100%, 100%)", // --color-primary-text
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: "var(--color-primary-bg)",
+          color: "var(--color-primary-text)",
+          fontSize: "0.875rem",
+          border: "1px solid var(--color-stroke)",
+        },
+        arrow: {
+          color: "var(--color-primary-bg)",
+          "&::before": {
+            border: "1px solid var(--color-stroke)",
+          },
         },
       },
     },

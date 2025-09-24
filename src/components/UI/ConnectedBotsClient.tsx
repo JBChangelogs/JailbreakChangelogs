@@ -30,7 +30,7 @@ export default function ConnectedBotsClient({
           </span>
         </div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="rounded-lg border p-4 shadow-sm">
         {/* Queue Stats */}
         {queueInfo && (
           <div className="mb-4 space-y-2 text-sm">
@@ -158,7 +158,7 @@ function BotStatusCard({
   const avatarUrl = avatarData?.imageUrl || null;
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-[#2E3944] bg-[#212A31] p-3">
+    <div className="flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
         {/* Avatar */}
         <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-600">

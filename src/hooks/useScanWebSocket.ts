@@ -5,7 +5,7 @@ import { INVENTORY_WS_URL } from "@/utils/api";
 
 /**
  * WebSocket hook for managing inventory scan operations
- * Handles connection, retry logic, slowmode, and UI state management
+ * Handles connection, retry logic, and UI state management
  */
 
 interface ScanStatus {
@@ -27,8 +27,6 @@ interface UseScanWebSocketReturn {
   progress: number | undefined;
   error: string | undefined;
   isConnected: boolean;
-  isSlowmode: boolean;
-  slowmodeTimeLeft: number;
   startScan: () => void;
   stopScan: () => void;
 }
@@ -39,53 +37,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [progress, setProgress] = useState<number | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [isConnected, setIsConnected] = useState(false);
-  const [isSlowmode, setIsSlowmode] = useState(false);
-  const [slowmodeTimeLeft, setSlowmodeTimeLeft] = useState(0);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scanningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
-  const slowmodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const slowmodeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const startSlowmode = useCallback((durationSeconds: number = 30) => {
-    console.log(`[SCAN WS] Starting slowmode for ${durationSeconds} seconds`);
-    setIsSlowmode(true);
-    setSlowmodeTimeLeft(durationSeconds);
-
-    if (slowmodeTimeoutRef.current) {
-      clearTimeout(slowmodeTimeoutRef.current);
-    }
-    if (slowmodeIntervalRef.current) {
-      clearInterval(slowmodeIntervalRef.current);
-    }
-
-    slowmodeIntervalRef.current = setInterval(() => {
-      setSlowmodeTimeLeft((prev) => {
-        if (prev <= 1) {
-          setIsSlowmode(false);
-          if (slowmodeIntervalRef.current) {
-            clearInterval(slowmodeIntervalRef.current);
-            slowmodeIntervalRef.current = null;
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    slowmodeTimeoutRef.current = setTimeout(() => {
-      setIsSlowmode(false);
-      setSlowmodeTimeLeft(0);
-      if (slowmodeIntervalRef.current) {
-        clearInterval(slowmodeIntervalRef.current);
-        slowmodeIntervalRef.current = null;
-      }
-    }, durationSeconds * 1000);
-  }, []);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -100,29 +57,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
-      connectionTimeoutRef.current = setTimeout(() => {
-        if (
-          wsRef.current &&
-          wsRef.current.readyState === WebSocket.CONNECTING
-        ) {
-          console.log("[SCAN WS] Connection timeout");
-          wsRef.current.close();
-          setError("Connection timeout - please try again");
-          setStatus("error");
-        }
-      }, 30000);
-
       ws.onopen = () => {
         console.log("[SCAN WS] Connected");
         setStatus("connected");
         setIsConnected(true);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
-
-        if (connectionTimeoutRef.current) {
-          clearTimeout(connectionTimeoutRef.current);
-          connectionTimeoutRef.current = null;
-        }
 
         ws.send(JSON.stringify({ action: "request" }));
         setStatus("scanning");
@@ -134,7 +74,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           );
           setError("Scanning timeout - please try again");
           setStatus("error");
-          startSlowmode(40);
 
           if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.close();
@@ -159,29 +98,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           console.log("[SCAN WS] Received:", data);
 
           if (data.error && data.attempt && data.total_attempts) {
-            if (data.attempt >= data.total_attempts) {
-              console.log(
-                "[SCAN WS] Max attempts reached, closing connection and resetting UI",
-              );
-              setError(`${data.error} - All attempts failed`);
-              setStatus("error");
-              startSlowmode(40);
-
-              setTimeout(() => {
-                if (
-                  wsRef.current &&
-                  wsRef.current.readyState === WebSocket.OPEN
-                ) {
-                  wsRef.current.close();
-                  setStatus("idle");
-                  setMessage(undefined);
-                  setProgress(undefined);
-                  setError(undefined);
-                }
-              }, 3000);
-              return;
-            }
-
             setStatus("scanning");
             setMessage(
               `${data.error} - Retrying (${data.attempt}/${data.total_attempts})`,
@@ -193,7 +109,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           if (data.error) {
             setError(data.error);
             setStatus("error");
-            startSlowmode(40);
             return;
           }
 
@@ -213,7 +128,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                 );
                 setError("Scanning timeout - please try again");
                 setStatus("error");
-                startSlowmode(40);
 
                 if (
                   wsRef.current &&
@@ -271,7 +185,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                   );
                   setError("Scanning timeout - please try again");
                   setStatus("error");
-                  startSlowmode(40);
 
                   if (
                     wsRef.current &&
@@ -297,7 +210,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                   );
                   setError("Scanning timeout - please try again");
                   setStatus("error");
-                  startSlowmode(40);
 
                   if (
                     wsRef.current &&
@@ -337,7 +249,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setMessage(formattedMessage);
               setProgress(100);
               setStatus("completed");
-              startSlowmode(40);
 
               setTimeout(() => {
                 if (wsRef.current) {
@@ -371,7 +282,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setStatus("completed");
             setProgress(100);
             setMessage("Scan completed successfully!");
-            startSlowmode(40);
 
             // Clear scanning timeout on completion
             if (scanningTimeoutRef.current) {
@@ -389,11 +299,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       ws.onclose = (event) => {
         console.log("[SCAN WS] Closed:", event.code, event.reason);
         setIsConnected(false);
-
-        if (connectionTimeoutRef.current) {
-          clearTimeout(connectionTimeoutRef.current);
-          connectionTimeoutRef.current = null;
-        }
 
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
@@ -451,7 +356,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       setError("Failed to connect to scan service");
       setStatus("error");
     }
-  }, [userId, status, startSlowmode]);
+  }, [userId, status]);
 
   const startScan = useCallback(() => {
     if (!userId) {
@@ -460,13 +365,8 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       return;
     }
 
-    if (isSlowmode) {
-      console.log("[SCAN WS] Scan blocked by slowmode");
-      return;
-    }
-
     connect();
-  }, [userId, connect, isSlowmode]);
+  }, [userId, connect]);
 
   const stopScan = useCallback(() => {
     if (wsRef.current) {
@@ -479,11 +379,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       reconnectTimeoutRef.current = null;
     }
 
-    if (connectionTimeoutRef.current) {
-      clearTimeout(connectionTimeoutRef.current);
-      connectionTimeoutRef.current = null;
-    }
-
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
@@ -494,24 +389,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       scanningTimeoutRef.current = null;
     }
 
-    if (slowmodeTimeoutRef.current) {
-      clearTimeout(slowmodeTimeoutRef.current);
-      slowmodeTimeoutRef.current = null;
-    }
-
-    if (slowmodeIntervalRef.current) {
-      clearInterval(slowmodeIntervalRef.current);
-      slowmodeIntervalRef.current = null;
-    }
-
     reconnectAttemptsRef.current = 0;
     setStatus("idle");
     setIsConnected(false);
     setMessage(undefined);
     setProgress(undefined);
     setError(undefined);
-    setIsSlowmode(false);
-    setSlowmodeTimeLeft(0);
   }, []);
 
   useEffect(() => {
@@ -526,8 +409,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     progress,
     error,
     isConnected,
-    isSlowmode,
-    slowmodeTimeLeft,
     startScan,
     stopScan,
   };

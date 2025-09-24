@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   ArrowRightIcon,
@@ -14,25 +14,27 @@ import dynamic from "next/dynamic";
 
 // Dynamic imports for heavy components
 const ChangelogMediaEmbed = dynamic(() => import("./ChangelogMediaEmbed"), {
-  loading: () => <div className="h-32 animate-pulse rounded bg-[#212A31]" />,
+  loading: () => <div className="bg-secondary-bg h-32 animate-pulse rounded" />,
   ssr: true,
 });
 
 const ChangelogComments = dynamic(
   () => import("../PageComments/ChangelogComments"),
   {
-    loading: () => <div className="h-64 animate-pulse rounded bg-[#212A31]" />,
+    loading: () => (
+      <div className="bg-secondary-bg h-64 animate-pulse rounded" />
+    ),
     ssr: true,
   },
 );
 
 const ChangelogQuickNav = dynamic(() => import("./ChangelogQuickNav"), {
-  loading: () => <div className="h-16 animate-pulse rounded bg-[#212A31]" />,
+  loading: () => <div className="bg-secondary-bg h-16 animate-pulse rounded" />,
   ssr: true,
 });
 
 const DisplayAd = dynamic(() => import("../Ads/DisplayAd"), {
-  loading: () => <div className="h-48 animate-pulse rounded bg-[#212A31]" />,
+  loading: () => <div className="bg-secondary-bg h-48 animate-pulse rounded" />,
   ssr: false,
 });
 
@@ -73,6 +75,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   const nextChangelog =
     currentIndex > 0 ? changelogList[currentIndex - 1] : null;
 
+  // Memoize parsed markdown to prevent hydration mismatches
+  const parsedSections = useMemo(() => parseMarkdown(sections), [sections]);
+
   useEffect(() => {
     // Get current user's premium type
     setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -108,21 +113,21 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
       <div className="sm:col-span-12 xl:col-span-8">
         <h1
-          className={`${inter.className} text-muted mb-8 border-b border-[#748D92] pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
+          className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
         >
           {title}
         </h1>
         <div className="prose prose-invert max-w-none">
-          {parseMarkdown(sections).map((section, sectionIndex) => (
+          {parsedSections.map((section, sectionIndex) => (
             <div key={sectionIndex} className="mb-8">
               {section.title && (
                 <h2
-                  className={`${inter.className} mb-4 text-2xl font-bold tracking-tighter text-[#748D92] sm:text-3xl`}
+                  className={`${inter.className} text-primary-text mb-4 text-2xl font-bold tracking-tighter sm:text-3xl`}
                 >
                   {section.title}
                 </h2>
               )}
-              <ul className="text-muted space-y-2">
+              <ul className="text-secondary-text space-y-2">
                 {section.items.map((item, itemIndex) => (
                   <li
                     key={itemIndex}
@@ -136,9 +141,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                     ) : (
                       <>
                         {item.isNested ? (
-                          <ArrowTurnDownRightIcon className="mt-1 h-6 w-6 flex-shrink-0 text-[#FFFFFF] sm:h-5 sm:w-5" />
+                          <ArrowTurnDownRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
                         ) : (
-                          <ArrowRightIcon className="mt-1 h-6 w-6 flex-shrink-0 text-[#FFFFFF] sm:h-5 sm:w-5" />
+                          <ArrowRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
                         )}
                         <span dangerouslySetInnerHTML={{ __html: item.text }} />
                       </>
@@ -178,13 +183,13 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         <div>
           {premiumStatusLoaded && currentUserPremiumType === 0 && (
             <div className="my-8 flex flex-col items-center">
+              <span className="text-secondary-text mb-2 block text-center text-xs">
+                ADVERTISEMENT
+              </span>
               <div
-                className="relative w-full max-w-[700px] overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+                className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
                 style={{ minHeight: "250px" }}
               >
-                <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                  Advertisement
-                </span>
                 <DisplayAd
                   adSlot="4408799044"
                   adFormat="auto"

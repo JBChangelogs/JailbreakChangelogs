@@ -91,17 +91,17 @@ export default function DupeFinderClient({
 
       {/* Error Display */}
       {error && !initialData && (
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-red-500/10 p-3">
-                <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+              <div className="bg-status-error/10 rounded-full p-3">
+                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
               </div>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-red-400">
+            <h3 className="text-status-error mb-2 text-lg font-semibold">
               {isUserFound ? "No Dupes Found" : "User Not Found"}
             </h3>
-            <p className="text-gray-300">{error}</p>
+            <p className="text-secondary-text">{error}</p>
           </div>
         </div>
       )}

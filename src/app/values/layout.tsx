@@ -1,9 +1,3 @@
-import type { Viewport } from "next";
-
-export const viewport: Viewport = {
-  themeColor: "#124e66",
-};
-
 export const metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
   title: "Roblox Jailbreak Values",

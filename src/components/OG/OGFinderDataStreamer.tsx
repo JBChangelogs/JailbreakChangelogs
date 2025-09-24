@@ -59,10 +59,10 @@ function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
               id="searchInput"
               value={robloxId}
               readOnly
-              className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10"
+              className="text-primary-text border-border-primary bg-secondary-bg w-full rounded-lg border px-4 py-2 pr-10 pl-10"
             />
             <svg
-              className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
         <div className="flex items-end">
           <button
             disabled
-            className="flex h-10 min-w-[100px] cursor-progress items-center justify-center gap-2 rounded-lg bg-[#212A31] px-6 text-sm font-medium text-white"
+            className="flex h-10 min-w-[100px] cursor-progress items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white"
           >
             <svg
               className="h-4 w-4 animate-spin"
@@ -106,25 +106,22 @@ function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
         </div>
       </form>
 
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
         <div className="animate-pulse space-y-4">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-full bg-gray-600"></div>
+            <div className="bg-surface-bg h-16 w-16 rounded-full"></div>
             <div className="flex-1">
-              <div className="mb-2 h-6 w-32 rounded bg-gray-600"></div>
-              <div className="h-4 w-24 rounded bg-gray-600"></div>
+              <div className="bg-surface-bg mb-2 h-6 w-32 rounded"></div>
+              <div className="bg-surface-bg h-4 w-24 rounded"></div>
             </div>
           </div>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 rounded-lg bg-[#2E3944] p-4"
-              >
-                <div className="h-12 w-12 rounded bg-gray-600"></div>
+              <div key={i} className="flex items-center gap-4 rounded-lg p-4">
+                <div className="bg-surface-bg h-12 w-12 rounded"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-48 rounded bg-gray-600"></div>
-                  <div className="h-3 w-32 rounded bg-gray-600"></div>
+                  <div className="bg-surface-bg h-4 w-48 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-32 rounded"></div>
                 </div>
               </div>
             ))}

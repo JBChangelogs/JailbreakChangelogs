@@ -135,41 +135,46 @@ export default function SupporterModal({
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+      <div
+        className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
+        aria-hidden="true"
+      />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto w-full max-w-2xl overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31] shadow-xl">
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-2xl overflow-hidden rounded-lg border shadow-lg">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#2E3944] p-6">
+          <div className="modal-header border-border-primary flex items-center justify-between border-b p-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-gradient-to-r from-[#5865F2] to-[#4752C4] p-2">
-                <SparklesIcon className="h-6 w-6 text-white" />
+              <div className="bg-button-info rounded-lg p-2">
+                <SparklesIcon className="text-form-button-text h-6 w-6" />
               </div>
               <div>
-                <Dialog.Title className="text-xl font-semibold text-white">
+                <Dialog.Title className="text-primary-text text-xl font-semibold">
                   {featureInfo.title}
                 </Dialog.Title>
-                <p className="text-sm text-[#748D92]">
+                <p className="text-secondary-text text-sm">
                   Upgrade your supporter tier to unlock this feature
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-[#748D92] transition-colors hover:bg-[#2E3944] hover:text-white"
+              className="text-secondary-text rounded-lg p-2 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="modal-content p-6">
             <div className="mb-6">
-              <p className="mb-4 text-[#D3D9D4]">{featureInfo.description}</p>
+              <p className="text-primary-text mb-4">
+                {featureInfo.description}
+              </p>
 
               {featureInfo.current && (
-                <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4">
-                  <span className="text-sm font-medium text-white">
+                <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+                  <span className="text-primary-text text-sm font-medium">
                     {featureInfo.current}
                   </span>
                 </div>
@@ -178,7 +183,7 @@ export default function SupporterModal({
 
             {/* Supporter Tiers */}
             <div className="mb-6">
-              <h3 className="mb-4 text-lg font-semibold text-white">
+              <h3 className="text-primary-text mb-4 text-lg font-semibold">
                 Recommended Supporter Tier
               </h3>
               <div className="grid grid-cols-1 gap-4">
@@ -188,26 +193,26 @@ export default function SupporterModal({
                     requiredTier < 4 ? SUPPORTER_TIERS[requiredTier] : null;
                   if (!recommendedTier)
                     return (
-                      <div className="text-center text-[#748D92]">
+                      <div className="text-secondary-text text-center">
                         You already have the highest supporter tier!
                       </div>
                     );
                   return (
                     <div
                       key={recommendedTier.name}
-                      className={`relative rounded-lg border-2 ${recommendedTier.color} bg-[#2E3944] p-4 ${
+                      className={`relative rounded-lg border-2 ${recommendedTier.color} bg-tertiary-bg p-4 ${
                         recommendedTier.recommended
-                          ? "ring-opacity-50 ring-2 ring-[#5865F2]"
+                          ? "ring-opacity-50 ring-button-info ring-2"
                           : ""
                       }`}
                     >
                       {recommendedTier.recommended && (
-                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 transform rounded-full bg-[#5865F2] px-3 py-1 text-xs font-medium text-white">
+                        <div className="bg-button-info text-form-button-text absolute -top-2 left-1/2 -translate-x-1/2 transform rounded-full px-3 py-1 text-xs font-medium">
                           Recommended
                         </div>
                       )}
                       <div className="mb-3 flex items-center gap-2">
-                        <h4 className="text-lg font-semibold text-white">
+                        <h4 className="text-primary-text text-lg font-semibold">
                           {recommendedTier.name}
                         </h4>
                         {recommendedTier.badgeColor && (
@@ -229,7 +234,7 @@ export default function SupporterModal({
                               "Post Comments up to 2000 characters",
                             ];
                             return (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 {
                                   commentPerks[
                                     recommendedTier
@@ -248,7 +253,7 @@ export default function SupporterModal({
                               "Trade Ad Duration: +24 Hours (48 Hours total)",
                             ];
                             return (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 {
                                   tradeAdPerks[
                                     recommendedTier
@@ -260,21 +265,21 @@ export default function SupporterModal({
                             );
                           } else if (feature === "custom_avatar") {
                             return (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 Upload and Use Custom Avatars (
                                 {getAllowedFileExtensions()})
                               </span>
                             );
                           } else if (feature === "custom_banner") {
                             return (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 Upload and Use Custom Banners (
                                 {getAllowedFileExtensions()})
                               </span>
                             );
                           } else if (feature === "inventory_refresh") {
                             return (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 On-Demand Inventory Refresh
                               </span>
                             );
@@ -282,7 +287,7 @@ export default function SupporterModal({
                             // fallback: show the first feature
                             return recommendedTier &&
                               recommendedTier.features[0] ? (
-                              <span className="block text-gray-300">
+                              <span className="text-secondary-text block">
                                 {recommendedTier.features[0]}
                               </span>
                             ) : null;
@@ -299,24 +304,26 @@ export default function SupporterModal({
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/supporting"
-                className="flex-1 rounded-lg bg-gradient-to-r from-[#5865F2] to-[#4752C4] px-6 py-3 text-center font-medium text-white transition-all duration-200 hover:from-[#4752C4] hover:to-[#3C45A5]"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover flex-1 rounded-lg px-6 py-3 text-center font-medium transition-all duration-200"
               >
                 View All Supporter Benefits
               </Link>
               <button
                 onClick={onClose}
-                className="cursor-pointer rounded-lg border border-[#37424D] bg-[#2E3944] px-6 py-3 text-[#D3D9D4] transition-colors hover:bg-[#37424D] hover:text-white"
+                className="text-secondary-text hover:text-primary-text border-border-primary bg-tertiary-bg hover:bg-primary-bg cursor-pointer rounded-lg border px-6 py-3 transition-colors"
               >
                 Maybe Later
               </button>
             </div>
 
             {/* Footer Note */}
-            <div className="mt-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-              <p className="text-center text-xs text-[#B8C5CA]">
-                💡 <strong className="text-[#D3D9D4]">Pro tip:</strong> All
-                supporter purchases are one-time only and non-refundable! Once
-                you purchase, you keep the perks forever.
+            <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-3">
+              <p className="text-center text-xs">
+                💡 <strong className="text-primary-text">Pro tip:</strong>{" "}
+                <span className="text-secondary-text">
+                  All supporter purchases are one-time only and non-refundable!
+                  Once you purchase, you keep the perks forever.
+                </span>
               </p>
             </div>
           </div>

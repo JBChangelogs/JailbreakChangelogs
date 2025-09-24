@@ -5,42 +5,19 @@ export const TradeAdSkeleton: React.FC = () => (
   <div className="mt-8">
     <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4"
-        >
+        <div key={i} className="rounded-lg border p-4">
           {/* User Info Skeleton */}
           <div className="mb-4 flex items-center space-x-3">
-            <Skeleton
-              variant="circular"
-              width={40}
-              height={40}
-              sx={{ bgcolor: "#2E3944" }}
-            />
+            <Skeleton variant="circular" width={40} height={40} />
             <div className="flex-1">
-              <Skeleton
-                variant="text"
-                width="75%"
-                height={24}
-                sx={{ bgcolor: "#2E3944" }}
-              />
-              <Skeleton
-                variant="text"
-                width="50%"
-                height={20}
-                sx={{ bgcolor: "#2E3944" }}
-              />
+              <Skeleton variant="text" width="75%" height={24} />
+              <Skeleton variant="text" width="50%" height={20} />
             </div>
           </div>
 
           {/* Status Skeleton */}
           <div className="mb-4 flex justify-end">
-            <Skeleton
-              variant="rounded"
-              width={80}
-              height={24}
-              sx={{ bgcolor: "#2E3944" }}
-            />
+            <Skeleton variant="rounded" width={80} height={24} />
           </div>
 
           {/* Trade Items Skeleton */}
@@ -51,7 +28,6 @@ export const TradeAdSkeleton: React.FC = () => (
                 variant="text"
                 width="30%"
                 height={20}
-                sx={{ bgcolor: "#2E3944" }}
                 className="mb-2"
               />
               <div className="grid grid-cols-4 gap-2">
@@ -61,7 +37,6 @@ export const TradeAdSkeleton: React.FC = () => (
                     variant="rounded"
                     width="100%"
                     height={80}
-                    sx={{ bgcolor: "#2E3944" }}
                   />
                 ))}
               </div>
@@ -73,7 +48,6 @@ export const TradeAdSkeleton: React.FC = () => (
                 variant="text"
                 width="30%"
                 height={20}
-                sx={{ bgcolor: "#2E3944" }}
                 className="mb-2"
               />
               <div className="grid grid-cols-4 gap-2">
@@ -83,7 +57,6 @@ export const TradeAdSkeleton: React.FC = () => (
                     variant="rounded"
                     width="100%"
                     height={80}
-                    sx={{ bgcolor: "#2E3944" }}
                   />
                 ))}
               </div>
@@ -92,28 +65,13 @@ export const TradeAdSkeleton: React.FC = () => (
 
           {/* Date Skeleton */}
           <div className="mt-4">
-            <Skeleton
-              variant="text"
-              width="40%"
-              height={16}
-              sx={{ bgcolor: "#2E3944" }}
-            />
+            <Skeleton variant="text" width="40%" height={16} />
           </div>
 
           {/* Buttons Skeleton */}
-          <div className="mt-4 space-y-2 border-t border-[#2E3944] pt-4">
-            <Skeleton
-              variant="rounded"
-              width="100%"
-              height={40}
-              sx={{ bgcolor: "#2E3944" }}
-            />
-            <Skeleton
-              variant="rounded"
-              width="100%"
-              height={40}
-              sx={{ bgcolor: "#2E3944" }}
-            />
+          <div className="mt-4 space-y-2 border-t pt-4">
+            <Skeleton variant="rounded" width="100%" height={40} />
+            <Skeleton variant="rounded" width="100%" height={40} />
           </div>
         </div>
       ))}

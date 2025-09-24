@@ -4,20 +4,14 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
-import Link from "next/link";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
-import {
-  ArrowLeftIcon,
-  ChatBubbleLeftIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import TradeItemsImages from "@/components/trading/TradeItemsImages";
-import TradeItemsList from "@/components/trading/TradeItemsList";
-import TradeValueComparison from "@/components/trading/TradeValueComparison";
+import TradeItemsWithValues from "@/components/trading/TradeItemsWithValues";
 import { TradeAd } from "@/types/trading";
 import TradeUserProfile from "@/components/trading/TradeUserProfile";
 import TradeAdMetadata from "@/components/trading/TradeAdMetadata";
@@ -53,9 +47,7 @@ export default function TradeDetailsClient({
     error: null,
     success: false,
   });
-  const [activeTab, setActiveTab] = useState<"items" | "values" | "comments">(
-    "items",
-  );
+  const [activeTab, setActiveTab] = useState<"items" | "comments">("items");
 
   const handleMakeOffer = async () => {
     try {
@@ -147,32 +139,20 @@ export default function TradeDetailsClient({
     }
   };
 
-  // Using string-based tabs to match calculator-style
-
   return (
     <>
       <Breadcrumb />
       <div className="container mx-auto mb-16">
-        <div className="mb-6 flex items-center justify-between px-4">
-          <Link
-            href="/trading"
-            className="inline-flex items-center gap-2 text-blue-300 transition-colors hover:text-blue-400"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to Trading
-          </Link>
-        </div>
-
         {/* Trade Card */}
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31]">
+        <div className="border-border-primary bg-secondary-bg rounded-lg border">
           {/* Header */}
-          <div className="border-b border-[#2E3944] p-6">
+          <div className="p-6">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <h1 className="text-muted text-2xl font-bold">
+                      <h1 className="text-primary-text text-2xl font-bold">
                         Trade #{trade.id}
                       </h1>
                       <div className="mt-4 flex flex-col gap-2 sm:mt-0 sm:flex-row">
@@ -184,10 +164,10 @@ export default function TradeDetailsClient({
                               disabled={offerStatus.loading}
                               className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
                                 offerStatus.loading
-                                  ? "text-muted cursor-not-allowed bg-[#2E3944]"
+                                  ? "text-secondary-text cursor-not-allowed"
                                   : offerStatus.success
-                                    ? "bg-[#43B581] text-white hover:bg-[#3CA374]"
-                                    : "bg-[#5865F2] text-white hover:bg-[#4752C4]"
+                                    ? "bg-status-success text-form-button-text hover:bg-status-success/80"
+                                    : "bg-button-info text-form-button-text hover:bg-button-info-hover"
                               }`}
                             >
                               <ChatBubbleLeftIcon className="h-4 w-4" />
@@ -204,8 +184,8 @@ export default function TradeDetailsClient({
                             disabled={isDeleting}
                             className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
                               isDeleting
-                                ? "cursor-not-allowed bg-red-500/50 text-white"
-                                : "bg-red-500 text-white hover:bg-red-600"
+                                ? "bg-status-error/50 text-form-button-text cursor-not-allowed"
+                                : "bg-status-error text-form-button-text hover:bg-status-error/80 cursor-pointer"
                             }`}
                           >
                             <TrashIcon className="h-4 w-4" />
@@ -218,7 +198,7 @@ export default function TradeDetailsClient({
                             href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 rounded-lg bg-[#5865F2] px-3 py-1 text-sm text-white transition-colors hover:bg-[#4752C4]"
+                            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors"
                           >
                             <DiscordIcon className="h-4 w-4" />
                             View in Discord
@@ -249,50 +229,33 @@ export default function TradeDetailsClient({
             />
 
             {/* Tabs - calculator style */}
-            <div className="mb-6 rounded-lg border border-[#2E3944] bg-[#212A31]">
-              <nav className="px-6 py-4">
-                <div className="flex flex-col space-y-1 rounded-lg bg-[#2E3944] p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
-                  <button
-                    onClick={() => setActiveTab("items")}
-                    className={`${
-                      activeTab === "items"
-                        ? "bg-[#5865F2] text-white shadow-sm"
-                        : "text-muted hover:bg-[#37424D] hover:text-[#FFFFFF]"
-                    } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-                  >
-                    Browse Items
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("values")}
-                    className={`${
-                      activeTab === "values"
-                        ? "bg-[#5865F2] text-white shadow-sm"
-                        : "text-muted hover:bg-[#37424D] hover:text-[#FFFFFF]"
-                    } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-                  >
-                    Value Comparison
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("comments")}
-                    className={`${
-                      activeTab === "comments"
-                        ? "bg-[#5865F2] text-white shadow-sm"
-                        : "text-muted hover:bg-[#37424D] hover:text-[#FFFFFF]"
-                    } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-                  >
-                    Comments
-                  </button>
-                </div>
-              </nav>
+            <div className="bg-primary-bg mb-6 rounded-lg p-4">
+              <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+                <button
+                  onClick={() => setActiveTab("items")}
+                  className={`${
+                    activeTab === "items"
+                      ? "bg-button-info text-form-button-text shadow-sm"
+                      : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+                  } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                >
+                  Items & Values
+                </button>
+                <button
+                  onClick={() => setActiveTab("comments")}
+                  className={`${
+                    activeTab === "comments"
+                      ? "bg-button-info text-form-button-text shadow-sm"
+                      : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+                  } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                >
+                  Comments
+                </button>
+              </div>
             </div>
             {/* Tab Content */}
             {activeTab === "items" ? (
-              <TradeItemsList
-                offering={trade.offering}
-                requesting={trade.requesting}
-              />
-            ) : activeTab === "values" ? (
-              <TradeValueComparison
+              <TradeItemsWithValues
                 offering={trade.offering}
                 requesting={trade.requesting}
               />
@@ -318,7 +281,7 @@ export default function TradeDetailsClient({
           message="Are you sure you want to delete this trade ad? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
-          confirmButtonClass="bg-red-500 hover:bg-red-600"
+          confirmButtonClass="bg-status-error text-form-button-text hover:bg-status-error-hover"
         />
 
         {/* Offer Confirmation Dialog */}
@@ -330,7 +293,7 @@ export default function TradeDetailsClient({
           message={`Are you sure you want to make an offer for Trade #${trade.id}? This will notify ${trade.user?.username || "the trade owner"} about your interest in trading for their ${trade.offering.length} items.`}
           confirmText="Make Offer"
           cancelText="Cancel"
-          confirmButtonClass="bg-[#5865F2] hover:bg-[#4752C4]"
+          confirmButtonClass="bg-button-info text-form-button-text hover:bg-button-info-hover"
         />
       </div>
     </>

@@ -17,7 +17,7 @@ export default function CreatorLink({ creator }: CreatorLinkProps) {
       href={`https://www.roblox.com/users/${id}/profile`}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-400 transition-colors hover:text-blue-300 hover:underline"
+      className="text-link hover:text-link-hover transition-colors hover:underline"
     >
       {name}
     </a>

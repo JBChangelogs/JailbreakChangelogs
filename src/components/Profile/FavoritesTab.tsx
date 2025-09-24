@@ -14,8 +14,8 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
+import { getCategoryColor } from "@/utils/categoryIcons";
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
-import { getItemTypeColor } from "@/utils/badgeColors";
 import { ItemDetails, FavoriteItem } from "@/types";
 
 interface FavoriteWithDetails extends FavoriteItem {
@@ -185,7 +185,6 @@ export default function FavoritesTab({
     }
 
     const isVideo = isVideoItem(imageName);
-    const typeColor = getItemTypeColor(itemType);
 
     return (
       <Link
@@ -193,7 +192,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 shadow-sm transition-colors hover:border-[#5865F2]">
+        <Box className="bg-primary-bg border-border-primary hover:border-button-info rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
               {isVideo ? (
@@ -224,37 +223,34 @@ export default function FavoritesTab({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 {isLoadingItem ? (
-                  <Skeleton
-                    variant="text"
-                    width="80%"
-                    height={20}
-                    sx={{ bgcolor: "#2E3944" }}
-                  />
+                  <Skeleton variant="text" width="80%" height={20} />
                 ) : (
-                  <span className="text-muted font-medium transition-colors group-hover:text-blue-300">
+                  <span className="text-primary-text group-hover:text-button-info font-medium transition-colors">
                     {itemName}
                   </span>
                 )}
               </div>
-              <div className="text-xs text-[#FFFFFF]">
+              <div className="text-secondary-text text-xs">
                 {itemType && (
                   <div className="mb-1">
                     {isLoadingItem ? (
-                      <Skeleton
-                        variant="rounded"
-                        width={80}
-                        height={20}
-                        sx={{ bgcolor: "#2E3944" }}
-                      />
+                      <Skeleton variant="rounded" width={80} height={20} />
                     ) : (
                       <Chip
                         label={itemType}
                         size="small"
+                        variant="outlined"
                         sx={{
-                          backgroundColor: typeColor,
-                          color: "#fff",
+                          backgroundColor: getCategoryColor(itemType) + "20", // Add 20% opacity
+                          borderColor: getCategoryColor(itemType),
+                          color: "var(--color-primary-text)",
                           fontSize: "0.65rem",
                           height: "20px",
+                          fontWeight: "medium",
+                          "&:hover": {
+                            borderColor: getCategoryColor(itemType),
+                            backgroundColor: getCategoryColor(itemType) + "30", // Slightly more opacity on hover
+                          },
                         }}
                       />
                     )}
@@ -264,7 +260,9 @@ export default function FavoritesTab({
             </div>
           </div>
 
-          <Divider sx={{ my: 1, backgroundColor: "#2E3944" }} />
+          <Divider
+            sx={{ my: 1, backgroundColor: "var(--color-border-primary)" }}
+          />
 
           <div className="flex items-center justify-start text-xs">
             <Tooltip
@@ -274,21 +272,20 @@ export default function FavoritesTab({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
+                    backgroundColor: "var(--color-primary-bg)",
+                    color: "var(--color-secondary-text)",
                     fontSize: "0.75rem",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #2E3944",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    boxShadow: "var(--color-card-shadow)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-primary-bg)",
                     },
                   },
                 },
               }}
             >
-              <span className="cursor-help text-[#FFFFFF]">
+              <span className="text-secondary-text cursor-help">
                 Favorited {formatRelativeDate(favorite.created_at)}
               </span>
             </Tooltip>
@@ -301,54 +298,35 @@ export default function FavoritesTab({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <StarIcon className="text-[#5865F2]" />
-              <h2 className="text-muted text-lg font-semibold">
+              <StarIcon className="text-button-info" />
+              <h2 className="text-primary-text text-lg font-semibold">
                 Favorited Items
               </h2>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[...Array(6)].map((_, index) => (
-              <Box
-                key={index}
-                className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 shadow-sm"
-              >
+              <Box key={index} className="rounded-lg border p-3 shadow-sm">
                 <div className="mb-2 flex items-center">
                   <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
                     <Skeleton
                       variant="rectangular"
                       width="100%"
                       height="100%"
-                      sx={{ bgcolor: "#2E3944" }}
                     />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
-                      <Skeleton
-                        variant="text"
-                        width={120}
-                        height={24}
-                        sx={{ bgcolor: "#2E3944" }}
-                      />
+                      <Skeleton variant="text" width={120} height={24} />
                     </div>
-                    <div className="text-xs text-[#FFFFFF]">
+                    <div className="text-secondary-text text-xs">
                       <div className="mb-1">
-                        <Skeleton
-                          variant="rounded"
-                          width={80}
-                          height={20}
-                          sx={{ bgcolor: "#2E3944" }}
-                        />
+                        <Skeleton variant="rounded" width={80} height={20} />
                       </div>
-                      <Skeleton
-                        variant="text"
-                        width={140}
-                        height={16}
-                        sx={{ bgcolor: "#2E3944" }}
-                      />
+                      <Skeleton variant="text" width={140} height={16} />
                     </div>
                   </div>
                 </div>
@@ -363,14 +341,14 @@ export default function FavoritesTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <StarIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <StarIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
           </div>
-          <p className="text-red-500">Error: {error}</p>
+          <p className="text-status-error">Error: {error}</p>
         </div>
       </div>
     );
@@ -379,14 +357,14 @@ export default function FavoritesTab({
   if (shouldHideFavorites) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <StarIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <StarIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-[#FFFFFF]">
+          <div className="text-primary-text flex items-center gap-2">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -409,11 +387,11 @@ export default function FavoritesTab({
 
   return (
     <div className="space-y-6" id="favorites-section">
-      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <StarIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <StarIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
           </div>
@@ -421,7 +399,7 @@ export default function FavoritesTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#475569]"
+            className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -433,7 +411,7 @@ export default function FavoritesTab({
         </div>
 
         {favorites.length === 0 ? (
-          <p className="text-[#FFFFFF] italic">No favorites yet</p>
+          <p className="text-primary-text italic">No favorites yet</p>
         ) : (
           <>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -450,10 +428,20 @@ export default function FavoritesTab({
                   color="primary"
                   sx={{
                     "& .MuiPaginationItem-root": {
-                      color: "#D3D9D4",
+                      color: "var(--color-primary-text)",
+                      "&.Mui-selected": {
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                        },
+                      },
+                      "&:hover": {
+                        backgroundColor: "var(--color-quaternary-bg)",
+                      },
                     },
-                    "& .Mui-selected": {
-                      backgroundColor: "#5865F2 !important",
+                    "& .MuiPaginationItem-icon": {
+                      color: "var(--color-primary-text)",
                     },
                   }}
                 />

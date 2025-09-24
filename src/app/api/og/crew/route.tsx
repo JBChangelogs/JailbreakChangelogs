@@ -156,7 +156,7 @@ export async function GET(request: Request) {
             textAlign: "center",
             padding: "32px 48px",
             borderRadius: "16px",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            backgroundColor: "rgba(22, 22, 26, 0.8)",
             border: "1px solid rgba(255, 255, 255, 0.1)",
             maxWidth: "800px",
           }}
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
               justifyContent: "center",
               fontSize: 48,
               fontFamily: "LuckiestGuy",
-              color: "#93c5fd",
+              color: "#2462cd",
               marginBottom: "16px",
               flexDirection: "column",
             }}
@@ -176,7 +176,7 @@ export async function GET(request: Request) {
             <b>Crew #{rank}</b>
             {season && season !== "19" && (
               <span
-                style={{ fontSize: 20, marginTop: "8px", color: "#fbbf24" }}
+                style={{ fontSize: 20, marginTop: "8px", color: "#2cb67d" }}
               >
                 Season {season}
               </span>
@@ -201,7 +201,7 @@ export async function GET(request: Request) {
               alignItems: "center",
               justifyContent: "center",
               fontSize: 24,
-              color: "#d1d5db",
+              color: "#94a1b2",
               lineHeight: "1.5",
             }}
           >
@@ -221,7 +221,7 @@ export async function GET(request: Request) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backgroundColor: "rgba(22, 22, 26, 0.9)",
             backdropFilter: "blur(10px)",
             padding: "20px",
             borderTop: "1px solid rgba(255, 255, 255, 0.1)",
@@ -250,13 +250,13 @@ export async function GET(request: Request) {
             <p
               style={{
                 fontSize: 18,
-                color: "#a0a0a0",
+                color: "#94a1b2",
                 margin: "0 0 16px 0",
                 textShadow: "1px 1px 2px rgba(0, 0, 0, 0.8)",
               }}
             >
               Visit{" "}
-              <span style={{ color: "#6366f1", fontWeight: "bold" }}>
+              <span style={{ color: "#2462cd", fontWeight: "bold" }}>
                 jailbreakchangelogs.xyz
               </span>
             </p>

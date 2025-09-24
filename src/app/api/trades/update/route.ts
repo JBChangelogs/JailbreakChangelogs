@@ -9,8 +9,17 @@ export async function POST(request: Request) {
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
 
-  const upstream = await fetch(`${BASE_API_URL}/trades/update`, {
+  if (!id) {
+    return NextResponse.json(
+      { message: "Missing required parameter: id" },
+      { status: 400 },
+    );
+  }
+
+  const upstream = await fetch(`${BASE_API_URL}/trades/update?id=${id}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ ...body, owner: token }),

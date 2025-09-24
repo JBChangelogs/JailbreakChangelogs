@@ -56,64 +56,33 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
             }}
             options={selectOptions}
             placeholder="Select a season"
-            classNamePrefix="react-select"
             className="w-full"
             isClearable={false}
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#212A31",
-                borderColor: "#2E3944",
-                color: "#D3D9D4",
-                minHeight: "48px",
-                "&:hover": {
-                  borderColor: "#5865F2",
-                },
-                "&:focus-within": {
-                  borderColor: "#5865F2",
-                },
-              }),
-              singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-              placeholder: (base) => ({ ...base, color: "#D3D9D4" }),
-              menu: (base) => ({
-                ...base,
-                backgroundColor: "#212A31",
-                color: "#D3D9D4",
-                zIndex: 3000,
-              }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isSelected
-                  ? "#5865F2"
-                  : state.isFocused
-                    ? "#37424D"
-                    : "#212A31",
-                color:
-                  state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                "&:active": {
-                  backgroundColor: "#124E66",
-                  color: "#FFFFFF",
-                },
-              }),
-              clearIndicator: (base) => ({
-                ...base,
-                color: "#D3D9D4",
-                "&:hover": {
-                  color: "#FFFFFF",
-                },
-              }),
-              dropdownIndicator: (base) => ({
-                ...base,
-                color: "#D3D9D4",
-                "&:hover": {
-                  color: "#FFFFFF",
-                },
-              }),
-            }}
             isSearchable={false}
+            unstyled
+            classNames={{
+              control: () =>
+                "text-secondary-text flex items-center justify-between rounded-lg border border-button-info bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer",
+              singleValue: () => "text-secondary-text",
+              placeholder: () => "text-secondary-text",
+              menu: () =>
+                "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+              option: ({ isSelected, isFocused }) =>
+                `px-4 py-3 cursor-pointer ${
+                  isSelected
+                    ? "bg-button-info text-primary-text"
+                    : isFocused
+                      ? "bg-quaternary-bg text-primary-text"
+                      : "bg-secondary-bg text-secondary-text"
+                }`,
+              clearIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
+              dropdownIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
+            }}
           />
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg border border-[#2E3944] bg-[#212A31]"></div>
+          <div className="border-stroke bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
         )}
 
         {seasonList.length > 0 &&
@@ -127,19 +96,19 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
         })() ? (
           <button
             onClick={onGoToLatestSeason}
-            className="text-muted flex items-center justify-between rounded-lg border border-[#5865F2] bg-[#2B2F4C] p-3 hover:bg-[#32365A] focus:outline-none"
+            className="text-secondary-text border-button-info bg-secondary-bg flex items-center justify-between rounded-lg border p-3 hover:cursor-pointer focus:outline-none"
           >
             <span>Go to Current Season</span>
-            <ClockIcon className="h-5 w-5 text-[#5865F2]" />
+            <ClockIcon className="text-button-info h-5 w-5" />
           </button>
         ) : (
           <button
             onClick={() => toast.error("Already on the current season")}
-            className="text-muted flex cursor-not-allowed items-center justify-between rounded-lg border border-[#5865F2] bg-[#2B2F4C] p-3 opacity-50 hover:bg-[#32365A] focus:outline-none"
+            className="text-secondary-text border-button-info bg-secondary-bg flex cursor-not-allowed items-center justify-between rounded-lg border p-3 opacity-50 focus:outline-none"
             aria-disabled="true"
           >
             <span>Go to Current Season</span>
-            <ClockIcon className="h-5 w-5 text-[#5865F2]" />
+            <ClockIcon className="text-button-info h-5 w-5" />
           </button>
         )}
 
@@ -150,10 +119,10 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
             onSeasonSelect(randomSeason.season.toString());
             toast.success(`Navigated to random season: ${randomSeason.title}`);
           }}
-          className="text-muted flex items-center justify-between rounded-lg border border-[#FAA61A] bg-[#3A2F1E] p-3 hover:bg-[#4A3A23] focus:outline-none"
+          className="text-secondary-text border-button-info bg-secondary-bg flex items-center justify-between rounded-lg border p-3 hover:cursor-pointer focus:outline-none"
         >
           <span>Random Season</span>
-          <FaDiceSix className="h-5 w-5 text-[#FAA61A]" />
+          <FaDiceSix className="text-button-info h-5 w-5" />
         </button>
       </div>
     </div>

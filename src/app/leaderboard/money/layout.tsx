@@ -1,8 +1,4 @@
-import type { Metadata, Viewport } from "next";
-
-export const viewport: Viewport = {
-  themeColor: "#124e66",
-};
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),

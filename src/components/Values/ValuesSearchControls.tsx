@@ -15,7 +15,7 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 const Slider = dynamic(() => import("@mui/material/Slider"), {
   ssr: false,
   loading: () => (
-    <div className="mt-1 h-8 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
+    <div className="border-stroke bg-secondary-bg mt-1 h-8 w-full animate-pulse rounded-md border"></div>
   ),
 });
 
@@ -147,19 +147,19 @@ export default function ValuesSearchControls({
                 placeholder={`Search ${filterSort === "name-all-items" ? "items" : filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ").toLowerCase()}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`text-muted w-full rounded-lg border px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] transition-all duration-300 focus:outline-none ${
+                className={`text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                   isSearchHighlighted
-                    ? "border-[#124E66] bg-[#1A5F7A] shadow-lg shadow-[#124E66]/20"
+                    ? "border-button-info bg-button-info/10 shadow-button-info/20 shadow-lg"
                     : isItemIdSearch
-                      ? "border-[#5865F2] bg-[#5865F2]/10 shadow-lg shadow-[#5865F2]/20"
-                      : "border-[#2E3944] bg-[#37424D] focus:border-[#124E66]"
+                      ? "border-button-info bg-button-info/10 shadow-button-info/20 shadow-lg"
+                      : "focus:border-button-info"
                 }`}
               />
-              <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+              <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                  className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
                   aria-label="Clear search"
                 >
                   <XMarkIcon />
@@ -264,51 +264,33 @@ export default function ValuesSearchControls({
                       { value: "name-horns", label: "Horns" },
                       { value: "name-weapon-skins", label: "Weapon Skins" },
                     ]}
-                    classNamePrefix="react-select"
                     className="w-full"
                     isClearable={true}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        backgroundColor: "#37424D",
-                        borderColor: "#2E3944",
-                        color: "#D3D9D4",
-                      }),
-                      singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                      menu: (base) => ({
-                        ...base,
-                        backgroundColor: "#37424D",
-                        color: "#D3D9D4",
-                        zIndex: 3000,
-                      }),
-                      option: (base, state) => ({
-                        ...base,
-                        backgroundColor: state.isSelected
-                          ? "#5865F2"
-                          : state.isFocused
-                            ? "#2E3944"
-                            : "#37424D",
-                        color:
-                          state.isSelected || state.isFocused
-                            ? "#FFFFFF"
-                            : "#D3D9D4",
-                        "&:active": {
-                          backgroundColor: "#124E66",
-                          color: "#FFFFFF",
-                        },
-                      }),
-                      clearIndicator: (base) => ({
-                        ...base,
-                        color: "#D3D9D4",
-                        "&:hover": {
-                          color: "#FFFFFF",
-                        },
-                      }),
+                    unstyled
+                    classNames={{
+                      control: () =>
+                        "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                      singleValue: () => "text-secondary-text",
+                      placeholder: () => "text-secondary-text",
+                      menu: () =>
+                        "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                      option: ({ isSelected, isFocused }) =>
+                        `px-4 py-3 cursor-pointer ${
+                          isSelected
+                            ? "bg-button-info text-form-button-text"
+                            : isFocused
+                              ? "bg-quaternary-bg text-primary-text"
+                              : "bg-secondary-bg text-secondary-text"
+                        }`,
+                      clearIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
+                      dropdownIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
                     }}
                     isSearchable={false}
                   />
                 ) : (
-                  <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
+                  <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
                 )}
               </div>
 
@@ -539,51 +521,35 @@ export default function ValuesSearchControls({
                         ],
                       },
                     ]}
-                    classNamePrefix="react-select"
                     className="w-full"
                     isClearable={true}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        backgroundColor: "#37424D",
-                        borderColor: "#2E3944",
-                        color: "#D3D9D4",
-                      }),
-                      singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                      menu: (base) => ({
-                        ...base,
-                        backgroundColor: "#37424D",
-                        color: "#D3D9D4",
-                        zIndex: 3000,
-                      }),
-                      option: (base, state) => ({
-                        ...base,
-                        backgroundColor: state.isSelected
-                          ? "#5865F2"
-                          : state.isFocused
-                            ? "#2E3944"
-                            : "#37424D",
-                        color:
-                          state.isSelected || state.isFocused
-                            ? "#FFFFFF"
-                            : "#D3D9D4",
-                        "&:active": {
-                          backgroundColor: "#124E66",
-                          color: "#FFFFFF",
-                        },
-                      }),
-                      clearIndicator: (base) => ({
-                        ...base,
-                        color: "#D3D9D4",
-                        "&:hover": {
-                          color: "#FFFFFF",
-                        },
-                      }),
+                    unstyled
+                    classNames={{
+                      control: () =>
+                        "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                      singleValue: () => "text-secondary-text",
+                      placeholder: () => "text-secondary-text",
+                      menu: () =>
+                        "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                      option: ({ isSelected, isFocused }) =>
+                        `px-4 py-3 cursor-pointer ${
+                          isSelected
+                            ? "bg-button-info text-form-button-text"
+                            : isFocused
+                              ? "bg-quaternary-bg text-primary-text"
+                              : "bg-secondary-bg text-secondary-text"
+                        }`,
+                      clearIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
+                      dropdownIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
+                      groupHeading: () =>
+                        "px-4 py-2 text-primary-text font-semibold text-sm",
                     }}
                     isSearchable={false}
                   />
                 ) : (
-                  <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
+                  <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
                 )}
               </div>
             </div>
@@ -591,15 +557,14 @@ export default function ValuesSearchControls({
 
           {/* Value range slider (always its own row) */}
           <div className="w-full">
-            <div className="rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2">
+            <div className="border-stroke bg-secondary-bg rounded-lg border px-3 py-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted text-xs">Value Range</span>
-                  <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
-                    New
+                  <span className="text-secondary-text text-xs">
+                    Value Range
                   </span>
                 </div>
-                <span className="text-muted text-[11px]">
+                <span className="text-secondary-text text-[11px]">
                   {rangeValue[0].toLocaleString()} -{" "}
                   {rangeValue[1] >= MAX_VALUE_RANGE
                     ? `${MAX_VALUE_RANGE.toLocaleString()}+`
@@ -642,10 +607,14 @@ export default function ValuesSearchControls({
                   marks={sliderMarks}
                   disableSwap
                   sx={{
-                    color: "#5865F2",
+                    color: "var(--color-button-info)",
                     mt: 1,
-                    "& .MuiSlider-markLabel": { color: "#D3D9D4" },
-                    "& .MuiSlider-mark": { backgroundColor: "#D3D9D4" },
+                    "& .MuiSlider-markLabel": {
+                      color: "var(--color-secondary-text)",
+                    },
+                    "& .MuiSlider-mark": {
+                      backgroundColor: "var(--color-secondary-text)",
+                    },
                   }}
                 />
               </div>
@@ -653,20 +622,20 @@ export default function ValuesSearchControls({
           </div>
 
           {/* Pro tip about Ctrl+F */}
-          <div className="mt-2 hidden items-center gap-1 text-xs text-[#D3D9D4] lg:flex">
+          <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
             💡 Pro tip: Press Ctrl+F to quickly focus the search
           </div>
         </div>
         {/* Right: Ad */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
           <div className="flex w-full max-w-[480px] flex-col lg:w-[480px] lg:flex-shrink-0">
+            <span className="text-secondary-text mb-2 block text-center text-xs">
+              ADVERTISEMENT
+            </span>
             <div
-              className="relative overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+              className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
               style={{ minHeight: "250px" }}
             >
-              <span className="absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs font-semibold text-white">
-                Advertisement
-              </span>
               <DisplayAd
                 adSlot="8162235433"
                 adFormat="auto"

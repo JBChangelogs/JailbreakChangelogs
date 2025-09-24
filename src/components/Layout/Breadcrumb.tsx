@@ -201,6 +201,16 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         }
       }
 
+      // Special handling for supporting route
+      if (pathSegments[0] === "supporting") {
+        if (index === 0) {
+          return {
+            label: "Supporting",
+            href: "/supporting",
+          };
+        }
+      }
+
       return {
         label: segment.charAt(0).toUpperCase() + segment.slice(1),
         href: `/${pathSegments.slice(0, index + 1).join("/")}`,
@@ -211,17 +221,17 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-4">
-        <div className="text-muted flex min-w-0 flex-wrap items-center">
+        <div className="text-secondary-text flex min-w-0 flex-wrap items-center">
           <div className="flex items-center">
             <Skeleton
               variant="circular"
               width={20}
               height={20}
-              sx={{ bgcolor: "#212A31" }}
+              className="bg-secondary-bg"
             />
           </div>
           <div className="flex items-center">
-            <span className="text-muted mx-2">
+            <span className="text-secondary-text mx-2">
               <svg
                 className="h-4 w-4"
                 fill="currentColor"
@@ -239,11 +249,11 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               variant="rounded"
               width={120}
               height={24}
-              sx={{ bgcolor: "#212A31" }}
+              className="bg-secondary-bg"
             />
           </div>
           <div className="flex items-center">
-            <span className="text-muted mx-2">
+            <span className="text-secondary-text mx-2">
               <svg
                 className="h-4 w-4"
                 fill="currentColor"
@@ -261,7 +271,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               variant="rounded"
               width={160}
               height={24}
-              sx={{ bgcolor: "#212A31" }}
+              className="bg-secondary-bg"
             />
           </div>
         </div>
@@ -271,14 +281,14 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <div className="text-muted flex min-w-0 flex-wrap items-center text-xs sm:text-sm">
+      <div className="text-secondary-text flex min-w-0 flex-wrap items-center text-xs sm:text-sm">
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1;
 
           return (
             <div key={`${index}-${item.href}`} className="flex items-center">
               {index > 0 && (
-                <span className="text-muted mx-2">
+                <span className="text-secondary-text mx-2">
                   <svg
                     className="h-3 w-3 sm:h-4 sm:w-4"
                     fill="currentColor"
@@ -295,7 +305,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               )}
 
               {isLast ? (
-                <span className="max-w-[200px] truncate rounded-full bg-[#212a31] px-2 py-0.5 text-xs font-medium text-blue-300 sm:max-w-[300px] sm:text-sm">
+                <span className="bg-secondary-bg text-primary-text max-w-[200px] truncate rounded-full px-2 py-0.5 text-xs font-medium sm:max-w-[300px] sm:text-sm">
                   {item.isHome ? (
                     <HomeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                   ) : (
@@ -305,7 +315,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               ) : (
                 <Link
                   href={item.href}
-                  className="text-muted hover:text-muted max-w-[200px] truncate text-xs sm:max-w-[300px] sm:text-sm"
+                  className="text-secondary-text hover:text-link-hover max-w-[200px] truncate text-xs sm:max-w-[300px] sm:text-sm"
                 >
                   {item.isHome ? (
                     <HomeIcon className="h-4 w-4 sm:h-5 sm:w-5" />

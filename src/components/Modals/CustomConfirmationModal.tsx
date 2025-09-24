@@ -1,5 +1,5 @@
 import React from "react";
-import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
+import { Dialog } from "@headlessui/react";
 
 interface CustomConfirmationModalProps {
   open: boolean;
@@ -16,6 +16,7 @@ export const CustomConfirmationModal: React.FC<
   CustomConfirmationModalProps
 > = ({
   open,
+  onClose,
   title,
   message,
   confirmText,
@@ -23,36 +24,41 @@ export const CustomConfirmationModal: React.FC<
   onConfirm,
   onCancel,
 }) => {
-  useLockBodyScroll(open);
-
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50">
+    <Dialog open={open} onClose={onClose} className="relative z-50">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"
       />
+
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="mx-auto w-full max-w-sm rounded-lg border border-[#5865F2] bg-[#212A31] p-6 shadow-xl">
-          <h2 className="mb-4 text-xl font-semibold text-white">{title}</h2>
-          <p className="text-muted/80 mb-6">{message}</p>
-          <div className="flex justify-end gap-3">
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+            {title}
+          </div>
+
+          <div className="modal-content px-6 pb-4">
+            <p className="text-secondary-text">{message}</p>
+          </div>
+
+          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
             <button
+              type="button"
               onClick={onCancel}
-              className="text-muted rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium transition-colors hover:bg-[#2E3944] hover:text-white"
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
             >
               {cancelText}
             </button>
             <button
+              type="button"
               onClick={onConfirm}
-              className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
+              className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
             >
               {confirmText}
             </button>
           </div>
-        </div>
+        </Dialog.Panel>
       </div>
-    </div>
+    </Dialog>
   );
 };

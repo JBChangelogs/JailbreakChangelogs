@@ -39,5 +39,5 @@ export default function TermsOfServiceLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <div className="text-primary-text min-h-screen">{children}</div>;
 }

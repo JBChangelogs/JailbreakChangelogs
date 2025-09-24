@@ -88,43 +88,35 @@ export default function CrewSeasonSelector({
             className="w-full"
             isClearable={false}
             isSearchable={false}
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#37424D",
-                borderColor: "#2E3944",
-                color: "#D3D9D4",
-              }),
-              singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-              menu: (base) => ({
-                ...base,
-                backgroundColor: "#37424D",
-                color: "#D3D9D4",
-                zIndex: 3000,
-              }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isSelected
-                  ? "#5865F2"
-                  : state.isFocused
-                    ? "#2E3944"
-                    : "#37424D",
-                color:
-                  state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                "&:active": {
-                  backgroundColor: "#124E66",
-                  color: "#FFFFFF",
-                },
-              }),
+            unstyled
+            classNames={{
+              control: () =>
+                "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+              singleValue: () => "text-secondary-text",
+              placeholder: () => "text-secondary-text",
+              menu: () =>
+                "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+              option: ({ isSelected, isFocused }) =>
+                `px-4 py-3 cursor-pointer ${
+                  isSelected
+                    ? "bg-button-info text-form-button-text"
+                    : isFocused
+                      ? "bg-quaternary-bg text-primary-text"
+                      : "bg-secondary-bg text-secondary-text"
+                }`,
+              clearIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
+              dropdownIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
             }}
           />
         ) : (
-          <div className="h-12 w-full animate-pulse rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
+          <div className="border-stroke bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
         )}
       </div>
 
       {/* Season Info */}
-      <div className="mt-3 text-sm text-gray-400">
+      <div className="text-secondary-text mt-3 text-sm">
         {getSeasonDescription(currentSeason)}
       </div>
     </div>

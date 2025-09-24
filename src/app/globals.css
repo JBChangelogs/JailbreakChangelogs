@@ -1,131 +1,427 @@
+@layer theme, base, mui, components, utilities;
 @import "tailwindcss";
-
-@plugin 'tailwindcss-animate';
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@theme {
+  /* DARK THEME - Default (current theme) */
+  /* Background Colors - Comprehensive Gray Scale */
+  --color-primary-bg: hsl(228, 13%, 8%); /* Main page background */
+  --color-secondary-bg: hsl(216, 6%, 15%); /* Card background - Cards, modals */
+  --color-tertiary-bg: hsl(
+    220,
+    5%,
+    20%
+  ); /* Elevated surfaces - Dropdowns, tooltips */
+  --color-quaternary-bg: hsl(
+    225,
+    4%,
+    25%
+  ); /* Subtle backgrounds - Hover states */
+  --color-surface-bg: hsl(
+    240,
+    3%,
+    12%
+  ); /* Surface backgrounds - Input fields */
+  --color-overlay-bg: hsl(
+    240,
+    8%,
+    9%,
+    0.8
+  ); /* Overlay backgrounds - Backdrops */
+  --color-newsletter-bg: hsl(60, 100%, 100%); /* Light sections */
 
-@layer base {
-  :root {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
-  }
+  /* Text Colors - Hierarchical Gray Scale */
+  --color-primary-text: hsl(
+    60,
+    100%,
+    100%
+  ); /* Main headings and important text */
+  --color-secondary-text: hsl(214, 16%, 64%); /* Body text and descriptions */
+  --color-tertiary-text: hsl(
+    214,
+    12%,
+    45%
+  ); /* Muted text - Captions, metadata */
+  --color-quaternary-text: hsl(214, 8%, 35%); /* Disabled text - Placeholders */
+  --color-card-headline: hsl(60, 100%, 100%); /* Headings within cards */
+  --color-card-paragraph: hsl(214, 16%, 64%); /* Text within cards */
+
+  /* Border and Separator Colors */
+  --color-border-primary: hsl(
+    214,
+    8%,
+    20%
+  ); /* Primary borders - Card outlines */
+  --color-border-secondary: hsl(
+    214,
+    6%,
+    15%
+  ); /* Secondary borders - Subtle separators */
+  --color-border-tertiary: hsl(
+    214,
+    4%,
+    12%
+  ); /* Tertiary borders - Very subtle lines */
+  --color-border-focus: hsl(210, 99%, 50%); /* Focus borders - Active states */
+  --color-border-error: hsl(
+    0,
+    81%,
+    62%
+  ); /* Error borders - Validation states */
+
+  /* Card Elements */
+  --color-card-tag-bg: hsl(210, 99%, 50%); /* Tag/chip backgrounds */
+  --color-card-tag-text: hsl(60, 100%, 100%); /* Text on tags/chips */
+  --color-card-highlight: hsl(
+    60,
+    100%,
+    100%
+  ); /* Highlighted elements in cards */
+  --color-card-shadow: hsl(0, 0%, 0%, 0.1); /* Card shadows */
+
+  /* Interactive Elements */
+  --color-link: hsl(210, 77%, 50%); /* Primary links */
+  --color-link-hover: hsl(210, 77%, 40%); /* Link hover states */
+  --color-link-active: hsl(210, 77%, 40%); /* Link active states */
+  --color-link-visited: hsl(214, 12%, 45%); /* Visited links */
+
+  /* Button Colors */
+  --color-button-info: hsl(
+    210,
+    99%,
+    35%
+  ); /* Primary buttons - Darker for better contrast */
+  --color-button-info-hover: hsl(210, 99%, 30%); /* Button hover states */
+  --color-button-info-active: hsl(218, 60%, 32%); /* Button active states */
+  --color-button-info-disabled: hsl(214, 8%, 25%); /* Disabled buttons */
+  --color-button-success: hsl(155, 61%, 44%); /* Success actions */
+  --color-button-success-hover: hsl(155, 55%, 38%); /* Success hover */
+  --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
+  --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
+  --color-button-secondary: hsl(214, 8%, 25%); /* Secondary buttons */
+  --color-button-secondary-hover: hsl(214, 6%, 20%); /* Secondary hover */
+  --color-form-button: hsl(
+    210,
+    99%,
+    35%
+  ); /* Form submit buttons - Darker for better contrast */
+  --color-form-button-text: hsl(60, 100%, 100%); /* Text on form buttons */
+
+  /* Form Elements */
+  --color-form-input: hsl(240, 8%, 9%); /* Input field backgrounds */
+  --color-form-input-focus: hsl(240, 3%, 12%); /* Input focus backgrounds */
+  --color-form-input-disabled: hsl(
+    214,
+    4%,
+    12%
+  ); /* Disabled input backgrounds */
+  --color-form-label: hsl(60, 100%, 100%); /* Form labels */
+  --color-form-placeholder: hsl(214, 8%, 35%); /* Placeholder text */
+  --color-form-error: hsl(0, 81%, 62%); /* Error text */
+  --color-form-success: hsl(155, 61%, 44%); /* Success text */
+
+  /* Status Colors */
+  --color-status-success: hsl(
+    155,
+    61%,
+    30%
+  ); /* Success states - Even darker for better contrast */
+  --color-status-warning: hsl(38, 100%, 61%); /* Warning states */
+  --color-status-error: hsl(
+    0,
+    81%,
+    45%
+  ); /* Error states - Darker for better contrast */
+  --color-status-info: hsl(210, 99%, 50%); /* Info states */
+  --color-status-neutral: hsl(214, 8%, 35%); /* Neutral states */
+
+  /* Additional Utility Colors */
+  --color-highlight: hsl(210, 99%, 50%); /* Accent color for highlights */
+  --color-secondary: hsl(225, 5%, 47%); /* Secondary accent color */
+  --color-tertiary: hsl(155, 61%, 44%); /* Tertiary accent color */
+  --color-stroke: hsl(0, 0%, 0%); /* Primary stroke color */
+
+  /* Warning Colors */
+  --color-warning: hsl(38, 100%, 61%); /* Orange for Double XP alerts */
+  --color-warning-light: hsl(48, 100%, 62%); /* Yellow for 2 weeks left */
+  --color-warning-dark: hsl(32, 85%, 52%); /* Darker warning */
+
+  /* Badge Colors */
+  --color-badge-owner: linear-gradient(
+    to right,
+    hsl(270, 100%, 50%),
+    hsl(240, 100%, 50%)
+  ); /* Purple to indigo gradient */
+  --color-badge-tester: hsl(270, 100%, 60%); /* Purple */
+  --color-badge-vtm: linear-gradient(
+    to right,
+    hsl(155, 100%, 30%),
+    hsl(155, 100%, 25%)
+  ); /* Emerald gradient */
+  --color-badge-vt: hsl(220, 100%, 50%); /* Blue */
+  --color-badge-partner: hsl(25, 100%, 50%); /* Orange */
+  --color-badge-contributor: linear-gradient(
+    to right,
+    hsl(180, 100%, 30%),
+    hsl(180, 100%, 25%)
+  ); /* Teal gradient */
+  --color-badge-developer: linear-gradient(
+    to right,
+    hsl(90, 100%, 50%),
+    hsl(90, 100%, 45%)
+  ); /* Lime gradient */
+  --color-badge-early-adopter: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Amber to yellow gradient */
+  --color-badge-premium-bronze: linear-gradient(
+    to right,
+    hsl(30, 100%, 50%),
+    hsl(30, 100%, 45%)
+  ); /* Bronze gradient */
+  --color-badge-premium-silver: linear-gradient(
+    to right,
+    hsl(0, 0%, 75%),
+    hsl(0, 0%, 65%)
+  ); /* Silver gradient */
+  --color-badge-premium-gold: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Gold gradient */
+
+  /* Opacity Variations */
+  --color-overlay-light: hsl(240, 8%, 9%, 0.5); /* Light overlay */
+  --color-overlay-medium: hsl(240, 8%, 9%, 0.7); /* Medium overlay */
+  --color-overlay-dark: hsl(240, 8%, 9%, 0.9); /* Dark overlay */
+
+  /* Hero Overlays */
+  --color-hero-overlay: hsl(0, 0%, 0%, 0.7); /* Hero overlay - Dark mode */
 }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
+/* LIGHT THEME - Applied when .light class is present */
+.light {
+  /* Background Colors - Light theme */
+  --color-primary-bg: hsl(0, 0%, 100%); /* Main page background - White */
+  --color-secondary-bg: hsl(
+    240,
+    4%,
+    95%
+  ); /* Card background - Very light gray */
+  --color-tertiary-bg: hsl(0, 0%, 96%); /* Elevated surfaces - Light gray */
+  --color-quaternary-bg: hsl(
+    0,
+    0%,
+    94%
+  ); /* Subtle backgrounds - Slightly darker gray */
+  --color-surface-bg: hsl(0, 0%, 100%); /* Surface backgrounds - White */
+  --color-overlay-bg: hsl(
+    0,
+    0%,
+    100%,
+    0.8
+  ); /* Overlay backgrounds - White with opacity */
+  --color-newsletter-bg: hsl(240, 8%, 9%); /* Dark sections */
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* Text Colors - Light theme */
+  --color-primary-text: hsl(240, 8%, 9%); /* Main headings - Dark */
+  --color-secondary-text: hsl(214, 16%, 36%); /* Body text - Medium dark */
+  --color-tertiary-text: hsl(214, 12%, 55%); /* Muted text - Medium gray */
+  --color-quaternary-text: hsl(214, 8%, 65%); /* Disabled text - Light gray */
+  --color-card-headline: hsl(240, 8%, 9%); /* Headings within cards - Dark */
+  --color-card-paragraph: hsl(
+    214,
+    16%,
+    36%
+  ); /* Text within cards - Medium dark */
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Border and Separator Colors - Light theme */
+  --color-border-primary: hsl(214, 8%, 80%); /* Primary borders - Light gray */
+  --color-border-secondary: hsl(
+    214,
+    6%,
+    85%
+  ); /* Secondary borders - Very light gray */
+  --color-border-tertiary: hsl(
+    214,
+    4%,
+    88%
+  ); /* Tertiary borders - Almost white */
+  --color-border-focus: hsl(210, 99%, 50%); /* Focus borders - Same blue */
+  --color-border-error: hsl(0, 81%, 62%); /* Error borders - Same red */
+
+  /* Card Elements - Light theme */
+  --color-card-tag-bg: hsl(
+    210,
+    99%,
+    50%
+  ); /* Tag/chip backgrounds - Same blue */
+  --color-card-tag-text: hsl(60, 100%, 100%); /* Text on tags/chips - White */
+  --color-card-highlight: hsl(240, 8%, 9%); /* Highlighted elements - Dark */
+  --color-card-shadow: hsl(0, 0%, 0%, 0.05); /* Card shadows - Very light */
+
+  /* Interactive Elements - Light theme */
+  --color-link: hsl(210, 99%, 50%); /* Primary links - Blue */
+  --color-link-hover: hsl(210, 99%, 40%); /* Link hover states - Darker blue */
+  --color-link-active: hsl(
+    218,
+    60%,
+    32%
+  ); /* Link active states - Even darker */
+  --color-link-visited: hsl(214, 12%, 55%); /* Visited links - Gray */
+
+  /* Button Colors - Light theme (same as dark) */
+  --color-button-info: hsl(
+    210,
+    99%,
+    35%
+  ); /* Primary buttons - Darker for better contrast */
+  --color-button-info-hover: hsl(210, 99%, 30%); /* Button hover states */
+  --color-button-info-active: hsl(218, 60%, 32%); /* Button active states */
+  --color-button-info-disabled: hsl(
+    214,
+    8%,
+    75%
+  ); /* Disabled buttons - Light gray */
+  --color-button-success: hsl(155, 61%, 44%); /* Success actions */
+  --color-button-success-hover: hsl(155, 55%, 38%); /* Success hover */
+  --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
+  --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
+  --color-button-secondary: hsl(
+    214,
+    8%,
+    75%
+  ); /* Secondary buttons - Light gray */
+  --color-button-secondary-hover: hsl(
+    214,
+    6%,
+    80%
+  ); /* Secondary hover - Lighter */
+  --color-form-button: hsl(
+    210,
+    99%,
+    35%
+  ); /* Form submit buttons - Darker for better contrast */
+  --color-form-button-text: hsl(60, 100%, 100%); /* Text on form buttons */
+
+  /* Form Elements - Light theme */
+  --color-form-input: hsl(0, 0%, 100%); /* Input field backgrounds - White */
+  --color-form-input-focus: hsl(
+    0,
+    0%,
+    98%
+  ); /* Input focus backgrounds - Very light */
+  --color-form-input-disabled: hsl(
+    214,
+    4%,
+    88%
+  ); /* Disabled input backgrounds - Light gray */
+  --color-form-label: hsl(240, 8%, 9%); /* Form labels - Dark */
+  --color-form-placeholder: hsl(
+    214,
+    8%,
+    65%
+  ); /* Placeholder text - Light gray */
+  --color-form-error: hsl(0, 81%, 62%); /* Error text - Same red */
+  --color-form-success: hsl(155, 61%, 44%); /* Success text - Same green */
+
+  /* Status Colors - Light theme (same as dark) */
+  --color-status-success: hsl(
+    155,
+    61%,
+    30%
+  ); /* Success states - Even darker for better contrast */
+  --color-status-warning: hsl(38, 100%, 61%); /* Warning states */
+  --color-status-error: hsl(
+    0,
+    81%,
+    45%
+  ); /* Error states - Darker for better contrast */
+  --color-status-info: hsl(210, 99%, 50%); /* Info states */
+  --color-status-neutral: hsl(214, 8%, 65%); /* Neutral states - Light gray */
+
+  /* Additional Utility Colors - Light theme */
+  --color-highlight: hsl(
+    210,
+    99%,
+    50%
+  ); /* Accent color for highlights - Same blue */
+  --color-secondary: hsl(225, 5%, 47%); /* Secondary accent color - Same */
+  --color-tertiary: hsl(155, 61%, 44%); /* Tertiary accent color - Same */
+  --color-stroke: hsl(214, 8%, 80%); /* Primary stroke color - Light gray */
+
+  /* Warning Colors - Light theme (same as dark) */
+  --color-warning: hsl(38, 100%, 61%); /* Orange for Double XP alerts */
+  --color-warning-light: hsl(48, 100%, 62%); /* Yellow for 2 weeks left */
+  --color-warning-dark: hsl(32, 85%, 52%); /* Darker warning */
+
+  /* Badge Colors - Light theme (same as dark) */
+  --color-badge-owner: linear-gradient(
+    to right,
+    hsl(270, 100%, 50%),
+    hsl(240, 100%, 50%)
+  ); /* Purple to indigo gradient */
+  --color-badge-tester: hsl(270, 100%, 60%); /* Purple */
+  --color-badge-vtm: linear-gradient(
+    to right,
+    hsl(155, 100%, 30%),
+    hsl(155, 100%, 25%)
+  ); /* Emerald gradient */
+  --color-badge-vt: hsl(220, 100%, 50%); /* Blue */
+  --color-badge-partner: hsl(25, 100%, 50%); /* Orange */
+  --color-badge-contributor: linear-gradient(
+    to right,
+    hsl(180, 100%, 30%),
+    hsl(180, 100%, 25%)
+  ); /* Teal gradient */
+  --color-badge-developer: linear-gradient(
+    to right,
+    hsl(90, 100%, 50%),
+    hsl(90, 100%, 45%)
+  ); /* Lime gradient */
+  --color-badge-early-adopter: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Amber to yellow gradient */
+  --color-badge-premium-bronze: linear-gradient(
+    to right,
+    hsl(30, 100%, 50%),
+    hsl(30, 100%, 45%)
+  ); /* Bronze gradient */
+  --color-badge-premium-silver: linear-gradient(
+    to right,
+    hsl(0, 0%, 75%),
+    hsl(0, 0%, 65%)
+  ); /* Silver gradient */
+  --color-badge-premium-gold: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Gold gradient */
+
+  /* Opacity Variations - Light theme */
+  --color-overlay-light: hsl(0, 0%, 100%, 0.5); /* Light overlay - White */
+  --color-overlay-medium: hsl(0, 0%, 100%, 0.7); /* Medium overlay - White */
+  --color-overlay-dark: hsl(0, 0%, 100%, 0.9); /* Dark overlay - White */
+
+  /* Hero Overlays - Light theme */
+  --color-hero-overlay: hsl(
+    0,
+    0%,
+    0%,
+    0.5
+  ); /* Hero overlay - Light mode (lighter) */
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+    outline-color: hsla(
+      231,
+      100%,
+      62%,
+      0.3
+    ); /* Button info color with opacity */
   }
 }

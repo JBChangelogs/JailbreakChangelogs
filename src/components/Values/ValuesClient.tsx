@@ -85,8 +85,13 @@ export default function ValuesClient({
       const loadingToast = toast.loading("Finding a random item...");
       const item = await fetchRandomItem();
       toast.dismiss(loadingToast);
-      toast.success(`Redirecting to ${item.name} ${item.type}...`);
+      const redirectToast = toast.loading(
+        `Redirecting to ${item.name} ${item.type}...`,
+      );
       router.push(`/item/${item.type.toLowerCase()}/${item.name}`);
+      setTimeout(() => {
+        toast.dismiss(redirectToast);
+      }, 2000);
     } catch (error) {
       console.error("Error fetching random item:", error);
       toast.error("Failed to fetch random item");
@@ -165,20 +170,20 @@ export default function ValuesClient({
         />
       </Suspense>
 
-      <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+      <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-muted text-3xl font-bold">
+          <h1 className="text-primary-text text-3xl font-bold">
             Roblox Jailbreak Value List
           </h1>
         </div>
-        <p className="text-muted mb-4">
+        <p className="text-secondary-text mb-4">
           Welcome to our Roblox Jailbreak trading values database. We&apos;ve
           partnered with{" "}
           <a
             href="https://discord.com/invite/jailbreaktrading"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-300 transition-colors hover:text-blue-400"
+            className="text-link hover:text-link-hover transition-colors"
           >
             Trading Core
           </a>{" "}
@@ -189,14 +194,14 @@ export default function ValuesClient({
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={handleRandomItem}
-            className="text-muted flex items-center gap-1.5 rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 hover:bg-[#124E66] focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
+            className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
             <SparklesIcon className="h-4 w-4 sm:h-6 sm:w-6" />
             <span className="text-sm sm:text-base">Random Item</span>
           </button>
           <button
             onClick={() => setShowHcModal(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-[#2E3944] bg-[#5865F2] px-4 py-2 text-white hover:bg-[#4752C4] focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
+            className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
             <span className="text-sm sm:text-base">
               Hyperchrome Pity Calculator
@@ -205,7 +210,7 @@ export default function ValuesClient({
         </div>
 
         {lastUpdated && (
-          <p className="text-muted mb-4 text-sm">
+          <p className="text-secondary-text mb-4 text-sm">
             Last updated: {formatClientDate(lastUpdated)}
           </p>
         )}

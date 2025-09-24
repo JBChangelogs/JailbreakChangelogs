@@ -1,8 +1,7 @@
 function useWindowWidth() {
-  const [width, setWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1024,
-  );
+  const [width, setWidth] = useState(1024);
   useEffect(() => {
+    setWidth(window.innerWidth);
     const handleResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -21,13 +20,9 @@ import {
   getVideoPath,
 } from "@/utils/images";
 import { sortByCashValue, sortByDemand, formatFullValue } from "@/utils/values";
+import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  getItemTypeColor,
-  getDemandColor,
-  getTrendColor,
-} from "@/utils/badgeColors";
-import { CategoryIconBadge } from "@/utils/categoryIcons";
+import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -71,7 +66,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const router = useRouter();
-  const ITEMS_PER_PAGE = windowWidth === 1024 ? 25 : 24;
+  const ITEMS_PER_PAGE = 24; // Fixed value to prevent hydration mismatch
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
   const displayDebouncedSearchQuery =
@@ -316,17 +311,17 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   return (
     <div className="space-y-4" data-component="available-items-grid">
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-1 pt-4 sm:p-2">
+      <div className="rounded-lg border p-1 pt-4 sm:p-2">
         {/* Ad Placement: Above the grid, only for non-premium users */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
           <div className="mb-6 flex w-full flex-col items-center">
+            <span className="text-secondary-text mb-2 block text-center text-xs">
+              ADVERTISEMENT
+            </span>
             <div
-              className="relative w-full max-w-[700px] overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+              className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
               style={{ minHeight: "250px" }}
             >
-              <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                Advertisement
-              </span>
               <DisplayAd
                 adSlot="4222990422"
                 adFormat="auto"
@@ -337,287 +332,269 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           </div>
         )}
 
-        <div className="relative mb-4">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
-            <input
-              type="text"
-              placeholder="Search items by name or type..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] transition-all duration-300 focus:border-[#124E66] focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
-                aria-label="Clear search"
-              >
-                <XMarkIcon />
-              </button>
+        <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Search - Takes up full width on mobile, 1/3 on desktop */}
+          <div className="relative lg:col-span-1">
+            <div className="relative">
+              <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search items by name or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                  aria-label="Clear search"
+                >
+                  <XMarkIcon />
+                </button>
+              )}
+            </div>
+            {debouncedSearchQuery && (
+              <div className="text-secondary-text mt-2 text-sm">
+                Found {filteredItems.length}{" "}
+                {filteredItems.length === 1 ? "item" : "items"} matching &quot;
+                {displayDebouncedSearchQuery}&quot;
+              </div>
             )}
           </div>
-          {debouncedSearchQuery && (
-            <div className="text-muted mt-2 text-sm">
-              Found {filteredItems.length}{" "}
-              {filteredItems.length === 1 ? "item" : "items"} matching &quot;
-              {displayDebouncedSearchQuery}&quot;
-            </div>
-          )}
-        </div>
 
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {selectLoaded ? (
-            <Select
-              value={{
-                value: filterSort,
-                label: (() => {
-                  switch (filterSort) {
-                    case "name-all-items":
-                      return "All Items";
-                    case "name-limited-items":
-                      return "Limited Items";
-                    case "name-seasonal-items":
-                      return "Seasonal Items";
-                    case "name-vehicles":
-                      return "Vehicles";
-                    case "name-spoilers":
-                      return "Spoilers";
-                    case "name-rims":
-                      return "Rims";
-                    case "name-body-colors":
-                      return "Body Colors";
-                    case "name-hyperchromes":
-                      return "HyperChromes";
-                    case "name-textures":
-                      return "Body Textures";
-                    case "name-tire-stickers":
-                      return "Tire Stickers";
-                    case "name-tire-styles":
-                      return "Tire Styles";
-                    case "name-drifts":
-                      return "Drifts";
-                    case "name-furnitures":
-                      return "Furniture";
-                    case "name-horns":
-                      return "Horns";
-                    case "name-weapon-skins":
-                      return "Weapon Skins";
-                    default:
-                      return filterSort;
+          {/* Dropdowns - Side by side on desktop */}
+          <div className="flex gap-4 lg:col-span-2">
+            {selectLoaded ? (
+              <Select
+                value={{
+                  value: filterSort,
+                  label: (() => {
+                    switch (filterSort) {
+                      case "name-all-items":
+                        return "All Items";
+                      case "name-limited-items":
+                        return "Limited Items";
+                      case "name-seasonal-items":
+                        return "Seasonal Items";
+                      case "name-vehicles":
+                        return "Vehicles";
+                      case "name-spoilers":
+                        return "Spoilers";
+                      case "name-rims":
+                        return "Rims";
+                      case "name-body-colors":
+                        return "Body Colors";
+                      case "name-hyperchromes":
+                        return "HyperChromes";
+                      case "name-textures":
+                        return "Body Textures";
+                      case "name-tire-stickers":
+                        return "Tire Stickers";
+                      case "name-tire-styles":
+                        return "Tire Styles";
+                      case "name-drifts":
+                        return "Drifts";
+                      case "name-furnitures":
+                        return "Furniture";
+                      case "name-horns":
+                        return "Horns";
+                      case "name-weapon-skins":
+                        return "Weapon Skins";
+                      default:
+                        return filterSort;
+                    }
+                  })(),
+                }}
+                onChange={(option: unknown) => {
+                  if (!option) {
+                    // Reset to original value when cleared
+                    setFilterSort("name-all-items");
+                    setPage(1);
+                    return;
                   }
-                })(),
-              }}
-              onChange={(option: unknown) => {
-                if (!option) {
-                  // Reset to original value when cleared
-                  setFilterSort("name-all-items");
+                  const newValue = (option as { value: FilterSort }).value;
+                  setFilterSort(newValue);
                   setPage(1);
-                  return;
-                }
-                const newValue = (option as { value: FilterSort }).value;
-                setFilterSort(newValue);
-                setPage(1);
-              }}
-              options={[
-                { value: "name-all-items", label: "All Items" },
-                { value: "name-limited-items", label: "Limited Items" },
-                { value: "name-seasonal-items", label: "Seasonal Items" },
-                { value: "name-vehicles", label: "Vehicles" },
-                { value: "name-spoilers", label: "Spoilers" },
-                { value: "name-rims", label: "Rims" },
-                { value: "name-body-colors", label: "Body Colors" },
-                { value: "name-hyperchromes", label: "HyperChromes" },
-                { value: "name-textures", label: "Body Textures" },
-                { value: "name-tire-stickers", label: "Tire Stickers" },
-                { value: "name-tire-styles", label: "Tire Styles" },
-                { value: "name-drifts", label: "Drifts" },
-                { value: "name-furnitures", label: "Furniture" },
-                { value: "name-horns", label: "Horns" },
-                { value: "name-weapon-skins", label: "Weapon Skins" },
-              ]}
-              classNamePrefix="react-select"
-              className="w-full"
-              isClearable={false}
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  borderColor: "#2E3944",
-                  color: "#D3D9D4",
-                }),
-                singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  color: "#D3D9D4",
-                  zIndex: 3000,
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#5865F2"
-                    : state.isFocused
-                      ? "#2E3944"
-                      : "#37424D",
-                  color:
-                    state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                  "&:active": {
-                    backgroundColor: "#124E66",
-                    color: "#FFFFFF",
-                  },
-                }),
-                clearIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
-                  },
-                }),
-              }}
-              isSearchable={false}
-            />
-          ) : (
-            <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
-          )}
+                }}
+                options={[
+                  { value: "name-all-items", label: "All Items" },
+                  { value: "name-limited-items", label: "Limited Items" },
+                  { value: "name-seasonal-items", label: "Seasonal Items" },
+                  { value: "name-vehicles", label: "Vehicles" },
+                  { value: "name-spoilers", label: "Spoilers" },
+                  { value: "name-rims", label: "Rims" },
+                  { value: "name-body-colors", label: "Body Colors" },
+                  { value: "name-hyperchromes", label: "HyperChromes" },
+                  { value: "name-textures", label: "Body Textures" },
+                  { value: "name-tire-stickers", label: "Tire Stickers" },
+                  { value: "name-tire-styles", label: "Tire Styles" },
+                  { value: "name-drifts", label: "Drifts" },
+                  { value: "name-furnitures", label: "Furniture" },
+                  { value: "name-horns", label: "Horns" },
+                  { value: "name-weapon-skins", label: "Weapon Skins" },
+                ]}
+                className="w-full"
+                isClearable={false}
+                unstyled
+                classNames={{
+                  control: () =>
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                  singleValue: () => "text-secondary-text",
+                  placeholder: () => "text-secondary-text",
+                  menu: () =>
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused }) =>
+                    `px-4 py-3 cursor-pointer ${
+                      isSelected
+                        ? "bg-button-info text-form-button-text"
+                        : isFocused
+                          ? "bg-quaternary-bg text-primary-text"
+                          : "bg-secondary-bg text-secondary-text"
+                    }`,
+                  clearIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  dropdownIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  groupHeading: () =>
+                    "px-4 py-2 text-primary-text font-semibold text-sm",
+                }}
+                isSearchable={false}
+              />
+            ) : (
+              <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+            )}
 
-          {selectLoaded ? (
-            <Select
-              value={{
-                value: valueSort,
-                label: (() => {
-                  switch (valueSort) {
-                    case "cash-desc":
-                      return "Cash Value (High to Low)";
-                    case "cash-asc":
-                      return "Cash Value (Low to High)";
-                    case "duped-desc":
-                      return "Duped Value (High to Low)";
-                    case "duped-asc":
-                      return "Duped Value (Low to High)";
-                    case "demand-desc":
-                      return "Demand (High to Low)";
-                    case "demand-asc":
-                      return "Demand (Low to High)";
-                    case "times-traded-desc":
-                      return "Times Traded (High to Low)";
-                    case "times-traded-asc":
-                      return "Times Traded (Low to High)";
-                    case "unique-circulation-desc":
-                      return "Unique Circulation (High to Low)";
-                    case "unique-circulation-asc":
-                      return "Unique Circulation (Low to High)";
-                    case "demand-multiple-desc":
-                      return "Demand Multiple (High to Low)";
-                    case "demand-multiple-asc":
-                      return "Demand Multiple (Low to High)";
-                    default:
-                      return valueSort;
+            {selectLoaded ? (
+              <Select
+                value={{
+                  value: valueSort,
+                  label: (() => {
+                    switch (valueSort) {
+                      case "cash-desc":
+                        return "Cash Value (High to Low)";
+                      case "cash-asc":
+                        return "Cash Value (Low to High)";
+                      case "duped-desc":
+                        return "Duped Value (High to Low)";
+                      case "duped-asc":
+                        return "Duped Value (Low to High)";
+                      case "demand-desc":
+                        return "Demand (High to Low)";
+                      case "demand-asc":
+                        return "Demand (Low to High)";
+                      case "times-traded-desc":
+                        return "Times Traded (High to Low)";
+                      case "times-traded-asc":
+                        return "Times Traded (Low to High)";
+                      case "unique-circulation-desc":
+                        return "Unique Circulation (High to Low)";
+                      case "unique-circulation-asc":
+                        return "Unique Circulation (Low to High)";
+                      case "demand-multiple-desc":
+                        return "Demand Multiple (High to Low)";
+                      case "demand-multiple-asc":
+                        return "Demand Multiple (Low to High)";
+                      default:
+                        return valueSort;
+                    }
+                  })(),
+                }}
+                onChange={(option: unknown) => {
+                  if (!option) {
+                    // Reset to original value when cleared
+                    setValueSort("cash-desc");
+                    setPage(1);
+                    return;
                   }
-                })(),
-              }}
-              onChange={(option: unknown) => {
-                if (!option) {
-                  // Reset to original value when cleared
-                  setValueSort("cash-desc");
+                  const newValue = (option as { value: ValueSort }).value;
+                  setValueSort(newValue);
                   setPage(1);
-                  return;
-                }
-                const newValue = (option as { value: ValueSort }).value;
-                setValueSort(newValue);
-                setPage(1);
-              }}
-              options={[
-                {
-                  label: "Values",
-                  options: [
-                    { value: "cash-desc", label: "Cash Value (High to Low)" },
-                    { value: "cash-asc", label: "Cash Value (Low to High)" },
-                    { value: "duped-desc", label: "Duped Value (High to Low)" },
-                    { value: "duped-asc", label: "Duped Value (Low to High)" },
-                  ],
-                },
-                {
-                  label: "Trading Metrics",
-                  options: [
-                    {
-                      value: "times-traded-desc",
-                      label: "Times Traded (High to Low)",
-                    },
-                    {
-                      value: "times-traded-asc",
-                      label: "Times Traded (Low to High)",
-                    },
-                    {
-                      value: "unique-circulation-desc",
-                      label: "Unique Circulation (High to Low)",
-                    },
-                    {
-                      value: "unique-circulation-asc",
-                      label: "Unique Circulation (Low to High)",
-                    },
-                    {
-                      value: "demand-multiple-desc",
-                      label: "Demand Multiple (High to Low)",
-                    },
-                    {
-                      value: "demand-multiple-asc",
-                      label: "Demand Multiple (Low to High)",
-                    },
-                  ],
-                },
-                {
-                  label: "Demand",
-                  options: [
-                    { value: "demand-desc", label: "Demand (High to Low)" },
-                    { value: "demand-asc", label: "Demand (Low to High)" },
-                  ],
-                },
-              ]}
-              classNamePrefix="react-select"
-              className="w-full"
-              isClearable={false}
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  borderColor: "#2E3944",
-                  color: "#D3D9D4",
-                }),
-                singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  color: "#D3D9D4",
-                  zIndex: 3000,
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#5865F2"
-                    : state.isFocused
-                      ? "#2E3944"
-                      : "#37424D",
-                  color:
-                    state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                  "&:active": {
-                    backgroundColor: "#124E66",
-                    color: "#FFFFFF",
+                }}
+                options={[
+                  {
+                    label: "Values",
+                    options: [
+                      { value: "cash-desc", label: "Cash Value (High to Low)" },
+                      { value: "cash-asc", label: "Cash Value (Low to High)" },
+                      {
+                        value: "duped-desc",
+                        label: "Duped Value (High to Low)",
+                      },
+                      {
+                        value: "duped-asc",
+                        label: "Duped Value (Low to High)",
+                      },
+                    ],
                   },
-                }),
-                clearIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
+                  {
+                    label: "Trading Metrics",
+                    options: [
+                      {
+                        value: "times-traded-desc",
+                        label: "Times Traded (High to Low)",
+                      },
+                      {
+                        value: "times-traded-asc",
+                        label: "Times Traded (Low to High)",
+                      },
+                      {
+                        value: "unique-circulation-desc",
+                        label: "Unique Circulation (High to Low)",
+                      },
+                      {
+                        value: "unique-circulation-asc",
+                        label: "Unique Circulation (Low to High)",
+                      },
+                      {
+                        value: "demand-multiple-desc",
+                        label: "Demand Multiple (High to Low)",
+                      },
+                      {
+                        value: "demand-multiple-asc",
+                        label: "Demand Multiple (Low to High)",
+                      },
+                    ],
                   },
-                }),
-              }}
-              isSearchable={false}
-            />
-          ) : (
-            <div className="h-10 w-full animate-pulse rounded-md border border-[#2E3944] bg-[#37424D]"></div>
-          )}
+                  {
+                    label: "Demand",
+                    options: [
+                      { value: "demand-desc", label: "Demand (High to Low)" },
+                      { value: "demand-asc", label: "Demand (Low to High)" },
+                    ],
+                  },
+                ]}
+                className="w-full"
+                isClearable={false}
+                unstyled
+                classNames={{
+                  control: () =>
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                  singleValue: () => "text-secondary-text",
+                  placeholder: () => "text-secondary-text",
+                  menu: () =>
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused }) =>
+                    `px-4 py-3 cursor-pointer ${
+                      isSelected
+                        ? "bg-button-info text-form-button-text"
+                        : isFocused
+                          ? "bg-quaternary-bg text-primary-text"
+                          : "bg-secondary-bg text-secondary-text"
+                    }`,
+                  clearIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  dropdownIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  groupHeading: () =>
+                    "px-4 py-2 text-primary-text font-semibold text-sm",
+                }}
+                isSearchable={false}
+              />
+            ) : (
+              <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+            )}
+          </div>
         </div>
 
         {/* Top Pagination */}
@@ -629,16 +606,20 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               onChange={handlePageChange}
               sx={{
                 "& .MuiPaginationItem-root": {
-                  color: "#D3D9D4",
+                  color: "var(--color-primary-text)",
                   "&.Mui-selected": {
-                    backgroundColor: "#5865F2",
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
                     "&:hover": {
-                      backgroundColor: "#4752C4",
+                      backgroundColor: "var(--color-button-info-hover)",
                     },
                   },
                   "&:hover": {
-                    backgroundColor: "#37424D",
+                    backgroundColor: "var(--color-quaternary-bg)",
                   },
+                },
+                "& .MuiPaginationItem-icon": {
+                  color: "var(--color-primary-text)",
                 },
               }}
             />
@@ -648,7 +629,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           {paginatedItems.length === 0 ? (
             <div className="col-span-full py-8 text-center">
-              <p className="text-muted">
+              <p className="text-tertiary-text">
                 {searchQuery
                   ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
                   : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`}
@@ -659,7 +640,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   setFilterSort("name-all-items");
                   setValueSort("cash-desc");
                 }}
-                className="text-muted mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 hover:bg-[#1A5F7A] focus:outline-none"
+                className="text-secondary-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
               >
                 Clear All Filters
               </button>
@@ -668,10 +649,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             paginatedItems.map((item) => (
               <div
                 key={item.id}
-                className={`group flex w-full flex-col rounded-lg p-2 text-left transition-colors ${
+                className={`group border-border-primary bg-tertiary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
                   item.tradable === 1
-                    ? "bg-[#1a2127] hover:bg-[#212A31]"
-                    : "cursor-not-allowed bg-[#1a2127] opacity-50"
+                    ? "hover:border-button-info"
+                    : "cursor-not-allowed opacity-50"
                 }`}
                 tabIndex={0}
                 role="button"
@@ -720,25 +701,28 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     />
                   </div>
                 </div>
-                <div className="flex flex-grow flex-col">
+                <div className="flex flex-grow flex-col p-2">
                   <div className="space-y-1.5">
-                    <span className="text-muted max-w-full text-sm font-semibold transition-colors group-hover:text-[#40c0e7]">
+                    <span className="text-link hover:text-link-hover max-w-full text-sm font-semibold transition-colors">
                       {item.name}
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span
-                        className="rounded-full px-2 py-0.5 text-xs text-white"
-                        style={{ backgroundColor: getItemTypeColor(item.type) }}
+                        className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                        style={{
+                          borderColor: getCategoryColor(item.type),
+                          backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
+                        }}
                       >
                         {item.type}
                       </span>
                       {item.is_limited === 1 && (
-                        <span className="rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500">
+                        <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
                           Limited
                         </span>
                       )}
                       {item.is_seasonal === 1 && (
-                        <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs text-cyan-400">
+                        <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
                           Seasonal
                         </span>
                       )}
@@ -750,12 +734,12 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     </div>
                     {item.tradable === 1 && (
                       <>
-                        <div className="text-muted space-y-1 text-xs">
-                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                            <span className="text-muted text-xs font-medium whitespace-nowrap">
+                        <div className="text-secondary-text space-y-1 text-xs">
+                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                            <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                               Cash
                             </span>
-                            <span className="rounded-lg bg-[#1d7da3] px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                            <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
                               {selectedVariants[item.id] &&
                               selectedVariants[item.id] !== "2025"
                                 ? item.children?.find(
@@ -794,11 +778,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   })()}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                            <span className="text-muted text-xs font-medium whitespace-nowrap">
+                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                            <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                               Duped
                             </span>
-                            <span className="rounded-lg bg-gray-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                            <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
                               {selectedVariants[item.id] &&
                               selectedVariants[item.id] !== "2025"
                                 ? item.children?.find(
@@ -837,8 +821,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   })()}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                            <span className="text-muted text-xs font-medium whitespace-nowrap">
+                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                            <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                               Demand
                             </span>
                             {(() => {
@@ -853,19 +837,19 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   : (item.demand ?? "N/A");
                               return (
                                 <span
-                                  className={`rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm ${getDemandColor(d)}`}
+                                  className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
                                 >
                                   {d === "N/A" ? "Unknown" : d}
                                 </span>
                               );
                             })()}
                           </div>
-                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                            <span className="text-muted text-xs font-medium whitespace-nowrap">
+                          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                            <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                               Trend
                             </span>
                             <span
-                              className={`rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm ${getTrendColor(item.trend || "Unknown")}`}
+                              className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
                             >
                               {!item.trend || item.trend === "N/A"
                                 ? "Unknown"
@@ -883,11 +867,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   openDropdownId === item.id ? null : item.id,
                                 );
                               }}
-                              className="text-muted flex w-full items-center justify-between gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm hover:bg-[#124E66] focus:outline-none"
+                              className="text-secondary-text border-stroke bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
                             >
                               {selectedVariants[item.id] || "2025"}
                               <ChevronDownIcon
-                                className={`h-4 w-4 transition-transform ${openDropdownId === item.id ? "rotate-180" : ""}`}
+                                className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
                               />
                             </button>
                             <AnimatePresence>
@@ -901,7 +885,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     duration: 0.18,
                                     ease: "easeOut",
                                   }}
-                                  className="absolute z-10 mt-1 w-full rounded-lg border border-[#2E3944] bg-[#37424D] shadow-lg"
+                                  className="border-stroke bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
                                 >
                                   <button
                                     onClick={(e) => {
@@ -910,11 +894,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       handleVariantSelect(item.id, "2025");
                                       setOpenDropdownId(null);
                                     }}
-                                    className={`text-muted w-full px-3 py-2 text-left text-sm hover:bg-[#124E66] ${
+                                    className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
                                       selectedVariants[item.id] === "2025" ||
                                       !selectedVariants[item.id]
-                                        ? "bg-[#124E66]"
-                                        : ""
+                                        ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                        : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
                                     }`}
                                   >
                                     2025
@@ -931,11 +915,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                         );
                                         setOpenDropdownId(null);
                                       }}
-                                      className={`text-muted w-full px-3 py-2 text-left text-sm hover:bg-[#124E66] ${
+                                      className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
                                         selectedVariants[item.id] ===
                                         child.sub_name
-                                          ? "bg-[#124E66]"
-                                          : ""
+                                          ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                          : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
                                       }`}
                                     >
                                       {child.sub_name}
@@ -957,7 +941,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           e.preventDefault();
                           handleAddItem(item, "offering");
                         }}
-                        className="flex-1 rounded-md bg-[#047857] px-2 py-1 text-xs text-white transition-colors hover:bg-[#065F46]"
+                        className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
                       >
                         Offer
                       </button>
@@ -967,7 +951,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                           e.preventDefault();
                           handleAddItem(item, "requesting");
                         }}
-                        className="flex-1 rounded-md bg-[#B91C1C] px-2 py-1 text-xs text-white transition-colors hover:bg-[#991B1B]"
+                        className="flex-1 rounded-md bg-red-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-red-700"
                       >
                         Request
                       </button>
@@ -986,16 +970,20 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               onChange={handlePageChange}
               sx={{
                 "& .MuiPaginationItem-root": {
-                  color: "#D3D9D4",
+                  color: "var(--color-primary-text)",
                   "&.Mui-selected": {
-                    backgroundColor: "#5865F2",
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
                     "&:hover": {
-                      backgroundColor: "#4752C4",
+                      backgroundColor: "var(--color-button-info-hover)",
                     },
                   },
                   "&:hover": {
-                    backgroundColor: "#37424D",
+                    backgroundColor: "var(--color-quaternary-bg)",
                   },
+                },
+                "& .MuiPaginationItem-icon": {
+                  color: "var(--color-primary-text)",
                 },
               }}
             />

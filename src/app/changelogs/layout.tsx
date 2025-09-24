@@ -10,5 +10,5 @@ export default function ChangelogsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen bg-[#2E3944]">{children}</div>;
+  return <div className="min-h-screen">{children}</div>;
 }

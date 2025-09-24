@@ -46,7 +46,7 @@ export default function ImageModal({
           alt={alt}
           width={width}
           height={height}
-          className="h-auto w-full rounded-lg border border-[#2E3944]"
+          className="h-auto w-full rounded-lg border"
           priority={priority}
         />
 

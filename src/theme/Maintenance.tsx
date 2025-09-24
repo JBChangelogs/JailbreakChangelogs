@@ -7,7 +7,7 @@ import Image from "next/image";
 import localFont from "next/font/local";
 
 const bangers = localFont({
-  src: "../../../public/fonts/Bangers.ttf",
+  src: "../../public/fonts/Bangers.ttf",
 });
 
 export default function Maintenance() {
@@ -30,7 +30,7 @@ export default function Maintenance() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#2E3944]">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
           <p className="text-white">Checking access...</p>
@@ -44,11 +44,20 @@ export default function Maintenance() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#2e3944] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat text-[#D3D9D4]">
+    <div
+      className="relative flex min-h-screen items-center justify-center bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat"
+      style={{ color: "var(--color-secondary-text)" }}
+    >
       <div className="absolute inset-0 z-[1] bg-black/70" />
 
       <div className="relative z-[2] container mx-auto max-w-2xl px-4">
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/[0.12] bg-[rgba(30,30,30,0.35)] px-8 py-8 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] backdrop-blur-xl">
+        <div
+          className="flex flex-col items-center gap-4 rounded-2xl border px-8 py-8 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] backdrop-blur-xl"
+          style={{
+            borderColor: "var(--color-border-primary)",
+            backgroundColor: "var(--color-overlay-medium)",
+          }}
+        >
           <Image
             src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
             alt="Jailbreak Changelogs Logo"
@@ -59,27 +68,45 @@ export default function Maintenance() {
             className="h-[140px] w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] filter"
           />
 
-          <h1 className={`${bangers.className} mb-4 text-5xl text-white`}>
+          <h1
+            className={`${bangers.className} mb-4 text-5xl`}
+            style={{ color: "var(--color-primary-text)" }}
+          >
             Under Maintenance
           </h1>
 
           <div className="space-y-4">
-            <p className="text-xl font-medium text-[#f3f4f6] drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+            <p
+              className="text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              style={{ color: "var(--color-primary-text)" }}
+            >
               We&apos;re making some improvements to bring you a better
               experience! 🚀
             </p>
 
-            <p className="text-lg font-medium text-[#f3f4f6] drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+            <p
+              className="text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              style={{ color: "var(--color-primary-text)" }}
+            >
               Check back soon.
             </p>
           </div>
 
-          <div className="w-full border-t border-white/[0.12] pt-4">
-            <h3 className="mb-4 text-xl font-bold text-[#f3f4f6]">
+          <div
+            className="w-full border-t pt-4"
+            style={{ borderColor: "var(--color-border-primary)" }}
+          >
+            <h3
+              className="mb-4 text-xl font-bold"
+              style={{ color: "var(--color-primary-text)" }}
+            >
               Stay Connected
             </h3>
 
-            <p className="mb-6 text-base font-medium text-[#f3f4f6] drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+            <p
+              className="mb-6 text-base font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              style={{ color: "var(--color-primary-text)" }}
+            >
               Follow us for updates and announcements
             </p>
 
@@ -88,7 +115,7 @@ export default function Maintenance() {
                 href="https://x.com/JBChangelogs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-[#000000] p-3 text-white transition-colors hover:bg-[#1A1A1A]"
+                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
                 aria-label="Twitter/X"
               >
                 <svg
@@ -103,7 +130,7 @@ export default function Maintenance() {
                 href="https://discord.jailbreakchangelogs.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-[#5865F2] p-3 text-white transition-colors hover:bg-[#4650c1]"
+                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
                 aria-label="Discord"
               >
                 <svg
@@ -118,7 +145,7 @@ export default function Maintenance() {
                 href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-[#305fff] p-3 text-white transition-colors hover:bg-[#264ccc]"
+                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
                 aria-label="Roblox Group"
               >
                 <svg
@@ -136,7 +163,19 @@ export default function Maintenance() {
             href="https://status.jailbreakchangelogs.xyz"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg bg-[#1d7da3] px-6 py-2.5 text-base font-semibold text-white shadow-[0_4px_14px_0_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1a6f91]"
+            className="rounded-lg px-6 py-2.5 text-base font-semibold shadow-[0_4px_14px_0_rgba(0,0,0,0.25)] transition-colors duration-200"
+            style={{
+              backgroundColor: "var(--color-button-info)",
+              color: "var(--color-form-button-text)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "var(--color-button-info-hover)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "var(--color-button-info)";
+            }}
           >
             Check Service Status
           </a>

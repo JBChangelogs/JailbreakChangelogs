@@ -18,14 +18,12 @@ import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
-import { OpenInNew } from "@mui/icons-material";
+import { OpenInNew, Settings as SettingsIcon } from "@mui/icons-material";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-// import { getToken } from '@/utils/auth';
-// import { PUBLIC_API_URL } from '@/utils/api';
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -108,18 +106,8 @@ export default function SettingsPage() {
   if (loading || settingsLoading) {
     return (
       <Container maxWidth="md" sx={{ minHeight: "100vh", py: 4 }}>
-        <Skeleton
-          variant="text"
-          width={200}
-          height={40}
-          sx={{ bgcolor: "#2E3944", mb: 2 }}
-        />
-        <Skeleton
-          variant="text"
-          width={300}
-          height={24}
-          sx={{ bgcolor: "#2E3944", mb: 4 }}
-        />
+        <Skeleton variant="text" width={200} height={40} sx={{ mb: 2 }} />
+        <Skeleton variant="text" width={300} height={24} sx={{ mb: 4 }} />
 
         {/* Privacy Settings Skeleton */}
         <Paper
@@ -127,43 +115,27 @@ export default function SettingsPage() {
           sx={{
             mb: 4,
             p: 3,
-            bgcolor: "#212A31",
-            color: "#D3D9D4",
-            border: "1px solid #2E3944",
+            backgroundColor: "var(--color-secondary-bg)",
+            color: "var(--color-primary-text)",
           }}
         >
-          <Skeleton
-            variant="text"
-            width={150}
-            height={32}
-            sx={{ bgcolor: "#2E3944", mb: 2 }}
-          />
-          <Divider sx={{ mb: 2, bgcolor: "#2E3944" }} />
+          <Skeleton variant="text" width={150} height={32} sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {[1, 2, 3].map((i) => (
               <Box
                 key={i}
                 sx={{ display: "flex", alignItems: "center", gap: 2 }}
               >
-                <Skeleton
-                  variant="rectangular"
-                  width={40}
-                  height={24}
-                  sx={{ bgcolor: "#2E3944" }}
-                />
+                <Skeleton variant="rectangular" width={40} height={24} />
                 <Box sx={{ flex: 1 }}>
                   <Skeleton
                     variant="text"
                     width="60%"
                     height={24}
-                    sx={{ bgcolor: "#2E3944", mb: 1 }}
+                    sx={{ mb: 1 }}
                   />
-                  <Skeleton
-                    variant="text"
-                    width="80%"
-                    height={20}
-                    sx={{ bgcolor: "#2E3944" }}
-                  />
+                  <Skeleton variant="text" width="80%" height={20} />
                 </Box>
               </Box>
             ))}
@@ -176,43 +148,27 @@ export default function SettingsPage() {
           sx={{
             mb: 4,
             p: 3,
-            bgcolor: "#212A31",
-            color: "#D3D9D4",
-            border: "1px solid #2E3944",
+            backgroundColor: "var(--color-secondary-bg)",
+            color: "var(--color-primary-text)",
           }}
         >
-          <Skeleton
-            variant="text"
-            width={150}
-            height={32}
-            sx={{ bgcolor: "#2E3944", mb: 2 }}
-          />
-          <Divider sx={{ mb: 2, bgcolor: "#2E3944" }} />
+          <Skeleton variant="text" width={150} height={32} sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {[1, 2].map((i) => (
               <Box
                 key={i}
                 sx={{ display: "flex", alignItems: "center", gap: 2 }}
               >
-                <Skeleton
-                  variant="rectangular"
-                  width={40}
-                  height={24}
-                  sx={{ bgcolor: "#2E3944" }}
-                />
+                <Skeleton variant="rectangular" width={40} height={24} />
                 <Box sx={{ flex: 1 }}>
                   <Skeleton
                     variant="text"
                     width="60%"
                     height={24}
-                    sx={{ bgcolor: "#2E3944", mb: 1 }}
+                    sx={{ mb: 1 }}
                   />
-                  <Skeleton
-                    variant="text"
-                    width="80%"
-                    height={20}
-                    sx={{ bgcolor: "#2E3944" }}
-                  />
+                  <Skeleton variant="text" width="80%" height={20} />
                 </Box>
               </Box>
             ))}
@@ -225,31 +181,15 @@ export default function SettingsPage() {
           sx={{
             mb: 4,
             p: 3,
-            bgcolor: "#212A31",
-            color: "#D3D9D4",
-            border: "1px solid #2E3944",
+            backgroundColor: "var(--color-secondary-bg)",
+            color: "var(--color-primary-text)",
           }}
         >
-          <Skeleton
-            variant="text"
-            width={150}
-            height={32}
-            sx={{ bgcolor: "#2E3944", mb: 2 }}
-          />
-          <Divider sx={{ mb: 2, bgcolor: "#2E3944" }} />
+          <Skeleton variant="text" width={150} height={32} sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Skeleton
-              variant="text"
-              width="80%"
-              height={24}
-              sx={{ bgcolor: "#2E3944" }}
-            />
-            <Skeleton
-              variant="text"
-              width="60%"
-              height={20}
-              sx={{ bgcolor: "#2E3944" }}
-            />
+            <Skeleton variant="text" width="80%" height={24} />
+            <Skeleton variant="text" width="60%" height={20} />
           </Box>
         </Paper>
       </Container>
@@ -280,11 +220,26 @@ export default function SettingsPage() {
         variant="h4"
         component="h1"
         gutterBottom
-        sx={{ mt: 2, color: "#D3D9D4" }}
+        sx={{
+          mt: 2,
+          color: "var(--color-primary-text)",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
       >
+        <SettingsIcon
+          sx={{
+            fontSize: "2rem",
+            color: "var(--color-primary-text) !important",
+          }}
+        />
         Settings
       </Typography>
-      <Typography variant="body1" sx={{ mb: 4, color: "#FFFFFF" }}>
+      <Typography
+        variant="body1"
+        sx={{ mb: 4, color: "var(--color-primary-text)" }}
+      >
         Welcome to your settings page, {userData.username}!
       </Typography>
 
@@ -296,20 +251,19 @@ export default function SettingsPage() {
             sx={{
               mb: 4,
               p: 3,
-              bgcolor: "#212A31",
-              color: "#D3D9D4",
-              border: "1px solid #2E3944",
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
             }}
           >
             <Typography
               variant="h6"
               component="h2"
               gutterBottom
-              sx={{ fontWeight: "bold", color: "#D3D9D4" }}
+              sx={{ fontWeight: "bold", color: "var(--color-primary-text)" }}
             >
               {category}
             </Typography>
-            <Divider sx={{ mb: 2, bgcolor: "#2E3944" }} />
+            <Divider sx={{ mb: 2 }} />
             <FormGroup>
               {settingKeys.map((key) => {
                 const typedKey = key as keyof typeof settings;
@@ -319,20 +273,24 @@ export default function SettingsPage() {
                     key={key}
                     sx={{
                       ...(isHighlighted && {
-                        backgroundColor: "rgba(88, 101, 242, 0.1)",
+                        backgroundColor:
+                          "rgba(var(--color-button-info-rgb), 0.1)",
                         borderRadius: 1,
                         p: 1,
-                        border: "1px solid #5865F2",
+                        border: "1px solid var(--color-button-info)",
                         animation: "pulse 2s infinite",
                         "@keyframes pulse": {
                           "0%": {
-                            boxShadow: "0 0 0 0 rgba(88, 101, 242, 0.4)",
+                            boxShadow:
+                              "0 0 0 0 rgba(var(--color-button-info-rgb), 0.4)",
                           },
                           "70%": {
-                            boxShadow: "0 0 0 10px rgba(88, 101, 242, 0)",
+                            boxShadow:
+                              "0 0 0 10px rgba(var(--color-button-info-rgb), 0)",
                           },
                           "100%": {
-                            boxShadow: "0 0 0 0 rgba(88, 101, 242, 0)",
+                            boxShadow:
+                              "0 0 0 0 rgba(var(--color-button-info-rgb), 0)",
                           },
                         },
                       }),
@@ -381,7 +339,7 @@ export default function SettingsPage() {
               (settings.banner_discord === 0 ||
                 settings.avatar_discord === 0) && (
                 <>
-                  <Divider sx={{ my: 3, bgcolor: "#2E3944" }} />
+                  <Divider sx={{ my: 3 }} />
                   <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                     <Button
                       variant="contained"
@@ -395,16 +353,16 @@ export default function SettingsPage() {
                         )
                       }
                       sx={{
-                        backgroundColor: "#1d7da3",
-                        color: "#FFFFFF",
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
                         fontWeight: 600,
                         borderRadius: 2,
                         px: 2,
                         py: 1,
-                        boxShadow: "0 2px 8px rgba(29, 125, 163, 0.3)",
+                        boxShadow: "var(--color-card-shadow)",
                         "&:hover": {
-                          backgroundColor: "#0D3A4D",
-                          boxShadow: "0 4px 12px rgba(29, 125, 163, 0.4)",
+                          backgroundColor: "var(--color-button-info-hover)",
+                          boxShadow: "var(--color-card-shadow)",
                           transform: "translateY(-1px)",
                         },
                         transition: "all 0.2s ease-in-out",
@@ -424,16 +382,16 @@ export default function SettingsPage() {
                         )
                       }
                       sx={{
-                        backgroundColor: "#1d7da3",
-                        color: "#FFFFFF",
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
                         fontWeight: 600,
                         borderRadius: 2,
                         px: 2,
                         py: 1,
-                        boxShadow: "0 2px 8px rgba(29, 125, 163, 0.3)",
+                        boxShadow: "var(--color-card-shadow)",
                         "&:hover": {
-                          backgroundColor: "#0D3A4D",
-                          boxShadow: "0 4px 12px rgba(29, 125, 163, 0.4)",
+                          backgroundColor: "var(--color-button-info-hover)",
+                          boxShadow: "var(--color-card-shadow)",
                           transform: "translateY(-1px)",
                         },
                         transition: "all 0.2s ease-in-out",
@@ -453,16 +411,16 @@ export default function SettingsPage() {
                         )
                       }
                       sx={{
-                        backgroundColor: "#1d7da3",
-                        color: "#FFFFFF",
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
                         fontWeight: 600,
                         borderRadius: 2,
                         px: 2,
                         py: 1,
-                        boxShadow: "0 2px 8px rgba(29, 125, 163, 0.3)",
+                        boxShadow: "var(--color-card-shadow)",
                         "&:hover": {
-                          backgroundColor: "#0D3A4D",
-                          boxShadow: "0 4px 12px rgba(29, 125, 163, 0.4)",
+                          backgroundColor: "var(--color-button-info-hover)",
+                          boxShadow: "var(--color-card-shadow)",
                           transform: "translateY(-1px)",
                         },
                         transition: "all 0.2s ease-in-out",
@@ -482,16 +440,16 @@ export default function SettingsPage() {
                         )
                       }
                       sx={{
-                        backgroundColor: "#1d7da3",
-                        color: "#FFFFFF",
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
                         fontWeight: 600,
                         borderRadius: 2,
                         px: 2,
                         py: 1,
-                        boxShadow: "0 2px 8px rgba(29, 125, 163, 0.3)",
+                        boxShadow: "var(--color-card-shadow)",
                         "&:hover": {
-                          backgroundColor: "#0D3A4D",
-                          boxShadow: "0 4px 12px rgba(29, 125, 163, 0.4)",
+                          backgroundColor: "var(--color-button-info-hover)",
+                          boxShadow: "var(--color-card-shadow)",
                           transform: "translateY(-1px)",
                         },
                         transition: "all 0.2s ease-in-out",
@@ -511,9 +469,34 @@ export default function SettingsPage() {
         sx={{
           mb: 4,
           p: 3,
-          bgcolor: "#212A31",
-          color: "#D3D9D4",
-          border: "2px solid #FF6B6B",
+          backgroundColor: "var(--color-secondary-bg)",
+          color: "var(--color-primary-text)",
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h2"
+          gutterBottom
+          sx={{
+            fontWeight: "bold",
+            color: "var(--color-primary-text)",
+            mb: 2,
+          }}
+        >
+          Account Connections
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <RobloxConnection userData={userData} />
+      </Paper>
+
+      <Paper
+        elevation={1}
+        sx={{
+          mb: 4,
+          p: 3,
+          backgroundColor: "var(--color-secondary-bg)",
+          color: "var(--color-primary-text)",
+          border: "2px solid var(--color-button-danger)",
           borderRadius: 2,
           position: "relative",
           "&::before": {
@@ -523,8 +506,7 @@ export default function SettingsPage() {
             left: 0,
             right: 0,
             height: "4px",
-            background:
-              "linear-gradient(90deg, #FF6B6B 0%, #FF5252 50%, #FF1744 100%)",
+            background: "var(--color-button-danger)",
             borderRadius: "2px 2px 0 0",
           },
         }}
@@ -535,14 +517,15 @@ export default function SettingsPage() {
           gutterBottom
           sx={{
             fontWeight: "bold",
-            color: "#FF6B6B",
+            color: "var(--color-button-danger)",
             mb: 2,
           }}
         >
           Danger Zone
         </Typography>
-        <Divider sx={{ mb: 2, bgcolor: "#FF6B6B", opacity: 0.3 }} />
-        <RobloxConnection userData={userData} />
+        <Divider
+          sx={{ mb: 2, bgcolor: "var(--color-button-danger)", opacity: 0.3 }}
+        />
         <DeleteAccount />
       </Paper>
 

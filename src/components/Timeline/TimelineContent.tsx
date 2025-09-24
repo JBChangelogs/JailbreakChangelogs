@@ -57,7 +57,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
     <div className="relative">
       {/* Vertical timeline line */}
       <motion.div
-        className="absolute top-0 bottom-0 left-0 w-1 bg-[#93c5fd] md:left-1/2 md:-translate-x-1/2"
+        className="bg-link absolute top-0 bottom-0 left-0 w-1 md:left-1/2 md:-translate-x-1/2"
         variants={timelineLineVariants}
         initial="hidden"
         animate="visible"
@@ -81,7 +81,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
           >
             {/* Connector line */}
             <motion.div
-              className={`absolute top-1/2 h-0.5 w-1/2 bg-[#93c5fd] ${index % 2 === 0 ? "left-0" : "right-0"}`}
+              className={`bg-link absolute top-1/2 h-0.5 w-1/2 ${index % 2 === 0 ? "left-0" : "right-0"}`}
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{
@@ -96,17 +96,11 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
               href={`/changelogs/${changelog.id}`}
               className={`group relative z-10 ml-8 w-full md:ml-0 md:w-[calc(45%-2rem)]`}
             >
-              <motion.div
-                className="overflow-hidden rounded-lg border border-[#2E3944] bg-[#212A31]"
-                whileHover={{
-                  borderColor: "#93c5fd",
-                  transition: { duration: 0.2 },
-                }}
-              >
+              <motion.div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border">
                 {changelog.image_url && (
                   <div className="relative aspect-video w-full">
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#212A31]">
-                      <ArrowPathIcon className="h-6 w-6 animate-spin text-[#93c5fd]" />
+                    <div className="bg-primary-bg absolute inset-0 flex items-center justify-center">
+                      <ArrowPathIcon className="text-link h-6 w-6 animate-spin" />
                     </div>
                     <Image
                       src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}
@@ -121,18 +115,18 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                 <motion.div
                   className="p-3"
                   whileHover={{
-                    backgroundColor: "#1a2127",
+                    backgroundColor: "var(--color-secondary-bg)",
                     transition: { duration: 0.2 },
                   }}
                 >
                   <div className="flex flex-col gap-0.5">
                     <h3
-                      className={`${inter.className} text-xl font-bold tracking-tighter text-blue-300 transition-colors group-hover:text-blue-400`}
+                      className={`${inter.className} --xl text-primary-text group-hover:text-link-hover font-bold tracking-tighter transition-colors`}
                     >
                       {changelog.title.split(" / ")[0]}
                     </h3>
                     <p
-                      className={`${inter.className} text-muted text-sm font-semibold tracking-tight`}
+                      className={`${inter.className} text-secondary-text text-sm font-semibold tracking-tight`}
                     >
                       {changelog.title.split(" / ")[1]}
                     </p>

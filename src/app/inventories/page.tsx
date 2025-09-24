@@ -30,24 +30,25 @@ interface BotAvatarData {
 export const dynamic = "force-dynamic";
 
 export default function InventoriesPage() {
-  // Check if Inventory Calculator feature is enabled
   if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
     return <ComingSoon />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
       <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-3xl font-bold text-white">Inventory Calculator</h1>
-        <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+        <h1 className="text-primary-text text-3xl font-bold">
+          Inventory Calculator
+        </h1>
+        <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
           New
         </span>
       </div>
 
       <ExperimentalFeatureBanner className="mb-6" />
 
-      <p className="mb-4 text-white">
+      <p className="text-primary-text mb-4">
         Enter a username or Roblox ID to check their Jailbreak inventory, or use
         the option below to view your own inventory.
       </p>
@@ -78,17 +79,17 @@ export default function InventoriesPage() {
 function StatsSkeleton() {
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="mb-2 h-8 animate-pulse rounded bg-[#37424D]"></div>
-        <div className="h-4 w-24 animate-pulse rounded bg-[#37424D]"></div>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
+        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="mb-2 h-8 animate-pulse rounded bg-[#37424D]"></div>
-        <div className="h-4 w-24 animate-pulse rounded bg-[#37424D]"></div>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
+        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="mb-2 h-8 animate-pulse rounded bg-[#37424D]"></div>
-        <div className="h-4 w-24 animate-pulse rounded bg-[#37424D]"></div>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
+        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
       </div>
     </div>
   );
@@ -98,24 +99,24 @@ function StatsSkeleton() {
 function OfficialBotsSkeleton() {
   return (
     <div className="mt-8">
-      <div className="mb-4 h-6 w-48 animate-pulse rounded bg-[#37424D]"></div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="mb-3 h-4 w-80 animate-pulse rounded bg-[#37424D]"></div>
+      <div className="bg-button-secondary mb-4 h-6 w-48 animate-pulse rounded"></div>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="bg-button-secondary mb-3 h-4 w-80 animate-pulse rounded"></div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col gap-3 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 sm:flex-row sm:items-center"
+              className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
             >
-              <div className="h-8 w-8 animate-pulse rounded-full bg-[#37424D]"></div>
-              <div className="h-10 w-10 animate-pulse rounded-full bg-[#37424D]"></div>
+              <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+              <div className="bg-button-secondary h-10 w-10 animate-pulse rounded-full"></div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1 h-4 w-32 animate-pulse rounded bg-[#37424D]"></div>
-                    <div className="h-3 w-24 animate-pulse rounded bg-[#37424D]"></div>
+                    <div className="bg-button-secondary mb-1 h-4 w-32 animate-pulse rounded"></div>
+                    <div className="bg-button-secondary h-3 w-24 animate-pulse rounded"></div>
                   </div>
-                  <div className="h-6 w-16 flex-shrink-0 animate-pulse rounded bg-[#37424D]"></div>
+                  <div className="bg-button-secondary h-6 w-16 flex-shrink-0 animate-pulse rounded"></div>
                 </div>
               </div>
             </div>
@@ -130,23 +131,23 @@ function OfficialBotsSkeleton() {
 function LeaderboardSkeleton() {
   return (
     <div className="mt-8">
-      <div className="mb-4 h-6 w-64 animate-pulse rounded bg-[#37424D]"></div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="bg-button-secondary mb-4 h-6 w-64 animate-pulse rounded"></div>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="flex flex-col gap-3 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 sm:flex-row sm:items-center"
+              className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
             >
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 animate-pulse rounded-full bg-[#37424D]"></div>
-                <div className="h-10 w-10 animate-pulse rounded-full bg-[#37424D]"></div>
+                <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                <div className="bg-button-secondary h-10 w-10 animate-pulse rounded-full"></div>
               </div>
               <div className="flex-1">
-                <div className="mb-1 h-4 w-32 animate-pulse rounded bg-[#37424D]"></div>
-                <div className="h-3 w-24 animate-pulse rounded bg-[#37424D]"></div>
+                <div className="bg-button-secondary mb-1 h-4 w-32 animate-pulse rounded"></div>
+                <div className="bg-button-secondary h-3 w-24 animate-pulse rounded"></div>
               </div>
-              <div className="h-6 w-16 animate-pulse rounded bg-[#37424D]"></div>
+              <div className="bg-button-secondary h-6 w-16 animate-pulse rounded"></div>
             </div>
           ))}
         </div>
@@ -166,23 +167,23 @@ async function StatsSection() {
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="text-2xl font-bold text-blue-400">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="text-primary-text text-2xl font-bold">
           {stats.item_count_str}
         </div>
-        <div className="text-sm text-gray-400">Items Tracked</div>
+        <div className="text-secondary-text text-sm">Items Tracked</div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="text-2xl font-bold text-green-400">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="text-primary-text text-2xl font-bold">
           {stats.user_count_str}
         </div>
-        <div className="text-sm text-gray-400">Users Scanned</div>
+        <div className="text-secondary-text text-sm">Users Scanned</div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-        <div className="text-2xl font-bold text-[#ef4444]">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="text-primary-text text-2xl font-bold">
           {duplicatesStats.total_duplicates_str}
         </div>
-        <div className="text-sm text-gray-400">Total Duplicates</div>
+        <div className="text-secondary-text text-sm">Total Duplicates</div>
       </div>
     </div>
   );
@@ -204,12 +205,12 @@ async function OfficialBotsSection() {
 
   return (
     <div className="mt-8">
-      <h2 className="mb-4 text-xl font-bold text-gray-300">
+      <h2 className="text-primary-text mb-4 text-xl font-bold">
         Official Scan Bots
       </h2>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div className="mb-3">
-          <p className="text-sm text-gray-400">
+          <p className="text-secondary-text text-sm">
             These are our official inventory scanning bots. Only these accounts
             are authorized to scan inventories on our behalf.
           </p>
@@ -238,15 +239,15 @@ async function OfficialBotsSection() {
             return (
               <div
                 key={botId}
-                className="flex flex-col gap-3 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 sm:flex-row sm:items-center"
+                className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
+                  <div className="bg-status-success text-form-button-text flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                     <RiVerifiedBadgeFill className="h-4 w-4" />
                   </div>
 
                   {/* Bot Avatar */}
-                  <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-[#37424D]">
+                  <div className="bg-surface-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
                     {avatarUrl ? (
                       <Image
                         src={avatarUrl}
@@ -257,8 +258,8 @@ async function OfficialBotsSection() {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#5865F2]">
-                          <span className="text-xs font-bold text-white">
+                        <div className="bg-button-info flex h-6 w-6 items-center justify-center rounded-full">
+                          <span className="text-form-button-text text-xs font-bold">
                             {displayName.charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -270,33 +271,17 @@ async function OfficialBotsSection() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium break-words text-blue-400">
-                        {displayName}
-                      </div>
-                      <div className="text-sm break-words text-gray-400">
-                        @{username}
-                      </div>
                       <a
                         href={`https://www.roblox.com/users/${botId}/profile`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 text-xs text-blue-300 transition-colors hover:text-blue-400"
+                        className="text-primary-text hover:text-link-hover font-medium break-words transition-colors"
                       >
-                        View Profile
-                        <svg
-                          className="h-3 w-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                          />
-                        </svg>
+                        {displayName}
                       </a>
+                      <div className="text-secondary-text text-sm break-words">
+                        @{username}
+                      </div>
                     </div>
                     <CopyButton text={botId} className="mt-1 flex-shrink-0" />
                   </div>
@@ -305,16 +290,18 @@ async function OfficialBotsSection() {
             );
           })}
         </div>
-        <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-900/20 p-3">
-          <div className="flex items-start gap-2">
-            <MdOutlineSecurity className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-400" />
-            <div className="text-sm text-yellow-300">
-              <p className="font-medium">Security Notice</p>
-              <p className="mt-1 text-yellow-400/80">
+        <div className="border-border-primary bg-button-info/10 mt-4 rounded-lg border p-4 shadow-sm">
+          <div className="flex items-start gap-4">
+            <MdOutlineSecurity className="text-button-info mt-0.5 h-4 w-4 flex-shrink-0" />
+            <div className="relative z-10">
+              <span className="text-primary-text text-base font-bold">
+                Security Notice
+              </span>
+              <div className="text-secondary-text mt-1">
                 If someone claims to be scanning inventories for JBCL but
                 isn&apos;t one of these official bots, they are impersonating
                 us. Please report such users to prevent scams.
-              </p>
+              </div>
             </div>
           </div>
         </div>
@@ -333,10 +320,10 @@ async function LeaderboardSection() {
 
   return (
     <div className="mt-8">
-      <h2 className="mb-4 text-xl font-bold text-gray-300">
+      <h2 className="text-primary-text mb-4 text-xl font-bold">
         Most Scanned Players ({leaderboard.length})
       </h2>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2">
           {leaderboard.map((user, index) => (
             <Suspense
@@ -413,24 +400,57 @@ async function LeaderboardUser({
   const username = robloxUser?.name || user.user_id;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 sm:flex-row sm:items-center">
+    <div
+      className={`flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
+        index <= 2
+          ? ""
+          : "border-border-primary bg-tertiary-bg hover:border-button-info"
+      }`}
+      style={{
+        ...(index === 0 && {
+          background:
+            "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+          borderColor: "hsl(45, 100%, 50%, 0.5)",
+        }),
+        ...(index === 1 && {
+          background:
+            "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+          borderColor: "hsl(0, 0%, 75%, 0.5)",
+        }),
+        ...(index === 2 && {
+          background:
+            "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+          borderColor: "hsl(30, 100%, 50%, 0.5)",
+        }),
+      }}
+    >
       <div className="flex items-center gap-3">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-            index === 0
-              ? "bg-yellow-500 text-black"
-              : index === 1
-                ? "bg-gray-400 text-black"
-                : index === 2
-                  ? "bg-amber-600 text-white"
-                  : "bg-[#37424D] text-gray-300"
+            index <= 2
+              ? "text-primary-text"
+              : "bg-button-secondary text-form-button-text"
           }`}
+          style={{
+            ...(index === 0 && {
+              background:
+                "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+            }),
+            ...(index === 1 && {
+              background:
+                "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+            }),
+            ...(index === 2 && {
+              background:
+                "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+            }),
+          }}
         >
           {index + 1}
         </div>
 
         {/* Avatar */}
-        <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-[#37424D]">
+        <div className="bg-button-secondary h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
           {avatarUrl ? (
             <Image
               src={avatarUrl}
@@ -441,8 +461,8 @@ async function LeaderboardUser({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#5865F2]">
-                <span className="text-xs font-bold text-white">
+              <div className="bg-button-info flex h-6 w-6 items-center justify-center rounded-full">
+                <span className="text-form-button-text text-xs font-bold">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -454,33 +474,17 @@ async function LeaderboardUser({
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-medium break-words text-blue-400">
-              {displayName}
-            </div>
-            <div className="text-sm break-words text-gray-400">
-              @{username} • {user.upsert_count.toLocaleString()} scans
-            </div>
             <a
               href={`https://www.roblox.com/users/${user.user_id}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-xs text-blue-300 transition-colors hover:text-blue-400"
+              className="text-primary-text hover:text-link-hover font-medium break-words transition-colors"
             >
-              View Roblox Profile
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
+              {displayName}
             </a>
+            <div className="text-secondary-text text-sm break-words">
+              @{username} • {user.upsert_count.toLocaleString()} scans
+            </div>
           </div>
           <CopyButton text={user.user_id} className="mt-1 flex-shrink-0" />
         </div>
@@ -498,26 +502,59 @@ function BasicLeaderboardUser({
   index: number;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 sm:flex-row sm:items-center">
+    <div
+      className={`flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
+        index <= 2
+          ? ""
+          : "border-border-primary bg-tertiary-bg hover:border-button-info"
+      }`}
+      style={{
+        ...(index === 0 && {
+          background:
+            "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+          borderColor: "hsl(45, 100%, 50%, 0.5)",
+        }),
+        ...(index === 1 && {
+          background:
+            "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+          borderColor: "hsl(0, 0%, 75%, 0.5)",
+        }),
+        ...(index === 2 && {
+          background:
+            "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+          borderColor: "hsl(30, 100%, 50%, 0.5)",
+        }),
+      }}
+    >
       <div className="flex items-center gap-3">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-            index === 0
-              ? "bg-yellow-500 text-black"
-              : index === 1
-                ? "bg-gray-400 text-black"
-                : index === 2
-                  ? "bg-amber-600 text-white"
-                  : "bg-[#37424D] text-gray-300"
+            index <= 2
+              ? "text-primary-text"
+              : "bg-button-secondary text-form-button-text"
           }`}
+          style={{
+            ...(index === 0 && {
+              background:
+                "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+            }),
+            ...(index === 1 && {
+              background:
+                "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+            }),
+            ...(index === 2 && {
+              background:
+                "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+            }),
+          }}
         >
           {index + 1}
         </div>
 
         {/* Placeholder Avatar */}
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#5865F2]">
-            <span className="text-xs font-bold text-white">?</span>
+        <div className="bg-button-secondary flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
+          <div className="bg-button-info flex h-6 w-6 items-center justify-center rounded-full">
+            <span className="text-form-button-text text-xs font-bold">?</span>
           </div>
         </div>
       </div>
@@ -525,8 +562,15 @@ function BasicLeaderboardUser({
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-blue-400">User {user.user_id}</div>
-            <div className="text-sm text-gray-400">
+            <a
+              href={`https://www.roblox.com/users/${user.user_id}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-text hover:text-link-hover font-medium transition-colors"
+            >
+              User {user.user_id}
+            </a>
+            <div className="text-secondary-text text-sm">
               @{user.user_id} • {user.upsert_count.toLocaleString()} scans
             </div>
           </div>

@@ -10,14 +10,11 @@ import {
   getVideoPath,
 } from "@/utils/images";
 import Link from "next/link";
-import {
-  getItemTypeColor,
-  getTrendColor,
-  getDemandColor,
-} from "@/utils/badgeColors";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import { formatFullValue } from "@/utils/values";
+import { getCategoryColor } from "@/utils/categoryIcons";
+import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -293,17 +290,19 @@ const SimilarItems = ({
   };
 
   return (
-    <div className="space-y-6 rounded-xl border border-gray-700 bg-[#212a31] p-6">
+    <div className="bg-secondary-bg border-border-primary hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       {/* Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/20">
-            <SparklesIcon className="h-5 w-5 text-purple-400" />
+          <div className="bg-button-info/20 flex h-8 w-8 items-center justify-center rounded-lg">
+            <SparklesIcon className="text-button-info h-5 w-5" />
           </div>
           <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold text-white">Similar Items</h3>
+            <h3 className="text-primary-text text-xl font-semibold">
+              Similar Items
+            </h3>
             {sortBy === "trading_metrics" && (
-              <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+              <span className="bg-button-info text-primary-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                 New
               </span>
             )}
@@ -322,59 +321,33 @@ const SimilarItems = ({
               setSortBy(newValue);
             }}
             options={sortOptions}
-            classNamePrefix="react-select"
             className="w-full"
             isClearable={false}
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#37424D",
-                borderColor: "#2E3944",
-                color: "#D3D9D4",
-                minHeight: "40px",
-                fontSize: "14px",
-                "&:hover": {
-                  borderColor: "#5865F2",
-                },
-                "&:focus-within": {
-                  borderColor: "#5865F2",
-                  boxShadow: "0 0 0 1px #5865F2",
-                },
-              }),
-              singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-              menu: (base) => ({
-                ...base,
-                backgroundColor: "#37424D",
-                color: "#D3D9D4",
-                zIndex: 3000,
-              }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isSelected
-                  ? "#5865F2"
-                  : state.isFocused
-                    ? "#2E3944"
-                    : "#37424D",
-                color:
-                  state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                fontSize: "14px",
-                "&:active": {
-                  backgroundColor: "#124E66",
-                  color: "#FFFFFF",
-                },
-              }),
-              dropdownIndicator: (base) => ({
-                ...base,
-                color: "#D3D9D4",
-                "&:hover": {
-                  color: "#FFFFFF",
-                },
-              }),
-            }}
             isSearchable={false}
+            unstyled
+            classNames={{
+              control: () =>
+                "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg",
+              singleValue: () => "text-secondary-text",
+              placeholder: () => "text-secondary-text",
+              menu: () =>
+                "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+              option: ({ isSelected, isFocused }) =>
+                `px-4 py-3 cursor-pointer ${
+                  isSelected
+                    ? "bg-button-info text-form-button-text"
+                    : isFocused
+                      ? "bg-quaternary-bg text-primary-text"
+                      : "bg-secondary-bg text-secondary-text"
+                }`,
+              clearIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
+              dropdownIndicator: () =>
+                "text-secondary-text hover:text-primary-text cursor-pointer",
+            }}
           />
         ) : (
-          <div className="h-10 w-full animate-pulse rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
+          <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
         )}
       </div>
 
@@ -383,18 +356,18 @@ const SimilarItems = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="mb-3 aspect-video rounded-lg border border-gray-700/50 bg-gray-800/50"></div>
-              <div className="mb-2 h-4 w-3/4 rounded bg-gray-800/50"></div>
-              <div className="h-4 w-1/2 rounded bg-gray-800/50"></div>
+              <div className="border-stroke bg-secondary-bg mb-3 aspect-video rounded-lg border"></div>
+              <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
+              <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
             </div>
           ))}
         </div>
       ) : similarItems.length === 0 ? (
-        <div className="rounded-lg border border-gray-700/50 bg-gray-800/50 p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-purple-500/30 bg-purple-500/20">
-            <SparklesIcon className="h-8 w-8 text-purple-400" />
+        <div className="bg-secondary-bg rounded-lg p-8 text-center">
+          <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+            <SparklesIcon className="text-button-info h-8 w-8" />
           </div>
-          <h4 className="mb-2 text-lg font-semibold text-white">
+          <h4 className="text-primary-text mb-2 text-lg font-semibold">
             {sortBy === "creator" && currentItem.creator !== "N/A"
               ? "No Items from Same Creator"
               : sortBy === "trading_metrics"
@@ -403,7 +376,7 @@ const SimilarItems = ({
                   ? "No Items with Similar Trends"
                   : "No Similar Items Found"}
           </h4>
-          <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-400">
+          <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
             {sortBy === "creator" && currentItem.creator !== "N/A"
               ? `No other items by ${currentItem.creator.split(/[ (]/)[0]} were found in the ${currentItem.type} category. Try switching to "Sort by Similarity" to see items with similar values and demand.`
               : sortBy === "creator" && currentItem.creator === "N/A"
@@ -417,28 +390,23 @@ const SimilarItems = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
-          {similarItems.map((item, index) => (
+          {similarItems.map((item) => (
             <Link
               key={item.id}
               href={`/item/${item.type.toLowerCase()}/${item.name}`}
               className="group block"
             >
               <div
-                className={`relative overflow-hidden rounded-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+                className={`border-stroke hover:border-button-info/50 relative overflow-hidden rounded-lg border transition-all duration-300 ${
                   item.is_seasonal === 1
-                    ? "border-2 border-[#40c0e7]"
+                    ? "border-button-info"
                     : item.is_limited === 1
-                      ? "border-2 border-[#ffd700]"
-                      : "border border-gray-700/50"
-                } bg-[#1a2127]`}
+                      ? "border-button-info"
+                      : ""
+                } bg-secondary-bg`}
               >
-                {/* Similarity Rank Badge */}
-                <div className="absolute top-2 left-2 z-10 rounded-full bg-black/70 px-2 py-1 text-xs font-bold text-white">
-                  #{index + 1}
-                </div>
-
                 {/* Media Section */}
-                <div className="relative aspect-video w-full overflow-hidden bg-[#212A31]">
+                <div className="relative aspect-video w-full overflow-hidden">
                   {isVideoItem(item.name) ? (
                     <video
                       src={getVideoPath(item.type, item.name)}
@@ -463,7 +431,7 @@ const SimilarItems = ({
                 <div className="flex flex-1 flex-col space-y-2 p-3">
                   {/* Item Name */}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-muted line-clamp-2 text-sm leading-tight font-semibold transition-colors hover:text-[#40c0e7]">
+                    <h3 className="text-link hover:text-link-hover line-clamp-2 text-sm leading-tight font-semibold transition-colors">
                       {item.name}
                     </h3>
                   </div>
@@ -471,13 +439,16 @@ const SimilarItems = ({
                   {/* Type Badge */}
                   <div className="flex flex-wrap gap-1">
                     <span
-                      className="bg-opacity-80 flex items-center rounded-full px-1.5 py-0.5 text-[10px] text-white"
-                      style={{ backgroundColor: getItemTypeColor(item.type) }}
+                      className="text-primary-text flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                      style={{
+                        borderColor: getCategoryColor(item.type),
+                        backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
+                      }}
                     >
                       {item.type}
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="flex items-center rounded-full bg-red-600/80 px-1.5 py-0.5 text-[10px] text-white">
+                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]">
                         Non-Tradable
                       </span>
                     )}
@@ -486,32 +457,32 @@ const SimilarItems = ({
                   {/* Values Section */}
                   <div className="space-y-1">
                     {/* Cash Value */}
-                    <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                      <span className="text-muted text-[10px] font-medium">
+                    <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-[10px] font-medium">
                         Cash
                       </span>
-                      <span className="rounded-lg bg-[#1d7da3] px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
                         {formatFullValue(item.cash_value)}
                       </span>
                     </div>
 
                     {/* Duped Value */}
-                    <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                      <span className="text-muted text-[10px] font-medium">
+                    <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-[10px] font-medium">
                         Duped
                       </span>
-                      <span className="rounded-lg bg-gray-600 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
                         {formatFullValue(item.duped_value)}
                       </span>
                     </div>
 
                     {/* Demand */}
-                    <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                      <span className="text-muted text-[10px] font-medium">
+                    <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-[10px] font-medium">
                         Demand
                       </span>
                       <span
-                        className={`rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm ${getDemandColor(item.demand)}`}
+                        className={`${getDemandColor(item.demand)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
                       >
                         {item.demand === "N/A" ? "Unknown" : item.demand}
                       </span>
@@ -519,12 +490,12 @@ const SimilarItems = ({
 
                     {/* Trend */}
                     {item.trend && item.trend !== "N/A" && (
-                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-[#2E3944] to-[#1a202c] p-1.5">
-                        <span className="text-muted text-[10px] font-medium">
+                      <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1.5">
+                        <span className="text-secondary-text text-[10px] font-medium">
                           Trend
                         </span>
                         <span
-                          className={`rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm ${getTrendColor(item.trend)}`}
+                          className={`${getTrendColor(item.trend)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
                         >
                           {item.trend}
                         </span>

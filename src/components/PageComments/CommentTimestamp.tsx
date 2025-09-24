@@ -43,15 +43,14 @@ const CommentTimestamp: React.FC<CommentTimestampProps> = ({
       slotProps={{
         tooltip: {
           sx: {
-            backgroundColor: "#0F1419",
-            color: "#D3D9D4",
+            backgroundColor: "var(--color-secondary-bg)",
+            color: "var(--color-primary-text)",
             fontSize: "0.75rem",
             padding: "8px 12px",
             borderRadius: "8px",
-            border: "1px solid #2E3944",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
             "& .MuiTooltip-arrow": {
-              color: "#0F1419",
+              color: "var(--color-secondary-bg)",
             },
           },
         },

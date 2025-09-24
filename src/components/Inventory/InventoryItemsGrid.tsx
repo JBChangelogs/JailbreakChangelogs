@@ -40,13 +40,13 @@ export default function InventoryItemsGrid({
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
+            <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
               <div className="flex items-start gap-4">
-                <div className="h-16 w-16 rounded-lg bg-[#2E3944]"></div>
+                <div className="bg-surface-bg h-16 w-16 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-[#2E3944]"></div>
-                  <div className="h-3 w-1/2 rounded bg-[#2E3944]"></div>
-                  <div className="h-3 w-1/3 rounded bg-[#2E3944]"></div>
+                  <div className="bg-surface-bg h-4 w-3/4 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/2 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/3 rounded"></div>
                 </div>
               </div>
             </div>
@@ -59,7 +59,9 @@ export default function InventoryItemsGrid({
   if (filteredItems.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-muted">No items found matching your criteria.</p>
+        <p className="text-secondary-text">
+          No items found matching your criteria.
+        </p>
       </div>
     );
   }
@@ -68,7 +70,7 @@ export default function InventoryItemsGrid({
     <div className="space-y-4">
       {/* Items Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredItems.map(({ item, itemData }) => {
+        {filteredItems.map(({ item }) => {
           const itemKey = `${item.categoryTitle}-${item.title}`;
           const duplicateCount = itemCounts.get(itemKey) || 1;
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
@@ -78,7 +80,6 @@ export default function InventoryItemsGrid({
             <InventoryItemCard
               key={item.id}
               item={item}
-              itemData={itemData}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
               onCardClick={onCardClick}
@@ -100,17 +101,20 @@ export default function InventoryItemsGrid({
             color="primary"
             sx={{
               "& .MuiPaginationItem-root": {
-                color: "#D3D9D4",
+                color: "var(--color-primary-text)",
                 "&.Mui-selected": {
-                  backgroundColor: "#5865F2",
-                  color: "#FFFFFF",
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-button-info-hover)",
+                  },
                 },
                 "&:hover": {
-                  backgroundColor: "#2E3944",
+                  backgroundColor: "var(--color-quaternary-bg)",
                 },
               },
-              "& .MuiPaginationItem-ellipsis": {
-                color: "#D3D9D4",
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
               },
             }}
           />

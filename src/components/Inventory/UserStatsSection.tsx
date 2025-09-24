@@ -4,6 +4,7 @@ import React from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
+import { formatMessageDate } from "@/utils/timestamp";
 import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -101,13 +102,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 };
 
 const formatDate = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatMessageDate(timestamp);
 };
 
 export default function UserStatsSection({
@@ -128,8 +123,8 @@ export default function UserStatsSection({
     return (
       <div className="space-y-4">
         <div className="animate-pulse">
-          <div className="mb-2 h-4 w-1/3 rounded bg-[#2E3944]"></div>
-          <div className="h-3 w-1/4 rounded bg-[#2E3944]"></div>
+          <div className="mb-2 h-4 w-1/3 rounded"></div>
+          <div className="h-3 w-1/4 rounded"></div>
         </div>
       </div>
     );
@@ -140,7 +135,7 @@ export default function UserStatsSection({
       {/* Basic Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="text-center">
-          <p className="text-muted text-sm">Total Items</p>
+          <p className="text-secondary-text text-sm">Total Items</p>
           <Tooltip
             title={currentData.item_count.toLocaleString()}
             placement="top"
@@ -148,27 +143,27 @@ export default function UserStatsSection({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   fontSize: "0.75rem",
                   padding: "8px 12px",
                   borderRadius: "8px",
-                  border: "1px solid #2E3944",
+
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <p className="cursor-help text-2xl font-bold text-white">
+            <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(currentData.item_count)}
             </p>
           </Tooltip>
         </div>
         <div className="text-center">
-          <p className="text-muted text-sm">Original Items</p>
+          <p className="text-secondary-text text-sm">Original Items</p>
           <Tooltip
             title={currentData.data
               .filter((item) => item.isOriginalOwner)
@@ -178,21 +173,21 @@ export default function UserStatsSection({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   fontSize: "0.75rem",
                   padding: "8px 12px",
                   borderRadius: "8px",
-                  border: "1px solid #2E3944",
+
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <p className="cursor-help text-2xl font-bold text-green-400">
+            <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(
                 currentData.data.filter((item) => item.isOriginalOwner).length,
               )}
@@ -200,7 +195,7 @@ export default function UserStatsSection({
           </Tooltip>
         </div>
         <div className="text-center">
-          <p className="text-muted text-sm">Non-Original</p>
+          <p className="text-secondary-text text-sm">Non-Original</p>
           <Tooltip
             title={currentData.data
               .filter((item) => !item.isOriginalOwner)
@@ -210,21 +205,21 @@ export default function UserStatsSection({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   fontSize: "0.75rem",
                   padding: "8px 12px",
                   borderRadius: "8px",
-                  border: "1px solid #2E3944",
+
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <p className="cursor-help text-2xl font-bold text-red-400">
+            <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(
                 currentData.data.filter((item) => !item.isOriginalOwner).length,
               )}
@@ -232,7 +227,7 @@ export default function UserStatsSection({
           </Tooltip>
         </div>
         <div className="text-center">
-          <p className="text-muted text-sm">Money</p>
+          <p className="text-secondary-text text-sm">Money</p>
           <Tooltip
             title={`$${currentData.money.toLocaleString()}`}
             placement="top"
@@ -240,21 +235,21 @@ export default function UserStatsSection({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   fontSize: "0.75rem",
                   padding: "8px 12px",
                   borderRadius: "8px",
-                  border: "1px solid #2E3944",
+
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <p className="cursor-help text-2xl font-bold text-green-400">
+            <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatMoney(currentData.money)}
             </p>
           </Tooltip>
@@ -270,10 +265,12 @@ export default function UserStatsSection({
 
       {/* Total Values */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-          <div className="text-muted mb-2 text-sm">Total Cash Value</div>
+        <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 text-center">
+          <div className="text-secondary-text mb-2 text-sm">
+            Total Cash Value
+          </div>
           {isLoadingValues ? (
-            <div className="animate-pulse text-2xl font-bold text-[#1d7da3]">
+            <div className="text-secondary-text animate-pulse text-2xl font-bold">
               Loading...
             </div>
           ) : (
@@ -284,30 +281,31 @@ export default function UserStatsSection({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     fontSize: "0.75rem",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #2E3944",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
               }}
             >
-              <div className="cursor-help text-2xl font-bold text-white">
+              <div className="text-primary-text cursor-help text-2xl font-bold">
                 {formatPreciseMoney(totalCashValue)}
               </div>
             </Tooltip>
           )}
         </div>
-        <div className="rounded-lg border border-[#37424D] bg-[#2E3944] p-4 text-center">
-          <div className="text-muted mb-2 text-sm">Total Duped Value</div>
+        <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 text-center">
+          <div className="text-secondary-text mb-2 text-sm">
+            Total Duped Value
+          </div>
           {isLoadingValues ? (
-            <div className="animate-pulse text-2xl font-bold text-gray-400">
+            <div className="text-secondary-text animate-pulse text-2xl font-bold">
               Loading...
             </div>
           ) : (
@@ -318,21 +316,20 @@ export default function UserStatsSection({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     fontSize: "0.75rem",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #2E3944",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
               }}
             >
-              <div className="cursor-help text-2xl font-bold text-white">
+              <div className="text-primary-text cursor-help text-2xl font-bold">
                 {formatPreciseMoney(totalDupedValue)}
               </div>
             </Tooltip>
@@ -343,7 +340,9 @@ export default function UserStatsSection({
       {/* Gamepasses */}
       {currentData.gamepasses && currentData.gamepasses.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-muted mb-2 text-lg font-medium">Gamepasses</h3>
+          <h3 className="text-primary-text mb-2 text-lg font-medium">
+            Gamepasses
+          </h3>
           <div className="flex flex-wrap gap-3">
             {(() => {
               const gamepassOrder = [
@@ -369,7 +368,7 @@ export default function UserStatsSection({
                 if (!gamepassInfo) return null;
 
                 const GamepassContent = () => (
-                  <div className="text-muted flex items-center gap-2 rounded-lg border border-[#5865F2] bg-[#2B2F4C] px-3 py-2 text-sm transition-colors hover:bg-[#32365A]">
+                  <div className="text-primary-text border-button-info hover:bg-button-info/10 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors">
                     <div className="relative h-6 w-6">
                       <Image
                         src={`/assets/images/gamepasses/${gamepassInfo.image}.webp`}
@@ -406,18 +405,24 @@ export default function UserStatsSection({
       )}
 
       {/* Metadata */}
-      <div className="text-muted mt-4 space-y-1 text-sm">
+      <div className="text-secondary-text mt-4 space-y-1 text-sm">
         <p>
-          <span className="font-semibold text-white">Scan Count:</span>{" "}
-          {currentData.scan_count}
+          <span className="text-primary-text font-semibold">Scan Count:</span>{" "}
+          <span className="text-secondary-text">{currentData.scan_count}</span>
         </p>
         <p>
-          <span className="font-semibold text-white">First Scanned:</span>{" "}
-          {formatDate(currentData.created_at)} ({createdRelativeTime})
+          <span className="text-primary-text font-semibold">
+            First Scanned:
+          </span>{" "}
+          <span className="text-secondary-text">
+            {formatDate(currentData.created_at)} ({createdRelativeTime})
+          </span>
         </p>
         <p>
-          <span className="font-semibold text-white">Last Scanned:</span>{" "}
-          {formatDate(currentData.updated_at)} ({updatedRelativeTime})
+          <span className="text-primary-text font-semibold">Last Scanned:</span>{" "}
+          <span className="text-secondary-text">
+            {formatDate(currentData.updated_at)} ({updatedRelativeTime})
+          </span>
         </p>
       </div>
     </div>

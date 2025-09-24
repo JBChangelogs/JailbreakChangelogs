@@ -1,9 +1,10 @@
 import React, { Suspense } from "react";
-import Link from "next/link";
 import { Metadata } from "next";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
 import DupeReportHeader from "@/components/Dupes/DupeReportHeader";
 import DupeSearchForm from "@/components/Dupes/DupeSearchForm";
 import { fetchItems, fetchDupes } from "@/utils/api";
+import { formatTimestamp } from "@/utils/timestamp";
 import Loading from "./loading";
 import { Item, DupeResult } from "@/types";
 
@@ -16,34 +17,38 @@ export const metadata: Metadata = {
 
 export default function DupeCalculatorPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4">
+      <Breadcrumb />
       <DupeReportHeader />
 
-      {/* Deprecated Message */}
-      <div className="mb-6 rounded-lg border border-orange-500 bg-orange-900/20 p-4">
-        <div className="flex items-center gap-3">
-          <div className="text-orange-400">⚠️</div>
-          <div>
-            <h3 className="font-semibold text-orange-300">
-              Deprecated Feature
-            </h3>
-            <p className="text-sm text-orange-200">
-              This dupe calculator is no longer maintained. Please use the new{" "}
-              <Link href="/dupes" className="underline hover:text-orange-100">
-                Dupe Finder
-              </Link>{" "}
-              for more accurate and comprehensive results.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+      <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
         <div className="mb-6">
-          <h2 className="text-muted text-xl font-semibold">
-            Check for Duped Items
+          <h2 className="text-secondary-text text-xl font-semibold">
+            Search for Duped Items
           </h2>
         </div>
+
+        {/* Stats Card */}
+        <div className="border-tertiary-bg bg-tertiary-bg mb-6 rounded-lg border p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-primary-text text-lg font-semibold">
+                Total Dupes Reported
+              </h3>
+              <p className="text-secondary-text text-sm">
+                All dupe reports in our database
+              </p>
+            </div>
+            <Suspense
+              fallback={
+                <div className="bg-quaternary-bg h-8 w-16 animate-pulse rounded" />
+              }
+            >
+              <DupeStatsWrapper />
+            </Suspense>
+          </div>
+        </div>
+
         <Suspense fallback={<Loading />}>
           <DupeSearchFormWrapper />
         </Suspense>
@@ -52,11 +57,37 @@ export default function DupeCalculatorPage() {
   );
 }
 
+async function DupeStatsWrapper() {
+  const dupes = await fetchDupes();
+  const totalDupes = Array.isArray(dupes) ? dupes.length : 0;
+
+  // Find the most recent dupe report
+  const lastReportedDupe =
+    Array.isArray(dupes) && dupes.length > 0
+      ? dupes.reduce((latest, current) =>
+          current.created_at > latest.created_at ? current : latest,
+        )
+      : null;
+
+  return (
+    <div className="text-center sm:text-right">
+      <div className="text-primary-text text-2xl font-bold">
+        {totalDupes.toLocaleString()}
+      </div>
+      {lastReportedDupe && (
+        <div className="text-secondary-text mt-1 text-xs">
+          Last reported:{" "}
+          {formatTimestamp(lastReportedDupe.created_at, { format: "long" })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 async function DupeSearchFormWrapper() {
   const [items, dupes] = await Promise.all([fetchItems(), fetchDupes()]);
   const safeDupes = Array.isArray(dupes) ? (dupes as DupeResult[]) : [];
+  const safeItems = Array.isArray(items) ? (items as Item[]) : [];
 
-  return (
-    <DupeSearchForm initialItems={items as Item[]} initialDupes={safeDupes} />
-  );
+  return <DupeSearchForm initialItems={safeItems} initialDupes={safeDupes} />;
 }

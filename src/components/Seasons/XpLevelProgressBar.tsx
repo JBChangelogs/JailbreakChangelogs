@@ -78,10 +78,10 @@ export default function XpLevelProgressBar({
   return (
     <div className="mb-3">
       {/* Game-style Progress Bar */}
-      <div className="relative h-8 w-full rounded-lg border-2 border-yellow-400 bg-black">
+      <div className="border-button-info bg-primary-bg relative h-8 w-full rounded-lg border-2">
         {/* Progress Fill */}
         <div
-          className="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-500"
+          className="bg-button-info absolute top-0 left-0 h-full transition-all duration-500"
           style={{
             width: `${progressPercentage}%`,
             borderRadius:
@@ -89,29 +89,44 @@ export default function XpLevelProgressBar({
           }}
         />
 
-        {/* XP Text Overlay */}
-        <div className="absolute top-1/2 left-2 -translate-y-1/2">
-          <span className="text-sm font-bold text-orange-500">
-            {xpRequiredForThisLevel.toLocaleString()}/
-            {xpRequiredForThisLevel.toLocaleString()}
-          </span>
+        {/* Mobile Layout - Stack vertically on small screens */}
+        <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
+          <div className="text-primary-text text-xs leading-tight font-bold">
+            <div className="text-center">LEVEL {level}</div>
+            <div className="text-center text-[10px]">
+              SEASON {season.season}
+            </div>
+          </div>
         </div>
 
-        {/* Level Info - Centered */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className="text-sm font-bold text-white">LEVEL {level}</span>
-        </div>
+        {/* Desktop Layout - Horizontal layout for larger screens */}
+        <div className="hidden sm:block">
+          {/* XP Text Overlay */}
+          <div className="absolute top-1/2 left-2 -translate-y-1/2">
+            <span className="text-primary-text text-sm font-bold">
+              {xpRequiredForThisLevel.toLocaleString()}/
+              {xpRequiredForThisLevel.toLocaleString()}
+            </span>
+          </div>
 
-        {/* Season Info - Right Side */}
-        <div className="absolute top-1/2 right-2 -translate-y-1/2">
-          <span className="text-sm font-bold text-white">
-            SEASON {season.season}
-          </span>
+          {/* Level Info - Centered */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <span className="text-primary-text text-sm font-bold">
+              LEVEL {level}
+            </span>
+          </div>
+
+          {/* Season Info - Right Side */}
+          <div className="absolute top-1/2 right-2 -translate-y-1/2">
+            <span className="text-primary-text text-sm font-bold">
+              SEASON {season.season}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Additional Info */}
-      <div className="mt-1 flex justify-between text-xs text-gray-400">
+      <div className="text-secondary-text mt-1 flex flex-col gap-1 text-xs sm:flex-row sm:justify-between">
         <span>This Level: {xpRequiredForThisLevel.toLocaleString()} XP</span>
         <span>Total: {totalXpForLevel.toLocaleString()} XP</span>
       </div>

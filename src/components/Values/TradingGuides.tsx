@@ -139,26 +139,26 @@ export default function TradingGuides({
   };
 
   return (
-    <div className="mt-8 border-t border-[#2E3944] pt-8">
+    <div className="border-secondary-text mt-8 border-t pt-8">
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="mb-4 flex w-full items-center justify-between rounded-lg border border-[#2E3944] bg-[#37424D] p-4 transition-colors hover:bg-[#2E3944]"
+        className="hover:bg-primary-bg border-stroke bg-secondary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <h3 className="text-muted text-xl font-semibold">
+          <h3 className="text-primary-text text-xl font-semibold">
             Trading Guides & Information
           </h3>
           {!isExpanded && (
-            <span className="hidden animate-pulse items-center rounded-full bg-[#5865F2] px-2 py-1 text-xs font-medium text-white md:inline-flex">
+            <span className="bg-button-info text-form-button-text hidden animate-pulse items-center rounded-full px-2 py-1 text-xs font-medium md:inline-flex">
               Click me!
             </span>
           )}
         </div>
         {isExpanded ? (
-          <ChevronUpIcon className="text-muted h-5 w-5" />
+          <ChevronUpIcon className="text-secondary-text h-5 w-5" />
         ) : (
-          <ChevronDownIcon className="text-muted h-5 w-5" />
+          <ChevronDownIcon className="text-secondary-text h-5 w-5" />
         )}
       </button>
 
@@ -166,10 +166,10 @@ export default function TradingGuides({
       {isExpanded && (
         <div className="flex flex-col gap-8 lg:flex-row">
           <div className="flex-1">
-            <h3 className="text-muted mb-2 text-xl font-semibold">
+            <h3 className="text-primary-text mb-2 text-xl font-semibold">
               Trader Notes
             </h3>
-            <ul className="text-muted mb-4 list-inside list-disc space-y-2">
+            <ul className="text-secondary-text mb-4 list-inside list-disc space-y-2">
               <li>This is NOT an official list, it is 100% community based</li>
               <li>
                 Some values may be outdated but we do our best to make sure
@@ -181,28 +181,30 @@ export default function TradingGuides({
               </li>
             </ul>
 
-            <h3 className="text-muted mb-2 text-xl font-semibold">
+            <h3 className="text-primary-text mb-4 text-xl font-semibold">
               Demand Levels Guide
             </h3>
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-3">
               {demandOrder.map((demand) => (
                 <button
                   key={demand}
                   onClick={() => handleDemandClick(demand)}
-                  className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
+                  className={`border-border-primary bg-primary-bg hover:border-border-focus flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 transition-all hover:scale-105 focus:outline-none ${
                     valueSort === getDemandValue(demand)
-                      ? "ring-2 ring-[#5865F2]"
+                      ? "ring-border-focus ring-2"
                       : ""
                   }`}
                 >
                   <span
                     className={`inline-block h-2 w-2 rounded-full ${getDemandColor(demand)}`}
                   ></span>
-                  <span className="text-sm font-bold text-white">{demand}</span>
+                  <span className="text-primary-text text-sm font-semibold">
+                    {demand}
+                  </span>
                 </button>
               ))}
             </div>
-            <p className="text-muted mb-4 text-sm">
+            <p className="text-secondary-text mb-4 text-sm">
               <strong>Note:</strong> Demand levels are ranked from lowest to
               highest. Items with higher demand are generally easier to trade
               and may have better values.
@@ -211,10 +213,10 @@ export default function TradingGuides({
               represented among items.
             </p>
 
-            <h3 className="text-muted mb-2 text-xl font-semibold">
+            <h3 className="text-primary-text mb-4 text-xl font-semibold">
               Trend Levels Guide
             </h3>
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-3">
               {trendOrder.map((trend) => (
                 <Tooltip
                   key={trend}
@@ -225,15 +227,14 @@ export default function TradingGuides({
                   slotProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: "#0F1419",
-                        color: "#D3D9D4",
+                        backgroundColor: "var(--color-primary-bg)",
+                        color: "var(--color-primary-text)",
                         fontSize: "0.75rem",
                         padding: "8px 12px",
                         borderRadius: "8px",
-                        border: "1px solid #2E3944",
                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                         "& .MuiTooltip-arrow": {
-                          color: "#0F1419",
+                          color: "var(--color-primary-bg)",
                         },
                       },
                     },
@@ -241,16 +242,16 @@ export default function TradingGuides({
                 >
                   <button
                     onClick={() => handleTrendClick(trend)}
-                    className={`flex items-center gap-2 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 transition-all hover:scale-105 focus:outline-none ${
+                    className={`border-border-primary bg-primary-bg hover:border-border-focus flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 transition-all hover:scale-105 focus:outline-none ${
                       valueSort === getTrendValue(trend)
-                        ? "ring-2 ring-[#5865F2]"
+                        ? "ring-border-focus ring-2"
                         : ""
                     }`}
                   >
                     <span
                       className={`inline-block h-2 w-2 rounded-full ${getTrendColor(trend)}`}
                     ></span>
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-primary-text text-sm font-semibold">
                       {trend}
                     </span>
                   </button>
@@ -298,9 +299,8 @@ export default function TradingGuides({
           }
           sx={{
             width: "100%",
-            backgroundColor: "#0F1419",
-            color: "#D3D9D4",
-            border: "1px solid #2E3944",
+            backgroundColor: "var(--color-primary-bg)",
+            color: "var(--color-primary-text)",
             borderRadius: "30px",
             "& .MuiAlert-message": {
               width: "100%",

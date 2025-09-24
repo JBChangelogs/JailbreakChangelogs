@@ -6,13 +6,13 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
-import { PUBLIC_API_URL } from "@/utils/api";
-import Image from "next/image";
 import Link from "next/link";
-import { getItemImagePath, handleImageError } from "@/utils/images";
-import { getItemTypeColor } from "@/utils/badgeColors";
-import { formatTimestamp } from "@/utils/timestamp";
+import { formatTimestamp, formatRelativeDate } from "@/utils/timestamp";
 import ReportDupeModal from "./ReportDupeModal";
+import { ItemDetails } from "@/types";
+import { TradeAdTooltip } from "../trading/TradeAdTooltip";
+import { getCategoryColor } from "@/utils/categoryIcons";
+import { Tooltip } from "@mui/material";
 
 interface DupeResult {
   item_id: number;
@@ -20,47 +20,6 @@ interface DupeResult {
   user_id: number | null;
   proof: string | null;
   created_at: number;
-}
-
-interface ItemDetails {
-  id: number;
-  name: string;
-  type: string;
-  creator: string;
-  is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
-  price: string;
-  is_limited: number;
-  notes: string;
-  demand: string;
-  description: string;
-  health: number;
-  tradable: number;
-  last_updated: number;
-  children?: Array<{
-    id: number;
-    parent: number;
-    sub_name: string;
-    created_at: number;
-    data: {
-      name: string;
-      type: string;
-      creator: string;
-      is_seasonal: number | null;
-      cash_value: string;
-      duped_value: string;
-      price: string;
-      is_limited: number | null;
-      duped_owners: string;
-      notes: string;
-      demand: string;
-      description: string;
-      health: number;
-      tradable: boolean;
-      last_updated: number;
-    };
-  }>;
 }
 
 interface Suggestion {
@@ -78,7 +37,8 @@ interface DupeResultsModalProps {
   suggestion: Suggestion | null;
   ownerName: string;
   itemName: string;
-  itemId: number;
+  itemDetails: ItemDetails | null;
+  allItemDetails: ItemDetails[];
 }
 
 const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
@@ -90,10 +50,9 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
   suggestion,
   ownerName,
   itemName,
-  itemId,
+  itemDetails,
+  allItemDetails,
 }) => {
-  const [itemDetails, setItemDetails] = useState<ItemDetails[]>([]);
-  const [itemLoading, setItemLoading] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const uniqueItemsCount = [...new Set(results.map((result) => result.item_id))]
     .length;
@@ -109,66 +68,39 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    const fetchItemDetails = async () => {
-      if (results.length > 0) {
-        setItemLoading(true);
-        try {
-          // Get unique item IDs
-          const uniqueItemIds = [
-            ...new Set(results.map((result) => result.item_id)),
-          ];
-
-          const itemPromises = uniqueItemIds.map((itemId) =>
-            fetch(`${PUBLIC_API_URL}/items/get?id=${itemId}`).then((res) =>
-              res.json(),
-            ),
-          );
-          const items = await Promise.all(itemPromises);
-          setItemDetails(items);
-        } catch (err) {
-          console.error("Error fetching item details:", err);
-        } finally {
-          setItemLoading(false);
-        }
-      }
-    };
-
-    fetchItemDetails();
-  }, [results]);
-
   if (!isOpen) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-        <div className="relative mx-4 w-full max-w-md rounded-lg bg-[#212A31] shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#2E3944] p-4">
-            <h2 className="text-xl font-semibold text-[#FFFFFF]">
-              Dupe Check Results
-            </h2>
+        <div
+          className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        <div className="modal-container bg-secondary-bg border-button-info relative mx-4 w-full max-w-4xl rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
+            <h2>Dupe Check Results</h2>
             <button
               onClick={onClose}
-              className="text-muted transition-colors hover:text-[#FFFFFF]"
+              className="text-secondary-text hover:text-primary-text"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="p-4">
+          <div className="modal-content p-6">
             {loading && (
               <div className="flex items-center justify-center py-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#5865F2]" />
+                <div className="border-button-info h-8 w-8 animate-spin rounded-full border-b-2" />
               </div>
             )}
 
             {error && !suggestion && (
-              <div className="py-4 text-center text-red-500">{error}</div>
+              <div className="text-button-danger py-4 text-center">{error}</div>
             )}
 
             {suggestion && (
-              <div className="py-2 text-center text-[#FFA500]">
+              <div className="text-status-warning py-2 text-center">
                 <div className="flex flex-col items-center">
                   <ExclamationTriangleIcon className="mb-2 h-12 w-12" />
                   <div>
@@ -186,14 +118,14 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
 
             {!loading && !error && !suggestion && results.length === 0 && (
               <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center text-green-500">
+                <div className="text-status-success flex flex-col items-center justify-center">
                   <FaCheckCircle className="mb-2 h-12 w-12" />
                   <div className="text-center">
-                    <div className="text-muted">
+                    <div className="text-secondary-text">
                       No dupes found for {ownerName}
                     </div>
                     {itemName && (
-                      <div className="text-muted">
+                      <div className="text-secondary-text">
                         No dupe record found for {itemName}
                       </div>
                     )}
@@ -203,7 +135,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                   <div className="flex justify-center">
                     <button
                       disabled
-                      className="cursor-not-allowed rounded-lg bg-gray-600 px-4 py-2 text-gray-400"
+                      className="bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed rounded-lg border px-4 py-2"
                     >
                       Report {itemName} as duped (Disabled)
                     </button>
@@ -214,70 +146,173 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
 
             {!loading && !error && results.length > 0 && (
               <div className="space-y-4">
-                <div className="mb-4 flex flex-col items-center justify-center text-red-500">
-                  <FaExclamationCircle className="mb-2 h-12 w-12" />
-                  <div className="text-muted">
-                    Found {uniqueItemsCount} unique dupe item
-                    {uniqueItemsCount !== 1 ? "s" : ""} for {results[0].owner}
+                {/* Header */}
+                <div className="bg-button-danger/10 border-button-danger/20 rounded-lg border p-4">
+                  <div className="flex items-center gap-3">
+                    <FaExclamationCircle className="text-button-danger h-6 w-6 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-primary-text text-lg font-semibold">
+                        {uniqueItemsCount} Dupe Item
+                        {uniqueItemsCount !== 1 ? "s" : ""} Found
+                      </h3>
+                      <p className="text-secondary-text text-sm">
+                        Owner:{" "}
+                        <span className="text-primary-text font-medium">
+                          {results[0].owner}
+                        </span>
+                      </p>
+                      <p className="text-secondary-text mt-1 text-xs">
+                        Last recorded dupe:{" "}
+                        <span className="text-primary-text font-medium">
+                          {formatTimestamp(
+                            results.reduce((latest, current) =>
+                              current.created_at > latest.created_at
+                                ? current
+                                : latest,
+                            ).created_at,
+                            {
+                              format: "long",
+                            },
+                          )}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {itemLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-[#5865F2]" />
+                {allItemDetails.length > 0 && (
+                  <div className="space-y-4">
+                    {/* Items List */}
+                    <div className="space-y-2">
+                      <h4 className="text-primary-text text-sm font-medium">
+                        Dupe Items:
+                      </h4>
+                      <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                        {allItemDetails
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((item, index) => {
+                            // Find the most recent dupe report for this item
+                            const itemDupes = results.filter(
+                              (result) => result.item_id === item.id,
+                            );
+                            const mostRecentDupe = itemDupes.reduce(
+                              (latest, current) =>
+                                current.created_at > latest.created_at
+                                  ? current
+                                  : latest,
+                            );
+
+                            return (
+                              <Link
+                                key={`${item.id}-${index}`}
+                                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                                className="group border-border-primary bg-secondary-bg/50 hover:border-button-info hover:bg-primary-bg flex items-center justify-between rounded-lg border p-3 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                      <Tooltip
+                                        title={
+                                          <TradeAdTooltip
+                                            item={{
+                                              id: item.id,
+                                              name: item.name,
+                                              type: item.type,
+                                              is_seasonal:
+                                                item.is_seasonal || 0,
+                                              is_limited: item.is_limited || 0,
+                                              cash_value: item.cash_value,
+                                              duped_value: item.duped_value,
+                                              trend: item.trend,
+                                              tradable:
+                                                typeof item.tradable ===
+                                                "boolean"
+                                                  ? item.tradable
+                                                    ? 1
+                                                    : 0
+                                                  : item.tradable,
+                                              base_name: item.name,
+                                              is_sub: false,
+                                              data: {
+                                                name: item.name,
+                                                type: item.type,
+                                                creator: item.creator,
+                                                is_seasonal: item.is_seasonal,
+                                                cash_value: item.cash_value,
+                                                duped_value: item.duped_value,
+                                                price: item.price,
+                                                is_limited: item.is_limited,
+                                                duped_owners: "",
+                                                notes: item.notes,
+                                                demand: item.demand,
+                                                trend: item.trend,
+                                                description: item.description,
+                                                health: item.health,
+                                                tradable:
+                                                  typeof item.tradable ===
+                                                  "boolean"
+                                                    ? item.tradable
+                                                    : Boolean(item.tradable),
+                                                last_updated: item.last_updated,
+                                              },
+                                            }}
+                                          />
+                                        }
+                                        arrow
+                                        placement="bottom"
+                                        disableTouchListener
+                                        slotProps={{
+                                          tooltip: {
+                                            sx: {
+                                              backgroundColor:
+                                                "var(--color-secondary-bg)",
+                                              color:
+                                                "var(--color-primary-text)",
+                                              maxWidth: "400px",
+                                              width: "auto",
+                                              minWidth: "300px",
+                                              "& .MuiTooltip-arrow": {
+                                                color:
+                                                  "var(--color-secondary-bg)",
+                                              },
+                                            },
+                                          },
+                                        }}
+                                      >
+                                        <span className="text-primary-text group-hover:text-link-hover cursor-help font-medium transition-colors">
+                                          {item.name}
+                                        </span>
+                                      </Tooltip>
+                                      <span
+                                        className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                                        style={{
+                                          borderColor: getCategoryColor(
+                                            item.type,
+                                          ),
+                                          backgroundColor:
+                                            getCategoryColor(item.type) + "20", // Add 20% opacity
+                                        }}
+                                      >
+                                        {item.type}
+                                      </span>
+                                    </div>
+                                    <span className="text-secondary-text text-xs">
+                                      Reported{" "}
+                                      {formatRelativeDate(
+                                        mostRecentDupe.created_at,
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-secondary-text text-xs">
+                                  View Details
+                                </div>
+                              </Link>
+                            );
+                          })}
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  itemDetails.length > 0 && (
-                    <>
-                      <div className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto pr-2">
-                        {itemDetails.map((item, index) => (
-                          <Link
-                            key={`${item.id}-${index}`}
-                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                            className="block rounded-lg border border-[#2E3944] p-3 transition-colors hover:border-[#5865F2]"
-                          >
-                            <div className="flex flex-col items-center text-center">
-                              <div className="flex-shrink-0">
-                                <Image
-                                  src={getItemImagePath(
-                                    item.type,
-                                    item.name,
-                                    true,
-                                  )}
-                                  alt={item.name}
-                                  width={150}
-                                  height={150}
-                                  className="object-contain"
-                                  onError={handleImageError}
-                                />
-                              </div>
-                              <div className="mt-2">
-                                <h3 className="text-sm font-medium text-[#FFFFFF]">
-                                  {item.name}
-                                </h3>
-                                <span
-                                  className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs"
-                                  style={{
-                                    backgroundColor: getItemTypeColor(
-                                      item.type,
-                                    ),
-                                  }}
-                                >
-                                  {item.type}
-                                </span>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                      <div className="text-muted mt-4 text-center">
-                        Last recorded dupe:{" "}
-                        {formatTimestamp(results[0].created_at, {
-                          format: "long",
-                        })}
-                      </div>
-                    </>
-                  )
                 )}
               </div>
             )}
@@ -292,7 +327,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
           itemName={itemName.split(" [")[0]}
           itemType={itemName.match(/\[(.*?)\]/)?.[1] || ""}
           ownerName={ownerName}
-          itemId={itemId}
+          itemId={itemDetails!.id}
           isOwnerNameReadOnly={true}
         />
       )}

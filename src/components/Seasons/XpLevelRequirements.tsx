@@ -76,11 +76,11 @@ export default function XpLevelRequirements({
   const maxTotalXp = levelRequirements[levelRequirements.length - 1].totalXp;
 
   return (
-    <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6">
+    <div className="border-stroke bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#5865F2] to-[#4752C4]">
+        <div className="from-button-info to-button-info/80 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br">
           <svg
-            className="h-6 w-6 text-white"
+            className="text-form-button-text h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -94,10 +94,10 @@ export default function XpLevelRequirements({
           </svg>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-primary-text text-2xl font-bold">
             XP Requirements by Level
           </h2>
-          <p className="text-gray-300">
+          <p className="text-secondary-text">
             Season {season.season} progression guide
           </p>
         </div>

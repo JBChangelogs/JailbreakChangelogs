@@ -58,53 +58,53 @@ export default function DupeStats({
   })();
 
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-      <h2 className="text-muted mb-4 text-xl font-semibold">
+    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+      <h2 className="text-primary-text mb-4 text-xl font-semibold">
         Duplicate Statistics
       </h2>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {/* Total Items */}
-        <div className="rounded-lg bg-[#37424D] p-4">
-          <p className="text-muted text-sm">Total Items</p>
-          <p className="text-2xl font-bold text-white">
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+          <p className="text-secondary-text text-sm">Total Items</p>
+          <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.totalItems}
           </p>
         </div>
 
         {/* Unique Items */}
-        <div className="rounded-lg bg-[#37424D] p-4">
-          <p className="text-muted text-sm">Unique Items</p>
-          <p className="text-2xl font-bold text-white">
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+          <p className="text-secondary-text text-sm">Unique Items</p>
+          <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.uniqueItems}
           </p>
         </div>
 
         {/* Duplicate Items */}
-        <div className="rounded-lg bg-[#37424D] p-4">
-          <p className="text-muted text-sm">Duplicate Items</p>
-          <p className="text-2xl font-bold text-white">
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+          <p className="text-secondary-text text-sm">Duplicate Items</p>
+          <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.duplicateCount}
           </p>
         </div>
 
         {/* Total Duplicates */}
-        <div className="rounded-lg bg-[#37424D] p-4">
-          <p className="text-muted text-sm">Total Duplicates</p>
-          <p className="text-2xl font-bold text-white">
+        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+          <p className="text-secondary-text text-sm">Total Duplicates</p>
+          <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.totalDuplicates}
           </p>
         </div>
       </div>
 
       {/* Dupe Value */}
-      <div className="mt-4 rounded-lg bg-[#37424D] p-4">
+      <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-muted text-sm">Total Dupe Value</p>
-            <p className="text-2xl font-bold text-red-400">
+            <p className="text-secondary-text text-sm">Total Dupe Value</p>
+            <p className="text-primary-text text-2xl font-bold">
               {isLoadingValues ? (
-                <div className="h-8 w-24 animate-pulse rounded bg-[#2E3944]"></div>
+                <div className="h-8 w-24 animate-pulse rounded"></div>
               ) : (
                 formatPreciseMoney(totalDupedValue)
               )}

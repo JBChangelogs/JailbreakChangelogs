@@ -14,6 +14,7 @@ import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { logError } from "@/services/logger";
+import { formatMessageDate } from "@/utils/timestamp";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
@@ -220,8 +221,8 @@ export default function OGFinderResults({
           const itemNameCompare = a.title.localeCompare(b.title);
           if (itemNameCompare !== 0) return itemNameCompare;
 
-          // If same item name, sort by logged date (oldest first) to match duplicate numbering
-          return a.logged_at - b.logged_at;
+          // If same item name, sort by ID to match duplicate numbering
+          return a.id.localeCompare(b.id);
         case "alpha-asc":
           return a.title.localeCompare(b.title);
         case "alpha-desc":
@@ -328,36 +329,43 @@ export default function OGFinderResults({
     setPage(newPage);
   };
 
-  // Create a map to track duplicate items
-  const itemCounts = useMemo(() => {
+  // Pre-calculate duplicate counts from FULL inventory (not filtered) for consistent numbering
+  const duplicateCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    paginatedData.forEach((item: OGItem) => {
-      const key = `${item.categoryTitle}-${item.title}`;
-      counts.set(key, (counts.get(key) || 0) + 1);
-    });
+    if (initialData?.results) {
+      initialData.results.forEach((item: OGItem) => {
+        const key = `${item.categoryTitle}-${item.title}`;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+    }
     return counts;
-  }, [paginatedData]);
+  }, [initialData?.results]);
 
-  // Create a map to track the order of duplicates based on logged date
+  // Use the pre-calculated duplicate counts
+  const itemCounts = duplicateCounts;
+
+  // Create a map to track the order of duplicates (using ALL items from full inventory)
   const duplicateOrders = useMemo(() => {
     const orders = new Map<string, number>();
 
-    // Group items by name
+    // Group items by name using ALL items from full inventory
     const itemGroups = new Map<string, OGItem[]>();
-    paginatedData.forEach((item: OGItem) => {
-      const key = `${item.categoryTitle}-${item.title}`;
-      if (!itemGroups.has(key)) {
-        itemGroups.set(key, []);
-      }
-      itemGroups.get(key)!.push(item);
-    });
+    if (initialData?.results) {
+      initialData.results.forEach((item: OGItem) => {
+        const key = `${item.categoryTitle}-${item.title}`;
+        if (!itemGroups.has(key)) {
+          itemGroups.set(key, []);
+        }
+        itemGroups.get(key)!.push(item);
+      });
+    }
 
-    // Sort each group by logged date (oldest first) and assign numbers
+    // Sort each group by ID for consistent ordering and assign numbers
     itemGroups.forEach((items) => {
       if (items.length > 1) {
-        // Sort by logged date (oldest first)
+        // Sort by ID for consistent ordering (each item has unique ID)
         const sortedItems = items.sort((a, b) => {
-          return a.logged_at - b.logged_at;
+          return a.id.localeCompare(b.id);
         });
 
         // Assign numbers starting from 1
@@ -369,7 +377,7 @@ export default function OGFinderResults({
     });
 
     return orders;
-  }, [paginatedData]);
+  }, [initialData?.results]);
 
   return (
     <div className="space-y-6">
@@ -387,17 +395,17 @@ export default function OGFinderResults({
 
       {/* Error Display */}
       {error && (
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-red-500/10 p-3">
-                <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+              <div className="bg-status-error/10 rounded-full p-3">
+                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
               </div>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-red-400">
+            <h3 className="text-status-error mb-2 text-lg font-semibold">
               Search Error
             </h3>
-            <p className="text-gray-300">{error}</p>
+            <p className="text-secondary-text">{error}</p>
           </div>
         </div>
       )}
@@ -406,17 +414,17 @@ export default function OGFinderResults({
       {!error &&
         (!initialData?.results || initialData.results.length === 0) && (
           <>
-            <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+            <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
               <div className="text-center">
                 <div className="mb-4 flex justify-center">
-                  <div className="rounded-full bg-red-500/10 p-3">
-                    <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+                  <div className="bg-status-error/10 rounded-full p-3">
+                    <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-red-400">
+                <h3 className="text-status-error mb-2 text-lg font-semibold">
                   No OG Items Found
                 </h3>
-                <p className="text-gray-300">
+                <p className="text-secondary-text">
                   No original items found for this user. Their items may not yet
                   have been logged by our bots.
                 </p>
@@ -450,13 +458,13 @@ export default function OGFinderResults({
             {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
             {currentUserPremiumType === 0 && (
               <div className="flex flex-col lg:col-span-1">
+                <span className="text-secondary-text mb-2 block text-center text-xs">
+                  ADVERTISEMENT
+                </span>
                 <div
-                  className="relative h-full overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+                  className="border-stroke bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
                   style={{ minHeight: "250px" }}
                 >
-                  <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                    Advertisement
-                  </span>
                   <DisplayAd
                     adSlot="2726163589"
                     adFormat="auto"
@@ -480,14 +488,16 @@ export default function OGFinderResults({
           />
 
           {/* Items Grid */}
-          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-            <h2 className="text-muted mb-4 text-xl font-semibold">OG Items</h2>
+          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+            <h2 className="text-primary-text mb-4 text-xl font-semibold">
+              OG Items
+            </h2>
 
             {/* Pro Tip - Only show when there are results */}
             {sortedData.length > 0 && (
-              <div className="mb-4 rounded-lg border border-[#5865F2] bg-[#5865F2]/10 p-3">
-                <div className="flex items-center gap-2 text-sm text-[#FFFFFF]">
-                  <span className="text-[#5865F2]">💡</span>
+              <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+                <div className="text-primary-text flex items-center gap-2 text-sm">
+                  <span className="text-button-info">💡</span>
                   <span className="font-medium">Pro Tip:</span>
                   <span>
                     Click on any item card to view its trading history.
@@ -528,9 +538,7 @@ export default function OGFinderResults({
           item={selectedItem}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
-          formatDate={(timestamp) =>
-            new Date(timestamp * 1000).toLocaleString()
-          }
+          formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
     </div>

@@ -32,60 +32,38 @@ export const TradeAdErrorModal: React.FC<TradeAdErrorModalProps> = ({
       fullWidth
       slotProps={{
         paper: {
-          style: {
-            backgroundColor: "#212A31",
-            color: "#D3D9D4",
-            border: "1px solid #2E3944",
-          },
+          className: "bg-secondary-bg text-primary-text",
         },
       }}
     >
-      <DialogTitle className="flex items-center justify-between border-b border-[#2E3944] p-4">
-        <span className="font-semibold text-[#FF6B6B]">
+      <DialogTitle className="flex items-center justify-between border-b p-4">
+        <span className="text-status-error font-semibold">
           Trade Ad Validation Errors
         </span>
         <Button
           onClick={onClose}
-          sx={{
-            color: "#D3D9D4",
-            "&:hover": {
-              color: "#FFFFFF",
-              backgroundColor: "transparent",
-            },
-            minWidth: "auto",
-            padding: "4px",
-          }}
+          className="text-primary-text hover:text-button-info min-w-auto p-1 hover:bg-transparent"
           size="small"
         >
           <XMarkIcon className="h-5 w-5" />
         </Button>
       </DialogTitle>
-      <DialogContent sx={{ padding: "24px !important" }}>
+      <DialogContent className="!p-6">
         <List>
           {errors.map((error, index) => (
-            <ListItem key={index} sx={{ py: 1 }}>
+            <ListItem key={index} className="py-1">
               <ListItemIcon>
-                <WarningIcon sx={{ color: "#FF6B6B" }} />
+                <WarningIcon className="text-status-error" />
               </ListItemIcon>
-              <ListItemText primary={error} sx={{ color: "#D3D9D4" }} />
+              <ListItemText primary={error} className="text-primary-text" />
             </ListItem>
           ))}
         </List>
       </DialogContent>
-      <DialogActions
-        sx={{
-          borderTop: "1px solid #2E3944",
-          p: 2,
-        }}
-      >
+      <DialogActions className="border-border-primary border-t p-2">
         <Button
           onClick={onClose}
-          sx={{
-            color: "#D3D9D4",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            },
-          }}
+          className="text-primary-text hover:bg-quaternary-bg"
         >
           Close
         </Button>

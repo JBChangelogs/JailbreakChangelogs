@@ -31,16 +31,18 @@ export const SettingToggle = ({
             disabled={disabled}
             sx={{
               "& .MuiSwitch-switchBase.Mui-checked": {
-                color: "#1d7da3",
+                color: "var(--color-button-info)",
               },
               "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                backgroundColor: "#1d7da3",
+                backgroundColor: "var(--color-button-info)",
+              },
+              "& .MuiSwitch-track": {
+                backgroundColor: "var(--color-primary-bg)",
+                border: "1px solid var(--color-border-primary)",
               },
               "&.Mui-disabled": {
-                color: "#FFFFFF",
-                "& + .MuiSwitch-track": {
-                  backgroundColor: "#2E3944",
-                },
+                color: "var(--color-primary-text)",
+                "& + .MuiSwitch-track": {},
               },
             }}
           />
@@ -50,11 +52,14 @@ export const SettingToggle = ({
             <Typography
               variant="subtitle1"
               component="div"
-              sx={{ color: "#D3D9D4" }}
+              sx={{ color: "var(--color-primary-text)" }}
             >
               {config.displayName}
             </Typography>
-            <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-secondary-text)" }}
+            >
               {config.description}
             </Typography>
           </Box>

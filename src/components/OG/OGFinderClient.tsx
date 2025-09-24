@@ -120,16 +120,16 @@ export default function OGFinderClient({
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               placeholder="Enter Roblox ID or username..."
-              className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
               disabled={isLoading}
               required
             />
-            <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+            <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
             {searchId && (
               <button
                 type="button"
                 onClick={() => setSearchId("")}
-                className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
                 aria-label="Clear search"
               >
                 <XMarkIcon />
@@ -141,10 +141,10 @@ export default function OGFinderClient({
           <button
             type="submit"
             disabled={isLoading || !searchId.trim()}
-            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white transition-all duration-200 focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:ring-offset-[#212A31] focus:outline-none ${
+            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium transition-all duration-200 ${
               isLoading
-                ? "cursor-progress bg-[#212A31]"
-                : "bg-[#5865F2] hover:bg-[#4752C4]"
+                ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
             }`}
           >
             {isLoading && (
@@ -191,17 +191,17 @@ export default function OGFinderClient({
 
       {/* Error Display */}
       {error && !initialData && (
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-red-500/10 p-3">
-                <ExclamationTriangleIcon className="h-8 w-8 text-red-400" />
+              <div className="bg-status-error/10 rounded-full p-3">
+                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
               </div>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-red-400">
+            <h3 className="text-status-error mb-2 text-lg font-semibold">
               User Not Found
             </h3>
-            <p className="text-gray-300">{error}</p>
+            <p className="text-secondary-text">{error}</p>
           </div>
         </div>
       )}

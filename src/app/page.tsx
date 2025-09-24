@@ -24,29 +24,39 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#2E3944]">
+    <main className="bg-primary-bg min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-black"></div>
           {backgroundImage && (
             <Image
               src={backgroundImage}
               alt="Jailbreak Background"
               fill
-              className="object-cover opacity-40"
+              className="object-cover"
+              style={{ objectPosition: "center 70%" }}
               priority
             />
           )}
+          <div
+            className="absolute inset-0 z-10"
+            style={{ backgroundColor: "var(--color-hero-overlay)" }}
+          ></div>
         </div>
 
         <div className="relative z-10 container mx-auto px-4">
           <div className="text-center">
-            <h1 className="text-muted mb-6 text-3xl font-bold md:text-5xl">
+            <h1
+              className="mb-6 text-3xl font-bold md:text-5xl"
+              style={{ color: "var(--color-form-button-text)" }}
+            >
               Roblox Jailbreak Changelogs & Values Hub
             </h1>
-            <p className="text-muted mx-auto mb-8 max-w-2xl text-base md:text-lg">
+            <p
+              className="mx-auto mb-8 max-w-2xl text-base md:text-lg"
+              style={{ color: "var(--color-form-button-text)" }}
+            >
               Your comprehensive platform for Roblox Jailbreak item values,
               trade listings, update tracking, and community features. Get
               accurate trading data, post trade ads, track seasonal changes, and
@@ -56,7 +66,7 @@ export default function Home() {
               href="roblox://experiences/start?placeId=606849621"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted inline-block rounded-lg bg-[#124E66] px-8 py-3 text-lg font-semibold hover:bg-[#0D3A4A]"
+              className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus inline-block rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
               Play Jailbreak Now
             </a>
@@ -67,19 +77,19 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-muted mb-12 text-center text-3xl font-bold">
+          <h2 className="text-primary-text mb-12 text-center text-3xl font-bold">
             Features
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 - Combined Changelogs & Seasonal */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <DocumentTextIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <DocumentTextIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Changelogs & Seasons
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 Access the entire history of changelogs for Roblox Jailbreak and
                 stay informed about all updates, seasonal changes, and the
                 newest rewards with their requirements.
@@ -87,14 +97,14 @@ export default function Home() {
             </div>
 
             {/* Feature 2 - Private Servers */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <CalendarIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <CalendarIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Private Servers
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 Browse and submit private server listings for Roblox Jailbreak.
                 Connect with fellow players in dedicated trading and gaming
                 communities.
@@ -102,14 +112,14 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <ChatBubbleLeftRightIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Community Engagement
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 Engage with the community by commenting on changelogs, seasons,
                 item and trade ad pages. OAuth ensures only verified members can
                 participate.
@@ -117,28 +127,28 @@ export default function Home() {
             </div>
 
             {/* Feature 4 - Values Database */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <CurrencyDollarIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <CurrencyDollarIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Values Database
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 View values for all tradable items in Roblox Jailbreak. Favorite
                 items, track value history, and monitor price changes over time.
               </p>
             </div>
 
             {/* Feature 5 */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <ArrowsRightLeftIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <ArrowsRightLeftIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Trading Hub
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 Create trade advertisements and check current item values. Post
                 your offers, request specific items, and browse through other
                 players&apos; trade listings to find the perfect deal.
@@ -146,14 +156,14 @@ export default function Home() {
             </div>
 
             {/* Feature 6 */}
-            <div className="rounded-lg border border-[#2E3944] bg-[#212a31] p-6">
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <ShieldCheckIcon className="h-6 w-6 text-[#3B82F6]" />
-                <h3 className="text-muted text-xl font-semibold">
+                <ShieldCheckIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
                   Dupe Detection System
                 </h3>
               </div>
-              <p className="text-[#FFFFFF]">
+              <p className="text-card-paragraph">
                 Report and check for duped items. Search by player or item to
                 see if they have been reported as duplicated in the trading
                 system.
@@ -161,18 +171,18 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-12 text-center">
-            <p className="text-[#D3D9D4]">
+            <p className="text-tertiary-text">
               Crafted with ❤️ by{" "}
               <Link
                 href="/users/659865209741246514"
-                className="text-blue-400 hover:text-blue-300 hover:underline"
+                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
               >
                 Jakobiis
               </Link>
               {" & "}
               <Link
                 href="/users/1019539798383398946"
-                className="text-blue-400 hover:text-blue-300 hover:underline"
+                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
               >
                 Jalenzz16
               </Link>

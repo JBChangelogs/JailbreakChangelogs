@@ -289,22 +289,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full text-white hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-owner)" }}
               onClick={handleOwnerBadgeClick}
             >
               <FaCrown className={currentSize.icon} />
@@ -321,22 +317,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-purple-400 text-black hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-tester)" }}
               onClick={handleTesterBadgeClick}
             >
               <BugAntIcon className={currentSize.icon} />
@@ -353,22 +345,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:opacity-90 ${currentSize.container}`}
+              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-vtm)" }}
               onClick={handleVTMBadgeClick}
             >
               <ChartBarIcon className={currentSize.icon} />
@@ -385,22 +373,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-blue-500 text-white hover:opacity-90 ${currentSize.container}`}
+              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-vt)" }}
               onClick={handleVTBadgeClick}
             >
               <UserGroupIcon className={currentSize.icon} />
@@ -417,22 +401,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-orange-500 text-white hover:opacity-90 ${currentSize.container}`}
+              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-partner)" }}
               onClick={handlePartnerBadgeClick}
             >
               <FaHandsHelping className={currentSize.icon} />
@@ -449,22 +429,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-teal-600 to-teal-700 text-white hover:opacity-90 ${currentSize.container}`}
+              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-contributor)" }}
               onClick={handleContributorBadgeClick}
             >
               <FaWrench className={currentSize.icon} />
@@ -481,22 +457,18 @@ export const UserBadges = ({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-lime-500 to-lime-600 text-black hover:opacity-90 ${currentSize.container}`}
+              className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
+              style={{ background: "var(--color-badge-developer)" }}
               onClick={handleDeveloperBadgeClick}
             >
               <CgCodeSlash className={currentSize.icon} />
@@ -517,9 +489,9 @@ export const UserBadges = ({
 
   if (premiumType) {
     const premiumStyles = {
-      1: "bg-gradient-to-r from-[#CD7F32] to-[#B87333]", // Bronze
-      2: "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9]", // Silver
-      3: "bg-gradient-to-r from-[#FFD700] to-[#DAA520]", // Gold
+      1: "var(--color-badge-premium-bronze)", // Bronze
+      2: "var(--color-badge-premium-silver)", // Silver
+      3: "var(--color-badge-premium-gold)", // Gold
     };
 
     badges.push(
@@ -531,24 +503,21 @@ export const UserBadges = ({
         slotProps={{
           tooltip: {
             sx: {
-              backgroundColor: "#0F1419",
-              color: "#D3D9D4",
-              fontSize: "0.75rem",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: "1px solid #2E3944",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
               "& .MuiTooltip-arrow": {
-                color: "#0F1419",
+                color: "var(--color-secondary-bg)",
               },
             },
           },
         }}
       >
         <div
-          className={`inline-flex items-center justify-center rounded-full ${
-            premiumStyles[premiumType as keyof typeof premiumStyles]
-          } cursor-help text-black hover:opacity-90 ${currentSize.container}`}
+          className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
+          style={{
+            background:
+              premiumStyles[premiumType as keyof typeof premiumStyles],
+          }}
           onClick={handlePremiumBadgeClick}
         >
           <TrophyIcon className={currentSize.icon} />
@@ -567,22 +536,18 @@ export const UserBadges = ({
         slotProps={{
           tooltip: {
             sx: {
-              backgroundColor: "#0F1419",
-              color: "#D3D9D4",
-              fontSize: "0.75rem",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: "1px solid #2E3944",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
               "& .MuiTooltip-arrow": {
-                color: "#0F1419",
+                color: "var(--color-secondary-bg)",
               },
             },
           },
         }}
       >
         <div
-          className={`inline-flex cursor-help items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:opacity-90 ${currentSize.container}`}
+          className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
+          style={{ background: "var(--color-badge-early-adopter)" }}
           onClick={handleEarlyAdopterBadgeClick}
         >
           <SparklesIcon className={currentSize.icon} />
@@ -602,7 +567,7 @@ export const UserBadges = ({
       primary_guild.identity_guild_id === "1286064050135896064";
     const badgeContent = (
       <div
-        className="inline-flex cursor-help items-center gap-1 rounded-md bg-gray-700 px-2.5 py-1 text-white"
+        className="bg-primary-bg border-border-primary text-primary-text inline-flex cursor-help items-center gap-1 rounded-md border px-2.5 py-1"
         style={{ minWidth: 0 }}
       >
         <Image
@@ -626,15 +591,10 @@ export const UserBadges = ({
         slotProps={{
           tooltip: {
             sx: {
-              backgroundColor: "#0F1419",
-              color: "#D3D9D4",
-              fontSize: "0.75rem",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: "1px solid #2E3944",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
               "& .MuiTooltip-arrow": {
-                color: "#0F1419",
+                color: "var(--color-secondary-bg)",
               },
             },
           },

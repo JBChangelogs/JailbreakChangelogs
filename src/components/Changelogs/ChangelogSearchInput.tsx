@@ -10,25 +10,29 @@ interface SearchResult {
   mentions: string[];
 }
 
-interface ChangelogSearchProps {
+interface ChangelogSearchInputProps {
   searchQuery: string;
   searchResults: SearchResult[];
   isSearchFocused: boolean;
   onSearchChange: (query: string) => void;
   onSearchFocus: (focused: boolean) => void;
   onChangelogSelect: (id: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
+const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
   searchQuery,
   searchResults,
   isSearchFocused,
   onSearchChange,
   onSearchFocus,
   onChangelogSelect,
+  placeholder = "Search changelogs...",
+  className = "",
 }) => {
   return (
-    <div className="relative mb-8">
+    <div className={`relative ${className}`}>
       <input
         type="text"
         value={searchQuery}
@@ -37,18 +41,18 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
         onBlur={() => {
           setTimeout(() => onSearchFocus(false), 200);
         }}
-        placeholder="Search changelogs..."
-        className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+        placeholder={placeholder}
+        className="text-secondary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
-        <MagnifyingGlassIcon className="h-5 w-5 text-[#FFFFFF]" />
+        <MagnifyingGlassIcon className="text-primary-text h-5 w-5" />
       </div>
       {searchQuery && (
         <button
           onClick={() => {
             onSearchChange("");
           }}
-          className="hover:text-muted absolute top-1/2 right-3 -translate-y-1/2 text-[#FFFFFF]"
+          className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
           aria-label="Clear search"
         >
           <XMarkIcon className="h-5 w-5" />
@@ -57,51 +61,51 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
 
       {/* Quick Filter Buttons */}
       {isSearchFocused && !searchQuery && (
-        <div className="absolute z-10 mt-1 w-full rounded-lg border border-[#2E3944] bg-[#212A31] p-2 shadow-lg">
+        <div className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border p-2 shadow-lg">
           <div className="flex flex-col gap-1">
             <button
               onClick={() => onSearchChange("has:video ")}
-              className="flex items-center gap-2 rounded border border-[#37424D] bg-[#2E3944] px-3 py-2 text-left transition-colors hover:bg-[#37424D]"
+              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("video")} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
               >
                 Video
               </span>
-              <span className="text-muted">Show videos</span>
+              <span className="text-secondary-text">Show videos</span>
             </button>
             <button
               onClick={() => onSearchChange("has:audio ")}
-              className="flex items-center gap-2 rounded border border-[#37424D] bg-[#2E3944] px-3 py-2 text-left transition-colors hover:bg-[#37424D]"
+              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("audio")} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
               >
                 Audio
               </span>
-              <span className="text-muted">Show audio</span>
+              <span className="text-secondary-text">Show audio</span>
             </button>
             <button
               onClick={() => onSearchChange("has:image ")}
-              className="flex items-center gap-2 rounded border border-[#37424D] bg-[#2E3944] px-3 py-2 text-left transition-colors hover:bg-[#37424D]"
+              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("image")} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
               >
                 Image
               </span>
-              <span className="text-muted">Show images</span>
+              <span className="text-secondary-text">Show images</span>
             </button>
             <button
               onClick={() => onSearchChange("has:mentions ")}
-              className="flex items-center gap-2 rounded border border-[#37424D] bg-[#2E3944] px-3 py-2 text-left transition-colors hover:bg-[#37424D]"
+              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
               >
                 Mentions
               </span>
-              <span className="text-muted">Show mentions</span>
+              <span className="text-secondary-text">Show mentions</span>
             </button>
           </div>
         </div>
@@ -109,17 +113,17 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
 
       {/* Search Results */}
       {searchResults.length > 0 ? (
-        <div className="absolute z-10 mt-1 w-full rounded-lg border border-[#2E3944] bg-[#212A31] shadow-lg">
+        <div className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg">
           <div className="max-h-[400px] overflow-y-auto">
             {searchResults.map((item) => (
               <button
                 key={item.id}
                 onClick={() => onChangelogSelect(item.id.toString())}
-                className="w-full border-b border-[#2E3944] px-4 py-3 text-left last:border-b-0 hover:bg-[#2B2F4C] focus:outline-none"
+                className="border-stroke hover:bg-primary-bg w-full cursor-pointer border-b px-4 py-3 text-left last:border-b-0 focus:outline-none"
               >
                 <div className="mb-1 flex items-center gap-2">
                   <span
-                    className="text-muted font-medium"
+                    className="text-primary-text font-medium"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
                         item.title,
@@ -130,7 +134,7 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
                   {item.mediaTypes.map((type) => (
                     <span
                       key={type}
-                      className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor(type)} text-white`}
+                      className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
                     >
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </span>
@@ -138,7 +142,7 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
                 </div>
                 {item.contentPreview && (
                   <p
-                    className="line-clamp-2 text-sm text-[#FFFFFF]"
+                    className="text-secondary-text line-clamp-2 text-sm"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
                         item.contentPreview,
@@ -152,7 +156,7 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
                     {item.mentions.map((mention) => (
                       <span
                         key={mention}
-                        className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
+                        className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
                       >
                         @{mention}
                       </span>
@@ -165,7 +169,7 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
         </div>
       ) : (
         searchQuery && (
-          <div className="text-muted absolute z-10 mt-1 w-full rounded-lg border border-[#2E3944] bg-[#212A31] p-4 text-center">
+          <div className="text-secondary-text border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border p-4 text-center">
             No results found
           </div>
         )
@@ -174,4 +178,4 @@ const ChangelogSearch: React.FC<ChangelogSearchProps> = ({
   );
 };
 
-export default ChangelogSearch;
+export default ChangelogSearchInput;

@@ -124,9 +124,9 @@ export default function AboutTab({
   return (
     <div className="space-y-6">
       {/* About Me Section */}
-      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <h2 className="text-muted text-lg font-semibold">About Me</h2>
+          <h2 className="text-primary-text text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (
             <Tooltip
               title="Edit bio"
@@ -135,15 +135,14 @@ export default function AboutTab({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
+                    backgroundColor: "var(--color-primary-bg)",
+                    color: "var(--color-secondary-text)",
                     fontSize: "0.75rem",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #2E3944",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    boxShadow: "0 4px 12px var(--color-card-shadow)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-primary-bg)",
                     },
                   },
                 },
@@ -153,59 +152,55 @@ export default function AboutTab({
                 variant="text"
                 onClick={() => setIsEditingBio(true)}
                 sx={{
-                  color: "#5865F2",
+                  color: "var(--color-button-info)",
                   minWidth: "auto",
                   padding: "4px",
-                  "&:hover": {
-                    backgroundColor: "rgba(88, 101, 242, 0.1)",
-                  },
                 }}
               >
-                <EditIcon className="h-5 w-5" />
+                <EditIcon className="text-button-info h-5 w-5" />
               </Button>
             </Tooltip>
           )}
         </div>
 
         {isEditingBio && currentUserId === user.id ? (
-          <div className="space-y-2">
-            <textarea
-              className="text-muted w-full resize-none rounded-md border border-[#5865F2] bg-[#212A31] p-2 focus:ring-2 focus:ring-[#5865F2] focus:outline-none"
-              rows={3}
-              value={newBio}
-              onChange={handleBioChange}
-              placeholder="Write something about yourself..."
-              maxLength={MAX_BIO_LENGTH}
-              style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
-            />
-            <div className="flex items-center justify-between">
-              <span
-                className={`text-xs ${newBio.length >= MAX_BIO_LENGTH ? "text-red-400" : "text-muted"}`}
+          <div className="space-y-3">
+            <div className="relative">
+              <textarea
+                value={newBio}
+                onChange={handleBioChange}
+                placeholder="Write something about yourself..."
+                className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                maxLength={MAX_BIO_LENGTH}
+                style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
+              />
+              <div
+                className={`absolute right-2 bottom-2 text-xs ${newBio.length >= MAX_BIO_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
               >
-                {newBio.length}/{MAX_BIO_LENGTH} characters
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setIsEditingBio(false);
-                    setNewBio(bio || "");
-                  }}
-                  className="cursor-pointer rounded bg-gray-600 px-4 py-1.5 text-sm font-medium text-[#D3D9D4] transition-colors hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveBio}
-                  disabled={isSavingBio}
-                  className={`rounded px-4 py-1.5 text-sm font-medium transition-colors ${
-                    isSavingBio
-                      ? "cursor-wait bg-[#5865F2] text-[#D3D9D4] opacity-70"
-                      : "cursor-pointer bg-[#5865F2] text-[#D3D9D4] hover:bg-[#4752C4]"
-                  } disabled:cursor-wait disabled:opacity-70`}
-                >
-                  {isSavingBio ? "Saving..." : "Save"}
-                </button>
+                {newBio.length}/{MAX_BIO_LENGTH}
               </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => {
+                  setIsEditingBio(false);
+                  setNewBio(bio || "");
+                }}
+                className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={handleSaveBio}
+                disabled={!newBio.trim() || isSavingBio}
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
+              >
+                {isSavingBio ? "Saving..." : "Save"}
+              </Button>
             </div>
           </div>
         ) : (
@@ -221,12 +216,12 @@ export default function AboutTab({
                     : lines;
                 return (
                   <>
-                    <p className="text-muted break-words whitespace-pre-wrap">
+                    <p className="text-primary-text break-words whitespace-pre-wrap">
                       {convertUrlsToLinks(visibleLines.join("\n"))}
                     </p>
                     {shouldTruncate && (
                       <button
-                        className="mt-2 flex items-center gap-1 text-sm font-medium text-blue-300 transition-colors duration-200 hover:text-blue-400 hover:underline"
+                        className="text-border-focus hover:text-button-info mt-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
                         onClick={() => setBioExpanded((e) => !e)}
                       >
                         {bioExpanded ? (
@@ -246,10 +241,10 @@ export default function AboutTab({
                 );
               })()
             ) : (
-              <p className="text-[#FFFFFF] italic">No bio yet</p>
+              <p className="text-primary-text italic">No bio yet</p>
             )}
             {localBioLastUpdated && (
-              <p className="mt-2 text-xs text-[#FFFFFF]">
+              <p className="text-secondary-text mt-2 text-xs">
                 Last updated:{" "}
                 <Tooltip
                   title={formatCustomDate(localBioLastUpdated)}
@@ -258,15 +253,14 @@ export default function AboutTab({
                   slotProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: "#0F1419",
-                        color: "#D3D9D4",
+                        backgroundColor: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
                         fontSize: "0.75rem",
                         padding: "8px 12px",
                         borderRadius: "8px",
-                        border: "1px solid #2E3944",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        boxShadow: "0 4px 12px var(--color-card-shadow)",
                         "& .MuiTooltip-arrow": {
-                          color: "#0F1419",
+                          color: "var(--color-secondary-bg)",
                         },
                       },
                     },

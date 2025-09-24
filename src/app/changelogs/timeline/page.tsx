@@ -13,7 +13,7 @@ export default async function TimelinePage() {
   const sortedChangelogs = [...changelogs].sort((a, b) => b.id - a.id);
 
   return (
-    <main className="min-h-screen bg-[#2E3944]">
+    <main className="min-h-screen">
       <div className="container mx-auto">
         <Breadcrumb />
         <TimelineClient changelogs={sortedChangelogs} />

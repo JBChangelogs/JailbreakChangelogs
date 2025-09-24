@@ -6,7 +6,6 @@ import { darkTheme } from "@/theme/darkTheme";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import TimelineHeader from "./TimelineHeader";
 import TimelineContent from "./TimelineContent";
-import TimelineModal from "./TimelineModal";
 import { Changelog } from "@/utils/api";
 
 interface TimelineClientProps {
@@ -14,7 +13,6 @@ interface TimelineClientProps {
 }
 
 export default function TimelineClient({ changelogs }: TimelineClientProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
@@ -35,17 +33,13 @@ export default function TimelineClient({ changelogs }: TimelineClientProps) {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <TimelineHeader onViewMore={() => setIsModalOpen(true)} />
+      <TimelineHeader />
       <TimelineContent changelogs={changelogs} />
-      <TimelineModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
 
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="text-muted fixed right-8 bottom-8 z-[2000] rounded-full bg-[#124E66] p-3 shadow-lg hover:bg-[#1A5F7A] focus:outline-none"
+          className="text-primary-text bg-button-info hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
           aria-label="Back to top"
         >
           <ArrowUpIcon className="h-6 w-6" />

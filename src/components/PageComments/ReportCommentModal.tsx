@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Dialog } from "@headlessui/react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
@@ -52,164 +53,61 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
     }
   };
 
-  if (!open) return null;
-
   return (
     <>
-      <div
-        className="modal-overlay"
-        onClick={onClose}
-        style={{
-          display: "flex",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 1000,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <Dialog open={open} onClose={onClose} className="relative z-50">
         <div
-          className="modal-container"
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          style={{
-            backgroundColor: "#212A31",
-            border: "1px solid #2E3944",
-            borderRadius: "8px",
-            minWidth: "400px",
-            maxWidth: "600px",
-            width: "100%",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <div
-            className="modal-header"
-            style={{
-              color: "#D3D9D4",
-              borderBottom: "1px solid #2E3944",
-              padding: "16px 24px",
-              fontSize: "1.25rem",
-              fontWeight: 600,
-            }}
-          >
-            Report Comment #{commentId} by {commentOwner}
-          </div>
-          <div className="modal-content" style={{ padding: "24px" }}>
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "12px",
-                backgroundColor: "#2E3944",
-                borderRadius: "4px",
-                border: "1px solid #5865F2",
-                maxHeight: "200px",
-                overflowY: "auto",
-              }}
-            >
-              <div
-                style={{
-                  color: "#748D92",
-                  fontSize: "12px",
-                  marginBottom: "4px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Comment Preview
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+            <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+              Report Comment #{commentId} by {commentOwner}
+            </div>
+            <div className="modal-content p-6">
+              <div className="bg-secondary-bg border-button-info mb-4 max-h-[200px] cursor-not-allowed overflow-y-auto rounded border p-3">
+                <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
+                  Comment Content
+                </div>
+                <div className="text-primary-text text-sm break-words whitespace-pre-wrap">
+                  {commentContent}
+                </div>
               </div>
-              <div
-                style={{
-                  color: "#D3D9D4",
-                  fontSize: "14px",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}
-              >
-                {commentContent}
+              <div className="relative">
+                <textarea
+                  value={reportReason}
+                  onChange={handleReasonChange}
+                  placeholder="Please provide a reason for reporting this comment..."
+                  className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                />
+                <div
+                  className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
+                >
+                  {reportReason.length}/{MAX_REASON_LENGTH}
+                </div>
               </div>
             </div>
-            <div style={{ position: "relative" }}>
-              <textarea
-                value={reportReason}
-                onChange={handleReasonChange}
-                placeholder="Please provide a reason for reporting this comment..."
-                style={{
-                  width: "100%",
-                  minHeight: "120px",
-                  padding: "12px",
-                  backgroundColor: "#2E3944",
-                  border: "1px solid #5865F2",
-                  borderRadius: "4px",
-                  color: "#D3D9D4",
-                  fontSize: "14px",
-                  resize: "vertical",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "8px",
-                  right: "8px",
-                  fontSize: "12px",
-                  color:
-                    reportReason.length >= MAX_REASON_LENGTH
-                      ? "#EF4444"
-                      : "#748D92",
-                }}
+            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+              <button
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
               >
-                {reportReason.length}/{MAX_REASON_LENGTH}
-              </div>
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!reportReason.trim() || isSubmitting}
+                className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Report"}
+              </button>
             </div>
-          </div>
-          <div
-            className="modal-footer"
-            style={{
-              padding: "16px 24px",
-              borderTop: "1px solid #2E3944",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "8px",
-            }}
-          >
-            <button
-              onClick={onClose}
-              disabled={isSubmitting}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "4px",
-                fontSize: "14px",
-                cursor: "pointer",
-                border: "none",
-                backgroundColor: "transparent",
-                color: "#5865F2",
-                opacity: isSubmitting ? 0.5 : 1,
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!reportReason.trim() || isSubmitting}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "4px",
-                fontSize: "14px",
-                cursor: "pointer",
-                border: "none",
-                backgroundColor: "#5865F2",
-                color: "#ffffff",
-                opacity: !reportReason.trim() || isSubmitting ? 0.5 : 1,
-                minWidth: "100px",
-              }}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Report"}
-            </button>
-          </div>
+          </Dialog.Panel>
         </div>
-      </div>
+      </Dialog>
       <LoginModalWrapper
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}

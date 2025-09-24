@@ -14,21 +14,21 @@ export default function XpTimeResults({
   timeWithPass,
 }: XpTimeResultsProps) {
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+    <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
       <h3 className="text-muted mb-3 text-xl font-semibold">
         ⏱️ Time to Complete (Normal XP Rate)
       </h3>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded bg-[#2E3944] p-3 text-center">
+        <div className="rounded p-3 text-center">
           <div className="text-muted mb-1 text-sm">Without Season Pass</div>
-          <div className="text-lg font-medium text-[#FFFFFF]">
+          <div className="text-primary-text text-lg font-medium">
             {timeNoPass.days} {timeNoPass.days === 1 ? "day" : "days"}
           </div>
           <div className="text-muted text-sm">{timeNoPass.completionDate}</div>
         </div>
-        <div className="rounded bg-[#2E3944] p-3 text-center">
+        <div className="rounded p-3 text-center">
           <div className="text-muted mb-1 text-sm">With Season Pass</div>
-          <div className="text-lg font-medium text-[#FFFFFF]">
+          <div className="text-primary-text text-lg font-medium">
             {timeWithPass.days} {timeWithPass.days === 1 ? "day" : "days"}
           </div>
           <div className="text-muted text-sm">

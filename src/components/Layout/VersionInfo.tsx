@@ -22,8 +22,14 @@ export default function VersionInfo() {
 
   return (
     <>
-      <p className="text-muted">Version: {versionInfo.version}</p>
-      <p className="text-muted">Last Updated: {versionInfo.date}</p>
+      <p className="text-primary-text">
+        Version:{" "}
+        <span className="text-secondary-text">{versionInfo.version}</span>
+      </p>
+      <p className="text-primary-text">
+        Last Updated:{" "}
+        <span className="text-secondary-text">{versionInfo.date}</span>
+      </p>
     </>
   );
 }

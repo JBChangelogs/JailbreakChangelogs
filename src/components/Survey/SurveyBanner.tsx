@@ -12,14 +12,14 @@ interface SurveyBannerProps {
 const SurveyBanner: React.FC<SurveyBannerProps> = ({ onAccept, onDismiss }) => {
   return (
     <div
-      className="fixed right-0 bottom-0 left-0 z-50 border-t border-[#124e66] bg-[#1A5F7A] p-4"
+      className="border-button-info bg-button-info fixed right-0 bottom-0 left-0 z-50 border-t p-4"
       style={{
         boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.2)",
       }}
     >
       <div className="container mx-auto flex items-center justify-between gap-4">
         <div className="flex-1">
-          <p className="text-white">
+          <p className="text-form-button-text">
             <span className="font-semibold">
               We&apos;d love to get your feedback!
             </span>
@@ -28,16 +28,16 @@ const SurveyBanner: React.FC<SurveyBannerProps> = ({ onAccept, onDismiss }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onAccept}
-            className="rounded bg-white px-4 py-2 font-medium text-[#124e66] transition-colors hover:bg-gray-100"
+            className="bg-secondary-bg text-primary-text hover:bg-quaternary-bg cursor-pointer rounded px-4 py-2 font-medium transition-colors"
           >
             Take Survey
           </button>
           <button
             onClick={onDismiss}
-            className="p-2 text-white/80 transition-colors hover:text-white"
+            className="text-form-button-text hover:text-form-button-text/80 p-2 transition-colors"
             aria-label="Dismiss"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <XMarkIcon className="h-5 w-5 text-current" />
           </button>
         </div>
       </div>

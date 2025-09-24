@@ -122,11 +122,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<{
-    comment: CommentData;
-    timeoutId: NodeJS.Timeout;
-  } | null>(null);
-  const [undoSnackbarOpen, setUndoSnackbarOpen] = useState(false);
   const [postSnackbarOpen, setPostSnackbarOpen] = useState(false);
   const [postSnackbarMsg, setPostSnackbarMsg] = useState("");
   const [postErrorSnackbarOpen, setPostErrorSnackbarOpen] = useState(false);
@@ -211,6 +206,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
         const response = await fetch(
           `${PUBLIC_API_URL}/users/get/batch?ids=${usersToFetch.join(",")}&nocache=true`,
+          {
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Comments/1.0",
+            },
+          },
         );
         if (!response.ok) throw new Error("Failed to fetch user data");
         const data = await response.json();
@@ -248,7 +248,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const refreshComments = useCallback(async () => {
     try {
       const endpoint = `${PUBLIC_API_URL}/comments/get?type=${type === "item" ? itemType : type}&id=${changelogId}&nocache=true`;
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Comments/1.0",
+        },
+      });
 
       if (response.status === 404) {
         setComments([]);
@@ -348,6 +352,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleEditComment = async (commentId: number) => {
     if (!editContent.trim()) return;
 
+    // Find the original comment to compare content
+    const originalComment = filteredComments.find((c) => c.id === commentId);
+    if (!originalComment) return;
+
+    // Check if content has actually changed
+    if (cleanCommentText(editContent) === originalComment.content) {
+      // No changes made, just close the edit mode
+      setEditingCommentId(null);
+      setEditContent("");
+      return;
+    }
+
     // Check if edit content length exceeds user's tier limit
     if (!checkCommentLength(editContent, currentUserPremiumType)) {
       if (currentUserPremiumType >= 3 && editContent.length > 2000) {
@@ -388,21 +404,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  const handleDeleteComment = (commentId: number) => {
-    const commentToDelete = comments.find((c) => c.id === commentId);
-    if (!commentToDelete) return;
+  const handleDeleteComment = async (commentId: number) => {
     // Optimistically remove from UI
     setComments((prev) => prev.filter((c) => c.id !== commentId));
-    // Set up undo state
-    const timeoutId = setTimeout(() => {
-      actuallyDeleteComment(commentId);
-      setPendingDelete(null);
-    }, 3000); // Changed from 5000 to 3000 ms
-    setPendingDelete({ comment: commentToDelete, timeoutId });
-    setUndoSnackbarOpen(true);
-  };
 
-  const actuallyDeleteComment = async (commentId: number) => {
     try {
       const response = await fetch(`/api/comments/delete`, {
         method: "POST",
@@ -414,21 +419,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
-      refreshComments();
+      // Comment successfully deleted, no need to refresh since we already removed it optimistically
     } catch (err) {
+      // If deletion failed, restore the comment
+      setComments((prev) => {
+        const originalComment = comments.find((c) => c.id === commentId);
+        return originalComment ? [originalComment, ...prev] : prev;
+      });
       setGlobalErrorSnackbarMsg(
         err instanceof Error ? err.message : "Failed to delete comment",
       );
       setGlobalErrorSnackbarOpen(true);
-    }
-  };
-
-  const handleUndoDelete = () => {
-    if (pendingDelete) {
-      clearTimeout(pendingDelete.timeoutId);
-      setComments((prev) => [pendingDelete.comment, ...prev]);
-      setPendingDelete(null);
-      setUndoSnackbarOpen(false);
     }
   };
 
@@ -553,12 +554,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="rounded-lg border border-blue-300 bg-[#212A31] p-2 sm:p-3">
+    <div className="space-y-2 sm:space-y-3">
+      <div className="border-border-primary bg-secondary-bg rounded-lg border p-2 sm:p-3">
         <div className="flex flex-col gap-4">
           <div>
             <h2
-              className={`${inter.className} text-muted mb-4 text-lg font-bold tracking-tight sm:text-xl`}
+              className={`${inter.className} text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl`}
             >
               {type === "changelog" ? (
                 `Comments for Changelog ${changelogId}: ${changelogTitle}`
@@ -569,14 +570,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               ) : (
                 <>
                   Comments for {changelogTitle}{" "}
-                  <span className="text-[#748D92]">({itemType})</span>
+                  <span className="text-secondary-text">({itemType})</span>
                 </>
               )}
             </h2>
           </div>
 
           {/* New Comment Form */}
-          <form onSubmit={handleSubmitComment} className="mb-6 sm:mb-8">
+          <form onSubmit={handleSubmitComment} className="mb-2">
             <TextField
               fullWidth
               multiline
@@ -599,57 +600,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   autoComplete: "off",
                   spellCheck: "false",
                   autoCapitalize: "off",
+                  className: "[&_textarea]:resize-y",
                 },
               }}
-              InputProps={{
-                sx: { "& textarea": { resize: "vertical" } },
-              }}
-              sx={{
-                "& .MuiFormHelperText-root": {
-                  color: "#748D92 !important",
-                  "&.Mui-disabled": {
-                    color: "#748D92 !important",
-                  },
-                  "&.Mui-error": {
-                    color: "#ef4444 !important",
-                  },
-                },
-                "& .MuiInputBase-root": {
-                  backgroundColor: "#2E3944 !important",
-                  "&.Mui-disabled": {
-                    backgroundColor: "#1E2328 !important",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#2E3944 !important",
-                    },
-                    "& .MuiInputBase-input": {
-                      color: "#748D92 !important",
-                      WebkitTextFillColor: "#748D92 !important",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: "#D3D9D4 !important",
-                    WebkitTextFillColor: "#D3D9D4 !important",
-                  },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: "#748D92 !important",
-                    opacity: 1,
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#2E3944 !important",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#5865F2 !important",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#5865F2 !important",
-                  },
-                },
-              }}
+              className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-stroke [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
             />
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={toggleSortOrder}
-                className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
+                className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -658,23 +617,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </button>
-              <Button
+              <button
                 type="submit"
-                variant="contained"
-                size="small"
                 disabled={
                   isLoggedIn && (!newComment.trim() || isSubmittingComment)
-                }
-                startIcon={
-                  isLoggedIn ? (
-                    isSubmittingComment ? (
-                      <CircularProgress size={16} sx={{ color: "#ffffff" }} />
-                    ) : (
-                      <BiSolidSend className="h-4 w-4" />
-                    )
-                  ) : (
-                    <FaSignInAlt className="h-4 w-4" />
-                  )
                 }
                 onClick={
                   !isLoggedIn
@@ -684,29 +630,40 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       }
                     : undefined
                 }
-                sx={{
-                  backgroundColor: "#5865F2",
-                  color: "#ffffff",
-                  "&:hover": {
-                    backgroundColor: "#4752C4",
-                  },
-                  "&:disabled": {
-                    backgroundColor: "#1E2328",
-                    color: "#748D92",
-                    border: "1px solid #2E3944",
-                  },
-                }}
+                className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                  isSubmittingComment
+                    ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                    : isLoggedIn && !newComment.trim()
+                      ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
+                      : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+                }`}
               >
-                {isLoggedIn
-                  ? isSubmittingComment
-                    ? "Posting..."
-                    : "Post Comment"
-                  : "Login to Comment"}
-              </Button>
+                {isLoggedIn ? (
+                  isSubmittingComment ? (
+                    <>
+                      <CircularProgress
+                        size={16}
+                        className="text-form-button-text"
+                      />
+                      Posting...
+                    </>
+                  ) : (
+                    <>
+                      <BiSolidSend className="h-4 w-4" />
+                      Post Comment
+                    </>
+                  )
+                ) : (
+                  <>
+                    <FaSignInAlt className="h-4 w-4" />
+                    Login to Comment
+                  </>
+                )}
+              </button>
             </div>
             {isLoggedIn && (
               <div className="mt-2 text-center">
-                <span className="text-xs text-[#748D92]">
+                <span className="text-secondary-text text-xs">
                   Tip: Comments can be edited within 1 hour of posting
                 </span>
               </div>
@@ -717,15 +674,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           {filteredComments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
               <div className="relative mb-6">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#5865F2]/20 to-[#4752C4]/20 blur-xl"></div>
-                <div className="relative rounded-full border border-[#5865F2]/30 bg-[#2E3944] p-4">
-                  <ChatBubbleLeftIcon className="h-8 w-8 text-[#5865F2] sm:h-10 sm:w-10" />
+                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
+                <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
+                  <ChatBubbleLeftIcon className="text-border-focus h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
               </div>
-              <h3 className="text-muted mb-2 text-lg font-semibold sm:text-xl">
+              <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
                 No comments yet
               </h3>
-              <p className="max-w-md text-sm leading-relaxed text-[#748D92] sm:text-base">
+              <p className="text-secondary-text max-w-md text-sm leading-relaxed sm:text-base">
                 Be the first to share your thoughts on this{" "}
                 {type === "changelog"
                   ? "changelog"
@@ -739,8 +696,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             </div>
           ) : (
             <>
-              <div className="rounded-xl border border-[#2E3944] bg-[#2E3944] p-4">
-                <div className="space-y-4 sm:space-y-6">
+              <div className="bg-tertiary-bg rounded-xl p-2">
+                <div className="space-y-2 sm:space-y-3">
                   {currentComments.map((comment) => {
                     const flags = userData[comment.user_id]?.flags || [];
                     const premiumType = userData[comment.user_id]?.premiumtype;
@@ -751,22 +708,22 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     return (
                       <div
                         key={comment.id}
-                        className="group relative overflow-hidden rounded-lg border border-transparent p-3 transition-all duration-200 hover:border-blue-300"
+                        className="group hover:border-border-focus border-border-tertiary relative overflow-hidden rounded-lg border p-3 transition-all duration-200"
                       >
                         {/* Header Section */}
                         <div className="flex items-center justify-between pb-2">
                           <div className="flex items-center gap-3">
                             {loadingUserData[comment.user_id] ? (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2E3944] ring-2 ring-[#5865F2]/20">
+                              <div className="bg-tertiary-bg ring-border-focus/20 flex h-10 w-10 items-center justify-center rounded-full ring-2">
                                 <CircularProgress
                                   size={20}
-                                  sx={{ color: "#5865F2" }}
+                                  className="text-border-focus"
                                 />
                               </div>
                             ) : hideRecent ? (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2E3944] bg-[#1E2328] ring-2 ring-[#748D92]/20">
+                              <div className="border-border-primary bg-primary-bg ring-tertiary-text/20 flex h-10 w-10 items-center justify-center rounded-full border ring-2">
                                 <svg
-                                  className="h-5 w-5 text-[#748D92]"
+                                  className="text-secondary-text h-5 w-5"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -780,7 +737,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 </svg>
                               </div>
                             ) : (
-                              <div className="rounded-full ring-2 ring-transparent transition-all duration-200 group-hover:ring-[#5865F2]/20">
+                              <div className="group-hover:ring-border-focus/20 rounded-full ring-2 ring-transparent transition-all duration-200">
                                 <UserAvatar
                                   userId={comment.user_id}
                                   avatarHash={userData[comment.user_id]?.avatar}
@@ -789,9 +746,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     comment.author
                                   }
                                   size={10}
-                                  accent_color={
-                                    userData[comment.user_id]?.accent_color
-                                  }
                                   custom_avatar={
                                     userData[comment.user_id]?.custom_avatar
                                   }
@@ -808,13 +762,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               <div className="flex flex-wrap items-center gap-2">
                                 {loadingUserData[comment.user_id] ? (
                                   <>
-                                    <div className="h-5 w-30 animate-pulse rounded bg-[#1E2328]" />
-                                    <div className="h-4 w-20 animate-pulse rounded bg-[#1E2328]" />
+                                    <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
+                                    <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
                                   </>
                                 ) : hideRecent ? (
                                   <div className="flex items-center gap-2">
                                     <svg
-                                      className="h-4 w-4 text-[#748D92]"
+                                      className="text-secondary-text h-4 w-4"
                                       fill="none"
                                       viewBox="0 0 24 24"
                                       stroke="currentColor"
@@ -826,7 +780,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                                       />
                                     </svg>
-                                    <span className="text-sm font-medium text-[#748D92]">
+                                    <span className="text-secondary-text text-sm font-medium">
                                       Hidden User
                                     </span>
                                   </div>
@@ -846,13 +800,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         slotProps={{
                                           tooltip: {
                                             sx: {
-                                              bgcolor: "#1A2228",
-                                              border: "1px solid #2E3944",
-                                              maxWidth: "400px",
-                                              width: "auto",
-                                              minWidth: "300px",
+                                              backgroundColor:
+                                                "var(--color-primary-bg)",
+                                              color:
+                                                "var(--color-primary-text)",
                                               "& .MuiTooltip-arrow": {
-                                                color: "#1A2228",
+                                                color:
+                                                  "var(--color-primary-bg)",
                                               },
                                             },
                                           },
@@ -860,7 +814,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       >
                                         <Link
                                           href={`/users/${comment.user_id}`}
-                                          className={`${inter.className} text-md truncate font-semibold text-blue-300 transition-colors duration-200 hover:text-blue-400 hover:underline`}
+                                          className={`${inter.className} text-md text-link hover:text-link-hover truncate font-semibold transition-colors duration-200 hover:underline`}
                                         >
                                           {userData[comment.user_id]
                                             ?.username || comment.author}
@@ -886,7 +840,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     {type === "trade" &&
                                       trade &&
                                       comment.user_id === trade.author && (
-                                        <span className="rounded-full bg-gradient-to-r from-[#5865F2] to-[#4752C4] px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+                                        <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-gradient-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
                                           OP
                                         </span>
                                       )}
@@ -907,16 +861,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <IconButton
                               size="small"
                               onClick={(e) => handleMenuOpen(e, comment.id)}
-                              sx={{
-                                color: "#ffffff",
-                                padding: "8px",
-                                borderRadius: "8px",
-                                transition: "all 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "rgba(88, 101, 242, 0.15)",
-                                },
-                              }}
-                              className={`${currentUserId === comment.user_id ? "hidden" : "opacity-0 group-hover:opacity-100"} ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""} transition-all duration-200`}
+                              className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-0 transition-all duration-200 group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
                             >
                               <EllipsisHorizontalIcon className="h-4 w-4" />
                             </IconButton>
@@ -930,7 +875,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               <TextField
                                 fullWidth
                                 multiline
-                                rows={4}
+                                minRows={3}
+                                maxRows={10}
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
                                 variant="outlined"
@@ -948,29 +894,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     autoComplete: "off",
                                     spellCheck: "false",
                                     autoCapitalize: "off",
+                                    className: "[&_textarea]:resize-y",
                                   },
                                 }}
-                                sx={{
-                                  "& .MuiInputBase-root": {
-                                    backgroundColor: "#1E2328",
-                                    borderRadius: "8px",
-                                    "& .MuiInputBase-input": {
-                                      color: "#D3D9D4",
-                                      fontSize: "0.875rem",
-                                    },
-                                    "& .MuiOutlinedInput-notchedOutline": {
-                                      borderColor: "#2E3944",
-                                    },
-                                    "&:hover .MuiOutlinedInput-notchedOutline":
-                                      {
-                                        borderColor: "#5865F2",
-                                      },
-                                    "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                      {
-                                        borderColor: "#5865F2",
-                                      },
-                                  },
-                                }}
+                                className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-stroke [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
                               />
                               <div className="flex gap-2">
                                 <Button
@@ -978,18 +905,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   variant="contained"
                                   onClick={() => handleEditComment(comment.id)}
                                   disabled={!editContent.trim()}
-                                  sx={{
-                                    backgroundColor: "#5865F2",
-                                    color: "#ffffff",
-                                    borderRadius: "6px",
-                                    textTransform: "none",
-                                    fontSize: "0.875rem",
-                                    "&:hover": {
-                                      backgroundColor: "#4752C4",
-                                    },
-                                  }}
+                                  className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
                                 >
-                                  Save Changes
+                                  Update
                                 </Button>
                                 <Button
                                   size="small"
@@ -998,18 +916,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     setEditingCommentId(null);
                                     setEditContent("");
                                   }}
-                                  sx={{
-                                    borderColor: "#2E3944",
-                                    color: "#748D92",
-                                    borderRadius: "6px",
-                                    textTransform: "none",
-                                    fontSize: "0.875rem",
-                                    "&:hover": {
-                                      borderColor: "#5865F2",
-                                      backgroundColor:
-                                        "rgba(88, 101, 242, 0.1)",
-                                    },
-                                  }}
+                                  className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
                                 >
                                   Cancel
                                 </Button>
@@ -1019,9 +926,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <div>
                               {loadingUserData[comment.user_id] ? (
                                 <div className="space-y-2">
-                                  <div className="h-5 w-full animate-pulse rounded bg-[#1E2328]" />
-                                  <div className="h-5 w-[90%] animate-pulse rounded bg-[#1E2328]" />
-                                  <div className="h-5 w-[80%] animate-pulse rounded bg-[#1E2328]" />
+                                  <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
+                                  <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
+                                  <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
                                 </div>
                               ) : (
                                 <>
@@ -1060,7 +967,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
                                       return (
                                         <>
-                                          <p className="text-muted text-sm leading-relaxed break-words whitespace-pre-wrap">
+                                          <p className="text-primary-text text-sm leading-relaxed break-words whitespace-pre-wrap">
                                             {convertUrlsToLinks(visibleContent)}
                                           </p>
                                           {shouldTruncate && (
@@ -1068,7 +975,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                               onClick={() =>
                                                 toggleCommentExpand(comment.id)
                                               }
-                                              className="mt-2 flex items-center gap-1 text-sm font-medium text-blue-300 transition-colors duration-200 hover:text-blue-400 hover:underline"
+                                              className="text-link hover:text-link-hover mt-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
                                             >
                                               {isExpanded ? (
                                                 <>
@@ -1101,60 +1008,28 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             selectedCommentId === comment.id
                           }
                           onClose={handleMenuClose}
-                          slotProps={{
-                            paper: {
-                              sx: {
-                                backgroundColor: "#212A31",
-                                border: "1px solid #2E3944",
-                                borderRadius: "12px",
-                                boxShadow:
-                                  "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)",
-                                overflow: "hidden",
-                                "& .MuiMenuItem-root": {
-                                  color: "#D3D9D4",
-                                  fontSize: "0.875rem",
-                                  padding: "12px 16px",
-                                  transition: "all 0.2s ease-in-out",
-                                  borderBottom:
-                                    "1px solid rgba(46, 57, 68, 0.3)",
-                                  "&:last-child": {
-                                    borderBottom: "none",
-                                  },
-                                  "&:hover": {
-                                    backgroundColor: "#2E3944",
-                                    color: "#ffffff",
-                                  },
-                                  "& .MuiSvgIcon-root": {
-                                    transition: "all 0.2s ease-in-out",
-                                  },
-                                  "&:hover .MuiSvgIcon-root": {
-                                    transform: "scale(1.1)",
-                                  },
-                                },
-                              },
-                            },
-                          }}
                         >
                           {currentUserId === comment.user_id ? (
                             [
                               // Only show edit option if comment is within 1 hour of creation
                               isCommentEditable(comment.date) && (
                                 <MenuItem key="edit" onClick={handleEditClick}>
-                                  <PencilIcon className="mr-3 h-4 w-4 text-[#5865F2]" />
+                                  <PencilIcon className="mr-3 h-4 w-4" />
                                   Edit Comment
                                 </MenuItem>
                               ),
                               <MenuItem
                                 key="delete"
                                 onClick={handleDeleteClick}
+                                className="text-button-danger hover:bg-button-danger/10"
                               >
-                                <TrashIcon className="mr-3 h-4 w-4 text-[#ef4444]" />
+                                <TrashIcon className="text-button-danger mr-3 h-4 w-4" />
                                 Delete Comment
                               </MenuItem>,
                             ].filter(Boolean)
                           ) : (
                             <MenuItem onClick={handleReportClick}>
-                              <FlagIcon className="mr-3 h-4 w-4 text-[#f59e0b]" />
+                              <FlagIcon className="mr-3 h-4 w-4" />
                               Report Comment
                             </MenuItem>
                           )}
@@ -1174,16 +1049,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     onChange={handlePageChange}
                     sx={{
                       "& .MuiPaginationItem-root": {
-                        color: "#D3D9D4",
+                        color: "var(--color-primary-text)",
                         "&.Mui-selected": {
-                          backgroundColor: "#5865F2",
+                          backgroundColor: "var(--color-button-info)",
+                          color: "var(--color-form-button-text)",
                           "&:hover": {
-                            backgroundColor: "#4752C4",
+                            backgroundColor: "var(--color-button-info-hover)",
                           },
                         },
                         "&:hover": {
-                          backgroundColor: "#2E3944",
+                          backgroundColor: "var(--color-quaternary-bg)",
                         },
+                      },
+                      "& .MuiPaginationItem-icon": {
+                        color: "var(--color-primary-text)",
                       },
                     }}
                   />
@@ -1246,38 +1125,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         requiredLimit={modalState.requiredLimit}
       />
 
-      {/* Undo Snackbar */}
-      <Snackbar
-        open={undoSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setUndoSnackbarOpen(false)}
-        autoHideDuration={3000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="info"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #5865F2",
-            fontWeight: 500,
-          }}
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={handleUndoDelete}
-              sx={{ fontWeight: 700 }}
-            >
-              UNDO
-            </Button>
-          }
-        >
-          Comment deleted.
-        </MuiAlert>
-      </Snackbar>
-
       {/* Post Success Snackbar */}
       <Snackbar
         open={postSnackbarOpen}
@@ -1289,12 +1136,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="success"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #5865F2",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
         >
           {postSnackbarMsg}
         </MuiAlert>
@@ -1311,12 +1153,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="error"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #ef4444",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-error border font-medium"
         >
           {postErrorSnackbarMsg}
         </MuiAlert>
@@ -1333,12 +1170,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="success"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #5865F2",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
         >
           {editSnackbarMsg}
         </MuiAlert>
@@ -1355,12 +1187,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="error"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #ef4444",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-error border font-medium"
         >
           {globalErrorSnackbarMsg}
         </MuiAlert>
@@ -1377,12 +1204,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="info"
-          sx={{
-            background: "#212A31",
-            color: "#fff",
-            border: "1px solid #5865F2",
-            fontWeight: 500,
-          }}
+          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
         >
           {infoSnackbarMsg}
         </MuiAlert>

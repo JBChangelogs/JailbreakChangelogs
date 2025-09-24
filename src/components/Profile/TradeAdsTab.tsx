@@ -7,9 +7,10 @@ import {
   Pagination,
   Chip,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
-import { formatRelativeDate } from "@/utils/timestamp";
-import { getItemTypeColor } from "@/utils/badgeColors";
+import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,6 +19,7 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
+import { getCategoryColor } from "@/utils/categoryIcons";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 interface TradeItem {
@@ -54,31 +56,37 @@ interface TradeAdsTabProps {
   userId: string;
   tradeAds?: TradeAd[];
   isLoadingAdditionalData?: boolean;
+  isOwnProfile?: boolean;
 }
 
 export default function TradeAdsTab({
   tradeAds: propTradeAds = [],
   isLoadingAdditionalData = false,
+  isOwnProfile = false,
 }: TradeAdsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const adsPerPage = 3;
-
-  // Use props data instead of fetching client-side
   const tradeAds = propTradeAds;
-  const loading = false; // No loading state needed since data comes from props
-  const error = null; // No error state needed since data comes from props
+  const loading = false;
+  const error = null;
+  const TradeAdItem = ({ ad }: { ad: TradeAd }) => {
+    const createdTime = useOptimizedRealTimeRelativeDate(
+      ad.created_at,
+      `trade-ad-created-${ad.id}`,
+    );
+    const expiresTime = useOptimizedRealTimeRelativeDate(
+      ad.expires,
+      `trade-ad-expires-${ad.id}`,
+    );
 
-  // Change page
+    return renderTradeAd({ ...ad, createdTime, expiresTime });
+  };
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
-
-  // Get current page ads
   const indexOfLastAd = currentPage * adsPerPage;
   const indexOfFirstAd = indexOfLastAd - adsPerPage;
   const currentAds = tradeAds.slice(indexOfFirstAd, indexOfLastAd);
-
-  // Render a trade item
   const renderTradeItem = (
     item: TradeItem | { data: TradeItem; sub_name?: string },
     totalItems: number,
@@ -86,7 +94,6 @@ export default function TradeAdsTab({
     // Handle both direct item data and nested data structure
     const itemData = "data" in item ? item.data : item;
     const isVideo = isVideoItem(itemData.name);
-    const typeColor = getItemTypeColor(itemData.type);
     const isVariant = "data" in item && item.sub_name;
     const displayName = isVariant
       ? `${itemData.name} [${item.sub_name}]`
@@ -98,7 +105,7 @@ export default function TradeAdsTab({
     return (
       <div
         key={itemData.id}
-        className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 shadow-sm transition-colors hover:border-[#5865F2]"
+        className="bg-primary-bg border-border-primary hover:border-button-info rounded-lg border p-3 shadow-sm transition-colors"
       >
         <div className="mb-2 flex items-center">
           <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
@@ -124,59 +131,43 @@ export default function TradeAdsTab({
           <div className="flex-1">
             <div className="flex items-start justify-between">
               {isLoadingAdditionalData ? (
-                <Skeleton
-                  variant="text"
-                  width="80%"
-                  height={20}
-                  sx={{ bgcolor: "#2E3944" }}
-                />
+                <Skeleton variant="text" width="80%" height={20} />
               ) : (
                 <Link
                   href={itemUrl}
-                  className="text-muted font-medium transition-colors hover:text-blue-400"
+                  className="text-primary-text hover:text-button-info font-medium transition-colors"
                 >
                   {displayName}
                 </Link>
               )}
             </div>
-            <div className="text-xs text-[#FFFFFF]">
+            <div className="text-secondary-text text-xs">
               <div className="mb-1">
                 {isLoadingAdditionalData ? (
-                  <Skeleton
-                    variant="rounded"
-                    width={80}
-                    height={20}
-                    sx={{ bgcolor: "#2E3944" }}
-                  />
+                  <Skeleton variant="rounded" width={80} height={20} />
                 ) : (
                   <Chip
                     label={itemData.type}
                     size="small"
+                    variant="outlined"
                     sx={{
-                      backgroundColor: typeColor,
-                      color: "#fff",
+                      backgroundColor: getCategoryColor(itemData.type) + "20", // Add 20% opacity
+                      borderColor: getCategoryColor(itemData.type),
+                      color: "var(--color-primary-text)",
                       fontSize: "0.65rem",
                       height: "20px",
+                      fontWeight: "medium",
+                      "&:hover": {
+                        borderColor: getCategoryColor(itemData.type),
+                        backgroundColor: getCategoryColor(itemData.type) + "30", // Slightly more opacity on hover
+                      },
                     }}
                   />
                 )}
               </div>
               <div className="space-y-1">
-                <p>
-                  Cash Value:{" "}
-                  {itemData.cash_value === null || itemData.cash_value === "N/A"
-                    ? "N/A"
-                    : itemData.cash_value}
-                </p>
-                <p>
-                  Duped Value:{" "}
-                  {itemData.duped_value === null ||
-                  itemData.duped_value === "N/A"
-                    ? "N/A"
-                    : itemData.duped_value}
-                </p>
                 {totalItems > 1 && (
-                  <p className="text-[#5865F2]">
+                  <p className="text-secondary-text">
                     +{totalItems - 1} other item
                     {totalItems - 1 !== 1 ? "s" : ""}
                   </p>
@@ -189,52 +180,119 @@ export default function TradeAdsTab({
     );
   };
 
-  // Render a trade ad
-  const renderTradeAd = (ad: TradeAd) => (
-    <div
-      key={ad.id}
-      className="mb-4 rounded-lg border border-[#5865F2] bg-[#2E3944] p-4"
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <SwapHorizIcon className="text-[#5865F2]" />
-        <Link
-          href={`/trading/ad/${ad.id}`}
-          className="text-muted text-lg font-semibold transition-colors hover:text-blue-400"
-        >
-          Trade Ad #{ad.id} - {ad.status}
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <h3 className="text-muted mb-2 font-medium">Offering:</h3>
-          {ad.offering.length > 0 ? (
-            <div className="space-y-2">
-              {renderTradeItem(ad.offering[0], ad.offering.length)}
-            </div>
-          ) : (
-            <p className="text-[#FFFFFF] italic">No items offered</p>
-          )}
+  const renderTradeAd = (
+    ad: TradeAd & { createdTime: string; expiresTime: string },
+  ) => {
+    return (
+      <div
+        key={ad.id}
+        className="border-border-primary bg-secondary-bg/30 mb-6 rounded-lg border p-5 shadow-sm"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SwapHorizIcon className="text-button-info h-6 w-6" />
+            <Link
+              href={`/trading/ad/${ad.id}`}
+              className="text-primary-text hover:text-button-info text-xl font-bold transition-colors"
+            >
+              Trade Ad #{ad.id}
+            </Link>
+          </div>
+          <div
+            className={`rounded-full border px-3 py-1 text-sm font-medium ${
+              ad.status === "Pending"
+                ? "bg-button-info/10 text-primary-text border-button-info/20"
+                : ad.status === "Completed"
+                  ? "bg-status-success/10 text-status-success border-status-success/20"
+                  : ad.status === "Expired"
+                    ? "bg-status-error/10 text-status-error border-status-error/20"
+                    : "bg-secondary-text/10 text-secondary-text border-secondary-text/20"
+            }`}
+          >
+            {ad.status}
+          </div>
         </div>
 
-        <div>
-          <h3 className="text-muted mb-2 font-medium">Requesting:</h3>
-          {ad.requesting.length > 0 ? (
-            <div className="space-y-2">
-              {renderTradeItem(ad.requesting[0], ad.requesting.length)}
-            </div>
-          ) : (
-            <p className="text-[#FFFFFF] italic">No items requested</p>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Offering Section */}
+          <div className="border-status-success/20 bg-status-success/10 rounded-lg border p-4">
+            <h3 className="text-status-success mb-4 text-lg font-bold">
+              Offering
+            </h3>
+            {ad.offering.length > 0 ? (
+              renderTradeItem(ad.offering[0], ad.offering.length)
+            ) : (
+              <p className="text-secondary-text italic">No items offered</p>
+            )}
+          </div>
+
+          {/* Requesting Section */}
+          <div className="border-status-error/20 bg-status-error/10 rounded-lg border p-4">
+            <h3 className="text-status-error mb-4 text-lg font-bold">
+              Requesting
+            </h3>
+            {ad.requesting.length > 0 ? (
+              renderTradeItem(ad.requesting[0], ad.requesting.length)
+            ) : (
+              <p className="text-secondary-text italic">No items requested</p>
+            )}
+          </div>
+        </div>
+
+        <div className="border-border-primary text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
+          <Tooltip
+            title={formatCustomDate(ad.created_at)}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  fontSize: "0.75rem",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px var(--color-card-shadow)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <span className="cursor-help">Created {ad.createdTime}</span>
+          </Tooltip>
+          {ad.expires && (
+            <>
+              <span className="text-tertiary-text">|</span>
+              <Tooltip
+                title={formatCustomDate(ad.expires)}
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px var(--color-card-shadow)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
+                    },
+                  },
+                }}
+              >
+                <span className="cursor-help">Expires {ad.expiresTime}</span>
+              </Tooltip>
+            </>
           )}
         </div>
       </div>
-
-      <div className="text-muted mt-3 text-xs">
-        <p>Created: {formatRelativeDate(ad.created_at)}</p>
-        {ad.expires && <p>Expires: {formatRelativeDate(ad.expires)}</p>}
-      </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -244,7 +302,7 @@ export default function TradeAdsTab({
         alignItems="center"
         minHeight={200}
       >
-        <CircularProgress sx={{ color: "#5865F2" }} />
+        <CircularProgress sx={{ color: "var(--color-button-info)" }} />
       </Box>
     );
   }
@@ -252,12 +310,14 @@ export default function TradeAdsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <SwapHorizIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">Trade Ads</h2>
+            <SwapHorizIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
+              Trade Ads
+            </h2>
           </div>
-          <p className="text-red-500">Error: {error}</p>
+          <p className="text-status-error">Error: {error}</p>
         </div>
       </div>
     );
@@ -265,19 +325,38 @@ export default function TradeAdsTab({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <SwapHorizIcon className="text-[#5865F2]" />
-          <h2 className="text-muted text-lg font-semibold">
+          <SwapHorizIcon className="text-button-info" />
+          <h2 className="text-primary-text text-lg font-semibold">
             Trade Ads [{tradeAds.length}]
           </h2>
         </div>
 
         {tradeAds.length === 0 ? (
-          <p className="text-[#FFFFFF] italic">No trade ads yet</p>
+          <div className="p-8 text-center">
+            <SwapHorizIcon className="text-button-info mx-auto mb-4 h-12 w-12" />
+            <h3 className="text-primary-text mb-2 text-xl font-semibold">
+              {isOwnProfile
+                ? "You have not posted any trade ads."
+                : "No trade ads available."}
+            </h3>
+            {isOwnProfile && (
+              <Link
+                href="/trading"
+                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
+              >
+                Create Trade Ad
+              </Link>
+            )}
+          </div>
         ) : (
           <>
-            <div className="space-y-4">{currentAds.map(renderTradeAd)}</div>
+            <div className="space-y-4">
+              {currentAds.map((ad) => (
+                <TradeAdItem key={ad.id} ad={ad} />
+              ))}
+            </div>
 
             {/* Pagination controls */}
             {tradeAds.length > adsPerPage && (
@@ -289,10 +368,20 @@ export default function TradeAdsTab({
                   color="primary"
                   sx={{
                     "& .MuiPaginationItem-root": {
-                      color: "#D3D9D4",
+                      color: "var(--color-primary-text)",
+                      "&.Mui-selected": {
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                        },
+                      },
+                      "&:hover": {
+                        backgroundColor: "var(--color-quaternary-bg)",
+                      },
                     },
-                    "& .Mui-selected": {
-                      backgroundColor: "#5865F2 !important",
+                    "& .MuiPaginationItem-icon": {
+                      color: "var(--color-primary-text)",
                     },
                   }}
                 />

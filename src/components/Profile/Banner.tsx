@@ -127,7 +127,7 @@ export const Banner = ({
   }, [userId]);
 
   return (
-    <div className="relative h-48 bg-[#2E3944] md:h-80">
+    <div className="relative h-48 md:h-80">
       <Image
         {...getBannerSource()}
         fill

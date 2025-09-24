@@ -38,41 +38,24 @@ export function useBotsPolling(intervalMs: number = 30000) {
       const result = await pollBotsData();
 
       if (result.success && result.data) {
-        const activeBotsCount =
-          result.data.botsData?.recent_heartbeats?.filter((bot) => {
-            const now = Math.floor(Date.now() / 1000);
-            const thirtySecondsAgo = now - 30;
-            return bot.last_heartbeat >= thirtySecondsAgo;
-          }).length || 0;
+        const totalBotsCount =
+          result.data.botsData?.recent_heartbeats?.length || 0;
 
         console.log(`[POLLING] Successfully fetched data at ${timestamp}:`, {
-          botsCount: result.data.botsData?.recent_heartbeats?.length || 0,
-          activeBotsCount,
+          botsCount: totalBotsCount,
           queueLength: result.data.queueInfo?.queue_length || 0,
           lastProcessed: result.data.queueInfo?.last_dequeue?.user_id || "none",
         });
 
-        setData((prev) => {
-          const newConsecutiveEmpty =
-            activeBotsCount === 0 ? prev.consecutiveEmptyResults + 1 : 0;
-          const shouldStopPolling = newConsecutiveEmpty >= 4;
-
-          if (shouldStopPolling) {
-            console.log(
-              `[POLLING] Stopping polling after ${newConsecutiveEmpty} consecutive empty results (2 minutes)`,
-            );
-          }
-
-          return {
-            botsData: result.data.botsData,
-            queueInfo: result.data.queueInfo,
-            lastUpdated: Date.now(),
-            error: null,
-            isLoading: false,
-            retryCount: 0,
-            consecutiveEmptyResults: newConsecutiveEmpty,
-            pollingStopped: shouldStopPolling,
-          };
+        setData({
+          botsData: result.data.botsData,
+          queueInfo: result.data.queueInfo,
+          lastUpdated: Date.now(),
+          error: null,
+          isLoading: false,
+          retryCount: 0,
+          consecutiveEmptyResults: 0,
+          pollingStopped: false,
         });
       } else {
         console.error(

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { getItemTypeColor } from "@/utils/badgeColors";
+import { getCategoryColor } from "@/utils/categoryIcons";
 
 interface Item {
   id: number;
@@ -69,12 +69,14 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/75" onClick={onClose} />
-      <div className="relative mx-4 w-full max-w-md rounded-lg bg-[#212A31] shadow-xl">
-        <div className="flex items-center justify-between border-b border-[#2E3944] p-4">
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Select Item</h2>
+      <div className="relative mx-4 w-full max-w-md rounded-lg shadow-xl">
+        <div className="flex items-center justify-between border-b p-4">
+          <h2 className="text-primary-text text-xl font-semibold">
+            Select Item
+          </h2>
           <button
             onClick={onClose}
-            className="text-muted transition-colors hover:text-[#FFFFFF]"
+            className="text-muted hover:text-primary-text transition-colors"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -88,7 +90,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-muted placeholder-muted/50 w-full rounded-lg border border-[#2E3944] bg-[#37424D] py-2 pr-4 pl-10 focus:border-[#5865F2] focus:outline-none"
+              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-2 pr-4 pl-10 focus:outline-none"
             />
           </div>
 
@@ -108,14 +110,19 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
                       onItemSelect(item);
                       onClose();
                     }}
-                    className="group flex w-full items-center justify-between rounded-lg border border-[#2E3944] bg-[#37424D] p-2 text-left transition-colors hover:bg-[#2E3944]"
+                    className="group hover:bg-quaternary-bg border-border-primary bg-tertiary-bg flex w-full items-center justify-between rounded-lg border p-2 text-left transition-colors"
                   >
-                    <span className="text-muted truncate transition-colors group-hover:text-[#FFFFFF]">
+                    <span className="text-secondary-text group-hover:text-primary-text truncate transition-colors">
                       {item.name}
                     </span>
                     <span
-                      className="ml-2 flex-shrink-0 rounded-full px-2 py-0.5 text-xs text-white"
-                      style={{ backgroundColor: getItemTypeColor(item.type) }}
+                      className="ml-2 flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
+                      style={{
+                        backgroundColor: getCategoryColor(item.type) + "20",
+                        borderColor: getCategoryColor(item.type),
+                        color: "var(--color-primary-text)",
+                        border: "1px solid",
+                      }}
                     >
                       {item.type}
                     </span>

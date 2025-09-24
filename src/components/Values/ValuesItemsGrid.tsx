@@ -176,7 +176,7 @@ export default function ValuesItemsGrid({
   return (
     <>
       <div className="mb-4 flex flex-col gap-4">
-        <p className="text-muted">
+        <p className="text-secondary-text">
           {debouncedSearchTerm
             ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? "item" : "items"} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
             : `Total ${filterSort !== "name-all-items" ? filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ") : "Items"}: ${rangeFilteredItems.length}`}
@@ -189,16 +189,20 @@ export default function ValuesItemsGrid({
               onChange={handlePageChange}
               sx={{
                 "& .MuiPaginationItem-root": {
-                  color: "#D3D9D4",
+                  color: "var(--color-primary-text)",
                   "&.Mui-selected": {
-                    backgroundColor: "#5865F2",
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
                     "&:hover": {
-                      backgroundColor: "#4752C4",
+                      backgroundColor: "var(--color-button-info-hover)",
                     },
                   },
                   "&:hover": {
-                    backgroundColor: "#2E3944",
+                    backgroundColor: "var(--color-quaternary-bg)",
                   },
+                },
+                "& .MuiPaginationItem-icon": {
+                  color: "var(--color-primary-text)",
                 },
               }}
             />
@@ -208,8 +212,8 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="col-span-full mb-4 rounded-lg bg-[#37424D] p-8 text-center">
-            <p className="text-muted text-lg">
+          <div className="bg-secondary-bg border-stroke col-span-full mb-4 rounded-lg border p-8 text-center">
+            <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : appliedMaxValue.toLocaleString()})`
                 : getNoItemsMessage()}
@@ -217,14 +221,14 @@ export default function ValuesItemsGrid({
             {rangeFilteredItems.length === 0 && items.length > 0 && (
               <button
                 onClick={onResetValueRange}
-                className="text-muted mt-4 mr-3 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 hover:bg-[#1A5F7A] focus:outline-none"
+                className="text-form-button-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none"
               >
                 Reset Value Range
               </button>
             )}
             <button
               onClick={onClearAllFilters}
-              className="text-muted mt-4 rounded-lg border border-[#2E3944] bg-[#124E66] px-6 py-2 hover:bg-[#1A5F7A] focus:outline-none"
+              className="text-form-button-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
             >
               Clear All Filters
             </button>
@@ -244,26 +248,28 @@ export default function ValuesItemsGrid({
                 currentUserPremiumType === 0 &&
                 (index + 1) % 12 === 0 &&
                 index + 1 < displayedItems.length && (
-                  <div className="col-span-full my-4">
-                    <div
-                      className="relative overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
-                      style={{ minHeight: "450px", maxHeight: "500px" }}
-                    >
-                      <span className="absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs font-semibold text-white">
-                        Advertisement
+                  <div className="col-span-full my-4 flex justify-center">
+                    <div className="w-full max-w-[700px]">
+                      <span className="text-secondary-text mb-2 block text-center text-xs">
+                        ADVERTISEMENT
                       </span>
-                      <DisplayAd
-                        adSlot="4358721799"
-                        adFormat="fluid"
-                        layoutKey="-62+ck+1k-2e+cb"
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          height: "100%",
-                        }}
-                      />
+                      <div
+                        className="border-stroke bg-secondary-bg relative overflow-hidden rounded-lg border shadow transition-all duration-300"
+                        style={{ minHeight: "450px", maxHeight: "500px" }}
+                      >
+                        <DisplayAd
+                          adSlot="4358721799"
+                          adFormat="fluid"
+                          layoutKey="-62+ck+1k-2e+cb"
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      </div>
+                      <AdRemovalNotice />
                     </div>
-                    <AdRemovalNotice />
                   </div>
                 )}
             </React.Fragment>
@@ -279,16 +285,20 @@ export default function ValuesItemsGrid({
             onChange={handlePageChange}
             sx={{
               "& .MuiPaginationItem-root": {
-                color: "#D3D9D4",
+                color: "var(--color-primary-text)",
                 "&.Mui-selected": {
-                  backgroundColor: "#5865F2",
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
                   "&:hover": {
-                    backgroundColor: "#4752C4",
+                    backgroundColor: "var(--color-button-info-hover)",
                   },
                 },
                 "&:hover": {
-                  backgroundColor: "#2E3944",
+                  backgroundColor: "var(--color-quaternary-bg)",
                 },
+              },
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
               },
             }}
           />

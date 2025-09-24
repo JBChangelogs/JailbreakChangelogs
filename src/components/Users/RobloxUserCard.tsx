@@ -16,84 +16,49 @@ interface RobloxUserCardProps {
       profile_public: number;
     };
   };
-  currentUserId: string | null;
 }
 
-export default function RobloxUserCard({
-  user,
-  currentUserId,
-}: RobloxUserCardProps) {
+export default function RobloxUserCard({ user }: RobloxUserCardProps) {
   const [avatarError, setAvatarError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const isPrivate =
-    user.settings?.profile_public === 0 && currentUserId !== user.id;
-
-  if (isPrivate) {
-    return (
-      <div className="flex items-center space-x-3">
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#1E2328]">
-          <svg
-            className="h-6 w-6 text-[#FFFFFF]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-            />
-          </svg>
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-muted truncate text-base font-semibold transition-colors group-hover:text-[#5865F2]">
-            Hidden User
-          </h2>
-          <p className="truncate text-sm text-[#FFFFFF] transition-colors group-hover:text-[#5865F2]">
-            Private Profile
-          </p>
-          <p className="text-sm text-[#FFFFFF]">Joined ???</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center space-x-3">
       {!avatarError && user.roblox_avatar ? (
         <div className="relative h-12 w-12 flex-shrink-0">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-[#2E3944]">
-              <CircularProgress size={24} sx={{ color: "#5865F2" }} />
+            <div className="absolute inset-0 flex items-center justify-center rounded-full">
+              <CircularProgress
+                size={24}
+                sx={{ color: "var(--color-button-info)" }}
+              />
             </div>
           )}
-          <div className="absolute inset-0 bg-[#212A31]">
+          <div className="absolute inset-0">
             <Image
               src={user.roblox_avatar}
               alt={`${user.roblox_display_name || user.roblox_username || "Roblox"} user's profile picture`}
               fill
               draggable={false}
-              className="rounded-full border border-[#2E3944] object-cover"
+              className="rounded-full border object-cover"
               onError={() => setAvatarError(true)}
               onLoad={() => setIsLoading(false)}
             />
           </div>
         </div>
       ) : (
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#1E2328]">
-          <RobloxIcon className="h-6 w-6 text-[#FFFFFF]" />
+        <div className="border-border-primary bg-tertiary-bg flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border">
+          <RobloxIcon className="text-primary-text h-6 w-6" />
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <h2 className="max-w-[180px] truncate text-base font-semibold text-[#FFFFFF] transition-colors group-hover:text-blue-300 sm:max-w-[250px]">
+        <h2 className="text-primary-text hover:text-border-focus max-w-[180px] truncate text-base font-semibold transition-colors sm:max-w-[250px]">
           {user.roblox_display_name || user.roblox_username || "Roblox User"}
         </h2>
-        <p className="max-w-[180px] truncate text-sm text-[#B9BBBE] transition-colors group-hover:text-blue-300 sm:max-w-[250px]">
+        <p className="text-secondary-text max-w-[180px] truncate text-sm sm:max-w-[250px]">
           @{user.roblox_username || "unknown"}
         </p>
-        <p className="text-sm text-[#72767D]">
+        <p className="text-tertiary-text text-sm">
           {user.roblox_join_date
             ? `Joined ${formatShortDate(user.roblox_join_date)}`
             : "Unknown join date"}

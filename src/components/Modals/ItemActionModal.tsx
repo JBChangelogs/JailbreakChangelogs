@@ -50,21 +50,21 @@ export default function ItemActionModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="mx-auto max-h-[80vh] w-full max-w-sm overflow-hidden rounded-lg border border-[#5865F2] bg-[#2E3944] sm:max-w-md">
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto max-h-[80vh] w-full max-w-sm overflow-hidden rounded-lg border shadow-lg sm:max-w-md">
           {/* Modal Header */}
-          <div className="border-b border-[#2E3944] bg-[#212A31] p-4 sm:p-6">
+          <div className="modal-header text-primary-text border-stroke px-4 py-4 text-lg font-semibold sm:px-6 sm:text-xl">
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
-                <Dialog.Title className="text-muted text-lg font-semibold sm:text-xl">
+                <Dialog.Title className="text-primary-text text-lg font-semibold sm:text-xl">
                   Item Actions
                 </Dialog.Title>
-                <p className="text-muted truncate text-sm opacity-75">
+                <p className="text-secondary-text truncate text-sm">
                   {item.title} {item.categoryTitle && `(${item.categoryTitle})`}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="text-muted rounded-full p-1 hover:text-white"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
@@ -72,18 +72,18 @@ export default function ItemActionModal({
           </div>
 
           {/* Modal Content */}
-          <div className="p-4 sm:p-6">
+          <div className="modal-content p-4 sm:p-6">
             <div className="space-y-3">
               {/* View Item Page */}
               <button
                 onClick={handleViewItemPage}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-[#2E3944] bg-[#212A31] p-3 text-left text-white transition-colors sm:p-4"
+                className="bg-quaternary-bg hover:bg-tertiary-bg text-primary-text border-border-primary flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
               >
                 <div>
                   <div className="text-sm font-medium sm:text-base">
                     View Item Page
                   </div>
-                  <div className="text-xs text-gray-400 sm:text-sm">
+                  <div className="text-secondary-text text-xs sm:text-sm">
                     See detailed item information, values, and statistics
                   </div>
                 </div>
@@ -93,28 +93,28 @@ export default function ItemActionModal({
               {hasTradeHistory ? (
                 <button
                   onClick={handleViewTradeHistory}
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-[#2E3944] bg-[#212A31] p-3 text-left text-white transition-colors sm:p-4"
+                  className="bg-quaternary-bg hover:bg-tertiary-bg text-primary-text border-border-primary flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
                 >
                   <div>
-                    <div className="font-medium">View Trade History</div>
-                    <div className="text-sm text-gray-400">
-                      View trade history for this item
+                    <div className="font-medium">View Ownership History</div>
+                    <div className="text-secondary-text text-sm">
+                      View ownership history for this item
                     </div>
                   </div>
                 </button>
               ) : (
-                <div className="flex w-full items-center gap-3 rounded-lg border border-[#2E3944] bg-[#212A31] p-3 text-left text-gray-500 sm:p-4">
+                <div className="bg-quaternary-bg text-tertiary-text border-border-primary flex w-full items-center gap-3 rounded-lg border p-3 text-left sm:p-4">
                   <div>
-                    <div className="font-medium">No Trade History</div>
-                    <div className="text-sm text-gray-500">
-                      This item has no trade history
+                    <div className="font-medium">No Ownership History</div>
+                    <div className="text-quaternary-text text-sm">
+                      This item has no ownership history
                     </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </Dialog.Panel>
       </div>
     </Dialog>
   );

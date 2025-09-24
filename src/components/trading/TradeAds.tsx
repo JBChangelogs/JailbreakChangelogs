@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// import { PUBLIC_API_URL } from '@/utils/api';
 import { TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
@@ -263,11 +262,11 @@ export default function TradeAds({
           hasTradeAds={userTradeAds.length > 0}
         />
         {activeTab === "view" && (
-          <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 text-center">
-            <h3 className="text-muted mb-4 text-lg font-medium">
+          <div className="mb-8 rounded-lg border p-6 text-center">
+            <h3 className="text-tertiary-text mb-4 text-lg font-medium">
               No Trade Ads Available
             </h3>
-            <p className="text-muted/70 mb-8">
+            <p className="text-tertiary-text/70 mb-8">
               This page seems empty at the moment.
             </p>
             <div className="flex justify-center gap-4">
@@ -275,9 +274,9 @@ export default function TradeAds({
                 variant="contained"
                 onClick={refreshTradeAds}
                 sx={{
-                  backgroundColor: "#5865F2",
+                  backgroundColor: "var(--color-button-info)",
                   "&:hover": {
-                    backgroundColor: "#4752C4",
+                    backgroundColor: "var(--color-button-info-hover)",
                   },
                 }}
               >
@@ -287,9 +286,9 @@ export default function TradeAds({
                 variant="contained"
                 onClick={() => handleTabChange("create")}
                 sx={{
-                  backgroundColor: "#5865F2",
+                  backgroundColor: "var(--color-button-info)",
                   "&:hover": {
-                    backgroundColor: "#4752C4",
+                    backgroundColor: "var(--color-button-info-hover)",
                   },
                 }}
               >
@@ -342,13 +341,13 @@ export default function TradeAds({
       {activeTab === "view" ? (
         <>
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-muted">
+            <p className="text-secondary-text">
               Showing {sortedTradeAds.length}{" "}
               {sortedTradeAds.length === 1 ? "trade ad" : "trade ads"}
             </p>
             <button
               onClick={toggleSortOrder}
-              className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#2E3944]"
+              className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
             >
               {sortOrder === "newest" ? (
                 <ArrowDownIcon className="h-4 w-4" />
@@ -396,20 +395,22 @@ export default function TradeAds({
                 count={totalPages}
                 page={page}
                 onChange={handlePageChange}
-                color="primary"
                 sx={{
                   "& .MuiPaginationItem-root": {
-                    color: "#D3D9D4",
+                    color: "var(--color-primary-text)",
                     "&.Mui-selected": {
-                      backgroundColor: "#5865F2",
-                      color: "white",
+                      backgroundColor: "var(--color-button-info)",
+                      color: "var(--color-form-button-text)",
                       "&:hover": {
-                        backgroundColor: "#4752C4",
+                        backgroundColor: "var(--color-button-info-hover)",
                       },
                     },
                     "&:hover": {
-                      backgroundColor: "#2E3944",
+                      backgroundColor: "var(--color-quaternary-bg)",
                     },
+                  },
+                  "& .MuiPaginationItem-icon": {
+                    color: "var(--color-primary-text)",
                   },
                 }}
               />
@@ -417,19 +418,18 @@ export default function TradeAds({
           )}
         </>
       ) : activeTab === "edit" && !selectedTradeAd ? (
-        <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 text-center">
-          <p className="text-muted mb-4">
+        <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+          <p className="text-secondary-text mb-4">
             Please click the edit button on the trade ad you want to modify
           </p>
           <Button
-            variant="outlined"
+            variant="contained"
             onClick={() => handleTabChange("view")}
             sx={{
-              borderColor: "#5865F2",
-              color: "#5865F2",
+              backgroundColor: "var(--color-button-info)",
+              color: "var(--color-form-button-text)",
               "&:hover": {
-                borderColor: "#4752C4",
-                backgroundColor: "#2B2F4C",
+                backgroundColor: "var(--color-button-info-hover)",
               },
             }}
           >
@@ -465,7 +465,7 @@ export default function TradeAds({
         }
         confirmText="Make Offer"
         cancelText="Cancel"
-        confirmButtonClass="bg-[#5865F2] hover:bg-[#4752C4]"
+        confirmButtonClass="bg-button-info hover:bg-button-info-hover"
       />
     </div>
   );

@@ -91,7 +91,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
             variant="text"
             width="30%"
             height={24}
-            sx={{ bgcolor: "#37424D" }}
+            className="bg-secondary-bg"
           />
           <div className="flex gap-2">
             {["1w", "1m", "6m", "1y", "all"].map((range) => (
@@ -100,7 +100,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
                 variant="rounded"
                 width={60}
                 height={32}
-                sx={{ bgcolor: "#37424D" }}
+                className="bg-secondary-bg"
               />
             ))}
           </div>
@@ -109,7 +109,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
           <Skeleton
             variant="rectangular"
             height={400}
-            sx={{ bgcolor: "#37424D", borderRadius: "8px" }}
+            className="bg-secondary-bg rounded-lg"
           />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
@@ -117,13 +117,13 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
                 variant="circular"
                 width={40}
                 height={40}
-                sx={{ bgcolor: "#5865F2", margin: "0 auto 8px" }}
+                className="bg-button-info mx-auto mb-2"
               />
               <Skeleton
                 variant="text"
                 width="60%"
                 height={20}
-                sx={{ bgcolor: "#37424D" }}
+                className="bg-secondary-bg"
               />
             </div>
           </div>
@@ -134,10 +134,10 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
 
   if (history.length === 0) {
     return (
-      <div className="rounded-lg border border-[#37424D] bg-gradient-to-br from-[#2A3441] to-[#1E252B] p-8 text-center shadow-lg">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#5865F2]/30 bg-gradient-to-br from-[#5865F2]/20 to-[#4752C4]/20">
+      <div className="bg-secondary-bg rounded-lg p-8 text-center">
+        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
           <svg
-            className="h-8 w-8 text-[#5865F2]"
+            className="text-button-info h-8 w-8"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -150,46 +150,13 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
             />
           </svg>
         </div>
-        <h3 className="mb-2 text-xl font-semibold text-white">
+        <h3 className="text-primary-text mb-2 text-xl font-semibold">
           No Value History Available
         </h3>
-        <p className="mx-auto mb-6 max-w-md text-sm leading-relaxed text-[#D3D9D4]">
+        <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
           This item doesn&apos;t have any recorded value changes yet. Value
           history will appear here once the item&apos;s value is updated.
         </p>
-        <div className="rounded-lg border border-[#5865F2]/20 bg-gradient-to-r from-[#5865F2]/10 to-[#4752C4]/10 p-4">
-          <div className="flex items-start gap-3">
-            <svg
-              className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#5865F2]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div className="text-left">
-              <h4 className="mb-1 font-medium text-white">Want to help?</h4>
-              <p className="text-sm leading-relaxed text-[#D3D9D4]">
-                If you think this item&apos;s value should be updated, you can
-                suggest a new value through{" "}
-                <a
-                  href="https://discord.com/invite/baHCsb8N5A"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-[#5865F2] transition-colors hover:underline"
-                >
-                  Trading Core
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
@@ -272,27 +239,27 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
       {
         label: "Cash Value",
         data: filteredData.map((item) => processValue(item.cash_value)),
-        borderColor: "#5865F2",
-        backgroundColor: "rgba(88, 101, 242, 0.2)",
+        borderColor: "#2462cd",
+        backgroundColor: "rgba(36, 98, 205, 0.2)",
         fill: true,
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#FFFFFF",
-        pointHoverBorderColor: "#5865F2",
+        pointHoverBackgroundColor: "#fffffe",
+        pointHoverBorderColor: "#2462cd",
         pointHoverBorderWidth: 2,
       },
       {
         label: "Duped Value",
         data: filteredData.map((item) => processValue(item.duped_value)),
-        borderColor: "#ED4245",
-        backgroundColor: "rgba(237, 66, 69, 0.2)",
+        borderColor: "#ed4f4f",
+        backgroundColor: "rgba(237, 79, 79, 0.2)",
         fill: true,
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#FFFFFF",
-        pointHoverBorderColor: "#ED4245",
+        pointHoverBackgroundColor: "#fffffe",
+        pointHoverBorderColor: "#ed4f4f",
         pointHoverBorderWidth: 2,
       },
     ],
@@ -309,7 +276,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
       legend: {
         position: "top" as const,
         labels: {
-          color: "#D3D9D4",
+          color: "#94a1b2",
         },
       },
       zoom: {
@@ -334,10 +301,9 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         enabled: true,
         mode: "index" as const,
         intersect: false,
-        backgroundColor: "#2e3944",
-        titleColor: "#FFFFFF",
-        bodyColor: "#D3D9D4",
-        borderColor: "#37424D",
+        backgroundColor: "#16161a",
+        titleColor: "#fffffe",
+        bodyColor: "#94a1b2",
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -347,9 +313,6 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
               month: "short",
               day: "numeric",
               year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
             });
           },
           label: function (context: TooltipItem<"line">) {
@@ -367,20 +330,26 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
             day: "MMM dd",
           },
         },
+        border: {
+          color: "transparent",
+        },
         grid: {
           display: false,
         },
         ticks: {
-          color: "#FFFFFF",
+          color: "#fffffe",
           display: false,
         },
       },
       y: {
+        border: {
+          color: "transparent",
+        },
         grid: {
-          color: "#37424D",
+          color: "rgba(148, 161, 178, 0.3)",
         },
         ticks: {
-          color: "#FFFFFF",
+          color: "#fffffe",
           callback: function (tickValue: number | string) {
             return formatValue(Number(tickValue));
           },
@@ -390,62 +359,54 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
   };
 
   return (
-    <div className="mb-8 rounded-lg bg-[#212A31] p-2">
+    <div className="mb-8 rounded-lg p-2">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm text-[#FFFFFF]">Value History</h3>
+        <h3 className="text-sm" style={{ color: "#fffffe" }}>
+          Value History
+        </h3>
         <ButtonGroup size="small" variant="outlined">
           <Button
             onClick={() => handleDateRangeChange("1w")}
-            sx={{
-              color: dateRange === "1w" ? "#5865F2" : "#FFFFFF",
-              borderColor: "#37424D",
-              "&:hover": { borderColor: "#5865F2" },
-              opacity: hasDataForRange("1w") ? 1 : 0.5,
-            }}
+            className={`border-secondary hover:border-button-info transition-colors ${
+              hasDataForRange("1w") ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            style={{ color: dateRange === "1w" ? "#2461cc" : "#fffffe" }}
           >
             1W
           </Button>
           <Button
             onClick={() => handleDateRangeChange("1m")}
-            sx={{
-              color: dateRange === "1m" ? "#5865F2" : "#FFFFFF",
-              borderColor: "#37424D",
-              "&:hover": { borderColor: "#5865F2" },
-              opacity: hasDataForRange("1m") ? 1 : 0.5,
-            }}
+            className={`border-secondary hover:border-button-info transition-colors ${
+              hasDataForRange("1m") ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            style={{ color: dateRange === "1m" ? "#2461cc" : "#fffffe" }}
           >
             1M
           </Button>
           <Button
             onClick={() => handleDateRangeChange("6m")}
-            sx={{
-              color: dateRange === "6m" ? "#5865F2" : "#FFFFFF",
-              borderColor: "#37424D",
-              "&:hover": { borderColor: "#5865F2" },
-              opacity: hasDataForRange("6m") ? 1 : 0.5,
-            }}
+            className={`border-secondary hover:border-button-info transition-colors ${
+              hasDataForRange("6m") ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            style={{ color: dateRange === "6m" ? "#2461cc" : "#fffffe" }}
           >
             6M
           </Button>
           <Button
             onClick={() => handleDateRangeChange("1y")}
-            sx={{
-              color: dateRange === "1y" ? "#5865F2" : "#FFFFFF",
-              borderColor: "#37424D",
-              "&:hover": { borderColor: "#5865F2" },
-              opacity: hasDataForRange("1y") ? 1 : 0.5,
-            }}
+            className={`border-secondary hover:border-button-info transition-colors ${
+              hasDataForRange("1y") ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            style={{ color: dateRange === "1y" ? "#2461cc" : "#fffffe" }}
           >
             1Y
           </Button>
           <Button
             onClick={() => handleDateRangeChange("all")}
-            sx={{
-              color: dateRange === "all" ? "#5865F2" : "#FFFFFF",
-              borderColor: "#37424D",
-              "&:hover": { borderColor: "#5865F2" },
-              opacity: hasDataForRange("all") ? 1 : 0.5,
-            }}
+            className={`border-secondary hover:border-button-info transition-colors ${
+              hasDataForRange("all") ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            style={{ color: dateRange === "all" ? "#2461cc" : "#fffffe" }}
           >
             All
           </Button>
@@ -455,25 +416,12 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         <Line ref={chartRef} data={chartData} options={options} />
       </div>
       <div className="mt-2 flex justify-end">
-        <Button
+        <button
           onClick={() => chartRef.current?.resetZoom()}
-          size="small"
-          variant="outlined"
-          sx={{
-            color: "#5865F2",
-            borderColor: "#37424D",
-            backgroundColor: "rgba(88, 101, 242, 0.08)",
-            borderRadius: "6px",
-            fontWeight: 600,
-            boxShadow: "0 1px 4px 0 rgba(88,101,242,0.04)",
-            "&:hover": {
-              borderColor: "#5865F2",
-              backgroundColor: "rgba(88, 101, 242, 0.16)",
-            },
-          }}
+          className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
         >
           Reset Zoom
-        </Button>
+        </button>
       </div>
     </div>
   );

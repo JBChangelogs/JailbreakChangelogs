@@ -36,26 +36,15 @@ export default function ConnectedBotsPolling() {
     "last-scanned",
   );
 
-  // Filter active bots (last 30 seconds) and sort alphabetically by display name
-  const activeBots =
-    botsData?.recent_heartbeats
-      ?.filter((bot) => {
-        const now = Math.floor(Date.now() / 1000);
-        const thirtySecondsAgo = now - 30;
-        return bot.last_heartbeat >= thirtySecondsAgo;
-      })
-      .sort((a, b) => {
-        // Get display names for sorting, fallback to bot ID
-        const nameA =
-          botUsersData?.[a.id]?.displayName ||
-          botUsersData?.[a.id]?.name ||
-          a.id;
-        const nameB =
-          botUsersData?.[b.id]?.displayName ||
-          botUsersData?.[b.id]?.name ||
-          b.id;
-        return nameA.localeCompare(nameB);
-      }) || [];
+  // Show all bots and sort alphabetically by display name
+  const allBots =
+    botsData?.recent_heartbeats?.sort((a, b) => {
+      const nameA =
+        botUsersData?.[a.id]?.displayName || botUsersData?.[a.id]?.name || a.id;
+      const nameB =
+        botUsersData?.[b.id]?.displayName || botUsersData?.[b.id]?.name || b.id;
+      return nameA.localeCompare(nameB);
+    }) || [];
 
   // Fetch Roblox data for bots only once (they don't change)
   useEffect(() => {
@@ -160,26 +149,28 @@ export default function ConnectedBotsPolling() {
     return (
       <div className="mt-6">
         <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-xl font-bold text-gray-300">Active Bots</h2>
+          <h2 className="text-secondary-text text-xl font-bold">
+            Connected Bots
+          </h2>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-            <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+            <div className="bg-status-neutral h-2 w-2 rounded-full"></div>
+            <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
           </div>
         </div>
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="py-8 text-center">
-            <div className="mb-2 text-lg font-medium text-red-400">
+            <div className="text-status-error mb-2 text-lg font-medium">
               Error loading bots
             </div>
-            <div className="mb-2 text-sm text-gray-500">{error}</div>
+            <div className="text-secondary-text mb-2 text-sm">{error}</div>
             {retryCount < 3 ? (
-              <div className="text-sm text-blue-400">
+              <div className="text-secondary-text text-sm">
                 Auto-retrying in 5 seconds... (attempt {retryCount + 1}/3)
               </div>
             ) : (
-              <div className="text-sm text-gray-500">
+              <div className="text-secondary-text text-sm">
                 Failed after 3 attempts. Will retry on next scheduled update.
               </div>
             )}
@@ -193,44 +184,48 @@ export default function ConnectedBotsPolling() {
     return (
       <div className="mt-6">
         <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-xl font-bold text-gray-300">Active Bots</h2>
+          <h2 className="text-secondary-text text-xl font-bold">
+            Connected Bots
+          </h2>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-500"></div>
-            <span className="text-xs font-medium tracking-wide text-yellow-400 uppercase">
+            <div className="bg-warning h-2 w-2 animate-pulse rounded-full"></div>
+            <span className="text-warning text-xs font-medium tracking-wide uppercase">
               CONNECTING
             </span>
           </div>
         </div>
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="py-8 text-center">
-            <div className="mb-2 text-lg font-medium text-gray-400">
+            <div className="text-secondary-text mb-2 text-lg font-medium">
               Loading bots...
             </div>
-            <div className="text-sm text-gray-500">Fetching bot data</div>
+            <div className="text-tertiary-text text-sm">Fetching bot data</div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (activeBots.length === 0) {
+  if (allBots.length === 0) {
     return (
       <div className="mt-6">
         <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-xl font-bold text-gray-300">Active Bots</h2>
+          <h2 className="text-secondary-text text-xl font-bold">
+            Connected Bots
+          </h2>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-            <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+            <div className="bg-status-neutral h-2 w-2 rounded-full"></div>
+            <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
           </div>
         </div>
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="py-8 text-center">
-            <div className="mb-2 text-lg font-medium text-gray-400">
+            <div className="text-secondary-text mb-2 text-lg font-medium">
               {pollingStopped ? "Bots offline" : "No bots active"}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-tertiary-text text-sm">
               {pollingStopped
                 ? "No inventory scanning bots have been active for 2+ minutes. Please check back in a bit."
                 : "No inventory scanning bots have been active in the last 30 seconds"}
@@ -244,15 +239,17 @@ export default function ConnectedBotsPolling() {
   return (
     <div className="mt-6">
       <div className="mb-4 flex items-center gap-3">
-        <h2 className="text-xl font-bold text-gray-300">Active Bots</h2>
+        <h2 className="text-secondary-text text-xl font-bold">
+          Connected Bots
+        </h2>
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
-          <span className="text-xs font-medium tracking-wide text-red-400 uppercase">
+          <span className="text-secondary-text text-xs font-medium tracking-wide uppercase">
             LIVE
           </span>
         </div>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="flex items-center gap-2">
@@ -265,21 +262,21 @@ export default function ConnectedBotsPolling() {
             {queueInfo && (
               <div className="mb-4 space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-400">Queue Length:</span>
-                  <span className="font-bold text-white">
+                  <span className="text-secondary-text">Queue Length:</span>
+                  <span className="text-primary-text font-bold">
                     {queueInfo.queue_length.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-400">Current Delay:</span>
-                  <span className="font-bold text-white">
+                  <span className="text-secondary-text">Current Delay:</span>
+                  <span className="text-primary-text font-bold">
                     {queueInfo.current_delay.toFixed(2)}s
                   </span>
                 </div>
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">Last Updated:</span>
-                    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-gray-600">
+                    <span className="text-secondary-text">Last Updated:</span>
+                    <div className="bg-surface-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
                       {lastProcessedAvatarData &&
                       Object.values(lastProcessedAvatarData).find(
                         (avatar: RobloxAvatar) =>
@@ -307,7 +304,7 @@ export default function ConnectedBotsPolling() {
                       href={`https://www.roblox.com/users/${queueInfo.last_dequeue.user_id}/profile`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-blue-300 transition-colors hover:text-blue-200"
+                      className="text-link hover:text-link-hover font-bold transition-colors"
                     >
                       {lastProcessedUserData?.[queueInfo.last_dequeue.user_id]
                         ?.displayName ||
@@ -325,13 +322,13 @@ export default function ConnectedBotsPolling() {
                         botUserData.name ||
                         `Bot ${botId}`;
                       return (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-tertiary-text text-xs">
                           (scanned by{" "}
                           <a
                             href={`https://www.roblox.com/users/${botId}/profile`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-300 transition-colors hover:text-blue-200"
+                            className="text-link hover:text-link-hover transition-colors"
                           >
                             {botDisplayName}
                           </a>
@@ -350,7 +347,7 @@ export default function ConnectedBotsPolling() {
             )}
 
             <div className="max-h-60 space-y-2 overflow-y-auto">
-              {activeBots.map((bot: ConnectedBot) => (
+              {allBots.map((bot: ConnectedBot) => (
                 <BotStatusCard
                   key={bot.id}
                   bot={bot}
@@ -401,10 +398,10 @@ function BotStatusCard({
   const avatarUrl = avatarData?.imageUrl || null;
 
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3">
+    <div className="border-border-primary bg-tertiary-bg rounded-lg border p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-600">
+          <div className="bg-surface-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
@@ -423,20 +420,20 @@ function BotStatusCard({
               href={`https://www.roblox.com/users/${bot.id}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-blue-300 transition-colors hover:text-blue-200"
+              className="text-link hover:text-link-hover text-sm font-medium transition-colors"
             >
               {displayName}
             </a>
-            <div className="text-xs text-gray-400">@{username}</div>
+            <div className="text-tertiary-text text-xs">@{username}</div>
           </div>
         </div>
 
         <div className="sm:text-right">
-          <div className="mb-1 text-xs text-gray-400">
+          <div className="text-secondary-text mb-1 text-xs">
             Last updated: {fullDate} ({relativeTime})
           </div>
           {bot.current_job && (
-            <div className="text-xs text-blue-400">
+            <div className="text-status-info text-xs">
               <div>Latest Job ID</div>
               <div className="font-mono text-xs break-all">
                 {bot.current_job}

@@ -28,31 +28,31 @@ export default function OGUserInfo({
   originalItemsCount,
 }: OGUserInfoProps) {
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-      <h2 className="text-muted mb-4 text-xl font-semibold">
+    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+      <h2 className="text-primary-text mb-4 text-xl font-semibold">
         User Information
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="mb-6 flex flex-col gap-4 rounded-lg border border-[#37424D] bg-[#2E3944] p-4 sm:flex-row sm:items-center">
+      <div className="border-border-primary bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
         {getUserAvatar(robloxId) ? (
           <Image
             src={getUserAvatar(robloxId)!}
             alt="Roblox Avatar"
             width={64}
             height={64}
-            className="flex-shrink-0 rounded-full bg-[#212A31]"
+            className="flex-shrink-0 rounded-full"
           />
         ) : (
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D]">
+          <div className="bg-surface-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
             <DefaultAvatar />
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="text-muted text-lg font-bold break-words">
+          <h3 className="text-primary-text text-lg font-bold break-words">
             {getUserDisplay(robloxId)}
           </h3>
-          <p className="text-muted text-sm break-words opacity-75">
+          <p className="text-primary-text text-sm break-words opacity-75">
             @{getUsername(robloxId)}
           </p>
 
@@ -67,15 +67,14 @@ export default function OGUserInfo({
                 slotProps={{
                   tooltip: {
                     sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
                       fontSize: "0.75rem",
                       padding: "8px 12px",
                       borderRadius: "8px",
-                      border: "1px solid #2E3944",
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                       "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
+                        color: "var(--color-secondary-bg)",
                       },
                     },
                   },
@@ -85,10 +84,10 @@ export default function OGUserInfo({
                   href={`https://discord.com/users/${userConnectionData.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
-                  <DiscordIcon className="h-4 w-4 flex-shrink-0 text-[#5865F2]" />
-                  <span className="text-sm font-medium">Discord</span>
+                  <DiscordIcon className="h-3 w-3" />
+                  <span className="text-xs font-medium">Discord</span>
                 </a>
               </Tooltip>
             )}
@@ -101,15 +100,14 @@ export default function OGUserInfo({
               slotProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: "#0F1419",
-                    color: "#D3D9D4",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     fontSize: "0.75rem",
                     padding: "8px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #2E3944",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                     "& .MuiTooltip-arrow": {
-                      color: "#0F1419",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
@@ -119,10 +117,10 @@ export default function OGUserInfo({
                 href={`https://www.roblox.com/users/${robloxId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
-                <RobloxIcon className="h-4 w-4 flex-shrink-0" />
-                <span className="text-sm font-medium">Roblox</span>
+                <RobloxIcon className="h-3 w-3" />
+                <span className="text-xs font-medium">Roblox</span>
               </a>
             </Tooltip>
 
@@ -135,15 +133,14 @@ export default function OGUserInfo({
                 slotProps={{
                   tooltip: {
                     sx: {
-                      backgroundColor: "#0F1419",
-                      color: "#D3D9D4",
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
                       fontSize: "0.75rem",
                       padding: "8px 12px",
                       borderRadius: "8px",
-                      border: "1px solid #2E3944",
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                       "& .MuiTooltip-arrow": {
-                        color: "#0F1419",
+                        color: "var(--color-secondary-bg)",
                       },
                     },
                   },
@@ -151,16 +148,16 @@ export default function OGUserInfo({
               >
                 <Link
                   href={`/users/${userConnectionData.id}`}
-                  className="text-muted flex items-center gap-2 rounded-full bg-gray-600 px-3 py-1.5"
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <Image
                     src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
                     alt="JBCL Logo"
                     width={16}
                     height={16}
-                    className="h-4 w-4 flex-shrink-0"
+                    className="h-3 w-3 flex-shrink-0"
                   />
-                  <span className="text-sm font-medium">Website Profile</span>
+                  <span className="text-xs font-medium">Website Profile</span>
                 </Link>
               </Tooltip>
             )}
@@ -170,8 +167,8 @@ export default function OGUserInfo({
 
       {/* Original Items Found */}
       <div className="mt-4 text-center">
-        <div className="text-muted text-sm">Original Items Found</div>
-        <div className="text-2xl font-bold text-[#4ade80]">
+        <div className="text-secondary-text text-sm">Original Items Found</div>
+        <div className="text-primary-text text-2xl font-bold">
           {(originalItemsCount || 0).toLocaleString()}
         </div>
       </div>

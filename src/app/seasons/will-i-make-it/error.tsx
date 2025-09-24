@@ -10,7 +10,7 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   return (
-    <div className="min-h-screen bg-[#2E3944]">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <Breadcrumb />
 
@@ -37,7 +37,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
               <button
                 onClick={() => (window.location.href = "/seasons")}
-                className="w-full rounded-lg bg-[#37424D] px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#2E3944]"
+                className="hover: w-full rounded-lg bg-[#37424D] px-6 py-3 font-semibold text-white transition-colors duration-200"
               >
                 Go to Seasons
               </button>

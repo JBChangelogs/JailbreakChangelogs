@@ -204,15 +204,15 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-lg bg-[#212A31] shadow-xl">
+      <div className="border-stroke bg-secondary-bg relative w-full max-w-md rounded-lg border shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#2E3944] p-4">
-          <h2 className="text-muted text-xl font-semibold">
+        <div className="border-border-primary flex items-center justify-between border-b p-4">
+          <h2 className="text-primary-text text-xl font-semibold">
             {editingServer ? "Edit Server" : "Add New Server"}
           </h2>
           <button
             onClick={onClose}
-            className="hover:text-muted rounded-md p-1 text-[#FFFFFF] hover:bg-[#2E3944]"
+            className="text-secondary-text hover:text-primary-text rounded-md p-1"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
@@ -224,19 +224,19 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
             <div>
               <label
                 htmlFor="server-link"
-                className="text-muted mb-2 block text-sm font-medium"
+                className="text-primary-text mb-2 block text-sm font-medium"
               >
-                Server Link <span className="text-red-500">*</span>
+                Server Link <span className="text-button-danger">*</span>
               </label>
               <input
                 id="server-link"
                 type="text"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className="text-muted w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
+                className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                 placeholder="Enter the server link"
               />
-              <p className="mt-1 text-sm text-[#FFFFFF]">
+              <p className="text-secondary-text mt-1 text-sm">
                 Enter the full private server link from Roblox
               </p>
             </div>
@@ -244,7 +244,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
             <div>
               <label
                 htmlFor="server-rules"
-                className="text-muted mb-2 block text-sm font-medium"
+                className="text-primary-text mb-2 block text-sm font-medium"
               >
                 Server Rules
               </label>
@@ -254,10 +254,10 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                 onChange={(e) => handleRulesChange(e.target.value)}
                 rows={4}
                 maxLength={MAX_RULES_LENGTH}
-                className="text-muted w-full rounded-md border border-[#2E3944] bg-[#2E3944] px-3 py-2 placeholder-[#FFFFFF] focus:border-[#5865F2] focus:outline-none"
+                className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                 placeholder="Enter the server rules"
               />
-              <p className="mt-1 text-sm text-[#FFFFFF]">
+              <p className="text-secondary-text mt-1 text-sm">
                 Optional: Add any specific rules or requirements for joining the
                 server
               </p>
@@ -276,18 +276,18 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                       setExpires(originalExpires);
                     }
                   }}
-                  className="h-4 w-4 rounded border-[#2E3944] bg-[#2E3944] text-[#5865F2] focus:ring-[#5865F2]"
+                  className="text-button-info focus:ring-button-info h-4 w-4 rounded"
                 />
-                <span className="text-muted text-sm">Never Expires</span>
+                <span className="text-primary-text text-sm">Never Expires</span>
               </label>
-              <p className="mt-1 text-sm text-[#FFFFFF]">
+              <p className="text-secondary-text mt-1 text-sm">
                 Check this if the server link should remain active indefinitely
               </p>
             </div>
 
             <div>
-              <div className="text-muted mb-2 flex items-center text-sm font-medium">
-                Expires <span className="text-red-500">*</span>
+              <div className="text-primary-text mb-2 flex items-center text-sm font-medium">
+                Expires <span className="text-button-danger">*</span>
               </div>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
@@ -302,42 +302,40 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                       placeholder: "Select expiration date",
                       sx: {
                         "& .MuiOutlinedInput-root": {
-                          backgroundColor: "#2E3944",
-                          borderColor: "#2E3944",
-                          color: "#D3D9D4",
+                          color: "var(--color-primary-text)",
                           "&:hover": {
-                            borderColor: "#5865F2",
+                            borderColor: "var(--color-button-info)",
                           },
                           "&.Mui-focused": {
-                            borderColor: "#5865F2",
+                            borderColor: "var(--color-button-info)",
                           },
                         },
                         "& .MuiInputLabel-root": {
-                          color: "#D3D9D4",
+                          color: "var(--color-primary-text)",
                         },
                       },
                     },
                   }}
                 />
               </LocalizationProvider>
-              <p className="mt-1 text-sm text-[#FFFFFF]">
+              <p className="text-secondary-text mt-1 text-sm">
                 When will this server link expire? Must be at least 7 days from
                 now
               </p>
             </div>
 
             {/* Actions */}
-            <div className="mt-8 flex justify-end space-x-4 border-t border-[#2E3944] pt-6">
+            <div className="border-border-primary mt-8 flex justify-end space-x-4 border-t pt-6">
               <button
                 onClick={onClose}
-                className="text-muted rounded-md px-4 py-2 text-sm font-medium hover:bg-[#2E3944]"
+                className="text-secondary-text hover:text-primary-text rounded-md px-4 py-2 text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4] disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading
                   ? editingServer

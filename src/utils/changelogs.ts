@@ -30,12 +30,9 @@ export function parseMarkdown(text: string) {
         }
 
         // Process mentions in text
-        const processedText = cleanLine.replace(
-          /@(\w+)/g,
-          (match, username) => {
-            return `<span class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-[#5865F2] text-white">@${username}</span>`;
-          },
-        );
+        const processedText = cleanLine.replace(/@(\w+)/g, (_, username) => {
+          return `<span class="text-link-hover">@${username}</span>`;
+        });
 
         return {
           type: "text" as const,
@@ -53,7 +50,7 @@ export function highlightText(text: string, query: string) {
   const regex = new RegExp(`(${query})`, "gi");
   return text.replace(
     regex,
-    '<mark class="bg-[#124E66] text-white px-1 rounded">$1</mark>',
+    '<mark class="bg-highlight text-primary-text px-1 rounded">$1</mark>',
   );
 }
 
@@ -110,23 +107,10 @@ export function getContentPreview(sections: string, query: string) {
   return cleanMarkdown(lines[0]); // Return first line if no match found
 }
 
-// Add helper function for badge colors
-export function getBadgeColor(type: string) {
-  switch (type) {
-    case "video":
-      return "bg-red-500";
-    case "audio":
-      return "bg-blue-500";
-    case "image":
-      return "bg-purple-500";
-    case "mentions":
-      return "bg-[#5865F2]";
-    default:
-      return "bg-[#124E66]";
-  }
+export function getBadgeColor() {
+  return "bg-button-info";
 }
 
-// Add helper function to parse date from title
 export function parseDateFromTitle(title: string): Date | null {
   const dateMatch = title.match(
     /^([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?\s+\d{4})/,

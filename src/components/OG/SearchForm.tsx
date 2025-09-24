@@ -28,15 +28,15 @@ export default function SearchForm({
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               placeholder="Enter username or Roblox ID (e.g., Jakobiis or 1910948809)"
-              className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
               required
             />
-            <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+            <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
             {searchId && (
               <button
                 type="button"
                 onClick={() => setSearchId("")}
-                className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
                 aria-label="Clear search"
               >
                 <XMarkIcon />
@@ -48,10 +48,10 @@ export default function SearchForm({
           <button
             type="submit"
             disabled={isLoading || externalIsLoading}
-            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium text-white transition-all duration-200 ${
+            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium transition-all duration-200 ${
               isLoading || externalIsLoading
-                ? "cursor-progress bg-[#212A31]"
-                : "bg-[#5865F2] hover:cursor-pointer hover:bg-[#4752C4]"
+                ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
             }`}
           >
             {(isLoading || externalIsLoading) && (

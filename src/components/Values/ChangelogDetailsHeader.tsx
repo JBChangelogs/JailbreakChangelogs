@@ -58,24 +58,24 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
   );
 
   return (
-    <div className="rounded-lg border border-[#37424D] bg-gradient-to-r from-[#2A3441] to-[#1E252B] p-6">
-      <h1 className="mb-2 text-3xl font-bold text-white">
+    <div className="border-border-primary bg-secondary-bg rounded-lg border p-6">
+      <h1 className="text-primary-text mb-2 text-3xl font-bold">
         Changelog #{changelog.id}
       </h1>
-      <p className="mb-4 text-[#D3D9D4]">
+      <p className="text-secondary-text mb-4">
         {changelog.change_count} change{changelog.change_count !== 1 ? "s" : ""}{" "}
         • Posted on {formatMessageDate(changelog.created_at * 1000)}
       </p>
 
       {/* Contributors */}
       <div className="mt-4">
-        <h3 className="mb-2 text-sm font-medium text-[#D3D9D4]">
+        <h3 className="text-secondary-text mb-2 text-sm font-medium">
           Contributors ({sortedContributors.length}):
         </h3>
         <div className="flex flex-wrap gap-2">
           {sortedContributors.map(([discordId, contributorName], index) => (
             <span key={discordId} className="flex items-center gap-1">
-              <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-[#2E3944]">
+              <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
                 <DefaultAvatar />
                 {userData[discordId]?.avatar &&
                   userData[discordId]?.avatar !== "None" && (
@@ -96,12 +96,12 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
                 href={`https://discord.com/users/${discordId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-[#40C0E7] hover:text-[#2B9CD9] hover:underline"
+                className="text-link hover:text-link-hover text-sm hover:underline"
               >
                 {contributorName}
               </a>
               {index < sortedContributors.length - 1 && (
-                <span className="text-sm text-[#D3D9D4]">,</span>
+                <span className="text-secondary-text text-sm">,</span>
               )}
             </span>
           ))}

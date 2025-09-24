@@ -81,8 +81,10 @@ export default function DupeFilters({
   ];
 
   return (
-    <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-      <h2 className="text-muted mb-4 text-xl font-semibold">Filter & Sort</h2>
+    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+      <h2 className="text-primary-text mb-4 text-xl font-semibold">
+        Filter & Sort
+      </h2>
 
       <div className="flex w-full flex-col gap-4 sm:flex-row">
         {/* Search Bar */}
@@ -93,13 +95,13 @@ export default function DupeFilters({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-2 pr-10 pl-10 placeholder-[#D3D9D4] shadow-sm focus:border-[#5865F2] focus:outline-none"
+            className="text-primary-text border-border-primary bg-primary-bg placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
-          <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -130,59 +132,34 @@ export default function DupeFilters({
                 value: cat,
                 label: cat,
               }))}
-              classNamePrefix="react-select"
               className="w-full"
               isMulti={false}
               isClearable={true}
               placeholder="Filter by category..."
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  borderColor: "#2E3944",
-                  color: "#D3D9D4",
-                }),
-                singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  color: "#D3D9D4",
-                  zIndex: 3000,
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#5865F2"
-                    : state.isFocused
-                      ? "#2E3944"
-                      : "#37424D",
-                  color:
-                    state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                  "&:active": {
-                    backgroundColor: "#124E66",
-                    color: "#FFFFFF",
-                  },
-                }),
-                clearIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
-                  },
-                }),
-                dropdownIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
-                  },
-                }),
-                placeholder: (base) => ({ ...base, color: "#D3D9D4" }),
-                input: (base) => ({ ...base, color: "#D3D9D4" }),
+              unstyled
+              classNames={{
+                control: () =>
+                  "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                singleValue: () => "text-secondary-text",
+                placeholder: () => "text-secondary-text",
+                menu: () =>
+                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
+                option: ({ isSelected, isFocused }) =>
+                  `px-4 py-3 cursor-pointer ${
+                    isSelected
+                      ? "bg-button-info text-form-button-text"
+                      : isFocused
+                        ? "bg-quaternary-bg text-primary-text"
+                        : "bg-secondary-bg text-secondary-text"
+                  }`,
+                clearIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
+                dropdownIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
               }}
             />
           ) : (
-            <div className="h-10 w-full rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
+            <div className="border-border-primary bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
           )}
         </div>
 
@@ -234,60 +211,37 @@ export default function DupeFilters({
                 );
               }}
               options={sortOptions}
-              classNamePrefix="react-select"
               className="w-full"
               isMulti={false}
               isClearable={true}
               placeholder="Sort by..."
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  borderColor: "#2E3944",
-                  color: "#D3D9D4",
-                }),
-                singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#37424D",
-                  color: "#D3D9D4",
-                  zIndex: 3000,
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#5865F2"
-                    : state.isFocused
-                      ? "#2E3944"
-                      : "#37424D",
-                  color:
-                    state.isSelected || state.isFocused ? "#FFFFFF" : "#D3D9D4",
-                  "&:active": {
-                    backgroundColor: "#124E66",
-                    color: "#FFFFFF",
-                  },
-                }),
-                clearIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
-                  },
-                }),
-                dropdownIndicator: (base) => ({
-                  ...base,
-                  color: "#D3D9D4",
-                  "&:hover": {
-                    color: "#FFFFFF",
-                  },
-                }),
-                placeholder: (base) => ({ ...base, color: "#D3D9D4" }),
-                input: (base) => ({ ...base, color: "#D3D9D4" }),
+              unstyled
+              classNames={{
+                control: () =>
+                  "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                singleValue: () => "text-secondary-text",
+                placeholder: () => "text-secondary-text",
+                menu: () =>
+                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
+                option: ({ isSelected, isFocused }) =>
+                  `px-4 py-3 cursor-pointer ${
+                    isSelected
+                      ? "bg-button-info text-form-button-text"
+                      : isFocused
+                        ? "bg-quaternary-bg text-primary-text"
+                        : "bg-secondary-bg text-secondary-text"
+                  }`,
+                clearIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
+                dropdownIndicator: () =>
+                  "text-secondary-text hover:text-primary-text cursor-pointer",
+                groupHeading: () =>
+                  "px-4 py-2 text-primary-text font-semibold text-sm",
               }}
               isSearchable={false}
             />
           ) : (
-            <div className="h-10 w-full rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
+            <div className="border-border-primary bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
           )}
         </div>
       </div>

@@ -7,7 +7,7 @@ export const getItemTypeColor = (type: string): string => {
 
   switch (normalizedType) {
     case "Vehicle":
-      return "#c82c2c";
+      return "hsl(0, 64%, 48%)";
     case "Spoiler":
       return "#8B5A00";
     case "Rim":
@@ -36,30 +36,40 @@ export const getItemTypeColor = (type: string): string => {
 };
 
 export const getDemandColor = (demand: string): string => {
-  switch (demand) {
-    case "Close to none":
-      return "bg-gray-500/80 text-white";
+  // Normalize the demand string to handle case variations
+  const normalizedDemand = demand
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+  switch (normalizedDemand) {
+    case "Close To None":
+      return "bg-gray-600 text-white";
     case "Very Low":
-      return "bg-red-500/80 text-white";
+      return "bg-red-600 text-white";
     case "Low":
-      return "bg-orange-500/80 text-white";
+      return "bg-orange-700 text-white";
     case "Medium":
-      return "bg-yellow-500/80 text-white";
+      return "bg-yellow-700 text-white";
     case "Decent":
-      return "bg-green-500/80 text-white";
+      return "bg-green-700 text-white";
     case "High":
-      return "bg-blue-500/80 text-white";
+      return "bg-blue-600 text-white";
     case "Very High":
-      return "bg-purple-500/80 text-white";
+      return "bg-purple-600 text-white";
     case "Extremely High":
-      return "bg-pink-500/80 text-white";
+      return "bg-pink-600 text-white";
     default:
-      return "bg-gray-500/80 text-white";
+      return "bg-gray-600 text-white";
   }
 };
 
 export const getTrendColor = (trend: string): string => {
-  switch (trend) {
+  // Normalize the trend string to handle case variations
+  const normalizedTrend =
+    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
+
+  switch (normalizedTrend) {
     case "Avoided":
       return "bg-red-600 text-white";
     case "Dropping":
@@ -75,7 +85,7 @@ export const getTrendColor = (trend: string): string => {
     case "Recovering":
       return "bg-orange-600 text-white";
     case "Rising":
-      return "bg-blue-500 text-white";
+      return "bg-blue-700 text-white";
     case "Hyped":
       return "bg-pink-500 text-white";
     default:

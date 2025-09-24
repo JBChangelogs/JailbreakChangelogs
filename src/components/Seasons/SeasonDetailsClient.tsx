@@ -134,7 +134,7 @@ export default function SeasonDetailsClient({
   const endDate = season.end_date > 0 ? new Date(season.end_date * 1000) : null;
 
   return (
-    <main className="min-h-screen bg-[#2E3944]">
+    <main className="min-h-screen">
       <div className="container mx-auto mb-8 px-4 sm:px-6">
         <Breadcrumb />
         <SeasonHeader
@@ -153,21 +153,21 @@ export default function SeasonDetailsClient({
           {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
           <div className="sm:col-span-12 xl:col-span-8">
             <h1
-              className={`${inter.className} text-muted mb-4 border-b border-[#D3D9D4] pb-2 text-3xl font-bold tracking-tighter`}
+              className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
             >
               Season {season.season} / {season.title}
             </h1>
-            <p className="text-muted mb-4">{season.description}</p>
+            <p className="text-secondary-text mb-4">{season.description}</p>
 
             {/* XP Calculator Button - Only show for highest season */}
             {season.season === latestSeasonNumber && (
-              <div className="mb-6 rounded-lg border border-[#124E66] bg-[#124E66]/10 p-4">
+              <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex-1">
-                    <h3 className="mb-2 text-lg font-semibold text-[#FFFFFF]">
+                    <h3 className="text-primary-text mb-2 text-lg font-semibold">
                       🎯 XP Progress Calculator
                     </h3>
-                    <p className="text-muted text-sm">
+                    <p className="text-secondary-text text-sm">
                       Calculate how long it will take to reach your target level
                       and see if you can complete the season on time.
                     </p>
@@ -175,7 +175,7 @@ export default function SeasonDetailsClient({
                   <div className="flex-shrink-0">
                     <Link
                       href="/seasons/will-i-make-it"
-                      className="inline-block w-full rounded-lg bg-[#124E66] px-6 py-3 text-center font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] lg:w-auto"
+                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
                     >
                       Calculate My Progress
                     </Link>
@@ -185,20 +185,20 @@ export default function SeasonDetailsClient({
             )}
 
             {/* Weekly Contracts Promo */}
-            <div className="mb-6 rounded-lg border border-[#124E66] bg-[#124E66]/10 p-4">
+            <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1">
-                  <h3 className="mb-2 text-lg font-semibold text-[#FFFFFF]">
+                  <h3 className="text-primary-text mb-2 text-lg font-semibold">
                     📋 Weekly Contracts
                   </h3>
-                  <p className="text-muted text-sm">
+                  <p className="text-secondary-text text-sm">
                     View your weekly contracts and their xp rewards.
                   </p>
                 </div>
                 <div className="flex-shrink-0">
                   <Link
                     href="/seasons/contracts"
-                    className="inline-block w-full rounded-lg bg-[#124E66] px-6 py-3 text-center font-semibold text-[#FFFFFF] transition-colors hover:bg-[#0D3A4A] lg:w-auto"
+                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
                   >
                     View Contracts
                   </Link>
@@ -207,21 +207,27 @@ export default function SeasonDetailsClient({
             </div>
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
-                <h3 className="text-muted mb-2 font-semibold">Start Date</h3>
-                <p className="text-muted">
+              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <h3 className="text-primary-text mb-2 font-semibold">
+                  Start Date
+                </h3>
+                <p className="text-secondary-text">
                   {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
                 </p>
               </div>
-              <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
-                <h3 className="text-muted mb-2 font-semibold">End Date</h3>
-                <p className="text-muted">
+              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <h3 className="text-primary-text mb-2 font-semibold">
+                  End Date
+                </h3>
+                <p className="text-secondary-text">
                   {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
                 </p>
               </div>
-              <div className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4">
-                <h3 className="text-muted mb-2 font-semibold">Duration</h3>
-                <p className="text-muted">
+              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <h3 className="text-primary-text mb-2 font-semibold">
+                  Duration
+                </h3>
+                <p className="text-secondary-text">
                   {startDate && endDate
                     ? `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
                     : "TBD"}
@@ -230,7 +236,7 @@ export default function SeasonDetailsClient({
             </div>
 
             <h2
-              className={`text-muted mb-4 border-b border-[#D3D9D4] pb-2 text-2xl font-bold tracking-tight ${inter.className}`}
+              className={`text-primary-text border-secondary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight ${inter.className}`}
             >
               Season Rewards
             </h2>
@@ -272,26 +278,26 @@ export default function SeasonDetailsClient({
                 .map((reward) => (
                   <div
                     key={reward.id}
-                    className="rounded-lg border border-[#2E3944] bg-[#37424D] p-4"
+                    className="border-stroke bg-secondary-bg rounded-lg border p-4"
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <h3 className="text-muted font-semibold">
+                      <h3 className="text-primary-text font-semibold">
                         {reward.item}
                       </h3>
                       <div className="flex gap-2">
                         {reward.bonus === "True" && (
-                          <span className="rounded-full bg-[#047857] px-2 py-1 text-xs font-medium text-white">
+                          <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
                             Bonus
                           </span>
                         )}
                         {reward.exclusive === "True" && (
-                          <span className="rounded-full bg-[#5865F2] px-2 py-1 text-xs font-medium text-white">
+                          <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
                             Exclusive
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-[#FFFFFF]">
+                    <p className="text-secondary-text text-sm">
                       Requirement: {reward.requirement}
                     </p>
                   </div>
@@ -304,13 +310,13 @@ export default function SeasonDetailsClient({
             <ImageGallery rewards={season.rewards} />
             {premiumStatusLoaded && currentUserPremiumType === 0 && (
               <div className="my-8 flex flex-col items-center">
+                <span className="text-secondary-text mb-2 block text-center text-xs">
+                  ADVERTISEMENT
+                </span>
                 <div
-                  className="relative w-full max-w-[700px] overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+                  className="border-stroke bg-secondary-bg relative w-full max-w-[700px] overflow-hidden rounded-lg border shadow transition-all duration-300"
                   style={{ minHeight: "250px" }}
                 >
-                  <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                    Advertisement
-                  </span>
                   <DisplayAd
                     adSlot="2909908750"
                     adFormat="auto"

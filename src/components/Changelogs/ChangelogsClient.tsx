@@ -70,15 +70,17 @@ export default function ChangelogsClient({
   return (
     <div className="py-8">
       <div className="mb-8">
-        <h1 className="mb-4 text-4xl font-bold text-white">Changelogs</h1>
-        <p className="mb-6 text-gray-300">
+        <h1 className="text-primary-text mb-4 text-4xl font-bold">
+          Changelogs
+        </h1>
+        <p className="text-secondary-text mb-6">
           Stay updated with the latest changes, fixes and improvements to Roblox
           Jailbreak.
         </p>
 
         <button
           onClick={handleLatestChangelog}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+          className="bg-button-info text-primary-text hover:bg-button-info-hover flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors duration-200"
         >
           View Latest Changelog
         </button>
@@ -89,17 +91,17 @@ export default function ChangelogsClient({
           <div
             key={changelog.id}
             onClick={() => router.push(`/changelogs/${changelog.id}`)}
-            className="cursor-pointer rounded-lg border border-[#37424D] bg-[#212A31] p-6 transition-colors duration-200 hover:bg-[#2A343C]"
+            className="border-border-primary bg-secondary-bg hover:bg-primary-bg cursor-pointer rounded-lg border p-6 transition-colors duration-200"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h2 className="mb-2 text-xl font-semibold text-white">
+                <h2 className="text-primary-text mb-2 text-xl font-semibold">
                   {changelog.title}
                 </h2>
-                <p className="mb-3 text-sm text-gray-400">
+                <p className="text-secondary-text mb-3 text-sm">
                   {formatDate(changelog.title)}
                 </p>
-                <div className="line-clamp-3 text-gray-300">
+                <div className="text-secondary-text line-clamp-3">
                   {changelog.sections.length > 200
                     ? `${changelog.sections.substring(0, 200)}...`
                     : changelog.sections}
@@ -126,7 +128,7 @@ export default function ChangelogsClient({
         <div ref={backToTopRef} className="fixed right-8 bottom-8 z-50">
           <button
             onClick={scrollToTop}
-            className="rounded-full bg-blue-600 p-3 text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-blue-700"
+            className="bg-button-info text-primary-text hover:bg-button-info-hover rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
             aria-label="Back to top"
           >
             <ArrowUpIcon className="h-6 w-6" />

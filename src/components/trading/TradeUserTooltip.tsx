@@ -32,11 +32,9 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
           avatarHash={user.avatar || null}
           username={user.username}
           size={16}
-          accent_color={user.accent_color}
           custom_avatar={user.custom_avatar}
           showBadge={false}
           settings={user.settings}
-          showBorder={true}
           premiumType={user.premiumtype as unknown as number}
         />
 
@@ -48,13 +46,13 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
               className="block transition-opacity hover:opacity-80"
             >
               <div className="flex items-center gap-2">
-                <h3 className="text-muted text-lg font-semibold transition-colors hover:text-blue-300">
+                <h3 className="text-primary-text hover:text-link text-lg font-semibold transition-colors">
                   {user.global_name && user.global_name !== "None"
                     ? user.global_name
                     : user.username}
                 </h3>
               </div>
-              <p className="text-sm text-[#B9BBBE]">@{user.username}</p>
+              <p className="text-secondary-text text-sm">@{user.username}</p>
             </Link>
           </div>
 
@@ -62,7 +60,7 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
             {/* Roblox Connection */}
             {user.roblox_id && user.roblox_username && (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-xs text-white">
+                <span className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs">
                   <RobloxIcon className="h-3 w-3" />
                   {user.roblox_username}
                 </span>

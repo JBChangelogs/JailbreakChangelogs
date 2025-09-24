@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import React from "react";
+import { Dialog } from "@headlessui/react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,48 +22,27 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = "Cancel",
   confirmButtonClass = "bg-red-500 hover:bg-red-600",
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        aria-hidden="true"
       />
 
-      {/* Dialog */}
-      <div className="relative mx-4 w-full max-w-md rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-xl">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="text-muted absolute top-4 right-4 transition-colors hover:text-white"
-        >
-          <XMarkIcon className="h-5 w-5" />
-        </button>
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+            {title}
+          </div>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <h3 className="text-muted text-xl font-semibold">{title}</h3>
-          <p className="text-muted">{message}</p>
+          <div className="modal-content p-6">
+            <p className="text-secondary-text mb-6">{message}</p>
+          </div>
 
-          {/* Buttons */}
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
             <button
               onClick={onClose}
-              className="text-muted px-4 py-2 transition-colors hover:text-white"
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
             >
               {cancelText}
             </button>
@@ -72,13 +51,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 onConfirm();
                 onClose();
               }}
-              className={`rounded-lg px-4 py-2 text-white transition-colors ${confirmButtonClass}`}
+              className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors ${confirmButtonClass}`}
             >
               {confirmText}
             </button>
           </div>
-        </div>
+        </Dialog.Panel>
       </div>
-    </div>
+    </Dialog>
   );
 };

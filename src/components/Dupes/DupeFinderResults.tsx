@@ -11,6 +11,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { logError } from "@/services/logger";
+import { formatMessageDate } from "@/utils/timestamp";
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
@@ -285,22 +286,25 @@ export default function DupeFinderResults({
     }
   }, [sortOrder, hasDuplicates]);
 
-  // Create maps for duplicate tracking
-  const itemCounts = useMemo(() => {
+  // Pre-calculate duplicate counts from FULL inventory (not paginated) for consistent numbering
+  const duplicateCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    paginatedData.forEach((item) => {
+    initialData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return counts;
-  }, [paginatedData]);
+  }, [initialData]);
+
+  // Use the pre-calculated duplicate counts
+  const itemCounts = duplicateCounts;
 
   const duplicateOrders = useMemo(() => {
     const orders = new Map<string, number>();
     const itemGroups = new Map<string, DupeFinderItem[]>();
 
-    // Group items by name
-    paginatedData.forEach((item) => {
+    // Group items by name using ALL items from full inventory
+    initialData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       if (!itemGroups.has(key)) {
         itemGroups.set(key, []);
@@ -308,30 +312,22 @@ export default function DupeFinderResults({
       itemGroups.get(key)!.push(item);
     });
 
-    // Sort each group by creation date and assign order numbers
+    // Sort each group by ID for consistent ordering and assign order numbers
     itemGroups.forEach((items) => {
       if (items.length > 1) {
-        items.sort((a, b) => {
-          const aCreated = a.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          const bCreated = b.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          if (aCreated && bCreated) {
-            return new Date(aCreated).getTime() - new Date(bCreated).getTime();
-          }
-          return 0;
+        // Sort by ID for consistent ordering (each item has unique ID)
+        const sortedItems = items.sort((a, b) => {
+          return a.id.localeCompare(b.id);
         });
 
-        items.forEach((item, index) => {
-          orders.set(item.id, index);
+        sortedItems.forEach((item, index) => {
+          orders.set(item.id, index + 1);
         });
       }
     });
 
     return orders;
-  }, [paginatedData]);
+  }, [initialData]);
 
   // Event handlers
   const handleCardClick = (item: DupeFinderItem) => {
@@ -387,13 +383,13 @@ export default function DupeFinderResults({
         {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
         {currentUserPremiumType === 0 && (
           <div className="flex flex-col lg:col-span-1">
+            <span className="text-secondary-text mb-2 block text-center text-xs">
+              ADVERTISEMENT
+            </span>
             <div
-              className="relative h-full overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+              className="border-border-primary bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
               style={{ minHeight: "250px" }}
             >
-              <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                Advertisement
-              </span>
               <DisplayAd
                 adSlot="9566904102"
                 adFormat="auto"
@@ -418,16 +414,16 @@ export default function DupeFinderResults({
       />
 
       {/* Items Grid */}
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
-        <h2 className="text-muted mb-4 text-xl font-semibold">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Duplicate Items
         </h2>
 
         {/* Pro Tip - Only show when there are results */}
         {sortedData.length > 0 && (
-          <div className="mb-4 rounded-lg border border-[#5865F2] bg-[#5865F2]/10 p-3">
-            <div className="flex items-center gap-2 text-sm text-[#FFFFFF]">
-              <span className="text-[#5865F2]">💡</span>
+          <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+            <div className="text-primary-text flex items-center gap-2 text-sm">
+              <span className="text-button-info">💡</span>
               <span className="font-medium">Pro Tip:</span>
               <span>Click on any item card to view its trading history.</span>
             </div>
@@ -466,9 +462,7 @@ export default function DupeFinderResults({
           item={selectedItem}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
-          formatDate={(timestamp) =>
-            new Date(timestamp * 1000).toLocaleString()
-          }
+          formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
     </div>

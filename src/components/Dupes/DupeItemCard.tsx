@@ -60,13 +60,13 @@ export default function DupeItemCard({
 
   return (
     <div
-      className="relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border-2 border-gray-800 bg-gray-700 p-3 text-white transition-all duration-200 hover:border-gray-600 hover:shadow-lg"
+      className="border-border-primary bg-primary-bg text-primary-text hover:border-border-focus hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
       onClick={() => onCardClick(item)}
     >
       {/* Duplicate Indicator */}
       {isDuplicate && duplicateNumber && (
         <div
-          className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg"
+          className="bg-button-danger text-form-button-text absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-lg"
           aria-label={`Duplicate item number ${duplicateNumber}`}
         >
           #{duplicateNumber}
@@ -76,19 +76,19 @@ export default function DupeItemCard({
       {/* Title */}
       <div className="mb-4 text-left">
         <p
-          className={`${bangers.className} text-md mb-1 tracking-wide text-gray-300`}
+          className={`${bangers.className} text-md text-secondary-text mb-1 tracking-wide`}
         >
           {item.categoryTitle}
         </p>
         <h2
-          className={`${bangers.className} text-2xl tracking-wide break-words`}
+          className={`${bangers.className} text-primary-text text-2xl tracking-wide break-words`}
         >
           {item.title}
         </h2>
       </div>
 
       {/* Item Image */}
-      <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg bg-[#212A31]">
+      <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
         {!["Brakes"].includes(item.categoryTitle) ? (
           isVideoItem(item.title) ? (
             <video
@@ -139,22 +139,22 @@ export default function DupeItemCard({
       {/* Statistics */}
       <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
         <div>
-          <div className="text-sm opacity-90">MONTHLY TRADED</div>
-          <div className="text-xl font-bold">
+          <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
+          <div className="text-primary-text text-xl font-bold">
             {formatNumber(item.timesTraded)}
           </div>
         </div>
         <div>
-          <div className="text-sm opacity-90">MONTHLY UNIQUE</div>
-          <div className="text-xl font-bold">
+          <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
+          <div className="text-primary-text text-xl font-bold">
             {formatNumber(item.uniqueCirculation)}
           </div>
         </div>
         <div>
-          <div className="text-sm opacity-90">CURRENT OWNER</div>
+          <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold italic">
             <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
-              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[#2E3944] bg-[#212A31]">
+              <div className="border-border-primary bg-surface-bg flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
                 {getUserAvatar(item.latest_owner) ? (
                   <Image
                     src={getUserAvatar(item.latest_owner)!}
@@ -171,7 +171,7 @@ export default function DupeItemCard({
                 href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-center break-words text-blue-300 transition-colors hover:text-blue-400 hover:underline"
+                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 {getUserDisplay(item.latest_owner)}
@@ -180,7 +180,7 @@ export default function DupeItemCard({
           </div>
         </div>
         <div>
-          <div className="text-sm opacity-90">DUPED VALUE</div>
+          <div className="text-secondary-text text-sm">DUPED VALUE</div>
           <Tooltip
             title={dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
             placement="top"
@@ -188,22 +188,17 @@ export default function DupeItemCard({
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "#0F1419",
-                  color: "#D3D9D4",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #2E3944",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
                   "& .MuiTooltip-arrow": {
-                    color: "#0F1419",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
             <div
-              className="cursor-help text-xl font-bold text-red-400"
+              className="text-primary-text cursor-help text-xl font-bold"
               aria-label={`Duped value: ${dupedValue > 0 ? formatCurrencyValue(dupedValue) : "Not available"}`}
             >
               {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
@@ -211,8 +206,8 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
-          <div className="text-sm opacity-90">CREATED AT</div>
-          <div className="text-xl font-bold">
+          <div className="text-secondary-text text-sm">CREATED AT</div>
+          <div className="text-primary-text text-xl font-bold">
             {(() => {
               const createdAtInfo = item.info.find(
                 (info) => info.title === "Created At",

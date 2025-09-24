@@ -64,8 +64,10 @@ export default function TradeItemsImages({
     <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Offering Items Images */}
       <div>
-        <h2 className="text-muted mb-4 text-lg font-semibold">Offering</h2>
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5">
+        <h2 className="text-primary-text mb-4 text-lg font-semibold">
+          Offering
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(offering).map((item) => (
             <Tooltip
               key={`${item.id}-${item.name}-${item.type}`}
@@ -84,13 +86,13 @@ export default function TradeItemsImages({
               slotProps={{
                 tooltip: {
                   sx: {
-                    bgcolor: "#1A2228",
-                    border: "1px solid #2E3944",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     maxWidth: "400px",
                     width: "auto",
                     minWidth: "300px",
                     "& .MuiTooltip-arrow": {
-                      color: "#1A2228",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
@@ -98,7 +100,7 @@ export default function TradeItemsImages({
             >
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
-                className="relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2 hover:ring-[#5865F2]"
+                className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
                 {isVideoItem(item.name) ? (
                   <video
@@ -123,7 +125,7 @@ export default function TradeItemsImages({
                   />
                 )}
                 {item.count > 1 && (
-                  <span className="absolute top-2 right-2 rounded-full border border-[#5865F2]/20 bg-[#5865F2] px-2.5 py-1 text-sm text-white">
+                  <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
                     ×{item.count}
                   </span>
                 )}
@@ -135,8 +137,10 @@ export default function TradeItemsImages({
 
       {/* Requesting Items Images */}
       <div>
-        <h2 className="text-muted mb-4 text-lg font-semibold">Requesting</h2>
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5">
+        <h2 className="text-primary-text mb-4 text-lg font-semibold">
+          Requesting
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(requesting).map((item) => (
             <Tooltip
               key={`${item.id}-${item.name}-${item.type}`}
@@ -155,13 +159,13 @@ export default function TradeItemsImages({
               slotProps={{
                 tooltip: {
                   sx: {
-                    bgcolor: "#1A2228",
-                    border: "1px solid #2E3944",
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
                     maxWidth: "400px",
                     width: "auto",
                     minWidth: "300px",
                     "& .MuiTooltip-arrow": {
-                      color: "#1A2228",
+                      color: "var(--color-secondary-bg)",
                     },
                   },
                 },
@@ -169,7 +173,7 @@ export default function TradeItemsImages({
             >
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
-                className="relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2 hover:ring-[#5865F2]"
+                className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
                 {isVideoItem(item.name) ? (
                   <video
@@ -194,7 +198,7 @@ export default function TradeItemsImages({
                   />
                 )}
                 {item.count > 1 && (
-                  <span className="absolute top-2 right-2 rounded-full border border-[#5865F2]/20 bg-[#5865F2] px-2.5 py-1 text-sm text-white">
+                  <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
                     ×{item.count}
                   </span>
                 )}

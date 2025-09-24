@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 // import { PUBLIC_API_URL } from '@/utils/api';
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -79,74 +78,73 @@ export default function ReportIssueModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto w-full max-w-sm rounded-lg bg-[#212A31] p-6">
-          <div className="flex items-center justify-between">
-            <Dialog.Title className="text-xl font-semibold text-white">
-              Report an Issue
-            </Dialog.Title>
-            <button
-              onClick={onClose}
-              className="text-muted rounded-full p-1 hover:bg-[#2E3944] hover:text-white"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
+        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+            Report an Issue
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-            <div>
-              <label
-                htmlFor="title"
-                className="text-muted block text-sm font-medium"
-              >
-                Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="placeholder-muted mt-1 block w-full rounded-md border border-[#37424D] bg-[#2E3944] px-3 py-2 text-white focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none"
-                placeholder="Brief description of the issue"
-                required
-              />
-              <p className="text-muted mt-1 text-xs">
-                Maximum {MAX_TITLE_LENGTH} characters
-              </p>
+          <form onSubmit={handleSubmit}>
+            <div className="modal-content p-6">
+              <div className="mb-4">
+                <label
+                  htmlFor="title"
+                  className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
+                >
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  placeholder="Brief description of the issue"
+                  required
+                />
+                <div
+                  className={`mt-1 text-xs ${title.length >= MAX_TITLE_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
+                >
+                  {title.length}/{MAX_TITLE_LENGTH}
+                </div>
+              </div>
+
+              <div className="relative">
+                <label
+                  htmlFor="description"
+                  className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  placeholder="Detailed description of the issue"
+                  required
+                />
+                <div
+                  className={`absolute right-2 bottom-2 text-xs ${description.length >= MAX_DESCRIPTION_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
+                >
+                  {description.length}/{MAX_DESCRIPTION_LENGTH}
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="description"
-                className="text-muted block text-sm font-medium"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                className="placeholder-muted mt-1 block w-full rounded-md border border-[#37424D] bg-[#2E3944] px-3 py-2 text-white focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none"
-                placeholder="Detailed description of the issue"
-                required
-              />
-              <p className="text-muted mt-1 text-xs">
-                Maximum {MAX_DESCRIPTION_LENGTH} characters
-              </p>
-            </div>
-
-            <div className="flex justify-end gap-3">
+            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="text-muted rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium hover:bg-[#2E3944] hover:text-white"
+                disabled={isSubmitting}
+                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="rounded-md bg-[#5865F2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752C4] focus:ring-2 focus:ring-[#5865F2] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={!title.trim() || !description.trim() || isSubmitting}
+                className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Submit Issue"}
               </button>

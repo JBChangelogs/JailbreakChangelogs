@@ -49,8 +49,22 @@ export const sortByDemand = (
   b: string,
   order: "asc" | "desc" = "desc",
 ): number => {
-  const aIndex = demandOrder.indexOf(a as (typeof demandOrder)[number]);
-  const bIndex = demandOrder.indexOf(b as (typeof demandOrder)[number]);
+  // Normalize demand strings to handle case variations
+  const normalizeDemand = (demand: string) =>
+    demand
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+  const normalizedA = normalizeDemand(a);
+  const normalizedB = normalizeDemand(b);
+
+  const aIndex = demandOrder.indexOf(
+    normalizedA as (typeof demandOrder)[number],
+  );
+  const bIndex = demandOrder.indexOf(
+    normalizedB as (typeof demandOrder)[number],
+  );
   return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 
@@ -59,8 +73,19 @@ export const sortByTrend = (
   b: string | null,
   order: "asc" | "desc" = "desc",
 ): number => {
-  const aIndex = a ? trendOrder.indexOf(a as (typeof trendOrder)[number]) : -1;
-  const bIndex = b ? trendOrder.indexOf(b as (typeof trendOrder)[number]) : -1;
+  // Normalize trend strings to handle case variations
+  const normalizeTrend = (trend: string) =>
+    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
+
+  const normalizedA = a ? normalizeTrend(a) : null;
+  const normalizedB = b ? normalizeTrend(b) : null;
+
+  const aIndex = normalizedA
+    ? trendOrder.indexOf(normalizedA as (typeof trendOrder)[number])
+    : -1;
+  const bIndex = normalizedB
+    ? trendOrder.indexOf(normalizedB as (typeof trendOrder)[number])
+    : -1;
   return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 

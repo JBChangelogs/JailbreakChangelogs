@@ -128,7 +128,7 @@ export default function MoneyLeaderboardClient({
       {initialLeaderboard && initialLeaderboard.length > 0 ? (
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-300">
+            <h2 className="text-primary-text text-xl font-bold">
               Money Leaderboard ({filteredLeaderboard.length}
               {searchTerm && ` of ${initialLeaderboard.length}`})
             </h2>
@@ -136,11 +136,11 @@ export default function MoneyLeaderboardClient({
 
           <MoneyLeaderboardSearch onSearch={handleSearch} />
 
-          <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+          <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mt-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
             <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
               {filteredLeaderboard.length === 0 && searchTerm ? (
                 <div className="py-8 text-center">
-                  <p className="text-gray-400">
+                  <p className="text-secondary-text">
                     No users found matching &quot;{displayQuery}&quot;
                   </p>
                 </div>
@@ -164,27 +164,48 @@ export default function MoneyLeaderboardClient({
                     <div
                       key={user.user_id}
                       className={`rounded-lg border p-3 transition-colors ${
-                        originalRank === 1
-                          ? "border-yellow-400/50 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 hover:bg-gradient-to-r hover:from-yellow-500/30 hover:to-yellow-600/30"
-                          : originalRank === 2
-                            ? "border-gray-300/50 bg-gradient-to-r from-gray-400/20 to-gray-500/20 hover:bg-gradient-to-r hover:from-gray-400/30 hover:to-gray-500/30"
-                            : originalRank === 3
-                              ? "border-amber-500/50 bg-gradient-to-r from-amber-600/20 to-amber-700/20 hover:bg-gradient-to-r hover:from-amber-600/30 hover:to-amber-700/30"
-                              : "border-[#2E3944] bg-[#2E3944] hover:border-[#5865F2]"
+                        originalRank <= 3 ? "" : "hover:border-button-info"
                       }`}
+                      style={{
+                        ...(originalRank === 1 && {
+                          background:
+                            "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+                          borderColor: "hsl(45, 100%, 50%, 0.5)",
+                        }),
+                        ...(originalRank === 2 && {
+                          background:
+                            "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+                          borderColor: "hsl(0, 0%, 75%, 0.5)",
+                        }),
+                        ...(originalRank === 3 && {
+                          background:
+                            "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+                          borderColor: "hsl(30, 100%, 50%, 0.5)",
+                        }),
+                      }}
                     >
                       <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                         <div className="flex items-center space-x-2 sm:space-x-3">
                           <div
                             className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 ${
-                              originalRank === 1
-                                ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-800"
-                                : originalRank === 2
-                                  ? "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800"
-                                  : originalRank === 3
-                                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-gray-800"
-                                    : "bg-[#2E3944] text-gray-300"
+                              originalRank <= 3
+                                ? "text-black"
+                                : "text-primary-text"
                             }`}
+                            style={{
+                              ...(originalRank === 1 && {
+                                background:
+                                  "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+                              }),
+                              ...(originalRank === 2 && {
+                                background:
+                                  "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+                              }),
+                              ...(originalRank === 3 && {
+                                background:
+                                  "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+                              }),
+                            }}
                           >
                             #{originalRank}
                           </div>
@@ -197,14 +218,14 @@ export default function MoneyLeaderboardClient({
                               className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
                             />
                           ) : (
-                            <div className="h-7 w-7 rounded-full bg-[#2E3944] sm:h-8 sm:w-8" />
+                            <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
                           )}
                           <div className="flex min-w-0 flex-1 flex-col">
                             <a
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="truncate text-sm font-medium text-blue-300 transition-colors hover:text-blue-200 sm:text-base"
+                              className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
                             >
                               {userDisplay}
                             </a>
@@ -212,14 +233,14 @@ export default function MoneyLeaderboardClient({
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="truncate text-xs text-gray-400 transition-colors hover:text-blue-400 sm:text-sm"
+                              className="text-secondary-text hover:text-link-hover truncate text-xs transition-colors sm:text-sm"
                             >
                               @{username}
                             </a>
                           </div>
                         </div>
                         <div className="flex items-center justify-center space-x-2 sm:ml-2 sm:justify-start">
-                          <span className="text-sm font-bold text-green-400 sm:text-lg">
+                          <span className="text-button-success text-sm font-bold sm:text-lg">
                             ${formatMoney(user.money)}
                           </span>
                         </div>
@@ -232,8 +253,8 @@ export default function MoneyLeaderboardClient({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-8 text-center">
-          <p className="text-gray-400">
+        <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
+          <p className="text-secondary-text">
             No money leaderboard data available at this time.
           </p>
         </div>

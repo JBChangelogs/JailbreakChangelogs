@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Maintenance from "./Maintenance";
+import Maintenance from "@/theme/Maintenance";
 import Header from "./Header";
 import { canBypassMaintenance } from "@/utils/maintenance";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -55,7 +55,7 @@ export default function MaintenanceBypass({
   // Show loading state while checking
   if (!isClient || canBypass === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#2e3944]">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg text-white">Loading...</div>
       </div>
     );

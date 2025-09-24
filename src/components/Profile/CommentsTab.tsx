@@ -158,7 +158,7 @@ export default function CommentsTab({
         alignItems="center"
         minHeight={200}
       >
-        <CircularProgress sx={{ color: "#5865F2" }} />
+        <CircularProgress sx={{ color: "var(--color-button-info)" }} />
       </Box>
     );
   }
@@ -166,14 +166,14 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <CommentIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <CommentIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments [{comments.length}]
             </h2>
           </div>
-          <p className="text-red-500">Error: {error}</p>
+          <p className="text-status-error">Error: {error}</p>
         </div>
       </div>
     );
@@ -182,14 +182,14 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <CommentIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <CommentIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-[#FFFFFF]">
+          <div className="text-primary-text flex items-center gap-2">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -212,11 +212,11 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="rounded-lg border border-[#5865F2] bg-[#2E3944] p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <CommentIcon className="text-[#5865F2]" />
-            <h2 className="text-muted text-lg font-semibold">
+            <CommentIcon className="text-button-info" />
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent{" "}
               {activeFilter
                 ? `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} `
@@ -228,7 +228,7 @@ export default function CommentsTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex items-center gap-1 rounded-lg border border-[#2E3944] bg-[#37424D] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#475569]"
+            className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -240,7 +240,7 @@ export default function CommentsTab({
         </div>
 
         {comments.length === 0 ? (
-          <p className="text-[#FFFFFF] italic">No comments yet</p>
+          <p className="text-primary-text italic">No comments yet</p>
         ) : (
           <>
             {/* Filter chips */}
@@ -251,14 +251,33 @@ export default function CommentsTab({
                   key={type}
                   label={type.charAt(0).toUpperCase() + type.slice(1)}
                   onClick={() => handleFilterChange(type)}
-                  color={activeFilter === type ? "primary" : "default"}
+                  variant={activeFilter === type ? "filled" : "outlined"}
                   sx={{
                     backgroundColor:
-                      activeFilter === type ? "#5865F2" : "#212A31",
-                    color: activeFilter === type ? "#fff" : "#FFFFFF",
+                      activeFilter === type
+                        ? "var(--color-button-info)"
+                        : "transparent",
+                    borderColor:
+                      activeFilter === type
+                        ? "var(--color-button-info)"
+                        : "var(--color-secondary-text)",
+                    color:
+                      activeFilter === type
+                        ? "var(--color-form-button-text)"
+                        : "var(--color-primary-text)",
                     "&:hover": {
                       backgroundColor:
-                        activeFilter === type ? "#4752C4" : "#292f6e",
+                        activeFilter === type
+                          ? "var(--color-button-info-hover)"
+                          : "var(--color-button-info)",
+                      borderColor:
+                        activeFilter === type
+                          ? "var(--color-button-info-hover)"
+                          : "var(--color-button-info)",
+                      color:
+                        activeFilter === type
+                          ? "var(--color-form-button-text)"
+                          : "var(--color-primary-text)",
                     },
                   }}
                 />
@@ -269,14 +288,33 @@ export default function CommentsTab({
                 key="item"
                 label="Items"
                 onClick={() => handleFilterChange("item")}
-                color={activeFilter === "item" ? "primary" : "default"}
+                variant={activeFilter === "item" ? "filled" : "outlined"}
                 sx={{
                   backgroundColor:
-                    activeFilter === "item" ? "#5865F2" : "#212A31",
-                  color: activeFilter === "item" ? "#fff" : "#FFFFFF",
+                    activeFilter === "item"
+                      ? "var(--color-button-info)"
+                      : "transparent",
+                  borderColor:
+                    activeFilter === "item"
+                      ? "var(--color-button-info)"
+                      : "var(--color-secondary-text)",
+                  color:
+                    activeFilter === "item"
+                      ? "var(--color-form-button-text)"
+                      : "var(--color-primary-text)",
                   "&:hover": {
                     backgroundColor:
-                      activeFilter === "item" ? "#4752C4" : "#292f6e",
+                      activeFilter === "item"
+                        ? "var(--color-button-info-hover)"
+                        : "var(--color-button-info)",
+                    borderColor:
+                      activeFilter === "item"
+                        ? "var(--color-button-info-hover)"
+                        : "var(--color-button-info)",
+                    color:
+                      activeFilter === "item"
+                        ? "var(--color-form-button-text)"
+                        : "var(--color-primary-text)",
                   },
                 }}
               />
@@ -284,7 +322,7 @@ export default function CommentsTab({
 
             <div className="space-y-4">
               {currentComments.length === 0 ? (
-                <p className="text-[#FFFFFF] italic">
+                <p className="text-primary-text italic">
                   {activeFilter
                     ? `No ${activeFilter === "item" ? "item" : activeFilter} comments yet`
                     : "No comments yet"}
@@ -324,10 +362,20 @@ export default function CommentsTab({
                   color="primary"
                   sx={{
                     "& .MuiPaginationItem-root": {
-                      color: "#D3D9D4",
+                      color: "var(--color-primary-text)",
+                      "&.Mui-selected": {
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                        },
+                      },
+                      "&:hover": {
+                        backgroundColor: "var(--color-quaternary-bg)",
+                      },
                     },
-                    "& .Mui-selected": {
-                      backgroundColor: "#5865F2 !important",
+                    "& .MuiPaginationItem-icon": {
+                      color: "var(--color-primary-text)",
                     },
                   }}
                 />

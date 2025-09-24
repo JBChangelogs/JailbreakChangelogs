@@ -6,7 +6,7 @@ export default function OGFinderLoading() {
       <Breadcrumb />
 
       {/* Description Section */}
-      <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+      <div className="mb-8 rounded-lg border p-6 shadow-sm">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-64 rounded bg-gray-600"></div>
           <div className="space-y-2">
@@ -17,7 +17,7 @@ export default function OGFinderLoading() {
       </div>
 
       {/* Search Form */}
-      <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+      <div className="mb-8 rounded-lg border p-6 shadow-sm">
         <div className="animate-pulse space-y-4">
           <div>
             <div className="mb-2 h-4 w-32 rounded bg-gray-600"></div>
@@ -28,7 +28,7 @@ export default function OGFinderLoading() {
       </div>
 
       {/* FAQ Section */}
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-6 shadow-sm">
+      <div className="rounded-lg border p-6 shadow-sm">
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-48 rounded bg-gray-600"></div>
           <div className="space-y-3">

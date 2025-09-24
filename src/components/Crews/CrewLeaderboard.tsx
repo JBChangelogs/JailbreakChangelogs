@@ -8,6 +8,7 @@ import { RobloxUser } from "@/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { FaClock } from "react-icons/fa";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const bangers = localFont({
@@ -109,11 +110,11 @@ export default function CrewLeaderboard({
   if (!leaderboard || leaderboard.length === 0) {
     return (
       <div className="mt-8">
-        <h2 className="mb-4 text-xl font-bold text-gray-300">
+        <h2 className="text-primary-text mb-4 text-xl font-bold">
           Crew Leaderboard
         </h2>
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
-          <p className="py-8 text-center text-gray-400">
+        <div className="border-stroke bg-secondary-bg rounded-lg border p-4 shadow-sm">
+          <p className="text-secondary-text py-8 text-center">
             No crew data available.
           </p>
         </div>
@@ -123,10 +124,10 @@ export default function CrewLeaderboard({
 
   return (
     <div className="mt-8">
-      <h2 className="mb-4 text-xl font-bold text-gray-300">
+      <h2 className="text-primary-text mb-4 text-xl font-bold">
         Crew Leaderboard ({filteredLeaderboard.length})
         {currentSeason !== 19 && (
-          <span className="ml-2 text-sm font-normal text-gray-400">
+          <span className="text-secondary-text ml-2 text-sm font-normal">
             - Season {currentSeason}
           </span>
         )}
@@ -140,13 +141,13 @@ export default function CrewLeaderboard({
             placeholder="Search crews..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 text-white placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+            className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
-          <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF] hover:text-gray-300"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -157,32 +158,26 @@ export default function CrewLeaderboard({
 
       {/* Historical Season Notice */}
       {currentSeason !== 19 && (
-        <div className="mb-4 rounded-lg border border-blue-700/30 bg-blue-900/20 p-4">
+        <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-blue-200">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="text-primary-text flex items-center gap-2">
+              <FaClock className="h-5 w-5" />
               <span className="font-medium">Historical Data</span>
             </div>
             <Link
               href="/crews"
-              className="inline-block w-fit rounded-lg bg-[#5865F2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-fit rounded-lg px-4 py-2 text-sm font-medium transition-colors"
             >
               Go to Current Season
             </Link>
           </div>
-          <p className="mt-2 text-sm text-blue-100">
+          <p className="text-secondary-text mt-2 text-sm">
             This is historical data from Season {currentSeason}.
           </p>
         </div>
       )}
 
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+      <div className="border-stroke bg-secondary-bg rounded-lg border p-4 shadow-sm">
         <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
           {filteredLeaderboard.map((crew, crewIndex) => {
             // The API data is already sorted by rating, so the position in the array is the rank
@@ -225,7 +220,7 @@ export default function CrewLeaderboard({
 
           {filteredLeaderboard.length === 0 && searchTerm && (
             <div className="py-8 text-center">
-              <p className="text-gray-400">
+              <p className="text-secondary-text">
                 No crews found matching &quot;{searchTerm}&quot;
               </p>
             </div>
@@ -263,26 +258,45 @@ function CrewLeaderboardEntry({
   return (
     <div
       className={`flex flex-col gap-3 rounded-lg border p-6 transition-colors sm:flex-row sm:items-center ${
-        index === 0
-          ? "border-yellow-400/50 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 hover:bg-gradient-to-r hover:from-yellow-500/30 hover:to-yellow-600/30"
-          : index === 1
-            ? "border-gray-300/50 bg-gradient-to-r from-gray-400/20 to-gray-500/20 hover:bg-gradient-to-r hover:from-gray-400/30 hover:to-gray-500/30"
-            : index === 2
-              ? "border-amber-500/50 bg-gradient-to-r from-amber-600/20 to-amber-700/20 hover:bg-gradient-to-r hover:from-amber-600/30 hover:to-amber-700/30"
-              : "border-[#37424D] bg-[#2E3944] hover:bg-[#37424D]"
+        index <= 3 ? "" : "hover:border-button-info"
       }`}
+      style={{
+        ...(index === 0 && {
+          background:
+            "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+          borderColor: "hsl(45, 100%, 50%, 0.5)",
+        }),
+        ...(index === 1 && {
+          background:
+            "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+          borderColor: "hsl(0, 0%, 75%, 0.5)",
+        }),
+        ...(index === 2 && {
+          background:
+            "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+          borderColor: "hsl(30, 100%, 50%, 0.5)",
+        }),
+      }}
     >
       {/* Rank Badge */}
       <div
         className={`flex h-10 w-10 items-center justify-center rounded-full text-base font-bold ${
-          index === 0
-            ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-800"
-            : index === 1
-              ? "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800"
-              : index === 2
-                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-gray-800"
-                : "bg-[#5865F2] text-white"
+          index <= 3 ? "text-gray-800" : "bg-button-info text-form-button-text"
         }`}
+        style={{
+          ...(index === 0 && {
+            background:
+              "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+          }),
+          ...(index === 1 && {
+            background:
+              "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+          }),
+          ...(index === 2 && {
+            background:
+              "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+          }),
+        }}
       >
         {index + 1}
       </div>
@@ -313,13 +327,13 @@ function CrewLeaderboardEntry({
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <h3
-            className={`text-lg break-words text-white sm:text-xl md:text-2xl lg:text-3xl ${bangers.className}`}
+            className={`text-primary-text text-lg break-words sm:text-xl md:text-2xl lg:text-3xl ${bangers.className}`}
           >
             <a
               href={`https://www.roblox.com/users/${crew.OwnerUserId}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-300 transition-colors hover:text-blue-200"
+              className="text-link hover:text-link-hover transition-colors"
             >
               {username}
             </a>
@@ -333,23 +347,23 @@ function CrewLeaderboardEntry({
         {/* Stats */}
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <div className="text-lg font-semibold text-white">
+            <div className="text-primary-text text-lg font-semibold">
               {formatRating(crew.Rating)}
             </div>
-            <div className="text-xs text-gray-400">Rating</div>
+            <div className="text-secondary-text text-xs">Rating</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold text-white">
+            <div className="text-primary-text text-lg font-semibold">
               {crew.BattlesPlayed}
             </div>
-            <div className="text-xs text-gray-400">Battles</div>
+            <div className="text-secondary-text text-xs">Battles</div>
           </div>
         </div>
 
         {/* View Crew Button - positioned on the right side */}
         <Link
           href={`/crews/${index + 1}${currentSeason !== 19 ? `?season=${currentSeason}` : ""}`}
-          className="inline-block w-fit rounded-lg bg-[#5865F2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-fit rounded-lg px-4 py-2 text-sm font-medium transition-colors"
         >
           View Crew
         </Link>

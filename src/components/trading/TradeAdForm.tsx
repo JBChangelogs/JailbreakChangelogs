@@ -3,13 +3,12 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem, TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
-import { Button, Skeleton } from "@mui/material";
+import { Button, Skeleton, Tooltip } from "@mui/material";
 import toast from "react-hot-toast";
 import { AvailableItemsGrid } from "./AvailableItemsGrid";
 import { CustomConfirmationModal } from "../Modals/CustomConfirmationModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
@@ -434,7 +433,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     return (
       <div className="space-y-6">
         {/* Expiration Time Selection Skeleton */}
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+        <div className="rounded-lg border p-4">
           <Skeleton variant="text" width={200} height={24} className="mb-4" />
           <div className="flex items-center gap-4">
             <Skeleton
@@ -452,7 +451,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         {/* Offering and Requesting Items Skeleton */}
         <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-          <div className="flex-1 rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+          <div className="flex-1 rounded-lg border p-4">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
@@ -467,7 +466,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+          <div className="flex-1 rounded-lg border p-4">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
@@ -520,11 +519,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className="mb-8 rounded-lg border border-[#2E3944] bg-[#212A31] p-6 text-center">
-        <h3 className="text-muted mb-4 text-lg font-medium">
+      <div className="mb-8 rounded-lg border p-6 text-center">
+        <h3 className="text-tertiary-text mb-4 text-lg font-medium">
           Create Trade Ads
         </h3>
-        <p className="text-muted/70 mb-8">
+        <p className="text-tertiary-text/70 mb-8">
           Please log in to create your own trade ads.
         </p>
       </div>
@@ -564,18 +563,20 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         {showClearConfirmModal && (
           <div className="fixed inset-0 z-50">
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
               aria-hidden="true"
               onClick={() => setShowClearConfirmModal(false)}
             />
             <div className="fixed inset-0 flex items-center justify-center p-4">
-              <div className="mx-auto w-full max-w-sm rounded-lg border border-[#5865F2] bg-[#212A31] p-6 shadow-xl">
-                <h2 className="mb-2 text-xl font-semibold text-white">
+              <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+                <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
                   Clear Trade Ad?
-                </h2>
-                <p className="text-muted/80 mb-6">
-                  Choose what to clear. This action cannot be undone.
-                </p>
+                </div>
+                <div className="modal-content mb-6">
+                  <p className="text-secondary-text">
+                    Choose what to clear. This action cannot be undone.
+                  </p>
+                </div>
                 <div className="mb-4 grid grid-cols-1 gap-3">
                   <button
                     onClick={() => {
@@ -587,7 +588,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       }
                       setShowClearConfirmModal(false);
                     }}
-                    className="w-full rounded-md border border-[#047857] bg-[#047857]/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#047857]/30"
+                    className="border-button-success bg-button-success/10 text-button-success hover:bg-button-success/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                   >
                     Clear Offering
                   </button>
@@ -601,7 +602,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       }
                       setShowClearConfirmModal(false);
                     }}
-                    className="w-full rounded-md border border-[#B91C1C] bg-[#B91C1C]/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#B91C1C]/30"
+                    className="border-button-danger bg-button-danger/10 text-button-danger hover:bg-button-danger/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                   >
                     Clear Requesting
                   </button>
@@ -609,15 +610,15 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     onClick={() => {
                       handleStartNewTradeAd();
                     }}
-                    className="w-full rounded-md bg-[#B91C1C] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#991B1B]"
+                    className="bg-button-danger text-form-button-text hover:bg-button-danger-hover w-full rounded-md px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                   >
                     Clear Both
                   </button>
                 </div>
-                <div className="flex justify-end">
+                <div className="modal-footer flex justify-end">
                   <button
                     onClick={() => setShowClearConfirmModal(false)}
-                    className="text-muted rounded-md border border-[#37424D] px-4 py-2 text-sm font-medium transition-colors hover:bg-[#2E3944] hover:text-white"
+                    className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
                   >
                     Cancel
                   </button>
@@ -639,133 +640,94 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         {/* Expiration Time Selection */}
         {!editMode && (
-          <div className="mb-4 rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
-            <h3 className="text-muted mb-2 flex items-center gap-2 font-medium">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-5 w-5 text-blue-400"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
-                />
-              </svg>
-              Trade Ad Expiration
-            </h3>
-            <p className="mb-2 text-sm text-blue-300">
-              How long should your trade ad be visible? <b>Supporters</b> can
-              choose longer durations!
-            </p>
-            <Link
-              href="/supporting"
-              className="mb-2 inline-flex items-center gap-2 rounded bg-[#2E3944] px-3 py-1 font-semibold text-white transition hover:bg-[#37424D]"
-              style={{ textDecoration: "none" }}
-            >
-              <Image
-                src="https://assets.jailbreakchangelogs.xyz/assets/images/JBCLHeart.webp"
-                alt="Heart"
-                width={16}
-                height={16}
-                className="h-4 w-4"
-              />
-              Become a Supporter
-            </Link>
-            <div className="flex items-center gap-4">
-              {selectLoaded ? (
-                <Select
-                  value={
-                    expirationHours !== null
-                      ? {
-                          value: expirationHours,
-                          label: `${expirationHours} ${expirationHours === 1 ? "hour" : "hours"}`,
-                        }
-                      : { value: null, label: "Select expiration..." }
-                  }
-                  onChange={(option: unknown) => {
-                    if (
-                      !option ||
-                      (option as { value: number | null }).value == null
-                    ) {
-                      setExpirationHours(null);
-                      return;
+          <div className="border-border-primary bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="relative z-10">
+              <span className="text-primary-text text-base font-bold">
+                Trade Ad Expiration
+              </span>
+              <div className="text-secondary-text mt-1">
+                How long should your trade ad be visible? Supporters can choose
+                longer durations!
+                <br />
+                <Link
+                  href="/supporting"
+                  className="hover:text-button-info underline transition-colors"
+                >
+                  Become a Supporter
+                </Link>
+              </div>
+              <div className="mt-3">
+                {selectLoaded ? (
+                  <Select
+                    value={
+                      expirationHours !== null
+                        ? {
+                            value: expirationHours,
+                            label: `${expirationHours} ${expirationHours === 1 ? "hour" : "hours"}`,
+                          }
+                        : { value: null, label: "Select expiration..." }
                     }
-                    const newValue = (option as { value: number }).value;
-                    setExpirationHours(newValue);
-                  }}
-                  options={[
-                    { value: null, label: "Select expiration..." },
-                    ...[6, 12, 24, 48].map((hours) => ({
-                      value: hours,
-                      label: `${hours} ${hours === 1 ? "hour" : "hours"}`,
-                    })),
-                  ]}
-                  placeholder="Select expiration..."
-                  classNamePrefix="react-select"
-                  className="w-full"
-                  isClearable={false}
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      backgroundColor: "#37424D",
-                      borderColor: "#2E3944",
-                      color: "#D3D9D4",
-                      minHeight: "40px",
-                      "&:hover": {
-                        borderColor: "#124E66",
-                      },
-                      "&:focus-within": {
-                        borderColor: "#124E66",
-                      },
-                    }),
-                    singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                    menu: (base) => ({
-                      ...base,
-                      backgroundColor: "#37424D",
-                      color: "#D3D9D4",
-                      zIndex: 3000,
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected
-                        ? "#124E66"
-                        : state.isFocused
-                          ? "#2E3944"
-                          : "#37424D",
-                      color:
-                        state.isSelected || state.isFocused
-                          ? "#FFFFFF"
-                          : "#D3D9D4",
-                      "&:active": {
-                        backgroundColor: "#124E66",
-                        color: "#FFFFFF",
-                      },
-                    }),
-                    dropdownIndicator: (base) => ({
-                      ...base,
-                      color: "#D3D9D4",
-                      "&:hover": {
-                        color: "#FFFFFF",
-                      },
-                    }),
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="h-10 w-full animate-pulse rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
-              )}
+                    onChange={(option: unknown) => {
+                      if (
+                        !option ||
+                        (option as { value: number | null }).value == null
+                      ) {
+                        setExpirationHours(null);
+                        return;
+                      }
+                      const newValue = (option as { value: number }).value;
+                      setExpirationHours(newValue);
+                    }}
+                    options={[
+                      { value: null, label: "Select expiration..." },
+                      ...[6, 12, 24, 48].map((hours) => ({
+                        value: hours,
+                        label: `${hours} ${hours === 1 ? "hour" : "hours"}`,
+                      })),
+                    ]}
+                    placeholder="Select expiration..."
+                    classNamePrefix="react-select"
+                    className="w-full"
+                    isClearable={false}
+                    unstyled
+                    classNames={{
+                      control: () =>
+                        "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                      singleValue: () => "text-secondary-text",
+                      placeholder: () => "text-secondary-text",
+                      menu: () =>
+                        "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                      option: ({ isSelected, isFocused }) =>
+                        `px-4 py-3 cursor-pointer ${
+                          isSelected
+                            ? "bg-button-info text-form-button-text"
+                            : isFocused
+                              ? "bg-quaternary-bg text-primary-text"
+                              : "bg-secondary-bg text-secondary-text"
+                        }`,
+                      clearIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
+                      dropdownIndicator: () =>
+                        "text-secondary-text hover:text-primary-text cursor-pointer",
+                      groupHeading: () =>
+                        "px-4 py-2 text-primary-text font-semibold text-sm",
+                    }}
+                    isSearchable={false}
+                  />
+                ) : (
+                  <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* Status Selection (Edit Mode Only) */}
         {editMode && tradeAd && (
-          <div className="mt-4 rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
-            <h3 className="text-muted mb-4 font-medium">Trade Status</h3>
+          <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
+            <h3 className="text-tertiary-text mb-4 font-medium">
+              Trade Status
+            </h3>
             {selectLoaded ? (
               <Select
                 value={{
@@ -792,94 +754,94 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 classNamePrefix="react-select"
                 className="w-full"
                 isClearable={false}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "#37424D",
-                    borderColor: "#2E3944",
-                    color: "#D3D9D4",
-                    minHeight: "40px",
-                    "&:hover": {
-                      borderColor: "#124E66",
-                    },
-                    "&:focus-within": {
-                      borderColor: "#124E66",
-                    },
-                  }),
-                  singleValue: (base) => ({ ...base, color: "#D3D9D4" }),
-                  menu: (base) => ({
-                    ...base,
-                    backgroundColor: "#37424D",
-                    color: "#D3D9D4",
-                    zIndex: 3000,
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? "#124E66"
-                      : state.isFocused
-                        ? "#2E3944"
-                        : "#37424D",
-                    color:
-                      state.isSelected || state.isFocused
-                        ? "#FFFFFF"
-                        : "#D3D9D4",
-                    "&:active": {
-                      backgroundColor: "#124E66",
-                      color: "#FFFFFF",
-                    },
-                  }),
-                  dropdownIndicator: (base) => ({
-                    ...base,
-                    color: "#D3D9D4",
-                    "&:hover": {
-                      color: "#FFFFFF",
-                    },
-                  }),
+                unstyled
+                classNames={{
+                  control: () =>
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                  singleValue: () => "text-secondary-text",
+                  placeholder: () => "text-secondary-text",
+                  menu: () =>
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused }) =>
+                    `px-4 py-3 cursor-pointer ${
+                      isSelected
+                        ? "bg-button-info text-form-button-text"
+                        : isFocused
+                          ? "bg-primary-bg text-primary-text"
+                          : "bg-secondary-bg text-secondary-text"
+                    }`,
+                  clearIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  dropdownIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  groupHeading: () =>
+                    "px-4 py-2 text-primary-text font-semibold text-sm",
                 }}
                 isSearchable={false}
               />
             ) : (
-              <div className="h-10 w-full animate-pulse rounded-lg border border-[#2E3944] bg-[#37424D]"></div>
+              <div className="bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
             )}
           </div>
         )}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-center gap-3">
-          <Button
-            variant="contained"
-            onClick={handleSwapSides}
-            sx={{
-              backgroundColor: "#5865F2",
-              color: "#FFFFFF",
-              "&:hover": {
-                backgroundColor: "#4752C4",
+          <Tooltip
+            title="Swap sides"
+            arrow
+            placement="top"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
               },
             }}
           >
-            <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
-            Swap Sides
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleClearSides}
-            sx={{
-              backgroundColor: "#EF4444",
-              color: "#FFFFFF",
-              "&:hover": {
-                backgroundColor: "#DC2626",
+            <Button
+              variant="contained"
+              onClick={handleSwapSides}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
+              Swap Sides
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title="Clear all items (hold Shift to clear both sides instantly)"
+            arrow
+            placement="top"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
               },
             }}
           >
-            <TrashIcon className="mr-1 h-5 w-5" />
-            Clear
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleClearSides}
+              className="bg-status-error text-form-button-text hover:bg-status-error-hover"
+            >
+              <TrashIcon className="mr-1 h-5 w-5" />
+              Clear
+            </Button>
+          </Tooltip>
         </div>
 
         {/* Pro tip about Shift+Clear */}
         <div className="text-center">
-          <div className="hidden items-center justify-center gap-1 text-xs text-[#D3D9D4] lg:flex">
+          <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
             💡 Pro tip: Hold Shift while clicking Clear to clear both sides
             instantly without confirmation
           </div>
@@ -887,35 +849,40 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         {/* Offering Items */}
         <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-          <div
-            className="flex-1 rounded-lg border border-[#2E3944] bg-[#212A31] p-4"
-            style={{ borderColor: "#047857" }}
-          >
+          <div className="border-status-success bg-secondary-bg flex-1 rounded-lg border p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h3 className="text-muted font-medium">Offering</h3>
-                <span className="text-muted/70 text-sm">
+                <h3 className="text-secondary-text font-medium">Offering</h3>
+                <span className="text-secondary-text/70 text-sm">
                   ({offeringItems.length}/8)
                 </span>
               </div>
-              <Button
-                variant="outlined"
-                onClick={() => handleMirrorItems("offering")}
-                size="small"
-                sx={{
-                  borderColor: "#047857",
-                  color: "#FFFFFF",
-                  backgroundColor: "rgba(4, 120, 87, 0.15)",
-                  "&:hover": {
-                    borderColor: "#065F46",
-                    backgroundColor: "rgba(4, 120, 87, 0.25)",
-                    color: "#FFFFFF",
+              <Tooltip
+                title="Mirror to requesting"
+                arrow
+                placement="top"
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
+                    },
                   },
                 }}
               >
-                <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
-                Mirror
-              </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleMirrorItems("offering")}
+                  size="small"
+                  className="border-status-success text-primary-text bg-status-success/15 hover:border-status-success hover:bg-status-success/25"
+                >
+                  <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                  Mirror
+                </Button>
+              </Tooltip>
             </div>
             <ItemGrid
               items={offeringItems}
@@ -924,53 +891,58 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 handleRemoveItem(id, "offering", subName)
               }
             />
-            <div className="text-muted/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
+            <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
               <span>
                 Total:{" "}
-                <span className="text-muted font-bold">
+                <span className="text-secondary-text font-bold">
                   {calculateTotals(offeringItems).cashValue}
                 </span>
               </span>
-              <span className="inline-flex items-center rounded-full border border-green-500/20 bg-green-500/80 px-2 py-0.5 text-white">
+              <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
                 {offeringItems.length} clean •{" "}
                 {calculateTotals(offeringItems).cashValue}
               </span>
-              <span className="inline-flex items-center rounded-full border border-red-500/20 bg-red-500/80 px-2 py-0.5 text-white">
+              <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
                 0 duped • 0
               </span>
             </div>
           </div>
 
           {/* Requesting Items */}
-          <div
-            className="flex-1 rounded-lg border border-[#2E3944] bg-[#212A31] p-4"
-            style={{ borderColor: "#B91C1C" }}
-          >
+          <div className="border-status-error bg-secondary-bg flex-1 rounded-lg border p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h3 className="text-muted font-medium">Requesting</h3>
-                <span className="text-muted/70 text-sm">
+                <h3 className="text-secondary-text font-medium">Requesting</h3>
+                <span className="text-secondary-text/70 text-sm">
                   ({requestingItems.length}/8)
                 </span>
               </div>
-              <Button
-                variant="outlined"
-                onClick={() => handleMirrorItems("requesting")}
-                size="small"
-                sx={{
-                  borderColor: "#B91C1C",
-                  color: "#FFFFFF",
-                  backgroundColor: "rgba(185, 28, 28, 0.15)",
-                  "&:hover": {
-                    borderColor: "#991B1B",
-                    backgroundColor: "rgba(185, 28, 28, 0.25)",
-                    color: "#FFFFFF",
+              <Tooltip
+                title="Mirror to offering"
+                arrow
+                placement="top"
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
+                    },
                   },
                 }}
               >
-                <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
-                Mirror
-              </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleMirrorItems("requesting")}
+                  size="small"
+                  className="border-status-error text-primary-text bg-status-error/15 hover:border-status-error hover:bg-status-error/25"
+                >
+                  <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                  Mirror
+                </Button>
+              </Tooltip>
             </div>
             <ItemGrid
               items={requestingItems}
@@ -979,18 +951,18 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 handleRemoveItem(id, "requesting", subName)
               }
             />
-            <div className="text-muted/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
+            <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
               <span>
                 Total:{" "}
-                <span className="text-muted font-bold">
+                <span className="text-secondary-text font-bold">
                   {calculateTotals(requestingItems).cashValue}
                 </span>
               </span>
-              <span className="inline-flex items-center rounded-full border border-green-500/20 bg-green-500/80 px-2 py-0.5 text-white">
+              <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
                 {requestingItems.length} clean •{" "}
                 {calculateTotals(requestingItems).cashValue}
               </span>
-              <span className="inline-flex items-center rounded-full border border-red-500/20 bg-red-500/80 px-2 py-0.5 text-white">
+              <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
                 0 duped • 0
               </span>
             </div>
@@ -999,8 +971,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         {/* Submit Button */}
         <div className="flex flex-col justify-end gap-3 sm:flex-row">
-          <Button
-            variant="outlined"
+          <button
             onClick={() => {
               if (editMode) {
                 window.history.pushState(null, "", window.location.pathname);
@@ -1017,25 +988,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               offeringItems.length === 0 &&
               requestingItems.length === 0
             }
-            sx={{
-              borderColor: "#D3D9D4",
-              color: "#D3D9D4",
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              padding: { xs: "6px 12px", sm: "8px 16px" },
-              "&:hover": {
-                borderColor: "#D3D9D4",
-                backgroundColor: "rgba(211, 217, 212, 0.1)",
-              },
-              "&.Mui-disabled": {
-                borderColor: "#2E3944",
-                color: "#2E3944",
-              },
-            }}
+            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+              !editMode &&
+              offeringItems.length === 0 &&
+              requestingItems.length === 0
+                ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
+                : "bg-button-secondary text-secondary-text border-button-secondary hover:bg-button-secondary-hover cursor-pointer"
+            }`}
           >
             {editMode ? "Cancel" : "Clear Trade Ad"}
-          </Button>
-          <Button
-            variant="contained"
+          </button>
+          <button
             onClick={() => {
               if (!editMode && expirationHours === null) {
                 toast.error(
@@ -1046,20 +1009,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               handleSubmit();
             }}
             disabled={submitting}
-            sx={{
-              backgroundColor: "#5865F2",
-              color: "white",
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              padding: { xs: "6px 12px", sm: "8px 16px" },
-              "&:hover": {
-                backgroundColor: "#4752C4",
-              },
-              "&.Mui-disabled": {
-                backgroundColor: "#444C56",
-                color: "#888",
-                cursor: "not-allowed",
-              },
-            }}
+            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+              submitting
+                ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+            }`}
           >
             {submitting
               ? editMode
@@ -1068,7 +1022,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               : editMode
                 ? "Update Trade Ad"
                 : "Create Trade Ad"}
-          </Button>
+          </button>
         </div>
 
         {/* Available Items Grid */}

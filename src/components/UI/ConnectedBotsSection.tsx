@@ -17,22 +17,14 @@ export default async function ConnectedBotsSection() {
     return null;
   }
 
-  // Filter recent heartbeats to only show bots active in last 30 seconds
-  const now = Math.floor(Date.now() / 1000);
-  const thirtySecondsAgo = now - 30;
+  const allBots = botsData.recent_heartbeats;
+  const totalCount = allBots.length;
 
-  const activeBots = botsData.recent_heartbeats.filter(
-    (bot) => bot.last_heartbeat >= thirtySecondsAgo,
-  );
-
-  const totalCount = activeBots.length;
-
-  // If no bots are active, show a message
   if (totalCount === 0) {
     return (
       <div className="mt-6">
         <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-xl font-bold text-gray-300">Active Bots</h2>
+          <h2 className="text-xl font-bold text-gray-300">Connected Bots</h2>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gray-500"></div>
             <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -40,13 +32,13 @@ export default async function ConnectedBotsSection() {
             </span>
           </div>
         </div>
-        <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 shadow-sm">
+        <div className="rounded-lg border p-4 shadow-sm">
           <div className="py-8 text-center">
             <div className="mb-2 text-lg font-medium text-gray-400">
-              No bots active
+              No bots available
             </div>
             <div className="text-sm text-gray-500">
-              No inventory scanning bots have been active in the last 30 seconds
+              No inventory scanning bots are currently available
             </div>
           </div>
         </div>
@@ -54,13 +46,11 @@ export default async function ConnectedBotsSection() {
     );
   }
 
-  // Fetch Roblox user data and avatars for active bots and last processed user
   let usersData: Record<string, RobloxUser> | null = null;
   let avatarsData: Record<string, RobloxAvatar> = {};
 
-  const userIdsToFetch = [...activeBots.map((bot) => bot.id)];
+  const userIdsToFetch = [...allBots.map((bot) => bot.id)];
 
-  // Add last processed user ID if available
   if (queueInfo?.last_dequeue?.user_id) {
     userIdsToFetch.push(queueInfo.last_dequeue.user_id);
   }
@@ -77,7 +67,6 @@ export default async function ConnectedBotsSection() {
       }),
     ]);
 
-    // Handle both return types from fetchRobloxUsersBatch
     usersData =
       fetchedUsersData && "data" in fetchedUsersData ? null : fetchedUsersData;
     avatarsData = fetchedAvatarsData || {};
@@ -85,7 +74,7 @@ export default async function ConnectedBotsSection() {
 
   return (
     <ConnectedBotsClient
-      activeBots={activeBots}
+      activeBots={allBots}
       usersData={usersData}
       avatarsData={avatarsData}
       queueInfo={queueInfo}

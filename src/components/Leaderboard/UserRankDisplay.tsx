@@ -51,13 +51,15 @@ export default function UserRankDisplay() {
 
   if (isLoading) {
     return (
-      <div className="mb-6 rounded-lg border border-[#2E3944] bg-[#212A31] p-4">
+      <div className="border-stroke bg-secondary-bg mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-200">Your Rank</h3>
-            <p className="text-sm text-gray-400">Loading your rank...</p>
+            <h3 className="text-primary-text text-lg font-semibold">
+              Your Rank
+            </h3>
+            <p className="text-secondary-text text-sm">Loading your rank...</p>
           </div>
-          <div className="h-8 w-8 animate-pulse rounded-full bg-[#2E3944]" />
+          <div className="h-8 w-8 animate-pulse rounded-full" />
         </div>
       </div>
     );
@@ -75,19 +77,19 @@ export default function UserRankDisplay() {
   return (
     <div className="mb-6">
       <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-300 sm:text-xl">
+        <h2 className="text-primary-text text-lg font-bold sm:text-xl">
           Your Rank
         </h2>
-        <span className="text-xs text-gray-300 sm:text-sm">
+        <span className="text-secondary-text text-xs sm:text-sm">
           Last Updated {formatCustomDate(userRank.updated_at)} (
           {formatRelativeDate(userRank.updated_at)})
         </span>
       </div>
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-3 shadow-sm sm:p-4">
-        <div className="rounded-lg border border-[#2E3944] bg-[#2E3944] p-3 transition-colors hover:border-[#5865F2]">
+      <div className="border-stroke bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
+        <div className="border-stroke hover:border-button-info rounded-lg border p-3 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="flex h-7 min-w-[2.5rem] items-center justify-center rounded-full bg-[#2E3944] px-1 text-xs font-bold text-gray-300 sm:h-8 sm:min-w-[3rem] sm:px-2">
+              <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
                 #{userRank.rank.toLocaleString()}
               </div>
               {user.roblox_avatar ? (
@@ -99,14 +101,14 @@ export default function UserRankDisplay() {
                   className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
                 />
               ) : (
-                <div className="h-7 w-7 rounded-full bg-[#2E3944] sm:h-8 sm:w-8" />
+                <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
               )}
               <div className="flex min-w-0 flex-1 flex-col">
                 <a
                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="truncate text-sm font-medium text-blue-300 transition-colors hover:text-blue-200 sm:text-base"
+                  className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
                 >
                   {user.roblox_display_name}
                 </a>
@@ -114,14 +116,14 @@ export default function UserRankDisplay() {
                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="truncate text-xs text-gray-400 transition-colors hover:text-blue-400 sm:text-sm"
+                  className="text-secondary-text hover:text-link-hover truncate text-xs transition-colors sm:text-sm"
                 >
                   @{user.roblox_username}
                 </a>
               </div>
             </div>
             <div className="ml-2 flex items-center space-x-2">
-              <span className="text-sm font-bold text-green-400 sm:text-lg">
+              <span className="text-button-success text-sm font-bold sm:text-lg">
                 ${formatMoney(userRank.money)}
               </span>
             </div>

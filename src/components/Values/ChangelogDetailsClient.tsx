@@ -1,18 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Pagination,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tabs,
-  Tab,
-  Button,
-  useMediaQuery,
-} from "@mui/material";
+import { Pagination, Chip, useMediaQuery } from "@mui/material";
+import { Dialog } from "@headlessui/react";
 import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme } from "@/theme/darkTheme";
@@ -25,7 +15,7 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { getItemTypeColor } from "@/utils/badgeColors";
+import { getCategoryColor } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
@@ -372,14 +362,6 @@ export default function ChangelogDetailsClient({
       ? `${searchQuery.slice(0, MAX_QUERY_DISPLAY_LENGTH)}...`
       : searchQuery;
 
-  if (!changelog) {
-    return (
-      <div className="py-8 text-center text-white">
-        <p>Changelog not found</p>
-      </div>
-    );
-  }
-
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="space-y-6">
@@ -397,13 +379,13 @@ export default function ChangelogDetailsClient({
           {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
           {premiumStatusLoaded && currentUserPremiumType === 0 && (
             <div className="flex flex-col lg:col-span-1">
+              <span className="text-secondary-text mb-2 block text-center text-xs">
+                ADVERTISEMENT
+              </span>
               <div
-                className="relative h-full overflow-hidden rounded-lg border border-[#2E3944] bg-[#1a2127] shadow transition-all duration-300"
+                className="border-stroke bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
                 style={{ minHeight: "250px" }}
               >
-                <span className="text-muted absolute top-2 left-2 z-10 rounded bg-[#212A31] px-2 py-0.5 text-xs">
-                  Advertisement
-                </span>
                 <DisplayAd
                   adSlot="8162235433"
                   adFormat="auto"
@@ -422,13 +404,13 @@ export default function ChangelogDetailsClient({
             placeholder="Search changes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-muted w-full rounded-lg border border-[#2E3944] bg-[#37424D] px-4 py-2 pr-10 pl-10 placeholder-[#D3D9D4] focus:border-[#124E66] focus:outline-none"
+            className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
-          <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]" />
+          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchQuery && (
             <button
               onClick={clearSearch}
-              className="hover:text-muted absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-[#FFFFFF]"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -437,9 +419,9 @@ export default function ChangelogDetailsClient({
         </div>
 
         {/* Filter by Item Type - Chip Style */}
-        <div className="rounded-lg border border-[#37424D] bg-[#212A31] p-4">
+        <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
           <div className="mb-3">
-            <h3 className="mb-2 text-sm font-medium text-[#D3D9D4]">
+            <h3 className="text-secondary-text mb-2 text-sm font-medium">
               Filter by item type:
             </h3>
           </div>
@@ -450,13 +432,30 @@ export default function ChangelogDetailsClient({
               variant={selectedType === "" ? "filled" : "outlined"}
               sx={{
                 backgroundColor:
-                  selectedType === "" ? "#5865F2" : "transparent",
-                borderColor: selectedType === "" ? "#5865F2" : "#37424D",
-                color: selectedType === "" ? "#FFFFFF" : "#D3D9D4",
+                  selectedType === ""
+                    ? "var(--color-button-info)"
+                    : "transparent",
+                borderColor:
+                  selectedType === ""
+                    ? "var(--color-button-info)"
+                    : "var(--color-secondary-text)",
+                color:
+                  selectedType === ""
+                    ? "var(--color-form-button-text)"
+                    : "var(--color-primary-text)",
                 "&:hover": {
                   backgroundColor:
-                    selectedType === "" ? "#4752C4" : "rgba(88, 101, 242, 0.1)",
-                  borderColor: selectedType === "" ? "#4752C4" : "#5865F2",
+                    selectedType === ""
+                      ? "var(--color-button-info-hover)"
+                      : "var(--color-button-info)",
+                  borderColor:
+                    selectedType === ""
+                      ? "var(--color-button-info-hover)"
+                      : "var(--color-button-info)",
+                  color:
+                    selectedType === ""
+                      ? "var(--color-form-button-text)"
+                      : "var(--color-primary-text)",
                 },
               }}
             />
@@ -469,20 +468,29 @@ export default function ChangelogDetailsClient({
                 sx={{
                   backgroundColor:
                     selectedType === type
-                      ? getItemTypeColor(type)
+                      ? "var(--color-button-info)"
                       : "transparent",
                   borderColor:
-                    selectedType === type ? getItemTypeColor(type) : "#37424D",
-                  color: "#FFFFFF",
+                    selectedType === type
+                      ? "var(--color-button-info)"
+                      : "var(--color-secondary-text)",
+                  color:
+                    selectedType === type
+                      ? "var(--color-form-button-text)"
+                      : "var(--color-primary-text)",
                   "&:hover": {
                     backgroundColor:
                       selectedType === type
-                        ? getItemTypeColor(type)
-                        : "rgba(88, 101, 242, 0.1)",
+                        ? "var(--color-button-info-hover)"
+                        : "var(--color-button-info)",
                     borderColor:
                       selectedType === type
-                        ? getItemTypeColor(type)
-                        : "#5865F2",
+                        ? "var(--color-button-info-hover)"
+                        : "var(--color-button-info)",
+                    color:
+                      selectedType === type
+                        ? "var(--color-form-button-text)"
+                        : "var(--color-primary-text)",
                   },
                 }}
               />
@@ -491,7 +499,7 @@ export default function ChangelogDetailsClient({
         </div>
 
         <div className="mb-2">
-          <p className="text-muted">
+          <p className="text-secondary-text">
             {searchQuery
               ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}`
               : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}`}
@@ -502,19 +510,22 @@ export default function ChangelogDetailsClient({
                 count={totalPages}
                 page={page}
                 onChange={handlePageChange}
-                color="primary"
                 sx={{
                   "& .MuiPaginationItem-root": {
-                    color: "#D3D9D4",
+                    color: "var(--color-primary-text)",
                     "&.Mui-selected": {
-                      backgroundColor: "#5865F2",
+                      backgroundColor: "var(--color-button-info)",
+                      color: "var(--color-form-button-text)",
                       "&:hover": {
-                        backgroundColor: "#4752C4",
+                        backgroundColor: "var(--color-button-info-hover)",
                       },
                     },
                     "&:hover": {
-                      backgroundColor: "rgba(88, 101, 242, 0.1)",
+                      backgroundColor: "var(--color-quaternary-bg)",
                     },
+                  },
+                  "& .MuiPaginationItem-icon": {
+                    color: "var(--color-primary-text)",
                   },
                 }}
               />
@@ -526,141 +537,142 @@ export default function ChangelogDetailsClient({
         <Dialog
           open={votersOpen}
           onClose={() => setVotersOpen(false)}
-          fullWidth
-          maxWidth="xs"
-          slotProps={{
-            paper: {
-              sx: {
-                backgroundColor: "#212A31",
-                border: "1px solid #2E3944",
-                borderRadius: "8px",
-              },
-            },
-          }}
+          className="relative z-50"
         >
-          <DialogTitle
-            sx={{
-              bgcolor: "#212A31",
-              color: "#FFFFFF",
-              borderBottom: "1px solid #2E3944",
-            }}
-          >
-            Voters
-          </DialogTitle>
-          <DialogContent dividers sx={{ bgcolor: "#212A31" }}>
-            <Tabs
-              value={votersTab === "up" ? 0 : 1}
-              onChange={(_, val) => setVotersTab(val === 0 ? "up" : "down")}
-              textColor="primary"
-              indicatorColor="primary"
-              variant="fullWidth"
-              sx={{
-                "& .MuiTab-root": {
-                  minHeight: "auto",
-                  padding: "8px 12px",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  color: "#D3D9D4",
-                  "&.Mui-selected": {
-                    color: "#FFFFFF",
-                    fontWeight: 600,
-                  },
-                  "&:hover": {
-                    color: "#FFFFFF",
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  },
-                },
-                "& .MuiTabs-indicator": {
-                  backgroundColor: "#5865F2",
-                  height: "3px",
-                },
-              }}
-            >
-              <Tab
-                label={
-                  <div className="flex flex-col items-center">
-                    <span className="font-medium">Upvotes</span>
-                    <span className="text-muted mt-1 text-xs">
-                      ({activeVoters?.upCount ?? 0})
-                    </span>
-                  </div>
-                }
-              />
-              <Tab
-                label={
-                  <div className="flex flex-col items-center">
-                    <span className="font-medium">Downvotes</span>
-                    <span className="text-muted mt-1 text-xs">
-                      ({activeVoters?.downCount ?? 0})
-                    </span>
-                  </div>
-                }
-              />
-            </Tabs>
-            <div className="mt-3 space-y-2">
-              {(votersTab === "up"
-                ? activeVoters?.up || []
-                : activeVoters?.down || []
-              ).length === 0 ? (
-                <div className="text-muted text-sm">No voters to display.</div>
-              ) : (
-                (votersTab === "up"
-                  ? activeVoters?.up || []
-                  : activeVoters?.down || []
-                ).map((voter: VoteRecord) => (
-                  <div key={voter.id} className="flex items-center gap-2">
-                    <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-[#2E3944]">
-                      <DefaultAvatar />
-                      {voter.avatar_hash && (
-                        <Image
-                          src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`)}`}
-                          alt={voter.name}
-                          fill
-                          className="object-cover"
-                          onError={(e) => {
-                            (
-                              e as unknown as { currentTarget: HTMLElement }
-                            ).currentTarget.style.display = "none";
-                          }}
-                        />
-                      )}
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+              <div className="modal-header text-primary-text px-6 py-4 text-2xl font-bold">
+                Voters
+              </div>
+
+              <div className="modal-content px-6 pt-3 pb-6">
+                <div className="bg-primary-bg border-border-primary mb-4 flex rounded-lg border">
+                  <button
+                    onClick={() => setVotersTab("up")}
+                    className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
+                      votersTab === "up"
+                        ? "text-primary-text bg-button-success/30 border-button-success border-b-2"
+                        : "text-tertiary-text hover:text-primary-text"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-base font-bold">Upvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.upCount ?? 0})
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-white">
-                        <a
-                          href={`https://discord.com/users/${voter.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 hover:underline"
-                        >
-                          {voter.name}
-                        </a>
+                  </button>
+                  <button
+                    onClick={() => setVotersTab("down")}
+                    className={`flex-1 cursor-pointer rounded-r-lg py-3 text-sm font-semibold transition-colors ${
+                      votersTab === "down"
+                        ? "text-primary-text bg-button-danger/20 border-button-danger border-b-2"
+                        : "text-tertiary-text hover:text-primary-text"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-base font-bold">Downvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.downCount ?? 0})
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="max-h-[400px] space-y-3 overflow-y-auto">
+                  {(votersTab === "up"
+                    ? activeVoters?.up || []
+                    : activeVoters?.down || []
+                  ).length === 0 ? (
+                    <div className="text-secondary-text py-8 text-center">
+                      <div className="mb-2 text-lg font-semibold">
+                        {(votersTab === "up"
+                          ? activeVoters?.upCount || 0
+                          : activeVoters?.downCount || 0) === 0
+                          ? "No voters to display"
+                          : "Voter details not available"}
                       </div>
-                      <div className="text-muted text-xs">
-                        {new Date(voter.timestamp * 1000).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
+                      <div className="text-sm">
+                        {(votersTab === "up"
+                          ? activeVoters?.upCount || 0
+                          : activeVoters?.downCount || 0) === 0
+                          ? votersTab === "up"
+                            ? "This suggestion hasn't received any upvotes yet."
+                            : "This suggestion hasn't received any downvotes yet."
+                          : votersTab === "up"
+                            ? `This suggestion has ${activeVoters?.upCount || 0} upvote${(activeVoters?.upCount || 0) === 1 ? "" : "s"}, but individual voter details are not available.`
+                            : `This suggestion has ${activeVoters?.downCount || 0} downvote${(activeVoters?.downCount || 0) === 1 ? "" : "s"}, but individual voter details are not available.`}
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ) : (
+                    (votersTab === "up"
+                      ? activeVoters?.up || []
+                      : activeVoters?.down || []
+                    ).map((voter: VoteRecord) => (
+                      <div
+                        key={voter.id}
+                        className="bg-primary-bg border-border-primary hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                      >
+                        <div className="ring-border-primary relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2">
+                          <DefaultAvatar />
+                          {voter.avatar_hash && (
+                            <Image
+                              src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`)}`}
+                              alt={voter.name}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                (
+                                  e as unknown as { currentTarget: HTMLElement }
+                                ).currentTarget.style.display = "none";
+                              }}
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-primary-text mb-1 text-base font-bold">
+                            <a
+                              href={`https://discord.com/users/${voter.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                            >
+                              {voter.name.replace(/(.+)\1/, "$1")}
+                            </a>
+                          </div>
+                          <div className="text-tertiary-text text-sm font-medium">
+                            {new Date(
+                              voter.timestamp * 1000,
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-footer flex justify-end gap-3 px-6 py-4">
+                <button
+                  onClick={() => setVotersOpen(false)}
+                  className="bg-button-info hover:bg-button-info-hover text-form-button-text border-border-primary min-w-[100px] cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
-          </DialogContent>
-          <DialogActions
-            sx={{ bgcolor: "#212A31", borderTop: "1px solid #2E3944" }}
-          >
-            <Button onClick={() => setVotersOpen(false)} variant="contained">
-              Close
-            </Button>
-          </DialogActions>
+          </div>
         </Dialog>
 
         {/* Changes Grid */}
@@ -673,27 +685,22 @@ export default function ChangelogDetailsClient({
             {paginatedChanges.map((change) => (
               <div
                 key={change.change_id}
-                className="relative rounded-lg border border-[#37424D] bg-[#212A31] p-4"
+                className="border-border-primary hover:border-button-info bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
               >
-                {/* Suggestion # Pill - Responsive placement */}
+                {/* Suggestion # Pill */}
                 {change.suggestion && (
-                  <div className="mb-2 lg:absolute lg:top-3 lg:right-3 lg:mb-0">
-                    <Chip
-                      label={`Suggestion #${change.suggestion.id}`}
-                      size="small"
-                      sx={{
-                        backgroundColor: "#5865F2",
-                        color: "white",
-                        fontSize: "0.75rem",
-                        "& .MuiChip-label": { color: "white", fontWeight: 700 },
-                      }}
-                    />
+                  <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                        Suggestion #{change.suggestion.id}
+                      </span>
+                    </div>
                   </div>
                 )}
 
                 {/* Item Header */}
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-[#37424D]">
+                  <div className="bg-tertiary-bg relative h-16 w-16 overflow-hidden rounded-lg">
                     {isVideoItem(change.item.name) ? (
                       <video
                         src={getVideoPath(change.item.type, change.item.name)}
@@ -721,18 +728,27 @@ export default function ChangelogDetailsClient({
                     <div className="mb-1">
                       <Link
                         href={`/item/${change.item.type}/${encodeURIComponent(change.item.name)}`}
-                        className="block font-semibold break-words whitespace-normal text-white transition-colors hover:text-[#40C0E7] lg:pr-24"
+                        className="text-primary-text hover:text-link block font-semibold break-words whitespace-normal transition-colors lg:pr-24"
                       >
                         {change.item.name}
                       </Link>
                       <Chip
                         label={change.item.type}
                         size="small"
+                        variant="outlined"
                         sx={{
-                          backgroundColor: getItemTypeColor(change.item.type),
-                          color: "white",
+                          backgroundColor:
+                            getCategoryColor(change.item.type) + "20", // Add 20% opacity
+                          borderColor: getCategoryColor(change.item.type),
+                          color: "var(--color-primary-text)",
                           fontSize: "0.75rem",
                           marginTop: "4px",
+                          fontWeight: "medium",
+                          "&:hover": {
+                            borderColor: getCategoryColor(change.item.type),
+                            backgroundColor:
+                              getCategoryColor(change.item.type) + "30", // Slightly more opacity on hover
+                          },
                         }}
                       />
                     </div>
@@ -741,12 +757,11 @@ export default function ChangelogDetailsClient({
 
                 {/* Suggestion Data - Show First if Exists */}
                 {change.suggestion && (
-                  <div className="relative mt-4 rounded-lg border border-[#5865F2]/20 bg-[#5865F2]/10 p-3">
-                    {/* Header: avatar, name, type chip, and votes */}
-                    <div className="mb-2 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="flex min-w-0 items-center gap-2">
+                  <div className="bg-primary-bg border-border-primary hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-3">
                         {change.suggestion.metadata?.avatar_hash && (
-                          <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-[#2E3944]">
+                          <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                             <DefaultAvatar />
                             <Image
                               src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`)}`}
@@ -761,20 +776,22 @@ export default function ChangelogDetailsClient({
                             />
                           </div>
                         )}
-                        <span className="truncate text-sm font-medium text-white">
-                          Suggested by{" "}
+                        <div className="flex flex-col">
+                          <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                            Suggested by
+                          </span>
                           <a
                             href={`https://discord.com/users/${change.suggestion.user_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline"
+                            className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline"
                           >
                             {change.suggestion.suggestor_name}
                           </a>
-                        </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-center text-xs">
-                        <div className="flex items-center justify-center overflow-hidden rounded-full border border-gray-600">
+                      <div className="flex items-center justify-center">
+                        <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
                           <button
                             type="button"
                             onClick={() => {
@@ -795,13 +812,13 @@ export default function ChangelogDetailsClient({
                               setVotersTab("up");
                               setVotersOpen(true);
                             }}
-                            className="flex items-center justify-center gap-1 border-r border-gray-600 bg-green-500/10 px-2 py-1 hover:bg-green-500/20 focus:outline-none"
+                            className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                             aria-label="View voters"
                           >
-                            <span className="font-medium text-green-400">
+                            <span className="text-button-success text-lg font-bold">
                               ↑
                             </span>
-                            <span className="font-semibold text-green-400">
+                            <span className="text-button-success text-lg font-bold">
                               {change.suggestion.vote_data.upvotes}
                             </span>
                           </button>
@@ -825,31 +842,23 @@ export default function ChangelogDetailsClient({
                               setVotersTab("down");
                               setVotersOpen(true);
                             }}
-                            className="flex items-center justify-center gap-1 bg-red-500/10 px-2 py-1 hover:bg-red-500/20 focus:outline-none"
+                            className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                             aria-label="View voters"
                           >
-                            <span className="font-medium text-red-400">↓</span>
-                            <span className="font-semibold text-red-400">
+                            <span className="text-button-danger text-lg font-bold">
+                              ↓
+                            </span>
+                            <span className="text-button-danger text-lg font-bold">
                               {change.suggestion.vote_data.downvotes}
                             </span>
                           </button>
                         </div>
                       </div>
                     </div>
-
-                    {/* Reason (full) */}
-                    <div className="mb-2 text-sm text-[#D3D9D4]">
+                    <div className="text-tertiary-text mb-4 text-sm leading-relaxed font-medium">
                       <ReactMarkdown
                         components={{
-                          strong: (props) => (
-                            <strong
-                              className="font-bold text-white"
-                              {...props}
-                            />
-                          ),
-                          p: (props) => (
-                            <div className="whitespace-pre-line" {...props} />
-                          ),
+                          strong: (props) => <b {...props} />,
                         }}
                       >
                         {change.suggestion.data.reason?.replace(
@@ -859,7 +868,7 @@ export default function ChangelogDetailsClient({
                       </ReactMarkdown>
                     </div>
 
-                    <div className="text-xs text-[#D3D9D4]">
+                    <div className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
                       Suggested on{" "}
                       {formatMessageDate(change.suggestion.created_at * 1000)}
                     </div>
@@ -867,190 +876,202 @@ export default function ChangelogDetailsClient({
                 )}
 
                 {/* Changes */}
-                <div className="mt-6 mb-4 space-y-4">
-                  {Object.entries(change.changes.old).map(
-                    ([key, oldValue], index) => {
-                      if (key === "last_updated") return null;
-                      const newValue = change.changes.new[key];
-                      // Hide rows where both current (old) and suggested (new) are effectively N/A
-                      // Treat null/undefined and the literal string "N/A" (case-insensitive) as N/A
-                      const isNA = (v: unknown) =>
-                        v == null ||
-                        (typeof v === "string" &&
-                          v.trim().toUpperCase() === "N/A");
-                      if (isNA(oldValue) && isNA(newValue)) return null;
-                      if (oldValue === newValue) return null;
+                <div className="mt-6 space-y-6">
+                  {Object.entries(change.changes.old).map(([key, oldValue]) => {
+                    if (key === "last_updated") return null;
+                    const newValue = change.changes.new[key];
+                    const isNA = (v: unknown) =>
+                      v == null ||
+                      (typeof v === "string" &&
+                        v.trim().toUpperCase() === "N/A");
+                    // Hide rows where both sides are effectively N/A
+                    if (isNA(oldValue) && isNA(newValue)) return null;
+                    if (oldValue === newValue) return null;
 
-                      return (
-                        <div key={key}>
-                          <div className="flex items-start gap-2">
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm text-[#D3D9D4] capitalize">
-                                {doesSuggestionTypeApplyToKey(
-                                  change.suggestion?.metadata?.suggestion_type,
-                                  key,
-                                ) ? (
-                                  <Chip
-                                    label={(() => {
-                                      const text =
-                                        change.suggestion!.metadata!.suggestion_type!.replace(
-                                          /_/g,
-                                          " ",
-                                        );
-                                      return text
-                                        .split(" ")
-                                        .map(
-                                          (w) =>
-                                            w.charAt(0).toUpperCase() +
-                                            w.slice(1),
-                                        )
-                                        .join(" ");
-                                    })()}
-                                    size="small"
-                                    sx={{
-                                      backgroundColor: "#124E66",
-                                      color: "#FFFFFF",
-                                      "& .MuiChip-label": {
-                                        color: "#FFFFFF",
-                                        fontWeight: 600,
-                                      },
-                                    }}
-                                  />
-                                ) : (
-                                  <>{key.replace(/_/g, " ")}:</>
-                                )}
-                              </div>
-                              <div className="mt-1 grid grid-cols-2 gap-4">
-                                <div className="min-w-0">
-                                  <div className="mb-1 flex items-center gap-1 text-xs font-medium text-[#9CA3AF]">
-                                    <FaCircleMinus className="h-3 w-3 text-red-400" />
-                                    OLD VALUE
-                                  </div>
-                                  <div
-                                    className="overflow-hidden text-sm break-words text-[#D3D9D4] line-through"
-                                    style={{
-                                      wordBreak: "normal",
-                                      overflowWrap: "anywhere",
-                                    }}
-                                  >
-                                    {key === "cash_value" ||
-                                    key === "duped_value"
-                                      ? formatFullValue(oldValue as string)
-                                      : key === "creator"
-                                        ? (() => {
-                                            const creatorInfo =
-                                              formatCreatorValue(oldValue);
-                                            if (creatorInfo.robloxId) {
-                                              return (
-                                                <a
-                                                  href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-400 transition-colors hover:text-blue-300 hover:underline"
-                                                >
-                                                  {creatorInfo.display}
-                                                </a>
-                                              );
-                                            }
-                                            return creatorInfo.display;
-                                          })()
-                                        : formatBooleanLikeValue(oldValue)}
-                                  </div>
+                    const formatValue = (
+                      k: string,
+                      v: unknown,
+                    ): {
+                      display: string;
+                      robloxId?: string;
+                      isCreator?: boolean;
+                    } => {
+                      if (k === "cash_value" || k === "duped_value") {
+                        return { display: formatFullValue(String(v)) };
+                      }
+                      if (k === "creator") {
+                        const creatorInfo = formatCreatorValue(v as unknown);
+                        return { ...creatorInfo, isCreator: true };
+                      }
+                      if (
+                        typeof v === "boolean" ||
+                        v === 1 ||
+                        v === 0 ||
+                        k.startsWith("is_")
+                      ) {
+                        return {
+                          display: formatBooleanLikeValue(v as unknown),
+                        };
+                      }
+                      const str =
+                        v === "" || v === null || v === undefined
+                          ? "N/A"
+                          : String(v);
+                      return { display: str };
+                    };
+
+                    return (
+                      <div key={key}>
+                        <div className="flex items-start gap-2 overflow-hidden">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-primary-text mb-3 text-lg font-bold capitalize">
+                              {doesSuggestionTypeApplyToKey(
+                                change.suggestion?.metadata?.suggestion_type,
+                                key,
+                              ) ? (
+                                <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                                  {(() => {
+                                    const text =
+                                      change.suggestion!.metadata!.suggestion_type!.replace(
+                                        /_/g,
+                                        " ",
+                                      );
+                                    return text
+                                      .split(" ")
+                                      .map(
+                                        (w) =>
+                                          w.charAt(0).toUpperCase() +
+                                          w.slice(1),
+                                      )
+                                      .join(" ");
+                                  })()}
+                                </span>
+                              ) : (
+                                <>{key.replace(/_/g, " ")}:</>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                              <div className="min-w-0">
+                                <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                  <FaCircleMinus className="text-button-danger h-4 w-4" />
+                                  OLD VALUE
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="mb-1 flex items-center gap-1 text-xs font-medium text-[#9CA3AF]">
-                                    <FaPlusCircle className="h-3 w-3 text-green-400" />
-                                    NEW VALUE
-                                  </div>
-                                  <div
-                                    className="overflow-hidden text-sm font-medium break-words text-white"
-                                    style={{
-                                      wordBreak: "normal",
-                                      overflowWrap: "anywhere",
-                                    }}
-                                  >
-                                    {key === "cash_value" ||
-                                    key === "duped_value"
-                                      ? formatFullValue(newValue as string)
-                                      : key === "creator"
-                                        ? (() => {
-                                            const creatorInfo =
-                                              formatCreatorValue(newValue);
-                                            if (creatorInfo.robloxId) {
-                                              return (
-                                                <a
-                                                  href={`https://www.roblox.com/users/${creatorInfo.robloxId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-400 transition-colors hover:text-blue-300 hover:underline"
-                                                >
-                                                  {creatorInfo.display}
-                                                </a>
-                                              );
-                                            }
-                                            return creatorInfo.display;
-                                          })()
-                                        : formatBooleanLikeValue(newValue)}
-                                  </div>
+                                <div
+                                  className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                  style={{
+                                    wordBreak: "normal",
+                                    overflowWrap: "anywhere",
+                                  }}
+                                >
+                                  {(() => {
+                                    const formatted = formatValue(
+                                      key,
+                                      oldValue,
+                                    );
+                                    if (
+                                      formatted.isCreator &&
+                                      formatted.robloxId
+                                    ) {
+                                      return (
+                                        <a
+                                          href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-link hover:text-link-hover transition-colors hover:underline"
+                                        >
+                                          {formatted.display}
+                                        </a>
+                                      );
+                                    }
+                                    return formatted.display;
+                                  })()}
+                                </div>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                  <FaPlusCircle className="text-button-success h-4 w-4" />
+                                  NEW VALUE
+                                </div>
+                                <div
+                                  className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                  style={{
+                                    wordBreak: "normal",
+                                    overflowWrap: "anywhere",
+                                  }}
+                                >
+                                  {(() => {
+                                    const formatted = formatValue(
+                                      key,
+                                      newValue,
+                                    );
+                                    if (
+                                      formatted.isCreator &&
+                                      formatted.robloxId
+                                    ) {
+                                      return (
+                                        <a
+                                          href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-link hover:text-link-hover transition-colors hover:underline"
+                                        >
+                                          {formatted.display}
+                                        </a>
+                                      );
+                                    }
+                                    return formatted.display;
+                                  })()}
                                 </div>
                               </div>
                             </div>
                           </div>
-                          {index <
-                            Object.entries(change.changes.old).filter(
-                              ([k, v]) => {
-                                if (k === "last_updated") return false;
-                                const nv = change.changes.new[k];
-                                const isNA = (val: unknown) =>
-                                  val == null ||
-                                  (typeof val === "string" &&
-                                    val.trim().toUpperCase() === "N/A");
-                                if (isNA(v) && isNA(nv)) return false;
-                                return v !== nv;
-                              },
-                            ).length -
-                              1 && (
-                            <div className="mt-4 border-t border-[#2E3944] pt-4"></div>
-                          )}
                         </div>
-                      );
-                    },
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center gap-2 border-t border-[#37424D] pt-4">
-                  <div className="h-6 w-6 overflow-hidden rounded-full">
-                    <Image
-                      src={
-                        userData[change.changed_by_id]?.avatar
-                          ? `https://cdn.discordapp.com/avatars/${change.changed_by_id}/${userData[change.changed_by_id].avatar}.webp?size=64`
-                          : `https://cdn.discordapp.com/embed/avatars/${parseInt(change.changed_by_id) % 5}.png`
-                      }
-                      alt={change.changed_by}
-                      width={24}
-                      height={24}
-                      className="h-full w-full object-cover"
-                    />
+                <div className="border-secondary-text mt-4 flex items-center gap-2 border-t pt-4">
+                  <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
+                    <DefaultAvatar />
+                    {userData[change.changed_by_id]?.avatar &&
+                      userData[change.changed_by_id]?.avatar !== "None" && (
+                        <Image
+                          src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.changed_by_id}/${userData[change.changed_by_id].avatar}?size=64`)}`}
+                          alt={change.changed_by}
+                          fill
+                          className="object-cover"
+                          onError={(e) => {
+                            (
+                              e as unknown as { currentTarget: HTMLElement }
+                            ).currentTarget.style.display = "none";
+                          }}
+                        />
+                      )}
                   </div>
-                  <span className="text-sm text-[#D3D9D4]">
-                    Changed by{" "}
-                    <Link
-                      href={`/users/${change.changed_by_id}`}
-                      className="text-[#40C0E7] hover:text-[#2B9CD9] hover:underline"
-                    >
-                      {change.changed_by}
-                    </Link>{" "}
-                    on {formatMessageDate(change.created_at * 1000)}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-primary-text text-sm font-medium">
+                      Changed by{" "}
+                      <Link
+                        href={`/users/${change.changed_by_id}`}
+                        className="text-link hover:text-link-hover hover:underline"
+                      >
+                        {change.changed_by}
+                      </Link>
+                    </span>
+                    <span className="text-secondary-text text-xs">
+                      on {formatMessageDate(change.created_at * 1000)}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
           </Masonry>
         ) : (
-          <div className="py-8 text-center text-white">
+          <div className="text-primary-text py-8 text-center">
             <p className="mb-2 text-lg font-medium">No changes found</p>
-            <p className="text-sm text-[#D3D9D4]">
+            <p className="text-secondary-text text-sm">
               {searchQuery && `No changes match "${displayQuery}"`}
               {searchQuery && selectedType && " and "}
               {selectedType &&
@@ -1062,7 +1083,7 @@ export default function ChangelogDetailsClient({
             {(searchQuery || selectedType) && (
               <button
                 onClick={clearSearch}
-                className="mt-3 rounded-lg bg-[#5865F2] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#4752C4]"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 rounded-lg px-4 py-2 transition-colors duration-200"
               >
                 Clear filters
               </button>
@@ -1077,19 +1098,22 @@ export default function ChangelogDetailsClient({
               count={totalPages}
               page={page}
               onChange={handlePageChange}
-              color="primary"
               sx={{
                 "& .MuiPaginationItem-root": {
-                  color: "#D3D9D4",
+                  color: "var(--color-primary-text)",
                   "&.Mui-selected": {
-                    backgroundColor: "#5865F2",
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
                     "&:hover": {
-                      backgroundColor: "#4752C4",
+                      backgroundColor: "var(--color-button-info-hover)",
                     },
                   },
                   "&:hover": {
-                    backgroundColor: "rgba(88, 101, 242, 0.1)",
+                    backgroundColor: "var(--color-quaternary-bg)",
                   },
+                },
+                "& .MuiPaginationItem-icon": {
+                  color: "var(--color-primary-text)",
                 },
               }}
             />

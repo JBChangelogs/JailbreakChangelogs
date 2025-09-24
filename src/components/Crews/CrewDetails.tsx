@@ -8,6 +8,7 @@ import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import { FaClock } from "react-icons/fa";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",
@@ -134,26 +135,20 @@ export default function CrewDetails({
     <div className="space-y-8">
       {/* Historical Season Notice */}
       {currentSeason !== 19 && (
-        <div className="rounded-lg border border-blue-700/30 bg-blue-900/20 p-4">
+        <div className="bg-secondary-bg border-border-primary rounded-lg border p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-blue-200">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="text-primary-text flex items-center gap-2">
+              <FaClock className="h-5 w-5" />
               <span className="font-medium">Historical Data</span>
             </div>
             <Link
               href="/crews"
-              className="inline-block w-fit rounded-lg bg-[#5865F2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-fit rounded-lg px-4 py-2 text-sm font-medium transition-colors"
             >
               Go to Current Season
             </Link>
           </div>
-          <p className="mt-2 text-sm text-blue-100">
+          <p className="text-secondary-text mt-2 text-sm">
             This is historical data from Season {currentSeason}.
           </p>
         </div>
@@ -161,15 +156,24 @@ export default function CrewDetails({
 
       {/* Crew Header with Flag, Rank, and Info */}
       <div
-        className={`rounded-lg border p-4 sm:p-6 ${
-          rank === 1
-            ? "border-yellow-400/50 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20"
-            : rank === 2
-              ? "border-gray-300/50 bg-gradient-to-r from-gray-400/20 to-gray-500/20"
-              : rank === 3
-                ? "border-amber-500/50 bg-gradient-to-r from-amber-600/20 to-amber-700/20"
-                : "border-[#2E3944] bg-[#212A31]"
-        }`}
+        className={`rounded-lg border p-4 sm:p-6 ${rank <= 3 ? "" : "border-stroke"}`}
+        style={{
+          ...(rank === 1 && {
+            background:
+              "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+            borderColor: "hsl(45, 100%, 50%, 0.5)",
+          }),
+          ...(rank === 2 && {
+            background:
+              "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+            borderColor: "hsl(0, 0%, 75%, 0.5)",
+          }),
+          ...(rank === 3 && {
+            background:
+              "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+            borderColor: "hsl(30, 100%, 50%, 0.5)",
+          }),
+        }}
       >
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           {/* Crew Flag with Owner Avatar */}
@@ -202,31 +206,48 @@ export default function CrewDetails({
             <div className="mb-4 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               <div
                 className={`text-4xl font-bold ${inter.className} ${
-                  rank === 1
-                    ? "text-yellow-400"
-                    : rank === 2
-                      ? "text-gray-300"
-                      : rank === 3
-                        ? "text-amber-500"
-                        : "text-blue-300"
+                  rank <= 3 ? "text-gray-800" : "text-primary-text"
                 }`}
+                style={{
+                  ...(rank === 1 && {
+                    background:
+                      "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }),
+                  ...(rank === 2 && {
+                    background:
+                      "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }),
+                  ...(rank === 3 && {
+                    background:
+                      "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }),
+                }}
               >
                 #{rank}
               </div>
             </div>
             <div className="mb-2 flex items-center gap-3">
               <h2
-                className={`${bangers.className} text-2xl break-words text-white sm:text-3xl lg:text-4xl xl:text-5xl`}
+                className={`${bangers.className} text-primary-text text-2xl break-words sm:text-3xl lg:text-4xl xl:text-5xl`}
               >
                 {getUsername(crew.OwnerUserId.toString())}&apos;s{" "}
                 {crew.ClanName}
               </h2>
-              <span className="rounded bg-[#5865F2] px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">
+              <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                 New
               </span>
             </div>
             {currentSeason !== 19 && (
-              <p className="text-sm text-gray-400">
+              <p className="text-secondary-text text-sm">
                 Season {currentSeason} • Historical Data
               </p>
             )}
@@ -235,17 +256,17 @@ export default function CrewDetails({
       </div>
 
       {/* Modern Crew Stats */}
-      <div className="rounded-xl border border-[#2E3944] bg-gradient-to-br from-[#212A31] to-[#1A2328] p-6 shadow-lg">
-        <h3 className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-300">
-          <div className="h-2 w-2 rounded-full bg-blue-400"></div>
+      <div className="border-stroke bg-secondary-bg rounded-xl border p-6 shadow-lg">
+        <h3 className="text-primary-text mb-6 flex items-center gap-2 text-lg font-semibold">
+          <div className="bg-button-info h-2 w-2 rounded-full"></div>
           Crew Performance
         </h3>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Rating with gradient background and flag */}
-          <div className="relative overflow-hidden rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -255,17 +276,19 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-2xl font-bold text-white">
+              <div className="text-primary-text mb-1 text-2xl font-bold">
                 {formatRating(crew.Rating)}
               </div>
-              <div className="text-sm font-medium text-blue-300">Rating</div>
+              <div className="text-secondary-text text-sm font-medium">
+                Rating
+              </div>
             </div>
           </div>
 
           {/* Battles with animated background and flag */}
-          <div className="relative overflow-hidden rounded-lg border border-green-500/30 bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -275,19 +298,19 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-2xl font-bold text-white">
+              <div className="text-primary-text mb-1 text-2xl font-bold">
                 {crew.BattlesPlayed}
               </div>
-              <div className="text-sm font-medium text-green-300">
+              <div className="text-secondary-text text-sm font-medium">
                 Battles Played
               </div>
             </div>
           </div>
 
           {/* Win Rate with progress bar and flag */}
-          <div className="relative overflow-hidden rounded-lg border border-yellow-500/30 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -297,10 +320,10 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-2xl font-bold text-white">
+              <div className="text-primary-text mb-1 text-2xl font-bold">
                 {winRate}%
               </div>
-              <div className="text-sm font-medium text-yellow-300">
+              <div className="text-secondary-text text-sm font-medium">
                 Win Rate
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-white/20">
@@ -313,9 +336,9 @@ export default function CrewDetails({
           </div>
 
           {/* Members with icon and flag */}
-          <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -325,17 +348,19 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-2xl font-bold text-white">
+              <div className="text-primary-text mb-1 text-2xl font-bold">
                 {crew.MemberUserIds.length}
               </div>
-              <div className="text-sm font-medium text-purple-300">Members</div>
+              <div className="text-secondary-text text-sm font-medium">
+                Members
+              </div>
             </div>
           </div>
 
           {/* Last Battle Date with flag */}
-          <div className="relative overflow-hidden rounded-lg border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -345,22 +370,22 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-lg font-bold text-white">
+              <div className="text-primary-text mb-1 text-lg font-bold">
                 {lastBattleDate}
               </div>
-              <div className="text-sm font-medium text-indigo-300">
+              <div className="text-secondary-text text-sm font-medium">
                 Last Battle
               </div>
-              <div className="mt-1 text-xs text-indigo-200">
+              <div className="text-tertiary-text mt-1 text-xs">
                 {timeSinceLastBattle}
               </div>
             </div>
           </div>
 
           {/* Battle Stats Summary with flag */}
-          <div className="relative overflow-hidden rounded-lg border border-red-500/30 bg-gradient-to-br from-red-500/20 to-pink-500/20 p-4">
+          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
-            <div className="absolute inset-0 opacity-5">
+            <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
                 src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
                 alt="Crew flag background"
@@ -370,13 +395,13 @@ export default function CrewDetails({
             </div>
 
             <div className="relative z-10">
-              <div className="mb-1 text-lg font-bold text-white">
+              <div className="text-primary-text mb-1 text-lg font-bold">
                 {crew.BattlesWon}
               </div>
-              <div className="text-sm font-medium text-red-300">
+              <div className="text-secondary-text text-sm font-medium">
                 Battles Won
               </div>
-              <div className="mt-1 text-xs text-red-200">
+              <div className="text-tertiary-text mt-1 text-xs">
                 of {crew.BattlesPlayed} total
               </div>
             </div>
@@ -384,28 +409,30 @@ export default function CrewDetails({
         </div>
 
         {/* Additional Stats Row */}
-        <div className="mt-6 border-t border-[#37424D] pt-6">
+        <div className="border-border-primary mt-6 border-t pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="flex items-center justify-between rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-              <span className="text-sm text-gray-200">Win/Loss Ratio</span>
-              <span className="font-semibold text-white">
+            <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+              <span className="text-secondary-text text-sm">
+                Win/Loss Ratio
+              </span>
+              <span className="text-primary-text font-semibold">
                 {crew.BattlesPlayed > 0
                   ? `${crew.BattlesWon}-${crew.BattlesPlayed - crew.BattlesWon}`
                   : "0-0"}
               </span>
             </div>
-            <div className="flex items-center justify-between rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-              <span className="text-sm text-gray-200">Avg Rating</span>
-              <span className="font-semibold text-white">
+            <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+              <span className="text-secondary-text text-sm">Avg Rating</span>
+              <span className="text-primary-text font-semibold">
                 {formatRating(crew.Rating)}
               </span>
             </div>
             {/* Only show Activity for current season */}
             {currentSeason === 19 && (
-              <div className="flex items-center justify-between rounded-lg border border-[#37424D] bg-[#2E3944] p-3">
-                <span className="text-sm text-gray-200">Activity</span>
+              <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+                <span className="text-secondary-text text-sm">Activity</span>
                 <span
-                  className={`font-semibold ${timeSinceLastBattle.includes("d") && parseInt(timeSinceLastBattle.split("d")[0]) > 14 ? "text-red-400" : "text-green-400"}`}
+                  className={`font-semibold ${timeSinceLastBattle.includes("d") && parseInt(timeSinceLastBattle.split("d")[0]) > 14 ? "text-button-danger" : "text-button-success"}`}
                 >
                   {timeSinceLastBattle.includes("d") &&
                   parseInt(timeSinceLastBattle.split("d")[0]) > 14
@@ -419,8 +446,8 @@ export default function CrewDetails({
       </div>
 
       {/* Crew Members */}
-      <div className="rounded-lg border border-[#2E3944] bg-[#212A31] p-4 sm:p-6">
-        <h2 className="mb-4 text-xl font-bold text-gray-100">
+      <div className="border-stroke bg-secondary-bg rounded-lg border p-4 sm:p-6">
+        <h2 className="text-primary-text mb-4 text-xl font-bold">
           Crew Members ({crew.MemberUserIds.length})
         </h2>
         <div className="space-y-3">
@@ -469,9 +496,9 @@ function CrewMember({
   const avatarUrl = getUserAvatar(memberIdStr);
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[#37424D] bg-[#2E3944] p-3 transition-colors hover:bg-[#37424D] sm:gap-3">
+    <div className="border-border-primary hover:border-button-info flex items-center gap-2 rounded-lg border p-3 transition-colors sm:gap-3">
       {/* Member Number */}
-      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#37424D] text-xs font-bold text-white sm:h-8 sm:w-8 sm:text-sm">
+      <div className="bg-button-info text-form-button-text flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 sm:text-sm">
         {index + 1}
       </div>
 
@@ -493,17 +520,17 @@ function CrewMember({
             href={`https://www.roblox.com/users/${memberId}/profile`}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate text-sm font-medium text-blue-400 transition-colors hover:text-blue-300 sm:text-base"
+            className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
           >
             {displayName}
           </a>
           {username && (
-            <span className="truncate text-xs text-gray-300 sm:text-sm">
+            <span className="text-secondary-text truncate text-xs sm:text-sm">
               (@{username})
             </span>
           )}
           {isOwner && (
-            <span className="w-fit rounded-full bg-[#5865F2] px-2 py-1 text-xs font-medium text-white">
+            <span className="bg-button-info text-form-button-text w-fit rounded-full px-2 py-1 text-xs font-medium">
               Owner
             </span>
           )}

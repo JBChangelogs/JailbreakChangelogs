@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
 
 interface ChangelogQuickNavProps {
   prevChangelog: { id: number; title: string } | null;
@@ -13,24 +14,38 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
   onChangelogSelect,
 }) => {
   return (
-    <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#2E3944] pt-4 sm:flex-row sm:gap-0">
+    <div className="mt-8 flex flex-col items-center justify-between gap-4 pt-4 sm:flex-row sm:gap-0">
       {prevChangelog && (
         <button
           onClick={() => {
             onChangelogSelect(prevChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="text-muted group flex w-full items-center gap-2 rounded-lg border border-blue-300 bg-transparent p-4 transition-colors hover:border-blue-400 sm:w-auto"
+          className="text-secondary-text group border-link hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 transition-colors sm:w-auto"
         >
-          <ChevronLeftIcon className="h-5 w-5 text-blue-300 group-hover:text-blue-400" />
+          <ChevronLeftIcon className="text-link group-hover:text-link-hover h-5 w-5" />
           <div className="flex flex-col items-start">
-            <span className="text-sm text-[#FFFFFF]">Previous</span>
-            <span
-              className="line-clamp-1 max-w-[300px] text-base font-medium text-blue-300 hover:text-blue-400"
+            <span className="text-primary-text text-sm">Previous</span>
+            <Tooltip
               title={prevChangelog.title}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
             >
-              {prevChangelog.title}
-            </span>
+              <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                {prevChangelog.title}
+              </span>
+            </Tooltip>
           </div>
         </button>
       )}
@@ -41,18 +56,32 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             onChangelogSelect(nextChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="text-muted group flex w-full items-center gap-2 rounded-lg border border-blue-300 bg-transparent p-4 text-right transition-colors hover:border-blue-400 sm:w-auto"
+          className="text-secondary-text group border-link hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 text-right transition-colors sm:w-auto"
         >
           <div className="flex flex-col items-end">
-            <span className="text-sm text-[#FFFFFF]">Next</span>
-            <span
-              className="line-clamp-1 max-w-[300px] text-base font-medium text-blue-300 hover:text-blue-400"
+            <span className="text-primary-text text-sm">Next</span>
+            <Tooltip
               title={nextChangelog.title}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
             >
-              {nextChangelog.title}
-            </span>
+              <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                {nextChangelog.title}
+              </span>
+            </Tooltip>
           </div>
-          <ChevronRightIcon className="h-5 w-5 text-blue-300 group-hover:text-blue-400" />
+          <ChevronRightIcon className="text-link group-hover:text-link-hover h-5 w-5" />
         </button>
       )}
     </div>
