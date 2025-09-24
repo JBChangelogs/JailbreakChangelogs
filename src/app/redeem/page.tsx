@@ -190,9 +190,9 @@ export default function RedeemPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-[1920px] px-4 py-16 sm:px-8">
-      <Breadcrumb />
+    <div className="container mx-auto mb-8 max-w-[1920px] px-4 pb-16 sm:px-8">
       <div className="mx-auto max-w-5xl">
+        <Breadcrumb />
         <h1 className="text-primary-text mb-12 text-center text-4xl font-bold">
           Redeem Jailbreak Changelogs Code
         </h1>
