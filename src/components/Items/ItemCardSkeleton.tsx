@@ -3,7 +3,7 @@ import { Skeleton } from "@mui/material";
 export default function ItemCardSkeleton() {
   return (
     <div className="w-full">
-      <div className="group border-stroke bg-secondary-bg relative flex flex-col overflow-hidden rounded-lg border">
+      <div className="group border-border-primary hover:border-border-focus bg-secondary-bg relative flex flex-col overflow-hidden rounded-lg border">
         <div className="aspect-h-1 aspect-w-1 bg-primary-bg w-full overflow-hidden rounded-t-lg">
           <Skeleton
             variant="rectangular"

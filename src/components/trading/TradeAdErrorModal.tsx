@@ -1,17 +1,7 @@
+"use client";
+
 import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import WarningIcon from "@mui/icons-material/Warning";
+import { Dialog, DialogPanel } from "@headlessui/react";
 
 interface TradeAdErrorModalProps {
   isOpen: boolean;
@@ -25,49 +15,38 @@ export const TradeAdErrorModal: React.FC<TradeAdErrorModalProps> = ({
   errors,
 }) => {
   return (
-    <Dialog
-      open={isOpen}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        paper: {
-          className: "bg-secondary-bg text-primary-text",
-        },
-      }}
-    >
-      <DialogTitle className="flex items-center justify-between border-b p-4">
-        <span className="text-status-error font-semibold">
-          Trade Ad Validation Errors
-        </span>
-        <Button
-          onClick={onClose}
-          className="text-primary-text hover:text-button-info min-w-auto p-1 hover:bg-transparent"
-          size="small"
-        >
-          <XMarkIcon className="h-5 w-5" />
-        </Button>
-      </DialogTitle>
-      <DialogContent className="!p-6">
-        <List>
-          {errors.map((error, index) => (
-            <ListItem key={index} className="py-1">
-              <ListItemIcon>
-                <WarningIcon className="text-status-error" />
-              </ListItemIcon>
-              <ListItemText primary={error} className="text-primary-text" />
-            </ListItem>
-          ))}
-        </List>
-      </DialogContent>
-      <DialogActions className="border-border-primary border-t p-2">
-        <Button
-          onClick={onClose}
-          className="text-primary-text hover:bg-quaternary-bg"
-        >
-          Close
-        </Button>
-      </DialogActions>
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        aria-hidden="true"
+      />
+
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+            Trade Ad Validation Errors
+          </div>
+
+          <div className="modal-content p-6">
+            <div className="space-y-3">
+              {errors.map((error, index) => (
+                <div key={index} className="text-primary-text text-sm">
+                  {error}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+            <button
+              onClick={onClose}
+              className="text-primary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover rounded-lg border px-4 py-2 text-sm font-medium focus:outline-none"
+            >
+              Close
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
     </Dialog>
   );
 };

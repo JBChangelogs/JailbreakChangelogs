@@ -404,7 +404,7 @@ async function LeaderboardUser({
       className={`flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
         index <= 2
           ? ""
-          : "border-border-primary bg-tertiary-bg hover:border-button-info"
+          : "border-border-primary bg-tertiary-bg hover:border-border-focus"
       }`}
       style={{
         ...(index === 0 && {
@@ -506,7 +506,7 @@ function BasicLeaderboardUser({
       className={`flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
         index <= 2
           ? ""
-          : "border-border-primary bg-tertiary-bg hover:border-button-info"
+          : "border-border-primary bg-tertiary-bg hover:border-border-focus"
       }`}
       style={{
         ...(index === 0 && {

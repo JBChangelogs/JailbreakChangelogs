@@ -23,7 +23,7 @@ export default async function CrewsPage({ searchParams }: CrewsPageProps) {
   const leaderboard = await fetchCrewLeaderboard(validSeason);
 
   return (
-    <div className="text-primary-text min-h-screen">
+    <div className="text-primary-text mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-6xl">
           <Breadcrumb />
@@ -61,7 +61,7 @@ function CrewLeaderboardSkeleton() {
       <h2 className="text-primary-text mb-4 text-xl font-bold">
         Crew Leaderboard
       </h2>
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-4 shadow-sm">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 shadow-sm">
         <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
           {Array.from({ length: 10 }).map((_, index) => (
             <div

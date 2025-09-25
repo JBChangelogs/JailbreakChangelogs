@@ -36,7 +36,7 @@ export default async function SeasonContractsPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pb-16">
         <Breadcrumb />
 
         {/* Countdown Section */}

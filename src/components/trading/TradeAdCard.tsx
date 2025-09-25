@@ -74,7 +74,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   const discordGuildId = "1286064050135896064";
   return (
     <div
-      className="border-border-primary bg-secondary-bg hover:border-button-info rounded-lg border p-4 transition-colors"
+      className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4 transition-colors"
       tabIndex={0}
       role="region"
     >

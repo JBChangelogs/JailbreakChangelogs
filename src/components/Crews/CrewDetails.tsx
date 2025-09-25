@@ -156,7 +156,7 @@ export default function CrewDetails({
 
       {/* Crew Header with Flag, Rank, and Info */}
       <div
-        className={`rounded-lg border p-4 sm:p-6 ${rank <= 3 ? "" : "border-stroke"}`}
+        className={`rounded-lg border p-4 sm:p-6 ${rank <= 3 ? "" : "border-border-primary hover:border-border-focus"}`}
         style={{
           ...(rank === 1 && {
             background:
@@ -256,7 +256,7 @@ export default function CrewDetails({
       </div>
 
       {/* Modern Crew Stats */}
-      <div className="border-stroke bg-secondary-bg rounded-xl border p-6 shadow-lg">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-xl border p-6 shadow-lg">
         <h3 className="text-primary-text mb-6 flex items-center gap-2 text-lg font-semibold">
           <div className="bg-button-info h-2 w-2 rounded-full"></div>
           Crew Performance
@@ -264,7 +264,7 @@ export default function CrewDetails({
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Rating with gradient background and flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -286,7 +286,7 @@ export default function CrewDetails({
           </div>
 
           {/* Battles with animated background and flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -308,7 +308,7 @@ export default function CrewDetails({
           </div>
 
           {/* Win Rate with progress bar and flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -336,7 +336,7 @@ export default function CrewDetails({
           </div>
 
           {/* Members with icon and flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -358,7 +358,7 @@ export default function CrewDetails({
           </div>
 
           {/* Last Battle Date with flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -383,7 +383,7 @@ export default function CrewDetails({
           </div>
 
           {/* Battle Stats Summary with flag */}
-          <div className="border-stroke bg-primary-bg relative overflow-hidden rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border p-4">
             {/* Flag background */}
             <div className="light:opacity-20 absolute inset-0 opacity-5 dark:opacity-5">
               <Image
@@ -446,7 +446,7 @@ export default function CrewDetails({
       </div>
 
       {/* Crew Members */}
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-4 sm:p-6">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6">
         <h2 className="text-primary-text mb-4 text-xl font-bold">
           Crew Members ({crew.MemberUserIds.length})
         </h2>
@@ -496,7 +496,7 @@ function CrewMember({
   const avatarUrl = getUserAvatar(memberIdStr);
 
   return (
-    <div className="border-border-primary hover:border-button-info flex items-center gap-2 rounded-lg border p-3 transition-colors sm:gap-3">
+    <div className="border-border-primary hover:border-border-focus flex items-center gap-2 rounded-lg border p-3 transition-colors sm:gap-3">
       {/* Member Number */}
       <div className="bg-button-info text-form-button-text flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 sm:text-sm">
         {index + 1}

@@ -368,7 +368,8 @@ export default function ChangelogDetailsClient({
         .sidebar-ad-container {
           width: 320px;
           height: 100px;
-          border: 1px solid var(--color-border-stroke);
+          border: 1px solid
+            var(--color-border-border-primary hover: border-border-focus);
           background-color: var(--color-secondary-bg);
           border-radius: 8px;
           overflow: hidden;
@@ -427,7 +428,7 @@ export default function ChangelogDetailsClient({
             placeholder="Search changes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchQuery && (
@@ -708,7 +709,7 @@ export default function ChangelogDetailsClient({
             {paginatedChanges.map((change) => (
               <div
                 key={change.change_id}
-                className="border-border-primary hover:border-button-info bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
+                className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
               >
                 {/* Suggestion # Pill */}
                 {change.suggestion && (

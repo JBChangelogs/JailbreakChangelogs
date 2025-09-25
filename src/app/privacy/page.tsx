@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           Last updated: May 07th, 2025
         </p>
 
-        <div className="border-stroke bg-secondary-bg hover:border-button-info rounded-lg border p-6 transition-colors">
+        <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
           <Typography className="text-primary-text">
             This Privacy Policy outlines our commitment to protecting your
             privacy. We prioritize transparency and do not collect any personal

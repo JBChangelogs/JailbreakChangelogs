@@ -402,10 +402,11 @@ export default function InventoryItems({
       {/* Pro Tip - Only show when there are results and not filtering */}
       {!isFiltering && filteredAndSortedItems.length > 0 && (
         <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
-          <div className="text-primary-text flex items-center gap-2 text-sm">
-            <span className="text-button-info">💡</span>
-            <span className="font-medium">Pro Tip:</span>
-            <span>Click on any item card to view its ownership history.</span>
+          <div className="text-primary-text flex items-start gap-2 text-sm">
+            <span className="text-button-info flex-shrink-0">💡</span>
+            <span className="font-medium">
+              Pro Tip: Click on any item card to view its ownership history.
+            </span>
           </div>
         </div>
       )}

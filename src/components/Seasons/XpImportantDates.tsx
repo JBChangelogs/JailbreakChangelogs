@@ -120,7 +120,7 @@ export default function XpImportantDates({
       <div className="space-y-4">
         {/* Double XP Countdown - Only show when Double XP hasn't started yet */}
         {doubleXpStatus !== "Double XP is now active!" && (
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="flex flex-col gap-3">
               <div className="text-center">
                 <span className="text-primary-text text-lg font-semibold">
@@ -139,7 +139,7 @@ export default function XpImportantDates({
         )}
 
         {/* Season End Countdown */}
-        <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
           <div className="flex flex-col gap-3">
             <div className="text-center">
               <span className="text-primary-text text-lg font-semibold">

@@ -51,7 +51,7 @@ export default function UserRankDisplay() {
 
   if (isLoading) {
     return (
-      <div className="border-stroke bg-secondary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-primary-text text-lg font-semibold">
@@ -85,8 +85,8 @@ export default function UserRankDisplay() {
           {formatRelativeDate(userRank.updated_at)})
         </span>
       </div>
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
-        <div className="border-stroke hover:border-button-info rounded-lg border p-3 transition-colors">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
+        <div className="border-border-primary hover:border-border-focus rounded-lg border p-3 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
@@ -108,7 +108,7 @@ export default function UserRankDisplay() {
                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
+                  className="text-primary-text hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
                 >
                   {user.roblox_display_name}
                 </a>

@@ -28,7 +28,7 @@ export default function TermsOfServicePage() {
           Last updated: September 12th, 2025
         </p>
 
-        <div className="border-stroke bg-secondary-bg hover:border-button-info rounded-lg border p-6 transition-colors">
+        <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
           <Typography className="text-primary-text">
             Please read these Terms of Service carefully before using Jailbreak
             Changelogs.

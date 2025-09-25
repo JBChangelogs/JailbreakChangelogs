@@ -347,7 +347,7 @@ export default function TradeAds({
             </p>
             <button
               onClick={toggleSortOrder}
-              className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+              className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
             >
               {sortOrder === "newest" ? (
                 <ArrowDownIcon className="h-4 w-4" />

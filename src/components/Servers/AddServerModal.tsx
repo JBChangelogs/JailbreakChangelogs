@@ -204,7 +204,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="border-stroke bg-secondary-bg relative w-full max-w-md rounded-lg border shadow-xl">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg relative w-full max-w-md rounded-lg border shadow-xl">
         {/* Header */}
         <div className="border-border-primary flex items-center justify-between border-b p-4">
           <h2 className="text-primary-text text-xl font-semibold">
@@ -233,7 +233,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                 type="text"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                 placeholder="Enter the server link"
               />
               <p className="text-secondary-text mt-1 text-sm">
@@ -254,7 +254,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                 onChange={(e) => handleRulesChange(e.target.value)}
                 rows={4}
                 maxLength={MAX_RULES_LENGTH}
-                className="text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                 placeholder="Enter the server rules"
               />
               <p className="text-secondary-text mt-1 text-sm">
@@ -301,17 +301,37 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                       variant: "outlined",
                       placeholder: "Select expiration date",
                       sx: {
+                        backgroundColor: "var(--color-primary-bg) !important",
                         "& .MuiOutlinedInput-root": {
                           color: "var(--color-primary-text)",
-                          "&:hover": {
+                          backgroundColor: "var(--color-primary-bg) !important",
+                          "& fieldset": {
+                            borderColor: "var(--color-border-primary)",
+                          },
+                          "&:hover fieldset": {
                             borderColor: "var(--color-button-info)",
                           },
-                          "&.Mui-focused": {
+                          "&.Mui-focused fieldset": {
                             borderColor: "var(--color-button-info)",
                           },
                         },
                         "& .MuiInputLabel-root": {
                           color: "var(--color-primary-text)",
+                        },
+                        "& .MuiInputBase-input": {
+                          backgroundColor: "var(--color-primary-bg) !important",
+                        },
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "var(--color-primary-bg) !important",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "var(--color-border-primary)",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "var(--color-button-info)",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "var(--color-button-info)",
                         },
                       },
                     },

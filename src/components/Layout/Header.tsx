@@ -291,22 +291,23 @@ export default function Header() {
             onClick={handleDrawerToggle}
             className="cursor-pointer"
           >
-            <ListItemIcon
-              sx={{ color: "var(--color-primary-text) !important" }}
-            >
-              <SettingsIcon />
+            <ListItemIcon>
+              <SettingsIcon className="text-primary-text" />
             </ListItemIcon>
-            <ListItemText primary="Settings" />
+            <ListItemText
+              primary="Settings"
+              primaryTypographyProps={{
+                sx: { color: "var(--color-primary-text)" },
+              }}
+            />
           </ListItem>
           <ListItem
             component="div"
             onClick={handleLogout}
             className="cursor-pointer"
           >
-            <ListItemIcon
-              sx={{ color: "var(--color-button-danger) !important" }}
-            >
-              <LogoutIcon />
+            <ListItemIcon>
+              <LogoutIcon className="text-button-danger" />
             </ListItemIcon>
             <ListItemText
               primary="Logout"
@@ -1181,6 +1182,11 @@ export default function Header() {
                 <IconButton
                   onClick={() => setIsDiscordModalOpen(true)}
                   className="text-button-info hover:bg-quaternary-bg transition-colors duration-200"
+                  sx={{
+                    "@media (max-width: 374px)": {
+                      display: "none",
+                    },
+                  }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

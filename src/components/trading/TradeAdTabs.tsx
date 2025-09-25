@@ -11,7 +11,7 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
   onTabChange,
   hasTradeAds,
 }) => (
-  <div className="border-stroke bg-secondary-bg mb-6 rounded-lg border">
+  <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border">
     <nav className="px-6 py-4">
       <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
         <button

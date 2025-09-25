@@ -8,7 +8,7 @@ export default function XpSeasonStatus({
   achievableWithPass,
 }: XpSeasonStatusProps) {
   return (
-    <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+    <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
       <h3 className="text-secondary-text mb-3 text-xl font-semibold">
         📅 Season Status
       </h3>

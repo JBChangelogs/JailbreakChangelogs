@@ -321,7 +321,7 @@ export default function ItemDetailsClient({
                 <div className="absolute top-4 left-4 z-10">
                   <button
                     onClick={handleFavoriteClick}
-                    className="border-stroke bg-secondary-bg/80 hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity"
+                    className="border-border-primary hover:border-border-focus bg-secondary-bg/80 hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity"
                     title={
                       isFavorited ? "Remove from favorites" : "Add to favorites"
                     }
@@ -409,7 +409,7 @@ export default function ItemDetailsClient({
                       ADVERTISEMENT
                     </span>
                     <div
-                      className="border-stroke bg-secondary-bg relative w-full overflow-hidden rounded-lg border shadow transition-all duration-300"
+                      className="border-border-primary hover:border-border-focus bg-secondary-bg relative w-full overflow-hidden rounded-lg border shadow transition-all duration-300"
                       style={{ minHeight: "250px" }}
                     >
                       <DisplayAd
@@ -506,7 +506,7 @@ export default function ItemDetailsClient({
                         slotProps={{
                           tooltip: {
                             className:
-                              "bg-secondary-bg text-secondary-text text-xs px-3 py-2 rounded-lg shadow-lg border border-stroke [&_.MuiTooltip-arrow]:text-primary-bg",
+                              "bg-secondary-bg text-secondary-text text-xs px-3 py-2 rounded-lg shadow-lg border border-border-primary hover:border-border-focus [&_.MuiTooltip-arrow]:text-primary-bg",
                           },
                         }}
                       >
@@ -761,7 +761,7 @@ export default function ItemDetailsClient({
                       </div>
                       <div className="mt-6">
                         <Link href="/dupes">
-                          <button className="bg-button-info text-form-button-text hover:bg-button-info-hover border-stroke cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold normal-case">
+                          <button className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary hover:border-border-focus cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold normal-case">
                             Search for Dupes
                           </button>
                         </Link>

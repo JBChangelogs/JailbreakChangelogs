@@ -22,7 +22,7 @@ export default function Loading() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="group hover:shadow-3xl border-stroke relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
+                className="group hover:shadow-3xl border-border-primary hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
               >
                 {/* Contract Header */}
                 <div className="bg-secondary-bg px-4 py-3"></div>
@@ -39,7 +39,7 @@ export default function Loading() {
                     <div className="mt-auto">
                       <div className="relative">
                         <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-stroke bg-primary-bg relative rounded-xl border px-4 py-3 shadow-lg"></div>
+                        <div className="border-border-primary hover:border-border-focus bg-primary-bg relative rounded-xl border px-4 py-3 shadow-lg"></div>
                       </div>
                     </div>
                   </div>
@@ -66,7 +66,7 @@ export default function Loading() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i + 3}
-                className="group hover:shadow-3xl border-stroke relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
+                className="group hover:shadow-3xl border-border-primary hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
               >
                 {/* Contract Header */}
                 <div className="bg-secondary-bg px-4 py-3"></div>
@@ -83,7 +83,7 @@ export default function Loading() {
                     <div className="mt-auto">
                       <div className="relative">
                         <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-stroke bg-primary-bg relative rounded-xl border px-4 py-3 shadow-lg"></div>
+                        <div className="border-border-primary hover:border-border-focus bg-primary-bg relative rounded-xl border px-4 py-3 shadow-lg"></div>
                       </div>
                     </div>
                   </div>

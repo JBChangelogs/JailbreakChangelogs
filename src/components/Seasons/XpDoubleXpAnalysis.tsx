@@ -11,7 +11,7 @@ export default function XpDoubleXpAnalysis({
   doubleXpResults,
 }: XpDoubleXpAnalysisProps) {
   return (
-    <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+    <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
       <h3 className="text-primary-text mb-3 text-xl font-semibold">
         🔄 Double XP Analysis
       </h3>

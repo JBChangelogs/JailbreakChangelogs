@@ -42,7 +42,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           setTimeout(() => onSearchFocus(false), 200);
         }}
         placeholder={placeholder}
-        className="text-secondary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
+        className="text-secondary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
         <MagnifyingGlassIcon className="text-primary-text h-5 w-5" />
@@ -65,7 +65,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           <div className="flex flex-col gap-1">
             <button
               onClick={() => onSearchChange("has:video ")}
-              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
@@ -76,7 +76,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:audio ")}
-              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
@@ -87,7 +87,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:image ")}
-              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
@@ -98,7 +98,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:mentions ")}
-              className="border-stroke bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
@@ -119,7 +119,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
               <button
                 key={item.id}
                 onClick={() => onChangelogSelect(item.id.toString())}
-                className="border-stroke hover:bg-primary-bg w-full cursor-pointer border-b px-4 py-3 text-left last:border-b-0 focus:outline-none"
+                className="border-border-primary hover:border-border-focus hover:bg-primary-bg w-full cursor-pointer border-b px-4 py-3 text-left last:border-b-0 focus:outline-none"
               >
                 <div className="mb-1 flex items-center gap-2">
                   <span

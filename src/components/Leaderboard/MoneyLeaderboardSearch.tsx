@@ -51,7 +51,7 @@ export default function MoneyLeaderboardSearch({
         placeholder="Search players by name or username..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className={`text-primary-text border-stroke bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+        className={`text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
           isSearchHighlighted
             ? "border-button-info shadow-button-info/20 shadow-lg"
             : ""

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Tabs, Tab, Box } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { UserWithFlags } from "@/utils/api";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 
@@ -12,72 +10,10 @@ interface ContributorsClientProps {
   usersWithFlags: UserWithFlags[];
 }
 
-const StyledTabs = styled(Tabs)(() => ({
-  marginBottom: "2rem",
-  "& .MuiTabs-flexContainer": {
-    justifyContent: "center",
-  },
-  "& .MuiTabs-indicator": {
-    backgroundColor: "var(--color-button-info)",
-  },
-  "& .MuiTabs-scrollButtons": {
-    color: "var(--color-primary-text) !important",
-    "&:hover": {
-      backgroundColor: "var(--color-quaternary-bg)",
-    },
-    "&.Mui-disabled": {
-      opacity: 0.3,
-      color: "var(--color-primary-text) !important",
-    },
-  },
-  "& .MuiTabScrollButton-root": {
-    color: "var(--color-primary-text) !important",
-    "&:hover": {
-      backgroundColor: "var(--color-quaternary-bg)",
-    },
-    "&.Mui-disabled": {
-      opacity: 0.3,
-      color: "var(--color-primary-text) !important",
-    },
-  },
-  "& .MuiSvgIcon-root": {
-    color: "var(--color-primary-text) !important",
-  },
-}));
-
-const StyledTab = styled(Tab)(() => ({
-  textTransform: "none",
-  color: "var(--color-secondary-text)",
-  fontSize: "0.875rem",
-  fontWeight: 500,
-  "&.Mui-selected": {
-    color: "var(--color-primary-text)",
-  },
-}));
-
-const TabPanel = ({
-  children,
-  value,
-  index,
-}: {
-  children: React.ReactNode;
-  value: number;
-  index: number;
-}) => (
-  <div
-    role="tabpanel"
-    hidden={value !== index}
-    id={`contributors-tabpanel-${index}`}
-    aria-labelledby={`contributors-tab-${index}`}
-  >
-    {value === index && children}
-  </div>
-);
-
 export default function ContributorsClient({
   usersWithFlags,
 }: ContributorsClientProps) {
-  const [value, setValue] = useState(0);
+  const [activeFilter, setActiveFilter] = useState("All");
 
   // Filter out excluded users
   const filteredUsers = usersWithFlags.filter(
@@ -170,42 +106,107 @@ export default function ContributorsClient({
     ...contributors,
   ];
 
+  const filters = [
+    { key: "All", label: "All" },
+    { key: "Owner", label: "Owner" },
+    { key: "Developer", label: "Developer" },
+    { key: "Partner", label: "Partner" },
+    { key: "Value List Manager", label: "Value List Manager" },
+    { key: "Value Team", label: "Value Team" },
+    { key: "Tester", label: "Tester" },
+    { key: "Value List Contributor", label: "Value List Contributor" },
+  ];
+
+  const getFilteredUsers = () => {
+    let usersToShow: (UserWithFlags & { role: string })[] = [];
+    let staticContributorsToShow: typeof staticContributors = [];
+
+    switch (activeFilter) {
+      case "All":
+        usersToShow = allTeam;
+        staticContributorsToShow = staticContributors;
+        break;
+      case "Owner":
+        usersToShow = owners;
+        break;
+      case "Developer":
+        usersToShow = developers;
+        break;
+      case "Partner":
+        usersToShow = partners;
+        break;
+      case "Value List Manager":
+        usersToShow = managers;
+        break;
+      case "Value Team":
+        usersToShow = valueTeam;
+        break;
+      case "Tester":
+        usersToShow = testers;
+        break;
+      case "Value List Contributor":
+        usersToShow = contributors;
+        staticContributorsToShow = staticContributors;
+        break;
+      default:
+        usersToShow = allTeam;
+        staticContributorsToShow = staticContributors;
+    }
+
+    return { usersToShow, staticContributorsToShow };
+  };
+
   const renderUser = (user: UserWithFlags, role: string) => (
-    <div key={user.id} className="mb-8 flex flex-col items-center text-center">
-      <Link href={`/users/${user.id}`}>
-        <UserAvatar
-          userId={user.id}
-          avatarHash={user.avatar || null}
-          username={user.username}
-          size={32}
-          showBadge={false}
-          custom_avatar={user.custom_avatar}
-          settings={user.settings}
-          premiumType={user.premiumtype}
-        />
-      </Link>
-      <div className="mt-4">
-        <Link
-          href={`/users/${user.id}`}
-          className="text-link hover:text-link-hover text-lg font-bold"
+    <div
+      key={user.id}
+      className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
+    >
+      <Link href={`/users/${user.id}`} className="flex flex-col items-center">
+        <div
+          className="relative flex-shrink-0 overflow-hidden rounded-full"
+          style={{
+            width: 128,
+            height: 128,
+            minWidth: 128,
+            minHeight: 128,
+          }}
         >
+          <UserAvatar
+            userId={user.id}
+            avatarHash={user.avatar || null}
+            username={user.username}
+            size={32}
+            showBadge={false}
+            custom_avatar={user.custom_avatar}
+            settings={user.settings}
+            premiumType={user.premiumtype}
+          />
+        </div>
+        <h1 className="text-primary-text group-hover:text-form-button-text mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
           {user.global_name && user.global_name !== "None"
             ? user.global_name
             : user.username}
-        </Link>
-        <div className="text-secondary-text mt-1 text-sm">{role}</div>
-      </div>
+        </h1>
+        <p className="text-secondary-text group-hover:text-form-button-text mt-2 capitalize opacity-80 transition-colors duration-300">
+          {role}
+        </p>
+      </Link>
     </div>
   );
 
   const renderStaticContributor = (contrib: (typeof staticContributors)[0]) => (
     <div
       key={contrib.key}
-      className="mb-8 flex flex-col items-center text-center"
+      className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
     >
-      <a href={contrib.link} target="_blank" rel="noopener noreferrer">
+      <a
+        href={contrib.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center"
+      >
         <div
-          className="border-button-info relative flex-shrink-0 overflow-hidden rounded-full border-4"
+          className="relative flex-shrink-0 overflow-hidden rounded-full"
           style={{
             width: 128,
             height: 128,
@@ -221,121 +222,59 @@ export default function ContributorsClient({
             style={{ objectFit: "cover", width: "100%", height: "100%" }}
           />
         </div>
-      </a>
-      <div className="mt-4">
-        <a
-          href={contrib.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-link hover:text-link-hover text-lg font-bold"
-        >
+        <h1 className="text-primary-text group-hover:text-form-button-text mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
           {contrib.name}
-        </a>
-        <div className="text-secondary-text mt-1 text-sm">{contrib.role}</div>
-      </div>
+        </h1>
+        <p className="text-secondary-text group-hover:text-form-button-text mt-2 capitalize opacity-80 transition-colors duration-300">
+          {contrib.role}
+        </p>
+      </a>
     </div>
   );
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
-  const getTabContent = (tabIndex: number) => {
-    let usersToShow: (UserWithFlags & { role: string })[] = [];
-    let staticContributorsToShow: typeof staticContributors = [];
-
-    switch (tabIndex) {
-      case 0: // All
-        usersToShow = allTeam;
-        staticContributorsToShow = staticContributors;
-        break;
-      case 1: // Owner
-        usersToShow = owners;
-        break;
-      case 2: // Developer
-        usersToShow = developers;
-        break;
-      case 3: // Partner
-        usersToShow = partners;
-        break;
-      case 4: // Value List Manager
-        usersToShow = managers;
-        break;
-      case 5: // Value Team
-        usersToShow = valueTeam;
-        break;
-      case 6: // Tester
-        usersToShow = testers;
-        break;
-      case 7: // Value List Contributor
-        usersToShow = contributors;
-        staticContributorsToShow = staticContributors;
-        break;
-      default:
-        usersToShow = allTeam;
-        staticContributorsToShow = staticContributors;
-    }
-
-    return (
-      <div className="grid grid-cols-2 justify-center gap-x-4 gap-y-12 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {usersToShow.map((user) => renderUser(user, user.role))}
-        {staticContributorsToShow.map((contrib) =>
-          renderStaticContributor(contrib),
-        )}
-      </div>
-    );
-  };
+  const { usersToShow, staticContributorsToShow } = getFilteredUsers();
 
   return (
-    <div className="text-primary-text container mx-auto px-4 py-16">
-      <h1 className="text-primary-text mb-12 text-center text-4xl font-bold">
-        Meet the <span className="text-link underline">team</span>
-      </h1>
+    <div className="bg-primary-bg">
+      <div className="container mx-auto px-6 py-10">
+        <h1 className="text-primary-text text-center text-2xl font-semibold capitalize lg:text-3xl">
+          Meet the <span className="text-button-info">team</span>
+        </h1>
 
-      <Box sx={{ width: "100%" }}>
-        <StyledTabs
-          value={value}
-          onChange={handleChange}
-          aria-label="contributors tabs"
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-        >
-          <StyledTab label="All" />
-          <StyledTab label="Owner" />
-          <StyledTab label="Developer" />
-          <StyledTab label="Partner" />
-          <StyledTab label="Value List Manager" />
-          <StyledTab label="Value Team" />
-          <StyledTab label="Tester" />
-          <StyledTab label="Value List Contributor" />
-        </StyledTabs>
+        <p className="text-secondary-text mx-auto my-6 max-w-2xl text-center">
+          Our dedicated team of developers, designers, and contributors who make
+          Jailbreak Changelogs possible.
+        </p>
 
-        <TabPanel value={value} index={0}>
-          {getTabContent(0)}
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          {getTabContent(1)}
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          {getTabContent(2)}
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          {getTabContent(3)}
-        </TabPanel>
-        <TabPanel value={value} index={4}>
-          {getTabContent(4)}
-        </TabPanel>
-        <TabPanel value={value} index={5}>
-          {getTabContent(5)}
-        </TabPanel>
-        <TabPanel value={value} index={6}>
-          {getTabContent(6)}
-        </TabPanel>
-        <TabPanel value={value} index={7}>
-          {getTabContent(7)}
-        </TabPanel>
-      </Box>
+        {/* Filter Buttons */}
+        <div className="mb-8 flex items-center justify-center">
+          <div className="border-button-info bg-secondary-bg scrollbar-hide flex items-center overflow-x-auto rounded-xl border p-1">
+            <div className="flex min-w-max items-center">
+              {filters.map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                  className={`flex-shrink-0 rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
+                    activeFilter === filter.key
+                      ? "bg-button-info text-form-button-text"
+                      : "text-secondary-text hover:text-primary-text hover:bg-quaternary-bg"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Team Grid */}
+        <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 xl:mt-16 xl:grid-cols-3">
+          {usersToShow.map((user) => renderUser(user, user.role))}
+          {staticContributorsToShow.map((contrib) =>
+            renderStaticContributor(contrib),
+          )}
+        </div>
+      </div>
     </div>
   );
 }

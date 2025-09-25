@@ -296,7 +296,7 @@ export default function ItemChangelogs({
           <Link href="/changelogs">
             <Button
               variant="contained"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover border-stroke rounded-lg border px-6 py-3 text-sm font-semibold normal-case"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary hover:border-border-focus rounded-lg border px-6 py-3 text-sm font-semibold normal-case"
             >
               View All Changelogs
             </Button>
@@ -451,7 +451,7 @@ export default function ItemChangelogs({
       </Dialog>
 
       {/* Central Changelogs Information Banner */}
-      <div className="border-stroke bg-secondary-bg mb-6 rounded-lg border p-6 shadow-lg">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border p-6 shadow-lg">
         <div className="flex items-start gap-4">
           <div className="flex-1">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -485,7 +485,7 @@ export default function ItemChangelogs({
         </div>
       </div>
 
-      <div className="border-stroke bg-secondary-bg mb-4 rounded-lg border p-3">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-4 rounded-lg border p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
@@ -500,7 +500,7 @@ export default function ItemChangelogs({
           </div>
           <button
             onClick={toggleSortOrder}
-            className="hover:bg-button-info-hover border-stroke bg-button-info text-form-button-text flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
+            className="hover:bg-button-info-hover border-border-primary hover:border-border-focus bg-button-info text-form-button-text flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -529,7 +529,7 @@ export default function ItemChangelogs({
           return (
             <div
               key={change.change_id}
-              className="border-border-primary hover:border-button-info bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
             >
               <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div className="flex items-center gap-2">

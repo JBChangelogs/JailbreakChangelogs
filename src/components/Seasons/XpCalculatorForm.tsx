@@ -92,7 +92,7 @@ export default function XpCalculatorForm({
 
   const maxXpForCurrentLevel = getMaxXpForLevel(currentLevel);
   return (
-    <div className="border-stroke bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-primary-text mb-6 text-2xl font-semibold">
         🎯 XP Progress Calculator
       </h2>
@@ -145,7 +145,7 @@ export default function XpCalculatorForm({
                 singleValue: () => "text-secondary-text",
                 placeholder: () => "text-secondary-text",
                 menu: () =>
-                  "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
                 option: ({ isSelected, isFocused }) =>
                   `px-4 py-3 cursor-pointer ${
                     isSelected

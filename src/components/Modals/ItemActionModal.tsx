@@ -52,7 +52,7 @@ export default function ItemActionModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto max-h-[80vh] w-full max-w-sm overflow-hidden rounded-lg border shadow-lg sm:max-w-md">
           {/* Modal Header */}
-          <div className="modal-header text-primary-text border-stroke px-4 py-4 text-lg font-semibold sm:px-6 sm:text-xl">
+          <div className="modal-header text-primary-text border-border-primary hover:border-border-focus px-4 py-4 text-lg font-semibold sm:px-6 sm:text-xl">
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
                 <Dialog.Title className="text-primary-text text-lg font-semibold sm:text-xl">

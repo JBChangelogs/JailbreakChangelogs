@@ -31,7 +31,7 @@ export default async function WillIMakeItPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <Breadcrumb />
 
@@ -51,7 +51,7 @@ export default async function WillIMakeItPage() {
         {/* Season Info & Calculator Info Side by Side */}
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Season Info & Countdown Section */}
-          <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
+          <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
             <XpImportantDates
               season={season.season}
               title={season.title}
@@ -63,7 +63,7 @@ export default async function WillIMakeItPage() {
           </div>
 
           {/* Calculator Info Section */}
-          <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
             <h3 className="text-primary-text mb-3 text-lg font-semibold">
               💡 How This Calculator Works
             </h3>

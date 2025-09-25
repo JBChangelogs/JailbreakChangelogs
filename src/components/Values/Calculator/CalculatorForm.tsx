@@ -191,7 +191,7 @@ const CalculatorItemGrid: React.FC<{
 
     return (
       <div
-        className={`border-stroke bg-secondary-bg hover:bg-secondary-bg/80 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-secondary-bg/80 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -1599,7 +1599,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="border-stroke bg-secondary-bg mb-6 rounded-lg border">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border">
         <nav className="px-6 py-4">
           <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
             <button
@@ -1665,7 +1665,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         <div className="mb-8">
           {/* Similar Items Near Total - Selector and Results */}
           {offeringItems.length === 0 && requestingItems.length === 0 ? (
-            <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
               <EmptyState
                 message={
                   'Go to the "Browse Items" tab to select items and see similar items near your total.'
@@ -1694,7 +1694,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   </div>
                 )}
               <div className="mb-4 flex justify-center sm:justify-start">
-                <div className="border-stroke bg-secondary-bg inline-flex gap-1 rounded-lg border p-2">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg inline-flex gap-1 rounded-lg border p-2">
                   <button
                     onClick={() => setTotalBasis("offering")}
                     className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${

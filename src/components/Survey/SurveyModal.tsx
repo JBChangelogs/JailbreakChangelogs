@@ -101,7 +101,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 rows={4}
                 placeholder="Type your answer here..."
                 required

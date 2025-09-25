@@ -294,7 +294,7 @@ const ServerList: React.FC = () => {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="border-stroke bg-secondary-bg rounded-lg border p-4 sm:p-6"
+              className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
@@ -349,7 +349,7 @@ const ServerList: React.FC = () => {
                   />
                 </div>
 
-                <div className="border-stroke bg-primary-bg rounded-lg border p-3 sm:p-4">
+                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
                   <Skeleton
                     variant="text"
                     width={100}
@@ -395,7 +395,7 @@ const ServerList: React.FC = () => {
 
   if (servers.length === 0) {
     return (
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-8 text-center">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-8 text-center">
         <ShieldCheckIcon className="text-button-info mx-auto mb-4 h-12 w-12" />
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
           No servers available
@@ -431,7 +431,7 @@ const ServerList: React.FC = () => {
         {currentServers.map((server, index) => (
           <div
             key={server.id}
-            className="border-stroke bg-secondary-bg rounded-lg border p-4 sm:p-6"
+            className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6"
           >
             <div className="mb-4 flex flex-col gap-3">
               <div className="flex items-center space-x-2">
@@ -557,7 +557,7 @@ const ServerList: React.FC = () => {
                 </span>
               </div>
 
-              <div className="border-stroke bg-primary-bg rounded-lg border p-3 sm:p-4">
+              <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
                 <h3 className="text-primary-text mb-2 text-sm font-semibold">
                   Server Rules
                 </h3>

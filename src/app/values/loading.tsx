@@ -6,7 +6,7 @@ export default function Loading() {
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         {/* Header skeleton */}
-        <div className="bg-secondary-bg border-stroke mb-8 rounded-lg border p-6">
+        <div className="bg-secondary-bg border-border-primary hover:border-border-focus mb-8 rounded-lg border p-6">
           <div className="mb-4 flex items-center justify-between">
             <Skeleton
               variant="text"
@@ -35,7 +35,7 @@ export default function Loading() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="border-stroke bg-secondary-bg rounded-lg border p-2"
+                className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2"
               >
                 <Skeleton
                   variant="rounded"
@@ -77,7 +77,7 @@ export default function Loading() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="border-stroke bg-secondary-bg rounded-lg border p-1"
+                className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-1"
               >
                 <Skeleton
                   variant="rounded"
@@ -100,7 +100,7 @@ export default function Loading() {
         <div className="mb-8">
           <div className="flex flex-col items-start gap-6 lg:flex-row">
             <div className="flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1">
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-2">
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
                 <Skeleton
                   variant="rounded"
                   width="100%"
@@ -108,7 +108,7 @@ export default function Loading() {
                   className="bg-secondary-bg"
                 />
               </div>
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-2">
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
                 <Skeleton
                   variant="rounded"
                   width="100%"
@@ -116,7 +116,7 @@ export default function Loading() {
                   className="bg-secondary-bg"
                 />
               </div>
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-2">
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
                 <Skeleton
                   variant="rounded"
                   width="100%"
@@ -126,7 +126,7 @@ export default function Loading() {
               </div>
             </div>
             <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0">
-              <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                 <Skeleton
                   variant="rounded"
                   width="100%"
@@ -157,7 +157,7 @@ export default function Loading() {
 
         {/* Pagination skeleton */}
         <div className="mt-8 flex justify-center">
-          <div className="border-stroke bg-secondary-bg rounded-lg border p-2">
+          <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
             <Skeleton
               variant="rounded"
               width={300}

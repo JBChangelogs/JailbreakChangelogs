@@ -114,7 +114,8 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         .sidebar-ad-container-changelog {
           width: 320px;
           height: 100px;
-          border: 1px solid var(--color-border-stroke);
+          border: 1px solid
+            var(--color-border-border-primary hover: border-border-focus);
           background-color: var(--color-secondary-bg);
           border-radius: 8px;
           overflow: hidden;

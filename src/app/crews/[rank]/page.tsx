@@ -51,7 +51,7 @@ export default async function CrewPage({
               </div>
             </div>
 
-            <div className="border-stroke bg-secondary-bg rounded-lg border p-8 text-center">
+            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-8 text-center">
               <h2 className="text-primary-text mb-4 text-2xl font-bold">
                 Rank #{rankNumber} Not Available
               </h2>

@@ -462,7 +462,7 @@ export default function OGFinderResults({
                   ADVERTISEMENT
                 </span>
                 <div
-                  className="border-stroke bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
+                  className="border-border-primary hover:border-border-focus bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
                   style={{ minHeight: "250px" }}
                 >
                   <DisplayAd
@@ -496,11 +496,11 @@ export default function OGFinderResults({
             {/* Pro Tip - Only show when there are results */}
             {sortedData.length > 0 && (
               <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
-                <div className="text-primary-text flex items-center gap-2 text-sm">
-                  <span className="text-button-info">💡</span>
-                  <span className="font-medium">Pro Tip:</span>
-                  <span>
-                    Click on any item card to view its ownership history.
+                <div className="text-primary-text flex items-start gap-2 text-sm">
+                  <span className="text-button-info flex-shrink-0">💡</span>
+                  <span className="font-medium">
+                    Pro Tip: Click on any item card to view its ownership
+                    history.
                   </span>
                 </div>
               </div>

@@ -192,7 +192,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="bg-primary-bg border-border-primary hover:border-button-info rounded-lg border p-3 shadow-sm transition-colors">
+        <Box className="bg-primary-bg border-border-primary hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
               {isVideo ? (
@@ -399,7 +399,7 @@ export default function FavoritesTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />

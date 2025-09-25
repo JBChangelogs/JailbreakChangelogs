@@ -160,7 +160,7 @@ export default function HyperchromeCalculatorModal({
                   id="pity"
                   min={0}
                   max={100}
-                  className="bg-form-input border-stroke text-primary-text focus:border-button-info hover:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your current pity percentage (0-100)"
                   value={pity}
                   onChange={(e) => {
@@ -176,7 +176,7 @@ export default function HyperchromeCalculatorModal({
 
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                   <div className="text-secondary-text mb-1 text-sm">Result</div>
                   <div className="flex items-baseline gap-2">
                     <div className="text-primary-text text-3xl font-extrabold">
@@ -203,7 +203,7 @@ export default function HyperchromeCalculatorModal({
             )}
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                   <div className="text-secondary-text mb-2 text-xs">
                     If you trade to a different level, here&apos;s what your
                     pity would be for each level-up.

@@ -69,7 +69,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
           {servers.map((server, index) => (
             <div
               key={server.id}
-              className="bg-primary-bg border-border-primary hover:border-button-info rounded-lg border p-4 transition-colors sm:p-6"
+              className="bg-primary-bg border-border-primary hover:border-border-focus rounded-lg border p-4 transition-colors sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">

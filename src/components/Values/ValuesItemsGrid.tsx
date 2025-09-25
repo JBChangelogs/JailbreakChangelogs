@@ -179,7 +179,8 @@ export default function ValuesItemsGrid({
         .responsive-ad-container-values {
           width: 320px;
           height: 100px;
-          border: 1px solid var(--color-border-stroke);
+          border: 1px solid
+            var(--color-border-border-primary hover: border-border-focus);
           background-color: var(--color-secondary-bg);
           border-radius: 8px;
           overflow: hidden;
@@ -238,7 +239,7 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="bg-secondary-bg border-stroke col-span-full mb-4 rounded-lg border p-8 text-center">
+          <div className="bg-secondary-bg border-border-primary hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center">
             <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : appliedMaxValue.toLocaleString()})`
@@ -247,14 +248,14 @@ export default function ValuesItemsGrid({
             {rangeFilteredItems.length === 0 && items.length > 0 && (
               <button
                 onClick={onResetValueRange}
-                className="text-form-button-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none"
+                className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none"
               >
                 Reset Value Range
               </button>
             )}
             <button
               onClick={onClearAllFilters}
-              className="text-form-button-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
+              className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
             >
               Clear All Filters
             </button>

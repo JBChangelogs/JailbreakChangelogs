@@ -278,13 +278,7 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className={`group relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg ${
-          currentItemData.is_seasonal === 1
-            ? "border-button-info hover:border-button-info-hover border-2"
-            : currentItemData.is_limited === 1
-              ? "border-button-info hover:border-button-info-hover border-2"
-              : "hover:border-button-info border-2 border-transparent"
-        } bg-secondary-bg`}
+        className={`group border-border-primary hover:border-border-focus bg-secondary-bg relative overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
@@ -314,7 +308,7 @@ export default function ItemCard({
           </div>
           <button
             onClick={handleFavoriteClick}
-            className={`border-stroke bg-secondary-bg/80 absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+            className={`border-border-primary hover:border-border-focus bg-secondary-bg/80 absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -404,7 +398,7 @@ export default function ItemCard({
         <Link href={itemUrl} className="block" prefetch={false}>
           <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-link hover:text-link-hover text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
+              <h3 className="text-primary-text hover:text-link-hover text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
                 {item.name}
               </h3>
             </div>

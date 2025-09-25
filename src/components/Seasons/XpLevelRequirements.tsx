@@ -76,7 +76,7 @@ export default function XpLevelRequirements({
   const maxTotalXp = levelRequirements[levelRequirements.length - 1].totalXp;
 
   return (
-    <div className="border-stroke bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="from-button-info to-button-info/80 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br">
           <svg

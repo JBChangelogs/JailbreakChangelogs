@@ -603,12 +603,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   className: "[&_textarea]:resize-y",
                 },
               }}
-              className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-stroke [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
+              className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-border-primary hover:border-border-focus [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
             />
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={toggleSortOrder}
-                className="border-stroke bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -696,7 +696,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             </div>
           ) : (
             <>
-              <div className="bg-tertiary-bg rounded-xl p-2">
+              <div className="p-2">
                 <div className="space-y-2 sm:space-y-3">
                   {currentComments.map((comment) => {
                     const flags = userData[comment.user_id]?.flags || [];
@@ -706,10 +706,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         ?.show_recent_comments === 0 &&
                       currentUserId !== comment.user_id;
                     return (
-                      <div
-                        key={comment.id}
-                        className="group hover:border-border-focus border-border-tertiary relative overflow-hidden rounded-lg border p-3 transition-all duration-200"
-                      >
+                      <div key={comment.id} className="group relative p-3">
                         {/* Header Section */}
                         <div className="flex items-center justify-between pb-2">
                           <div className="flex items-center gap-3">
@@ -801,12 +798,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           tooltip: {
                                             sx: {
                                               backgroundColor:
-                                                "var(--color-primary-bg)",
+                                                "var(--color-secondary-bg)",
                                               color:
                                                 "var(--color-primary-text)",
                                               "& .MuiTooltip-arrow": {
                                                 color:
-                                                  "var(--color-primary-bg)",
+                                                  "var(--color-secondary-bg)",
                                               },
                                             },
                                           },
@@ -814,7 +811,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       >
                                         <Link
                                           href={`/users/${comment.user_id}`}
-                                          className={`${inter.className} text-md text-link hover:text-link-hover truncate font-semibold transition-colors duration-200 hover:underline`}
+                                          className={`${inter.className} text-md text-primary-text hover:text-link-hover truncate font-semibold transition-colors duration-200 hover:underline`}
                                         >
                                           {userData[comment.user_id]
                                             ?.username || comment.author}
@@ -861,7 +858,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <IconButton
                               size="small"
                               onClick={(e) => handleMenuOpen(e, comment.id)}
-                              className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-0 transition-all duration-200 group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
+                              className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
                             >
                               <EllipsisHorizontalIcon className="h-4 w-4" />
                             </IconButton>
@@ -897,7 +894,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     className: "[&_textarea]:resize-y",
                                   },
                                 }}
-                                className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-stroke [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
+                                className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-border-primary hover:border-border-focus [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
                               />
                               <div className="flex gap-2">
                                 <Button

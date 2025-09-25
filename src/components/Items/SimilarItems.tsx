@@ -327,11 +327,11 @@ const SimilarItems = ({
             unstyled
             classNames={{
               control: () =>
-                "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg",
+                "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg",
               singleValue: () => "text-secondary-text",
               placeholder: () => "text-secondary-text",
               menu: () =>
-                "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
               option: ({ isSelected, isFocused }) =>
                 `px-4 py-3 cursor-pointer ${
                   isSelected
@@ -347,7 +347,7 @@ const SimilarItems = ({
             }}
           />
         ) : (
-          <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
+          <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
         )}
       </div>
 
@@ -356,7 +356,7 @@ const SimilarItems = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="border-stroke bg-secondary-bg mb-3 aspect-video rounded-lg border"></div>
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-3 aspect-video rounded-lg border"></div>
               <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
               <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
             </div>
@@ -397,7 +397,7 @@ const SimilarItems = ({
               className="group block"
             >
               <div
-                className={`border-stroke hover:border-button-info/50 relative overflow-hidden rounded-lg border transition-all duration-300 ${
+                className={`border-border-primary hover:border-border-focus relative overflow-hidden rounded-lg border transition-all duration-300 ${
                   item.is_seasonal === 1
                     ? "border-button-info"
                     : item.is_limited === 1

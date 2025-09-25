@@ -206,7 +206,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                               <Link
                                 key={`${item.id}-${index}`}
                                 href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                                className="group border-border-primary bg-secondary-bg/50 hover:border-button-info hover:bg-primary-bg flex items-center justify-between rounded-lg border p-3 transition-colors"
+                                className="group border-border-primary bg-secondary-bg/50 hover:border-border-focus hover:bg-primary-bg flex items-center justify-between rounded-lg border p-3 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="flex flex-col">

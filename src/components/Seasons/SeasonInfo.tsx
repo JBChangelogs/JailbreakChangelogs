@@ -14,7 +14,7 @@ export default function SeasonInfo({
   endDate,
 }: SeasonInfoProps) {
   return (
-    <div className="border-stroke bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-muted mb-4 text-2xl font-semibold">
         Season Information
       </h2>

@@ -19,7 +19,7 @@ export default function Loading() {
           {/* Crew Leaderboard skeleton */}
           <div className="mt-8">
             <div className="bg-secondary-bg mb-4 h-6 w-48 animate-pulse rounded"></div>
-            <div className="border-stroke bg-secondary-bg rounded-lg border p-4 shadow-sm">
+            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 shadow-sm">
               <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <div

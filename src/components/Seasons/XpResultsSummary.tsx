@@ -136,7 +136,7 @@ export default function XpResultsSummary({
   return (
     <div className="space-y-6">
       {/* Main Summary Card */}
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
         <h3
           id="season-progress-summary"
           className="text-primary-text mb-4 text-2xl font-bold"
@@ -203,7 +203,7 @@ export default function XpResultsSummary({
 
         {/* Time Estimates */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-primary-text flex items-center gap-2 font-semibold">
                 <IoTime className="text-blue-400" />
@@ -236,7 +236,7 @@ export default function XpResultsSummary({
             </div>
           </div>
 
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-primary-text flex items-center gap-2 font-semibold">
                 <IoTime className="text-green-400" />
@@ -272,7 +272,7 @@ export default function XpResultsSummary({
       </div>
 
       {/* XP Options Analysis */}
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
         <h3 className="text-primary-text mb-4 text-xl font-semibold">
           XP Options Analysis
         </h3>
@@ -285,7 +285,7 @@ export default function XpResultsSummary({
 
         <div className="space-y-4">
           {/* Without Season Pass Analysis */}
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <h4 className="text-primary-text mb-3 font-semibold">
               Without Season Pass
             </h4>
@@ -363,7 +363,7 @@ export default function XpResultsSummary({
           </div>
 
           {/* With Season Pass Analysis */}
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <h4 className="text-primary-text mb-3 font-semibold">
               With Season Pass
             </h4>
@@ -443,12 +443,12 @@ export default function XpResultsSummary({
       </div>
 
       {/* Important Dates */}
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
         <h3 className="text-primary-text mb-4 text-xl font-semibold">
           Important Season Dates
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="text-center">
               <div className="text-primary-text text-lg font-semibold">
                 Double XP Starts
@@ -461,7 +461,7 @@ export default function XpResultsSummary({
               </div>
             </div>
           </div>
-          <div className="border-stroke bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="text-center">
               <div className="text-primary-text text-lg font-semibold">
                 Season Ends

@@ -692,11 +692,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     unstyled
                     classNames={{
                       control: () =>
-                        "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                        "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
                       singleValue: () => "text-secondary-text",
                       placeholder: () => "text-secondary-text",
                       menu: () =>
-                        "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                        "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
                       option: ({ isSelected, isFocused }) =>
                         `px-4 py-3 cursor-pointer ${
                           isSelected
@@ -715,7 +715,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     isSearchable={false}
                   />
                 ) : (
-                  <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
                 )}
               </div>
             </div>
@@ -757,11 +757,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 unstyled
                 classNames={{
                   control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
                   singleValue: () => "text-secondary-text",
                   placeholder: () => "text-secondary-text",
                   menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
                   option: ({ isSelected, isFocused }) =>
                     `px-4 py-3 cursor-pointer ${
                       isSelected

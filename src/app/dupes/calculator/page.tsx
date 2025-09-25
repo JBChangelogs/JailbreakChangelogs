@@ -17,43 +17,45 @@ export const metadata: Metadata = {
 
 export default function DupeCalculatorPage() {
   return (
-    <div className="container mx-auto px-4">
-      <Breadcrumb />
-      <DupeReportHeader />
+    <main className="mb-8 min-h-screen">
+      <div className="container mx-auto px-4">
+        <Breadcrumb />
+        <DupeReportHeader />
 
-      <div className="border-stroke bg-secondary-bg rounded-lg border p-6">
-        <div className="mb-6">
-          <h2 className="text-secondary-text text-xl font-semibold">
-            Search for Duped Items
-          </h2>
-        </div>
-
-        {/* Stats Card */}
-        <div className="border-tertiary-bg bg-tertiary-bg mb-6 rounded-lg border p-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-primary-text text-lg font-semibold">
-                Total Dupes Reported
-              </h3>
-              <p className="text-secondary-text text-sm">
-                All dupe reports in our database
-              </p>
-            </div>
-            <Suspense
-              fallback={
-                <div className="bg-quaternary-bg h-8 w-16 animate-pulse rounded" />
-              }
-            >
-              <DupeStatsWrapper />
-            </Suspense>
+        <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
+          <div className="mb-6">
+            <h2 className="text-secondary-text text-xl font-semibold">
+              Search for Duped Items
+            </h2>
           </div>
-        </div>
 
-        <Suspense fallback={<Loading />}>
-          <DupeSearchFormWrapper />
-        </Suspense>
+          {/* Stats Card */}
+          <div className="border-tertiary-bg bg-tertiary-bg mb-6 rounded-lg border p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-primary-text text-lg font-semibold">
+                  Total Dupes Reported
+                </h3>
+                <p className="text-secondary-text text-sm">
+                  All dupe reports in our database
+                </p>
+              </div>
+              <Suspense
+                fallback={
+                  <div className="bg-quaternary-bg h-8 w-16 animate-pulse rounded" />
+                }
+              >
+                <DupeStatsWrapper />
+              </Suspense>
+            </div>
+          </div>
+
+          <Suspense fallback={<Loading />}>
+            <DupeSearchFormWrapper />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 

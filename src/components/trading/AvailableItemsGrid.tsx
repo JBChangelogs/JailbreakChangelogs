@@ -315,7 +315,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         .responsive-ad-container {
           width: 320px;
           height: 100px;
-          border: 1px solid var(--color-border-stroke);
+          border: 1px solid
+            var(--color-border-border-primary hover: border-border-focus);
           background-color: var(--color-primary-bg);
           border-radius: 8px;
           overflow: hidden;
@@ -366,7 +367,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   placeholder="Search items by name or type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="text-primary-text border-stroke bg-primary-bg placeholder-secondary-text focus:border-button-info hover:bg-primary-bg min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                  className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info hover:bg-primary-bg min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -464,11 +465,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   unstyled
                   classNames={{
                     control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
                     singleValue: () => "text-secondary-text",
                     placeholder: () => "text-secondary-text",
                     menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
                     option: ({ isSelected, isFocused }) =>
                       `px-4 py-3 cursor-pointer ${
                         isSelected
@@ -487,7 +488,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   isSearchable={false}
                 />
               ) : (
-                <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
               )}
 
               {selectLoaded ? (
@@ -600,11 +601,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   unstyled
                   classNames={{
                     control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-stroke bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
                     singleValue: () => "text-secondary-text",
                     placeholder: () => "text-secondary-text",
                     menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-stroke bg-secondary-bg shadow-lg",
+                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
                     option: ({ isSelected, isFocused }) =>
                       `px-4 py-3 cursor-pointer ${
                         isSelected
@@ -623,7 +624,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   isSearchable={false}
                 />
               ) : (
-                <div className="border-stroke bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
               )}
             </div>
           </div>
@@ -671,7 +672,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     setFilterSort("name-all-items");
                     setValueSort("cash-desc");
                   }}
-                  className="text-secondary-text border-stroke bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
+                  className="text-secondary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
                 >
                   Clear All Filters
                 </button>
@@ -682,7 +683,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   key={item.id}
                   className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
                     item.tradable === 1
-                      ? "hover:border-button-info"
+                      ? "hover:border-border-focus"
                       : "cursor-not-allowed opacity-50"
                   }`}
                   tabIndex={0}
@@ -898,7 +899,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     openDropdownId === item.id ? null : item.id,
                                   );
                                 }}
-                                className="text-secondary-text border-stroke bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
+                                className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
                               >
                                 {selectedVariants[item.id] || "2025"}
                                 <ChevronDownIcon
@@ -916,7 +917,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       duration: 0.18,
                                       ease: "easeOut",
                                     }}
-                                    className="border-stroke bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
+                                    className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
                                   >
                                     <button
                                       onClick={(e) => {

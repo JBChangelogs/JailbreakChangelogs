@@ -139,7 +139,8 @@ export default function SeasonDetailsClient({
         .sidebar-ad-container-season {
           width: 320px;
           height: 100px;
-          border: 1px solid var(--color-border-stroke);
+          border: 1px solid
+            var(--color-border-border-primary hover: border-border-focus);
           background-color: var(--color-secondary-bg);
           border-radius: 8px;
           overflow: hidden;
@@ -234,7 +235,7 @@ export default function SeasonDetailsClient({
               </div>
 
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     Start Date
                   </h3>
@@ -242,7 +243,7 @@ export default function SeasonDetailsClient({
                     {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
                   </p>
                 </div>
-                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     End Date
                   </h3>
@@ -250,7 +251,7 @@ export default function SeasonDetailsClient({
                     {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
                   </p>
                 </div>
-                <div className="border-stroke bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     Duration
                   </h3>
@@ -305,7 +306,7 @@ export default function SeasonDetailsClient({
                   .map((reward) => (
                     <div
                       key={reward.id}
-                      className="border-stroke bg-secondary-bg rounded-lg border p-4"
+                      className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4"
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <h3 className="text-primary-text font-semibold">

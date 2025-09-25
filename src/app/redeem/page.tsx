@@ -213,7 +213,7 @@ export default function RedeemPage() {
                   id="code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`bg-secondary-bg border-stroke text-primary-text w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
+                  className={`bg-secondary-bg border-border-primary hover:border-border-focus text-primary-text w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
                     message?.type === "error"
                       ? "border-button-danger focus:ring-button-danger"
                       : "focus:border-button-info focus:ring-button-info"

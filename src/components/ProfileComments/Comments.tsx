@@ -264,7 +264,7 @@ export default function Comment({
       }
       className="group block"
     >
-      <Box className="bg-primary-bg border-border-primary hover:border-button-info rounded-lg border p-3 shadow-sm transition-colors">
+      <Box className="bg-primary-bg border-border-primary hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
         <div className="mb-2 flex">
           {renderThumbnail()}
           <div className="min-w-0 flex-1">
