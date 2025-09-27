@@ -21,6 +21,15 @@ export async function POST(request: Request) {
   });
 
   const text = await upstream.text();
+
+  if (!upstream.ok) {
+    console.error("Trade offer failed:", text);
+    return NextResponse.json(
+      { message: "Failed to make trade offer" },
+      { status: upstream.status },
+    );
+  }
+
   return new NextResponse(text, {
     status: upstream.status,
     headers: {

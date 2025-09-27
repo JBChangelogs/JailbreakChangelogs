@@ -20,8 +20,9 @@ export async function DELETE() {
 
     if (!resp.ok) {
       const err = await resp.text();
+      console.error("Account deletion failed:", err);
       return NextResponse.json(
-        { message: err || "Failed to delete account" },
+        { message: "Failed to delete account" },
         { status: resp.status },
       );
     }

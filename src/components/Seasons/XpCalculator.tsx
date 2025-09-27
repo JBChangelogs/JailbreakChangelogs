@@ -97,6 +97,25 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       }
     };
 
+    // Helper function to calculate realistic days needed
+    const calculateRealisticDays = (xpNeeded: number, expPerWeek: number) => {
+      const rawDays = (xpNeeded / expPerWeek) * 7;
+
+      // For very small XP amounts (less than 1 day's worth), ensure minimum 2 days
+      // This accounts for daily limits, contract availability, and realistic progression
+      if (rawDays < 1.5) {
+        return 2;
+      }
+
+      // For amounts that would take 1-2 days, round up to 2 days minimum
+      if (rawDays <= 2) {
+        return 2;
+      }
+
+      // For larger amounts, use normal ceiling
+      return Math.ceil(rawDays);
+    };
+
     const expPerWeekDouble = (hasGamePass: boolean) => {
       if (hasGamePass) {
         return (
@@ -113,12 +132,14 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     const targetLevelExp = getExpFromLevel(season.xp_data.targetLevel);
     const xpNeeded = targetLevelExp - myExp;
 
-    // Time calculations
-    const howLongNoGamePassDays = Math.ceil(
-      ((targetLevelExp - myExp) / expPerWeek(false)) * 7,
+    // Time calculations with realistic minimum bounds
+    const howLongNoGamePassDays = calculateRealisticDays(
+      targetLevelExp - myExp,
+      expPerWeek(false),
     );
-    const howLongWithGamePassDays = Math.ceil(
-      ((targetLevelExp - myExp) / expPerWeek(true)) * 7,
+    const howLongWithGamePassDays = calculateRealisticDays(
+      targetLevelExp - myExp,
+      expPerWeek(true),
     );
 
     const targetLevelDateNoGamePass =
@@ -137,16 +158,19 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       noPass: DoubleXpResult;
       withPass: DoubleXpResult;
     } | null = null;
-    const newDaysNoPass =
-      (targetLevelExp - myExp) / expPerWeek(false) -
-      1 +
-      (targetLevelExp - myExp) / expPerWeekDouble(false);
-    const newLvlDateNoPass = Math.ceil(newDaysNoPass * 7) * 86400;
-    const newDaysWithPass =
-      (targetLevelExp - myExp) / expPerWeek(true) -
-      1 +
-      (targetLevelExp - myExp) / expPerWeekDouble(true);
-    const newLvlDateWithPass = Math.ceil(newDaysWithPass * 7) * 86400;
+
+    // Calculate Double XP days using the same realistic approach
+    const doubleXpDaysNoPass = calculateRealisticDays(
+      targetLevelExp - myExp,
+      expPerWeekDouble(false),
+    );
+    const doubleXpDaysWithPass = calculateRealisticDays(
+      targetLevelExp - myExp,
+      expPerWeekDouble(true),
+    );
+
+    const newLvlDateNoPass = doubleXpDaysNoPass * 86400;
+    const newLvlDateWithPass = doubleXpDaysWithPass * 86400;
 
     doubleXpResults = {
       noPass: {

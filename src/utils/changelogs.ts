@@ -24,7 +24,7 @@ export function parseMarkdown(text: string) {
           return {
             type: "media" as const,
             mediaType: mediaMatch[1] as "image" | "video" | "audio",
-            url: `https://assets.jailbreakchangelogs.xyz${mediaMatch[2].trim()}`,
+            url: `/api/assets${mediaMatch[2].trim()}`,
             isNested: line.trim().startsWith("- - "),
           };
         }

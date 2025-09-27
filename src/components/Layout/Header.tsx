@@ -607,8 +607,8 @@ export default function Header() {
               <Image
                 src={
                   isCollabPage
-                    ? "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent.webp"
-                    : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
+                    ? "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent.webp"
+                    : "/api/assets/logos/JBCL_Long_Transparent.webp"
                 }
                 alt="Jailbreak Changelogs Logo"
                 width={isSmallScreen ? 150 : 200}
@@ -991,7 +991,7 @@ export default function Header() {
                     aria-label="Support us"
                   >
                     <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                      src="/api/assets/images/kofi_assets/kofi_symbol.svg"
                       alt="Ko-fi"
                       width={22}
                       height={22}
@@ -1155,7 +1155,7 @@ export default function Header() {
                   aria-label="Support us"
                 >
                   <Image
-                    src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                    src="/api/assets/images/kofi_assets/kofi_symbol.svg"
                     alt="Ko-fi"
                     width={22}
                     height={22}

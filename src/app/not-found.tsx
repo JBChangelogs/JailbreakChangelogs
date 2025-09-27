@@ -40,7 +40,7 @@ export default function NotFound() {
         <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
           <Image
             className="w-full max-w-lg lg:mx-auto"
-            src="/assets/images/404.svg"
+            src="/api/assets/images/404.svg"
             alt="404 Error Illustration"
             width={500}
             height={400}

@@ -219,6 +219,11 @@ export default function XpResultsSummary({
               </div>
               <div className="text-secondary-text text-sm">
                 {results.timeNoPass.days === 1 ? "day" : "days"}
+                {results.timeNoPass.days === 2 && results.xpNeeded < 1000 && (
+                  <div className="mt-1 text-xs text-gray-400">
+                    (minimum realistic time)
+                  </div>
+                )}
               </div>
               {results.achievableNoPass ? (
                 <div className="text-secondary-text mt-1 text-xs">
@@ -252,6 +257,11 @@ export default function XpResultsSummary({
               </div>
               <div className="text-secondary-text text-sm">
                 {results.timeWithPass.days === 1 ? "day" : "days"}
+                {results.timeWithPass.days === 2 && results.xpNeeded < 1000 && (
+                  <div className="mt-1 text-xs text-gray-400">
+                    (minimum realistic time)
+                  </div>
+                )}
               </div>
               {results.achievableWithPass ? (
                 <div className="text-secondary-text mt-1 text-xs">

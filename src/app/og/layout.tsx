@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/og",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs OG Finder",
@@ -29,9 +29,7 @@ export const metadata: Metadata = {
     title: "OG Finder - Jailbreak Changelogs",
     description:
       "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
-    ],
+    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
   },
 };
 

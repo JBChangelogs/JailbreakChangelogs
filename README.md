@@ -15,7 +15,7 @@
 
 Leave us a ⭐ if you like the Jailbreak Changelogs project.
 
-[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%232e3944&axis=%23ffffff&line=%235bc0de)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%231d80e2)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
 
 # Roblox Jailbreak Changelogs
 

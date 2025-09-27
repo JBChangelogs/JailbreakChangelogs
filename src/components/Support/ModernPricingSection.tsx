@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
-import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { getAllowedFileExtensions } from "@/config/settings";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface SupporterTier {
   name: string;
@@ -82,6 +82,18 @@ export default function ModernPricingSection() {
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+
+  // Dynamic image paths based on theme
+  const kofiImagePath =
+    resolvedTheme === "dark"
+      ? "/api/assets/images/support/kofi/dark/kofi-dark.png"
+      : "/api/assets/images/support/kofi/kofi-light.png";
+
+  const robloxImagePath =
+    resolvedTheme === "dark"
+      ? "/api/assets/images/support/roblox/dark/roblox-dark.png"
+      : "/api/assets/images/support/roblox/roblox-light.png";
 
   useEffect(() => {
     const tierParam = searchParams.get("tier");
@@ -193,21 +205,41 @@ export default function ModernPricingSection() {
 
               <h4 className="text-primary-text mt-2 text-3xl font-semibold">
                 {tier.name === "Free" ? (
-                  <>
-                    {isYearly ? "0R$" : "$0"}
+                  <div className="flex items-center gap-2">
+                    {isYearly ? (
+                      <>
+                        <Image
+                          src="/api/assets/images/Robux_Icon.png"
+                          alt="Robux"
+                          width={24}
+                          height={24}
+                          className="h-6 w-6"
+                        />
+                        <span>0R$</span>
+                      </>
+                    ) : (
+                      <span>$0</span>
+                    )}
                     <span className="text-secondary-text text-base font-normal">
                       {" "}
                       {isYearly ? "Robux" : "USD"}
                     </span>
-                  </>
+                  </div>
                 ) : isYearly && tier.priceAlt ? (
-                  <>
-                    {tier.priceAlt.split(" ")[1]}
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src="/api/assets/images/Robux_Icon.png"
+                      alt="Robux"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6"
+                    />
+                    <span>{tier.priceAlt.split(" ")[1]}</span>
                     <span className="text-secondary-text text-base font-normal">
                       {" "}
                       Robux
                     </span>
-                  </>
+                  </div>
                 ) : (
                   <>
                     {tier.price}
@@ -323,14 +355,7 @@ export default function ModernPricingSection() {
               Ko-fi Donations
             </h3>
             <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-              alt="Ko-fi Symbol"
-              width={40}
-              height={40}
-              className="mx-auto mb-4"
-            />
-            <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/images/support/KoFi_Supporter_QR_Code.webp"
+              src={kofiImagePath}
               alt="Ko-fi Support QR Code"
               width={192}
               height={192}
@@ -350,9 +375,8 @@ export default function ModernPricingSection() {
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
-            <RobloxIcon className="mx-auto mb-4 h-10 w-10" />
             <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/images/support/Roblox_Supporter_QR_Code.webp"
+              src={robloxImagePath}
               alt="Roblox Support QR Code"
               width={192}
               height={192}

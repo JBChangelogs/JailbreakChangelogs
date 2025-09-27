@@ -103,7 +103,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                       <ArrowPathIcon className="text-link h-6 w-6 animate-spin" />
                     </div>
                     <Image
-                      src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}
+                      src={`/api/assets${changelog.image_url}`}
                       alt={changelog.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 45vw"

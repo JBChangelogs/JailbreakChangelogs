@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Value Calculator Banner",
@@ -22,9 +22,7 @@ export const metadata: Metadata = {
     title: "Value Calculator",
     description:
       "Calculate the value of your Roblox Jailbreak items and trades",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
-    ],
+    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
   },
 };
 

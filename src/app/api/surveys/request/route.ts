@@ -17,6 +17,12 @@ export async function GET() {
   );
 
   const text = await upstream.text();
+
+  if (!upstream.ok) {
+    console.error("Survey request failed:", text);
+    return NextResponse.json({ survey: null }, { status: 200 });
+  }
+
   return new NextResponse(text, {
     status: upstream.status,
     headers: {

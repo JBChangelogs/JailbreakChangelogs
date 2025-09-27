@@ -31,7 +31,7 @@ export async function generateMetadata({
         url: `https://jailbreakchangelogs.xyz/changelogs/${id}`,
         siteName: "Jailbreak Changelogs",
         images: changelog.image_url
-          ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`]
+          ? [`/api/assets${changelog.image_url}`]
           : [],
       },
       twitter: {
@@ -39,7 +39,7 @@ export async function generateMetadata({
         title: changelog.title,
         description: `View the complete changelog for ${changelog.title}. Track updates, features, and modifications in this Jailbreak update.`,
         images: changelog.image_url
-          ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`]
+          ? [`/api/assets${changelog.image_url}`]
           : [],
       },
     };

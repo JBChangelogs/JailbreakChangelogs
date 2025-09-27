@@ -5,12 +5,28 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
+        allow: ["/values", "/values/*", "/item/*", "/changelogs", "/seasons"],
         disallow: [
           "/*?page=",
           "/*?filter=",
           "/api/",
           "/cdn-cgi/",
           "/dupes/calculator",
+          "/settings",
+          "/trading/ad",
+        ],
+      },
+      {
+        userAgent: "Googlebot",
+        allow: ["/values", "/values/*", "/item/*", "/changelogs", "/seasons"],
+        disallow: [
+          "/*?page=",
+          "/*?filter=",
+          "/api/",
+          "/cdn-cgi/",
+          "/dupes/calculator",
+          "/settings",
+          "/trading/ad",
         ],
       },
     ],
@@ -20,5 +36,6 @@ export default function robots(): MetadataRoute.Robots {
       "https://jailbreakchangelogs.xyz/seasons/sitemap.xml",
       "https://jailbreakchangelogs.xyz/values/sitemap.xml",
     ],
+    host: "https://jailbreakchangelogs.xyz",
   };
 }

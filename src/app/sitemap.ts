@@ -15,8 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/values`,
       lastModified: new Date().toISOString(),
-      priority: 0.9,
-      changeFrequency: "daily" as const,
+      priority: 1.0,
+      changeFrequency: "hourly" as const,
     },
     {
       url: `${BASE_URL}/faq`,
@@ -87,8 +87,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/values/calculator`,
       lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "daily" as const,
+      priority: 0.9,
+      changeFrequency: "hourly" as const,
     },
     {
       url: `${BASE_URL}/users`,

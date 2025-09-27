@@ -79,8 +79,7 @@ export default function ContributorsClient({
       name: "Trading Core",
       role: "Value List Contributor",
       username: "Trading Core",
-      avatar:
-        "https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Bg_Big.webp",
+      avatar: "/api/assets/contributors/TradingCore_Bg_Big.webp",
       link: "https://discord.com/invite/jailbreaktrading",
       external: true,
     },
@@ -89,8 +88,7 @@ export default function ContributorsClient({
       name: "EIesia",
       role: "Value List Contributor",
       username: "EIesia",
-      avatar:
-        "https://assets.jailbreakchangelogs.xyz/assets/contributors/EIesia.webp",
+      avatar: "/api/assets/contributors/EIesia.webp",
       link: "https://www.roblox.com/users/582234297/profile",
       external: true,
     },

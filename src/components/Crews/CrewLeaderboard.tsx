@@ -304,7 +304,7 @@ function CrewLeaderboardEntry({
       {/* Crew Flag with Owner Avatar */}
       <div className="relative h-20 w-32 overflow-hidden rounded">
         <Image
-          src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
+          src="/api/assets/images/crews/flags/Flag_3.png"
           alt="Crew flag"
           width={128}
           height={80}

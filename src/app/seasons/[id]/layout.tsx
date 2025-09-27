@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .sort(() => Math.random() - 0.5)
       .slice(0, 4);
     const images = shuffledRewards.map((reward: Reward) => ({
-      url: `https://assets.jailbreakchangelogs.xyz${reward.link}`,
+      url: `/api/assets${reward.link}`,
       width: 1200,
       height: 630,
       alt: `${reward.item} - Season ${season.season} Reward`,

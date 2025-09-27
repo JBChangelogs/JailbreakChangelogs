@@ -22,6 +22,15 @@ export async function POST(request: Request) {
   });
 
   const text = await upstream.text();
+
+  if (!upstream.ok) {
+    console.error("Comment edit failed:", text);
+    return NextResponse.json(
+      { message: "Failed to edit comment" },
+      { status: upstream.status },
+    );
+  }
+
   return new NextResponse(text, {
     status: upstream.status,
     headers: {

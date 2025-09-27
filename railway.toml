@@ -1,5 +1,4 @@
 [build]
-builder = "railpack"
 buildCommand = "pnpm build"
 
 [deploy]

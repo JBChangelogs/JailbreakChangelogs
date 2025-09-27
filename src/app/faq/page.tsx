@@ -124,8 +124,7 @@ export default function FAQPage() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
         style={{
-          backgroundImage:
-            "url(https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background5.webp)",
+          backgroundImage: "url(/api/assets/backgrounds/background5.webp)",
         }}
       />
       <div className="absolute inset-0 opacity-60" />

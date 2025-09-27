@@ -39,8 +39,7 @@ async function isImageAccessible(url: string): Promise<boolean> {
 const BACKGROUND_COUNT = 19;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
-  (_, i) =>
-    `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/png/background${i + 1}.png`,
+  (_, i) => `/api/assets/backgrounds/png/background${i + 1}.png`,
 );
 
 /**

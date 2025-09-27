@@ -330,7 +330,7 @@ export default function RedeemPage() {
                     <li className="flex flex-col items-center sm:flex-row sm:items-center">
                       <div className="mb-1 flex items-center sm:mb-0">
                         <Image
-                          src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                          src="/api/assets/images/kofi_assets/kofi_symbol.svg"
                           alt="Ko-fi Symbol"
                           width={16}
                           height={16}

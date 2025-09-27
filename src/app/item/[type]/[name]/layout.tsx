@@ -7,7 +7,7 @@ import { WithContext, FAQPage, BreadcrumbList, ListItem } from "schema-dts";
 import type { ItemDetails } from "@/types/index";
 
 const FALLBACK_IMAGE =
-  "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp";
+  "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp";
 
 interface Props {
   params: Promise<{

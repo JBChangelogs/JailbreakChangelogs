@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/values/changelogs",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+        url: "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Value Changelogs Banner",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description:
       "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+      "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
     ],
   },
 };

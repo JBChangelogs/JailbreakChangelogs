@@ -10,7 +10,8 @@ import { updateBanner } from "@/services/settingsService";
 import toast from "react-hot-toast";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
-import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
+import { UPLOAD_CONFIG } from "@/config/settings";
+import { validateFile } from "@/utils/fileValidation";
 
 interface BannerSettingsProps {
   userData: UserData;
@@ -114,23 +115,20 @@ export const BannerSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Client-side file validation before upload
-    if (
-      !UPLOAD_CONFIG.ALLOWED_FILE_TYPES.includes(
-        file.type as (typeof UPLOAD_CONFIG.ALLOWED_FILE_TYPES)[number],
-      )
-    ) {
-      setBannerError(
-        `Invalid file type. Only ${getAllowedFileExtensions()} files are allowed for upload.`,
-      );
-      return;
-    }
+    // Client-side validation with helpful warnings
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    const allowedMimeTypes = [...UPLOAD_CONFIG.ALLOWED_FILE_TYPES];
 
-    // Validate file size
-    if (file.size > UPLOAD_CONFIG.MAX_FILE_SIZE) {
-      setBannerError(
-        `File too large. Maximum size is ${UPLOAD_CONFIG.MAX_FILE_SIZE_MB}MB.`,
-      );
+    const validation = validateFile(
+      file,
+      allowedExtensions,
+      allowedMimeTypes,
+      UPLOAD_CONFIG.MAX_FILE_SIZE,
+      UPLOAD_CONFIG.MAX_FILE_SIZE_MB,
+    );
+
+    if (!validation.isValid) {
+      setBannerError(validation.error || "Invalid file");
       return;
     }
 
@@ -158,16 +156,25 @@ export const BannerSettings = ({
         throw new Error(result.message || "Upload failed");
       }
 
-      // Copy the image URL to clipboard and set it in the form
-      await navigator.clipboard.writeText(result.imageUrl);
+      // Auto-fill the URL field with uploaded image
       setCustomBannerUrl(result.imageUrl);
       validateBannerUrl(result.imageUrl);
-      toast.success(
-        'Image uploaded! URL copied to clipboard and added to form. Click "Update" to set as banner.',
-        {
-          duration: 6000, // 6 seconds
-        },
-      );
+
+      // Auto-save the banner immediately
+      try {
+        await updateBanner(result.imageUrl);
+        onBannerUpdate(result.imageUrl);
+        toast.success("Banner updated successfully!", {
+          duration: 3000,
+        });
+      } catch {
+        toast.success(
+          'Image uploaded! URL has been added to the form. Click "Update" to set as banner.',
+          {
+            duration: 4000,
+          },
+        );
+      }
     } catch (error) {
       console.error("Error uploading file:", error);
       const errorMessage =
@@ -373,7 +380,8 @@ export const BannerSettings = ({
               disabled={
                 !isValidBanner ||
                 !userData?.premiumtype ||
-                userData.premiumtype < 2
+                userData.premiumtype < 2 ||
+                isUploading
               }
               sx={{
                 backgroundColor: "var(--color-button-info)",

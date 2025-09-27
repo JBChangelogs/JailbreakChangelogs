@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/leaderboard/money",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Money Leaderboard",
@@ -29,9 +29,7 @@ export const metadata: Metadata = {
     title: "Money Leaderboard - Jailbreak Changelogs",
     description:
       "View the top players in Roblox Jailbreak ranked by their total money. See who has the most cash, find your rank, and track the wealthiest players in the game.",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
-    ],
+    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
   },
   keywords: [
     "jailbreak",

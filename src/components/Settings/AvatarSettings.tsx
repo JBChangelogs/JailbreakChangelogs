@@ -10,7 +10,8 @@ import { updateAvatar } from "@/services/settingsService";
 import toast from "react-hot-toast";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
-import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
+import { UPLOAD_CONFIG } from "@/config/settings";
+import { validateFile } from "@/utils/fileValidation";
 
 interface AvatarSettingsProps {
   userData: UserData;
@@ -116,23 +117,20 @@ export const AvatarSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Client-side file validation before upload
-    if (
-      !UPLOAD_CONFIG.ALLOWED_FILE_TYPES.includes(
-        file.type as (typeof UPLOAD_CONFIG.ALLOWED_FILE_TYPES)[number],
-      )
-    ) {
-      setAvatarError(
-        `Invalid file type. Only ${getAllowedFileExtensions()} files are allowed for upload.`,
-      );
-      return;
-    }
+    // Client-side validation with helpful warnings
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    const allowedMimeTypes = [...UPLOAD_CONFIG.ALLOWED_FILE_TYPES];
 
-    // Validate file size
-    if (file.size > UPLOAD_CONFIG.MAX_FILE_SIZE) {
-      setAvatarError(
-        `File too large. Maximum size is ${UPLOAD_CONFIG.MAX_FILE_SIZE_MB}MB.`,
-      );
+    const validation = validateFile(
+      file,
+      allowedExtensions,
+      allowedMimeTypes,
+      UPLOAD_CONFIG.MAX_FILE_SIZE,
+      UPLOAD_CONFIG.MAX_FILE_SIZE_MB,
+    );
+
+    if (!validation.isValid) {
+      setAvatarError(validation.error || "Invalid file");
       return;
     }
 
@@ -160,16 +158,25 @@ export const AvatarSettings = ({
         throw new Error(result.message || "Upload failed");
       }
 
-      // Copy the image URL to clipboard and set it in the form
-      await navigator.clipboard.writeText(result.imageUrl);
+      // Auto-fill the URL field with uploaded image
       setCustomAvatarUrl(result.imageUrl);
       validateAvatarUrl(result.imageUrl);
-      toast.success(
-        'Image uploaded! URL copied to clipboard and added to form. Click "Update" to set as avatar.',
-        {
-          duration: 6000, // 6 seconds
-        },
-      );
+
+      // Auto-save the avatar immediately
+      try {
+        await updateAvatar(result.imageUrl);
+        onAvatarUpdate(result.imageUrl);
+        toast.success("Avatar updated successfully!", {
+          duration: 3000,
+        });
+      } catch {
+        toast.success(
+          'Image uploaded! URL has been added to the form. Click "Update" to set as avatar.',
+          {
+            duration: 4000,
+          },
+        );
+      }
     } catch (error) {
       console.error("Error uploading file:", error);
       const errorMessage =
@@ -375,7 +382,8 @@ export const AvatarSettings = ({
               disabled={
                 !isValidAvatar ||
                 !userData?.premiumtype ||
-                userData.premiumtype < 2
+                userData.premiumtype < 2 ||
+                isUploading
               }
               sx={{
                 backgroundColor: "var(--color-button-info)",

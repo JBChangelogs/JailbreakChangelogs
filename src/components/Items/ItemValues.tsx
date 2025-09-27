@@ -74,7 +74,7 @@ export default function ItemValues({
             {!hasNoPrice &&
               (isRobuxPrice ? (
                 <Image
-                  src="/assets/images/Robux_Icon.png"
+                  src="/api/assets/images/Robux_Icon.png"
                   alt="Robux"
                   width={20}
                   height={20}

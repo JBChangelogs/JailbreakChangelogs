@@ -305,7 +305,7 @@ export default function Footer() {
                   className="bg-button-info text-form-button-text hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors duration-200 focus:ring-2 focus:outline-none"
                 >
                   <Image
-                    src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                    src="/api/assets/images/kofi_assets/kofi_symbol.svg"
                     alt="Kofi Symbol"
                     width={24}
                     height={24}

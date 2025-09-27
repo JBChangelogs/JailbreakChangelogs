@@ -45,7 +45,7 @@ export default function Maintenance() {
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat"
+      className="relative flex min-h-screen items-center justify-center bg-[url('/api/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat"
       style={{ color: "var(--color-secondary-text)" }}
     >
       <div className="absolute inset-0 z-[1] bg-black/70" />
@@ -59,7 +59,7 @@ export default function Maintenance() {
           }}
         >
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+            src="/api/assets/logos/JBCL_Short_Transparent.webp"
             alt="Jailbreak Changelogs Logo"
             width={140}
             height={140}
