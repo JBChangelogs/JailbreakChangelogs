@@ -41,7 +41,6 @@ const SUPPORTER_TIERS = [
       "Post Comments up to 800 characters",
       `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
       `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
-      "On-Demand Inventory Refresh",
     ],
     color: "border-[#C0C0C0]",
     badgeColor: "from-[#C0C0C0] to-[#A9A9A9]",
@@ -104,7 +103,7 @@ const getFeatureDescription = (
       return {
         title: "Unlock On-Demand Inventory Refresh",
         description:
-          "You're trying to refresh inventory data on-demand, but this feature requires Supporter II or higher. Upgrade to unlock instant inventory refreshes anytime!",
+          "You're trying to refresh inventory data on-demand, but this feature requires Supporter III. Upgrade to unlock instant inventory refreshes anytime!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };

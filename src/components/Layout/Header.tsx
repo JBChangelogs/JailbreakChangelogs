@@ -480,8 +480,8 @@ export default function Header() {
             <Box className="flex flex-wrap items-center gap-1">
               <span>Inventory Calculator</span>
               {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                <span className="border-primary-text text-primary-text group-hover:border-form-button-text group-hover:text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase transition-colors duration-200">
-                  Beta
+                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                  New
                 </span>
               ) : (
                 <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
@@ -833,8 +833,8 @@ export default function Header() {
                             <div className="flex flex-wrap items-center gap-2">
                               <span>Inventory Calculator</span>
                               {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                                <span className="border-primary-text text-primary-text group-hover:border-form-button-text group-hover:text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase transition-colors duration-200">
-                                  Beta
+                                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                                  New
                                 </span>
                               ) : (
                                 <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">

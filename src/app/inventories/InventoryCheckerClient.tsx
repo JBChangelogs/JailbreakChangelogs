@@ -14,6 +14,7 @@ import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
+import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 
 interface InventoryCheckerClientProps {
   initialData?: InventoryData;
@@ -629,6 +630,9 @@ export default function InventoryCheckerClient({
             currentSeason={currentSeason}
           />
 
+          {/* Ad Section - Only show for non-premium users */}
+          <InventoryAdSection className="my-6" />
+
           {/* Inventory Items */}
           <InventoryItems
             initialData={currentData}
@@ -637,6 +641,7 @@ export default function InventoryCheckerClient({
             onItemClick={handleItemClick}
             itemsData={itemsData}
             onPageChange={handlePageChangeWithPreload}
+            isOwnInventory={isOwnInventory}
           />
 
           {/* Trade History Modal */}

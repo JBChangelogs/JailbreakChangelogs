@@ -546,14 +546,14 @@ export default function RedeemPage() {
                 access to your new benefits.
               </p>
 
-              <p className="text-button-info mb-6 text-base font-medium">
+              <p className="text-primary-text mb-6 text-base font-bold">
                 Thank you for your support!
               </p>
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/supporting"
-                  className="text-secondary-text hover:text-primary-text border-border-primary hover:bg-tertiary-bg w-full rounded-lg border px-4 py-2 transition-colors sm:flex-1"
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors sm:flex-1"
                 >
                   View All Benefits
                 </Link>

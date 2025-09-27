@@ -47,6 +47,7 @@ export default async function InventoryCheckerPage({
         </span>
       </div>
       <ExperimentalFeatureBanner className="mb-6" />
+
       <Suspense
         fallback={<InventoryCheckerClient robloxId={userid} isLoading={true} />}
       >

@@ -265,7 +265,7 @@ export default function UserStatsSection({
 
       {/* Total Values */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 text-center">
+        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 text-sm">
             Total Cash Value
           </div>
@@ -300,7 +300,7 @@ export default function UserStatsSection({
             </Tooltip>
           )}
         </div>
-        <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 text-center">
+        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 text-sm">
             Total Duped Value
           </div>
@@ -368,7 +368,7 @@ export default function UserStatsSection({
                 if (!gamepassInfo) return null;
 
                 const GamepassContent = () => (
-                  <div className="text-primary-text border-button-info hover:bg-button-info/10 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors">
+                  <div className="bg-primary/10 border-primary/30 text-primary-text hover:bg-primary/20 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors">
                     <div className="relative h-6 w-6">
                       <Image
                         src={`/assets/images/gamepasses/${gamepassInfo.image}.webp`}

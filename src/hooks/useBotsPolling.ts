@@ -84,15 +84,11 @@ export function useBotsPolling(intervalMs: number = 30000) {
     // Initial fetch
     fetchData();
 
-    // Set up polling interval only if polling hasn't been stopped
-    const interval = setInterval(() => {
-      if (!data.pollingStopped) {
-        fetchData();
-      }
-    }, intervalMs);
+    // Set up polling interval
+    const interval = setInterval(fetchData, intervalMs);
 
     return () => clearInterval(interval);
-  }, [fetchData, intervalMs, data.pollingStopped]);
+  }, [fetchData, intervalMs]);
 
   // Auto-retry on error
   useEffect(() => {

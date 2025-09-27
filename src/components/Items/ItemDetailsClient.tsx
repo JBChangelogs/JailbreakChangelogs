@@ -409,7 +409,7 @@ export default function ItemDetailsClient({
                       ADVERTISEMENT
                     </span>
                     <div
-                      className="border-border-primary hover:border-border-focus bg-secondary-bg relative w-full overflow-hidden rounded-lg border shadow transition-all duration-300"
+                      className="relative w-full overflow-hidden rounded-lg transition-all duration-300"
                       style={{ minHeight: "250px" }}
                     >
                       <DisplayAd

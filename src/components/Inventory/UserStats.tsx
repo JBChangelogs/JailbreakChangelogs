@@ -122,6 +122,11 @@ export default function UserStats({
             (dupeItem as { item_id: number }).item_id,
           );
           if (itemData) {
+            // Skip items with 49+ ownership history entries
+            if (dupeItem.history && dupeItem.history.length >= 49) {
+              return;
+            }
+
             let dupedValue = parseCashValueForTotal(itemData.duped_value);
 
             // If main item doesn't have duped value, check children/variants based on created date

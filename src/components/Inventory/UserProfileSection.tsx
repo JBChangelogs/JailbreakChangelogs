@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { DefaultAvatar } from "@/utils/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -58,34 +59,8 @@ export default function UserProfileSection({
     return dataAge < 300; // 5 minutes
   };
 
-  // Check if user has access to refresh feature (requires Supporter II+)
-  const checkRefreshAccess = () => {
-    if (!isAuthenticated || !user) {
-      setShowLoginModal(true);
-      return false;
-    }
-
-    const userTier = user.premiumtype || 0;
-    if (userTier < 2) {
-      openModal({
-        feature: "inventory_refresh",
-        currentTier: userTier,
-        requiredTier: 2,
-        currentLimit:
-          userTier === 0 ? "Free" : userTier === 1 ? "Supporter I" : "Unknown",
-        requiredLimit: "Supporter II",
-      });
-      return false;
-    }
-    return true;
-  };
-
   const handleRefresh = () => {
     if (isRefreshing) return;
-
-    // Check if user has access to refresh feature
-    if (!checkRefreshAccess()) return;
-
     onRefresh();
   };
 
@@ -139,10 +114,57 @@ export default function UserProfileSection({
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
+      } else if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("high enough supporter")
+      ) {
+        showScanErrorToast("You need to be Supporter III to use this feature.");
+        const userTier = user?.premiumtype || 0;
+        const TIER_NAMES = {
+          0: "Free",
+          1: "Supporter I",
+          2: "Supporter II",
+          3: "Supporter III",
+        };
+        const currentLimit =
+          TIER_NAMES[userTier as keyof typeof TIER_NAMES] || "Unknown";
+        openModal({
+          feature: "inventory_refresh",
+          currentTier: userTier,
+          requiredTier: 3,
+          currentLimit: currentLimit,
+          requiredLimit: "Supporter III",
+        });
+      } else if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("recent scan")
+      ) {
+        let message =
+          "You have a recent scan. Please wait before requesting another scan.";
+
+        if (scanWebSocket.expiresAt) {
+          const now = Math.floor(Date.now() / 1000);
+          const remainingSeconds = scanWebSocket.expiresAt - now;
+
+          if (remainingSeconds > 0) {
+            let timeText;
+            if (remainingSeconds < 60) {
+              timeText = `${remainingSeconds} seconds`;
+            } else if (remainingSeconds < 3600) {
+              const minutes = Math.ceil(remainingSeconds / 60);
+              timeText = `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+            } else {
+              const hours = Math.floor(remainingSeconds / 3600);
+              const minutes = Math.ceil((remainingSeconds % 3600) / 60);
+              timeText = `${hours}h ${minutes}m`;
+            }
+            message = `You have a recent scan. Please wait ${timeText} before requesting another scan.`;
+          }
+        }
+
+        showScanErrorToast(message);
       } else if (scanWebSocket.error) {
-        showScanErrorToast(
-          "No bots online at the moment. Please try again later.",
-        );
+        showScanErrorToast(scanWebSocket.error);
       }
     }
 
@@ -155,10 +177,13 @@ export default function UserProfileSection({
     scanWebSocket.status,
     scanWebSocket.error,
     scanWebSocket.progress,
+    scanWebSocket.expiresAt,
+    openModal,
+    user?.premiumtype,
   ]);
 
   return (
-    <div className="mb-6 flex flex-col gap-4 rounded-lg p-4 sm:flex-row sm:items-center">
+    <div className="mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-center">
       {/* Avatar */}
       {getUserAvatar(userId) ? (
         <Image
@@ -169,20 +194,8 @@ export default function UserProfileSection({
           className="flex-shrink-0 rounded-full"
         />
       ) : (
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
-          <svg
-            className="text-muted h-8 w-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+        <div className="bg-primary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
+          <DefaultAvatar />
         </div>
       )}
 
@@ -511,7 +524,7 @@ export default function UserProfileSection({
       ) : (
         /* Show login prompt for potential profile owner */
         <div className="mt-4">
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+          <div className="border-border-primary bg-primary-bg shadow-card-shadow rounded-lg border p-4">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
                 <svg
@@ -582,6 +595,8 @@ export default function UserProfileSection({
         feature={modalState.feature || "refresh inventory data"}
         currentTier={modalState.currentTier || 0}
         requiredTier={modalState.requiredTier || 1}
+        currentLimit={modalState.currentLimit}
+        requiredLimit={modalState.requiredLimit}
       />
     </div>
   );

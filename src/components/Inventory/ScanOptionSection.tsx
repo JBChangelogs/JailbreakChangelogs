@@ -11,12 +11,9 @@ export default function ScanOptionSection({
   variant = "main",
 }: ScanOptionSectionProps) {
   const { user, isAuthenticated } = useAuthContext();
-
-  // Use different background colors based on context
   const backgroundClass =
-    variant === "main" ? "bg-secondary-bg" : "bg-secondary-bg";
-  const borderClass =
-    variant === "main" ? "border-border-primary" : "border-border-primary";
+    variant === "main" ? "bg-secondary-bg" : "bg-primary-bg";
+  const borderClass = "border-border-primary";
 
   return (
     <div

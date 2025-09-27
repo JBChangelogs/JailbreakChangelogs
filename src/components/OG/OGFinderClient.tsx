@@ -140,14 +140,14 @@ export default function OGFinderClient({
         <div className="flex items-end">
           <button
             type="submit"
-            disabled={isLoading || !searchId.trim()}
+            disabled={isLoading || externalIsLoading || !searchId.trim()}
             className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium transition-all duration-200 ${
-              isLoading
+              isLoading || externalIsLoading
                 ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
                 : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
             }`}
           >
-            {isLoading && (
+            {(isLoading || externalIsLoading) && (
               <svg
                 className="h-4 w-4 animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
@@ -170,7 +170,7 @@ export default function OGFinderClient({
               </svg>
             )}
             <span className="whitespace-nowrap">
-              {isLoading ? "Searching..." : "Search"}
+              {isLoading || externalIsLoading ? "Searching..." : "Search"}
             </span>
           </button>
         </div>

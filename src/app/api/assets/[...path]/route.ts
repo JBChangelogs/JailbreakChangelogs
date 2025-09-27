@@ -45,48 +45,88 @@ export async function GET(
     }
 
     const chunks: Uint8Array[] = [];
-    const reader = response.Body.transformToWebStream().getReader();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
+    // Use transformToByteArray for better compatibility with Node.js v24
+    try {
+      const byteArray = await response.Body.transformToByteArray();
+      const buffer = new Uint8Array(byteArray);
+      const headers = new Headers();
+      const extension = key.split(".").pop()?.toLowerCase();
+      const contentTypeMap: Record<string, string> = {
+        png: "image/png",
+        webp: "image/webp",
+        webm: "video/webm",
+        mp4: "video/mp4",
+        gif: "image/gif",
+        mp3: "audio/mpeg",
+        ogg: "audio/ogg",
+        svg: "image/svg+xml",
+        ttf: "font/ttf",
+      };
+
+      const contentType =
+        contentTypeMap[extension || ""] || "application/octet-stream";
+      headers.set("Content-Type", contentType);
+      headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      headers.set("Access-Control-Allow-Origin", "*");
+      headers.set("Access-Control-Allow-Methods", "GET");
+      headers.set("Access-Control-Allow-Headers", "Content-Type");
+
+      return new NextResponse(buffer, {
+        status: 200,
+        headers,
+      });
+    } catch (transformError) {
+      console.warn(
+        "transformToByteArray failed, falling back to streaming:",
+        transformError,
+      );
+
+      // Fallback to the original streaming approach
+      const reader = response.Body.transformToWebStream().getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+
+      const buffer = new Uint8Array(
+        chunks.reduce((acc, chunk) => acc + chunk.length, 0),
+      );
+      let offset = 0;
+      for (const chunk of chunks) {
+        buffer.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      const headers = new Headers();
+      const extension = key.split(".").pop()?.toLowerCase();
+      const contentTypeMap: Record<string, string> = {
+        png: "image/png",
+        webp: "image/webp",
+        webm: "video/webm",
+        mp4: "video/mp4",
+        gif: "image/gif",
+        mp3: "audio/mpeg",
+        ogg: "audio/ogg",
+        svg: "image/svg+xml",
+        ttf: "font/ttf",
+      };
+
+      const contentType =
+        contentTypeMap[extension || ""] || "application/octet-stream";
+      headers.set("Content-Type", contentType);
+      headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      headers.set("Access-Control-Allow-Origin", "*");
+      headers.set("Access-Control-Allow-Methods", "GET");
+      headers.set("Access-Control-Allow-Headers", "Content-Type");
+
+      return new NextResponse(buffer, {
+        status: 200,
+        headers,
+      });
     }
-
-    const buffer = new Uint8Array(
-      chunks.reduce((acc, chunk) => acc + chunk.length, 0),
-    );
-    let offset = 0;
-    for (const chunk of chunks) {
-      buffer.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    const headers = new Headers();
-    const extension = key.split(".").pop()?.toLowerCase();
-    const contentTypeMap: Record<string, string> = {
-      png: "image/png",
-      webp: "image/webp",
-      webm: "video/webm",
-      mp4: "video/mp4",
-      gif: "image/gif",
-      mp3: "audio/mpeg",
-      ogg: "audio/ogg",
-      svg: "image/svg+xml",
-    };
-
-    const contentType =
-      contentTypeMap[extension || ""] || "application/octet-stream";
-    headers.set("Content-Type", contentType);
-    headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-    headers.set("Access-Control-Allow-Origin", "*");
-    headers.set("Access-Control-Allow-Methods", "GET");
-    headers.set("Access-Control-Allow-Headers", "Content-Type");
-
-    return new NextResponse(buffer, {
-      status: 200,
-      headers,
-    });
   } catch (error) {
     console.error("Error serving file from Railway Object Storage:", error);
 

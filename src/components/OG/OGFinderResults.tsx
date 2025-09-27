@@ -457,12 +457,12 @@ export default function OGFinderResults({
 
             {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
             {currentUserPremiumType === 0 && (
-              <div className="flex flex-col lg:col-span-1">
+              <div className="flex flex-col items-center lg:col-span-1">
                 <span className="text-secondary-text mb-2 block text-center text-xs">
                   ADVERTISEMENT
                 </span>
                 <div
-                  className="border-border-primary hover:border-border-focus bg-secondary-bg relative h-full overflow-hidden rounded-lg border shadow transition-all duration-300"
+                  className="relative h-full overflow-hidden rounded-lg transition-all duration-300"
                   style={{ minHeight: "250px" }}
                 >
                   <DisplayAd

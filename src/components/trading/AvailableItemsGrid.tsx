@@ -346,7 +346,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               <span className="text-secondary-text mb-2 block text-center text-xs">
                 ADVERTISEMENT
               </span>
-              <div className="responsive-ad-container">
+              <div
+                className="responsive-ad-container"
+                style={{ background: "transparent", border: "none" }}
+              >
                 <DisplayAd
                   adSlot="4222990422"
                   adFormat="auto"

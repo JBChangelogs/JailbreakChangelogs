@@ -8,13 +8,13 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    localStorage.setItem("theme-toggle-announcement-dismissed", "true");
+    localStorage.setItem("inventory-release-announcement-dismissed", "true");
   };
 
   useEffect(() => {
     // Check if user has previously dismissed this announcement
     const dismissed = localStorage.getItem(
-      "theme-toggle-announcement-dismissed",
+      "inventory-release-announcement-dismissed",
     );
     if (dismissed === "true") {
       setIsVisible(false);
@@ -50,8 +50,9 @@ export default function NewsTicker() {
 
           <div className="flex flex-col items-center gap-2 lg:flex-row lg:gap-3">
             <span className="text-primary-text text-center text-xs lg:text-sm">
-              <strong>New Theme Toggle!</strong> Find it in the header to cycle
-              between light, dark, and system themes
+              <strong>Inventory Checker!</strong> Check your own inventory or
+              browse other players&apos; inventories to see their items and
+              values
             </span>
           </div>
 

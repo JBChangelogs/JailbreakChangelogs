@@ -247,7 +247,7 @@ export default function OGItemCard({
       </div>
 
       {/* Season and Level badges - always show container for consistent layout */}
-      <div className="border-border-primary mt-3 flex min-h-[40px] justify-center gap-2 border-t pt-3">
+      <div className="border-secondary-text mt-3 flex min-h-[40px] justify-center gap-2 border-t pt-3">
         {item.season && (
           <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
             <span className="text-form-button-text text-xs font-bold">

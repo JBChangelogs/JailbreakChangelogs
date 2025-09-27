@@ -368,12 +368,8 @@ export default function ChangelogDetailsClient({
         .sidebar-ad-container {
           width: 320px;
           height: 100px;
-          border: 1px solid
-            var(--color-border-border-primary hover: border-border-focus);
-          background-color: var(--color-secondary-bg);
           border-radius: 8px;
           overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
           transition: all 0.3s ease;
         }
 
@@ -405,7 +401,7 @@ export default function ChangelogDetailsClient({
 
           {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
           {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="flex flex-col lg:col-span-1">
+            <div className="flex flex-col items-center lg:col-span-1">
               <span className="text-secondary-text mb-2 block text-center text-xs">
                 ADVERTISEMENT
               </span>
