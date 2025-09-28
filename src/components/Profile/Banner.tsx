@@ -15,7 +15,8 @@ interface BannerProps {
 const BACKGROUND_COUNT = 19;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
-  (_, i) => `/api/assets/backgrounds/background${i + 1}.webp`,
+  (_, i) =>
+    `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${i + 1}.webp`,
 );
 
 // Optimized seed calculation - converts string to number more efficiently

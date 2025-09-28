@@ -238,7 +238,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                     <Tab
                       icon={
                         <Image
-                          src="/api/assets/logos/discord/Discord_Logo.webp"
+                          src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
                           alt="Discord"
                           width={120}
                           height={36}

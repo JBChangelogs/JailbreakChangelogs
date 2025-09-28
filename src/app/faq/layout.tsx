@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/faq",
     images: [
       {
-        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Banner",
@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
     description:
       "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
-    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 

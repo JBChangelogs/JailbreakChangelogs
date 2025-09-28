@@ -86,13 +86,13 @@ export default function ModernPricingSection() {
   // Dynamic image paths based on theme
   const kofiImagePath =
     resolvedTheme === "dark"
-      ? "/api/assets/images/support/kofi/dark/kofi-dark.png"
-      : "/api/assets/images/support/kofi/kofi-light.png";
+      ? "https://assets.jailbreakchangelogs.xyz/assets/images/support/kofi/dark/kofi-dark.png"
+      : "https://assets.jailbreakchangelogs.xyz/assets/images/support/kofi/kofi-light.png";
 
   const robloxImagePath =
     resolvedTheme === "dark"
-      ? "/api/assets/images/support/roblox/dark/roblox-dark.png"
-      : "/api/assets/images/support/roblox/roblox-light.png";
+      ? "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/dark/roblox-dark.png"
+      : "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/roblox-light.png";
 
   useEffect(() => {
     const tierParam = searchParams.get("tier");
@@ -208,7 +208,7 @@ export default function ModernPricingSection() {
                     {isYearly ? (
                       <>
                         <Image
-                          src="/api/assets/images/Robux_Icon.png"
+                          src="https://assets.jailbreakchangelogs.xyz/assets/images/Robux_Icon.png"
                           alt="Robux"
                           width={24}
                           height={24}
@@ -227,7 +227,7 @@ export default function ModernPricingSection() {
                 ) : isYearly && tier.priceAlt ? (
                   <div className="flex items-center gap-2">
                     <Image
-                      src="/api/assets/images/Robux_Icon.png"
+                      src="https://assets.jailbreakchangelogs.xyz/assets/images/Robux_Icon.png"
                       alt="Robux"
                       width={24}
                       height={24}

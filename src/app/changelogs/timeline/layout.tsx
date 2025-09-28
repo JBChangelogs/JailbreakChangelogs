@@ -14,7 +14,7 @@ export const metadata: Metadata = {
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
     images: [
       {
-        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Timeline",
@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     title: "Jailbreak Update Timeline | Complete History of Changes",
     description:
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
-    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 

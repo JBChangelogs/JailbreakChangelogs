@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/supporting",
     images: [
       {
-        url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Banner",
@@ -29,7 +29,9 @@ export const metadata: Metadata = {
     title: "Support Jailbreak Changelogs",
     description:
       "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
-    images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+    ],
   },
 };
 

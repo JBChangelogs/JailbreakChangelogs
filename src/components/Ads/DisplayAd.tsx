@@ -102,7 +102,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         <div className="from-button-info/10 to-button-info/5 border-button-info/20 rounded-lg border bg-gradient-to-br p-6 text-center shadow-lg">
           <div className="mb-4 flex items-center justify-center">
             <Image
-              src="/api/assets/logos/JBCL_Short_Transparent.webp"
+              src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
               alt="JBCL Logo"
               width={56}
               height={56}

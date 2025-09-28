@@ -19,7 +19,7 @@ export default function BotPage() {
   useEffect(() => {
     const randomNumber = Math.floor(Math.random() * 19) + 1;
     setBackgroundImage(
-      `/api/assets/backgrounds/background${randomNumber}.webp`,
+      `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`,
     );
   }, []);
 

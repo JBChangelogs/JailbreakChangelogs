@@ -198,7 +198,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
             <div>
               <div className={`relative w-full ${imageAspectRatio}`}>
                 <Image
-                  src={`/api/assets${imageUrl}`}
+                  src={`https://assets.jailbreakchangelogs.xyz/assets${imageUrl}`}
                   alt={title}
                   fill
                   className="rounded-lg object-contain"

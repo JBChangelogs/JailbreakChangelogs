@@ -29,7 +29,7 @@ export async function generateMetadata({
       siteName: "Jailbreak Changelogs",
       images: [
         {
-          url: "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
           width: 1200,
           height: 630,
           alt: "Value Changelog Banner",
@@ -41,7 +41,7 @@ export async function generateMetadata({
       title: `Value Changelog #${id}`,
       description: `View value changes in this Jailbreak Changelogs Value update.`,
       images: [
-        "/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background.webp",
       ],
     },
   };

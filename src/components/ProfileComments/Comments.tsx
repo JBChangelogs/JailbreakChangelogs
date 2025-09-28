@@ -87,7 +87,7 @@ export default function Comment({
       return (
         <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
-            src={`/api/assets/images/changelogs/${item_id}.webp`}
+            src={`https://assets.jailbreakchangelogs.xyz/assets/images/changelogs/${item_id}.webp`}
             alt={`Changelog ${item_id}`}
             fill
             className="object-cover"
@@ -101,7 +101,7 @@ export default function Comment({
       return (
         <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
-            src={`/api/assets/images/seasons/${item_id}/10.webp`}
+            src={`https://assets.jailbreakchangelogs.xyz/assets/images/seasons/${item_id}/10.webp`}
             alt={`Season ${item_id}`}
             fill
             className="object-cover"
@@ -115,7 +115,7 @@ export default function Comment({
       return (
         <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
-            src="/api/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background_Small.webp"
+            src="https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background_Small.webp"
             alt="Trade Ad"
             fill
             className="object-cover"

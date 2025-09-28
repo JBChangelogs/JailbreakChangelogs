@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
       images: [
         {
-          url: "/api/assets/logos/JBCL_Long_Dark_Background.webp",
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
           width: 1200,
           height: 630,
           alt: "Jailbreak Changelogs Banner",
@@ -67,7 +67,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Latest Updates & Patch Notes | Changelogs",
       description:
         "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
-      images: ["/api/assets/logos/JBCL_Long_Dark_Background.webp"],
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+      ],
     },
   };
 }
@@ -98,7 +100,7 @@ export default async function RootLayout({
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
                 <Image
-                  src="/api/assets/logos/JBCL_Short_Transparent.webp"
+                  src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
                   alt="Jailbreak Changelogs"
                   width={96}
                   height={96}
@@ -188,7 +190,7 @@ export default async function RootLayout({
           <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
             <div className="mx-auto max-w-md p-8 text-center">
               <Image
-                src="/api/assets/logos/JBCL_Short_Transparent.webp"
+                src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
                 alt="Jailbreak Changelogs"
                 width={96}
                 height={96}
