@@ -19,7 +19,10 @@ export async function GET() {
   const text = await upstream.text();
 
   if (!upstream.ok) {
-    console.error("Survey request failed:", text);
+    // Don't log 429 (rate limit/cooldown) as errors since they're expected behavior
+    if (upstream.status !== 429) {
+      console.error("Survey request failed:", text);
+    }
     return NextResponse.json({ survey: null }, { status: 200 });
   }
 
