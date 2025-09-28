@@ -93,7 +93,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
     >
       <div className="relative aspect-video overflow-hidden rounded-lg">
         <Image
-          src={`https://assets.jailbreakchangelogs.xyz/assets${filteredRewards[currentImageIndex].link}`}
+          src={`https://assets.jailbreakchangelogs.xyz${filteredRewards[currentImageIndex].link}`}
           alt={filteredRewards[currentImageIndex].item}
           fill
           className="object-contain"

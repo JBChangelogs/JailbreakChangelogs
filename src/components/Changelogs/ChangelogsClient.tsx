@@ -110,7 +110,7 @@ export default function ChangelogsClient({
               {changelog.image_url && (
                 <div className="ml-4 flex-shrink-0">
                   <Image
-                    src={`https://assets.jailbreakchangelogs.xyz/assets${changelog.image_url}`}
+                    src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}
                     alt="Changelog"
                     width={64}
                     height={64}

@@ -18,7 +18,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Changelog Thumbnails
     if (changelog.image_url) {
-      entry.images = [`${ASSETS_URL}${changelog.image_url}`];
+      entry.images = [
+        `https://assets.jailbreakchangelogs.xyz${changelog.image_url}`,
+      ];
     }
 
     return entry;
