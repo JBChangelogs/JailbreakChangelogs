@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { fetchSeasonsList, Season, Reward } from "@/utils/api";
 
 const BASE_URL = "https://jailbreakchangelogs.xyz";
-const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz/assets";
+const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const data = await fetchSeasonsList();
@@ -51,9 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       // Add level 10 reward image if available
       if (level10Reward?.link) {
-        entry.images = [
-          `https://assets.jailbreakchangelogs.xyz${level10Reward.link}`,
-        ];
+        entry.images = [`${ASSETS_URL}${level10Reward.link}`];
       }
 
       return entry;

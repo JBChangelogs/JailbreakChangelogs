@@ -365,6 +365,9 @@ export default function XpResultsSummary({
                           : "days"}{" "}
                         - Complete by:{" "}
                         {results.doubleXpResults.noPass.completionDate})
+                        <div className="text-xs text-gray-500 mt-1">
+                          Results may vary (±1 day)
+                        </div>
                       </span>
                     )}
                   </div>
@@ -443,6 +446,9 @@ export default function XpResultsSummary({
                           : "days"}{" "}
                         - Complete by:{" "}
                         {results.doubleXpResults.withPass.completionDate})
+                        <div className="text-xs text-gray-500 mt-1">
+                          Results may vary (±1 day)
+                        </div>
                       </span>
                     )}
                   </div>
