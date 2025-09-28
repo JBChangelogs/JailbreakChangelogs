@@ -45,6 +45,10 @@ const gamepassData = {
     link: "https://www.roblox.com/game-pass/1142100573/The-Pass",
     image: "Walmart",
   },
+  Stash: {
+    link: "https://www.roblox.com/game-pass/2068240/Extra-Storage-Retiring-Soon",
+    image: "Stash",
+  },
 };
 
 interface UserStatsSectionProps {
@@ -348,6 +352,7 @@ export default function UserStatsSection({
             {(() => {
               const gamepassOrder = [
                 "VIP",
+                "Stash",
                 "PremiumGarage",
                 "BOSS",
                 "SWAT",
