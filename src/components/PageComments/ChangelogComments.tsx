@@ -91,7 +91,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   type,
   itemType,
   trade,
-  inventory,
   initialComments = [],
   initialUserMap = {},
 }) => {
