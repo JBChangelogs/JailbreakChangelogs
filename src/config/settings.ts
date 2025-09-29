@@ -7,8 +7,8 @@ export type SettingConfigItem = {
 };
 
 export const UPLOAD_CONFIG = {
-  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB in bytes
-  MAX_FILE_SIZE_MB: 10, // 10MB for display purposes
+  MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB in bytes
+  MAX_FILE_SIZE_MB: 20, // 20MB for display purposes
   ALLOWED_FILE_TYPES: ["image/jpeg", "image/jpg", "image/png", "image/gif"],
 } as const;
 
