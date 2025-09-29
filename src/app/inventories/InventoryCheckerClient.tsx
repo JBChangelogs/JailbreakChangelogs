@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ThemeProvider, Tabs, Tab, Box } from "@mui/material";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
-import { fetchItems } from "@/utils/api";
+import { fetchItems, ENABLE_WS_SCAN } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -16,6 +16,16 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
+import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import { useSupporterModal } from "@/hooks/useSupporterModal";
+import SupporterModal from "@/components/Modals/SupporterModal";
+import {
+  showScanLoadingToast,
+  updateScanLoadingToast,
+  dismissScanLoadingToast,
+  showScanSuccessToast,
+  showScanErrorToast,
+} from "@/utils/scanToasts";
 import dynamic from "next/dynamic";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -67,6 +77,7 @@ export default function InventoryCheckerClient({
   const progressiveLoadingRef = useRef<Set<string>>(new Set());
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const preloadingPagesRef = useRef<Set<number>>(new Set());
+  const forceShowErrorHandledRef = useRef<boolean>(false);
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
   );
@@ -86,6 +97,8 @@ export default function InventoryCheckerClient({
 
   // Auth context and scan functionality
   const { user, isAuthenticated } = useAuthContext();
+  const scanWebSocket = useScanWebSocket(robloxId || "");
+  const { modalState, openModal, closeModal } = useSupporterModal();
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -97,6 +110,140 @@ export default function InventoryCheckerClient({
   const handleDataRefresh = async (newData: InventoryData) => {
     setRefreshedData(newData);
   };
+
+  // Handle scan status updates (for error state scanning)
+  useEffect(() => {
+    if (!isOwnInventory) {
+      return;
+    }
+
+    if (error && initialData) {
+      return;
+    }
+
+    if (!error || initialData) {
+      return;
+    }
+
+    if (scanWebSocket.status === "connecting") {
+      showScanLoadingToast("Connecting to scan service...");
+    }
+
+    if (scanWebSocket.status === "scanning") {
+      if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("User found")
+      ) {
+        updateScanLoadingToast("User found in game!");
+      } else if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("Bot joined server")
+      ) {
+        updateScanLoadingToast("Bot joined server, scanning...");
+      } else if (scanWebSocket.message) {
+        updateScanLoadingToast(`Scanning: ${scanWebSocket.message}`);
+      } else if (scanWebSocket.progress !== undefined) {
+        updateScanLoadingToast(`Scanning... ${scanWebSocket.progress}%`);
+      }
+    }
+
+    if (
+      scanWebSocket.status === "completed" &&
+      scanWebSocket.message &&
+      scanWebSocket.message.includes("Added to queue")
+    ) {
+      dismissScanLoadingToast();
+      showScanSuccessToast(scanWebSocket.message);
+    }
+
+    if (scanWebSocket.status === "error") {
+      dismissScanLoadingToast();
+
+      if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("No bots available")
+      ) {
+        showScanErrorToast(
+          "No scan bots are currently online. Please try again later.",
+        );
+      } else if (
+        scanWebSocket.message &&
+        scanWebSocket.message.includes("User not found in game")
+      ) {
+        showScanErrorToast(
+          "User not found in game. Please join a trade server and try again.",
+        );
+      } else if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("high enough supporter")
+      ) {
+        showScanErrorToast("You need to be Supporter III to use this feature.");
+        const tierNames = [
+          "Free",
+          "Supporter I",
+          "Supporter II",
+          "Supporter III",
+        ];
+        const userTier = user?.premiumtype || 0;
+        openModal({
+          feature: "inventory_refresh",
+          requiredTier: 3,
+          currentTier: userTier,
+          currentLimit: tierNames[userTier],
+          requiredLimit: tierNames[3],
+        });
+      } else if (
+        scanWebSocket.error &&
+        scanWebSocket.error.includes("recent scan")
+      ) {
+        let message =
+          "You have a recent scan. Please wait before requesting another scan.";
+
+        if (scanWebSocket.expiresAt) {
+          const now = Math.floor(Date.now() / 1000);
+          const remainingSeconds = scanWebSocket.expiresAt - now;
+
+          if (remainingSeconds > 0) {
+            let timeText;
+            if (remainingSeconds < 60) {
+              timeText = `${remainingSeconds} seconds`;
+            } else if (remainingSeconds < 3600) {
+              const minutes = Math.ceil(remainingSeconds / 60);
+              timeText = `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+            } else {
+              const hours = Math.floor(remainingSeconds / 3600);
+              const minutes = Math.ceil((remainingSeconds % 3600) / 60);
+              timeText = `${hours}h ${minutes}m`;
+            }
+            message = `You have a recent scan. Please wait ${timeText} before requesting another scan.`;
+          }
+        }
+        // Add small delay to ensure loading toast is fully dismissed
+        setTimeout(() => {
+          showScanErrorToast(message);
+        }, 100);
+      } else if (scanWebSocket.error) {
+        showScanErrorToast(scanWebSocket.error);
+      }
+    }
+
+    // Handle forceShowError flag for disabled WebSocket scanning
+    if (
+      scanWebSocket.forceShowError &&
+      scanWebSocket.error &&
+      !forceShowErrorHandledRef.current
+    ) {
+      console.log("[INVENTORY] Force showing error:", scanWebSocket.error);
+      showScanErrorToast(scanWebSocket.error);
+      scanWebSocket.resetForceShowError(); // Reset the flag
+      forceShowErrorHandledRef.current = true; // Mark as handled
+    }
+
+    // Reset the handled flag when forceShowError becomes false
+    if (!scanWebSocket.forceShowError) {
+      forceShowErrorHandledRef.current = false;
+    }
+  }, [scanWebSocket, isOwnInventory, error, initialData, openModal, user]);
 
   // Function to handle tab changes
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -632,15 +779,212 @@ export default function InventoryCheckerClient({
               </h3>
               <p className="text-secondary-text mb-4 break-words">{error}</p>
 
-              {/* Show login prompt for potential profile owner */}
-              {!isOwnInventory && (
+              {/* Show scan option for profile owner or login prompt for others */}
+              {isOwnInventory ? (
+                <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                  <div className="space-y-3">
+                    <p className="text-primary-text text-sm text-center mb-3">
+                      Your inventory hasn&apos;t been scanned yet.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <p className="text-secondary-text text-sm">
+                          Wait for one of our bots to randomly join your trade
+                          server
+                        </p>
+                      </div>
+                      <div className="text-secondary-text text-sm font-medium text-center">
+                        OR
+                      </div>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => {
+                            console.log(
+                              "[INVENTORY] Request Scan button clicked",
+                            );
+                            console.log(
+                              "[INVENTORY] Current scan status:",
+                              scanWebSocket.status,
+                            );
+                            console.log(
+                              "[INVENTORY] Current scan error:",
+                              scanWebSocket.error,
+                            );
+                            scanWebSocket.startScan();
+                          }}
+                          disabled={
+                            !ENABLE_WS_SCAN ||
+                            scanWebSocket.status === "scanning" ||
+                            scanWebSocket.status === "connecting"
+                          }
+                          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                            !ENABLE_WS_SCAN ||
+                            scanWebSocket.status === "scanning" ||
+                            scanWebSocket.status === "connecting"
+                              ? `bg-button-info-disabled text-form-button-text border-button-info-disabled ${
+                                  !ENABLE_WS_SCAN
+                                    ? "cursor-not-allowed"
+                                    : "cursor-progress"
+                                }`
+                              : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
+                          }`}
+                        >
+                          {scanWebSocket.status === "connecting" ? (
+                            <>
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              Connecting...
+                            </>
+                          ) : scanWebSocket.status === "scanning" ? (
+                            <>
+                              <svg
+                                className="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              {scanWebSocket.message &&
+                              scanWebSocket.message.includes(
+                                "Bot joined server",
+                              )
+                                ? "Scanning..."
+                                : scanWebSocket.message &&
+                                    scanWebSocket.message.includes("Retrying")
+                                  ? "Retrying..."
+                                  : scanWebSocket.message &&
+                                      scanWebSocket.message.includes(
+                                        "You will be scanned when you join",
+                                      )
+                                    ? "Processing..."
+                                    : scanWebSocket.message || "Processing..."}
+                            </>
+                          ) : scanWebSocket.status === "completed" ? (
+                            <>
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              Scan Complete
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              {scanWebSocket.message &&
+                              scanWebSocket.message.includes("recent scan") ? (
+                                <>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  {scanWebSocket.message.includes("recent scan")
+                                    ? "Recent Scan Found"
+                                    : scanWebSocket.message.includes(
+                                          "User not found",
+                                        )
+                                      ? "User Not Found"
+                                      : scanWebSocket.message.includes(
+                                            "not in game",
+                                          )
+                                        ? "Not In Game"
+                                        : scanWebSocket.message}
+                                </>
+                              ) : scanWebSocket.message &&
+                                scanWebSocket.message.includes("not found") ? (
+                                <>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                    />
+                                  </svg>
+                                  User Not Found
+                                </>
+                              ) : !ENABLE_WS_SCAN ? (
+                                "Scanning Disabled"
+                              ) : (
+                                "Request a Scan"
+                              )}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
                   <p className="text-primary-text mb-1 text-sm font-medium">
                     Are you the owner of this profile?
                   </p>
                   <p className="text-secondary-text text-sm">
-                    Login to request an inventory scan. Your inventory will be
-                    automatically scanned when you join a trading server.
+                    Login to request an inventory scan.
                   </p>
                 </div>
               )}
@@ -731,6 +1075,17 @@ export default function InventoryCheckerClient({
             />
           </>
         )}
+
+        {/* Supporter Modal */}
+        <SupporterModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          feature={modalState.feature || "inventory_refresh"}
+          currentTier={modalState.currentTier || user?.premiumtype || 0}
+          requiredTier={modalState.requiredTier || 3}
+          currentLimit={modalState.currentLimit}
+          requiredLimit={modalState.requiredLimit}
+        />
       </div>
     </ThemeProvider>
   );

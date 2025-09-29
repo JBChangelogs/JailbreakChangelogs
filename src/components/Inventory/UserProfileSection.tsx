@@ -12,6 +12,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
+import { ENABLE_WS_SCAN } from "@/utils/api";
 import {
   showScanLoadingToast,
   updateScanLoadingToast,
@@ -327,17 +328,38 @@ export default function UserProfileSection({
             <button
               onClick={scanWebSocket.startScan}
               disabled={
+                !ENABLE_WS_SCAN ||
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
               }
               className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                !ENABLE_WS_SCAN ||
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
-                  ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                  ? `bg-button-info-disabled text-form-button-text border-button-info-disabled ${
+                      !ENABLE_WS_SCAN ? "cursor-not-allowed" : "cursor-progress"
+                    }`
                   : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
               }`}
             >
-              {scanWebSocket.status === "connecting" ? (
+              {!ENABLE_WS_SCAN ? (
+                <>
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                  Scanning Disabled
+                </>
+              ) : scanWebSocket.status === "connecting" ? (
                 <>
                   <svg
                     className="h-4 w-4 animate-spin"
@@ -546,14 +568,20 @@ export default function UserProfileSection({
                   Want on-demand scans?
                 </h4>
                 <p className="text-secondary-text mb-3 text-sm">
-                  {!isAuthenticated
-                    ? "Login and connect your Roblox account to request instant inventory scans anytime."
-                    : user?.roblox_id
-                      ? "You can request instant inventory scans anytime from your own inventory page."
-                      : "Connect your Roblox account to request instant inventory scans anytime."}
+                  {!ENABLE_WS_SCAN
+                    ? "Inventory scanning is temporarily disabled. Please check back later."
+                    : !isAuthenticated
+                      ? "Login and connect your Roblox account to request instant inventory scans anytime."
+                      : user?.roblox_id
+                        ? "You can request instant inventory scans anytime from your own inventory page."
+                        : "Connect your Roblox account to request instant inventory scans anytime."}
                 </p>
                 <div className="flex gap-2">
-                  {!isAuthenticated ? (
+                  {!ENABLE_WS_SCAN ? (
+                    <span className="text-secondary-text inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium">
+                      Scanning Temporarily Disabled
+                    </span>
+                  ) : !isAuthenticated ? (
                     <Link
                       href="/faq"
                       className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"

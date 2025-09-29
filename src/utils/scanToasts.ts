@@ -2,6 +2,8 @@ import toast from "react-hot-toast";
 
 // Track active scan loading toast to prevent duplicates
 let activeScanLoadingToast: string | null = null;
+// Track active scan error toast to prevent duplicates
+let activeScanErrorToast: string | null = null;
 
 /**
  * Shows a scan loading toast with deduplication to prevent multiple loading messages
@@ -64,16 +66,38 @@ export function showScanSuccessToast(message: string, toastId?: string): void {
 }
 
 /**
- * Replaces scan loading toast with error message
+ * Shows scan error message - either replaces loading toast or shows independent toast
  */
 export function showScanErrorToast(message: string, toastId?: string): void {
+  // If there's already an active scan error toast, dismiss it first
+  if (activeScanErrorToast) {
+    toast.dismiss(activeScanErrorToast);
+  }
+
   const id = toastId || activeScanLoadingToast;
   if (id) {
-    toast.error(message, {
+    // Replace if toast ID is valid
+    activeScanErrorToast = toast.error(message, {
       id,
+      duration: 5000,
+      position: "bottom-right",
+    });
+  } else {
+    // Create independent error toast if no valid ID
+    activeScanErrorToast = toast.error(message, {
       duration: 5000,
       position: "bottom-right",
     });
   }
   activeScanLoadingToast = null;
+}
+
+/**
+ * Clears error toast tracking (useful for cleanup)
+ */
+export function clearScanErrorToast(): void {
+  if (activeScanErrorToast) {
+    toast.dismiss(activeScanErrorToast);
+    activeScanErrorToast = null;
+  }
 }

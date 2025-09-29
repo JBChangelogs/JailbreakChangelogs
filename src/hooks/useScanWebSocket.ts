@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { INVENTORY_WS_URL } from "@/utils/api";
+import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api";
 
 /**
  * WebSocket hook for managing inventory scan operations
@@ -31,6 +31,8 @@ interface UseScanWebSocketReturn {
   isConnected: boolean;
   startScan: () => void;
   stopScan: () => void;
+  forceShowError: boolean; // Add this to force error display
+  resetForceShowError: () => void; // Add this to reset the flag
 }
 
 export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
@@ -40,6 +42,20 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [error, setError] = useState<string | undefined>();
   const [expiresAt, setExpiresAt] = useState<number | undefined>();
   const [isConnected, setIsConnected] = useState(false);
+  const [forceShowError, setForceShowError] = useState(false);
+
+  // Add logging for state changes
+  useEffect(() => {
+    console.log("[SCAN WS] Status changed to:", status);
+  }, [status]);
+
+  useEffect(() => {
+    console.log("[SCAN WS] Error changed to:", error);
+  }, [error]);
+
+  useEffect(() => {
+    console.log("[SCAN WS] ForceShowError changed to:", forceShowError);
+  }, [forceShowError]);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -364,14 +380,28 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   }, [userId, status]);
 
   const startScan = useCallback(() => {
+    console.log("[SCAN WS] startScan called with userId:", userId);
+    console.log("[SCAN WS] Current status:", status);
+    console.log("[SCAN WS] ENABLE_WS_SCAN:", ENABLE_WS_SCAN);
+
     if (!userId) {
+      console.log("[SCAN WS] No userId provided, setting error");
       setError("No user ID provided");
       setStatus("error");
       return;
     }
 
+    if (!ENABLE_WS_SCAN) {
+      console.log("[SCAN WS] WebSocket scanning disabled, setting error");
+      setError("Inventory scanning is temporarily disabled");
+      setStatus("error");
+      setForceShowError(true); // Force error display on next render
+      return;
+    }
+
+    console.log("[SCAN WS] Starting scan connection...");
     connect();
-  }, [userId, connect]);
+  }, [userId, connect, status]);
 
   const stopScan = useCallback(() => {
     if (wsRef.current) {
@@ -403,6 +433,11 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     setExpiresAt(undefined);
   }, []);
 
+  const resetForceShowError = useCallback(() => {
+    console.log("[SCAN WS] Resetting forceShowError flag");
+    setForceShowError(false);
+  }, []);
+
   useEffect(() => {
     return () => {
       stopScan();
@@ -418,5 +453,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     isConnected,
     startScan,
     stopScan,
+    forceShowError,
+    resetForceShowError,
   };
 }
