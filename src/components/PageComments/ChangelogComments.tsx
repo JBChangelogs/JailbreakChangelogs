@@ -818,16 +818,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           OP
                                         </span>
                                       )}
-
-                                    {/* Inventory Owner Badge */}
-                                    {type === "inventory" &&
-                                      inventory &&
-                                      comment.item_id.toString() ===
-                                        inventory.owner && (
-                                        <span className="from-button-success to-button-success-hover text-card-tag-text rounded-full bg-gradient-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
-                                          Inventory Owner
-                                        </span>
-                                      )}
                                   </>
                                 )}
                               </div>
