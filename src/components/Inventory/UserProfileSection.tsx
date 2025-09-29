@@ -183,7 +183,7 @@ export default function UserProfileSection({
   ]);
 
   return (
-    <div className="mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-center">
+    <div className="bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-center">
       {/* Avatar */}
       {getUserAvatar(userId) ? (
         <Image
@@ -524,7 +524,7 @@ export default function UserProfileSection({
       ) : (
         /* Show login prompt for potential profile owner */
         <div className="mt-4">
-          <div className="border-border-primary bg-primary-bg shadow-card-shadow rounded-lg border p-4">
+          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
                 <svg

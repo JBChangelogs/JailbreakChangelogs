@@ -125,6 +125,20 @@ export default function Comment({
       );
     }
 
+    if (item_type.toLowerCase() === "inventory") {
+      return (
+        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+          <Image
+            src={`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${item_id}&size=150x150&format=Png&isCircular=false`}
+            alt={`User ${item_id}'s inventory`}
+            fill
+            className="object-cover"
+            onError={handleImageError}
+          />
+        </div>
+      );
+    }
+
     // Handle item types that need item details (vehicle, weapon skin, etc.)
     const itemTypes = [
       "vehicle",
@@ -221,6 +235,10 @@ export default function Comment({
       return `Trade #${item_id}`;
     }
 
+    if (item_type.toLowerCase() === "inventory") {
+      return `Inventory #${item_id}`;
+    }
+
     if (itemDetails?.name) {
       return itemDetails.name;
     }
@@ -260,7 +278,9 @@ export default function Comment({
             ? `/seasons/${item_id}`
             : item_type.toLowerCase() === "trade"
               ? `/trading/ad/${item_id}`
-              : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`
+              : item_type.toLowerCase() === "inventory"
+                ? `/inventories/${item_id}`
+                : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`
       }
       className="group block"
     >

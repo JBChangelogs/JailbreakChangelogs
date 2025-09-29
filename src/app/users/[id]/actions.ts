@@ -120,7 +120,10 @@ export async function fetchCommentDetails(
           .filter((c) => {
             const type = c.item_type.toLowerCase();
             return (
-              type !== "changelog" && type !== "season" && type !== "trade"
+              type !== "changelog" &&
+              type !== "season" &&
+              type !== "trade" &&
+              type !== "inventory"
             );
           })
           .map((c) => c.item_id.toString()),
@@ -172,9 +175,16 @@ export async function fetchCommentDetails(
       items: itemMap,
       seasons: seasonMap,
       trades: {}, // Empty since we don't need trade details
+      inventories: {}, // Empty since we don't need inventory details for comments
     };
   } catch (error) {
     console.error("[SERVER ACTION] Failed to fetch comment details:", error);
-    return { changelogs: {}, items: {}, seasons: {}, trades: {} };
+    return {
+      changelogs: {},
+      items: {},
+      seasons: {},
+      trades: {},
+      inventories: {},
+    };
   }
 }

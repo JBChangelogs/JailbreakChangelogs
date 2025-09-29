@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
@@ -413,14 +414,21 @@ export default function InventoryItems({
               Items with most copies:{" "}
               {inventoryStats.duplicates
                 .slice(0, 3)
-                .map(([itemName, count]) => (
-                  <span
-                    key={itemName}
-                    className="text-primary-text font-medium"
-                  >
-                    {itemName.split("-")[1]} ({count})
-                  </span>
-                ))
+                .map(([itemName, count]) => {
+                  const [categoryTitle, title] = itemName.split("-");
+                  const href = `/item/${encodeURIComponent(categoryTitle.toLowerCase())}/${encodeURIComponent(title)}`;
+                  return (
+                    <span key={itemName}>
+                      <Link
+                        href={href}
+                        className="text-primary-text hover:text-button-primary cursor-pointer font-medium transition-colors hover:underline"
+                        title={`View ${title} details`}
+                      >
+                        {title} ({count})
+                      </Link>
+                    </span>
+                  );
+                })
                 .reduce(
                   (acc, curr, index) =>
                     acc.concat(index === 0 ? [curr] : [", ", curr]),

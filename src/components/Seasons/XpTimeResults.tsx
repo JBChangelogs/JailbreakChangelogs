@@ -25,7 +25,7 @@ export default function XpTimeResults({
             {timeNoPass.days} {timeNoPass.days === 1 ? "day" : "days"}
           </div>
           <div className="text-muted text-sm">{timeNoPass.completionDate}</div>
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="mt-1 text-xs text-gray-500">
             Results may vary (±1 day)
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function XpTimeResults({
           <div className="text-muted text-sm">
             {timeWithPass.completionDate}
           </div>
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="mt-1 text-xs text-gray-500">
             Results may vary (±1 day)
           </div>
         </div>

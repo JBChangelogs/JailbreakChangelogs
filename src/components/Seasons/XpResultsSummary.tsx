@@ -225,6 +225,9 @@ export default function XpResultsSummary({
                   </div>
                 )}
               </div>
+              <div className="mt-1 text-xs text-gray-500">
+                Results may vary (±1 day)
+              </div>
               {results.achievableNoPass ? (
                 <div className="text-secondary-text mt-1 text-xs">
                   {results.timeNoPass.completionDate}
@@ -262,6 +265,9 @@ export default function XpResultsSummary({
                     (minimum realistic time)
                   </div>
                 )}
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                Results may vary (±1 day)
               </div>
               {results.achievableWithPass ? (
                 <div className="text-secondary-text mt-1 text-xs">
@@ -365,7 +371,7 @@ export default function XpResultsSummary({
                           : "days"}{" "}
                         - Complete by:{" "}
                         {results.doubleXpResults.noPass.completionDate})
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="mt-1 text-xs text-gray-500">
                           Results may vary (±1 day)
                         </div>
                       </span>
@@ -446,7 +452,7 @@ export default function XpResultsSummary({
                           : "days"}{" "}
                         - Complete by:{" "}
                         {results.doubleXpResults.withPass.completionDate})
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="mt-1 text-xs text-gray-500">
                           Results may vary (±1 day)
                         </div>
                       </span>

@@ -418,7 +418,7 @@ export default function TradeAds({
           )}
         </>
       ) : activeTab === "edit" && !selectedTradeAd ? (
-        <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+        <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
           <p className="text-secondary-text mb-4">
             Please click the edit button on the trade ad you want to modify
           </p>

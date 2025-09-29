@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ThemeProvider, Tabs, Tab, Box } from "@mui/material";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
 import { fetchItems } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
@@ -15,6 +16,16 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
+import dynamic from "next/dynamic";
+import { CommentData } from "@/utils/api";
+import { UserData } from "@/types/auth";
+
+const ChangelogComments = dynamic(
+  () => import("@/components/PageComments/ChangelogComments"),
+  {
+    ssr: false,
+  },
+);
 
 interface InventoryCheckerClientProps {
   initialData?: InventoryData;
@@ -28,6 +39,8 @@ interface InventoryCheckerClientProps {
   error?: string;
   isLoading?: boolean;
   remainingUserIds?: string[];
+  initialComments?: CommentData[];
+  initialCommentUserMap?: Record<string, UserData>;
 }
 
 export default function InventoryCheckerClient({
@@ -42,6 +55,8 @@ export default function InventoryCheckerClient({
   error,
   isLoading: externalIsLoading,
   remainingUserIds = [],
+  initialComments = [],
+  initialCommentUserMap = {},
 }: InventoryCheckerClientProps) {
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
@@ -63,6 +78,7 @@ export default function InventoryCheckerClient({
   const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
     null,
   );
+  const [activeTab, setActiveTab] = useState(0);
   const dupedItems =
     initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
 
@@ -82,6 +98,11 @@ export default function InventoryCheckerClient({
     setRefreshedData(newData);
   };
 
+  // Function to handle tab changes
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
   useEffect(() => {
     if (refreshedData) {
       toast.success(
@@ -93,6 +114,17 @@ export default function InventoryCheckerClient({
       );
     }
   }, [refreshedData]);
+
+  // Comments are provided server-side via initialComments prop
+  // No need for client-side fetching
+
+  // Reset activeTab when robloxId changes to ensure we don't get stuck on non-existent tabs
+  // Only reset if robloxId is actually missing, not just when there are data fetching errors
+  useEffect(() => {
+    if (!robloxId && activeTab === 1) {
+      setActiveTab(0);
+    }
+  }, [robloxId, activeTab]);
 
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
@@ -575,87 +607,131 @@ export default function InventoryCheckerClient({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search Form */}
-      <SearchForm
-        searchId={searchId}
-        setSearchId={setSearchId}
-        handleSearch={handleSearch}
-        isLoading={isLoading}
-        externalIsLoading={externalIsLoading || false}
-      />
+    <ThemeProvider theme={{}}>
+      <div className="space-y-6">
+        {/* Search Form */}
+        <SearchForm
+          searchId={searchId}
+          setSearchId={setSearchId}
+          handleSearch={handleSearch}
+          isLoading={isLoading}
+          externalIsLoading={externalIsLoading || false}
+        />
 
-      {/* Error Display */}
-      {error && !initialData && (
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-          <div className="text-center">
-            <div className="mb-4 flex justify-center">
-              <div className="bg-status-error/10 rounded-full p-3">
-                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+        {/* Error Display */}
+        {error && !initialData && (
+          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="bg-status-error/10 rounded-full p-3">
+                  <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                </div>
               </div>
+              <h3 className="text-status-error mb-2 text-lg font-semibold">
+                Unable to Fetch Inventory Data
+              </h3>
+              <p className="text-secondary-text mb-4 break-words">{error}</p>
+
+              {/* Show login prompt for potential profile owner */}
+              {!isOwnInventory && (
+                <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                  <p className="text-primary-text mb-1 text-sm font-medium">
+                    Are you the owner of this profile?
+                  </p>
+                  <p className="text-secondary-text text-sm">
+                    Login to request an inventory scan. Your inventory will be
+                    automatically scanned when you join a trading server.
+                  </p>
+                </div>
+              )}
             </div>
-            <h3 className="text-status-error mb-2 text-lg font-semibold">
-              Unable to Fetch Inventory Data
-            </h3>
-            <p className="text-secondary-text mb-4 break-words">{error}</p>
-
-            {/* Show login prompt for potential profile owner */}
-            {!isOwnInventory && (
-              <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
-                <p className="text-primary-text mb-1 text-sm font-medium">
-                  Are you the owner of this profile?
-                </p>
-                <p className="text-secondary-text text-sm">
-                  Login to request an inventory scan. Your inventory will be
-                  automatically scanned when you join a trading server.
-                </p>
-              </div>
-            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* User Stats and Inventory Items - Only show when no error and has data */}
-      {!error && initialData && currentData && (
-        <>
-          {/* User Stats */}
-          <UserStats
-            initialData={currentData}
-            robloxUsers={robloxUsers}
-            robloxAvatars={robloxAvatars}
-            userConnectionData={userConnectionData || null}
-            itemsData={itemsData}
-            dupedItems={dupedItems}
-            onRefresh={handleDataRefresh}
-            currentSeason={currentSeason}
-          />
+        {/* User Stats and Inventory Items - Only show when no error and has data */}
+        {!error && initialData && currentData && (
+          <>
+            {/* User Stats */}
+            <UserStats
+              initialData={currentData}
+              robloxUsers={robloxUsers}
+              robloxAvatars={robloxAvatars}
+              userConnectionData={userConnectionData || null}
+              itemsData={itemsData}
+              dupedItems={dupedItems}
+              onRefresh={handleDataRefresh}
+              currentSeason={currentSeason}
+            />
 
-          {/* Ad Section - Only show for non-premium users */}
-          <InventoryAdSection className="my-6" />
+            {/* Ad Section - Only show for non-premium users */}
+            <InventoryAdSection className="my-6" />
 
-          {/* Inventory Items */}
-          <InventoryItems
-            initialData={currentData}
-            robloxUsers={robloxUsers}
-            robloxAvatars={robloxAvatars}
-            onItemClick={handleItemClick}
-            itemsData={itemsData}
-            onPageChange={handlePageChangeWithPreload}
-            isOwnInventory={isOwnInventory}
-          />
+            {/* Tabbed Interface */}
+            <div className="mt-6">
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                className="[&_.MuiTab-root]:text-secondary-text [&_.MuiTab-root:hover]:text-primary-text [&_.MuiTab-root:hover]:bg-button-info/10 [&_.MuiTab-root.Mui-selected]:text-button-info [&_.MuiTab-root.Mui-selected]:border-button-info [&_.MuiTabs-indicator]:bg-button-info [&_.MuiTabs-scrollButtons]:text-secondary-text [&_.MuiTabs-scrollButtons:hover]:bg-button-info/10 [&_.MuiTabs-scrollButtons:hover]:text-primary-text [&_.MuiTab-root]:mr-1 [&_.MuiTab-root]:min-h-12 [&_.MuiTab-root]:rounded-t-lg [&_.MuiTab-root]:px-5 [&_.MuiTab-root]:py-3 [&_.MuiTab-root]:text-sm [&_.MuiTab-root]:font-medium [&_.MuiTab-root]:normal-case [&_.MuiTab-root]:transition-all [&_.MuiTab-root]:duration-200 [&_.MuiTab-root.Mui-selected]:border-b-2 [&_.MuiTab-root.Mui-selected]:font-semibold [&_.MuiTabs-indicator]:h-1 [&_.MuiTabs-indicator]:rounded-sm [&_.MuiTabs-scrollButtons.Mui-disabled]:opacity-30"
+                sx={{
+                  "& .MuiTabs-scrollButtons": {
+                    "&.Mui-disabled": {
+                      opacity: 0.3,
+                    },
+                  },
+                  "& .MuiTabScrollButton-root": {
+                    "&.Mui-disabled": {
+                      opacity: 0.3,
+                    },
+                  },
+                }}
+              >
+                <Tab label="Inventory Items" />
+                {robloxId && <Tab label="Comments" />}
+              </Tabs>
 
-          {/* Trade History Modal */}
-          <TradeHistoryModal
-            isOpen={showHistoryModal}
-            onClose={closeHistoryModal}
-            item={selectedItem}
-            getUserAvatar={getUserAvatar}
-            getUserDisplay={getUserDisplay}
-            formatDate={formatDate}
-            loadingUserIds={loadingUserIds}
-          />
-        </>
-      )}
-    </div>
+              {/* Tab Content */}
+              <Box className="mt-4">
+                {activeTab === 0 && (
+                  <InventoryItems
+                    initialData={currentData}
+                    robloxUsers={robloxUsers}
+                    robloxAvatars={robloxAvatars}
+                    onItemClick={handleItemClick}
+                    itemsData={itemsData}
+                    onPageChange={handlePageChangeWithPreload}
+                    isOwnInventory={isOwnInventory}
+                  />
+                )}
+
+                {activeTab === 1 && robloxId && (
+                  <ChangelogComments
+                    changelogId={robloxId}
+                    changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
+                    type="inventory"
+                    inventory={{ owner: robloxId }}
+                    initialComments={initialComments}
+                    initialUserMap={initialCommentUserMap}
+                  />
+                )}
+              </Box>
+            </div>
+
+            {/* Trade History Modal */}
+            <TradeHistoryModal
+              isOpen={showHistoryModal}
+              onClose={closeHistoryModal}
+              item={selectedItem}
+              getUserAvatar={getUserAvatar}
+              getUserDisplay={getUserDisplay}
+              formatDate={formatDate}
+              loadingUserIds={loadingUserIds}
+            />
+          </>
+        )}
+      </div>
+    </ThemeProvider>
   );
 }

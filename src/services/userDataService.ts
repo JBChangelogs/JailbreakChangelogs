@@ -142,10 +142,27 @@ export class UserDataService {
       );
     }
 
-    // Execute all fetches in parallel
-    const results = await Promise.all(fetchPromises);
+    // Execute all fetches in parallel with graceful error handling
+    const results = await Promise.allSettled(fetchPromises);
 
-    const [allUserData, allAvatarData, userConnectionData, dupeData] = results;
+    // Extract successful results, providing defaults for failed ones
+    const [allUserData, allAvatarData, userConnectionData, dupeData] =
+      results.map((result, index) => {
+        if (result.status === "fulfilled") {
+          return result.value;
+        } else {
+          console.warn(
+            `[SERVER] UserDataService: Promise ${index} failed:`,
+            result.reason,
+          );
+          // Return appropriate defaults based on the promise index
+          if (index === 0) return null; // user data
+          if (index === 1) return null; // avatar data
+          if (index === 2) return null; // user connection data
+          if (index === 3) return { error: "Failed to fetch dupe data" }; // dupe data
+          return null;
+        }
+      });
 
     // Process user data
     const robloxUsers = this.processUserData(allUserData);

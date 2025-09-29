@@ -32,7 +32,7 @@ interface CommentsTabProps {
 }
 
 // Main filter categories
-const MAIN_CATEGORIES = ["changelog", "season", "trade"];
+const MAIN_CATEGORIES = ["changelog", "season", "trade", "inventory"];
 
 export default function CommentsTab({
   comments,
@@ -51,7 +51,8 @@ export default function CommentsTab({
     items: Record<string, unknown>;
     seasons: Record<string, unknown>;
     trades: Record<string, unknown>;
-  }>({ changelogs: {}, items: {}, seasons: {}, trades: {} });
+    inventories: Record<string, unknown>;
+  }>({ changelogs: {}, items: {}, seasons: {}, trades: {}, inventories: {} });
   const [detailsLoading, setDetailsLoading] = useState(false);
   const commentsPerPage = 6;
 
@@ -66,7 +67,8 @@ export default function CommentsTab({
       Object.keys(commentDetails.changelogs).length === 0 &&
       Object.keys(commentDetails.items).length === 0 &&
       Object.keys(commentDetails.seasons).length === 0 &&
-      Object.keys(commentDetails.trades).length === 0
+      Object.keys(commentDetails.trades).length === 0 &&
+      Object.keys(commentDetails.inventories).length === 0
     ) {
       setDetailsLoading(true);
 
@@ -90,6 +92,7 @@ export default function CommentsTab({
             items: { ...sharedItemDetails, ...details.items },
             seasons: { ...sharedItemDetails, ...details.seasons },
             trades: { ...sharedItemDetails, ...details.trades },
+            inventories: { ...sharedItemDetails, ...details.inventories },
           };
           setCommentDetails(mergedDetails);
           setDetailsLoading(false);

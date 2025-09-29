@@ -66,9 +66,9 @@ export default function SeasonContractsClient({
                 <div className="flex items-center justify-center gap-4">
                   {/* Team Icon */}
                   {team === "Criminal" ? (
-                    <RiCriminalFill className="text-form-button-text h-8 w-8" />
+                    <RiCriminalFill className="text-form-button-text h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10" />
                   ) : (
-                    <GiPoliceOfficerHead className="text-form-button-text h-8 w-8" />
+                    <GiPoliceOfficerHead className="text-form-button-text h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10" />
                   )}
                   <span className="text-form-button-text text-2xl font-bold tracking-wide uppercase">
                     {team} Contracts

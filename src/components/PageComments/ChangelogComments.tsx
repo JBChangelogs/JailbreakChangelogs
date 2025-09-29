@@ -2,7 +2,6 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   CircularProgress,
-  TextField,
   Button,
   IconButton,
   Pagination,
@@ -10,7 +9,11 @@ import {
   MenuItem,
   Tooltip,
 } from "@mui/material";
-import { PUBLIC_API_URL, CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api";
+import {
+  refreshComments,
+  fetchUsersBatchAction,
+} from "@/app/api/comments/actions";
 import { UserAvatar } from "@/utils/avatar";
 import {
   PencilIcon,
@@ -60,12 +63,15 @@ const isCommentEditable = (commentDate: string): boolean => {
 };
 
 interface ChangelogCommentsProps {
-  changelogId: number;
+  changelogId: number | string;
   changelogTitle: string;
-  type: "changelog" | "season" | "item" | "trade";
+  type: "changelog" | "season" | "item" | "trade" | "inventory";
   itemType?: string;
   trade?: {
     author: string;
+  };
+  inventory?: {
+    owner: string;
   };
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
@@ -85,6 +91,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   type,
   itemType,
   trade,
+  inventory,
   initialComments = [],
   initialUserMap = {},
 }) => {
@@ -113,8 +120,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [selectedCommentId, setSelectedCommentId] = useState<number | null>(
     null,
   );
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(
@@ -135,11 +140,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   // Supporter modal hook
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
-
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
 
   useEffect(() => {
     // Check if user is logged in
@@ -204,21 +204,16 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           return newState;
         });
 
-        const response = await fetch(
-          `${PUBLIC_API_URL}/users/get/batch?ids=${usersToFetch.join(",")}&nocache=true`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Comments/1.0",
-            },
-          },
-        );
-        if (!response.ok) throw new Error("Failed to fetch user data");
-        const data = await response.json();
+        const result = await fetchUsersBatchAction(usersToFetch);
+
+        if (!result.success) {
+          throw new Error(result.error || "Failed to fetch user data");
+        }
 
         setUserData((prev) => {
           const newState = { ...prev };
-          data.forEach((user: UserData) => {
-            newState[user.id] = user;
+          Object.entries(result.data || {}).forEach(([userId, user]) => {
+            newState[userId] = user as UserData;
           });
           return newState;
         });
@@ -244,27 +239,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     [userData, loadingUserData, failedUserData],
   );
 
-  // Function to refresh comments from server
-  const refreshComments = useCallback(async () => {
+  // Function to refresh comments using Server Action
+  const refreshCommentsFromServer = useCallback(async () => {
     try {
-      const endpoint = `${PUBLIC_API_URL}/comments/get?type=${type === "item" ? itemType : type}&id=${changelogId}&nocache=true`;
-      const response = await fetch(endpoint, {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Comments/1.0",
-        },
-      });
+      const result = await refreshComments(
+        type === "item" ? itemType || type : type,
+        changelogId.toString(),
+      );
 
-      if (response.status === 404) {
-        setComments([]);
-        return;
+      if (!result.success) {
+        throw new Error(result.error || "Failed to fetch comments");
       }
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch comments");
-      }
-
-      const data = await response.json();
-      const commentsArray = Array.isArray(data) ? data : [];
+      const commentsArray = Array.isArray(result.data?.comments)
+        ? result.data.comments
+        : [];
       setComments(commentsArray);
 
       // Fetch user data for new comments
@@ -276,20 +265,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       console.error("Error refreshing comments:", err);
     }
   }, [changelogId, type, itemType, fetchUserData]);
-
-  // Initialize comments with server-side data
-  useEffect(() => {
-    if (isMounted) {
-      setInitialLoadComplete(true);
-    }
-  }, [isMounted]);
-
-  // Refresh comments when changelogId changes (for quick nav navigation)
-  useEffect(() => {
-    if (isMounted && initialLoadComplete) {
-      refreshComments();
-    }
-  }, [changelogId, isMounted, initialLoadComplete, refreshComments]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -338,7 +313,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       );
       setPostSnackbarOpen(true);
       setNewComment("");
-      refreshComments();
+      refreshCommentsFromServer();
     } catch (err) {
       setGlobalErrorSnackbarMsg(
         err instanceof Error ? err.message : "Failed to post comment",
@@ -395,7 +370,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setEditSnackbarOpen(true);
       setEditingCommentId(null);
       setEditContent("");
-      refreshComments();
+      refreshCommentsFromServer();
     } catch (err) {
       setGlobalErrorSnackbarMsg(
         err instanceof Error ? err.message : "Failed to edit comment",
@@ -567,6 +542,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 `Comments for Season ${changelogId}: ${changelogTitle}`
               ) : type === "trade" ? (
                 `Comments for Trade #${changelogId}`
+              ) : type === "inventory" ? (
+                `Comments for ${changelogTitle}`
               ) : (
                 <>
                   Comments for {changelogTitle}{" "}
@@ -578,33 +555,31 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
           {/* New Comment Form */}
           <form onSubmit={handleSubmitComment} className="mb-2">
-            <TextField
-              fullWidth
-              multiline
-              minRows={3}
-              maxRows={10}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={
-                isLoggedIn ? "Write a comment..." : "Please log in to comment"
-              }
-              variant="outlined"
-              helperText={
-                !isLoggedIn ? "You must be logged in to comment" : " "
-              }
-              disabled={!isLoggedIn}
-              size="small"
-              slotProps={{
-                input: {
-                  autoCorrect: "off",
-                  autoComplete: "off",
-                  spellCheck: "false",
-                  autoCapitalize: "off",
-                  className: "[&_textarea]:resize-y",
-                },
-              }}
-              className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-border-primary hover:border-border-focus [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
-            />
+            <div className="space-y-2">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={
+                  isLoggedIn ? "Write a comment..." : "Please log in to comment"
+                }
+                disabled={!isLoggedIn}
+                rows={3}
+                className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
+                  !isLoggedIn
+                    ? "bg-primary-bg border-secondary-bg text-primary-text placeholder-primary-text cursor-not-allowed"
+                    : "bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info placeholder-secondary-text"
+                }`}
+                autoCorrect="off"
+                autoComplete="off"
+                spellCheck="false"
+                autoCapitalize="off"
+              />
+              {!isLoggedIn && (
+                <p className="text-secondary-text text-xs">
+                  You must be logged in to comment
+                </p>
+              )}
+            </div>
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={toggleSortOrder}
@@ -690,7 +665,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     ? "season"
                     : type === "trade"
                       ? "trade ad"
-                      : "item"}
+                      : type === "inventory"
+                        ? "inventory"
+                        : "item"}
                 !
               </p>
             </div>
@@ -841,6 +818,16 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           OP
                                         </span>
                                       )}
+
+                                    {/* Inventory Owner Badge */}
+                                    {type === "inventory" &&
+                                      inventory &&
+                                      comment.item_id.toString() ===
+                                        inventory.owner && (
+                                        <span className="from-button-success to-button-success-hover text-card-tag-text rounded-full bg-gradient-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
+                                          Inventory Owner
+                                        </span>
+                                      )}
                                   </>
                                 )}
                               </div>
@@ -869,33 +856,38 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         <div>
                           {editingCommentId === comment.id ? (
                             <div className="space-y-3">
-                              <TextField
-                                fullWidth
-                                multiline
-                                minRows={3}
-                                maxRows={10}
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                error={
-                                  editContent.length >
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editContent}
+                                  onChange={(e) =>
+                                    setEditContent(e.target.value)
+                                  }
+                                  rows={3}
+                                  className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
+                                    editContent.length >
+                                    getCharLimit(
+                                      currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                    )
+                                      ? "bg-form-input border-button-danger text-primary-text focus:border-button-danger"
+                                      : "bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info"
+                                  }`}
+                                  autoCorrect="off"
+                                  autoComplete="off"
+                                  spellCheck="false"
+                                  autoCapitalize="off"
+                                />
+                                {editContent.length >
                                   getCharLimit(
                                     currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                  )
-                                }
-                                helperText={" "}
-                                slotProps={{
-                                  input: {
-                                    autoCorrect: "off",
-                                    autoComplete: "off",
-                                    spellCheck: "false",
-                                    autoCapitalize: "off",
-                                    className: "[&_textarea]:resize-y",
-                                  },
-                                }}
-                                className="[&_.MuiFormHelperText-root]:text-secondary-text [&_.MuiFormHelperText-root.Mui-disabled]:text-secondary-text [&_.MuiFormHelperText-root.Mui-error]:text-button-danger [&_.MuiInputBase-root]:bg-form-input [&_.MuiInputBase-root.Mui-disabled]:bg-primary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiOutlinedInput-notchedOutline]:border-secondary-bg [&_.MuiInputBase-root.Mui-disabled_.MuiInputBase-input]:text-secondary-text [&_.MuiInputBase-input]:text-primary-text [&_.MuiInputBase-input::placeholder]:text-secondary-text [&_.MuiOutlinedInput-notchedOutline]:border-border-primary hover:border-border-focus [&_.MuiInputBase-root:hover_.MuiOutlinedInput-notchedOutline]:border-button-info [&_.MuiInputBase-root.Mui-focused_.MuiOutlinedInput-notchedOutline]:border-button-info"
-                              />
+                                  ) && (
+                                  <p className="text-button-danger text-xs">
+                                    Comment is too long. Character limit:{" "}
+                                    {getCharLimit(
+                                      currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                    )}
+                                  </p>
+                                )}
+                              </div>
                               <div className="flex gap-2">
                                 <Button
                                   size="small"

@@ -10,40 +10,51 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-
-// Gamepass mapping with links and image names
 const gamepassData = {
   PremiumGarage: {
     link: "https://www.roblox.com/game-pass/2725211/Pro-Garage",
     image: "PremiumGarage",
+    displayName: "Pro Garage",
   },
   DuffelBag: {
     link: "https://www.roblox.com/game-pass/2219040/Duffel-Bag",
     image: "DuffelBag",
+    displayName: "Bigger Duffel Bag",
   },
   SWAT: {
     link: "https://www.roblox.com/game-pass/2070427/SWAT-Team",
     image: "SWAT",
+    displayName: "SWAT",
   },
   Stereo: {
     link: "https://www.roblox.com/game-pass/2218187/Car-Stereo",
     image: "Stereo",
+    displayName: "Car Stereo",
   },
   BOSS: {
     link: "https://www.roblox.com/game-pass/4974038/Crime-Boss",
     image: "BOSS",
+    displayName: "Crime BOSS",
   },
   VIP: {
     link: "https://www.roblox.com/game-pass/2296901/Very-Important-Player-VIP",
     image: "VIP",
+    displayName: "Very Important Player [VIP]",
   },
   TradingVIP: {
     link: "https://www.roblox.com/game-pass/56149618/VIP-Trading",
     image: "TradingVIP",
+    displayName: "VIP Trading",
   },
   Walmart: {
     link: "https://www.roblox.com/game-pass/1142100573/The-Pass",
     image: "Walmart",
+    displayName: "Walmart",
+  },
+  Stash: {
+    link: "https://www.roblox.com/game-pass/2068240/Extra-Storage-Retiring-Soon",
+    image: "Stash",
+    displayName: "Extra Storage",
   },
 };
 
@@ -340,11 +351,13 @@ export default function UserStatsSection({
 
       {/* Gamepasses */}
       {currentData.gamepasses && currentData.gamepasses.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-primary-text mb-2 text-lg font-medium">
-            Gamepasses
-          </h3>
-          <div className="flex flex-wrap gap-3">
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-primary-text text-sm font-medium">
+              Owned Passes ({currentData.gamepasses.length})
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {(() => {
               const gamepassOrder = [
                 "VIP",
@@ -355,9 +368,9 @@ export default function UserStatsSection({
                 "DuffelBag",
                 "Stereo",
                 "Walmart",
+                "Stash",
               ];
 
-              // Get unique gamepasses and sort them according to the specified order
               const uniqueGamepasses = [...new Set(currentData.gamepasses)];
               const orderedGamepasses = gamepassOrder.filter((gamepass) =>
                 uniqueGamepasses.includes(gamepass),
@@ -369,18 +382,33 @@ export default function UserStatsSection({
                 if (!gamepassInfo) return null;
 
                 const GamepassContent = () => (
-                  <div className="bg-primary/10 border-primary/30 text-primary-text hover:bg-primary/20 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors">
-                    <div className="relative h-6 w-6">
+                  <div className="group border-border-primary bg-primary-bg hover:border-primary/50 hover:bg-primary/5 flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
+                    <div className="relative h-8 w-8 flex-shrink-0">
                       <Image
-                        src={`/assets/images/gamepasses/${gamepassInfo.image}.webp`}
+                        src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
                         alt={gamepass}
-                        width={24}
-                        height={24}
-                        className="object-contain"
+                        width={32}
+                        height={32}
+                        className="h-full w-full object-contain"
                         onError={handleImageError}
                       />
                     </div>
-                    <span>{gamepass}</span>
+                    <span className="text-primary-text group-hover:text-primary text-sm font-medium transition-colors">
+                      {gamepassInfo.displayName}
+                    </span>
+                    {gamepassInfo.link && (
+                      <svg
+                        className="text-secondary-text h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
                   </div>
                 );
 

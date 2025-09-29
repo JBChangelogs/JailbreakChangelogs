@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/UI/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
+import { fetchComments } from "@/utils/api";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,12 @@ export default async function InventoryCheckerPage({
     notFound();
   }
 
+  // Fetch comments for the inventory - only for numeric IDs
+  // For usernames, comments will be fetched after username resolution in InventoryDataStreamer
+  const commentsData = isNumeric
+    ? await fetchComments("inventory", userid)
+    : { comments: [], userMap: {} };
+
   return (
     <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
@@ -51,7 +58,11 @@ export default async function InventoryCheckerPage({
       <Suspense
         fallback={<InventoryCheckerClient robloxId={userid} isLoading={true} />}
       >
-        <InventoryDataStreamer robloxId={userid} />
+        <InventoryDataStreamer
+          robloxId={userid}
+          initialComments={commentsData.comments}
+          initialCommentUserMap={commentsData.userMap}
+        />
       </Suspense>
     </div>
   );

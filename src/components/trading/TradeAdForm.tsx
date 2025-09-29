@@ -519,11 +519,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className="mb-8 rounded-lg border p-6 text-center">
-        <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
+        <h3 className="text-secondary-text mb-4 text-lg font-medium">
           Create Trade Ads
         </h3>
-        <p className="text-tertiary-text/70 mb-8">
+        <p className="text-secondary-text mb-8">
           Please log in to create your own trade ads.
         </p>
       </div>

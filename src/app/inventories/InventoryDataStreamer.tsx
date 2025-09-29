@@ -3,16 +3,25 @@ import {
   fetchInventoryData,
   fetchRobloxUserByUsername,
   fetchLatestSeason,
+  fetchComments,
 } from "@/utils/api";
+import { CommentData } from "@/utils/api";
+import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import UserDataStreamer from "./UserDataStreamer";
 
 interface InventoryDataStreamerProps {
   robloxId: string;
+  initialComments?: CommentData[];
+  initialCommentUserMap?: Record<string, UserData>;
 }
 
 // Component that fetches inventory data
-async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
+async function InventoryDataFetcher({
+  robloxId,
+  initialComments,
+  initialCommentUserMap,
+}: InventoryDataStreamerProps) {
   // Check if the input is a username (not a number) or a Roblox ID
   const isUsername = !/^\d+$/.test(robloxId);
 
@@ -24,6 +33,13 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
       const userData = await fetchRobloxUserByUsername(robloxId);
       if (userData && userData.id) {
         actualRobloxId = userData.id.toString();
+
+        // Fetch comments for the resolved ID if we don't have initial comments
+        if (!initialComments || initialComments.length === 0) {
+          const commentsData = await fetchComments("inventory", actualRobloxId);
+          initialComments = commentsData.comments;
+          initialCommentUserMap = commentsData.userMap;
+        }
       } else {
         const truncatedUsername =
           robloxId.length > 50 ? `${robloxId.substring(0, 47)}...` : robloxId;
@@ -31,6 +47,8 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
           <InventoryCheckerClient
             robloxId={robloxId}
             error={`Username "${truncatedUsername}" not found. Please check the spelling and try again.`}
+            initialComments={initialComments}
+            initialCommentUserMap={initialCommentUserMap}
           />
         );
       }
@@ -42,6 +60,8 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
         <InventoryCheckerClient
           robloxId={robloxId}
           error={`Failed to find user "${truncatedUsername}". Please check the spelling and try again.`}
+          initialComments={initialComments}
+          initialCommentUserMap={initialCommentUserMap}
         />
       );
     }
@@ -62,7 +82,12 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
         ? result
         : (result as { message?: string }).message;
     return (
-      <InventoryCheckerClient robloxId={actualRobloxId} error={errorMessage} />
+      <InventoryCheckerClient
+        robloxId={actualRobloxId}
+        error={errorMessage}
+        initialComments={initialComments}
+        initialCommentUserMap={initialCommentUserMap}
+      />
     );
   }
 
@@ -72,6 +97,8 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
       <InventoryCheckerClient
         robloxId={actualRobloxId}
         error="Failed to fetch inventory data. Please try again."
+        initialComments={initialComments}
+        initialCommentUserMap={initialCommentUserMap}
       />
     );
   }
@@ -83,6 +110,8 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
           robloxId={actualRobloxId}
           initialData={result}
           isLoading={true}
+          initialComments={initialComments}
+          initialCommentUserMap={initialCommentUserMap}
         />
       }
     >
@@ -90,6 +119,8 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
         robloxId={actualRobloxId}
         inventoryData={result}
         currentSeason={currentSeason}
+        initialComments={initialComments}
+        initialCommentUserMap={initialCommentUserMap}
       />
     </Suspense>
   );
@@ -97,6 +128,14 @@ async function InventoryDataFetcher({ robloxId }: { robloxId: string }) {
 
 export default function InventoryDataStreamer({
   robloxId,
+  initialComments,
+  initialCommentUserMap,
 }: InventoryDataStreamerProps) {
-  return <InventoryDataFetcher robloxId={robloxId} />;
+  return (
+    <InventoryDataFetcher
+      robloxId={robloxId}
+      initialComments={initialComments}
+      initialCommentUserMap={initialCommentUserMap}
+    />
+  );
 }
