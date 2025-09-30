@@ -157,9 +157,14 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                       </h3>
                       <p className="text-secondary-text text-sm">
                         Owner:{" "}
-                        <span className="text-primary-text font-medium">
+                        <a
+                          href={`https://www.roblox.com/users/${results[0].user_id}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-link hover:text-link-hover font-medium transition-colors hover:underline"
+                        >
                           {results[0].owner}
-                        </span>
+                        </a>
                       </p>
                       <p className="text-secondary-text mt-1 text-xs">
                         Last recorded dupe:{" "}

@@ -15,12 +15,27 @@ export default function ContributorsClient({
 }: ContributorsClientProps) {
   const [activeFilter, setActiveFilter] = useState("All");
 
-  // Filter out excluded users
   const filteredUsers = usersWithFlags.filter(
     (user) => user.id !== "1327206739665489930",
   );
 
-  const getUserRole = (user: UserWithFlags): string => {
+  const getUserRoles = (user: UserWithFlags): string[] => {
+    const enabledFlags = user.flags.filter((flag) => flag.enabled);
+    const flagToRole: Record<string, string> = {
+      is_owner: "Owner",
+      is_developer: "Developer",
+      is_partner: "Partner",
+      is_vtm: "Value List Manager",
+      is_vt: "Value Team",
+      is_contributor: "Contributor",
+      is_tester: "Tester",
+    };
+
+    const sortedFlags = enabledFlags.sort((a, b) => a.index - b.index);
+    return sortedFlags.map((flag) => flagToRole[flag.flag]).filter(Boolean);
+  };
+
+  const getUserPrimaryRole = (user: UserWithFlags): string => {
     const enabledFlags = user.flags.filter((flag) => flag.enabled);
     const highestPriorityFlag = enabledFlags.reduce((highest, current) =>
       current.index < highest.index ? current : highest,
@@ -31,53 +46,58 @@ export default function ContributorsClient({
       is_partner: "Partner",
       is_vtm: "Value List Manager",
       is_vt: "Value Team",
-      is_contributor: "Value List Contributor",
+      is_contributor: "Contributor",
       is_tester: "Tester",
     };
 
     return flagToRole[highestPriorityFlag.flag] || "Member";
   };
 
-  const userRoleMap = new Map<string, { user: UserWithFlags; role: string }>();
+  const owners: (UserWithFlags & { role: string })[] = [];
+  const developers: (UserWithFlags & { role: string })[] = [];
+  const partners: (UserWithFlags & { role: string })[] = [];
+  const managers: (UserWithFlags & { role: string })[] = [];
+  const valueTeam: (UserWithFlags & { role: string })[] = [];
+  const testers: (UserWithFlags & { role: string })[] = [];
+  const contributors: (UserWithFlags & { role: string })[] = [];
 
   filteredUsers.forEach((user) => {
-    const role = getUserRole(user);
-    userRoleMap.set(user.id, { user, role });
+    const roles = getUserRoles(user);
+
+    roles.forEach((role) => {
+      const userWithRole = { ...user, role };
+
+      switch (role) {
+        case "Owner":
+          owners.push(userWithRole);
+          break;
+        case "Developer":
+          developers.push(userWithRole);
+          break;
+        case "Partner":
+          partners.push(userWithRole);
+          break;
+        case "Value List Manager":
+          managers.push(userWithRole);
+          break;
+        case "Value Team":
+          valueTeam.push(userWithRole);
+          break;
+        case "Tester":
+          testers.push(userWithRole);
+          break;
+        case "Contributor":
+          contributors.push(userWithRole);
+          break;
+      }
+    });
   });
-
-  const owners = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Owner")
-    .map(({ user }) => ({ ...user, role: "Owner" }));
-
-  const developers = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Developer")
-    .map(({ user }) => ({ ...user, role: "Developer" }));
-
-  const partners = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Partner")
-    .map(({ user }) => ({ ...user, role: "Partner" }));
-
-  const managers = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Value List Manager")
-    .map(({ user }) => ({ ...user, role: "Value List Manager" }));
-
-  const valueTeam = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Value Team")
-    .map(({ user }) => ({ ...user, role: "Value Team" }));
-
-  const testers = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Tester")
-    .map(({ user }) => ({ ...user, role: "Tester" }));
-
-  const contributors = Array.from(userRoleMap.values())
-    .filter(({ role }) => role === "Value List Contributor")
-    .map(({ user }) => ({ ...user, role: "Value List Contributor" }));
 
   const staticContributors = [
     {
       key: "tradingcore",
       name: "Trading Core",
-      role: "Value List Contributor",
+      role: "Contributor",
       username: "Trading Core",
       avatar:
         "https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Bg_Big.webp",
@@ -87,7 +107,7 @@ export default function ContributorsClient({
     {
       key: "eiesia",
       name: "EIesia",
-      role: "Value List Contributor",
+      role: "Contributor",
       username: "EIesia",
       avatar:
         "https://assets.jailbreakchangelogs.xyz/assets/contributors/EIesia.webp",
@@ -96,15 +116,49 @@ export default function ContributorsClient({
     },
   ];
 
-  const allTeam = [
-    ...owners,
-    ...developers,
-    ...partners,
-    ...managers,
-    ...valueTeam,
-    ...testers,
-    ...contributors,
-  ];
+  const sortByHierarchy = (users: (UserWithFlags & { role: string })[]) => {
+    return users.sort((a, b) => {
+      const aPrimaryFlag = a.flags
+        .filter((flag) => flag.enabled)
+        .reduce((highest, current) =>
+          current.index < highest.index ? current : highest,
+        );
+      const bPrimaryFlag = b.flags
+        .filter((flag) => flag.enabled)
+        .reduce((highest, current) =>
+          current.index < highest.index ? current : highest,
+        );
+      return aPrimaryFlag.index - bPrimaryFlag.index;
+    });
+  };
+
+  const sortedOwners = sortByHierarchy(owners);
+  const sortedDevelopers = sortByHierarchy(developers);
+  const sortedPartners = sortByHierarchy(partners);
+  const sortedManagers = sortByHierarchy(managers);
+  const sortedValueTeam = sortByHierarchy(valueTeam);
+  const sortedTesters = sortByHierarchy(testers);
+  const sortedContributors = sortByHierarchy(contributors);
+
+  const allTeam = filteredUsers
+    .map((user) => ({
+      ...user,
+      roles: getUserRoles(user),
+      primaryRole: getUserPrimaryRole(user),
+    }))
+    .sort((a, b) => {
+      const aPrimaryFlag = a.flags
+        .filter((flag) => flag.enabled)
+        .reduce((highest, current) =>
+          current.index < highest.index ? current : highest,
+        );
+      const bPrimaryFlag = b.flags
+        .filter((flag) => flag.enabled)
+        .reduce((highest, current) =>
+          current.index < highest.index ? current : highest,
+        );
+      return aPrimaryFlag.index - bPrimaryFlag.index;
+    });
 
   const filters = [
     { key: "All", label: "All" },
@@ -114,11 +168,15 @@ export default function ContributorsClient({
     { key: "Value List Manager", label: "Value List Manager" },
     { key: "Value Team", label: "Value Team" },
     { key: "Tester", label: "Tester" },
-    { key: "Value List Contributor", label: "Value List Contributor" },
+    { key: "Contributor", label: "Contributor" },
   ];
 
   const getFilteredUsers = () => {
-    let usersToShow: (UserWithFlags & { role: string })[] = [];
+    let usersToShow: (UserWithFlags & {
+      role?: string;
+      roles?: string[];
+      primaryRole?: string;
+    })[] = [];
     let staticContributorsToShow: typeof staticContributors = [];
 
     switch (activeFilter) {
@@ -127,25 +185,25 @@ export default function ContributorsClient({
         staticContributorsToShow = staticContributors;
         break;
       case "Owner":
-        usersToShow = owners;
+        usersToShow = sortedOwners;
         break;
       case "Developer":
-        usersToShow = developers;
+        usersToShow = sortedDevelopers;
         break;
       case "Partner":
-        usersToShow = partners;
+        usersToShow = sortedPartners;
         break;
       case "Value List Manager":
-        usersToShow = managers;
+        usersToShow = sortedManagers;
         break;
       case "Value Team":
-        usersToShow = valueTeam;
+        usersToShow = sortedValueTeam;
         break;
       case "Tester":
-        usersToShow = testers;
+        usersToShow = sortedTesters;
         break;
-      case "Value List Contributor":
-        usersToShow = contributors;
+      case "Contributor":
+        usersToShow = sortedContributors;
         staticContributorsToShow = staticContributors;
         break;
       default:
@@ -156,7 +214,14 @@ export default function ContributorsClient({
     return { usersToShow, staticContributorsToShow };
   };
 
-  const renderUser = (user: UserWithFlags, role: string) => (
+  const renderUser = (
+    user: UserWithFlags & {
+      role?: string;
+      roles?: string[];
+      primaryRole?: string;
+    },
+    role?: string,
+  ) => (
     <div
       key={user.id}
       className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
@@ -188,7 +253,7 @@ export default function ContributorsClient({
             : user.username}
         </h1>
         <p className="text-secondary-text group-hover:text-form-button-text mt-2 capitalize opacity-80 transition-colors duration-300">
-          {role}
+          {user.roles ? user.roles.join(", ") : role || user.role}
         </p>
       </Link>
     </div>

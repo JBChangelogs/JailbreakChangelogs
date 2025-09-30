@@ -177,7 +177,7 @@ export default function InventoryItemCard({
                 href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-text hover:text-link text-center break-words transition-colors hover:underline"
+                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 {isOriginalOwner
