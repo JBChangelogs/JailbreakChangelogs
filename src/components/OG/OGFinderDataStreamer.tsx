@@ -159,10 +159,20 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       }
     } catch (error) {
       console.error("Error fetching user by username:", error);
+
+      // Check if it's a 502 error specifically for the username lookup
+      const isServerError =
+        error instanceof Error &&
+        error.message.includes("Failed to fetch user: 502");
+
+      const errorMessage = isServerError
+        ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
+        : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+
       return (
         <OGFinderResults
           robloxId={robloxId}
-          error={`Failed to find user "${robloxId}". Please check the spelling and try again.`}
+          error={errorMessage}
           initialData={null}
           robloxUsers={{}}
           robloxAvatars={{}}

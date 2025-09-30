@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ThemeProvider, Tabs, Tab, Box } from "@mui/material";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
-import { fetchItems, ENABLE_WS_SCAN } from "@/utils/api";
+import { ENABLE_WS_SCAN } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -51,6 +51,7 @@ interface InventoryCheckerClientProps {
   remainingUserIds?: string[];
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
+  items?: Item[]; // Items data passed from server
 }
 
 export default function InventoryCheckerClient({
@@ -67,6 +68,7 @@ export default function InventoryCheckerClient({
   remainingUserIds = [],
   initialComments = [],
   initialCommentUserMap = {},
+  items = [],
 }: InventoryCheckerClientProps) {
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
@@ -84,7 +86,7 @@ export default function InventoryCheckerClient({
   const [robloxAvatars, setRobloxAvatars] = useState(
     initialRobloxAvatars || {},
   );
-  const [itemsData, setItemsData] = useState<Item[]>([]);
+  const [itemsData] = useState<Item[]>(items);
   const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
   const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
     null,
@@ -468,21 +470,7 @@ export default function InventoryCheckerClient({
     return () => clearTimeout(timeoutId);
   }, [remainingUserIds, setRobloxUsers, setRobloxAvatars]);
 
-  // Fetch items data for value calculations
-  useEffect(() => {
-    const loadItemsData = async () => {
-      try {
-        const items = await fetchItems();
-        setItemsData(items);
-      } catch (error) {
-        console.error("Failed to fetch items data:", error);
-      }
-    };
-
-    if (initialData?.data && initialData.data.length > 0) {
-      loadItemsData();
-    }
-  }, [initialData]);
+  // Items data is now passed as props from server-side, no need to fetch
 
   // Progressive loading for trade history users and missing original owners
   const loadPageData = useCallback(
@@ -509,33 +497,8 @@ export default function InventoryCheckerClient({
       const userIdsToLoad: string[] = [];
       const avatarIdsToLoad: string[] = [];
 
-      // Collect user IDs from both trade history and original owners
+      // Collect user IDs from trade history only (original owner avatars no longer needed)
       currentPageItems.forEach((item) => {
-        // Check original owner data
-        const originalOwnerInfo = item.info.find(
-          (info) => info.title === "Original Owner",
-        );
-        if (
-          originalOwnerInfo &&
-          originalOwnerInfo.value &&
-          /^\d+$/.test(originalOwnerInfo.value)
-        ) {
-          const originalOwnerId = originalOwnerInfo.value;
-          const hasUserData =
-            robloxUsers[originalOwnerId] ||
-            initialRobloxUsers?.[originalOwnerId];
-          const hasAvatarData =
-            robloxAvatars[originalOwnerId] ||
-            initialRobloxAvatars?.[originalOwnerId];
-
-          if (!hasUserData) {
-            userIdsToLoad.push(originalOwnerId);
-          }
-          if (!hasAvatarData) {
-            avatarIdsToLoad.push(originalOwnerId);
-          }
-        }
-
         // Check trade history users
         if (item.history && item.history.length > 0) {
           item.history.forEach((trade) => {
@@ -775,7 +738,9 @@ export default function InventoryCheckerClient({
                 </div>
               </div>
               <h3 className="text-status-error mb-2 text-lg font-semibold">
-                Unable to Fetch Inventory Data
+                {error.includes("Server error")
+                  ? "Server Error"
+                  : "Unable to Fetch Inventory Data"}
               </h3>
               <p className="text-secondary-text mb-4 break-words">{error}</p>
 
@@ -783,7 +748,7 @@ export default function InventoryCheckerClient({
               {isOwnInventory ? (
                 <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
                   <div className="space-y-3">
-                    <p className="text-primary-text text-sm text-center mb-3">
+                    <p className="text-primary-text mb-3 text-center text-sm">
                       Your inventory hasn&apos;t been scanned yet.
                     </p>
                     <div className="space-y-3">
@@ -793,7 +758,7 @@ export default function InventoryCheckerClient({
                           server
                         </p>
                       </div>
-                      <div className="text-secondary-text text-sm font-medium text-center">
+                      <div className="text-secondary-text text-center text-sm font-medium">
                         OR
                       </div>
                       <div className="flex justify-center">

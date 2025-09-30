@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
-import { fetchItems } from "@/utils/api";
 import { parseCurrencyValue } from "@/utils/currency";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -23,6 +22,7 @@ interface DupeFinderResultsProps {
   robloxUsers: Record<string, RobloxUser>;
   robloxAvatars: Record<string, string>;
   userConnectionData: UserConnectionData | null;
+  items: Item[]; // Items data passed from server
 }
 
 export default function DupeFinderResults({
@@ -31,19 +31,20 @@ export default function DupeFinderResults({
   robloxUsers,
   robloxAvatars,
   userConnectionData,
+  items,
 }: DupeFinderResultsProps) {
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<
+    | "duplicates"
     | "alpha-asc"
     | "alpha-desc"
     | "traded-desc"
     | "unique-desc"
     | "created-asc"
     | "created-desc"
-    | "duplicates"
-  >("created-desc");
+  >("duplicates");
 
   const [page, setPage] = useState(1);
   const [localRobloxUsers, setLocalRobloxUsers] =
@@ -55,7 +56,7 @@ export default function DupeFinderResults({
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<DupeFinderItem | null>(null);
-  const [itemsData, setItemsData] = useState<Item[]>([]);
+  const [itemsData] = useState<Item[]>(items);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
 
   const { user } = useAuthContext();
@@ -145,22 +146,7 @@ export default function DupeFinderResults({
     setPage(1);
   }, [searchTerm, selectedCategories, sortOrder]);
 
-  // Fetch items data
-  useEffect(() => {
-    const fetchItemsData = async () => {
-      try {
-        const items = await fetchItems();
-        setItemsData(items);
-      } catch (error) {
-        logError("Error fetching items data", error, {
-          component: "DupeFinderResults",
-          action: "fetchItemsData",
-        });
-      }
-    };
-
-    fetchItemsData();
-  }, [initialData]);
+  // Items data is now passed as props from server-side, no need to fetch
 
   // Calculate total duped value
   useEffect(() => {
@@ -233,20 +219,8 @@ export default function DupeFinderResults({
           if (aCount === 1 && bCount > 1) return 1;
           const itemNameCompare = a.title.localeCompare(b.title);
           if (itemNameCompare !== 0) return itemNameCompare;
-          const aCreated = a.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          const bCreated = b.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          if (aCreated && bCreated) {
-            const aDate = new Date(aCreated);
-            const bDate = new Date(bCreated);
-            if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
-              return aDate.getTime() - bDate.getTime();
-            }
-          }
-          return 0;
+          // For items with same name, sort by ID to match duplicate numbering
+          return a.id.localeCompare(b.id);
         case "alpha-asc":
           return a.title.localeCompare(b.title);
         case "alpha-desc":
@@ -365,7 +339,7 @@ export default function DupeFinderResults({
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <DupeSearchInput />
+      <DupeSearchInput initialValue={robloxId} />
 
       {/* User Info */}
       <div

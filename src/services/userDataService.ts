@@ -280,28 +280,14 @@ export class UserDataService {
 
   /**
    * Extracts user IDs from inventory data (for UserDataStreamer)
+   * Only extracts main user ID since original owner avatars are no longer needed
    */
   static extractUserIdsFromInventory(
     inventoryData: InventoryData,
     robloxId: string,
   ): string[] {
-    const userIdsToFetch = new Set<string>();
-
-    // Add all original owner IDs from the inventory
-    inventoryData.data.forEach((item) => {
-      const originalOwnerInfo = item.info.find(
-        (info) => info.title === "Original Owner",
-      );
-      if (originalOwnerInfo && originalOwnerInfo.value) {
-        userIdsToFetch.add(originalOwnerInfo.value);
-      }
-    });
-
-    // Convert to array and ensure main user is first
-    const allUserIds = Array.from(userIdsToFetch);
-    const uniqueUserIds = [...new Set([robloxId, ...allUserIds])];
-
-    return uniqueUserIds;
+    // Only return the main user ID since we no longer need original owner data
+    return [robloxId];
   }
 
   /**

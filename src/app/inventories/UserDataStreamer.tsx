@@ -7,6 +7,7 @@ import { fetchUserByRobloxId } from "@/utils/api";
 import { logError } from "@/services/logger";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
+import { Item } from "@/types";
 
 interface UserDataStreamerProps {
   robloxId: string;
@@ -14,6 +15,7 @@ interface UserDataStreamerProps {
   currentSeason: Season | null;
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
+  items: Item[]; // Items data passed from server
 }
 
 // Loading component for user data - shows inventory immediately
@@ -23,6 +25,7 @@ function UserDataLoadingFallback({
   currentSeason,
   initialComments,
   initialCommentUserMap,
+  items,
 }: UserDataStreamerProps) {
   return (
     <InventoryCheckerClient
@@ -34,6 +37,7 @@ function UserDataLoadingFallback({
       currentSeason={currentSeason}
       initialComments={initialComments}
       initialCommentUserMap={initialCommentUserMap}
+      items={items}
     />
   );
 }
@@ -45,32 +49,24 @@ async function UserDataFetcher({
   currentSeason,
   initialComments,
   initialCommentUserMap,
+  items,
 }: UserDataStreamerProps) {
-  // Extract user IDs from inventory data
+  // Extract user IDs from inventory data (only main user since original owner avatars are no longer needed)
   const userIds = UserDataService.extractUserIdsFromInventory(
     inventoryData,
     robloxId,
   );
 
-  // Apply frequency-based prioritization for large inventories
-  const MAX_ORIGINAL_OWNERS_TO_FETCH = 1000;
-  const finalUserIds = UserDataService.prioritizeInventoryUsers(
-    userIds,
-    inventoryData,
-    MAX_ORIGINAL_OWNERS_TO_FETCH,
-    "INVENTORY",
-  );
-
-  // Get the remaining user IDs that weren't included in the initial fetch
-  const remainingUserIds = userIds.filter((id) => !finalUserIds.includes(id));
-
   // Fetch user data using the shared service (without connection data)
-  const userDataResult = await UserDataService.fetchUserData(finalUserIds, {
-    maxUsers: MAX_ORIGINAL_OWNERS_TO_FETCH,
+  const userDataResult = await UserDataService.fetchUserData(userIds, {
+    maxUsers: 1, // Only fetching main user
     includeUserConnection: false,
     includeDupeData: true,
     context: "INVENTORY",
   });
+
+  // No remaining user IDs since we only fetch the main user
+  // const remainingUserIds: string[] = [];
 
   // Fetch connection data directly for the main user (like OG finder does)
   const userConnectionData = await fetchUserByRobloxId(robloxId).catch(
@@ -92,11 +88,10 @@ async function UserDataFetcher({
       userConnectionData={userConnectionData}
       initialDupeData={userDataResult.dupeData}
       currentSeason={currentSeason}
-      remainingUserIds={
-        remainingUserIds.length > 0 ? remainingUserIds : undefined
-      }
+      remainingUserIds={undefined}
       initialComments={initialComments}
       initialCommentUserMap={initialCommentUserMap}
+      items={items}
     />
   );
 }
@@ -107,6 +102,7 @@ export default function UserDataStreamer({
   currentSeason,
   initialComments,
   initialCommentUserMap,
+  items,
 }: UserDataStreamerProps) {
   return (
     <Suspense
@@ -117,6 +113,7 @@ export default function UserDataStreamer({
           currentSeason={currentSeason}
           initialComments={initialComments}
           initialCommentUserMap={initialCommentUserMap}
+          items={items}
         />
       }
     >
@@ -126,6 +123,7 @@ export default function UserDataStreamer({
         currentSeason={currentSeason}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        items={items}
       />
     </Suspense>
   );

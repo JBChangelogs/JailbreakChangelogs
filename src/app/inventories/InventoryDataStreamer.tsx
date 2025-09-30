@@ -4,6 +4,7 @@ import {
   fetchRobloxUserByUsername,
   fetchLatestSeason,
   fetchComments,
+  fetchItems,
 } from "@/utils/api";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -56,10 +57,20 @@ async function InventoryDataFetcher({
       console.error("Error fetching user by username:", error);
       const truncatedUsername =
         robloxId.length > 50 ? `${robloxId.substring(0, 47)}...` : robloxId;
+
+      // Check if it's a 502 error specifically for the username lookup
+      const isServerError =
+        error instanceof Error &&
+        error.message.includes("Failed to fetch user: 502");
+
+      const errorMessage = isServerError
+        ? `Server error while searching for "${truncatedUsername}". Please try searching by Roblox ID instead, or try again later.`
+        : `Failed to find user "${truncatedUsername}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+
       return (
         <InventoryCheckerClient
           robloxId={robloxId}
-          error={`Failed to find user "${truncatedUsername}". Please check the spelling and try again.`}
+          error={errorMessage}
           initialComments={initialComments}
           initialCommentUserMap={initialCommentUserMap}
         />
@@ -67,9 +78,10 @@ async function InventoryDataFetcher({
     }
   }
 
-  const [result, currentSeason] = await Promise.all([
+  const [result, currentSeason, items] = await Promise.all([
     fetchInventoryData(actualRobloxId),
     fetchLatestSeason(),
+    fetchItems(),
   ]);
 
   // Check if the result contains an error
@@ -121,6 +133,7 @@ async function InventoryDataFetcher({
         currentSeason={currentSeason}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        items={items}
       />
     </Suspense>
   );

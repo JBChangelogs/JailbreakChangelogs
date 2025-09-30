@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
-import type { DupeFinderItem, RobloxUser } from "@/types";
+import type { DupeFinderItem, RobloxUser, Item } from "@/types";
 
 interface UserConnectionData {
   id: string;
@@ -23,6 +23,7 @@ interface DupeFinderClientProps {
   error?: string;
   isLoading?: boolean;
   isUserFound?: boolean;
+  items?: Item[]; // Items data passed from server
 }
 
 export default function DupeFinderClient({
@@ -34,6 +35,7 @@ export default function DupeFinderClient({
   error,
   isLoading: externalIsLoading,
   isUserFound = true,
+  items = [],
 }: DupeFinderClientProps) {
   const [isLoading, setIsLoading] = useState(externalIsLoading || false);
   const [localRobloxUsers, setLocalRobloxUsers] = useState<
@@ -76,7 +78,7 @@ export default function DupeFinderClient({
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <DupeSearchInput isLoading={isLoading} />
+      <DupeSearchInput initialValue={robloxId || ""} isLoading={isLoading} />
 
       {/* Results */}
       {initialData && (
@@ -86,6 +88,7 @@ export default function DupeFinderClient({
           robloxUsers={localRobloxUsers}
           robloxAvatars={localRobloxAvatars}
           userConnectionData={userConnectionData || null}
+          items={items}
         />
       )}
 
@@ -99,7 +102,11 @@ export default function DupeFinderClient({
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">
-              {isUserFound ? "No Dupes Found" : "User Not Found"}
+              {error.includes("Server error")
+                ? "Server Error"
+                : isUserFound
+                  ? "No Dupes Found"
+                  : "User Not Found"}
             </h3>
             <p className="text-secondary-text">{error}</p>
           </div>

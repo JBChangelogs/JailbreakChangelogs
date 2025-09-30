@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import { DupeFinderItem, Item } from "@/types";
 import { formatCurrencyValue } from "@/utils/currency";
-import { DefaultAvatar } from "@/utils/avatar";
 import {
   getItemImagePath,
   isVideoItem,
@@ -14,6 +13,7 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/images";
+import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -36,7 +36,7 @@ export default function DupeItemCard({
   item,
   itemData,
   getUserDisplay,
-  getUserAvatar,
+  // getUserAvatar,
   getDupedValueForItem,
   onCardClick,
   duplicateNumber,
@@ -75,11 +75,26 @@ export default function DupeItemCard({
 
       {/* Title */}
       <div className="mb-4 text-left">
-        <p
-          className={`${bangers.className} text-md text-secondary-text mb-1 tracking-wide`}
-        >
-          {item.categoryTitle}
-        </p>
+        <div className="mb-1 flex items-center gap-2">
+          <span
+            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+            style={{
+              borderColor: getCategoryColor(item.categoryTitle),
+              backgroundColor: getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
+            }}
+          >
+            {(() => {
+              const categoryIcon = getCategoryIcon(item.categoryTitle);
+              return categoryIcon ? (
+                <categoryIcon.Icon
+                  className="h-3 w-3"
+                  style={{ color: getCategoryColor(item.categoryTitle) }}
+                />
+              ) : null;
+            })()}
+            {item.categoryTitle}
+          </span>
+        </div>
         <h2
           className={`${bangers.className} text-primary-text text-2xl tracking-wide break-words`}
         >
@@ -139,44 +154,40 @@ export default function DupeItemCard({
       {/* Statistics */}
       <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
         <div>
-          <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
-          <div className="text-primary-text text-xl font-bold">
-            {formatNumber(item.timesTraded)}
-          </div>
-        </div>
-        <div>
           <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <div className="text-primary-text text-xl font-bold">
-            {formatNumber(item.uniqueCirculation)}
-          </div>
+          <Tooltip
+            title={item.uniqueCirculation.toLocaleString()}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <div className="text-primary-text cursor-help text-xl font-bold">
+              {formatNumber(item.uniqueCirculation)}
+            </div>
+          </Tooltip>
         </div>
         <div>
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
-          <div className="text-xl font-bold italic">
-            <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
-              <div className="border-border-primary bg-surface-bg flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
-                {getUserAvatar(item.latest_owner) ? (
-                  <Image
-                    src={getUserAvatar(item.latest_owner)!}
-                    alt="Current Owner Avatar"
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <DefaultAvatar />
-                )}
-              </div>
-              <a
-                href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {getUserDisplay(item.latest_owner)}
-              </a>
-            </div>
+          <div className="text-xl font-bold">
+            <a
+              href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-text hover:text-link text-center break-words transition-colors hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {getUserDisplay(item.latest_owner)}
+            </a>
           </div>
         </div>
         <div>
@@ -206,17 +217,27 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
-          <div className="text-secondary-text text-sm">CREATED AT</div>
-          <div className="text-primary-text text-xl font-bold">
-            {(() => {
-              const createdAtInfo = item.info.find(
-                (info) => info.title === "Created At",
-              );
-              return createdAtInfo
-                ? formatDateOnly(new Date(createdAtInfo.value).getTime() / 1000)
-                : "N/A";
-            })()}
-          </div>
+          <div className="text-secondary-text text-sm">LOGGED ON</div>
+          <Tooltip
+            title={new Date(item.logged_at * 1000).toLocaleString()}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <div className="text-primary-text cursor-help text-xl font-bold">
+              {formatDateOnly(item.logged_at)}
+            </div>
+          </Tooltip>
         </div>
       </div>
     </div>

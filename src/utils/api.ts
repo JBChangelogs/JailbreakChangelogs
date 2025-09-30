@@ -1850,7 +1850,7 @@ export async function fetchRobloxUserByUsername(username: string) {
       console.error(
         `[SERVER] fetchRobloxUserByUsername: Failed with status ${response.status} ${response.statusText}`,
       );
-      return null;
+      throw new Error(`Failed to fetch user: ${response.status}`);
     }
 
     const data = await response.json();
@@ -1865,7 +1865,8 @@ export async function fetchRobloxUserByUsername(username: string) {
       "[SERVER] fetchRobloxUserByUsername: Error fetching user by username:",
       err,
     );
-    return null;
+    // Re-throw the error so it can be properly handled upstream
+    throw err;
   }
 }
 

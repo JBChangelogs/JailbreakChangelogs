@@ -199,7 +199,9 @@ export default function OGFinderClient({
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">
-              User Not Found
+              {error.includes("Server error")
+                ? "Server Error"
+                : "User Not Found"}
             </h3>
             <p className="text-secondary-text">{error}</p>
           </div>

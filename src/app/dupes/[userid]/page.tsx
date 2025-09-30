@@ -34,7 +34,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>

@@ -4,6 +4,7 @@ import {
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
+  fetchItems,
 } from "@/utils/api";
 import type { RobloxUser } from "@/types";
 import DupeFinderClient from "./DupeFinderClient";
@@ -60,16 +61,28 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
             robloxId={robloxId}
             error={`Username "${robloxId}" not found. Please check the spelling and try again.`}
             isUserFound={false}
+            items={[]}
           />
         );
       }
     } catch (error) {
       console.error("Error fetching user by username:", error);
+
+      // Check if it's a 502 error specifically for the username lookup
+      const isServerError =
+        error instanceof Error &&
+        error.message.includes("Failed to fetch user: 502");
+
+      const errorMessage = isServerError
+        ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
+        : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+
       return (
         <DupeFinderClient
           robloxId={robloxId}
-          error={`Failed to find user "${robloxId}". Please check the spelling and try again.`}
+          error={errorMessage}
           isUserFound={false}
+          items={[]}
         />
       );
     }
@@ -87,6 +100,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
           robloxId={actualRobloxId}
           error={result.error}
           isUserFound={true}
+          items={[]}
         />
       );
     } else {
@@ -96,6 +110,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
           robloxId={actualRobloxId}
           error={result.error}
           isUserFound={false}
+          items={[]}
         />
       );
     }
@@ -108,6 +123,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
         robloxId={actualRobloxId}
         error="No dupe data found for this user."
         isUserFound={false}
+        items={[]}
       />
     );
   }
@@ -171,7 +187,16 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     });
   }
 
-  return <DupeUserDataStreamer robloxId={actualRobloxId} dupeData={result} />;
+  // Fetch items data server-side to avoid client-side refetching
+  const items = await fetchItems();
+
+  return (
+    <DupeUserDataStreamer
+      robloxId={actualRobloxId}
+      dupeData={result}
+      items={items}
+    />
+  );
 }
 
 export default function DupeFinderDataStreamer({
