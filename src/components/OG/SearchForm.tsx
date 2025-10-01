@@ -10,6 +10,16 @@ interface SearchFormProps {
   externalIsLoading: boolean;
 }
 
+/**
+ * Renders a responsive search form for entering a username or Roblox ID.
+ *
+ * @param searchId - Current value of the search input.
+ * @param setSearchId - Callback to update the search input value.
+ * @param handleSearch - Form submission handler.
+ * @param isLoading - Local loading flag that disables the submit button when true.
+ * @param externalIsLoading - External loading flag that also disables the submit button when true.
+ * @returns The rendered search form React element.
+ */
 export default function SearchForm({
   searchId,
   setSearchId,
@@ -36,7 +46,7 @@ export default function SearchForm({
               <button
                 type="button"
                 onClick={() => setSearchId("")}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
                 <XMarkIcon />

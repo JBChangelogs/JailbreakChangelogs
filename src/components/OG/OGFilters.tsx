@@ -42,6 +42,20 @@ interface OGFiltersProps {
   initialData: OGSearchData | null;
 }
 
+/**
+ * Render filter and sort controls for OG items.
+ *
+ * Renders a search input, a category selector (loaded dynamically), and a sort selector with grouped options.
+ *
+ * @param searchTerm - Current search string shown in the search input
+ * @param setSearchTerm - Setter invoked when the search input changes or is cleared
+ * @param selectedCategories - Array of currently selected category values (first entry is used)
+ * @param setSelectedCategories - Setter invoked when the category selection changes
+ * @param sortOrder - Current sort key used by the sort selector
+ * @param setSortOrder - Setter invoked when the sort selection changes
+ * @param initialData - Initial search payload used to derive available categories and detect duplicates
+ * @returns A React element containing the filter and sort UI (search bar, category select, and sort select)
+ */
 export default function OGFilters({
   searchTerm,
   setSearchTerm,
@@ -138,7 +152,7 @@ export default function OGFilters({
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

@@ -49,6 +49,20 @@ interface OGFinderClientProps {
   isLoading?: boolean;
 }
 
+/**
+ * Renders the OG Finder UI including the search form, results streamer, loading states, and error display.
+ *
+ * The component manages local input and loading state, gates searches behind authentication (opening a login modal and showing a toast when unauthenticated), navigates to /og/{id} on submit, synchronizes local Roblox user and avatar caches with incoming props, and displays search results or an error card.
+ *
+ * @param initialData - Optional initial search results to display
+ * @param robloxId - Optional Roblox ID to preload into the search and to stream results for
+ * @param originalSearchTerm - Optional original search term associated with `initialData`
+ * @param robloxUsers - Optional initial map of Roblox user data keyed by ID
+ * @param robloxAvatars - Optional initial map of Roblox avatar URLs keyed by user ID
+ * @param error - Optional error message to display when no `initialData` is present
+ * @param isLoading - Optional external loading state to sync with the component's internal loading indicator
+ * @returns The rendered React element for the OG Finder client interface
+ */
 export default function OGFinderClient({
   initialData,
   robloxId,
@@ -129,7 +143,7 @@ export default function OGFinderClient({
               <button
                 type="button"
                 onClick={() => setSearchId("")}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
                 <XMarkIcon />

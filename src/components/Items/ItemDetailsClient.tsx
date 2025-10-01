@@ -96,6 +96,20 @@ interface ItemDetailsClientProps {
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
+/**
+ * Render the interactive item details view including media, metadata, tabs, and user interactions.
+ *
+ * Renders a two-column details page for an item (or selected variant) with media display (image/video/horn audio), favorite control, premium ad handling, description, official metrics, and tabbed sections for value history, changelogs, duped owners, similar items, and comments.
+ *
+ * @param item - The primary item details to display. If a variant is selected, some sections reflect the selected variant.
+ * @param initialChanges - Optional initial changelog entries for the parent item used to seed the Changes tab.
+ * @param initialUserMap - Optional map of user data keyed by user id for use by changelogs/comments.
+ * @param similarItemsPromise - Promise that resolves to similar ItemDetails (used by the Similar Items tab).
+ * @param initialFavoriteCount - Optional initial number of favorites to display.
+ * @param initialComments - Optional initial comments for the Comments tab.
+ * @param initialCommentUserMap - Optional map of user data for the initial comments.
+ * @returns The rendered JSX element for the item details client component.
+ */
 export default function ItemDetailsClient({
   item,
   initialChanges,
@@ -823,7 +837,7 @@ export default function ItemDetailsClient({
                                 setOwnerSearchTerm("");
                                 setDupedOwnersPage(1);
                               }}
-                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transition-colors"
+                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transition-colors cursor-pointer"
                               aria-label="Clear search"
                             >
                               <XMarkIcon />

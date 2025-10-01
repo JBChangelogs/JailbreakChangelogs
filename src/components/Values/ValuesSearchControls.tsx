@@ -33,6 +33,23 @@ interface ValuesSearchControlsProps {
   searchSectionRef: React.RefObject<HTMLDivElement | null>;
 }
 
+/**
+ * Render the values search controls: search input, filter and sort selects, and a value range slider (with optional ad column for non‑premium users).
+ *
+ * The component focuses and highlights the search input when the user presses Ctrl/Cmd+F, enforces a minimum distance between slider thumbs, and persists filter/sort choices to localStorage. Selecting "My Favorites" in the filter requires authentication (shows an error toast when not authenticated).
+ *
+ * @param searchTerm - Current search input value
+ * @param setSearchTerm - Setter for the search input value
+ * @param filterSort - Current filter selection key
+ * @param setFilterSort - Setter for the filter selection; updates localStorage and validates favorites selection against authentication
+ * @param valueSort - Current sort selection key
+ * @param setValueSort - Setter for the sort selection; updates localStorage
+ * @param rangeValue - Current two‑element range [min, max] used by the slider
+ * @param setRangeValue - Setter for the range value while the slider is being dragged
+ * @param setAppliedMinValue - Setter invoked when the slider change is committed to apply the current minimum value
+ * @param setAppliedMaxValue - Setter invoked when the slider change is committed to apply the current maximum value
+ * @param searchSectionRef - Ref attached to the component's root element (used for scrolling/anchor behavior)
+ */
 export default function ValuesSearchControls({
   searchTerm,
   setSearchTerm,
@@ -186,7 +203,7 @@ export default function ValuesSearchControls({
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm("")}
-                    className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                    className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
                     <XMarkIcon />

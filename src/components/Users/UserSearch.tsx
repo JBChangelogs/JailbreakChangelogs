@@ -19,6 +19,17 @@ interface UserSearchProps {
   initialUsers: UserData[];
 }
 
+/**
+ * Render a searchable, paginated list of users with type filtering and detail tooltips.
+ *
+ * Renders a search input (with debounced query), user-type tabs ("discord" or "roblox"),
+ * a results grid showing either Discord or Roblox user cards wrapped with a user details tooltip,
+ * and pagination that syncs with the URL hash. Clears and resets page when appropriate and
+ * highlights the authenticated user's context in tooltips.
+ *
+ * @param initialUsers - Source list of users to display and filter
+ * @returns The user search UI containing the search bar, type tabs, results grid, tooltips, and pagination controls
+ */
 export default function UserSearch({ initialUsers }: UserSearchProps) {
   const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,7 +137,7 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
                 setSearchQuery("");
                 setPage(1);
               }}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

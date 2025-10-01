@@ -17,6 +17,13 @@ interface HyperchromeCalculatorModalProps {
   onClose: () => void;
 }
 
+/**
+ * Render a modal that calculates how many robberies are needed to reach the next HyperChrome level based on the current level and pity percentage.
+ *
+ * @param open - Whether the modal is visible.
+ * @param onClose - Callback invoked to close the modal.
+ * @returns A Dialog-based modal element containing a two-step wizard to select HyperChrome level, enter current pity, and display calculated robberies and related pity mappings.
+ */
 export default function HyperchromeCalculatorModal({
   open,
   onClose,
@@ -64,7 +71,7 @@ export default function HyperchromeCalculatorModal({
             <button
               aria-label="Close"
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10"
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10 cursor-pointer"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

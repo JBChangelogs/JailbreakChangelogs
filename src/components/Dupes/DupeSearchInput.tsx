@@ -11,6 +11,17 @@ interface DupeSearchInputProps {
   className?: string;
 }
 
+/**
+ * Renders a search input with clear and submit controls for navigating to dupe results.
+ *
+ * The form accepts an ID or username, allows clearing the input, and navigates to `/dupes/{trimmed input}` when submitted.
+ *
+ * @param initialValue - Optional initial input value (defaults to empty string)
+ * @param isLoading - Optional external loading flag; when true, input and submit are disabled and the button shows a loading state
+ * @param placeholder - Optional input placeholder text
+ * @param className - Optional additional CSS classes applied to the root form element
+ * @returns The form element that captures the search term and triggers navigation to the corresponding dupe results page
+ */
 export default function DupeSearchInput({
   initialValue = "",
   isLoading = false,
@@ -54,7 +65,7 @@ export default function DupeSearchInput({
             <button
               type="button"
               onClick={() => setSearchId("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

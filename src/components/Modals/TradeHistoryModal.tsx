@@ -35,6 +35,22 @@ interface TradeHistoryModalProps {
   getHasVerifiedBadge?: (userId: string) => boolean;
 }
 
+/**
+ * Render a modal showing an item's ownership (trade) history.
+ *
+ * Renders a dialog listing paired trades derived from the item's history entries, with controls to sort by newest or oldest, an optional loading indicator for user profiles, and visual highlighting for the earliest trade shown.
+ *
+ * @param isOpen - Whether the modal is open
+ * @param onClose - Callback invoked to close the modal
+ * @param item - The item whose ownership history is displayed; if `null` the component renders nothing
+ * @param getUserAvatar - Resolver that returns an avatar image URL for a given user ID (string) or `undefined` if none
+ * @param getUserDisplay - Resolver that returns a display name for a given user ID (string)
+ * @param formatDate - Formatter for trade timestamps
+ * @param loadingUserIds - Set of user IDs currently loading; when non-empty a loading indicator is shown
+ * @param getUsername - Optional resolver that returns a username for a given user ID (string); used in preference to `getUserDisplay` when provided
+ * @param getHasVerifiedBadge - Optional predicate that returns `true` for user IDs that should show a verified badge
+ * @returns The rendered modal element, or `null` when `item` is not provided
+ */
 export default function TradeHistoryModal({
   isOpen,
   onClose,
@@ -120,7 +136,7 @@ export default function TradeHistoryModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors cursor-pointer"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>

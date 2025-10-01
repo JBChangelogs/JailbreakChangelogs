@@ -38,6 +38,25 @@ interface InventoryFiltersProps {
   hasDuplicates: boolean;
 }
 
+/**
+ * Render the inventory filters UI including original/non-original toggles, a searchable input, a category selector, and a sort selector.
+ *
+ * Renders two checkbox filters (Original Items Only, Non-Original Items Only), a text search with clear control, a category Select (single-select, clearable), and a sort Select with grouped options and an optional "Group Duplicates" entry when duplicates exist. Select controls show a pulsing placeholder until the dynamic Select component loads.
+ *
+ * @param searchTerm - Current text in the search input.
+ * @param setSearchTerm - Callback to update the search text.
+ * @param selectedCategories - Array of currently selected category ids/names (uses the first item as the active selection).
+ * @param setSelectedCategories - Callback to update selected categories (setting an empty array clears selection).
+ * @param showOnlyOriginal - Whether the "Original Items Only" filter is active.
+ * @param showOnlyNonOriginal - Whether the "Non-Original Items Only" filter is active.
+ * @param availableCategories - List of category names available for filtering.
+ * @param onFilterToggle - Callback invoked with the new checked state when the "Original Items Only" checkbox changes.
+ * @param onNonOriginalFilterToggle - Callback invoked with the new checked state when the "Non-Original Items Only" checkbox changes.
+ * @param sortOrder - Current sort order key.
+ * @param setSortOrder - Callback to update the sort order.
+ * @param hasDuplicates - When true, enables a "Group Duplicates" sort option.
+ * @returns The filters UI as a React element.
+ */
 export default function InventoryFilters({
   searchTerm,
   setSearchTerm,
@@ -103,7 +122,7 @@ export default function InventoryFilters({
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

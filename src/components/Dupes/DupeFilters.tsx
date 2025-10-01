@@ -18,6 +18,21 @@ interface DupeFiltersProps {
   hasDuplicates: boolean;
 }
 
+/**
+ * Render the filter and sort toolbar for the dupe finder, providing search, category filter, and sort controls.
+ *
+ * Renders a search input (with clear), a category select, and a sort select. The Select components are dynamically enabled after client load and show pulsing placeholders until available. Category options are derived from `initialData`; sort options include grouped choices and an optional "Group Duplicates" entry when `hasDuplicates` is true.
+ *
+ * @param searchTerm - Current search input value
+ * @param setSearchTerm - Setter to update the search input value
+ * @param selectedCategories - Array with the currently selected category values (at most one)
+ * @param setSelectedCategories - Setter to update selected categories
+ * @param sortOrder - Current sort choice key
+ * @param setSortOrder - Setter to update the sort order
+ * @param initialData - Source items used to derive available category options
+ * @param hasDuplicates - Whether duplicate grouping should be offered as a sort option
+ * @returns The filter and sort UI as a React element
+ */
 export default function DupeFilters({
   searchTerm,
   setSearchTerm,
@@ -101,7 +116,7 @@ export default function DupeFilters({
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

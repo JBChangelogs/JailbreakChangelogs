@@ -10,6 +10,16 @@ interface SearchFormProps {
   externalIsLoading: boolean;
 }
 
+/**
+ * Renders a search form for entering a username or Roblox ID with a clear button and a submit control.
+ *
+ * @param searchId - Current value of the search input.
+ * @param setSearchId - Setter called with the new input value or an empty string to clear the field.
+ * @param handleSearch - Form submit handler.
+ * @param isLoading - Component-local loading state that disables the submit button and shows a spinner when true.
+ * @param externalIsLoading - External loading state that also disables the submit button and shows a spinner when true.
+ * @returns The JSX form element for searching.
+ */
 export default function SearchForm({
   searchId,
   setSearchId,
@@ -35,7 +45,7 @@ export default function SearchForm({
             <button
               type="button"
               onClick={() => setSearchId("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

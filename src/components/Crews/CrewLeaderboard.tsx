@@ -20,6 +20,15 @@ interface CrewLeaderboardProps {
   currentSeason: number;
 }
 
+/**
+ * Render the crew leaderboard UI with search, progressive owner data loading, and season context.
+ *
+ * Displays ranked crew entries, a search bar that filters by clan name or owner display name, and a historical season notice when the provided season is not the current one. Owner Roblox profiles and avatars are loaded progressively as entries appear. Top ranks receive special visual styling and each entry includes rating, battles, and a link to view the crew.
+ *
+ * @param leaderboard - Array of crew entries to display (sorted by rating).
+ * @param currentSeason - The season number to show (used for the historical season notice and season-aware links).
+ * @returns A React element containing the crew leaderboard UI, search controls, and any notices or placeholders.
+ */
 export default function CrewLeaderboard({
   leaderboard,
   currentSeason,
@@ -147,7 +156,7 @@ export default function CrewLeaderboard({
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />

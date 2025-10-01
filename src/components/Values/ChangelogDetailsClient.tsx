@@ -159,6 +159,15 @@ interface ChangelogDetailsClientProps {
   userData: Record<string, UserData>;
 }
 
+/**
+ * Render a detailed, filterable, and paginated changelog view with suggestion and voting UI.
+ *
+ * Displays a responsive masonry grid of changes with search and item-type filtering, suggestion details (including up/down votes and voter lists), changelist comparisons, changer information, and an ad sidebar shown to non-premium users.
+ *
+ * @param changelog - The changelog group containing the changes and associated metadata to display.
+ * @param userData - A mapping of user IDs to user information (avatars, display names, etc.) used for rendering changer and voter profiles.
+ * @returns The React element representing the changelog details interface.
+ */
 export default function ChangelogDetailsClient({
   changelog,
   userData,
@@ -408,7 +417,7 @@ export default function ChangelogDetailsClient({
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
                 <XMarkIcon />

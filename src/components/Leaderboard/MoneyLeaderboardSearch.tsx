@@ -8,6 +8,14 @@ interface MoneyLeaderboardSearchProps {
   onSearch: (searchTerm: string) => void;
 }
 
+/**
+ * Render a debounced search input for the money leaderboard that supports Ctrl/Cmd+F focus and a clear button.
+ *
+ * Calls `onSearch` with the debounced search string when the user stops typing.
+ *
+ * @param onSearch - Callback invoked with the current debounced search string
+ * @returns The search input React element
+ */
 export default function MoneyLeaderboardSearch({
   onSearch,
 }: MoneyLeaderboardSearchProps) {
@@ -61,7 +69,7 @@ export default function MoneyLeaderboardSearch({
       {searchTerm && (
         <button
           onClick={() => setSearchTerm("")}
-          className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+          className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
           aria-label="Clear search"
         >
           <XMarkIcon />

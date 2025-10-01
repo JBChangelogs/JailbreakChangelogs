@@ -118,6 +118,15 @@ const getFeatureDescription = (
   }
 };
 
+/**
+ * Render a modal that prompts the user to upgrade their supporter tier to unlock a specific feature.
+ *
+ * @param feature - Identifier of the feature being locked (e.g., "comment_length", "custom_avatar").
+ * @param requiredTier - Index of the supporter tier required to unlock the feature (matches SUPPORTER_TIERS indexes).
+ * @param currentLimit - Current limit or value for the feature (displayed when applicable).
+ * @param requiredLimit - Required limit or value for the feature after upgrading (displayed when applicable).
+ * @returns The modal React element for displaying feature details, recommended tier, and upgrade actions.
+ */
 export default function SupporterModal({
   isOpen,
   onClose,
@@ -158,7 +167,7 @@ export default function SupporterModal({
             </div>
             <button
               onClick={onClose}
-              className="text-secondary-text rounded-lg p-2 transition-colors"
+              className="text-secondary-text rounded-lg p-2 transition-colors cursor-pointer"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

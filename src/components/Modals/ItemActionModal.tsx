@@ -15,6 +15,17 @@ interface ItemActionModalProps {
   onViewTradeHistory: () => void;
 }
 
+/**
+ * Render a modal presenting actions for a specific item.
+ *
+ * Displays the item's title and category, a button that navigates to the item's page, and a control to view ownership/trade history (enabled only when the item has an ownership history array with more than one entry). Closes the modal before navigating or invoking the history handler.
+ *
+ * @param isOpen - Controls whether the modal is visible.
+ * @param onClose - Callback invoked to close the modal.
+ * @param item - The item to act on; when `null` the component renders `null`. Expected to contain `title`, optional `categoryTitle`, and optional `history` (array or string).
+ * @param onViewTradeHistory - Callback invoked when the user requests to view the item's ownership/trade history.
+ * @returns The modal element when `item` is provided, otherwise `null`.
+ */
 export default function ItemActionModal({
   isOpen,
   onClose,
@@ -64,7 +75,7 @@ export default function ItemActionModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-secondary-text hover:text-primary-text rounded-full p-1"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1 cursor-pointer"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
