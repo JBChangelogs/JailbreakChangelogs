@@ -126,6 +126,11 @@
     61%,
     30%
   ); /* Success states - Even darker for better contrast */
+  --color-status-success-vibrant: hsl(
+    120,
+    61%,
+    50%
+  ); /* Vibrant green for online presence - theme independent */
   --color-status-warning: hsl(38, 100%, 61%); /* Warning states */
   --color-status-error: hsl(
     0,
@@ -332,6 +337,11 @@
     61%,
     30%
   ); /* Success states - Even darker for better contrast */
+  --color-status-success-vibrant: hsl(
+    120,
+    61%,
+    50%
+  ); /* Vibrant green for online presence - theme independent */
   --color-status-warning: hsl(38, 100%, 61%); /* Warning states */
   --color-status-error: hsl(
     0,

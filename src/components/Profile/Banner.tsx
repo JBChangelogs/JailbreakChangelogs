@@ -12,7 +12,7 @@ interface BannerProps {
 }
 
 // Move static data outside component
-const BACKGROUND_COUNT = 19;
+const BACKGROUND_COUNT = 24;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>
@@ -133,8 +133,16 @@ export const Banner = ({
         fill
         priority
         draggable={false}
-        className="object-cover"
+        className="z-0 object-cover"
         alt={`${username}'s profile banner`}
+      />
+      {/* Dark gradient overlay at the bottom for better text readability */}
+      <div
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 30%, transparent 70%)",
+        }}
       />
     </div>
   );

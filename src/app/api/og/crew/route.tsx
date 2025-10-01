@@ -24,7 +24,7 @@ async function isImageAccessible(url: string): Promise<boolean> {
 
 // Pre-defined background images for crews
 // These are served from our CDN and provide consistent branding
-const BACKGROUND_COUNT = 19;
+const BACKGROUND_COUNT = 24;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>

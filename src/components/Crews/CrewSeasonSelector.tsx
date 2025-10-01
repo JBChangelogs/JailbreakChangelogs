@@ -91,11 +91,11 @@ export default function CrewSeasonSelector({
             unstyled
             classNames={{
               control: () =>
-                "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
+                "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
               singleValue: () => "text-secondary-text",
               placeholder: () => "text-secondary-text",
               menu: () =>
-                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
+                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
               option: ({ isSelected, isFocused }) =>
                 `px-4 py-3 cursor-pointer ${
                   isSelected
@@ -106,12 +106,11 @@ export default function CrewSeasonSelector({
                 }`,
               clearIndicator: () =>
                 "text-secondary-text hover:text-primary-text cursor-pointer",
-              dropdownIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
+              dropdownIndicator: () => "text-secondary-text cursor-pointer",
             }}
           />
         ) : (
-          <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
+          <div className="border-border-primary bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
         )}
       </div>
 

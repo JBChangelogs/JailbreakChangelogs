@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   DocumentTextIcon,
   CalendarIcon,
@@ -11,17 +11,34 @@ import {
   ShieldCheckIcon,
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
+import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 export default function Home() {
-  const [backgroundImage, setBackgroundImage] = useState("");
+  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Generate random number between 1 and 14
-    const randomNumber = Math.floor(Math.random() * 19) + 1;
-    setBackgroundImage(
-      `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${randomNumber}.webp`,
-    );
+    // Generate shuffled array of background images
+    const shuffledImages = generateShuffledBackgroundImages();
+    setBackgroundImages(shuffledImages);
   }, []);
+
+  // Function to cycle to the next image
+  const nextImage = useCallback(() => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex + 1 >= backgroundImages.length ? 0 : prevIndex + 1,
+    );
+  }, [backgroundImages.length]);
+
+  // Auto-cycle through images every 10 seconds
+  useEffect(() => {
+    if (backgroundImages.length === 0) return;
+
+    const interval = setInterval(nextImage, 10000);
+    return () => clearInterval(interval);
+  }, [backgroundImages.length, nextImage]);
+
+  const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
 
   return (
     <main className="bg-primary-bg min-h-screen">
@@ -29,12 +46,12 @@ export default function Home() {
       <section className="relative py-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          {backgroundImage && (
+          {currentBackgroundImage && (
             <Image
-              src={backgroundImage}
+              src={currentBackgroundImage}
               alt="Jailbreak Background"
               fill
-              className="object-cover"
+              className="object-cover transition-opacity duration-1000"
               style={{ objectPosition: "center 70%" }}
               priority
             />

@@ -272,6 +272,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -294,6 +295,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -316,6 +318,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -344,6 +347,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -366,6 +370,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -391,6 +396,7 @@ export default function CrewDetails({
                 alt="Crew flag background"
                 fill
                 className="object-cover"
+                draggable={false}
               />
             </div>
 
@@ -411,7 +417,7 @@ export default function CrewDetails({
         {/* Additional Stats Row */}
         <div className="border-border-primary mt-6 border-t pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+            <div className="border-border-primary bg-primary-bg flex items-center justify-between rounded-lg border p-3">
               <span className="text-secondary-text text-sm">
                 Win/Loss Ratio
               </span>
@@ -421,7 +427,7 @@ export default function CrewDetails({
                   : "0-0"}
               </span>
             </div>
-            <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+            <div className="border-border-primary bg-primary-bg flex items-center justify-between rounded-lg border p-3">
               <span className="text-secondary-text text-sm">Avg Rating</span>
               <span className="text-primary-text font-semibold">
                 {formatRating(crew.Rating)}
@@ -429,7 +435,7 @@ export default function CrewDetails({
             </div>
             {/* Only show Activity for current season */}
             {currentSeason === 19 && (
-              <div className="border-border-primary flex items-center justify-between rounded-lg border p-3">
+              <div className="border-border-primary bg-primary-bg flex items-center justify-between rounded-lg border p-3">
                 <span className="text-secondary-text text-sm">Activity</span>
                 <span
                   className={`font-semibold ${timeSinceLastBattle.includes("d") && parseInt(timeSinceLastBattle.split("d")[0]) > 14 ? "text-button-danger" : "text-button-success"}`}

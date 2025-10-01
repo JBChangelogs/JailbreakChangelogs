@@ -14,13 +14,10 @@ export default async function MoneyLeaderboardPage() {
         <Breadcrumb />
 
         <div className="mb-8">
-          <div className="flex items-center gap-3">
+          <div>
             <h1 className="text-primary-text text-3xl font-bold">
               Money Leaderboard
             </h1>
-            <span className="bg-button-info text-form-button-text rounded px-2 py-1 text-xs font-semibold uppercase">
-              New
-            </span>
           </div>
           <p className="text-secondary-text mt-2">
             Top players ranked by their total money in Jailbreak

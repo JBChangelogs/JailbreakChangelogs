@@ -67,7 +67,7 @@ const AvatarWrapper = ({
   const ringStyle =
     isOnline && !isHidden
       ? ({
-          "--tw-ring-color": "var(--color-status-success)",
+          "--tw-ring-color": "var(--color-status-success-vibrant)",
         } as React.CSSProperties)
       : {};
 
@@ -81,7 +81,10 @@ const AvatarWrapper = ({
           : "rounded-full";
 
   return (
-    <div className={`${ringClass} ${roundedClass}`} style={ringStyle}>
+    <div
+      className={`${ringClass} ${roundedClass} relative z-20`}
+      style={ringStyle}
+    >
       {children}
     </div>
   );

@@ -258,7 +258,7 @@ function CrewLeaderboardEntry({
   return (
     <div
       className={`flex flex-col gap-3 rounded-lg border p-6 transition-colors sm:flex-row sm:items-center ${
-        index <= 3 ? "" : "border-border-primary hover:border-border-focus"
+        index <= 2 ? "" : "border-border-primary hover:border-border-focus"
       }`}
       style={{
         ...(index === 0 && {
@@ -281,7 +281,7 @@ function CrewLeaderboardEntry({
       {/* Rank Badge */}
       <div
         className={`flex h-10 w-10 items-center justify-center rounded-full text-base font-bold ${
-          index <= 3 ? "text-gray-800" : "bg-button-info text-form-button-text"
+          index <= 2 ? "text-gray-800" : "bg-button-info text-form-button-text"
         }`}
         style={{
           ...(index === 0 && {

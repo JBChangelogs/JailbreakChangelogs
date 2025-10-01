@@ -87,13 +87,10 @@ export default async function CrewPage({
           <Breadcrumb />
 
           <div className="mb-6">
-            <div className="mb-4 flex items-center gap-3">
+            <div className="mb-4">
               <h1 className="text-primary-text text-4xl font-bold">
                 Crew Details
               </h1>
-              <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
             </div>
           </div>
 
