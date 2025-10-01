@@ -64,7 +64,7 @@ export default function HyperchromeCalculatorModal({
             <button
               aria-label="Close"
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10"
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10 cursor-pointer"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

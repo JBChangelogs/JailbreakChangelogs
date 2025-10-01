@@ -82,7 +82,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
             <h2>Dupe Check Results</h2>
             <button
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text"
+              className="text-secondary-text hover:text-primary-text cursor-pointer"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>

@@ -120,7 +120,7 @@ export default function TradeHistoryModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors cursor-pointer"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>

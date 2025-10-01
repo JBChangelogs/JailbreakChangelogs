@@ -52,7 +52,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           onClick={() => {
             onSearchChange("");
           }}
-          className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
+          className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
           aria-label="Clear search"
         >
           <XMarkIcon className="h-5 w-5" />

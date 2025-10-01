@@ -823,7 +823,7 @@ export default function ItemDetailsClient({
                                 setOwnerSearchTerm("");
                                 setDupedOwnersPage(1);
                               }}
-                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transition-colors"
+                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transition-colors cursor-pointer"
                               aria-label="Clear search"
                             >
                               <XMarkIcon />

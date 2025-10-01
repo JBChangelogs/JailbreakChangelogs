@@ -64,7 +64,7 @@ export default function ItemActionModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-secondary-text hover:text-primary-text rounded-full p-1"
+                className="text-secondary-text hover:text-primary-text rounded-full p-1 cursor-pointer"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
