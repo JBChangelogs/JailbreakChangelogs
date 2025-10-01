@@ -1,3 +1,6 @@
-pnpm run format:check
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+bun run format:check
 
 

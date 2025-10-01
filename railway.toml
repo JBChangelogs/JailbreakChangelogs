@@ -1,9 +1,9 @@
 [build]
 builder = "railpack"
-buildCommand = "pnpm build"
+buildCommand = "bun run build"
 
 [deploy]
-startCommand = "pnpm start"
+startCommand = "bun run start"
 healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"

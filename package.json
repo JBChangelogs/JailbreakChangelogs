@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "check": "pnpm type-check && pnpm lint",
+    "check": "bun run type-check && bun run lint",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "prepare": "husky"

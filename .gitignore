@@ -1,7 +1,27 @@
 node_modules
-package-lock.json
+.next
 .vercel
 .vscode
+
+# Env
+.env
 .env*.local
-.next
+
+# TypeScript build info
 tsconfig.tsbuildinfo
+
+# OS/Editor
+.DS_Store
+.idea
+.eslintcache
+
+# Build artifacts
+coverage/
+dist/
+
+# Lockfiles (non-Bun)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Note: keep bun.lock tracked (do not ignore)

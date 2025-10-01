@@ -33,18 +33,18 @@ We enforce ESLint + Prettier via Git hooks (Husky + lint-staged).
   - If issues remain, the commit is blocked; fix and re-commit
 
 - On push: formatting is verified
-  - Runs `pnpm format:check`; push is blocked if any files are not formatted
+  - Runs `bun run format:check`; push is blocked if any files are not formatted
 
 Manual commands (if needed):
 
 ```
-pnpm format       # write formatting changes
-pnpm format:check # check formatting without writing
+bun run format       # write formatting changes
+bun run format:check # check formatting without writing
 ```
 
 Notes:
 
-- After a fresh clone, run `pnpm install` once to set up Husky hooks.
+- After a fresh clone, run `bun install` once to set up Husky hooks.
 
 ### Editor setup
 
