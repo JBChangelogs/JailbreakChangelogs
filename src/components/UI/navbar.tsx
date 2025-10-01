@@ -87,7 +87,8 @@ export const MenuItem = ({
               <motion.div
                 transition={menuTransition}
                 layoutId="active"
-                className="bg-secondary-bg border-border-primary shadow-card-shadow rounded-2xl border backdrop-blur-sm"
+                layout
+                className="bg-secondary-bg border-border-primary shadow-card-shadow rounded-2xl border backdrop-blur-sm overflow-hidden"
               >
                 <motion.div layout className="flex flex-col gap-1 px-2 py-3">
                   {children}
