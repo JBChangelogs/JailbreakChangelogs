@@ -54,7 +54,7 @@ const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
     </div>
   ),
 });
-import { NavbarWithAuth } from "@/components/ui/navbar-with-auth";
+import { NavbarModern } from "@/components/UI/navbar";
 
 export default function Header() {
   const pathname = usePathname();
@@ -587,7 +587,7 @@ export default function Header() {
   return (
     <>
       {/* Desktop: Use new navbar */}
-      {!isMobile && <NavbarWithAuth />}
+      {!isMobile && <NavbarModern />}
 
       {/* Mobile: Use original header with drawer */}
       {isMobile && (

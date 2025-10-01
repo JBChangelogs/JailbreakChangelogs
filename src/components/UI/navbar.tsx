@@ -22,7 +22,7 @@ const ThemeToggle = dynamic(() => import("@/components/Layout/ThemeToggle"), {
 });
 import { Settings, LogOut } from "lucide-react";
 
-const transition = {
+const menuTransition = {
   type: "spring" as const,
   mass: 0.5,
   damping: 11.5,
@@ -43,17 +43,16 @@ export const MenuItem = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <div
-      onMouseEnter={() => setActive(item)}
-      onMouseLeave={() => setActive(null)}
-      className="relative"
-    >
-      <span
+    <div onMouseEnter={() => setActive(item)} className="relative">
+      <motion.span
         className={`flex cursor-pointer items-center transition-colors duration-200 ${
           active === item
             ? "bg-button-info text-form-button-text rounded-lg px-3 py-1"
             : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active rounded-lg px-3 py-1"
         }`}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
       >
         <span className="font-bold">{item}</span>
         <motion.div
@@ -72,16 +71,13 @@ export const MenuItem = ({
             <path d="M7 10l5 5 5-5z" />
           </svg>
         </motion.div>
-      </span>
+      </motion.span>
       {active !== null && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          initial={{ opacity: 0, scale: 0.85, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          transition={{
-            duration: 0.2,
-            ease: [0.4, 0, 0.2, 1],
-          }}
+          exit={{ opacity: 0, scale: 0.85, y: 10 }}
+          transition={menuTransition}
         >
           {active === item && (
             <div
@@ -89,9 +85,9 @@ export const MenuItem = ({
               style={{ top: "100%" }}
             >
               <motion.div
-                transition={transition}
+                transition={menuTransition}
                 layoutId="active"
-                className="bg-secondary-bg border-border-primary shadow-card-shadow rounded-2xl border"
+                className="bg-secondary-bg border-border-primary shadow-card-shadow rounded-2xl border backdrop-blur-sm"
               >
                 <motion.div layout className="flex flex-col gap-1 px-2 py-3">
                   {children}
@@ -119,13 +115,15 @@ export const HoveredLink = ({
   ...rest
 }: HoveredLinkProps) => {
   return (
-    <Link
-      href={href}
-      className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
-      {...rest}
-    >
-      {children}
-    </Link>
+    <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+      <Link
+        href={href}
+        className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
+        {...rest}
+      >
+        {children}
+      </Link>
+    </motion.div>
   );
 };
 
@@ -133,18 +131,27 @@ export const NavLink = ({
   href,
   children,
   className = "",
+  setActive,
 }: {
   href: string;
   children: React.ReactNode;
   className?: string;
+  setActive?: (item: string | null) => void;
 }) => {
   return (
-    <Link
-      href={href}
-      className={`text-primary-text hover:bg-button-info-hover active:bg-button-info-active active:text-form-button-text hover:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      onMouseEnter={() => setActive?.(null)}
     >
-      {children}
-    </Link>
+      <Link
+        href={href}
+        className={`text-primary-text hover:bg-button-info-hover active:bg-button-info-active active:text-form-button-text hover:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
+      >
+        {children}
+      </Link>
+    </motion.div>
   );
 };
 
@@ -165,7 +172,7 @@ export const Badge = ({
   return <span className={`${baseClasses} ${variantClasses}`}>{children}</span>;
 };
 
-export const NavbarWithAuth = ({ className }: { className?: string }) => {
+export const NavbarModern = ({ className }: { className?: string }) => {
   const [active, setActive] = useState<string | null>(null);
   const [isDiscordModalOpen, setIsDiscordModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -230,7 +237,9 @@ export const NavbarWithAuth = ({ className }: { className?: string }) => {
           onMouseLeave={() => setActive(null)}
         >
           {/* Changelogs */}
-          <NavLink href="/changelogs">Changelogs</NavLink>
+          <NavLink href="/changelogs" setActive={setActive}>
+            Changelogs
+          </NavLink>
 
           {/* Seasons */}
           <MenuItem setActive={setActive} active={active} item="Seasons">
@@ -397,11 +406,11 @@ export const NavbarWithAuth = ({ className }: { className?: string }) => {
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="bg-secondary-bg border-border-primary absolute right-0 z-50 mt-2 w-64 rounded-lg border py-2 shadow-lg"
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="bg-secondary-bg border-border-primary absolute right-0 z-50 mt-2 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
+                    initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                    transition={menuTransition}
                   >
                     {/* User info */}
                     <div className="border-border-secondary border-b px-4 py-3">
