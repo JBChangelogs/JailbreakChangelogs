@@ -73,7 +73,8 @@ export async function fetchFavoriteItemDetails(
         return { [favorite.item_id]: null };
       } catch (err) {
         console.error(
-          `[SERVER ACTION] Error fetching item details for ${favorite.item_id}:`,
+          "[SERVER ACTION] Error fetching item details for %s:",
+          favorite.item_id,
           err,
         );
         return { [favorite.item_id]: null };

@@ -13,9 +13,22 @@ import type { UserData } from "@/types/auth";
  */
 async function isImageAccessible(url: string): Promise<boolean> {
   try {
+    // Parse URL once to safely inspect components
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return false;
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+    const pathname = parsed.pathname.toLowerCase();
+    const isGif = pathname.endsWith(".gif");
+    const isTenor = hostname === "tenor.com" || hostname.endsWith(".tenor.com");
+
     // For GIF URLs (like Tenor), try a GET request instead of HEAD
-    if (url.includes(".gif") || url.includes("tenor.com")) {
-      const response = await fetch(url, {
+    if (isGif || isTenor) {
+      const response = await fetch(parsed.toString(), {
         method: "GET",
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; JailbreakChangelogs-OG/1.0)",
@@ -24,7 +37,7 @@ async function isImageAccessible(url: string): Promise<boolean> {
       return response.ok;
     }
 
-    const response = await fetch(url, { method: "HEAD" });
+    const response = await fetch(parsed.toString(), { method: "HEAD" });
     const contentType = response.headers.get("content-type");
     return response.ok && contentType
       ? contentType.startsWith("image/")
