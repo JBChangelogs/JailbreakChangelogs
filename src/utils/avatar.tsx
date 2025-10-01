@@ -32,16 +32,20 @@ export const DefaultAvatar = () => (
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="xMidYMid meet"
   >
     <circle cx="12" cy="12" r="12" fill="#121317" />
-    <path
-      d="M12 13.5C14.4853 13.5 16.5 11.4853 16.5 9C16.5 6.51472 14.4853 4.5 12 4.5C9.51472 4.5 7.5 6.51472 7.5 9C7.5 11.4853 9.51472 13.5 12 13.5Z"
-      fill="#d3d9d4"
-    />
-    <path
-      d="M12 15C8.13401 15 5 18.134 5 22H19C19 18.134 15.866 15 12 15Z"
-      fill="#d3d9d4"
-    />
+    {/* Slightly inset the figure to avoid touching the outer circle edge at tiny sizes */}
+    <g transform="translate(12,12) scale(0.92) translate(-12,-12)">
+      <path
+        d="M12 13.5C14.4853 13.5 16.5 11.4853 16.5 9C16.5 6.51472 14.4853 4.5 12 4.5C9.51472 4.5 7.5 6.51472 7.5 9C7.5 11.4853 9.51472 13.5 12 13.5Z"
+        fill="#d3d9d4"
+      />
+      <path
+        d="M12 15C8.13401 15 5 18.134 5 22H19C19 18.134 15.866 15 12 15Z"
+        fill="#d3d9d4"
+      />
+    </g>
   </svg>
 );
 
