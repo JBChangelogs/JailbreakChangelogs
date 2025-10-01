@@ -101,6 +101,57 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
   );
 };
 
+const FliktemMikudayo = ({ userId }: { userId: string }) => {
+  const [showPlayButton, setShowPlayButton] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (userId === "328826331867381762") {
+      const newAudio = new Audio("/assets/images/mikudayo.mp3");
+      newAudio.volume = 0.7;
+      setAudio(newAudio);
+      newAudio
+        .play()
+        .then(() => {
+          console.log("Fliktem successfully said Mikudayo!");
+          setShowPlayButton(false);
+        })
+        .catch((error) => {
+          console.log("Fliktem refused to say Mikudayo:", error);
+          setShowPlayButton(true);
+        });
+
+      return () => {
+        newAudio.pause();
+        newAudio.currentTime = 0;
+      };
+    }
+  }, [userId]);
+
+  const handlePlayClick = () => {
+    if (audio) {
+      audio.play().catch((error) => {
+        console.log("Fliktem still refused to say Mikudayo:", error);
+      });
+      setShowPlayButton(false);
+    }
+  };
+
+  if (!showPlayButton) return null;
+
+  return (
+    <div className="fixed right-4 bottom-4 z-50">
+      <button
+        onClick={handlePlayClick}
+        className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+        title="Fliktem says Mikudayo"
+      >
+        <BsMusicNoteBeamed className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
+      </button>
+    </div>
+  );
+};
+
 interface CommentData {
   id: number;
   author: string;
@@ -576,6 +627,7 @@ export default function UserProfileClient({
   return (
     <main className="min-h-screen pb-8">
       <LinSuperIdol userId={userId} />
+      <FliktemMikudayo userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <div className="bg-secondary-bg border-border-primary overflow-hidden rounded-lg border shadow-md">
