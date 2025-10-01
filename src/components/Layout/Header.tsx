@@ -65,7 +65,7 @@ export default function Header() {
     pathname.startsWith("/values/changelogs");
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"), { noSsr: true });
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const {
     showLoginModal,
@@ -584,6 +584,13 @@ export default function Header() {
     </List>
   );
 
+  // Avoid SSR/client mismatch flicker by rendering a placeholder until mounted
+  if (!mounted) {
+    return (
+      <div className="bg-primary-bg/75 border-border-primary sticky top-0 z-[1200] h-[64px] border-b backdrop-blur-lg" />
+    );
+  }
+
   return (
     <>
       {/* Desktop: Use new navbar */}
@@ -593,6 +600,8 @@ export default function Header() {
       {isMobile && (
         <AppBar
           position="sticky"
+          color="transparent"
+          elevation={0}
           className="bg-primary-bg/75 border-border-primary top-0 z-[1200] border-b backdrop-blur-lg"
         >
           <Toolbar className="flex items-center justify-between">
@@ -1236,7 +1245,21 @@ export default function Header() {
         ModalProps={{
           keepMounted: true,
         }}
-        className="[&_.MuiDrawer-paper]:bg-primary-bg [&_.MuiDrawer-paper]:border-border-primary [&_.MuiDrawer-paper]:text-primary-text [&_.MuiDrawer-paper]:box-border [&_.MuiDrawer-paper]:w-60 [&_.MuiDrawer-paper]:border-l"
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: "hsla(228, 13%, 8%, 0.75) !important",
+              backdropFilter: "blur(12px)",
+              backgroundImage: "none",
+              color: "var(--color-primary-text)",
+              borderLeft: "1px solid var(--color-border-primary)",
+              width: "15rem",
+              boxSizing: "border-box",
+              boxShadow: "none",
+            },
+          },
+        }}
+        className="[&_.MuiDrawer-paper]:bg-primary-bg/75 [&_.MuiDrawer-paper]:backdrop-blur-lg [&_.MuiDrawer-paper]:border-border-primary [&_.MuiDrawer-paper]:text-primary-text [&_.MuiDrawer-paper]:box-border [&_.MuiDrawer-paper]:w-60 [&_.MuiDrawer-paper]:border-l"
       >
         {drawer}
       </Drawer>
