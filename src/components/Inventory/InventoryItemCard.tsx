@@ -13,6 +13,7 @@ import {
   handleImageError,
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -29,6 +30,7 @@ interface InventoryItemCardProps {
   item: InventoryItem;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge?: (userId: string) => boolean;
   onCardClick: (item: InventoryItem) => void;
   duplicateCount?: number;
   duplicateOrder?: number;
@@ -39,6 +41,7 @@ export default function InventoryItemCard({
   item,
   getUserDisplay,
   // getUserAvatar,
+  getHasVerifiedBadge,
   onCardClick,
   duplicateCount = 1,
   duplicateOrder = 1,
@@ -180,9 +183,17 @@ export default function InventoryItemCard({
                 className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                {isOriginalOwner
-                  ? getUserDisplay(userId)
-                  : getUserDisplay(originalOwnerInfo.value)}
+                <span className="inline-flex items-center gap-2">
+                  {isOriginalOwner
+                    ? getUserDisplay(userId)
+                    : getUserDisplay(originalOwnerInfo.value)}
+                  {getHasVerifiedBadge &&
+                    (isOriginalOwner
+                      ? getHasVerifiedBadge(userId)
+                      : getHasVerifiedBadge(originalOwnerInfo.value)) && (
+                      <VerifiedBadgeIcon className="h-4 w-4" />
+                    )}
+                </span>
               </a>
             ) : (
               <span className="text-secondary-text text-sm">Unknown</span>

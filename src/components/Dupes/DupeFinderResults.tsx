@@ -67,7 +67,7 @@ export default function DupeFinderResults({
   const getUserDisplay = useCallback(
     (userId: string) => {
       const user = localRobloxUsers[userId];
-      return user?.displayName || user?.name || userId;
+      return user?.name || user?.displayName || userId;
     },
     [localRobloxUsers],
   );
@@ -86,6 +86,14 @@ export default function DupeFinderResults({
       return localRobloxAvatars[userId] || "";
     },
     [localRobloxAvatars],
+  );
+
+  const getHasVerifiedBadge = useCallback(
+    (userId: string) => {
+      const user = localRobloxUsers[userId];
+      return Boolean(user?.hasVerifiedBadge);
+    },
+    [localRobloxUsers],
   );
 
   const getDupedValueForItem = useCallback(
@@ -354,6 +362,7 @@ export default function DupeFinderResults({
             getUserDisplay={getUserDisplay}
             getUsername={getUsername}
             getUserAvatar={getUserAvatar}
+            getHasVerifiedBadge={getHasVerifiedBadge}
             dupeItemsCount={initialData.length}
             totalDupedValue={totalDupedValue}
           />
@@ -417,6 +426,7 @@ export default function DupeFinderResults({
           onPageChange={handlePageChange}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
+          getHasVerifiedBadge={getHasVerifiedBadge}
           getDupedValueForItem={getDupedValueForItem}
           onCardClick={handleCardClick}
           itemCounts={itemCounts}
@@ -442,6 +452,8 @@ export default function DupeFinderResults({
           item={selectedItem}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
+          getUsername={getUsername}
+          getHasVerifiedBadge={getHasVerifiedBadge}
           formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}

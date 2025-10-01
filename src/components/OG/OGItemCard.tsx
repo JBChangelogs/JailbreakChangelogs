@@ -12,6 +12,7 @@ import {
   handleImageError,
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -57,6 +58,7 @@ interface OGItemCardProps {
   item: OGItem;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge?: (userId: string) => boolean;
   onCardClick: (item: OGItem) => void;
   duplicateCount?: number;
   duplicateOrder?: number;
@@ -66,6 +68,7 @@ export default function OGItemCard({
   item,
   getUserDisplay,
   // getUserAvatar,
+  getHasVerifiedBadge,
   onCardClick,
   duplicateCount = 1,
   duplicateOrder = 1,
@@ -209,7 +212,12 @@ export default function OGItemCard({
               className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
-              {getUserDisplay(item.user_id)}
+              <span className="inline-flex items-center gap-2">
+                {getUserDisplay(item.user_id)}
+                {getHasVerifiedBadge && getHasVerifiedBadge(item.user_id) && (
+                  <VerifiedBadgeIcon className="h-4 w-4" />
+                )}
+              </span>
             </a>
           </div>
         </div>

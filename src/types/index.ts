@@ -129,6 +129,7 @@ export interface RobloxUser {
   name: string;
   displayName: string;
   username: string;
+  hasVerifiedBadge?: boolean;
 }
 
 export interface RobloxAvatar {

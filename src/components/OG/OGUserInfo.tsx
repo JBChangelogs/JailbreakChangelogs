@@ -7,6 +7,7 @@ import { UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DefaultAvatar } from "@/utils/avatar";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -16,6 +17,7 @@ interface OGUserInfoProps {
   getUserDisplay: (userId: string) => string;
   getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge: (userId: string) => boolean;
   originalItemsCount: number;
 }
 
@@ -25,6 +27,7 @@ export default function OGUserInfo({
   getUserDisplay,
   getUsername,
   getUserAvatar,
+  getHasVerifiedBadge,
   originalItemsCount,
 }: OGUserInfoProps) {
   return (
@@ -34,7 +37,7 @@ export default function OGUserInfo({
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="border-border-primary bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
+      <div className="border-border-primary bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
         {getUserAvatar(robloxId) ? (
           <Image
             src={getUserAvatar(robloxId)!}
@@ -50,7 +53,12 @@ export default function OGUserInfo({
         )}
         <div className="min-w-0 flex-1">
           <h3 className="text-primary-text text-lg font-bold break-words">
-            {getUserDisplay(robloxId)}
+            <span className="inline-flex items-center gap-2">
+              {getUserDisplay(robloxId)}
+              {getHasVerifiedBadge(robloxId) && (
+                <VerifiedBadgeIcon className="h-4 w-4" />
+              )}
+            </span>
           </h3>
           <p className="text-primary-text text-sm break-words opacity-75">
             @{getUsername(robloxId)}

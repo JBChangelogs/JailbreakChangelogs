@@ -29,6 +29,7 @@ interface OGItemsGridProps {
   onPageChange: (page: number) => void;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge: (userId: string) => boolean;
   onCardClick: (item: OGItem) => void;
   itemCounts?: Map<string, number>;
   duplicateOrders?: Map<string, number>;
@@ -41,6 +42,7 @@ export default function OGItemsGrid({
   onPageChange,
   getUserDisplay,
   getUserAvatar,
+  getHasVerifiedBadge,
   onCardClick,
   itemCounts = new Map(),
   duplicateOrders = new Map(),
@@ -71,6 +73,7 @@ export default function OGItemsGrid({
               item={item}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
+              getHasVerifiedBadge={getHasVerifiedBadge}
               onCardClick={onCardClick}
               duplicateCount={duplicateCount}
               duplicateOrder={duplicateOrder}

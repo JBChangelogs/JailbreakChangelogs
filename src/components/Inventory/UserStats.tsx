@@ -59,7 +59,7 @@ export default function UserStats({
     (userId: string) => {
       const user = robloxUsers[userId];
       if (!user) return userId;
-      return user.displayName || user.name || userId;
+      return user.name || user.displayName || userId;
     },
     [robloxUsers],
   );
@@ -78,6 +78,14 @@ export default function UserStats({
       return robloxAvatars[userId] || "";
     },
     [robloxAvatars],
+  );
+
+  const getHasVerifiedBadge = useCallback(
+    (userId: string) => {
+      const user = robloxUsers[userId];
+      return Boolean(user?.hasVerifiedBadge);
+    },
+    [robloxUsers],
   );
 
   // Calculate cash value
@@ -245,6 +253,7 @@ export default function UserStats({
           getUserDisplay={getUserDisplay}
           getUsername={getUsername}
           getUserAvatar={getUserAvatar}
+          getHasVerifiedBadge={getHasVerifiedBadge}
           currentData={initialData}
           isRefreshing={isRefreshing}
           onRefresh={handleRefresh}

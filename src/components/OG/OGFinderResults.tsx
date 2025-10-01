@@ -93,6 +93,7 @@ export default function OGFinderResults({
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<OGItem | null>(null);
+  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
 
   const itemsPerPage = 20;
 
@@ -100,7 +101,7 @@ export default function OGFinderResults({
   const getUserDisplay = useCallback(
     (userId: string) => {
       const user = localRobloxUsers[userId];
-      return user?.displayName || user?.name || userId;
+      return user?.name || user?.displayName || userId;
     },
     [localRobloxUsers],
   );
@@ -118,6 +119,14 @@ export default function OGFinderResults({
       return localRobloxAvatars[userId] || "";
     },
     [localRobloxAvatars],
+  );
+
+  const getHasVerifiedBadge = useCallback(
+    (userId: string) => {
+      const user = localRobloxUsers[userId];
+      return Boolean(user?.hasVerifiedBadge);
+    },
+    [localRobloxUsers],
   );
 
   // Fetch missing user data function
@@ -341,6 +350,36 @@ export default function OGFinderResults({
     return counts;
   }, [initialData?.results]);
 
+  // Progressive load trade history user data when opening modal
+  useEffect(() => {
+    if (!showHistoryModal || !selectedItem) return;
+    if (!selectedItem.history || typeof selectedItem.history === "string") {
+      return;
+    }
+
+    const missingIds: string[] = [];
+    selectedItem.history.forEach((entry) => {
+      const idStr = entry.UserId.toString();
+      const user = localRobloxUsers[idStr];
+      if (!user?.name && !user?.displayName) {
+        missingIds.push(idStr);
+      }
+    });
+
+    if (missingIds.length === 0) return;
+
+    const uniqueMissing = Array.from(new Set(missingIds));
+    setLoadingUserIds(new Set(uniqueMissing));
+
+    (async () => {
+      try {
+        await fetchMissingUserData(uniqueMissing);
+      } finally {
+        setLoadingUserIds(new Set());
+      }
+    })();
+  }, [showHistoryModal, selectedItem, localRobloxUsers, fetchMissingUserData]);
+
   // Use the pre-calculated duplicate counts
   const itemCounts = duplicateCounts;
 
@@ -451,6 +490,7 @@ export default function OGFinderResults({
                 getUserDisplay={getUserDisplay}
                 getUsername={getUsername}
                 getUserAvatar={getUserAvatar}
+                getHasVerifiedBadge={getHasVerifiedBadge}
                 originalItemsCount={initialData?.count || 0}
               />
             </div>
@@ -513,6 +553,7 @@ export default function OGFinderResults({
               onPageChange={handlePageChange}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
+              getHasVerifiedBadge={getHasVerifiedBadge}
               onCardClick={handleCardClick}
               itemCounts={itemCounts}
               duplicateOrders={duplicateOrders}
@@ -538,6 +579,9 @@ export default function OGFinderResults({
           item={selectedItem}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
+          getUsername={getUsername}
+          getHasVerifiedBadge={getHasVerifiedBadge}
+          loadingUserIds={loadingUserIds}
           formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}

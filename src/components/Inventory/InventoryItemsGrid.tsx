@@ -15,6 +15,7 @@ interface InventoryItemsGridProps {
   onPageChange: (page: number) => void;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge?: (userId: string) => boolean;
   onCardClick: (item: InventoryItem) => void;
   isLoading?: boolean;
   userId: string;
@@ -29,6 +30,7 @@ export default function InventoryItemsGrid({
   onPageChange,
   getUserDisplay,
   getUserAvatar,
+  getHasVerifiedBadge,
   onCardClick,
   isLoading = false,
   userId,
@@ -82,6 +84,7 @@ export default function InventoryItemsGrid({
               item={item}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
+              getHasVerifiedBadge={getHasVerifiedBadge}
               onCardClick={onCardClick}
               duplicateCount={duplicateCount}
               duplicateOrder={duplicateOrder}

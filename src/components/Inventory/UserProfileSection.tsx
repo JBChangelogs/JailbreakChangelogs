@@ -8,6 +8,7 @@ import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DefaultAvatar } from "@/utils/avatar";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -29,6 +30,7 @@ interface UserProfileSectionProps {
   getUserDisplay: (userId: string) => string;
   getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
   isRefreshing: boolean;
   onRefresh: () => void;
@@ -40,6 +42,7 @@ export default function UserProfileSection({
   getUserDisplay,
   getUsername,
   getUserAvatar,
+  getHasVerifiedBadge,
   currentData,
   isRefreshing,
   onRefresh,
@@ -203,7 +206,12 @@ export default function UserProfileSection({
       {/* User Info */}
       <div className="min-w-0 flex-1">
         <h3 className="text-primary-text text-lg font-bold break-words">
-          {getUserDisplay(userId)}
+          <span className="inline-flex items-center gap-2">
+            {getUserDisplay(userId)}
+            {getHasVerifiedBadge(userId) && (
+              <VerifiedBadgeIcon className="h-4 w-4" />
+            )}
+          </span>
         </h3>
         <p className="text-primary-text text-sm break-words">
           @{getUsername(userId)}

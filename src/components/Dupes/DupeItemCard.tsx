@@ -14,6 +14,7 @@ import {
   handleImageError,
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -26,6 +27,7 @@ interface DupeItemCardProps {
   itemData: Item;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge?: (userId: string) => boolean;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   duplicateNumber?: number;
@@ -37,6 +39,7 @@ export default function DupeItemCard({
   itemData,
   getUserDisplay,
   // getUserAvatar,
+  getHasVerifiedBadge,
   getDupedValueForItem,
   onCardClick,
   duplicateNumber,
@@ -186,7 +189,13 @@ export default function DupeItemCard({
               className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
-              {getUserDisplay(item.latest_owner)}
+              <span className="inline-flex items-center gap-2">
+                {getUserDisplay(item.latest_owner)}
+                {getHasVerifiedBadge &&
+                  getHasVerifiedBadge(item.latest_owner) && (
+                    <VerifiedBadgeIcon className="h-4 w-4" />
+                  )}
+              </span>
             </a>
           </div>
         </div>

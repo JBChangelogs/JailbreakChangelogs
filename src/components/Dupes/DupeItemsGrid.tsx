@@ -11,6 +11,7 @@ interface DupeItemsGridProps {
   onPageChange: (page: number) => void;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
+  getHasVerifiedBadge?: (userId: string) => boolean;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   itemCounts: Map<string, number>;
@@ -25,6 +26,7 @@ export default function DupeItemsGrid({
   onPageChange,
   getUserDisplay,
   getUserAvatar,
+  getHasVerifiedBadge,
   getDupedValueForItem,
   onCardClick,
   itemCounts,
@@ -62,6 +64,7 @@ export default function DupeItemsGrid({
               itemData={itemData}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
+              getHasVerifiedBadge={getHasVerifiedBadge}
               getDupedValueForItem={getDupedValueForItem}
               onCardClick={onCardClick}
               duplicateNumber={duplicateNumber}
