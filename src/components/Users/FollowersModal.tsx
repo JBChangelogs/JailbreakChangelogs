@@ -270,7 +270,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
             <span>Followers ({followers.length})</span>
             <button
               onClick={onClose}
-              className="text-primary-text hover:text-primary-text transition-colors"
+              className="text-primary-text hover:text-primary-text transition-colors cursor-pointer"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -300,7 +300,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                        className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                         aria-label="Clear search"
                       >
                         <XMarkIcon />

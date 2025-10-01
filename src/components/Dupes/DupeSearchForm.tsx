@@ -271,7 +271,7 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
                   setOwnerSuggestions([]);
                   setShowOwnerSuggestions(false);
                 }}
-                className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
+                className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
@@ -347,7 +347,7 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
                   setItemSuggestions([]);
                   setShowItemSuggestions(false);
                 }}
-                className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
+                className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>

@@ -375,7 +375,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2"
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
                     <XMarkIcon />

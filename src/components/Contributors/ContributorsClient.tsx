@@ -319,7 +319,7 @@ export default function ContributorsClient({
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className={`flex-shrink-0 rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
+                  className={`flex-shrink-0 rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize cursor-pointer transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
                     activeFilter === filter.key
                       ? "bg-button-info text-form-button-text"
                       : "text-secondary-text hover:text-primary-text hover:bg-quaternary-bg"
