@@ -16,9 +16,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 - **Seasons** (`/seasons`) - Seasonal content, rewards, and progression tracking
 - **Values** (`/values`) - Item value database with price tracking and history
 - **Trading** (`/trading`) - Trade advertisements and marketplace
-- **Servers** (`/servers`) - Private server listings and community servers
-- **Users** (`/users`) - User profiles and community features
-
+- **Servers** (`/servers`) -  Browse and submit private servers for grinding, hanging out, trading, and more.
 ### Specialized Tools
 - **Values Calculator** (`/values/calculator`) - Calculate item values and trading worth
 - **Inventory Checker** (`/inventories`) - Check player inventories and item ownership

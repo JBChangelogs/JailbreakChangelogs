@@ -7,9 +7,9 @@ import {
   DocumentTextIcon,
   CalendarIcon,
   ChatBubbleLeftRightIcon,
-  ArrowsRightLeftIcon,
   ShieldCheckIcon,
   CurrencyDollarIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
@@ -98,7 +98,7 @@ export default function Home() {
             Features
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Feature 1 - Combined Changelogs & Seasonal */}
+            {/* Feature 1 - Changelogs & Seasons */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <DocumentTextIcon className="text-link h-6 w-6" />
@@ -107,13 +107,55 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Access the entire history of changelogs for Roblox Jailbreak and
-                stay informed about all updates, seasonal changes, and the
-                newest rewards with their requirements.
+                Access the complete history of Jailbreak updates since 2017,
+                seasonal rewards, contracts, and XP calculators to track your
+                progress.
               </p>
             </div>
 
-            {/* Feature 2 - Private Servers */}
+            {/* Feature 2 - Player Tools */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <UserIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  Player Tools
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                Check inventories, find OG owners, detect duped items, and view
+                money leaderboards to track player progress and item ownership.
+              </p>
+            </div>
+
+            {/* Feature 3 - Trading & Values */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <CurrencyDollarIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  Trading & Values
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                View item values, create trade ads, calculate trading worth, and
+                access official trading statistics from Badimo.
+              </p>
+            </div>
+
+            {/* Feature 4 - Community Features */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <ChatBubbleLeftRightIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  Community Features
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                Join discussions, create profiles, track crew leaderboards, and
+                browse private servers with OAuth-secured community engagement.
+              </p>
+            </div>
+
+            {/* Feature 5 - Private Servers */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <CalendarIcon className="text-link h-6 w-6" />
@@ -122,68 +164,22 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Browse and submit private server listings for Roblox Jailbreak.
-                Connect with fellow players in dedicated trading and gaming
-                communities.
+                Browse and submit private servers for grinding, hanging out,
+                trading, and more. Connect with fellow players.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Community Engagement
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Engage with the community by commenting on changelogs, seasons,
-                item and trade ad pages. OAuth ensures only verified members can
-                participate.
-              </p>
-            </div>
-
-            {/* Feature 4 - Values Database */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <CurrencyDollarIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Values Database
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                View values for all tradable items in Roblox Jailbreak. Favorite
-                items, track value history, and monitor price changes over time.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <ArrowsRightLeftIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Trading Hub
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Create trade advertisements and check current item values. Post
-                your offers, request specific items, and browse through other
-                players&apos; trade listings to find the perfect deal.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
+            {/* Feature 6 - Advanced Tools */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <ShieldCheckIcon className="text-link h-6 w-6" />
                 <h3 className="text-card-headline text-xl font-semibold">
-                  Dupe Detection System
+                  Advanced Tools
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Report and check for duped items. Search by player or item to
-                see if they have been reported as duplicated in the trading
-                system.
+                Access XP calculators, dupe detection, crew rankings, and money
+                leaderboards for comprehensive Jailbreak analytics and tracking.
               </p>
             </div>
           </div>

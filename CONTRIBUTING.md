@@ -2,6 +2,17 @@
 
 First off, thank you for considering contributing to JailbreakChangelogs. It's people like you that make this project such a great tool.
 
+## Environment Setup Required
+
+**Important:** Before you can contribute to this project, you'll need to set up a local environment file with the necessary API endpoints and configuration variables. Due to resource abuse concerns, our API endpoints are not publicly available.
+
+To get access to the required environment variables and API endpoints, you'll need to:
+
+1. Reach out to [@jalenzz](https://discord.com/users/1019539798383398946) on Discord
+2. Have a one-on-one discussion about what you're looking to contribute
+
+Once you have the environment file (.env.local) set up, you can proceed with the contribution process outlined below.
+
 ## Where do I go from here?
 
 If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.xyz) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.xyz?report-issue)!
@@ -99,7 +110,7 @@ git push --force-with-lease 325-fixing-sidebar-images
 
 ## Code review
 
-A team member will review your PR and may request changes. Address these changes and push your fixes to the same branch.
+We will review your PR and may request changes. Address these changes and push your fixes to the same branch.
 
 ## What happens next?
 

@@ -130,7 +130,51 @@ export default function BotPage() {
             Bot Features
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Feature 1 */}
+            {/* Feature 1 - Inventory Commands */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <CommandLineIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  Inventory Commands
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                Check player inventories directly from Discord with /inventory
+                commands. View detailed item listings without leaving your
+                server.
+              </p>
+            </div>
+
+            {/* Feature 2 - OG Finder */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <BoltIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  OG Finder
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                Find original owners of rare items using /og commands in
+                Discord. Track item provenance and authenticity directly through
+                the bot.
+              </p>
+            </div>
+
+            {/* Feature 3 - Dupe Detection */}
+            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-2">
+                <ArrowsRightLeftIcon className="text-link h-6 w-6" />
+                <h3 className="text-card-headline text-xl font-semibold">
+                  Dupe Detection
+                </h3>
+              </div>
+              <p className="text-card-paragraph">
+                Check for duplicated items with /dupe commands. Verify item
+                authenticity before trading.
+              </p>
+            </div>
+
+            {/* Feature 4 - Season Tracking */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <CalendarIcon className="text-link h-6 w-6" />
@@ -139,81 +183,37 @@ export default function BotPage() {
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Remove the hassle of visiting the website! With season tracking,
-                you can view all the latest season content directly from the
-                Discord bot.
+                View latest season content and rewards without leaving Discord.
+                Stay updated on seasonal progress and requirements.
               </p>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 5 - Changelog History */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <DocumentTextIcon className="text-link h-6 w-6" />
                 <h3 className="text-card-headline text-xl font-semibold">
-                  Changelog Tracking
+                  Changelog History
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Stay informed about the latest updates and changes without the
-                hassle of visiting external sites. Get instant updates on
-                changelogs right from the bot.
+                View previous changelogs and seasons directly from Discord.
+                Browse the complete history of Jailbreak updates.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <ArrowsRightLeftIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Item Tracking
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Use /item and /items commands to track specific items or browse
-                all available items in Jailbreak. View detailed item information
-                directly through Discord!
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <BoltIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Fast & Efficient
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Optimized for performance with quick res ponse times and
-                efficient resource usage to keep your server running smoothly.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <CommandLineIcon className="text-link h-6 w-6" />
-                <h3 className="text-card-headline text-xl font-semibold">
-                  Easy Commands
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Access Jailbreak information quickly with simple commands. Check
-                values, view changelogs, and more with intuitive slash commands.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
+            {/* Feature 6 - Trade Features */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <ChatBubbleLeftRightIcon className="text-link h-6 w-6" />
                 <h3 className="text-card-headline text-xl font-semibold">
-                  Trade Notifications
+                  Trade Features
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Get DMs from users who want to trade with you from our trading
-                page when you make a trade ad.
+                Receive DMs when users want to trade with you and get trade ads
+                automatically posted to our Discord server for maximum
+                visibility.
               </p>
             </div>
           </div>
