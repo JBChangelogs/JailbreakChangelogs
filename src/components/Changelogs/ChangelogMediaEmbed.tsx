@@ -19,14 +19,14 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
             alt="Embedded image"
             width={800}
             height={600}
-            className="w-full rounded-lg object-contain"
+            className="w-full object-contain"
           />
         </div>
       );
     case "video":
       return (
         <div className="my-4 w-full max-w-2xl">
-          <video src={url} controls className="w-full rounded-lg" />
+          <video src={url} controls className="w-full" />
         </div>
       );
     case "audio":

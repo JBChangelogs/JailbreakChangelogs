@@ -1,15 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/UI/carousel";
 
 interface Reward {
   id: number;
-  season_number: number;
   item: string;
   requirement: string;
   link: string;
-  exclusive: string;
   bonus: string;
 }
 
@@ -18,8 +24,13 @@ interface ImageGalleryProps {
 }
 
 export default function ImageGallery({ rewards }: ImageGalleryProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const plugin = Autoplay({
+    delay: 4000,
+    stopOnInteraction: true,
+    stopOnMouseEnter: true,
+    stopOnFocusIn: true,
+  });
+
   const filteredRewards = rewards.filter((reward) => {
     // Include rewards with valid images
     if (reward.link === "N/A") return false;
@@ -39,44 +50,6 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
     return false;
   });
 
-  const handlePreviousImage = useCallback(() => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? filteredRewards.length - 1 : prev - 1,
-    );
-  }, [filteredRewards.length]);
-
-  const handleNextImage = useCallback(() => {
-    setCurrentImageIndex((prev) =>
-      prev === filteredRewards.length - 1 ? 0 : prev + 1,
-    );
-  }, [filteredRewards.length]);
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        handlePreviousImage();
-      } else if (e.key === "ArrowRight") {
-        handleNextImage();
-      }
-    },
-    [handlePreviousImage, handleNextImage],
-  );
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  useEffect(() => {
-    if (isPaused) return;
-
-    const interval = setInterval(() => {
-      handleNextImage();
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [isPaused, handleNextImage]);
-
   if (filteredRewards.length === 0) {
     return (
       <div className="flex aspect-video items-center justify-center rounded-lg">
@@ -86,68 +59,33 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
   }
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      <div className="relative aspect-video overflow-hidden rounded-lg">
-        <Image
-          src={`https://assets.jailbreakchangelogs.xyz${filteredRewards[currentImageIndex].link}`}
-          alt={filteredRewards[currentImageIndex].item}
-          fill
-          className="object-contain"
-          priority
-        />
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={() => {
-            setIsPaused(true);
-            handlePreviousImage();
-          }}
-          className="absolute top-1/2 left-2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70 sm:p-2"
-          aria-label="Previous image"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 sm:h-6 sm:w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={() => {
-            setIsPaused(true);
-            handleNextImage();
-          }}
-          className="absolute top-1/2 right-2 z-20 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70 sm:p-2"
-          aria-label="Next image"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 sm:h-6 sm:w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
+    <div className="relative w-full">
+      <Carousel
+        plugins={[plugin]}
+        className="w-full"
+        opts={{
+          loop: true,
+        }}
+      >
+        <CarouselContent>
+          {filteredRewards.map((reward, index) => (
+            <CarouselItem key={reward.id}>
+              <div className="relative aspect-video overflow-hidden rounded-lg">
+                <Image
+                  src={`https://assets.jailbreakchangelogs.xyz${reward.link}`}
+                  alt={reward.item}
+                  fill
+                  className="object-contain"
+                  priority={index === 0}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="cursor-pointer" />
+        <CarouselNext className="cursor-pointer" />
+      </Carousel>
     </div>
   );
 }

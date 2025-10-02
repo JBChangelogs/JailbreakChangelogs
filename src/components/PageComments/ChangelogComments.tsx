@@ -583,7 +583,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 rows={3}
                 className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
                   !isLoggedIn
-                    ? "bg-primary-bg border-secondary-bg text-primary-text placeholder-primary-text cursor-not-allowed"
+                    ? "bg-primary-bg border-secondary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
                     : "bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info placeholder-secondary-text"
                 }`}
                 autoCorrect="off"
@@ -600,7 +600,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={toggleSortOrder}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
