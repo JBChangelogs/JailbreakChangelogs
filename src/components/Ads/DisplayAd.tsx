@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 interface DisplayAdProps {
@@ -22,15 +23,12 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   const adRef = useRef<HTMLModElement>(null);
   const [, setAdLoaded] = useState(false);
   const [showSupportMessage, setShowSupportMessage] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
-
-  // Use current path as key to prevent React from re-rendering ads unnecessarily
-  const currentPath =
-    typeof window !== "undefined" ? window.location.pathname : "";
+  const [initializedPath, setInitializedPath] = useState<string | null>(null);
+  const currentPath = usePathname() || "";
 
   useEffect(() => {
-    // Only initialize once per path change to prevent duplicate ad requests
-    if (hasInitialized) return;
+    if (!currentPath) return;
+    if (initializedPath === currentPath) return;
 
     // Configure container dimensions based on ad format
     if (adRef.current) {
@@ -72,7 +70,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
     // Initialize AdSense ad only once per path
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
-      setHasInitialized(true);
+      setInitializedPath(currentPath);
       // Start monitoring ad status after AdSense initialization
       setTimeout(checkAdStatus, 500);
     } catch {
@@ -81,7 +79,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         setShowSupportMessage(true);
       }
     }
-  }, [adFormat, showFallback, currentPath, hasInitialized]);
+  }, [adFormat, showFallback, currentPath, initializedPath]);
 
   // Fallback: Show branded support message when ad fails to load
   if (showSupportMessage && showFallback) {
@@ -183,7 +181,6 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
 
   return (
     <ins
-      key={`${currentPath}-${adSlot}`}
       ref={adRef}
       className={`adsbygoogle ${className}`}
       style={{
