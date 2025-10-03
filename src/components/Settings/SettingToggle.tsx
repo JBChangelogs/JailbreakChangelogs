@@ -1,4 +1,4 @@
-import { Switch, FormControlLabel, Box, Typography } from "@mui/material";
+import { Switch, Field, Label, Description } from "@headlessui/react";
 import { SettingConfigItem } from "@/config/settings";
 import { UserSettings } from "@/types/auth";
 
@@ -21,50 +21,22 @@ export const SettingToggle = ({
   disabled,
 }: SettingToggleProps) => {
   return (
-    <Box sx={{ mb: 2 }}>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={value === 1}
-            onChange={(e) => onChange(name, e.target.checked ? 1 : 0)}
-            name={name}
-            disabled={disabled}
-            sx={{
-              "& .MuiSwitch-switchBase.Mui-checked": {
-                color: "var(--color-button-info)",
-              },
-              "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                backgroundColor: "var(--color-button-info)",
-              },
-              "& .MuiSwitch-track": {
-                backgroundColor: "var(--color-primary-bg)",
-                border: "1px solid var(--color-border-primary)",
-              },
-              "&.Mui-disabled": {
-                color: "var(--color-primary-text)",
-                "& + .MuiSwitch-track": {},
-              },
-            }}
-          />
-        }
-        label={
-          <Box>
-            <Typography
-              variant="subtitle1"
-              component="div"
-              sx={{ color: "var(--color-primary-text)" }}
-            >
-              {config.displayName}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "var(--color-secondary-text)" }}
-            >
-              {config.description}
-            </Typography>
-          </Box>
-        }
-      />
-    </Box>
+    <div className="mb-2">
+      <Field disabled={disabled}>
+        <Label className="text-primary-text text-base font-medium">
+          {config.displayName}
+        </Label>
+        <Description className="text-secondary-text text-sm">
+          {config.description}
+        </Description>
+        <Switch
+          checked={value === 1}
+          onChange={(checked) => onChange(name, checked ? 1 : 0)}
+          className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-primary-bg border border-border-primary transition data-checked:bg-button-info data-disabled:cursor-not-allowed data-disabled:opacity-50 cursor-pointer"
+        >
+          <span className="size-4 translate-x-1 rounded-full bg-white dark:bg-gray-200 transition group-data-checked:translate-x-6" />
+        </Switch>
+      </Field>
+    </div>
   );
 };
