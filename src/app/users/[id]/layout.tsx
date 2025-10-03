@@ -34,7 +34,8 @@ export async function generateViewport({
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      error.message.startsWith("BANNED_USER:")
+      (error.message.startsWith("BANNED_USER:") ||
+        error.message.startsWith("NOT_FOUND:"))
     ) {
       return {};
     }
@@ -158,7 +159,7 @@ export async function generateMetadata({
       };
     }
 
-    // Fallback for other errors
+    // Fallback for other errors (including NOT_FOUND)
     return {
       metadataBase: new URL("https://jailbreakchangelogs.xyz"),
       title: "User Not Found | Changelogs",
@@ -174,12 +175,23 @@ export async function generateMetadata({
         type: "website",
         url: `/users/${userId}`,
         siteName: "Jailbreak Changelogs",
+        images: [
+          {
+            url: "https://jailbreakchangelogs.xyz/assets/images/JBCL_Long_Dark_Background.png",
+            width: 1200,
+            height: 630,
+            alt: "Jailbreak Changelogs Logo",
+          },
+        ],
       },
       twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "User Not Found | Changelogs",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
+        images: [
+          "https://jailbreakchangelogs.xyz/assets/images/JBCL_Long_Dark_Background.png",
+        ],
       },
     };
   }

@@ -236,6 +236,22 @@ async function UserProfileDataFetcher({ userId }: { userId: string }) {
       );
     }
 
+    // Handle not found errors (404)
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("NOT_FOUND:")
+    ) {
+      return (
+        <UserProfileClient
+          userId={userId}
+          error={{ message: "User not found", code: 404 }}
+        />
+      );
+    }
+
     // Handle other errors
     return (
       <UserProfileClient
