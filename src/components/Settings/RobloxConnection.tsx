@@ -83,7 +83,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                   href={`https://www.roblox.com/users/${userData.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-button-info hover:text-button-info-hover font-bold inline-flex items-center gap-1 hover:underline"
+                  className="text-link hover:text-link-hover font-bold inline-flex items-center gap-1 hover:underline"
                 >
                   {userData.roblox_username}
                   <svg
