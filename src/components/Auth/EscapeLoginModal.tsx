@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 
 export default function EscapeLoginModal() {
@@ -34,7 +34,7 @@ export default function EscapeLoginModal() {
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
             Login with Token
           </div>
@@ -81,7 +81,7 @@ export default function EscapeLoginModal() {
               </button>
             </div>
           </form>
-        </Dialog.Panel>
+        </DialogPanel>
       </div>
     </Dialog>
   );

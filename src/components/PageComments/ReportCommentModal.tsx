@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
@@ -62,7 +62,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
             <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
               Report Comment #{commentId} by {commentOwner}
             </div>
@@ -105,7 +105,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                 {isSubmitting ? "Submitting..." : "Submit Report"}
               </button>
             </div>
-          </Dialog.Panel>
+          </DialogPanel>
         </div>
       </Dialog>
       <LoginModalWrapper

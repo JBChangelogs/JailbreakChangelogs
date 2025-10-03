@@ -8,7 +8,7 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 
 export default function RedeemPage() {
   const [code, setCode] = useState("");
@@ -460,11 +460,11 @@ export default function RedeemPage() {
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
+          <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
             <div className="mb-4">
-              <Dialog.Title className="text-primary-text text-xl font-semibold">
+              <DialogTitle className="text-primary-text text-xl font-semibold">
                 Confirm Code Redemption
-              </Dialog.Title>
+              </DialogTitle>
               <p className="text-secondary-text mt-2 text-sm">
                 Are you sure you want to redeem this code?
               </p>
@@ -493,7 +493,7 @@ export default function RedeemPage() {
                 Redeem Code
               </button>
             </div>
-          </Dialog.Panel>
+          </DialogPanel>
         </div>
       </Dialog>
 
@@ -508,7 +508,7 @@ export default function RedeemPage() {
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
+          <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
             <div className="absolute inset-0 overflow-hidden rounded-lg">
               <div
                 className="absolute -top-4 left-1/4 h-2 w-2 animate-bounce rounded-full bg-yellow-400"
@@ -537,9 +537,9 @@ export default function RedeemPage() {
                 <TrophyIcon className="h-10 w-10 text-white" />
               </div>
 
-              <Dialog.Title className="text-primary-text mb-4 text-3xl font-bold">
+              <DialogTitle className="text-primary-text mb-4 text-3xl font-bold">
                 Code Redeemed Successfully!
-              </Dialog.Title>
+              </DialogTitle>
 
               <p className="text-secondary-text mb-4 text-lg">
                 Your supporter code has been successfully redeemed! You now have
@@ -565,7 +565,7 @@ export default function RedeemPage() {
                 </Link>
               </div>
             </div>
-          </Dialog.Panel>
+          </DialogPanel>
         </div>
       </Dialog>
     </div>
