@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import dynamic from "next/dynamic";
+import { Box } from "@mui/material";
+import React from "react";
 
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
@@ -124,56 +125,7 @@ interface ProfileTabsProps {
   tradeAds?: TradeAd[];
 }
 
-const StyledTabs = dynamic(
-  () =>
-    import("@mui/material/Tabs").then(async (TabsModule) => {
-      const { styled } = await import("@mui/material/styles");
-      return styled(TabsModule.default)(() => ({
-        "& .MuiTabs-indicator": {
-          backgroundColor: "var(--color-button-info)",
-        },
-        "& .MuiTabs-scrollButtons": {
-          color: "var(--color-primary-text) !important",
-          "&:hover": {
-            backgroundColor: "var(--color-quaternary-bg)",
-          },
-          "&.Mui-disabled": {
-            opacity: 0.3,
-            color: "var(--color-primary-text) !important",
-          },
-        },
-        "& .MuiTabScrollButton-root": {
-          color: "var(--color-primary-text) !important",
-          "&:hover": {
-            backgroundColor: "var(--color-quaternary-bg)",
-          },
-          "&.Mui-disabled": {
-            opacity: 0.3,
-            color: "var(--color-primary-text) !important",
-          },
-        },
-        "& .MuiSvgIcon-root": {
-          color: "var(--color-primary-text) !important",
-        },
-      }));
-    }),
-  { ssr: false },
-);
-
-const StyledTab = dynamic(
-  () =>
-    import("@mui/material/Tab").then(async (TabModule) => {
-      const { styled } = await import("@mui/material/styles");
-      return styled(TabModule.default)(() => ({
-        textTransform: "none",
-        color: "var(--color-secondary-text)",
-        "&.Mui-selected": {
-          color: "var(--color-primary-text)",
-        },
-      }));
-    }),
-  { ssr: false },
-);
+// Reset to basic Tabs/Tab for debugging mobile scroll snapping
 
 const TabPanel = ({
   children,
@@ -280,23 +232,13 @@ export default function ProfileTabs({
 
   return (
     <div className="w-full">
-      <div>
-        <StyledTabs
-          value={value}
-          onChange={handleChange}
-          aria-label="profile tabs"
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-          className="[&_.MuiTab-root]:text-secondary-text [&_.MuiTab-root:hover]:text-primary-text [&_.MuiTab-root:hover]:bg-button-info/10 [&_.MuiTab-root.Mui-selected]:text-button-info [&_.MuiTab-root.Mui-selected]:border-button-info [&_.MuiTabs-indicator]:bg-button-info [&_.MuiTabs-scrollButtons]:text-secondary-text [&_.MuiTabs-scrollButtons:hover]:bg-button-info/10 [&_.MuiTabs-scrollButtons:hover]:text-primary-text [&_.MuiTab-root]:mr-1 [&_.MuiTab-root]:min-h-12 [&_.MuiTab-root]:rounded-t-lg [&_.MuiTab-root]:px-5 [&_.MuiTab-root]:py-3 [&_.MuiTab-root]:text-sm [&_.MuiTab-root]:font-medium [&_.MuiTab-root]:normal-case [&_.MuiTab-root]:transition-all [&_.MuiTab-root]:duration-200 [&_.MuiTab-root.Mui-selected]:border-b-2 [&_.MuiTab-root.Mui-selected]:font-semibold [&_.MuiTabs-indicator]:h-1 [&_.MuiTabs-indicator]:rounded-sm [&_.MuiTabs-scrollButtons.Mui-disabled]:opacity-30"
-        >
-          <StyledTab label="About" />
-          <StyledTab label="Comments" />
-          <StyledTab label="Favorites" />
-          <StyledTab label="Private Servers" />
-          {hasRobloxConnection && <StyledTab label="Roblox Profile" />}
-        </StyledTabs>
-      </div>
+      <ProfileOverflowTabs
+        value={value}
+        onChange={(e, idx) =>
+          handleChange(e as unknown as React.SyntheticEvent, idx)
+        }
+        hasRobloxConnection={hasRobloxConnection}
+      />
       <TabPanel value={value} index={0}>
         <AboutTab
           user={user}
@@ -345,5 +287,110 @@ export default function ProfileTabs({
         </TabPanel>
       )}
     </div>
+  );
+}
+
+function ProfileOverflowTabs({
+  value,
+  onChange,
+  hasRobloxConnection,
+}: {
+  value: number;
+  onChange: (e: React.SyntheticEvent, v: number) => void;
+  hasRobloxConnection: boolean;
+}) {
+  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
+  const [showArrows, setShowArrows] = React.useState(false);
+
+  const updateArrowVisibility = React.useCallback(() => {
+    const node = scrollerRef.current;
+    if (!node) return setShowArrows(false);
+    const hasOverflow = node.scrollWidth > node.clientWidth + 1;
+    setShowArrows(hasOverflow);
+  }, []);
+
+  React.useEffect(() => {
+    updateArrowVisibility();
+    const onResize = () => updateArrowVisibility();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [updateArrowVisibility]);
+
+  React.useEffect(() => {
+    updateArrowVisibility();
+  }, [value, hasRobloxConnection, updateArrowVisibility]);
+
+  const scrollByAmount = (delta: number) => {
+    const node = scrollerRef.current;
+    if (!node) return;
+    node.scrollBy({ left: delta, behavior: "smooth" });
+  };
+
+  const labels = [
+    "About",
+    "Comments",
+    "Favorites",
+    "Private Servers",
+    ...(hasRobloxConnection ? ["Roblox Profile"] : []),
+  ];
+
+  return (
+    <Box>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          type="button"
+          aria-label="scroll left"
+          onClick={() => scrollByAmount(-200)}
+          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+            showArrows ? "" : "hidden"
+          }`}
+        >
+          ‹
+        </button>
+        <div
+          ref={scrollerRef}
+          role="tablist"
+          aria-label="profile tabs"
+          className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap"
+          style={{
+            scrollbarWidth: "thin",
+            WebkitOverflowScrolling: "touch",
+            flex: 1,
+          }}
+        >
+          {labels.map((label, idx) => (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={value === idx}
+              aria-controls={`profile-tabpanel-${idx}`}
+              id={`profile-tab-${idx}`}
+              onClick={(e) =>
+                onChange(e as unknown as React.SyntheticEvent, idx)
+              }
+              className={
+                (value === idx
+                  ? "text-button-info border-button-info border-b-2 font-semibold "
+                  : "text-secondary-text hover:text-primary-text ") +
+                "px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+              }
+              style={{ display: "inline-block" }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          aria-label="scroll right"
+          onClick={() => scrollByAmount(200)}
+          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+            showArrows ? "" : "hidden"
+          }`}
+        >
+          ›
+        </button>
+      </div>
+    </Box>
   );
 }

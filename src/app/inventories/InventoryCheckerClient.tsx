@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { ThemeProvider, Tabs, Tab, Box } from "@mui/material";
+import { ThemeProvider, Box } from "@mui/material";
+import React from "react";
 import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
 import { ENABLE_WS_SCAN } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
@@ -977,29 +978,13 @@ export default function InventoryCheckerClient({
 
             {/* Tabbed Interface */}
             <div className="mt-6">
-              <Tabs
+              <InventoryOverflowTabs
                 value={activeTab}
-                onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                allowScrollButtonsMobile
-                className="[&_.MuiTab-root]:text-secondary-text [&_.MuiTab-root:hover]:text-primary-text [&_.MuiTab-root:hover]:bg-button-info/10 [&_.MuiTab-root.Mui-selected]:text-button-info [&_.MuiTab-root.Mui-selected]:border-button-info [&_.MuiTabs-indicator]:bg-button-info [&_.MuiTabs-scrollButtons]:text-secondary-text [&_.MuiTabs-scrollButtons:hover]:bg-button-info/10 [&_.MuiTabs-scrollButtons:hover]:text-primary-text [&_.MuiTab-root]:mr-1 [&_.MuiTab-root]:min-h-12 [&_.MuiTab-root]:rounded-t-lg [&_.MuiTab-root]:px-5 [&_.MuiTab-root]:py-3 [&_.MuiTab-root]:text-sm [&_.MuiTab-root]:font-medium [&_.MuiTab-root]:normal-case [&_.MuiTab-root]:transition-all [&_.MuiTab-root]:duration-200 [&_.MuiTab-root.Mui-selected]:border-b-2 [&_.MuiTab-root.Mui-selected]:font-semibold [&_.MuiTabs-indicator]:h-1 [&_.MuiTabs-indicator]:rounded-sm [&_.MuiTabs-scrollButtons.Mui-disabled]:opacity-30"
-                sx={{
-                  "& .MuiTabs-scrollButtons": {
-                    "&.Mui-disabled": {
-                      opacity: 0.3,
-                    },
-                  },
-                  "& .MuiTabScrollButton-root": {
-                    "&.Mui-disabled": {
-                      opacity: 0.3,
-                    },
-                  },
-                }}
-              >
-                <Tab label="Inventory Items" />
-                {robloxId && <Tab label="Comments" />}
-              </Tabs>
+                onChange={(e, idx) =>
+                  handleTabChange(e as unknown as React.SyntheticEvent, idx)
+                }
+                hasComments={Boolean(robloxId)}
+              />
 
               {/* Tab Content */}
               <Box className="mt-4">
@@ -1063,5 +1048,104 @@ export default function InventoryCheckerClient({
         />
       </div>
     </ThemeProvider>
+  );
+}
+
+function InventoryOverflowTabs({
+  value,
+  onChange,
+  hasComments,
+}: {
+  value: number;
+  onChange: (e: React.SyntheticEvent, v: number) => void;
+  hasComments: boolean;
+}) {
+  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
+  const [showArrows, setShowArrows] = React.useState(false);
+
+  const updateArrowVisibility = React.useCallback(() => {
+    const node = scrollerRef.current;
+    if (!node) return setShowArrows(false);
+    const hasOverflow = node.scrollWidth > node.clientWidth + 1;
+    setShowArrows(hasOverflow);
+  }, []);
+
+  React.useEffect(() => {
+    updateArrowVisibility();
+    const onResize = () => updateArrowVisibility();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [updateArrowVisibility]);
+
+  React.useEffect(() => {
+    updateArrowVisibility();
+  }, [value, hasComments, updateArrowVisibility]);
+
+  const scrollByAmount = (delta: number) => {
+    const node = scrollerRef.current;
+    if (!node) return;
+    node.scrollBy({ left: delta, behavior: "smooth" });
+  };
+
+  const labels = ["Inventory Items", ...(hasComments ? ["Comments"] : [])];
+
+  return (
+    <Box>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          type="button"
+          aria-label="scroll left"
+          onClick={() => scrollByAmount(-200)}
+          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+            showArrows ? "" : "hidden"
+          }`}
+        >
+          ‹
+        </button>
+        <div
+          ref={scrollerRef}
+          role="tablist"
+          aria-label="inventory tabs"
+          className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap"
+          style={{
+            scrollbarWidth: "thin",
+            WebkitOverflowScrolling: "touch",
+            flex: 1,
+          }}
+        >
+          {labels.map((label, idx) => (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={value === idx}
+              aria-controls={`inventory-tabpanel-${idx}`}
+              id={`inventory-tab-${idx}`}
+              onClick={(e) =>
+                onChange(e as unknown as React.SyntheticEvent, idx)
+              }
+              className={
+                (value === idx
+                  ? "text-button-info border-button-info border-b-2 font-semibold "
+                  : "text-secondary-text hover:text-primary-text ") +
+                "px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+              }
+              style={{ display: "inline-block" }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          aria-label="scroll right"
+          onClick={() => scrollByAmount(200)}
+          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+            showArrows ? "" : "hidden"
+          }`}
+        >
+          ›
+        </button>
+      </div>
+    </Box>
   );
 }

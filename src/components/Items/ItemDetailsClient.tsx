@@ -4,7 +4,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ThemeProvider, Tabs, Tab, Box, Pagination } from "@mui/material";
+import { ThemeProvider, Box, Pagination } from "@mui/material";
+import React from "react";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
@@ -282,6 +283,120 @@ export default function ItemDetailsClient({
       window.location.hash = "comments";
     }
   };
+
+  // Custom horizontal scroll tabs to avoid MUI auto-centering behavior
+  const ItemDetailsTabs = React.useMemo(() => {
+    const TabsInner = React.memo(
+      function TabsInner({
+        value,
+        onChange,
+      }: {
+        value: number;
+        onChange: (e: React.SyntheticEvent, v: number) => void;
+      }) {
+        const scrollerRef = React.useRef<HTMLDivElement | null>(null);
+        const [showArrows, setShowArrows] = React.useState(false);
+
+        const scrollByAmount = (delta: number) => {
+          const node = scrollerRef.current;
+          if (!node) return;
+          node.scrollBy({ left: delta, behavior: "smooth" });
+        };
+
+        const updateArrowVisibility = React.useCallback(() => {
+          const node = scrollerRef.current;
+          if (!node) return setShowArrows(false);
+          // When wrapping is enabled on desktop, overflow-x is visible and widths are similar
+          const hasOverflow = node.scrollWidth > node.clientWidth + 1;
+          setShowArrows(hasOverflow);
+        }, []);
+
+        React.useEffect(() => {
+          updateArrowVisibility();
+          const onResize = () => updateArrowVisibility();
+          window.addEventListener("resize", onResize);
+          return () => window.removeEventListener("resize", onResize);
+        }, [updateArrowVisibility]);
+
+        React.useEffect(() => {
+          // Re-evaluate when active tab changes (sizes can shift slightly)
+          updateArrowVisibility();
+        }, [value, updateArrowVisibility]);
+
+        const labels = [
+          "Details",
+          "Value History",
+          "Changes",
+          "Dupes",
+          "Similar Items",
+          "Comments",
+        ];
+
+        return (
+          <Box>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                type="button"
+                aria-label="scroll left"
+                onClick={() => scrollByAmount(-200)}
+                className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+                  showArrows ? "" : "hidden"
+                }`}
+              >
+                ‹
+              </button>
+              <div
+                ref={scrollerRef}
+                role="tablist"
+                aria-label="item details tabs"
+                style={{
+                  scrollbarWidth: "thin",
+                  WebkitOverflowScrolling: "touch",
+                  flex: 1,
+                }}
+                className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap"
+              >
+                {labels.map((label, idx) => (
+                  <button
+                    key={label}
+                    role="tab"
+                    aria-selected={value === idx}
+                    aria-controls={`item-tabpanel-${idx}`}
+                    id={`item-tab-${idx}`}
+                    onClick={(e) =>
+                      onChange(e as unknown as React.SyntheticEvent, idx)
+                    }
+                    style={{ display: "inline-block" }}
+                    className={
+                      (value === idx
+                        ? "text-button-info border-button-info border-b-2 font-semibold "
+                        : "text-secondary-text hover:text-primary-text ") +
+                      "px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                aria-label="scroll right"
+                onClick={() => scrollByAmount(200)}
+                className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
+                  showArrows ? "" : "hidden"
+                }`}
+              >
+                ›
+              </button>
+            </div>
+          </Box>
+        );
+      },
+      (prev, next) => prev.value === next.value,
+    );
+
+    return TabsInner;
+  }, []);
 
   const currentItem = selectedVariant || item;
 
@@ -572,48 +687,7 @@ export default function ItemDetailsClient({
                   )}
               </div>
 
-              <Box className="border-secondary-text border-b">
-                <Tabs
-                  value={activeTab}
-                  onChange={handleTabChange}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  allowScrollButtonsMobile
-                  className="[&_.MuiTab-root]:text-secondary-text [&_.MuiTab-root:hover]:text-primary-text [&_.MuiTab-root:hover]:bg-button-info/10 [&_.MuiTab-root.Mui-selected]:text-button-info [&_.MuiTab-root.Mui-selected]:border-button-info [&_.MuiTabs-indicator]:bg-button-info [&_.MuiTabs-scrollButtons]:text-secondary-text [&_.MuiTabs-scrollButtons:hover]:bg-button-info/10 [&_.MuiTabs-scrollButtons:hover]:text-primary-text [&_.MuiTab-root]:mr-1 [&_.MuiTab-root]:min-h-12 [&_.MuiTab-root]:rounded-t-lg [&_.MuiTab-root]:px-5 [&_.MuiTab-root]:py-3 [&_.MuiTab-root]:text-sm [&_.MuiTab-root]:font-medium [&_.MuiTab-root]:normal-case [&_.MuiTab-root]:transition-all [&_.MuiTab-root]:duration-200 [&_.MuiTab-root.Mui-selected]:border-b-2 [&_.MuiTab-root.Mui-selected]:font-semibold [&_.MuiTabs-indicator]:h-1 [&_.MuiTabs-indicator]:rounded-sm [&_.MuiTabs-scrollButtons.Mui-disabled]:opacity-30"
-                  sx={{
-                    "& .MuiTabs-scrollButtons": {
-                      color: "var(--color-primary-text) !important",
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                      "&.Mui-disabled": {
-                        opacity: 0.3,
-                        color: "var(--color-primary-text) !important",
-                      },
-                    },
-                    "& .MuiTabScrollButton-root": {
-                      color: "var(--color-primary-text) !important",
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                      "&.Mui-disabled": {
-                        opacity: 0.3,
-                        color: "var(--color-primary-text) !important",
-                      },
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: "var(--color-primary-text) !important",
-                    },
-                  }}
-                >
-                  <Tab label="Details" />
-                  <Tab label="Value History" />
-                  <Tab label="Changes" />
-                  <Tab label="Dupes" />
-                  <Tab label="Similar Items" />
-                  <Tab label="Comments" />
-                </Tabs>
-              </Box>
+              <ItemDetailsTabs value={activeTab} onChange={handleTabChange} />
 
               {activeTab === 0 && (
                 <>
@@ -771,7 +845,7 @@ export default function ItemDetailsClient({
                     <>
                       {/* Owners Grid */}
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <h3 className="text-primary-text text-2xl font-bold">
                             Duped Owners List
                           </h3>
