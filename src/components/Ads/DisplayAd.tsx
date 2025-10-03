@@ -25,6 +25,9 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   const [showSupportMessage, setShowSupportMessage] = useState(false);
   const [initializedPath, setInitializedPath] = useState<string | null>(null);
   const currentPath = usePathname() || "";
+  const observerRef = useRef<MutationObserver | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const finishedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!currentPath) return;
@@ -47,38 +50,84 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
       }
     }
 
-    // Official Google AdSense method for detecting ad load status
-    const checkAdStatus = () => {
-      if (adRef.current) {
-        const adStatus = adRef.current.getAttribute("data-ad-status");
-
-        if (adStatus === "filled") {
-          setAdLoaded(true);
-          setShowSupportMessage(false);
-        } else if (adStatus === "unfilled") {
-          // No ad inventory available or ad blocked - show support message
-          if (showFallback) {
-            setShowSupportMessage(true);
-          }
-        } else {
-          // Ad still loading, check again in 1 second
-          setTimeout(checkAdStatus, 1000);
-        }
-      }
-    };
-
     // Initialize AdSense ad only once per path
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       setInitializedPath(currentPath);
-      // Start monitoring ad status after AdSense initialization
-      setTimeout(checkAdStatus, 500);
+      // Start monitoring ad status via MutationObserver
+      const element = adRef.current;
+      if (element) {
+        finishedRef.current = false;
+
+        const evaluateStatus = () => {
+          if (!element || finishedRef.current) return;
+          const adStatus = element.getAttribute("data-ad-status");
+          if (adStatus === "filled") {
+            finishedRef.current = true;
+            setAdLoaded(true);
+            setShowSupportMessage(false);
+            if (observerRef.current) observerRef.current.disconnect();
+            if (timeoutRef.current) {
+              window.clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+          } else if (adStatus === "unfilled") {
+            finishedRef.current = true;
+            if (showFallback) setShowSupportMessage(true);
+            if (observerRef.current) observerRef.current.disconnect();
+            if (timeoutRef.current) {
+              window.clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+          }
+        };
+
+        // Observe attribute changes for immediate reaction
+        observerRef.current = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            if (
+              mutation.type === "attributes" &&
+              mutation.attributeName === "data-ad-status"
+            ) {
+              evaluateStatus();
+            }
+          }
+        });
+        observerRef.current.observe(element, {
+          attributes: true,
+          attributeFilter: ["data-ad-status"],
+        });
+
+        // Evaluate immediately in case the attribute is already set by the time we attach
+        evaluateStatus();
+
+        // Safety timeout in case the attribute never appears (e.g., script blocked)
+        timeoutRef.current = window.setTimeout(() => {
+          if (!finishedRef.current && showFallback) {
+            setShowSupportMessage(true);
+          }
+          if (observerRef.current) observerRef.current.disconnect();
+          timeoutRef.current = null;
+        }, 9000);
+      }
     } catch {
       // AdSense blocked or unavailable - show support message immediately
       if (showFallback) {
         setShowSupportMessage(true);
       }
     }
+    return () => {
+      // Cleanup observer and timeout on unmount or path change
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      finishedRef.current = false;
+    };
   }, [adFormat, showFallback, currentPath, initializedPath]);
 
   // Fallback: Show branded support message when ad fails to load
@@ -196,7 +245,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         maxHeight: adFormat === "fluid" ? "500px" : undefined,
         ...style,
       }}
-      data-ad-client="ca-pub-8152532464536367"
+      data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
       data-ad-slot={adSlot}
       data-ad-format={adFormat}
       {...(layoutKey ? { "data-ad-layout-key": layoutKey } : {})}
