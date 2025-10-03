@@ -54,6 +54,48 @@ export default function InventoryItems({
 
   const itemsPerPage = 20;
 
+  // Helper function to get variant-specific values for inventory items
+  const getVariantSpecificValues = (
+    item: InventoryItem,
+    baseItemData: Item,
+  ) => {
+    // If the item has children (variants), try to match based on creation date
+    if (baseItemData.children && baseItemData.children.length > 0) {
+      // Get the year from the created date
+      const createdAtInfo = item.info.find(
+        (info) => info.title === "Created At",
+      );
+      const createdYear = createdAtInfo
+        ? new Date(createdAtInfo.value).getFullYear().toString()
+        : null;
+
+      // Find the child variant that matches the created year
+      const matchingChild = createdYear
+        ? baseItemData.children.find(
+            (child) =>
+              child.sub_name === createdYear &&
+              child.data &&
+              child.data.cash_value &&
+              child.data.cash_value !== "N/A" &&
+              child.data.cash_value !== null,
+          )
+        : null;
+
+      if (matchingChild) {
+        return {
+          cash_value: matchingChild.data.cash_value,
+          duped_value: matchingChild.data.duped_value,
+        };
+      }
+    }
+
+    // Fall back to base item values
+    return {
+      cash_value: baseItemData.cash_value,
+      duped_value: baseItemData.duped_value,
+    };
+  };
+
   // Event handlers
   const handleCardClick = (item: InventoryItem) => {
     setSelectedItemForAction(item);
@@ -205,10 +247,22 @@ export default function InventoryItems({
       return true;
     });
 
-    const mappedItems = filtered.map((item) => ({
-      item,
-      itemData: itemsData.find((data) => data.id === item.item_id)!,
-    }));
+    const mappedItems = filtered.map((item) => {
+      const baseItemData = itemsData.find((data) => data.id === item.item_id)!;
+      const variantValues = getVariantSpecificValues(item, baseItemData);
+
+      // Create a modified item data object with variant-specific values
+      const itemDataWithVariants = {
+        ...baseItemData,
+        cash_value: variantValues.cash_value,
+        duped_value: variantValues.duped_value,
+      };
+
+      return {
+        item,
+        itemData: itemDataWithVariants,
+      };
+    });
 
     // Sort the items
     return [...mappedItems].sort((a, b) => {

@@ -4,6 +4,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import { InventoryItem } from "@/app/inventories/types";
+import { Item } from "@/types";
 import {
   getItemImagePath,
   isVideoItem,
@@ -14,6 +15,7 @@ import {
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { formatFullValue } from "@/utils/values";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -28,6 +30,7 @@ const formatNumber = (num: number) => {
 
 interface InventoryItemCardProps {
   item: InventoryItem;
+  itemData?: Item;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge?: (userId: string) => boolean;
@@ -39,6 +42,7 @@ interface InventoryItemCardProps {
 
 export default function InventoryItemCard({
   item,
+  itemData,
   getUserDisplay,
   // getUserAvatar,
   getHasVerifiedBadge,
@@ -172,6 +176,76 @@ export default function InventoryItemCard({
             </div>
           </Tooltip>
         </div>
+
+        {/* Cash Value */}
+        {itemData && (
+          <div>
+            <div className="text-secondary-text text-sm">CASH VALUE</div>
+            <Tooltip
+              title={formatFullValue(itemData.cash_value)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                <span className="sm:hidden">
+                  {itemData.cash_value === null || itemData.cash_value === "N/A"
+                    ? "N/A"
+                    : itemData.cash_value}
+                </span>
+                <span className="hidden sm:inline">
+                  {formatFullValue(itemData.cash_value)}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* Duped Value */}
+        {itemData && (
+          <div>
+            <div className="text-secondary-text text-sm">DUPED VALUE</div>
+            <Tooltip
+              title={formatFullValue(itemData.duped_value)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                <span className="sm:hidden">
+                  {itemData.duped_value === null ||
+                  itemData.duped_value === "N/A"
+                    ? "N/A"
+                    : itemData.duped_value}
+                </span>
+                <span className="hidden sm:inline">
+                  {formatFullValue(itemData.duped_value)}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
         <div>
           <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
           <div className="text-xl font-bold">
