@@ -13,6 +13,8 @@ import { formatProfileDate } from "@/utils/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
+import { useAdReloader } from "@/hooks/useAdReloader";
+import { triggerAdReload } from "@/utils/adUtils";
 import { Season, CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 
@@ -35,6 +37,17 @@ export default function SeasonDetailsClient({
   initialUserMap = {},
 }: SeasonDetailsClientProps) {
   const router = useRouter();
+
+  // Initialize ad reloader for route changes
+  useAdReloader({
+    enabled: true,
+    onRouteChangeStart: () => {
+      console.log("Route change started - clearing ads");
+    },
+    onRouteChangeComplete: () => {
+      console.log("Route change completed - reloading ads");
+    },
+  });
 
   // Use state to manage the current season
   const [currentSeasonState, setCurrentSeasonState] = useState(currentSeason);
@@ -107,6 +120,11 @@ export default function SeasonDetailsClient({
 
       // Update the current season data directly
       setCurrentSeasonState(selectedSeason);
+
+      // Trigger ad reload after state update
+      setTimeout(() => {
+        triggerAdReload();
+      }, 100);
     } else {
       // If the season is not in our list, navigate to fetch it
       router.replace(`/seasons/${selectedId}`);
@@ -123,6 +141,11 @@ export default function SeasonDetailsClient({
 
       // Update the current season data directly
       setCurrentSeasonState(currentSeason);
+
+      // Trigger ad reload after state update
+      setTimeout(() => {
+        triggerAdReload();
+      }, 100);
     } else {
       // Fallback to router navigation if current season not found
       router.push(`/seasons/${latestSeasonNumber}`);

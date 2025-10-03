@@ -10,6 +10,7 @@ interface DisplayAdProps {
   adFormat?: "auto" | "fluid"; // AdSense ad format type
   layoutKey?: string; // Required for in-feed ads to maintain layout
   showFallback?: boolean; // Show support message when ad fails to load
+  enableReloading?: boolean; // Enable ad reloading on route changes
 }
 
 const DisplayAd: React.FC<DisplayAdProps> = ({
@@ -19,6 +20,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   adFormat = "auto",
   layoutKey,
   showFallback = true,
+  enableReloading = true,
 }) => {
   const adRef = useRef<HTMLModElement>(null);
   const [, setAdLoaded] = useState(false);
@@ -250,6 +252,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
       data-ad-format={adFormat}
       {...(layoutKey ? { "data-ad-layout-key": layoutKey } : {})}
       data-full-width-responsive={adFormat === "auto" ? "true" : undefined}
+      {...(enableReloading ? { "data-ad": "true" } : {})}
     />
   );
 };
