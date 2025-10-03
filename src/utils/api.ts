@@ -496,6 +496,7 @@ export async function fetchLatestChangelog(): Promise<Changelog> {
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
+    cache: "no-store",
   });
   if (!response.ok) throw new Error("Failed to fetch latest changelog");
   return response.json();
@@ -704,6 +705,7 @@ export async function fetchLatestSeason() {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
+      cache: "no-store",
     });
 
     if (!response.ok) {

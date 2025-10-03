@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { fetchLatestSeason } from "@/utils/api";
 
+export const revalidate = 60;
+
 export default async function SeasonsPage() {
   try {
     // Fetch the latest season and redirect directly to it

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { fetchLatestChangelog } from "@/utils/api";
 
+export const revalidate = 60;
+
 export default async function ChangelogsPage() {
   try {
     // Fetch the latest changelog and redirect directly to it
