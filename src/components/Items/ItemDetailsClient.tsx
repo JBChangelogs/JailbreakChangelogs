@@ -355,7 +355,7 @@ export default function ItemDetailsClient({
                   WebkitOverflowScrolling: "touch",
                   flex: 1,
                 }}
-                className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap"
+                className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap border-b-2 border-secondary-text"
               >
                 {labels.map((label, idx) => (
                   <button
@@ -370,9 +370,9 @@ export default function ItemDetailsClient({
                     style={{ display: "inline-block" }}
                     className={
                       (value === idx
-                        ? "text-button-info border-button-info border-b-2 font-semibold "
-                        : "text-secondary-text hover:text-primary-text ") +
-                      "px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+                        ? "text-button-info border-button-info border-b-2 font-semibold"
+                        : "text-secondary-text hover:text-primary-text") +
+                      " px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
                     }
                   >
                     {label}

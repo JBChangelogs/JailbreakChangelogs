@@ -170,6 +170,24 @@ const doesSuggestionTypeApplyToKey = (
   return false;
 };
 
+// Return a human-friendly label for the suggestion type (or fallback to 'Value')
+const formatSuggestionTypeLabel = (
+  suggestionType?: string,
+  changeKey?: string,
+) => {
+  if (
+    doesSuggestionTypeApplyToKey(suggestionType, changeKey) &&
+    suggestionType
+  ) {
+    const text = suggestionType.replace(/_/g, " ");
+    return text
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }
+  return "Value";
+};
+
 export default function ItemChangelogs({
   initialChanges,
   initialUserMap,
@@ -719,20 +737,11 @@ export default function ItemChangelogs({
                               key,
                             ) ? (
                               <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
-                                {(() => {
-                                  const text =
-                                    change.suggestion_data!.metadata!.suggestion_type!.replace(
-                                      /_/g,
-                                      " ",
-                                    );
-                                  return text
-                                    .split(" ")
-                                    .map(
-                                      (w) =>
-                                        w.charAt(0).toUpperCase() + w.slice(1),
-                                    )
-                                    .join(" ");
-                                })()}
+                                {formatSuggestionTypeLabel(
+                                  change.suggestion_data?.metadata
+                                    ?.suggestion_type,
+                                  key,
+                                )}
                               </span>
                             ) : (
                               <>{key.replace(/_/g, " ")}:</>
@@ -742,7 +751,11 @@ export default function ItemChangelogs({
                             <div className="min-w-0">
                               <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                 <FaCircleMinus className="text-button-danger h-4 w-4" />
-                                OLD VALUE
+                                {`OLD ${formatSuggestionTypeLabel(
+                                  change.suggestion_data?.metadata
+                                    ?.suggestion_type,
+                                  key,
+                                ).toUpperCase()}`}
                               </div>
                               <div
                                 className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
@@ -785,7 +798,11 @@ export default function ItemChangelogs({
                             <div className="min-w-0">
                               <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                 <FaPlusCircle className="text-button-success h-4 w-4" />
-                                NEW VALUE
+                                {`NEW ${formatSuggestionTypeLabel(
+                                  change.suggestion_data?.metadata
+                                    ?.suggestion_type,
+                                  key,
+                                ).toUpperCase()}`}
                               </div>
                               <div
                                 className="text-primary-text overflow-hidden text-lg font-bold break-words"
