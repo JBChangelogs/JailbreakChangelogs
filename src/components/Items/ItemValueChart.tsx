@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchItemHistory } from "@/utils/api";
 import { Button, ButtonGroup, Skeleton } from "@mui/material";
 import toast from "react-hot-toast";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -40,6 +41,15 @@ interface ValueHistory {
   date: string;
   cash_value: string;
   duped_value: string;
+  metadata?: {
+    ItemId: number;
+    Type: string;
+    Name: string;
+    TimesTraded: number;
+    UniqueCirculation: number;
+    DemandMultiple: number;
+    LastUpdated: number;
+  } | null;
 }
 
 interface ItemValueChartProps {
@@ -54,6 +64,11 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
   );
   const [loading, setLoading] = useState(true);
   const chartRef = useRef<ChartJS<"line">>(null);
+  const tradingChartRef = useRef<ChartJS<"line">>(null);
+  const { theme } = useTheme();
+
+  // Text color derived from current theme (stable reference)
+  const textColor = theme === "light" ? "#1a1a1a" : "#fffffe";
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -82,6 +97,24 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
     };
     loadZoomPlugin();
   }, []);
+
+  // Update chart colors when theme changes
+  useEffect(() => {
+    if (chartRef.current) {
+      const chart = chartRef.current;
+      chart.options.scales!.x!.ticks!.color = textColor;
+      chart.options.scales!.y!.ticks!.color = textColor;
+      chart.options.plugins!.legend!.labels!.color = textColor;
+      chart.update();
+    }
+    if (tradingChartRef.current) {
+      const chart = tradingChartRef.current;
+      chart.options.scales!.x!.ticks!.color = textColor;
+      chart.options.scales!.y!.ticks!.color = textColor;
+      chart.options.plugins!.legend!.labels!.color = textColor;
+      chart.update();
+    }
+  }, [textColor]);
 
   if (loading) {
     return (
@@ -233,6 +266,9 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
 
   const filteredData = getFilteredData();
 
+  // Filter data that has metadata for trading metrics
+  const tradingData = filteredData.filter((item) => item.metadata !== null);
+
   const chartData: ChartData<"line"> = {
     labels: filteredData.map((item) => new Date(parseInt(item.date) * 1000)),
     datasets: [
@@ -241,6 +277,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         data: filteredData.map((item) => processValue(item.cash_value)),
         borderColor: "#2462cd",
         backgroundColor: "rgba(36, 98, 205, 0.2)",
+        borderWidth: 4,
         fill: true,
         tension: 0.5,
         pointRadius: 0,
@@ -254,6 +291,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         data: filteredData.map((item) => processValue(item.duped_value)),
         borderColor: "#ed4f4f",
         backgroundColor: "rgba(237, 79, 79, 0.2)",
+        borderWidth: 4,
         fill: true,
         tension: 0.5,
         pointRadius: 0,
@@ -261,6 +299,43 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         pointHoverBackgroundColor: "#fffffe",
         pointHoverBorderColor: "#ed4f4f",
         pointHoverBorderWidth: 2,
+      },
+    ],
+  };
+
+  // Trading metrics chart data
+  const tradingChartData: ChartData<"line"> = {
+    labels: tradingData.map((item) => new Date(parseInt(item.date) * 1000)),
+    datasets: [
+      {
+        label: "Times Traded",
+        data: tradingData.map((item) => item.metadata?.TimesTraded || 0),
+        borderColor: "#10b981",
+        backgroundColor: "rgba(16, 185, 129, 0.2)",
+        borderWidth: 4,
+        fill: true,
+        tension: 0.5,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: "#fffffe",
+        pointHoverBorderColor: "#10b981",
+        pointHoverBorderWidth: 2,
+        yAxisID: "y",
+      },
+      {
+        label: "Unique Circulation",
+        data: tradingData.map((item) => item.metadata?.UniqueCirculation || 0),
+        borderColor: "#f59e0b",
+        backgroundColor: "rgba(245, 158, 11, 0.2)",
+        borderWidth: 4,
+        fill: true,
+        tension: 0.5,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: "#fffffe",
+        pointHoverBorderColor: "#f59e0b",
+        pointHoverBorderWidth: 2,
+        yAxisID: "y",
       },
     ],
   };
@@ -276,7 +351,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
       legend: {
         position: "top" as const,
         labels: {
-          color: "#94a1b2",
+          color: textColor,
         },
       },
       zoom: {
@@ -301,9 +376,9 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         enabled: true,
         mode: "index" as const,
         intersect: false,
-        backgroundColor: "#16161a",
-        titleColor: "#fffffe",
-        bodyColor: "#94a1b2",
+        backgroundColor: textColor === "#1a1a1a" ? "#fffffe" : "#16161a",
+        titleColor: textColor,
+        bodyColor: theme === "light" ? "#6b7280" : "#94a1b2",
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -337,7 +412,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
           display: false,
         },
         ticks: {
-          color: "#fffffe",
+          color: textColor,
           display: false,
         },
       },
@@ -349,7 +424,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
           color: "rgba(148, 161, 178, 0.3)",
         },
         ticks: {
-          color: "#fffffe",
+          color: textColor,
           callback: function (tickValue: number | string) {
             return formatValue(Number(tickValue));
           },
@@ -358,71 +433,187 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
     },
   };
 
+  // Trading metrics chart options
+  const tradingOptions: ChartOptions<"line"> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index" as const,
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        position: "top" as const,
+        labels: {
+          color: textColor,
+        },
+      },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: "x",
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          pinch: {
+            enabled: true,
+          },
+          mode: "x",
+        },
+        limits: {
+          x: { min: "original", max: "original", minRange: 3600 * 1000 * 24 }, // Minimum 1 day range
+        },
+      },
+      tooltip: {
+        enabled: true,
+        mode: "index" as const,
+        intersect: false,
+        backgroundColor: textColor === "#1a1a1a" ? "#fffffe" : "#16161a",
+        titleColor: textColor,
+        bodyColor: theme === "light" ? "#6b7280" : "#94a1b2",
+        borderWidth: 1,
+        padding: 10,
+        callbacks: {
+          title: function (context: TooltipItem<"line">[]) {
+            const date = new Date(context[0].parsed.x);
+            return date.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
+          },
+          label: function (context: TooltipItem<"line">) {
+            return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day" as const,
+          displayFormats: {
+            day: "MMM dd",
+          },
+        },
+        border: {
+          color: "transparent",
+        },
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: textColor,
+          display: false,
+        },
+      },
+      y: {
+        border: {
+          color: "transparent",
+        },
+        grid: {
+          color: "rgba(148, 161, 178, 0.3)",
+        },
+        ticks: {
+          color: textColor,
+          callback: function (tickValue: number | string) {
+            return Number(tickValue).toLocaleString();
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <div className="mb-8 rounded-lg p-2">
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm" style={{ color: "#fffffe" }}>
-          Value History
-        </h3>
-        <ButtonGroup size="small" variant="outlined">
-          <Button
-            onClick={() => handleDateRangeChange("1w")}
-            className={`border-secondary hover:border-border-focus transition-colors ${
-              hasDataForRange("1w") ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
-            style={{ color: dateRange === "1w" ? "#2461cc" : "#fffffe" }}
+    <div className="mb-8 rounded-lg p-2 space-y-8">
+      {/* Value History Chart */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-primary-text">Value History</h3>
+          <ButtonGroup size="small" variant="outlined">
+            <Button
+              onClick={() => handleDateRangeChange("1w")}
+              className={`border-secondary hover:border-border-focus transition-colors ${
+                hasDataForRange("1w") ? "cursor-pointer" : "cursor-not-allowed"
+              } ${dateRange === "1w" ? "text-button-info" : "text-primary-text"}`}
+            >
+              1W
+            </Button>
+            <Button
+              onClick={() => handleDateRangeChange("1m")}
+              className={`border-secondary hover:border-border-focus transition-colors ${
+                hasDataForRange("1m") ? "cursor-pointer" : "cursor-not-allowed"
+              } ${dateRange === "1m" ? "text-button-info" : "text-primary-text"}`}
+            >
+              1M
+            </Button>
+            <Button
+              onClick={() => handleDateRangeChange("6m")}
+              className={`border-secondary hover:border-border-focus transition-colors ${
+                hasDataForRange("6m") ? "cursor-pointer" : "cursor-not-allowed"
+              } ${dateRange === "6m" ? "text-button-info" : "text-primary-text"}`}
+            >
+              6M
+            </Button>
+            <Button
+              onClick={() => handleDateRangeChange("1y")}
+              className={`border-secondary hover:border-border-focus transition-colors ${
+                hasDataForRange("1y") ? "cursor-pointer" : "cursor-not-allowed"
+              } ${dateRange === "1y" ? "text-button-info" : "text-primary-text"}`}
+            >
+              1Y
+            </Button>
+            <Button
+              onClick={() => handleDateRangeChange("all")}
+              className={`border-secondary hover:border-border-focus transition-colors ${
+                hasDataForRange("all") ? "cursor-pointer" : "cursor-not-allowed"
+              } ${dateRange === "all" ? "text-button-info" : "text-primary-text"}`}
+            >
+              All
+            </Button>
+          </ButtonGroup>
+        </div>
+        <div className="h-[350px]">
+          <Line ref={chartRef} data={chartData} options={options} />
+        </div>
+        <div className="mt-2 flex justify-end">
+          <button
+            onClick={() => chartRef.current?.resetZoom()}
+            className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
           >
-            1W
-          </Button>
-          <Button
-            onClick={() => handleDateRangeChange("1m")}
-            className={`border-secondary hover:border-border-focus transition-colors ${
-              hasDataForRange("1m") ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
-            style={{ color: dateRange === "1m" ? "#2461cc" : "#fffffe" }}
-          >
-            1M
-          </Button>
-          <Button
-            onClick={() => handleDateRangeChange("6m")}
-            className={`border-secondary hover:border-border-focus transition-colors ${
-              hasDataForRange("6m") ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
-            style={{ color: dateRange === "6m" ? "#2461cc" : "#fffffe" }}
-          >
-            6M
-          </Button>
-          <Button
-            onClick={() => handleDateRangeChange("1y")}
-            className={`border-secondary hover:border-border-focus transition-colors ${
-              hasDataForRange("1y") ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
-            style={{ color: dateRange === "1y" ? "#2461cc" : "#fffffe" }}
-          >
-            1Y
-          </Button>
-          <Button
-            onClick={() => handleDateRangeChange("all")}
-            className={`border-secondary hover:border-border-focus transition-colors ${
-              hasDataForRange("all") ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
-            style={{ color: dateRange === "all" ? "#2461cc" : "#fffffe" }}
-          >
-            All
-          </Button>
-        </ButtonGroup>
+            Reset Zoom
+          </button>
+        </div>
       </div>
-      <div className="h-[350px]">
-        <Line ref={chartRef} data={chartData} options={options} />
-      </div>
-      <div className="mt-2 flex justify-end">
-        <button
-          onClick={() => chartRef.current?.resetZoom()}
-          className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-        >
-          Reset Zoom
-        </button>
-      </div>
+
+      {/* Trading Metrics Chart */}
+      {tradingData.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-primary-text">
+              Trading Metrics
+            </h3>
+          </div>
+          <div className="h-[350px]">
+            <Line
+              ref={tradingChartRef}
+              data={tradingChartData}
+              options={tradingOptions}
+            />
+          </div>
+          <div className="mt-2 flex justify-end">
+            <button
+              onClick={() => tradingChartRef.current?.resetZoom()}
+              className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+            >
+              Reset Zoom
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -28,6 +28,7 @@
     "@next/third-parties": "^15.5.4",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/canvas-confetti": "^1.9.0",
+    "apexcharts": "3.46.0",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",

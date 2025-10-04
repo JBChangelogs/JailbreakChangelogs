@@ -19,6 +19,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 import toast from "react-hot-toast";
@@ -165,7 +166,7 @@ export default function ItemDetailsClient({
     // Hash navigation
     if (window.location.hash === "#comments") {
       setActiveTab(5);
-    } else if (window.location.hash === "#history") {
+    } else if (window.location.hash === "#charts") {
       setActiveTab(1);
     } else if (window.location.hash === "#changes") {
       setActiveTab(2);
@@ -272,7 +273,7 @@ export default function ItemDetailsClient({
           (searchParams.toString() ? `?${searchParams.toString()}` : ""),
       );
     } else if (newValue === 1) {
-      window.location.hash = "history";
+      window.location.hash = "charts";
     } else if (newValue === 2) {
       window.location.hash = "changes";
     } else if (newValue === 3) {
@@ -325,7 +326,7 @@ export default function ItemDetailsClient({
 
         const labels = [
           "Details",
-          "Value History",
+          "Charts",
           "Changes",
           "Dupes",
           "Similar Items",
@@ -637,7 +638,7 @@ export default function ItemDetailsClient({
                 {currentItem.metadata &&
                   Object.keys(currentItem.metadata).length > 0 && (
                     <div className="mt-3">
-                      <div className="border-button-info/30 bg-button-info/10 rounded-md border px-2 py-1">
+                      <div className="border-button-info/30 bg-button-info/10 rounded-md border px-2 py-2">
                         <div className="text-button-info text-xs font-semibold tracking-wide uppercase">
                           Official Trading Metrics
                         </div>
@@ -662,8 +663,31 @@ export default function ItemDetailsClient({
                           {typeof currentItem.metadata.UniqueCirculation ===
                             "number" && (
                             <div className="border-button-info/30 rounded-md border p-3">
-                              <div className="text-secondary-text text-xs">
+                              <div className="text-secondary-text text-xs flex items-center gap-1">
                                 Unique Circulation
+                                <Tooltip
+                                  title={
+                                    "Unique copies that have been traded in the last 30 days."
+                                  }
+                                  placement="top"
+                                  arrow
+                                  slotProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor:
+                                          "var(--color-secondary-bg)",
+                                        color: "var(--color-primary-text)",
+                                        "& .MuiTooltip-arrow": {
+                                          color: "var(--color-secondary-bg)",
+                                        },
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <span className="text-tertiary-text hover:text-primary-text cursor-help">
+                                    <InformationCircleIcon className="h-4 w-4" />
+                                  </span>
+                                </Tooltip>
                               </div>
                               <div className="text-primary-text text-lg font-semibold">
                                 {currentItem.metadata.UniqueCirculation.toLocaleString()}
