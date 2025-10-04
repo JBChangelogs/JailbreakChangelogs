@@ -553,7 +553,7 @@ export default function UserProfileSection({
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
-        <div className="mt-4">
+        <div>
           <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
