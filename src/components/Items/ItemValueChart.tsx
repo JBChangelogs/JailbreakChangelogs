@@ -194,15 +194,16 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
     );
   }
 
-  // Convert string values to numbers (removing 'm' suffix and converting to millions)
-  const processValue = (value: string) => {
-    if (!value || value === "N/A") return 0;
+  const parseRawValue = (value: string): number | null => {
+    if (!value || value === "N/A") return null;
 
-    const numericPart = value.toLowerCase().replace(/[km]$/, "");
-    const suffix = value.toLowerCase().slice(-1);
+    const v = value.toString().trim().toLowerCase();
+    // If value is just a number-like string
+    const suffix = v.slice(-1);
+    const numericPart = v.replace(/[km]$/, "");
     const numericValue = parseFloat(numericPart);
 
-    if (isNaN(numericValue)) return 0;
+    if (isNaN(numericValue)) return null;
 
     switch (suffix) {
       case "k":
@@ -269,12 +270,23 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
   // Filter data that has metadata for trading metrics
   const tradingData = filteredData.filter((item) => item.metadata !== null);
 
+  const cashSeries = filteredData.map((item) => parseRawValue(item.cash_value));
+  const dupedSeries = filteredData.map((item) =>
+    parseRawValue(item.duped_value),
+  );
+
+  // Show value chart only if at least one of the series contains a numeric value
+  const hasNumericFor = (series: (number | null)[]) =>
+    series.some((v) => v !== null && v !== undefined);
+  const shouldShowValueChart =
+    hasNumericFor(cashSeries) || hasNumericFor(dupedSeries);
+
   const chartData: ChartData<"line"> = {
     labels: filteredData.map((item) => new Date(parseInt(item.date) * 1000)),
     datasets: [
       {
         label: "Cash Value",
-        data: filteredData.map((item) => processValue(item.cash_value)),
+        data: cashSeries,
         borderColor: "#2462cd",
         backgroundColor: "rgba(36, 98, 205, 0.2)",
         borderWidth: 4,
@@ -285,10 +297,11 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         pointHoverBackgroundColor: "#fffffe",
         pointHoverBorderColor: "#2462cd",
         pointHoverBorderWidth: 2,
+        spanGaps: false,
       },
       {
         label: "Duped Value",
-        data: filteredData.map((item) => processValue(item.duped_value)),
+        data: dupedSeries,
         borderColor: "#ed4f4f",
         backgroundColor: "rgba(237, 79, 79, 0.2)",
         borderWidth: 4,
@@ -299,6 +312,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
         pointHoverBackgroundColor: "#fffffe",
         pointHoverBorderColor: "#ed4f4f",
         pointHoverBorderWidth: 2,
+        spanGaps: false,
       },
     ],
   };
@@ -391,7 +405,12 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
             });
           },
           label: function (context: TooltipItem<"line">) {
-            return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+            const y = context.parsed.y;
+            if (y === null || y === undefined) {
+              return `${context.dataset.label}: N/A`;
+            }
+            // Prefer formatted compact value (e.g. 1.2m / 5k) for readability
+            return `${context.dataset.label}: ${formatValue(Number(y))}`;
           },
         },
       },
@@ -576,17 +595,46 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
             </Button>
           </ButtonGroup>
         </div>
-        <div className="h-[350px]">
-          <Line ref={chartRef} data={chartData} options={options} />
-        </div>
-        <div className="mt-2 flex justify-end">
-          <button
-            onClick={() => chartRef.current?.resetZoom()}
-            className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-          >
-            Reset Zoom
-          </button>
-        </div>
+        {shouldShowValueChart ? (
+          <>
+            <div className="h-[350px]">
+              <Line ref={chartRef} data={chartData} options={options} />
+            </div>
+            <div className="mt-2 flex justify-end">
+              <button
+                onClick={() => chartRef.current?.resetZoom()}
+                className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+              >
+                Reset Zoom
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="bg-secondary-bg rounded-lg p-8 text-center">
+            <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+              <svg
+                className="text-button-info h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-primary-text mb-2 text-xl font-semibold">
+              No Value History Available
+            </h3>
+            <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+              This item doesn&apos;t have any recorded value changes yet. Value
+              history will appear here once the item&apos;s value is updated.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Trading Metrics Chart */}
