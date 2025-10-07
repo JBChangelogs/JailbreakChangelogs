@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FilterSort } from "@/types";
-import { HomeIcon } from "@heroicons/react/24/solid";
 
 interface User {
   id: string;
@@ -66,7 +65,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   // Split the pathname and create breadcrumb items
   const pathSegments = pathname.split("/").filter(Boolean);
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: "", href: "/", isHome: true },
+    { label: "Home", href: "/", isHome: true },
     ...pathSegments.map((segment, index) => {
       // Special handling for user profile pages
       if (index === 1 && isUserProfilePage && username) {
@@ -281,53 +280,90 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <div className="text-secondary-text flex min-w-0 flex-wrap items-center text-xs sm:text-sm">
-        {breadcrumbItems.map((item, index) => {
-          const isLast = index === breadcrumbItems.length - 1;
+      <nav className="flex" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+          {breadcrumbItems.map((item, index) => {
+            const isLast = index === breadcrumbItems.length - 1;
 
-          return (
-            <div key={`${index}-${item.href}`} className="flex items-center">
-              {index > 0 && (
-                <span className="text-secondary-text mx-2">
+            if (index === 0) {
+              return (
+                <li
+                  key={`${index}-${item.href}`}
+                  className="inline-flex items-center"
+                >
+                  {isLast ? (
+                    <span className="inline-flex items-center text-sm font-medium text-secondary-text">
+                      <svg
+                        className="w-3 h-3 mr-2.5"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                      </svg>
+                      {item.label}
+                    </span>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="inline-flex items-center text-sm font-medium text-secondary-text hover:text-link-hover"
+                    >
+                      <svg
+                        className="w-3 h-3 mr-2.5"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                      </svg>
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              );
+            }
+
+            return (
+              <li
+                key={`${index}-${item.href}`}
+                aria-current={isLast ? "page" : undefined}
+              >
+                <div className="flex items-center">
                   <svg
-                    className="h-3 w-3 sm:h-4 sm:w-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    className="w-3 h-3 text-secondary-text mx-1"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 9 4-4-4-4"
                     />
                   </svg>
-                </span>
-              )}
-
-              {isLast ? (
-                <span className="bg-secondary-bg text-primary-text max-w-[200px] truncate rounded-full px-2 py-0.5 text-xs font-medium sm:max-w-[300px] sm:text-sm">
-                  {item.isHome ? (
-                    <HomeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  {isLast ? (
+                    <span className="ml-1 text-sm font-medium text-secondary-text md:ml-2">
+                      {item.label}
+                    </span>
                   ) : (
-                    item.label
+                    <Link
+                      href={item.href}
+                      className="ml-1 text-sm font-medium text-secondary-text hover:text-link-hover md:ml-2"
+                    >
+                      {item.label}
+                    </Link>
                   )}
-                </span>
-              ) : (
-                <Link
-                  href={item.href}
-                  className="text-secondary-text hover:text-link-hover max-w-[200px] truncate text-xs sm:max-w-[300px] sm:text-sm"
-                >
-                  {item.isHome ? (
-                    <HomeIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  ) : (
-                    item.label
-                  )}
-                </Link>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
     </div>
   );
 }

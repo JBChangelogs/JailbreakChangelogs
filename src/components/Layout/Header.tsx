@@ -380,9 +380,6 @@ export default function Header() {
           primary={
             <Box className="flex flex-wrap items-center gap-1">
               <span>Will I Make It</span>
-              <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
             </Box>
           }
         />
@@ -397,9 +394,6 @@ export default function Header() {
           primary={
             <Box className="flex flex-wrap items-center gap-1">
               <span>Weekly Contracts</span>
-              <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
             </Box>
           }
         />
@@ -444,9 +438,7 @@ export default function Header() {
             <Box className="flex flex-wrap items-center gap-1">
               <span>Dupe Finder</span>
               {isFeatureEnabled("DUPE_FINDER") ? (
-                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  New
-                </span>
+                <></>
               ) : (
                 <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                   Coming Soon
@@ -483,9 +475,7 @@ export default function Header() {
             <Box className="flex flex-wrap items-center gap-1">
               <span>Inventory Calculator</span>
               {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  New
-                </span>
+                <></>
               ) : (
                 <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                   Coming Soon
@@ -506,9 +496,7 @@ export default function Header() {
             <Box className="flex flex-wrap items-center gap-1">
               <span>OG Finder</span>
               {isFeatureEnabled("OG_FINDER") ? (
-                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  New
-                </span>
+                <></>
               ) : (
                 <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                   Coming Soon
@@ -703,9 +691,6 @@ export default function Header() {
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>Will I Make It</span>
-                                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                  New
-                                </span>
                               </div>
                             </Link>
                             <Link
@@ -715,9 +700,6 @@ export default function Header() {
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>Weekly Contracts</span>
-                                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                  New
-                                </span>
                               </div>
                             </Link>
                           </div>
@@ -803,11 +785,7 @@ export default function Header() {
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>Dupe Finder</span>
-                                {isFeatureEnabled("DUPE_FINDER") ? (
-                                  <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    New
-                                  </span>
-                                ) : (
+                                {!isFeatureEnabled("DUPE_FINDER") && (
                                   <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                                     Coming Soon
                                   </span>
@@ -835,11 +813,7 @@ export default function Header() {
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>Inventory Calculator</span>
-                                {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                                  <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    New
-                                  </span>
-                                ) : (
+                                {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
                                   <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                                     Coming Soon
                                   </span>
@@ -853,11 +827,7 @@ export default function Header() {
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span>OG Finder</span>
-                                {isFeatureEnabled("OG_FINDER") ? (
-                                  <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    New
-                                  </span>
-                                ) : (
+                                {!isFeatureEnabled("OG_FINDER") && (
                                   <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                                     Coming Soon
                                   </span>

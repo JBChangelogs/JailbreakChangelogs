@@ -46,7 +46,6 @@ export interface Change {
     suggestor_name: string;
     message_id: number | string;
     data: {
-      // Old format fields
       item_name: string;
       current_value?: string;
       suggested_value?: string;
@@ -57,7 +56,6 @@ export interface Change {
       current_trend?: string | null;
       suggested_trend?: string | null;
       reason: string;
-      // New format fields
       item_type?: string;
       item_id?: number;
       current_cash_value?: string;

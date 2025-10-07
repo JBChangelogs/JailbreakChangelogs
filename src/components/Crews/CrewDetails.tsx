@@ -242,9 +242,6 @@ export default function CrewDetails({
                 {getUsername(crew.OwnerUserId.toString())}&apos;s{" "}
                 {crew.ClanName}
               </h2>
-              <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
             </div>
             {currentSeason !== 19 && (
               <p className="text-secondary-text text-sm">

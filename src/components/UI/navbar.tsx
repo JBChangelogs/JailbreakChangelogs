@@ -247,13 +247,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/seasons/will-i-make-it">
               <div className="flex items-center gap-2">
                 <span>Will I Make It</span>
-                <Badge variant="new">New</Badge>
               </div>
             </HoveredLink>
             <HoveredLink href="/seasons/contracts">
               <div className="flex items-center gap-2">
                 <span>Weekly Contracts</span>
-                <Badge variant="new">New</Badge>
               </div>
             </HoveredLink>
           </MenuItem>
@@ -270,9 +268,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/dupes">
               <div className="flex items-center gap-2">
                 <span>Dupe Finder</span>
-                {isFeatureEnabled("DUPE_FINDER") ? (
-                  <Badge variant="new">New</Badge>
-                ) : (
+                {!isFeatureEnabled("DUPE_FINDER") && (
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
               </div>
@@ -282,9 +278,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/inventories">
               <div className="flex items-center gap-2">
                 <span>Inventory Calculator</span>
-                {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                  <Badge variant="new">New</Badge>
-                ) : (
+                {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
               </div>
@@ -292,9 +286,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/og">
               <div className="flex items-center gap-2">
                 <span>OG Finder</span>
-                {isFeatureEnabled("OG_FINDER") ? (
-                  <Badge variant="new">New</Badge>
-                ) : (
+                {!isFeatureEnabled("OG_FINDER") && (
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
               </div>

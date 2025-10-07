@@ -38,9 +38,6 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
       <Breadcrumb />
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
-        <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-          New
-        </span>
       </div>
       <ExperimentalFeatureBanner className="mb-6" />
       <p className="text-secondary-text mb-4">

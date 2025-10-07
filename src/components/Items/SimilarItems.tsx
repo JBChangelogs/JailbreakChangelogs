@@ -301,11 +301,6 @@ const SimilarItems = ({
             <h3 className="text-primary-text text-xl font-semibold">
               Similar Items
             </h3>
-            {sortBy === "trading_metrics" && (
-              <span className="bg-button-info text-primary-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
-            )}
           </div>
         </div>
 

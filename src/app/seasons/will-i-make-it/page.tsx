@@ -39,9 +39,6 @@ export default async function WillIMakeItPage() {
           <h1 className="text-primary-text text-4xl font-bold">
             Will I Make It to Level 10?
           </h1>
-          <span className="bg-button-info text-form-button-text rounded px-2 py-1 text-[12px] font-semibold uppercase">
-            New
-          </span>
         </div>
         <p className="text-secondary-text mb-8 text-lg">
           Calculate your chances of reaching level 10 in Season {season.season}:{" "}
