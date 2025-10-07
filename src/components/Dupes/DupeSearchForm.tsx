@@ -113,6 +113,30 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
   };
 
   const handleSearch = async () => {
+    if (itemName.trim()) {
+      const match = itemName.match(/^(.*?)\s*\[(.*?)\]$/);
+      if (!match) {
+        toast.error(
+          "Invalid item format. Please select an item from the dropdown suggestions provided.",
+        );
+        return;
+      }
+
+      const [, itemNameOnly, itemType] = match;
+      const matchingItem = allItems.find(
+        (item) =>
+          item.name.toLowerCase() === itemNameOnly.toLowerCase() &&
+          item.type.toLowerCase() === itemType.toLowerCase(),
+      );
+
+      if (!matchingItem) {
+        toast.error(
+          "Item not found in database. Please select a valid item from the dropdown suggestions provided.",
+        );
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     setSuggestion(null);
@@ -150,36 +174,20 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
       }
 
       if (itemName.trim()) {
-        // Parse the item name and type from the input
+        // Parse the item name and type from the input (already validated above)
         const match = itemName.match(/^(.*?)\s*\[(.*?)\]$/);
-        if (!match) {
-          setError(
-            'Invalid item format. Please use format: "Item Name [Type]"',
-          );
-          setLoading(false);
-          return;
-        }
-
-        const [, itemNameOnly, itemType] = match;
+        const [, itemNameOnly, itemType] = match!;
         const matchingItem = allItems.find(
           (item) =>
             item.name.toLowerCase() === itemNameOnly.toLowerCase() &&
             item.type.toLowerCase() === itemType.toLowerCase(),
         );
 
-        if (!matchingItem) {
-          setError(
-            "Item not found. Please select a valid item from the suggestions list.",
-          );
-          setLoading(false);
-          return;
-        }
-
-        const details = findItemDetails(matchingItem.id);
+        const details = findItemDetails(matchingItem!.id);
         setItemDetails(details);
 
         filteredResults = filteredResults.filter(
-          (dupe) => dupe.item_id === matchingItem.id,
+          (dupe) => dupe.item_id === matchingItem!.id,
         );
       }
 
@@ -302,7 +310,8 @@ const DupeSearchForm: React.FC<DupeSearchFormProps> = ({
             htmlFor="itemName"
             className="text-secondary-text mb-1 block text-sm font-medium"
           >
-            Item Name
+            Item Name{" "}
+            <span className="text-xs font-normal">(Select from dropdown)</span>
           </label>
           <div className="relative">
             <div className="absolute top-1/2 left-3 -translate-y-1/2">

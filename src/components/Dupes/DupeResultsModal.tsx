@@ -100,18 +100,33 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
             )}
 
             {suggestion && (
-              <div className="text-status-warning py-2 text-center">
-                <div className="flex flex-col items-center">
-                  <ExclamationTriangleIcon className="mb-2 h-12 w-12" />
-                  <div>
-                    {suggestion.message}
-                    <br />
-                    Did you mean:{" "}
-                    <span className="font-bold">
-                      {suggestion.suggestedName}
-                    </span>
-                    ? ({suggestion.similarity.toFixed(1)}% match)
+              <div className="space-y-4">
+                <div className="text-status-warning py-2 text-center">
+                  <div className="flex flex-col items-center">
+                    <ExclamationTriangleIcon className="mb-2 h-12 w-12" />
+                    <div>
+                      {suggestion.message}
+                      <br />
+                      Did you mean:{" "}
+                      <span className="font-bold">
+                        {suggestion.suggestedName}
+                      </span>
+                      ? ({suggestion.similarity.toFixed(1)}% match)
+                    </div>
                   </div>
+                </div>
+                <div className="bg-button-info/10 border-button-info/20 rounded-lg border p-4">
+                  <p className="text-secondary-text text-center text-sm">
+                    This is a manual report-based system. For more comprehensive
+                    dupe detection, try our{" "}
+                    <Link
+                      href="/dupes"
+                      className="text-link hover:text-link-hover font-medium transition-colors hover:underline"
+                    >
+                      automated dupe checker
+                    </Link>
+                    .
+                  </p>
                 </div>
               </div>
             )}
@@ -130,6 +145,19 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="bg-button-info/10 border-button-info/20 rounded-lg border p-4">
+                  <p className="text-secondary-text text-center text-sm">
+                    This is a manual report-based system. For more comprehensive
+                    dupe detection, try our{" "}
+                    <Link
+                      href="/dupes"
+                      className="text-link hover:text-link-hover font-medium transition-colors hover:underline"
+                    >
+                      automated dupe checker
+                    </Link>
+                    .
+                  </p>
                 </div>
                 {itemName && (
                   <div className="flex justify-center">
@@ -185,6 +213,20 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                   </div>
                 </div>
 
+                <div className="bg-button-info/10 border-button-info/20 rounded-lg border p-4">
+                  <p className="text-secondary-text text-center text-sm">
+                    This is a manual report-based system. For more comprehensive
+                    dupe detection, try our{" "}
+                    <Link
+                      href="/dupes"
+                      className="text-link hover:text-link-hover font-medium transition-colors hover:underline"
+                    >
+                      automated dupe checker
+                    </Link>
+                    .
+                  </p>
+                </div>
+
                 {allItemDetails.length > 0 && (
                   <div className="space-y-4">
                     {/* Items List */}
@@ -211,7 +253,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                               <Link
                                 key={`${item.id}-${index}`}
                                 href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                                className="group border-border-primary bg-secondary-bg/50 hover:border-border-focus hover:bg-primary-bg flex items-center justify-between rounded-lg border p-3 transition-colors"
+                                className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center justify-between rounded-lg border p-3 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="flex flex-col">
@@ -284,7 +326,7 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                                           },
                                         }}
                                       >
-                                        <span className="text-primary-text group-hover:text-link-hover cursor-help font-medium transition-colors">
+                                        <span className="text-primary-text hover:text-link-hover cursor-help font-medium transition-colors">
                                           {item.name}
                                         </span>
                                       </Tooltip>
@@ -325,14 +367,14 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
         </div>
       </div>
 
-      {itemName && (
+      {itemName && itemDetails && (
         <ReportDupeModal
           isOpen={isReportModalOpen}
           onClose={() => setIsReportModalOpen(false)}
           itemName={itemName.split(" [")[0]}
           itemType={itemName.match(/\[(.*?)\]/)?.[1] || ""}
           ownerName={ownerName}
-          itemId={itemDetails!.id}
+          itemId={itemDetails.id}
           isOwnerNameReadOnly={true}
         />
       )}
