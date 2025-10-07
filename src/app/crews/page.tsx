@@ -27,6 +27,28 @@ export default async function CrewsPage({ searchParams }: CrewsPageProps) {
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-6xl">
           <Breadcrumb />
+          <div className="border-border-primary bg-button-info/10 mb-6 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="relative z-10">
+              <span className="text-primary-text text-base font-bold">
+                Notice
+              </span>
+              <div className="text-secondary-text mt-1">
+                Badimo&apos;s crew data has not been updated since{" "}
+                <span className="font-bold">Sep 29, 2025</span>. This is an
+                upstream issue; we cannot refresh the data until it is resolved.
+                Please reach out to{" "}
+                <a
+                  href="https://x.com/badimo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors"
+                >
+                  @badimo
+                </a>{" "}
+                on X to look into it.
+              </div>
+            </div>
+          </div>
           <div className="mb-8">
             <div className="mb-4">
               <h1 className="text-primary-text text-4xl font-bold">

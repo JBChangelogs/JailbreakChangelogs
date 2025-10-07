@@ -166,7 +166,7 @@ export default function MoneyLeaderboardClient({
                       className={`rounded-lg border p-3 transition-colors ${
                         originalRank <= 3
                           ? ""
-                          : "border-border-primary hover:border-border-focus"
+                          : "border-border-primary hover:border-border-focus bg-primary-bg"
                       }`}
                       style={{
                         ...(originalRank === 1 && {
@@ -217,17 +217,17 @@ export default function MoneyLeaderboardClient({
                               alt={`${userDisplay} avatar`}
                               width={32}
                               height={32}
-                              className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
+                              className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8"
                             />
                           ) : (
-                            <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
+                            <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8" />
                           )}
                           <div className="flex min-w-0 flex-1 flex-col">
                             <a
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
+                              className="text-primary-text hover:text-link truncate text-sm font-medium transition-colors sm:text-base"
                             >
                               {userDisplay}
                             </a>
@@ -235,7 +235,7 @@ export default function MoneyLeaderboardClient({
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-secondary-text hover:text-link-hover truncate text-xs transition-colors sm:text-sm"
+                              className="text-secondary-text hover:text-link truncate text-xs transition-colors sm:text-sm"
                             >
                               @{username}
                             </a>
