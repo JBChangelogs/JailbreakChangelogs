@@ -313,8 +313,43 @@ export default function UserStatsSection({
           )}
         </div>
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-          <div className="text-secondary-text mb-2 text-sm">
+          <div className="text-secondary-text mb-2 text-sm flex items-center justify-center gap-1">
             Total Duped Value
+            <Tooltip
+              title="This shows the total duped value of all items in your inventory, not just items marked as duplicated. It represents the total value if all your items were valued at their duped prices."
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    maxWidth: "300px",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <svg
+                className="text-secondary-text hover:text-primary-text h-4 w-4 cursor-help transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </Tooltip>
           </div>
           {isLoadingValues ? (
             <div className="text-secondary-text animate-pulse text-2xl font-bold">

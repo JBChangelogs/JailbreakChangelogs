@@ -42,10 +42,8 @@ export default function UserStats({
   userConnectionData,
   currentSeason,
   itemsData,
-  dupedItems,
   onRefresh,
 }: UserStatsProps) {
-  // State management
   const [totalCashValue, setTotalCashValue] = useState<number>(0);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
@@ -118,31 +116,24 @@ export default function UserStats({
     calculateCashValue();
   }, [initialData.data, itemsData]);
 
-  // Calculate duped value
+  // Calculate duped value for ALL items in inventory (not just marked as duplicated)
   useEffect(() => {
     const calculateDupedValue = () => {
       try {
         let totalDuped = 0;
         const itemMap = new Map(itemsData.map((item) => [item.id, item]));
 
-        dupedItems.forEach((dupeItem) => {
-          const itemData = itemMap.get(
-            (dupeItem as { item_id: number }).item_id,
-          );
+        initialData.data.forEach((inventoryItem) => {
+          const itemData = itemMap.get(inventoryItem.item_id);
           if (itemData) {
-            // Skip items with 49+ ownership history entries
-            if (dupeItem.history && dupeItem.history.length >= 49) {
-              return;
-            }
-
             let dupedValue = parseCashValueForTotal(itemData.duped_value);
 
             // If main item doesn't have duped value, check children/variants based on created date
             if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
               // Get the year from the created date (from item info)
-              const createdAtInfo = (
-                dupeItem as { info: Array<{ title: string; value: string }> }
-              ).info.find((info) => info.title === "Created At");
+              const createdAtInfo = inventoryItem.info?.find(
+                (info) => info.title === "Created At",
+              );
               const createdYear = createdAtInfo
                 ? new Date(createdAtInfo.value).getFullYear().toString()
                 : null;
@@ -187,7 +178,7 @@ export default function UserStats({
     };
 
     calculateDupedValue();
-  }, [dupedItems, itemsData]);
+  }, [initialData.data, itemsData]);
 
   // Handle refresh
   const handleRefresh = async () => {
