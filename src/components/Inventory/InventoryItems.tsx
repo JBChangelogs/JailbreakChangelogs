@@ -50,6 +50,8 @@ export default function InventoryItems({
     | "created-desc"
     | "cash-desc"
     | "cash-asc"
+    | "duped-desc"
+    | "duped-asc"
   >("created-desc");
 
   const itemsPerPage = 20;
@@ -325,6 +327,14 @@ export default function InventoryItems({
           const aCashAsc = parseNumericValue(a.itemData?.cash_value);
           const bCashAsc = parseNumericValue(b.itemData?.cash_value);
           return aCashAsc - bCashAsc;
+        case "duped-desc":
+          const aDupedDesc = parseNumericValue(a.itemData?.duped_value);
+          const bDupedDesc = parseNumericValue(b.itemData?.duped_value);
+          return bDupedDesc - aDupedDesc;
+        case "duped-asc":
+          const aDupedAsc = parseNumericValue(a.itemData?.duped_value);
+          const bDupedAsc = parseNumericValue(b.itemData?.duped_value);
+          return aDupedAsc - bDupedAsc;
         default:
           return 0;
       }

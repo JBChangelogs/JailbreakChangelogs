@@ -155,28 +155,13 @@ export default function TradeHistoryModal({
               Array.isArray(item.history) &&
               item.history.length >= 49 && (
                 <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-4">
-                  <div className="text-primary-text mb-3 flex items-center gap-2 text-sm">
-                    <span className="font-medium">Ownership History Limit</span>
+                  <div className="text-primary-text mb-2 flex items-center gap-2 text-sm">
+                    <span className="font-medium">Data Limitation</span>
                   </div>
-                  <div className="text-secondary-text space-y-1 text-sm">
-                    <div>
-                      Due to Badimo restrictions, we can only display{" "}
-                      <span className="text-primary-text font-semibold">
-                        49
-                      </span>{" "}
-                      ownership history entries.
-                    </div>
-                    <div>
-                      This item has{" "}
-                      <span className="text-primary-text font-semibold">
-                        49
-                      </span>{" "}
-                      total history entries, but only the most recent{" "}
-                      <span className="text-primary-text font-semibold">
-                        49
-                      </span>{" "}
-                      are shown below.
-                    </div>
+                  <div className="text-secondary-text text-sm">
+                    Badimo&apos;s data only provides the most recent{" "}
+                    <span className="text-primary-text font-semibold">49</span>{" "}
+                    trades for this item.
                   </div>
                 </div>
               )}
@@ -278,7 +263,7 @@ export default function TradeHistoryModal({
                                     href={`https://www.roblox.com/users/${trade.fromUser.UserId}/profile`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
+                                    className="text-primary-text hover:text-link truncate font-medium transition-colors hover:underline"
                                   >
                                     <span className="inline-flex items-center gap-1.5">
                                       {getUsername
@@ -345,7 +330,7 @@ export default function TradeHistoryModal({
                                     href={`https://www.roblox.com/users/${trade.toUser.UserId}/profile`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
+                                    className="text-primary-text hover:text-link truncate font-medium transition-colors hover:underline"
                                   >
                                     <span className="inline-flex items-center gap-1.5">
                                       {getUsername

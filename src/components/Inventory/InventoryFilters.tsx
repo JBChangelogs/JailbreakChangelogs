@@ -13,7 +13,9 @@ type SortOrder =
   | "created-asc"
   | "created-desc"
   | "cash-desc"
-  | "cash-asc";
+  | "cash-asc"
+  | "duped-desc"
+  | "duped-asc";
 
 export interface InventoryStats {
   isLargeInventory: boolean;
@@ -194,7 +196,11 @@ export default function InventoryFilters({
                               ? "Cash Value (High to Low)"
                               : sortOrder === "cash-asc"
                                 ? "Cash Value (Low to High)"
-                                : "Sort by...",
+                                : sortOrder === "duped-desc"
+                                  ? "Duped Value (High to Low)"
+                                  : sortOrder === "duped-asc"
+                                    ? "Duped Value (Low to High)"
+                                    : "Sort by...",
               }}
               onChange={(option) => {
                 if (option) {
@@ -217,6 +223,8 @@ export default function InventoryFilters({
                   options: [
                     { value: "cash-desc", label: "Cash Value (High to Low)" },
                     { value: "cash-asc", label: "Cash Value (Low to High)" },
+                    { value: "duped-desc", label: "Duped Value (High to Low)" },
+                    { value: "duped-asc", label: "Duped Value (Low to High)" },
                   ],
                 },
                 {
