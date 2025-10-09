@@ -167,6 +167,13 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
           };
         }
         if (index === 1) {
+          // Special handling for networth segment
+          if (segment === "networth") {
+            return {
+              label: "Networth",
+              href: `/${pathSegments.slice(0, index + 1).join("/")}`,
+            };
+          }
           return {
             label: segment,
             href: `/${pathSegments.slice(0, index + 1).join("/")}`,

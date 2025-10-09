@@ -1,0 +1,35 @@
+import { fetchNetworthLeaderboard } from "@/utils/api";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+import NetworthLeaderboardClient from "@/components/Leaderboard/NetworthLeaderboardClient";
+
+// Cache this page for 5 minutes
+export const revalidate = 300;
+
+export default async function NetworthLeaderboardPage() {
+  const leaderboard = await fetchNetworthLeaderboard();
+
+  return (
+    <main className="mb-8 min-h-screen">
+      <div className="container mx-auto px-4">
+        <Breadcrumb />
+
+        <div className="mb-8">
+          <div className="flex items-center gap-3">
+            <h1 className="text-primary-text text-3xl font-bold">
+              Networth Leaderboard
+            </h1>
+            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+              New
+            </span>
+          </div>
+          <p className="text-secondary-text mt-2">
+            Top players ranked by their total inventory networth in Roblox
+            Jailbreak
+          </p>
+        </div>
+
+        <NetworthLeaderboardClient initialLeaderboard={leaderboard} />
+      </div>
+    </main>
+  );
+}

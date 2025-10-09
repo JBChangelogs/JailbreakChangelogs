@@ -23,6 +23,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 - **OG Finder** (`/og`) - Find original owners of rare items
 - **Dupe Finder** (`/dupes`) - Report and detect duplicated items
 - **Money Leaderboard** (`/leaderboard/money`) - Top players by in-game money
+- **Networth Leaderboard** (`/inventories/networth`) - Top players by inventory networth
 
 ### Community Features
 - **Comments System** - OAuth-protected commenting on changelogs, seasons, items, and trades

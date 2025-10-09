@@ -277,7 +277,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/trading">Trade Ads</HoveredLink>
             <HoveredLink href="/inventories">
               <div className="flex items-center gap-2">
-                <span>Inventory Calculator</span>
+                <span>Inventory Checker</span>
                 {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
@@ -299,6 +299,12 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/crews">Crew Leaderboard</HoveredLink>
             <HoveredLink href="/leaderboard/money">
               Money Leaderboard
+            </HoveredLink>
+            <HoveredLink href="/inventories/networth">
+              <div className="flex items-center gap-2">
+                <span>Networth Leaderboard</span>
+                <Badge variant="new">New</Badge>
+              </div>
             </HoveredLink>
             <HoveredLink href="/servers">Private Servers</HoveredLink>
             <HoveredLink href="/bot">Discord Bot</HoveredLink>

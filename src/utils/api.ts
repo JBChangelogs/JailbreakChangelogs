@@ -1507,6 +1507,12 @@ export interface MoneyLeaderboardEntry {
   money: number;
 }
 
+export interface NetworthLeaderboardEntry {
+  user_id: string;
+  networth: number;
+  inventory_count: number;
+}
+
 export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
   try {
     const response = await fetch(`${INVENTORY_API_URL}/items/count`, {
@@ -1565,6 +1571,59 @@ export async function fetchMoneyLeaderboard(): Promise<
     return data as MoneyLeaderboardEntry[];
   } catch (err) {
     console.error("[SERVER] Error fetching money leaderboard:", err);
+    return [];
+  }
+}
+
+export async function fetchNetworthLeaderboard(): Promise<
+  NetworthLeaderboardEntry[]
+> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/networth/leaderboard`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch networth leaderboard");
+    }
+
+    const data = await response.json();
+    return data as NetworthLeaderboardEntry[];
+  } catch (err) {
+    console.error("[SERVER] Error fetching networth leaderboard:", err);
+    return [];
+  }
+}
+
+export interface UserNetworthData {
+  snapshot_time: number;
+  networth: number;
+  inventory_count: number;
+}
+
+export async function fetchUserNetworth(
+  robloxId: string,
+): Promise<UserNetworthData[]> {
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/user/networth?id=${robloxId}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user networth");
+    }
+
+    const data = await response.json();
+    return data as UserNetworthData[];
+  } catch (err) {
+    console.error("[SERVER] Error fetching user networth:", err);
     return [];
   }
 }

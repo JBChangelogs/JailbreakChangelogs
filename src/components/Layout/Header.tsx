@@ -473,7 +473,7 @@ export default function Header() {
         <ListItemText
           primary={
             <Box className="flex flex-wrap items-center gap-1">
-              <span>Inventory Calculator</span>
+              <span>Inventory Checker</span>
               {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
                 <></>
               ) : (
@@ -534,6 +534,23 @@ export default function Header() {
         className="cursor-pointer pl-4"
       >
         <ListItemText primary="Money Leaderboard" />
+      </ListItem>
+      <ListItem
+        component={Link}
+        href="/inventories/networth"
+        onClick={handleDrawerToggle}
+        className="cursor-pointer pl-4"
+      >
+        <ListItemText
+          primary={
+            <Box className="flex flex-wrap items-center gap-1">
+              <span>Networth Leaderboard</span>
+              <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                New
+              </span>
+            </Box>
+          }
+        />
       </ListItem>
       <ListItem
         component={Link}
@@ -812,7 +829,7 @@ export default function Header() {
                               onClick={handleNavMenuClose}
                             >
                               <div className="flex flex-wrap items-center gap-2">
-                                <span>Inventory Calculator</span>
+                                <span>Inventory Checker</span>
                                 {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
                                   <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
                                     Coming Soon
@@ -911,6 +928,18 @@ export default function Header() {
                               onClick={handleCommunityMenuClose}
                             >
                               Money Leaderboard
+                            </Link>
+                            <Link
+                              href="/inventories/networth"
+                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
+                              onClick={handleCommunityMenuClose}
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span>Networth Leaderboard</span>
+                                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                                  New
+                                </span>
+                              </div>
                             </Link>
                             <Link
                               href="/servers"

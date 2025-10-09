@@ -39,7 +39,7 @@ export default function InventoriesPage() {
       <Breadcrumb />
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">
-          Inventory Calculator
+          Inventory Checker
         </h1>
       </div>
 
