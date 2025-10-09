@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   fetchRobloxUsersBatchLeaderboard,
   fetchRobloxAvatars,
@@ -229,22 +230,20 @@ export default function NetworthLeaderboardClient({
                             <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8" />
                           )}
                           <div className="flex min-w-0 flex-1 flex-col">
-                            <a
-                              href={`https://www.roblox.com/users/${user.user_id}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link truncate text-sm font-medium transition-colors sm:text-base"
+                            <Link
+                              href={`/inventories/${user.user_id}`}
+                              prefetch={false}
+                              className="text-primary-text hover:text-link truncate text-sm font-medium transition-colors sm:text-base cursor-pointer"
                             >
                               {userDisplay}
-                            </a>
-                            <a
-                              href={`https://www.roblox.com/users/${user.user_id}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-secondary-text hover:text-link truncate text-xs transition-colors sm:text-sm"
+                            </Link>
+                            <Link
+                              href={`/inventories/${user.user_id}`}
+                              prefetch={false}
+                              className="text-secondary-text hover:text-link truncate text-xs transition-colors sm:text-sm cursor-pointer"
                             >
                               @{username}
-                            </a>
+                            </Link>
                           </div>
                         </div>
                         <div className="flex flex-col items-end space-y-1 sm:ml-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
