@@ -95,7 +95,7 @@ const DupeFinderFAQ: React.FC = () => {
               </Typography>
             </AccordionSummary>
             <AccordionDetails
-              sx={{ backgroundColor: "var(--color-secondary-bg)" }}
+              sx={{ backgroundColor: "var(--color-primary-bg)" }}
             >
               <Typography className="text-secondary-text">
                 {faq.answer}

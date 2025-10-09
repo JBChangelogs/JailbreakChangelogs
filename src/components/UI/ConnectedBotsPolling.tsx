@@ -12,6 +12,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
+import RetryErrorDisplay from "./RetryErrorDisplay";
 
 export default function ConnectedBotsPolling() {
   const { botsData, queueInfo, error, isLoading, retryCount, pollingStopped } =
@@ -159,23 +160,12 @@ export default function ConnectedBotsPolling() {
             </span>
           </div>
         </div>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-          <div className="py-8 text-center">
-            <div className="text-status-error mb-2 text-lg font-medium">
-              Error loading bots
-            </div>
-            <div className="text-secondary-text mb-2 text-sm">{error}</div>
-            {retryCount < 3 ? (
-              <div className="text-secondary-text text-sm">
-                Auto-retrying in 5 seconds... (attempt {retryCount + 1}/3)
-              </div>
-            ) : (
-              <div className="text-secondary-text text-sm">
-                Failed after 3 attempts. Will retry on next scheduled update.
-              </div>
-            )}
-          </div>
-        </div>
+        <RetryErrorDisplay
+          error={error}
+          retryCount={retryCount}
+          maxRetries={3}
+          retryDelay={5}
+        />
       </div>
     );
   }
@@ -325,7 +315,7 @@ export default function ConnectedBotsPolling() {
                           botUserData.name ||
                           `Bot ${botId}`;
                         return (
-                          <span className="text-tertiary-text text-xs">
+                          <span className="text-secondary-text text-xs">
                             (scanned by{" "}
                             <a
                               href={`https://www.roblox.com/users/${botId}/profile`}
@@ -349,7 +339,7 @@ export default function ConnectedBotsPolling() {
                 ) : (
                   <div className="flex items-center gap-2">
                     <span className="text-secondary-text">Last Updated:</span>
-                    <span className="text-tertiary-text">
+                    <span className="text-primary-text">
                       No recent activity
                     </span>
                   </div>
@@ -409,7 +399,7 @@ function BotStatusCard({
   const avatarUrl = avatarData?.imageUrl || null;
 
   return (
-    <div className="border-border-primary bg-tertiary-bg rounded-lg border p-3">
+    <div className="border-border-primary bg-primary-bg rounded-lg border p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-surface-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">

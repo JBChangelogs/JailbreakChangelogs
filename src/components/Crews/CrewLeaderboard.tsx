@@ -257,7 +257,7 @@ function CrewLeaderboardEntry({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-lg border p-6 transition-colors sm:flex-row sm:items-center ${
+      className={`flex flex-col gap-3 rounded-lg border p-6 transition-colors sm:flex-row sm:items-center bg-primary-bg ${
         index <= 2 ? "" : "border-border-primary hover:border-border-focus"
       }`}
       style={{
