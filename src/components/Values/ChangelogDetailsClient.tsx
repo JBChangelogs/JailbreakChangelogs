@@ -475,42 +475,41 @@ export default function ChangelogDetailsClient({
                   },
                 }}
               />
-              {itemTypes.map((type) => (
-                <Chip
-                  key={type}
-                  label={type}
-                  onClick={() => setSelectedType(type)}
-                  variant={selectedType === type ? "filled" : "outlined"}
-                  sx={{
-                    backgroundColor:
-                      selectedType === type
-                        ? "var(--color-button-info)"
-                        : "transparent",
-                    borderColor:
-                      selectedType === type
-                        ? "var(--color-button-info)"
-                        : "var(--color-secondary-text)",
-                    color:
-                      selectedType === type
-                        ? "var(--color-form-button-text)"
-                        : "var(--color-primary-text)",
-                    "&:hover": {
+              {itemTypes.map((type) => {
+                const categoryColor = getCategoryColor(type);
+                return (
+                  <Chip
+                    key={type}
+                    label={type}
+                    onClick={() => setSelectedType(type)}
+                    variant={selectedType === type ? "filled" : "outlined"}
+                    sx={{
                       backgroundColor:
-                        selectedType === type
-                          ? "var(--color-button-info-hover)"
-                          : "var(--color-button-info)",
+                        selectedType === type ? categoryColor : "transparent",
                       borderColor:
                         selectedType === type
-                          ? "var(--color-button-info-hover)"
-                          : "var(--color-button-info)",
+                          ? categoryColor
+                          : "var(--color-secondary-text)",
                       color:
                         selectedType === type
-                          ? "var(--color-form-button-text)"
+                          ? "#ffffff"
                           : "var(--color-primary-text)",
-                    },
-                  }}
-                />
-              ))}
+                      "&:hover": {
+                        backgroundColor:
+                          selectedType === type
+                            ? categoryColor
+                            : categoryColor + "40",
+                        borderColor:
+                          selectedType === type ? categoryColor : categoryColor,
+                        color:
+                          selectedType === type
+                            ? "#ffffff"
+                            : "var(--color-primary-text)",
+                      },
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
 
