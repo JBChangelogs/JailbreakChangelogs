@@ -12,14 +12,20 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import dynamic from "next/dynamic";
 import { Tooltip } from "@mui/material";
 
-const ThemeToggle = dynamic(() => import("@/components/Layout/ThemeToggle"), {
-  ssr: false,
-  loading: () => (
-    <div className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-      <div className="h-5 w-5" />
-    </div>
-  ),
-});
+const AnimatedThemeToggler = dynamic(
+  () =>
+    import("@/components/UI/animated-theme-toggler").then((mod) => ({
+      default: mod.AnimatedThemeToggler,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+        <div className="h-5 w-5" />
+      </div>
+    ),
+  },
+);
 import { Settings, LogOut } from "lucide-react";
 
 const menuTransition = {
@@ -346,7 +352,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           </Tooltip>
 
           {/* Theme toggle */}
-          <ThemeToggle />
+          <AnimatedThemeToggler />
 
           {/* User menu or login button */}
           {userData ? (

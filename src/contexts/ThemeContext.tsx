@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -18,9 +18,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get theme from localStorage on mount
-    const savedTheme = localStorage.getItem("theme") as Theme;
-    if (savedTheme && ["light", "dark", "system"].includes(savedTheme)) {
-      setTheme(savedTheme);
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "system") {
+      // Migrate users who had system theme to light mode
+      setTheme("light");
+      localStorage.setItem("theme", "light");
+    } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
+      setTheme(savedTheme as Theme);
     }
   }, []);
 
@@ -30,42 +35,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Remove existing theme classes
     root.classList.remove("light", "dark");
 
-    let actualTheme: "light" | "dark";
-
-    if (theme === "system") {
-      // Use system preference
-      actualTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    } else {
-      actualTheme = theme;
-    }
-
     // Apply the theme class
-    root.classList.add(actualTheme);
-    setResolvedTheme(actualTheme);
+    root.classList.add(theme);
+    setResolvedTheme(theme);
 
     // Save to localStorage
     localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
-    // Listen for system theme changes when theme is set to 'system'
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-      const handleChange = () => {
-        const root = document.documentElement;
-        root.classList.remove("light", "dark");
-
-        const actualTheme = mediaQuery.matches ? "dark" : "light";
-        root.classList.add(actualTheme);
-        setResolvedTheme(actualTheme);
-      };
-
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
   }, [theme]);
 
   return (

@@ -46,14 +46,20 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import dynamic from "next/dynamic";
 
-const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
-  ssr: false,
-  loading: () => (
-    <div className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-      <div className="h-5 w-5" />
-    </div>
-  ),
-});
+const AnimatedThemeToggler = dynamic(
+  () =>
+    import("@/components/UI/animated-theme-toggler").then((mod) => ({
+      default: mod.AnimatedThemeToggler,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+        <div className="h-5 w-5" />
+      </div>
+    ),
+  },
+);
 import { NavbarModern } from "@/components/UI/navbar";
 
 export default function Header() {
@@ -1009,7 +1015,7 @@ export default function Header() {
                     </Link>
                   </Tooltip>
 
-                  <ThemeToggle />
+                  <AnimatedThemeToggler />
 
                   {userData ? (
                     <>
@@ -1149,7 +1155,7 @@ export default function Header() {
                   </Link>
                 </Tooltip>
 
-                <ThemeToggle />
+                <AnimatedThemeToggler />
                 <IconButton
                   aria-label="open drawer"
                   edge="end"
