@@ -138,7 +138,7 @@ export default function Footer() {
                   aria-label="Bluesky"
                 >
                   <Icon
-                    icon="simple-icons:bluesky"
+                    icon="logos:bluesky"
                     className="h-6 w-6"
                     inline={true}
                   />
@@ -188,7 +188,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
               >
-                <Icon icon="mdi:web" className="h-5 w-5" inline={true} />
+                <Icon icon="carbon:wikis" className="h-5 w-5" inline={true} />
                 Jailbreak Wiki
               </a>
               <Link
@@ -196,7 +196,7 @@ export default function Footer() {
                 className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
               >
                 <Icon
-                  icon="mdi:help-circle"
+                  icon="material-symbols:question-mark"
                   className="h-5 w-5"
                   inline={true}
                 />
@@ -206,20 +206,28 @@ export default function Footer() {
                 href="/redeem"
                 className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
               >
-                <Icon icon="mdi:gift" className="h-5 w-5" inline={true} />
+                <Icon
+                  icon="material-symbols:redeem-rounded"
+                  className="h-5 w-5"
+                  inline={true}
+                />
                 Redeem Code
               </Link>
               <Link
                 href="/bot"
                 className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
               >
-                <Icon icon="mdi:robot" className="h-5 w-5" inline={true} />
+                <Icon icon="bx:bot" className="h-5 w-5" inline={true} />
                 Discord Bot
               </Link>
               <Suspense
                 fallback={
                   <div className="text-link hover:text-link-hover flex w-full cursor-pointer items-center gap-2">
-                    <Icon icon="mdi:bug" className="h-5 w-5" inline={true} />
+                    <Icon
+                      icon="solar:bug-linear"
+                      className="h-5 w-5"
+                      inline={true}
+                    />
                     Report an Issue
                   </div>
                 }

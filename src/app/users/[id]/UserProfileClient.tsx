@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { UserAvatar } from "@/utils/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button, Skeleton } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
+import { Icon } from "@iconify/react";
 import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
@@ -875,7 +875,13 @@ export default function UserProfileClient({
                       <Link href="/settings">
                         <Button
                           variant="contained"
-                          startIcon={<SettingsIcon />}
+                          startIcon={
+                            <Icon
+                              icon="material-symbols:settings"
+                              className="h-5 w-5"
+                              inline={true}
+                            />
+                          }
                           className="bg-button-info text-form-button-text hover:bg-button-info-hover"
                         >
                           Settings

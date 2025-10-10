@@ -20,10 +20,8 @@ import {
   Divider,
   Tooltip,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import LogoutIcon from "@mui/icons-material/Logout";
-import SettingsIcon from "@mui/icons-material/Settings";
+import { Icon } from "@iconify/react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState, useEffect } from "react";
 import {
@@ -301,13 +299,18 @@ export default function Header() {
             className="cursor-pointer"
           >
             <ListItemIcon>
-              <SettingsIcon className="text-primary-text" />
+              <Icon
+                icon="material-symbols:settings"
+                className="text-primary-text"
+                inline={true}
+              />
             </ListItemIcon>
             <ListItemText
-              primary="Settings"
-              primaryTypographyProps={{
-                sx: { color: "var(--color-primary-text)" },
-              }}
+              primary={
+                <Typography sx={{ color: "var(--color-primary-text)" }}>
+                  Settings
+                </Typography>
+              }
             />
           </ListItem>
           <ListItem
@@ -316,13 +319,18 @@ export default function Header() {
             className="cursor-pointer"
           >
             <ListItemIcon>
-              <LogoutIcon className="text-button-danger" />
+              <Icon
+                icon="material-symbols:logout"
+                className="text-button-danger"
+                inline={true}
+              />
             </ListItemIcon>
             <ListItemText
-              primary="Logout"
-              primaryTypographyProps={{
-                sx: { color: "var(--color-button-danger)" },
-              }}
+              primary={
+                <Typography sx={{ color: "var(--color-button-danger)" }}>
+                  Logout
+                </Typography>
+              }
             />
           </ListItem>
         </>
@@ -1092,7 +1100,11 @@ export default function Header() {
                                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
                                   onClick={handleMenuClose}
                                 >
-                                  <SettingsIcon className="text-primary-text group-hover:text-form-button-text mr-3 text-xl" />
+                                  <Icon
+                                    icon="material-symbols:settings"
+                                    className="text-primary-text group-hover:text-form-button-text mr-3 text-xl"
+                                    inline={true}
+                                  />
                                   Settings
                                 </Link>
 
@@ -1100,7 +1112,11 @@ export default function Header() {
                                   className="text-button-danger hover:bg-button-danger/10 hover:text-button-danger flex w-full cursor-pointer items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
                                   onClick={handleLogout}
                                 >
-                                  <LogoutIcon className="text-button-danger mr-3 text-xl" />
+                                  <Icon
+                                    icon="material-symbols:logout"
+                                    className="text-button-danger mr-3 text-xl"
+                                    inline={true}
+                                  />
                                   Logout
                                 </button>
                               </div>
@@ -1167,7 +1183,11 @@ export default function Header() {
                     },
                   }}
                 >
-                  <MenuIcon />
+                  <Icon
+                    icon="material-symbols:menu"
+                    className="h-6 w-6"
+                    inline={true}
+                  />
                 </IconButton>
               </Box>
             )}

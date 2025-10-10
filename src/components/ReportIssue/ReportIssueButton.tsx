@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { BugAntIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@iconify/react";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -32,7 +32,7 @@ export default function ReportIssueButton() {
         onClick={handleOpenModal}
         className="text-link hover:text-link-hover flex w-full cursor-pointer items-center gap-2"
       >
-        <BugAntIcon className="h-5 w-5" />
+        <Icon icon="solar:bug-linear" className="h-5 w-5" inline={true} />
         Report an Issue
       </button>
       <ReportIssueModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

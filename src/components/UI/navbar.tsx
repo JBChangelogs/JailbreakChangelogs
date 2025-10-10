@@ -26,7 +26,7 @@ const AnimatedThemeToggler = dynamic(
     ),
   },
 );
-import { Settings, LogOut } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const menuTransition = {
   type: "spring" as const,
@@ -439,7 +439,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         href="/settings"
                         className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                       >
-                        <Settings className="h-4 w-4" />
+                        <Icon
+                          icon="material-symbols:settings"
+                          className="h-4 w-4"
+                          inline={true}
+                        />
                         Settings
                       </Link>
 
@@ -447,7 +451,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         className="text-button-danger hover:bg-button-danger/10 hover:text-button-danger flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                         onClick={handleLogout}
                       >
-                        <LogOut className="h-4 w-4" />
+                        <Icon
+                          icon="material-symbols:logout"
+                          className="h-4 w-4"
+                          inline={true}
+                        />
                         Logout
                       </button>
                     </div>
