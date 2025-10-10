@@ -89,7 +89,7 @@ export default function UserSearchVirtual({
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 160, // Reduced estimate for tighter spacing
+    estimateSize: () => 140,
     overscan: 5, // Render 5 extra rows above/below viewport for smooth scrolling
   });
 
@@ -191,7 +191,7 @@ export default function UserSearchVirtual({
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                   >
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4 p-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 p-4">
                       {rowUsers.map((user: UserData) => {
                         return (
                           <Tooltip
