@@ -20,9 +20,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch scan history from inventory API
     const response = await fetch(
-      `${INVENTORY_API_URL}/user/history?id=${userId}`,
+      `${INVENTORY_API_URL}/user/history?id=${userId}&limit=1000`,
       {
         method: "GET",
         headers: {

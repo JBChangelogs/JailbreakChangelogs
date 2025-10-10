@@ -3,13 +3,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  fetchRobloxUsersBatchLeaderboard,
-  fetchRobloxAvatars,
-} from "@/utils/api";
 import { useDebounce } from "@/hooks/useDebounce";
 import NetworthLeaderboardSearch from "./NetworthLeaderboardSearch";
 import UserNetworthDisplay from "./UserNetworthDisplay";
+import { DefaultAvatar } from "@/utils/avatar";
+import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 
 interface NetworthLeaderboardEntry {
   user_id: string;
@@ -33,6 +31,9 @@ export default function NetworthLeaderboardClient({
   const [avatarDataMap, setAvatarDataMap] = useState<Record<string, string>>(
     {},
   );
+  const [avatarErrorMap, setAvatarErrorMap] = useState<Record<string, boolean>>(
+    {},
+  );
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Helper function to format networth
@@ -45,43 +46,43 @@ export default function NetworthLeaderboardClient({
     return new Intl.NumberFormat("en-US").format(count);
   };
 
-  // Load user data and avatars for all users
+  // Load user data and avatars for all users in batches of 10
   useEffect(() => {
     const loadUserData = async () => {
       if (initialLeaderboard.length === 0) return;
 
       try {
         const userIds = initialLeaderboard.map((user) => user.user_id);
+        const BATCH_SIZE = 50;
 
-        // Fetch batch user data and avatars
-        const [userDataResult, avatarData] = await Promise.all([
-          fetchRobloxUsersBatchLeaderboard(userIds),
-          fetchRobloxAvatars(userIds),
-        ]);
-
-        // Process user data
-        let newUserDataMap: Record<
-          string,
-          { displayName?: string; name?: string }
-        > = {};
-        if (userDataResult && typeof userDataResult === "object") {
-          newUserDataMap = userDataResult;
+        // Split userIds into batches of 50
+        const batches = [];
+        for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+          batches.push(userIds.slice(i, i + BATCH_SIZE));
         }
 
-        // Process avatar data
-        const newAvatarDataMap: Record<string, string> = {};
-        if (avatarData && typeof avatarData === "object") {
-          Object.values(avatarData).forEach(
-            (avatar: { targetId?: number; imageUrl?: string }) => {
-              if (avatar && avatar.targetId && avatar.imageUrl) {
-                newAvatarDataMap[avatar.targetId.toString()] = avatar.imageUrl;
-              }
-            },
-          );
-        }
+        // Process each batch sequentially using server action
+        for (const batch of batches) {
+          try {
+            // Fetch batch user data and avatars via server action
+            const result = await fetchLeaderboardUserData(batch);
 
-        setUserDataMap(newUserDataMap);
-        setAvatarDataMap(newAvatarDataMap);
+            // Process user data
+            if (result.userData && typeof result.userData === "object") {
+              setUserDataMap((prev) => ({ ...prev, ...result.userData }));
+            }
+
+            // Process avatar data
+            if (result.avatarData && typeof result.avatarData === "object") {
+              setAvatarDataMap((prev) => ({ ...prev, ...result.avatarData }));
+            }
+          } catch (error) {
+            console.error(
+              `Failed to fetch batch for networth leaderboard:`,
+              error,
+            );
+          }
+        }
       } catch (error) {
         console.error(
           "Failed to fetch user data for networth leaderboard:",
@@ -218,16 +219,24 @@ export default function NetworthLeaderboardClient({
                           >
                             #{originalRank}
                           </div>
-                          {avatarUrl ? (
+                          {avatarUrl && !avatarErrorMap[user.user_id] ? (
                             <Image
                               src={avatarUrl}
                               alt={`${userDisplay} avatar`}
                               width={32}
                               height={32}
                               className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8"
+                              onError={() => {
+                                setAvatarErrorMap((prev) => ({
+                                  ...prev,
+                                  [user.user_id]: true,
+                                }));
+                              }}
                             />
                           ) : (
-                            <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8" />
+                            <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8">
+                              <DefaultAvatar />
+                            </div>
                           )}
                           <div className="flex min-w-0 flex-1 flex-col">
                             <Link

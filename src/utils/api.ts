@@ -892,7 +892,7 @@ export async function fetchRandomItem() {
 
 export async function fetchItemHistory(id: string) {
   try {
-    const response = await fetch(`${PUBLIC_API_URL}/item/history?id=${id}`, {
+    const response = await fetch(`${BASE_API_URL}/item/history?id=${id}`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
       },

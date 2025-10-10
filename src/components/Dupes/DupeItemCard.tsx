@@ -221,7 +221,12 @@ export default function DupeItemCard({
               className="text-primary-text cursor-help text-xl font-bold"
               aria-label={`Duped value: ${dupedValue > 0 ? formatCurrencyValue(dupedValue) : "Not available"}`}
             >
-              {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
+              <span className="sm:hidden">
+                {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
+              </span>
+              <span className="hidden sm:inline">
+                {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
+              </span>
             </div>
           </Tooltip>
         </div>

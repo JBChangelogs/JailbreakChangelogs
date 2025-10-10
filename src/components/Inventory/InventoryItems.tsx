@@ -7,6 +7,9 @@ import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
+import dynamic from "next/dynamic";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -491,13 +494,33 @@ export default function InventoryItems({
                   const href = `/item/${encodeURIComponent(categoryTitle.toLowerCase())}/${encodeURIComponent(title)}`;
                   return (
                     <span key={itemName}>
-                      <Link
-                        href={href}
-                        className="text-primary-text hover:text-button-primary cursor-pointer font-medium transition-colors hover:underline"
+                      <Tooltip
                         title={`View ${title} details`}
+                        placement="top"
+                        arrow
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "var(--color-secondary-bg)",
+                              color: "var(--color-primary-text)",
+                              fontSize: "0.75rem",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                              "& .MuiTooltip-arrow": {
+                                color: "var(--color-secondary-bg)",
+                              },
+                            },
+                          },
+                        }}
                       >
-                        {title} ({count})
-                      </Link>
+                        <Link
+                          href={href}
+                          className="text-primary-text hover:text-button-primary cursor-pointer font-medium transition-colors hover:underline"
+                        >
+                          {title} ({count})
+                        </Link>
+                      </Tooltip>
                     </span>
                   );
                 })
