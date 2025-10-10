@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react";
 import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Tooltip } from "@mui/material";
 
 interface AnimatedThemeTogglerProps
   extends React.ComponentPropsWithoutRef<"div"> {
@@ -74,46 +73,29 @@ export const AnimatedThemeToggler = ({
   }, [isDark, setTheme, duration]);
 
   return (
-    <Tooltip
-      title={`Toggle to ${isDark ? "Light" : "Dark"} mode`}
-      arrow
-      placement="bottom"
-      slotProps={{
-        tooltip: {
-          sx: {
-            backgroundColor: "var(--color-secondary-bg)",
-            color: "var(--color-primary-text)",
-            "& .MuiTooltip-arrow": {
-              color: "var(--color-secondary-bg)",
-            },
-          },
-        },
-      }}
+    <div
+      ref={buttonRef}
+      onClick={toggleTheme}
+      className={cn(
+        "cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95",
+        className,
+      )}
+      {...props}
     >
-      <div
-        ref={buttonRef}
-        onClick={toggleTheme}
-        className={cn(
-          "cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95",
-          className,
-        )}
-        {...props}
-      >
-        {isDark ? (
-          <Icon
-            icon="solar:sun-bold-duotone"
-            className="h-5 w-5 text-primary-text"
-            inline={true}
-          />
-        ) : (
-          <Icon
-            icon="line-md:moon-filled"
-            className="h-5 w-5 text-primary-text"
-            inline={true}
-          />
-        )}
-        <span className="sr-only">Toggle theme</span>
-      </div>
-    </Tooltip>
+      {isDark ? (
+        <Icon
+          icon="solar:sun-bold-duotone"
+          className="h-5 w-5 text-primary-text"
+          inline={true}
+        />
+      ) : (
+        <Icon
+          icon="line-md:moon-filled"
+          className="h-5 w-5 text-primary-text"
+          inline={true}
+        />
+      )}
+      <span className="sr-only">Toggle theme</span>
+    </div>
   );
 };

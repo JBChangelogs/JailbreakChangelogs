@@ -1,7 +1,7 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchUsersForList } from "@/utils/api";
-import UserSearch from "@/components/Users/UserSearch";
+import UserSearchVirtual from "@/components/Users/UserSearchVirtual";
 import OnlineUsers from "@/components/Layout/OnlineUsers";
 import { fetchOnlineUsers, OnlineUser } from "@/utils/api";
 
@@ -30,7 +30,7 @@ export default async function UsersPage() {
           <OnlineUsers max={5} initial={online} />
         </div>
 
-        <UserSearch initialUsers={users} />
+        <UserSearchVirtual initialUsers={users} />
       </div>
     </div>
   );
