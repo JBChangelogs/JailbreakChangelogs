@@ -1,17 +1,4 @@
-import {
-  FaClock,
-  FaRegSnowflake,
-  FaCarAlt,
-  FaFire,
-  FaLayerGroup,
-  FaHome,
-  FaBullhorn,
-} from "react-icons/fa";
-import { FaJar, FaGun } from "react-icons/fa6";
-import { GiCarWheel } from "react-icons/gi";
-import { RiPaintFill } from "react-icons/ri";
-import { PiStickerFill } from "react-icons/pi";
-import { CircleStackIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@iconify/react";
 
 interface CategoryIcon {
   Icon: React.ComponentType<{
@@ -20,44 +7,59 @@ interface CategoryIcon {
   }>;
 }
 
+// Enhanced Iconify icon mapping following best practices
+const createIconifyIcon = (iconName: string) => {
+  const IconComponent = ({
+    className,
+    style,
+  }: {
+    className?: string;
+    style?: React.CSSProperties;
+  }) => (
+    <Icon icon={iconName} className={className} style={style} inline={true} />
+  );
+  IconComponent.displayName = `IconifyIcon(${iconName})`;
+  return IconComponent;
+};
+
 export const getCategoryIcon = (type: string): CategoryIcon | null => {
   const normalizedType = type.toLowerCase().trim();
   switch (normalizedType) {
     case "vehicles":
     case "vehicle":
-      return { Icon: FaCarAlt };
+      return { Icon: createIconifyIcon("mdi:car") };
     case "hyperchromes":
     case "hyperchrome":
-      return { Icon: FaJar };
+      return { Icon: createIconifyIcon("fa6-solid:jar") };
     case "rims":
     case "rim":
-      return { Icon: GiCarWheel };
+      return { Icon: createIconifyIcon("solar:wheel-bold") };
     case "spoilers":
     case "spoiler":
-      return { Icon: RocketLaunchIcon };
+      return { Icon: createIconifyIcon("mdi:rocket-launch") };
     case "body colors":
     case "body color":
-      return { Icon: RiPaintFill };
+      return { Icon: createIconifyIcon("mdi:format-paint") };
     case "textures":
     case "texture":
-      return { Icon: FaLayerGroup };
+      return { Icon: createIconifyIcon("mdi:layers") };
     case "tire stickers":
     case "tire sticker":
-      return { Icon: PiStickerFill };
+      return { Icon: createIconifyIcon("mdi:sticker") };
     case "tire styles":
     case "tire style":
-      return { Icon: CircleStackIcon };
+      return { Icon: createIconifyIcon("ph:tire-bold") };
     case "drifts":
     case "drift":
-      return { Icon: FaFire };
+      return { Icon: createIconifyIcon("mdi:fire") };
     case "furniture":
-      return { Icon: FaHome };
+      return { Icon: createIconifyIcon("mdi:home") };
     case "horns":
     case "horn":
-      return { Icon: FaBullhorn };
+      return { Icon: createIconifyIcon("mdi:bullhorn") };
     case "weapon skins":
     case "weapon skin":
-      return { Icon: FaGun };
+      return { Icon: createIconifyIcon("fa7-solid:gun") };
     default:
       return null;
   }
@@ -143,7 +145,8 @@ export const CategoryIconBadge = ({
     if (isSeasonal) {
       return (
         <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <FaRegSnowflake
+          <Icon
+            icon="noto-v1:snowflake"
             className={`${className}`}
             style={{ color: "#40c0e7" }}
           />
@@ -154,7 +157,11 @@ export const CategoryIconBadge = ({
     if (isLimited) {
       return (
         <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <FaClock className={`${className}`} style={{ color: "#ffd700" }} />
+          <Icon
+            className={`${className}`}
+            style={{ color: "#ffd700" }}
+            icon="mdi:clock"
+          />
         </div>
       );
     }
@@ -163,7 +170,8 @@ export const CategoryIconBadge = ({
     if (isSeasonal) {
       return (
         <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <FaRegSnowflake
+          <Icon
+            icon="noto-v1:snowflake"
             className={`${className}`}
             style={{ color: "#40c0e7" }}
           />
@@ -174,7 +182,11 @@ export const CategoryIconBadge = ({
     if (isLimited) {
       return (
         <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <FaClock className={`${className}`} style={{ color: "#ffd700" }} />
+          <Icon
+            className={`${className}`}
+            style={{ color: "#ffd700" }}
+            icon="mdi:clock"
+          />
         </div>
       );
     }

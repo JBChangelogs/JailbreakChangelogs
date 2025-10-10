@@ -20,6 +20,8 @@
     "@emotion/styled": "^11.14.1",
     "@headlessui/react": "^2.2.8",
     "@heroicons/react": "^2.2.0",
+    "@iconify/react": "^6.0.2",
+    "@iconify/types": "^2.0.0",
     "@mui/icons-material": "^7.3.3",
     "@mui/lab": "7.0.0",
     "@mui/material": "^7.3.3",

@@ -3,14 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import {
-  DocumentTextIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  ShieldCheckIcon,
-  CurrencyDollarIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
+import { Icon } from "@iconify/react";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 export default function Home() {
@@ -101,7 +94,11 @@ export default function Home() {
             {/* Feature 1 - Changelogs & Seasons */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <DocumentTextIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:file-document"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Changelogs & Seasons
                 </h3>
@@ -116,7 +113,11 @@ export default function Home() {
             {/* Feature 2 - Player Tools */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <UserIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:account"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Player Tools
                 </h3>
@@ -130,7 +131,11 @@ export default function Home() {
             {/* Feature 3 - Trading & Values */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <CurrencyDollarIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:currency-usd"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Trading & Values
                 </h3>
@@ -144,7 +149,11 @@ export default function Home() {
             {/* Feature 4 - Community Features */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:chat"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Community Features
                 </h3>
@@ -158,7 +167,11 @@ export default function Home() {
             {/* Feature 5 - Private Servers */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <CalendarIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:calendar"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Private Servers
                 </h3>
@@ -172,7 +185,11 @@ export default function Home() {
             {/* Feature 6 - Advanced Tools */}
             <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
-                <ShieldCheckIcon className="text-link h-6 w-6" />
+                <Icon
+                  icon="mdi:shield-check"
+                  className="text-link h-6 w-6"
+                  inline={true}
+                />
                 <h3 className="text-card-headline text-xl font-semibold">
                   Advanced Tools
                 </h3>
@@ -186,44 +203,11 @@ export default function Home() {
           <div className="mt-12 text-center">
             <p className="text-tertiary-text flex items-center justify-center gap-1">
               Crafted with{" "}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                className="inline"
-              >
-                <path
-                  fill="#1d80e2"
-                  fillOpacity="0"
-                  d="M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9c0 0 -7.43 -7.79 -8.24 -9c-0.48 -0.71 -0.76 -1.57 -0.76 -2.5c0 -2.49 2.01 -4.5 4.5 -4.5c1.56 0 2.87 0.84 3.74 2c0.76 1 0.76 1 0.76 1Z"
-                >
-                  <animate
-                    fill="freeze"
-                    attributeName="fill-opacity"
-                    begin="0.7s"
-                    dur="0.5s"
-                    values="0;1"
-                  />
-                </path>
-                <path
-                  fill="none"
-                  stroke="#1d80e2"
-                  strokeDasharray="32"
-                  strokeDashoffset="32"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8c0 0 0 0 -0.76 -1c-0.88 -1.16 -2.18 -2 -3.74 -2c-2.49 0 -4.5 2.01 -4.5 4.5c0 0.93 0.28 1.79 0.76 2.5c0.81 1.21 8.24 9 8.24 9M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9"
-                >
-                  <animate
-                    fill="freeze"
-                    attributeName="stroke-dashoffset"
-                    dur="0.7s"
-                    values="32;0"
-                  />
-                </path>
-              </svg>
+              <Icon
+                icon="line-md:heart-filled"
+                className="inline w-4 h-4 text-blue-500"
+                style={{ color: "#1d80e2" }}
+              />
               {" by "}
               <Link
                 href="/users/659865209741246514"

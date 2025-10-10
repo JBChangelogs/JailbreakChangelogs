@@ -7,9 +7,6 @@ const CircularProgress = dynamic(
   { ssr: false },
 );
 
-// Removed dynamic Badge import and styled components to prevent layout shifts
-// Now using simple CSS badges for better performance and no hydration issues
-
 interface UserAvatarProps {
   userId: string;
   avatarHash: string | null;
