@@ -39,11 +39,17 @@ export default function NetworthLeaderboardClient({
   const [avatarErrorMap, setAvatarErrorMap] = useState<Record<string, boolean>>(
     {},
   );
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  // Initialize all rows as expanded by default
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(() => {
+    if (initialLeaderboard.length > 0) {
+      return new Set(initialLeaderboard.map((user) => user.user_id));
+    }
+    return new Set();
+  });
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Initialize all rows as expanded by default
+  // Update expandedRows when initialLeaderboard changes
   useEffect(() => {
     if (initialLeaderboard.length > 0) {
       const allUserIds = new Set(
