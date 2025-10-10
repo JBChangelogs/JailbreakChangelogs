@@ -258,6 +258,7 @@ export default function UserStats({
         totalCashValue={totalCashValue}
         totalDupedValue={totalDupedValue}
         isLoadingValues={isLoadingValues}
+        userId={initialData.user_id}
       />
     </div>
   );

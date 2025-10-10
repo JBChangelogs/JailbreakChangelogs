@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -8,6 +8,7 @@ import { formatMessageDate } from "@/utils/timestamp";
 import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import ScanHistoryModal from "../Modals/ScanHistoryModal";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 const gamepassData = {
@@ -64,6 +65,7 @@ interface UserStatsSectionProps {
   totalCashValue: number;
   totalDupedValue: number;
   isLoadingValues: boolean;
+  userId: string;
 }
 
 // Helper functions
@@ -123,13 +125,45 @@ export default function UserStatsSection({
   totalCashValue,
   totalDupedValue,
   isLoadingValues,
+  userId,
 }: UserStatsSectionProps) {
+  const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
+  const [scanHistory, setScanHistory] = useState<
+    Array<{ scan_id: string; created_at: number }>
+  >([]);
+  const [isLoadingScanHistory, setIsLoadingScanHistory] = useState(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
   const updatedRelativeTime = useRealTimeRelativeDate(
     currentData?.updated_at || 0,
   );
+
+  const fetchScanHistory = async () => {
+    setIsLoadingScanHistory(true);
+    try {
+      const response = await fetch(
+        `/api/inventories/scan-history?id=${userId}`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch scan history");
+      }
+      const data = await response.json();
+      setScanHistory(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching scan history:", error);
+      setScanHistory([]);
+    } finally {
+      setIsLoadingScanHistory(false);
+    }
+  };
+
+  const handleOpenScanHistory = () => {
+    setIsScanHistoryModalOpen(true);
+    if (scanHistory.length === 0) {
+      fetchScanHistory();
+    }
+  };
 
   if (!currentData) {
     return (
@@ -489,6 +523,24 @@ export default function UserStatsSection({
           </span>
         </p>
       </div>
+
+      {/* View Scan History Button */}
+      <div className="mt-4">
+        <button
+          onClick={handleOpenScanHistory}
+          disabled={isLoadingScanHistory}
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+        >
+          {isLoadingScanHistory ? "Loading..." : "View Scan History"}
+        </button>
+      </div>
+
+      {/* Scan History Modal */}
+      <ScanHistoryModal
+        isOpen={isScanHistoryModalOpen}
+        onClose={() => setIsScanHistoryModalOpen(false)}
+        initialScanHistory={scanHistory}
+      />
     </div>
   );
 }
