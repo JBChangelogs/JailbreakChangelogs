@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: May 07th, 2025
+          Last updated: October 9th, 2025
         </p>
 
         <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
@@ -114,6 +114,45 @@ export default function PrivacyPage() {
               <Typography className="text-secondary-text">
                 Our website may contain links to third-party websites. We are
                 not responsible for the privacy practices of these websites.
+              </Typography>
+            </div>
+
+            <div>
+              <h2 className="text-primary-text mb-4 text-xl font-semibold">
+                Data Deletion Requests
+              </h2>
+              <Typography className="text-secondary-text mb-4">
+                You have the right to request deletion of your data at any time.
+                If you would like to request deletion of your inventory data or
+                any other information we have collected, you can contact us
+                through the following methods:
+              </Typography>
+              <ul className="text-secondary-text list-inside list-disc space-y-1">
+                <li>
+                  Join our{" "}
+                  <a
+                    href="https://discord.gg/jailbreakchangelogs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover hover:underline"
+                  >
+                    Discord server
+                  </a>{" "}
+                  and submit a deletion request
+                </li>
+                <li>
+                  Email us at{" "}
+                  <a
+                    href="mailto:support@jailbreakchangelogs.xyz"
+                    className="text-link hover:text-link-hover hover:underline"
+                  >
+                    support@jailbreakchangelogs.xyz
+                  </a>
+                </li>
+              </ul>
+              <Typography className="text-secondary-text mt-4">
+                We will process your deletion request promptly and confirm once
+                your data has been removed from our systems.
               </Typography>
             </div>
 

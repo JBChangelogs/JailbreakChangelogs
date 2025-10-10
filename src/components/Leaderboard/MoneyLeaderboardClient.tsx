@@ -46,9 +46,9 @@ export default function MoneyLeaderboardClient({
 
       try {
         const userIds = initialLeaderboard.map((user) => user.user_id);
-        const BATCH_SIZE = 50;
+        const BATCH_SIZE = 250;
 
-        // Split userIds into batches of 50
+        // Split userIds into batches of 250
         const batches = [];
         for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
           batches.push(userIds.slice(i, i + BATCH_SIZE));
@@ -130,7 +130,7 @@ export default function MoneyLeaderboardClient({
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text text-xl font-bold">
-              Money Leaderboard ({filteredLeaderboard.length}
+              Money Leaderboard ({filteredLeaderboard.length} players
               {searchTerm && ` of ${initialLeaderboard.length}`})
             </h2>
           </div>

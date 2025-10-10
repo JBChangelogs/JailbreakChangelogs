@@ -137,7 +137,7 @@ export default function NetworthLeaderboardClient({
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text text-xl font-bold">
-              Networth Leaderboard ({filteredLeaderboard.length}
+              Networth Leaderboard ({filteredLeaderboard.length} players
               {searchTerm && ` of ${initialLeaderboard.length}`})
             </h2>
           </div>

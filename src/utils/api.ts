@@ -1579,11 +1579,14 @@ export async function fetchNetworthLeaderboard(): Promise<
   NetworthLeaderboardEntry[]
 > {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/networth/leaderboard`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+    const response = await fetch(
+      `${INVENTORY_API_URL}/networth/leaderboard?limit=1000`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch networth leaderboard");
