@@ -49,7 +49,6 @@ const FollowingModal = dynamic(
   },
 );
 import type { UserFlag } from "@/types/auth";
-import { BsMusicNoteBeamed } from "react-icons/bs";
 
 const LinSuperIdol = ({ userId }: { userId: string }) => {
   const [showPlayButton, setShowPlayButton] = useState(false);
@@ -96,7 +95,11 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
         className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300 cursor-pointer"
         title="Lin is a super idol"
       >
-        <BsMusicNoteBeamed className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
+        <Icon
+          icon="material-symbols:music-note"
+          className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+          inline={true}
+        />
       </button>
     </div>
   );

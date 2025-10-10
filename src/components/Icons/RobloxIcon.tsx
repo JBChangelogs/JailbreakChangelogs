@@ -1,10 +1,9 @@
+import { Icon } from "@iconify/react";
+
 export const RobloxIcon = ({ className }: { className?: string }) => (
-  <svg
+  <Icon
+    icon="simple-icons:roblox"
     className={`text-primary-text ${className || ""}`}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z" />
-  </svg>
+    inline={true}
+  />
 );

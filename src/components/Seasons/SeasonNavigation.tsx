@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
-import { FaDiceSix } from "react-icons/fa6";
+import { Icon } from "@iconify/react";
 import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
@@ -122,7 +122,11 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
           className="text-secondary-text border-button-info bg-secondary-bg flex items-center justify-between rounded-lg border p-3 hover:cursor-pointer focus:outline-none"
         >
           <span>Random Season</span>
-          <FaDiceSix className="text-button-info h-5 w-5" />
+          <Icon
+            icon="streamline-ultimate:dice-bold"
+            className="text-button-info h-5 w-5"
+            inline={true}
+          />
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api";
-import { RiVerifiedBadgeFill } from "react-icons/ri";
+import { Icon } from "@iconify/react";
 import Image from "next/image";
 import CopyButton from "@/app/inventories/CopyButton";
 
@@ -26,7 +26,11 @@ function OfficialBotsSkeleton() {
             >
               <div className="flex items-center gap-3">
                 <div className="bg-status-success text-form-button-text flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
-                  <RiVerifiedBadgeFill className="h-4 w-4" />
+                  <Icon
+                    icon="ri:verified-badge-fill"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 </div>
                 <div className="bg-surface-bg h-10 w-10 animate-pulse rounded-full"></div>
               </div>
@@ -110,7 +114,11 @@ async function OfficialBotsContent() {
               >
                 <div className="flex items-center gap-3">
                   <div className="bg-status-success text-form-button-text flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
-                    <RiVerifiedBadgeFill className="h-4 w-4" />
+                    <Icon
+                      icon="ri:verified-badge-fill"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
                   </div>
 
                   {/* Bot Avatar */}

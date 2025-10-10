@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
 });
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -226,12 +226,20 @@ export default function AboutTab({
                       >
                         {bioExpanded ? (
                           <>
-                            <FaChevronUp className="h-4 w-4" />
+                            <Icon
+                              icon="mdi:chevron-up"
+                              className="h-4 w-4"
+                              inline={true}
+                            />
                             Show less
                           </>
                         ) : (
                           <>
-                            <FaChevronDown className="h-4 w-4" />
+                            <Icon
+                              icon="mdi:chevron-down"
+                              className="h-4 w-4"
+                              inline={true}
+                            />
                             Read more
                           </>
                         )}

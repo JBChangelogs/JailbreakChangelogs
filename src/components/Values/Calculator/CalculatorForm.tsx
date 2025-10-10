@@ -15,8 +15,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { CiBoxList } from "react-icons/ci";
+import { Icon } from "@iconify/react";
 import { TradeAdTooltip } from "../../trading/TradeAdTooltip";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
@@ -97,7 +96,7 @@ const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({
           className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-colors hover:cursor-pointer"
           onClick={handleClick}
         >
-          <CiBoxList className="h-4 w-4" />
+          <Icon icon="circum:box-list" className="h-4 w-4" inline={true} />
           Browse Items
         </button>
       </div>
@@ -917,9 +916,17 @@ const CalculatorValueComparison: React.FC<{
               >
                 {difference !== 0 &&
                   (difference < 0 ? (
-                    <FaArrowUp className="text-white" />
+                    <Icon
+                      icon="famicons:arrow-up"
+                      className="text-white"
+                      inline={true}
+                    />
                   ) : (
-                    <FaArrowDown className="text-white" />
+                    <Icon
+                      icon="famicons:arrow-down"
+                      className="text-white"
+                      inline={true}
+                    />
                   ))}
                 {formatCurrencyValue(Math.abs(difference))}
               </span>

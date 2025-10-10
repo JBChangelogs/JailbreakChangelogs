@@ -5,7 +5,7 @@ import {
   XMarkIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { formatTimestamp, formatRelativeDate } from "@/utils/timestamp";
 import ReportDupeModal from "./ReportDupeModal";
@@ -134,7 +134,11 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
             {!loading && !error && !suggestion && results.length === 0 && (
               <div className="space-y-4">
                 <div className="text-status-success flex flex-col items-center justify-center">
-                  <FaCheckCircle className="mb-2 h-12 w-12" />
+                  <Icon
+                    icon="material-symbols:check-circle"
+                    className="mb-2 h-12 w-12"
+                    inline={true}
+                  />
                   <div className="text-center">
                     <div className="text-secondary-text">
                       No dupes found for {ownerName}
@@ -177,7 +181,11 @@ const DupeResultsModal: React.FC<DupeResultsModalProps> = ({
                 {/* Header */}
                 <div className="bg-button-danger/10 border-button-danger/20 rounded-lg border p-4">
                   <div className="flex items-center gap-3">
-                    <FaExclamationCircle className="text-button-danger h-6 w-6 flex-shrink-0" />
+                    <Icon
+                      icon="tabler:exclamation-circle-filled"
+                      className="text-button-danger h-6 w-6 flex-shrink-0"
+                      inline={true}
+                    />
                     <div className="flex-1">
                       <h3 className="text-primary-text text-lg font-semibold">
                         {uniqueItemsCount} Dupe Item

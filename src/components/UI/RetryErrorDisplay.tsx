@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { HiStatusOffline } from "react-icons/hi";
+import { Icon } from "@iconify/react";
 
 interface RetryErrorDisplayProps {
   error: string;
@@ -64,7 +64,11 @@ export default function RetryErrorDisplay({
           ) : (
             // Offline status icon when not retrying
             <div className="h-8 w-8 rounded-full bg-status-error/10 flex items-center justify-center">
-              <HiStatusOffline className="h-5 w-5 text-status-error" />
+              <Icon
+                icon="heroicons-solid:status-offline"
+                className="h-5 w-5 text-status-error"
+                inline={true}
+              />
             </div>
           )}
         </div>

@@ -1,6 +1,5 @@
 import { CalculationResults, Season } from "@/types/seasons";
-import { FaCheck, FaTimes } from "react-icons/fa";
-import { IoTime } from "react-icons/io5";
+import { Icon } from "@iconify/react";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
 
 interface XpResultsSummaryProps {
@@ -14,9 +13,9 @@ export default function XpResultsSummary({
 }: XpResultsSummaryProps) {
   const getStatusIcon = (achievable: boolean) =>
     achievable ? (
-      <FaCheck className="text-green-400" />
+      <Icon icon="fa:check" className="text-green-400" inline={true} />
     ) : (
-      <FaTimes className="text-red-400" />
+      <Icon icon="fa:times" className="text-red-400" inline={true} />
     );
 
   // Helper function to calculate XP within current level
@@ -206,7 +205,11 @@ export default function XpResultsSummary({
           <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-primary-text flex items-center gap-2 font-semibold">
-                <IoTime className="text-blue-400" />
+                <Icon
+                  icon="mdi:clock"
+                  className="text-blue-400"
+                  inline={true}
+                />
                 Without Season Pass
               </h4>
               <span className="text-lg">
@@ -247,7 +250,11 @@ export default function XpResultsSummary({
           <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-between">
               <h4 className="text-primary-text flex items-center gap-2 font-semibold">
-                <IoTime className="text-green-400" />
+                <Icon
+                  icon="mdi:clock"
+                  className="text-green-400"
+                  inline={true}
+                />
                 With Season Pass
               </h4>
               <span className="text-lg">
@@ -310,9 +317,17 @@ export default function XpResultsSummary({
                 <div className="flex items-center gap-2">
                   <span className="flex-shrink-0 text-lg">
                     {results.achievableNoPass ? (
-                      <FaCheck className="text-green-400" />
+                      <Icon
+                        icon="fa:check"
+                        className="text-green-400"
+                        inline={true}
+                      />
                     ) : (
-                      <FaTimes className="text-red-400" />
+                      <Icon
+                        icon="fa:times"
+                        className="text-red-400"
+                        inline={true}
+                      />
                     )}
                   </span>
                   <span className="text-primary-text text-sm sm:text-base">
@@ -339,9 +354,17 @@ export default function XpResultsSummary({
                   <div className="flex items-center gap-2">
                     <span className="text-lg">
                       {results.doubleXpResults.noPass.achievable ? (
-                        <FaCheck className="text-green-400" />
+                        <Icon
+                          icon="fa:check"
+                          className="text-green-400"
+                          inline={true}
+                        />
                       ) : (
-                        <FaTimes className="text-red-400" />
+                        <Icon
+                          icon="fa:times"
+                          className="text-red-400"
+                          inline={true}
+                        />
                       )}
                     </span>
                     <span className="text-primary-text">
@@ -391,9 +414,17 @@ export default function XpResultsSummary({
                 <div className="flex items-center gap-2">
                   <span className="flex-shrink-0 text-lg">
                     {results.achievableWithPass ? (
-                      <FaCheck className="text-green-400" />
+                      <Icon
+                        icon="fa:check"
+                        className="text-green-400"
+                        inline={true}
+                      />
                     ) : (
-                      <FaTimes className="text-red-400" />
+                      <Icon
+                        icon="fa:times"
+                        className="text-red-400"
+                        inline={true}
+                      />
                     )}
                   </span>
                   <span className="text-primary-text text-sm sm:text-base">
@@ -420,9 +451,17 @@ export default function XpResultsSummary({
                   <div className="flex items-center gap-2">
                     <span className="text-lg">
                       {results.doubleXpResults.withPass.achievable ? (
-                        <FaCheck className="text-green-400" />
+                        <Icon
+                          icon="fa:check"
+                          className="text-green-400"
+                          inline={true}
+                        />
                       ) : (
-                        <FaTimes className="text-red-400" />
+                        <Icon
+                          icon="fa:times"
+                          className="text-red-400"
+                          inline={true}
+                        />
                       )}
                     </span>
                     <span className="text-primary-text">

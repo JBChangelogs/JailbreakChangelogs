@@ -1,4 +1,4 @@
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   CircularProgress,
@@ -24,8 +24,6 @@ import {
   ChatBubbleLeftIcon,
   FlagIcon,
 } from "@heroicons/react/24/outline";
-import { BiSolidSend } from "react-icons/bi";
-import { FaSignInAlt } from "react-icons/fa";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
 import { Inter } from "next/font/google";
@@ -641,13 +639,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     </>
                   ) : (
                     <>
-                      <BiSolidSend className="h-4 w-4" />
+                      <Icon
+                        icon="streamline-plump:mail-send-email-message-solid"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
                       Post Comment
                     </>
                   )
                 ) : (
                   <>
-                    <FaSignInAlt className="h-4 w-4" />
+                    <Icon icon="uil:signin" className="h-4 w-4" inline={true} />
                     Login to Comment
                   </>
                 )}
@@ -998,12 +1000,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                             >
                                               {isExpanded ? (
                                                 <>
-                                                  <FaChevronUp className="h-4 w-4" />
+                                                  <Icon
+                                                    icon="mdi:chevron-up"
+                                                    className="h-4 w-4"
+                                                    inline={true}
+                                                  />
                                                   Show less
                                                 </>
                                               ) : (
                                                 <>
-                                                  <FaChevronDown className="h-4 w-4" />
+                                                  <Icon
+                                                    icon="mdi:chevron-down"
+                                                    className="h-4 w-4"
+                                                    inline={true}
+                                                  />
                                                   Read more
                                                 </>
                                               )}

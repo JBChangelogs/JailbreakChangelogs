@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TradeItem } from "@/types/trading";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { FaArrowCircleUp, FaArrowAltCircleDown } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import { formatFullValue, demandOrder } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { getCategoryColor } from "@/utils/categoryIcons";
@@ -264,9 +264,17 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                           className={`flex items-center gap-2 ${isAbove ? "text-status-success" : "text-status-error"}`}
                         >
                           {isAbove ? (
-                            <FaArrowCircleUp className="h-4 w-4" />
+                            <Icon
+                              icon="fa-solid:arrow-circle-up"
+                              className="h-4 w-4"
+                              inline={true}
+                            />
                           ) : (
-                            <FaArrowAltCircleDown className="h-4 w-4" />
+                            <Icon
+                              icon="fa-solid:arrow-alt-circle-down"
+                              className="h-4 w-4"
+                              inline={true}
+                            />
                           )}
                           <span className="text-primary-text text-sm font-medium">
                             {isAbove ? "Above by" : "Below by"}{" "}
@@ -290,9 +298,17 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                               className={`flex items-center gap-2 ${demandDelta > 0 ? "text-status-success" : "text-status-error"}`}
                             >
                               {demandDelta > 0 ? (
-                                <FaArrowCircleUp className="h-4 w-4" />
+                                <Icon
+                                  icon="fa-solid:arrow-circle-up"
+                                  className="h-4 w-4"
+                                  inline={true}
+                                />
                               ) : (
-                                <FaArrowAltCircleDown className="h-4 w-4" />
+                                <Icon
+                                  icon="fa-solid:arrow-alt-circle-down"
+                                  className="h-4 w-4"
+                                  inline={true}
+                                />
                               )}
                               <span className="text-primary-text text-sm">
                                 {Math.abs(demandDelta)} level

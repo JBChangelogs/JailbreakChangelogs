@@ -24,8 +24,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
-import { FaCircleMinus } from "react-icons/fa6";
-import { FaPlusCircle } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 
 interface Item {
   id: number;
@@ -869,7 +868,11 @@ export default function ChangelogDetailsClient({
                                   <div className="grid grid-cols-2 gap-6">
                                     <div className="min-w-0">
                                       <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                        <FaCircleMinus className="text-button-danger h-4 w-4" />
+                                        <Icon
+                                          icon="mdi:minus-circle"
+                                          className="text-button-danger h-4 w-4"
+                                          inline={true}
+                                        />
                                         {`OLD ${formatSuggestionTypeLabel(
                                           change.suggestion?.metadata
                                             ?.suggestion_type,
@@ -909,7 +912,11 @@ export default function ChangelogDetailsClient({
                                     </div>
                                     <div className="min-w-0">
                                       <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                        <FaPlusCircle className="text-button-success h-4 w-4" />
+                                        <Icon
+                                          icon="mdi:plus-circle"
+                                          className="text-button-success h-4 w-4"
+                                          inline={true}
+                                        />
                                         {`NEW ${formatSuggestionTypeLabel(
                                           change.suggestion?.metadata
                                             ?.suggestion_type,

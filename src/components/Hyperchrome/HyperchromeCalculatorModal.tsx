@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { FaArrowRight } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   calculateRobberiesToLevelUp,
@@ -176,7 +176,7 @@ export default function HyperchromeCalculatorModal({
 
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
                   <div className="text-secondary-text mb-1 text-sm">Result</div>
                   <div className="flex items-baseline gap-2">
                     <div className="text-primary-text text-3xl font-extrabold">
@@ -203,33 +203,53 @@ export default function HyperchromeCalculatorModal({
             )}
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
                   <div className="text-secondary-text mb-2 text-xs">
                     If you trade to a different level, here&apos;s what your
                     pity would be for each level-up.
                   </div>
                   {parseFloat(otherPity[1]) <= 100 && (
                     <div className="text-secondary-text text-base">
-                      Level 1 <FaArrowRight className="mx-1 inline" /> Level 2:{" "}
-                      {otherPity[1]}%
+                      Level 1{" "}
+                      <Icon
+                        icon="mingcute:arrow-right-fill"
+                        className="mx-1 inline"
+                        inline={true}
+                      />{" "}
+                      Level 2: {otherPity[1]}%
                     </div>
                   )}
                   {parseFloat(otherPity[2]) <= 100 && (
                     <div className="text-secondary-text text-base">
-                      Level 2 <FaArrowRight className="mx-1 inline" /> Level 3:{" "}
-                      {otherPity[2]}%
+                      Level 2{" "}
+                      <Icon
+                        icon="mingcute:arrow-right-fill"
+                        className="mx-1 inline"
+                        inline={true}
+                      />{" "}
+                      Level 3: {otherPity[2]}%
                     </div>
                   )}
                   {parseFloat(otherPity[3]) <= 100 && (
                     <div className="text-secondary-text text-base">
-                      Level 3 <FaArrowRight className="mx-1 inline" /> Level 4:{" "}
-                      {otherPity[3]}%
+                      Level 3{" "}
+                      <Icon
+                        icon="mingcute:arrow-right-fill"
+                        className="mx-1 inline"
+                        inline={true}
+                      />{" "}
+                      Level 4: {otherPity[3]}%
                     </div>
                   )}
                   {parseFloat(otherPity[4]) <= 100 && (
                     <div className="text-secondary-text text-base">
-                      Level 4 <FaArrowRight className="mx-1 inline" /> Level 5:{" "}
-                      {otherPity[4]}%
+                      Level 4{" "}
+                      <Icon
+                        icon="mingcute:arrow-right-fill"
+                        className="mx-1 inline"
+                        inline={true}
+                      />{" "}
+                      Level 5: {otherPity[4]}%
                     </div>
                   )}
                 </div>

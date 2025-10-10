@@ -10,8 +10,7 @@ import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
 import type { UserData } from "@/types/auth";
-import { FaCircleMinus } from "react-icons/fa6";
-import { FaPlusCircle } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 
 type ItemChangeValue = string | number | boolean | null;
 
@@ -748,7 +747,11 @@ export default function ItemChangelogs({
                           <div className="grid grid-cols-2 gap-6">
                             <div className="min-w-0">
                               <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                <FaCircleMinus className="text-button-danger h-4 w-4" />
+                                <Icon
+                                  icon="mdi:minus-circle"
+                                  className="text-button-danger h-4 w-4"
+                                  inline={true}
+                                />
                                 {`OLD ${formatSuggestionTypeLabel(
                                   change.suggestion_data?.metadata
                                     ?.suggestion_type,
@@ -795,7 +798,11 @@ export default function ItemChangelogs({
                             </div>
                             <div className="min-w-0">
                               <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                <FaPlusCircle className="text-button-success h-4 w-4" />
+                                <Icon
+                                  icon="mdi:plus-circle"
+                                  className="text-button-success h-4 w-4"
+                                  inline={true}
+                                />
                                 {`NEW ${formatSuggestionTypeLabel(
                                   change.suggestion_data?.metadata
                                     ?.suggestion_type,
