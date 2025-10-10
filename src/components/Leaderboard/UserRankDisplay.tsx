@@ -86,47 +86,45 @@ export default function UserRankDisplay() {
         </span>
       </div>
       <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
-        <div className="border-border-primary hover:border-border-focus rounded-lg border p-3 transition-colors">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
-                #{userRank.rank.toLocaleString()}
-              </div>
-              {user.roblox_avatar ? (
-                <Image
-                  src={user.roblox_avatar}
-                  alt={`${user.roblox_display_name} avatar`}
-                  width={32}
-                  height={32}
-                  className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
-                />
-              ) : (
-                <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
-              )}
-              <div className="flex min-w-0 flex-1 flex-col">
-                <a
-                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-text hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
-                >
-                  {user.roblox_display_name}
-                </a>
-                <a
-                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-secondary-text hover:text-link-hover truncate text-xs transition-colors sm:text-sm"
-                >
-                  @{user.roblox_username}
-                </a>
-              </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
+              #{userRank.rank.toLocaleString()}
             </div>
-            <div className="ml-2 flex items-center space-x-2">
-              <span className="text-button-success text-sm font-bold sm:text-lg">
-                ${formatMoney(userRank.money)}
-              </span>
+            {user.roblox_avatar ? (
+              <Image
+                src={user.roblox_avatar}
+                alt={`${user.roblox_display_name} avatar`}
+                width={32}
+                height={32}
+                className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
+              />
+            ) : (
+              <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
+            )}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <a
+                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-text hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
+              >
+                {user.roblox_display_name}
+              </a>
+              <a
+                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary-text hover:text-link-hover truncate text-xs transition-colors sm:text-sm"
+              >
+                @{user.roblox_username}
+              </a>
             </div>
+          </div>
+          <div className="ml-2 flex items-center space-x-2">
+            <span className="text-button-success text-sm font-bold sm:text-lg">
+              ${formatMoney(userRank.money)}
+            </span>
           </div>
         </div>
       </div>

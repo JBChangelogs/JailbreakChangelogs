@@ -1557,11 +1557,14 @@ export async function fetchMoneyLeaderboard(): Promise<
   MoneyLeaderboardEntry[]
 > {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/money/leaderboard`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+    const response = await fetch(
+      `${INVENTORY_API_URL}/money/leaderboard?limit=1000`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch money leaderboard");
