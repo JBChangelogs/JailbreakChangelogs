@@ -7,9 +7,9 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import NetworthLeaderboardSearch from "./NetworthLeaderboardSearch";
 import UserNetworthDisplay from "./UserNetworthDisplay";
+import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
 import { DefaultAvatar } from "@/utils/avatar";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
-import { getCategoryColor } from "@/utils/categoryIcons";
 
 interface NetworthLeaderboardEntry {
   user_id: string;
@@ -39,25 +39,11 @@ export default function NetworthLeaderboardClient({
   const [avatarErrorMap, setAvatarErrorMap] = useState<Record<string, boolean>>(
     {},
   );
-  // Initialize all rows as expanded by default
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(() => {
-    if (initialLeaderboard.length > 0) {
-      return new Set(initialLeaderboard.map((user) => user.user_id));
-    }
-    return new Set();
-  });
+  const [selectedUser, setSelectedUser] =
+    useState<NetworthLeaderboardEntry | null>(null);
+  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-  // Update expandedRows when initialLeaderboard changes
-  useEffect(() => {
-    if (initialLeaderboard.length > 0) {
-      const allUserIds = new Set(
-        initialLeaderboard.map((user) => user.user_id),
-      );
-      setExpandedRows(allUserIds);
-    }
-  }, [initialLeaderboard]);
 
   // Load user data and avatars
   useEffect(() => {
@@ -135,11 +121,6 @@ export default function NetworthLeaderboardClient({
     overscan: 5, // Render 5 extra items above/below viewport for smooth scrolling
   });
 
-  // Recalculate virtualizer when expanded rows change to update heights
-  useEffect(() => {
-    virtualizer.measure();
-  }, [expandedRows, virtualizer]);
-
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {
     const handleResize = () => {
@@ -154,17 +135,16 @@ export default function NetworthLeaderboardClient({
     setSearchTerm(term);
   };
 
-  // Toggle individual row expansion state for breakdown visibility
-  const toggleRowExpanded = (userId: string) => {
-    setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(userId)) {
-        newSet.delete(userId);
-      } else {
-        newSet.add(userId);
-      }
-      return newSet;
-    });
+  // Handle opening breakdown modal
+  const handleOpenBreakdown = (user: NetworthLeaderboardEntry) => {
+    setSelectedUser(user);
+    setIsBreakdownModalOpen(true);
+  };
+
+  // Handle closing breakdown modal
+  const handleCloseBreakdown = () => {
+    setIsBreakdownModalOpen(false);
+    setSelectedUser(null);
   };
 
   // Format large numbers with commas for better readability
@@ -229,10 +209,6 @@ export default function NetworthLeaderboardClient({
                       `User ${user.user_id}`;
                     const username = userData?.name || user.user_id;
                     const avatarUrl = avatarDataMap[user.user_id];
-                    const isExpanded = expandedRows.has(user.user_id);
-                    const hasPercentages =
-                      user.percentages &&
-                      Object.keys(user.percentages).length > 0;
 
                     return (
                       <div
@@ -248,11 +224,12 @@ export default function NetworthLeaderboardClient({
                         }}
                       >
                         <div
-                          className={`rounded-lg border p-3 transition-all duration-200 mb-4 ${
+                          className={`rounded-lg border p-3 transition-all duration-200 mb-4 cursor-pointer hover:shadow-lg ${
                             originalRank <= 3
                               ? ""
                               : "border-border-primary hover:border-border-focus bg-primary-bg"
                           }`}
+                          onClick={() => handleOpenBreakdown(user)}
                           style={{
                             ...(originalRank === 1 && {
                               background:
@@ -330,40 +307,10 @@ export default function NetworthLeaderboardClient({
                                 >
                                   @{username}
                                 </Link>
-                                {hasPercentages && (
-                                  <button
-                                    onClick={() =>
-                                      toggleRowExpanded(user.user_id)
-                                    }
-                                    className="text-secondary-text hover:text-primary-text transition-colors text-xs flex items-center gap-1 bg-secondary-bg hover:bg-border-primary px-2 py-1 rounded-md border border-border-primary hover:border-border-focus w-fit mt-1 cursor-pointer"
-                                    aria-label={
-                                      isExpanded
-                                        ? "Collapse inventory breakdown"
-                                        : "View inventory breakdown"
-                                    }
-                                  >
-                                    <span className="text-xs font-medium">
-                                      {isExpanded ? "Hide" : "Show"} Breakdown
-                                    </span>
-                                    <svg
-                                      className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 9l-7 7-7-7"
-                                      />
-                                    </svg>
-                                  </button>
-                                )}
                               </div>
                             </div>
-                            <div className="flex flex-col items-end space-y-1 sm:ml-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                              <div className="text-right">
+                            <div className="flex items-center justify-center space-x-2 sm:ml-2 sm:justify-start">
+                              <div className="text-center sm:text-right">
                                 <span className="text-button-success text-sm font-bold sm:text-lg">
                                   ${formatNetworth(user.networth)}
                                 </span>
@@ -371,68 +318,14 @@ export default function NetworthLeaderboardClient({
                                   {formatInventoryCount(user.inventory_count)}{" "}
                                   items
                                 </div>
+                                <div className="flex justify-center sm:justify-end mt-1">
+                                  <div className="text-secondary-text text-xs bg-secondary-bg px-2 py-1 rounded border border-border-primary">
+                                    Click to view breakdown
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-
-                          {/* Expandable breakdown section with charts and category grid */}
-                          {hasPercentages && isExpanded && (
-                            <div className="mt-3 pt-3 border-t border-border-primary animate-in fade-in duration-200">
-                              <h4 className="text-primary-text text-sm font-semibold mb-2">
-                                Inventory Breakdown
-                              </h4>
-
-                              {/* Stacked bar chart showing category percentages */}
-                              <div className="mb-3 h-8 w-full overflow-hidden rounded-md bg-secondary-bg flex">
-                                {Object.entries(user.percentages!)
-                                  .sort(([, a], [, b]) => b - a)
-                                  .map(([category, percentage]) => (
-                                    <div
-                                      key={category}
-                                      className="relative group"
-                                      style={{
-                                        width: `${percentage}%`,
-                                        backgroundColor:
-                                          getCategoryColor(category),
-                                      }}
-                                      title={`${category}: ${percentage.toFixed(2)}%`}
-                                    >
-                                      {percentage > 5 && (
-                                        <span className="absolute inset-0 hidden sm:flex items-center justify-center text-xs font-medium text-white drop-shadow">
-                                          {percentage.toFixed(1)}%
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
-                              </div>
-
-                              {/* Responsive category grid with color indicators */}
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                {Object.entries(user.percentages!)
-                                  .sort(([, a], [, b]) => b - a)
-                                  .map(([category, percentage]) => (
-                                    <div
-                                      key={category}
-                                      className="flex items-center gap-2 text-xs"
-                                    >
-                                      <div
-                                        className="w-3 h-3 rounded-sm flex-shrink-0"
-                                        style={{
-                                          backgroundColor:
-                                            getCategoryColor(category),
-                                        }}
-                                      />
-                                      <span className="text-primary-text truncate">
-                                        {category}
-                                      </span>
-                                      <span className="text-secondary-text ml-auto">
-                                        {percentage.toFixed(1)}%
-                                      </span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     );
@@ -448,6 +341,22 @@ export default function NetworthLeaderboardClient({
             No networth leaderboard data available at this time.
           </p>
         </div>
+      )}
+
+      {/* Inventory Breakdown Modal */}
+      {selectedUser && (
+        <InventoryBreakdownModal
+          isOpen={isBreakdownModalOpen}
+          onClose={handleCloseBreakdown}
+          username={
+            userDataMap[selectedUser.user_id]?.name || selectedUser.user_id
+          }
+          networth={selectedUser.networth}
+          inventoryCount={selectedUser.inventory_count}
+          percentages={selectedUser.percentages || {}}
+          money={selectedUser.money}
+          inventoryValue={selectedUser.inventory_value}
+        />
       )}
     </>
   );

@@ -45,7 +45,6 @@ export default function UserStats({
   onRefresh,
 }: UserStatsProps) {
   const [totalCashValue, setTotalCashValue] = useState<number>(0);
-  const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -116,70 +115,6 @@ export default function UserStats({
     calculateCashValue();
   }, [initialData.data, itemsData]);
 
-  // Calculate duped value for ALL items in inventory (not just marked as duplicated)
-  useEffect(() => {
-    const calculateDupedValue = () => {
-      try {
-        let totalDuped = 0;
-        const itemMap = new Map(itemsData.map((item) => [item.id, item]));
-
-        initialData.data.forEach((inventoryItem) => {
-          const itemData = itemMap.get(inventoryItem.item_id);
-          if (itemData) {
-            let dupedValue = parseCashValueForTotal(itemData.duped_value);
-
-            // If main item doesn't have duped value, check children/variants based on created date
-            if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
-              // Get the year from the created date (from item info)
-              const createdAtInfo = inventoryItem.info?.find(
-                (info) => info.title === "Created At",
-              );
-              const createdYear = createdAtInfo
-                ? new Date(createdAtInfo.value).getFullYear().toString()
-                : null;
-
-              // Find the child variant that matches the created year
-              const matchingChild = createdYear
-                ? itemData.children.find(
-                    (child: {
-                      sub_name: string;
-                      data: { duped_value: string | null };
-                    }) =>
-                      child.sub_name === createdYear &&
-                      child.data &&
-                      child.data.duped_value &&
-                      child.data.duped_value !== "N/A" &&
-                      child.data.duped_value !== null,
-                  )
-                : null;
-
-              if (matchingChild) {
-                dupedValue = parseCashValueForTotal(
-                  matchingChild.data.duped_value,
-                );
-              }
-            }
-
-            // Only use duped values, ignore cash values
-            if (!isNaN(dupedValue) && dupedValue > 0) {
-              totalDuped += dupedValue;
-            }
-          }
-        });
-
-        setTotalDupedValue(totalDuped);
-      } catch (error) {
-        logError("Error calculating duped value", error, {
-          component: "UserStats",
-          action: "calculateTotalDupedValue",
-        });
-        setTotalDupedValue(0);
-      }
-    };
-
-    calculateDupedValue();
-  }, [initialData.data, itemsData]);
-
   // Handle refresh
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -228,7 +163,7 @@ export default function UserStats({
   // Set loading state
   useEffect(() => {
     setIsLoadingValues(false);
-  }, [totalCashValue, totalDupedValue]);
+  }, [totalCashValue]);
 
   return (
     <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
@@ -256,7 +191,6 @@ export default function UserStats({
         currentData={initialData}
         currentSeason={currentSeason}
         totalCashValue={totalCashValue}
-        totalDupedValue={totalDupedValue}
         isLoadingValues={isLoadingValues}
         userId={initialData.user_id}
       />
