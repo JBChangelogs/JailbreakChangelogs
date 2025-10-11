@@ -25,3 +25,5 @@ package-lock.json
 yarn.lock
 
 # Note: keep bun.lock tracked (do not ignore)
+# Sentry Config File
+.env.sentry-build-plugin
