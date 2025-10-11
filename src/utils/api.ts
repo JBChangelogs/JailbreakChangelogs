@@ -367,9 +367,9 @@ export async function fetchItems() {
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
     return data as Item[];
-  } catch {
-    console.error("[SERVER] Error fetching items");
-    return [];
+  } catch (error) {
+    console.error("[SERVER] Error fetching items:", error);
+    throw error; // Re-throw to allow error boundaries to handle it
   }
 }
 
@@ -714,9 +714,9 @@ export async function fetchLatestSeason() {
 
     const data = await response.json();
     return data;
-  } catch (err) {
-    console.error("[SERVER] Error fetching latest season:", err);
-    return null;
+  } catch (error) {
+    console.error("[SERVER] Error fetching latest season:", error);
+    throw error; // Re-throw to allow error boundaries to handle it
   }
 }
 
