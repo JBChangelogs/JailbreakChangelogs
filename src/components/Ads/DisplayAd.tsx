@@ -148,7 +148,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
           height: "100%",
         }}
       >
-        <div className="from-button-info/10 to-button-info/5 border-button-info/20 rounded-lg border bg-gradient-to-br p-6 text-center shadow-lg">
+        <div className="p-6 text-center">
           <div className="mb-4 flex items-center justify-center">
             <Image
               src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
@@ -200,31 +200,16 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
             </svg>
           </div>
           <div className="text-secondary-text mb-4 text-sm leading-relaxed">
-            We&apos;re a small team! Ads help cover costs like Discord bots,
-            database, APIs, website hosting, domain fees and more.
+            Please consider turning off your ad blocker to support our site!
             <br />
-            Become a supporter today to hide ads across all pages and get sweet
-            perks!
-          </div>
-          <a
-            href="/supporting"
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-md transition-all duration-200 hover:shadow-lg"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <a
+              href="/supporting"
+              className="text-link hover:text-link-hover transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-            View Perks
-          </a>
+              Become a supporter
+            </a>{" "}
+            to hide ads and get exclusive perks.
+          </div>
         </div>
       </div>
     );

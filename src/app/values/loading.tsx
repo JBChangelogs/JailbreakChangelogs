@@ -98,39 +98,56 @@ export default function Loading() {
 
         {/* Search and filter skeleton */}
         <div className="mb-8">
-          <div className="flex flex-col items-start gap-6 lg:flex-row">
-            <div className="flex w-full flex-col gap-4 lg:min-w-0 lg:flex-1">
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
-                <Skeleton
-                  variant="rounded"
-                  width="100%"
-                  height={40}
-                  className="bg-secondary-bg"
-                />
+          <div className="flex flex-col gap-6">
+            {/* Search and dropdowns row */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">
+              {/* Search input skeleton */}
+              <div className="w-full lg:w-1/3">
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
+                  <Skeleton
+                    variant="rounded"
+                    width="100%"
+                    height={40}
+                    className="bg-secondary-bg"
+                  />
+                </div>
               </div>
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
-                <Skeleton
-                  variant="rounded"
-                  width="100%"
-                  height={40}
-                  className="bg-secondary-bg"
-                />
-              </div>
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
-                <Skeleton
-                  variant="rounded"
-                  width="100%"
-                  height={40}
-                  className="bg-secondary-bg"
-                />
+
+              {/* Filter and Sort dropdowns skeleton */}
+              <div className="flex flex-col gap-4 lg:flex-row lg:gap-4 lg:flex-1">
+                {/* Filter dropdown skeleton */}
+                <div className="w-full lg:w-1/2">
+                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
+                    <Skeleton
+                      variant="rounded"
+                      width="100%"
+                      height={40}
+                      className="bg-secondary-bg"
+                    />
+                  </div>
+                </div>
+
+                {/* Sort dropdown skeleton */}
+                <div className="w-full lg:w-1/2">
+                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
+                    <Skeleton
+                      variant="rounded"
+                      width="100%"
+                      height={40}
+                      className="bg-secondary-bg"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="w-full max-w-[480px] lg:w-[480px] lg:flex-shrink-0">
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+
+            {/* Value range slider skeleton */}
+            <div className="w-full">
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-3">
                 <Skeleton
                   variant="rounded"
                   width="100%"
-                  height={250}
+                  height={60}
                   className="bg-secondary-bg"
                 />
               </div>
@@ -148,11 +165,38 @@ export default function Loading() {
           />
         </div>
 
-        {/* Items grid skeleton */}
-        <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(24)].map((_, i) => (
-            <ItemCardSkeleton key={i} />
-          ))}
+        {/* Items grid skeleton with sidebar layout */}
+        <div className="mb-8 grid grid-cols-1 gap-8 xl:grid-cols-12">
+          {/* Items Grid - 8/12 columns on desktop, full width on tablet and mobile */}
+          <div className="xl:col-span-8">
+            <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...Array(24)].map((_, i) => (
+                <ItemCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar - 4/12 columns on desktop, hidden on tablet and mobile */}
+          <div className="hidden xl:col-span-4 xl:block">
+            <div className="sticky top-24">
+              <div className="flex flex-col items-center">
+                <Skeleton
+                  variant="text"
+                  width={100}
+                  height={16}
+                  className="bg-secondary-bg mb-2"
+                />
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+                  <Skeleton
+                    variant="rounded"
+                    width={160}
+                    height={600}
+                    className="bg-secondary-bg"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Pagination skeleton */}

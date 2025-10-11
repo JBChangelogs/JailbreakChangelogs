@@ -24,16 +24,15 @@ export function reloadAds(): void {
     // Clear existing ads
     clearAdContent();
 
-    // Reload ads
+    // Reload ads with proper loaded property check
     setTimeout(() => {
-      if (window.adsbygoogle) {
-        window.adsbygoogle.length = 0;
-      }
-
-      const adDivs = document.querySelectorAll('[data-ad="true"]');
-      adDivs.forEach(() => {
+      // Check if adsbygoogle is loaded before pushing new ads
+      if (
+        window.adsbygoogle &&
+        !(window.adsbygoogle as { loaded?: boolean }).loaded
+      ) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      });
+      }
     }, 100);
   } catch (error) {
     console.warn("Failed to reload ads:", error);

@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import React from "react";
 
 interface ValuesItemsGridProps {
@@ -37,26 +34,7 @@ export default function ValuesItemsGrid({
   valueSort,
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
 
   const parseNumericValue = (value: string | null): number => {
     if (!value || value === "N/A") return -1;
@@ -87,7 +65,7 @@ export default function ValuesItemsGrid({
     if (width < 375) return 1;
     if (width < 768) return 2;
     if (width < 1024) return 2;
-    if (width < 1280) return 3;
+    if (width < 1280) return 2;
     return 4;
   };
 
@@ -176,32 +154,6 @@ export default function ValuesItemsGrid({
 
   return (
     <>
-      <style jsx>{`
-        .responsive-ad-container-values {
-          width: 320px;
-          height: 100px;
-          border: 1px solid
-            var(--color-border-border-primary hover: border-border-focus);
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-        }
-
-        @media (min-width: 500px) {
-          .responsive-ad-container-values {
-            width: 468px;
-            height: 60px;
-          }
-        }
-
-        @media (min-width: 800px) {
-          .responsive-ad-container-values {
-            width: 728px;
-            height: 90px;
-          }
-        }
-      `}</style>
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {debouncedSearchTerm
@@ -245,7 +197,6 @@ export default function ValuesItemsGrid({
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const rowItems = rows[virtualRow.index];
               const rowIndex = virtualRow.index;
-              const globalIndex = rowIndex * itemsPerRow;
 
               return (
                 <div
@@ -260,9 +211,13 @@ export default function ValuesItemsGrid({
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-4">
-                    {rowItems.map((item: Item, itemIndex: number) => {
-                      const absoluteIndex = globalIndex + itemIndex;
+                  <div
+                    className="grid gap-4 mb-4"
+                    style={{
+                      gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
+                    }}
+                  >
+                    {rowItems.map((item: Item) => {
                       return (
                         <React.Fragment key={item.id}>
                           <ItemCard
@@ -272,32 +227,6 @@ export default function ValuesItemsGrid({
                               onFavoriteChange(item.id, fav);
                             }}
                           />
-                          {/* Show in-feed ad after every 12 items */}
-                          {premiumStatusLoaded &&
-                            currentUserPremiumType === 0 &&
-                            (absoluteIndex + 1) % 12 === 0 &&
-                            absoluteIndex + 1 < rangeFilteredItems.length && (
-                              <div className="col-span-full my-4 flex justify-center">
-                                <div className="w-full max-w-[700px]">
-                                  <span className="text-secondary-text mb-2 block text-center text-xs">
-                                    ADVERTISEMENT
-                                  </span>
-                                  <div className="responsive-ad-container-values">
-                                    <DisplayAd
-                                      adSlot="4358721799"
-                                      adFormat="fluid"
-                                      layoutKey="-62+ck+1k-2e+cb"
-                                      style={{
-                                        display: "block",
-                                        width: "100%",
-                                        height: "100%",
-                                      }}
-                                    />
-                                  </div>
-                                  <AdRemovalNotice />
-                                </div>
-                              </div>
-                            )}
                         </React.Fragment>
                       );
                     })}
