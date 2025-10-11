@@ -55,9 +55,14 @@ interface ValueHistory {
 interface ItemValueChartProps {
   itemId: string;
   variantId?: number;
+  hideTradingMetrics?: boolean;
 }
 
-const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
+const ItemValueChart = ({
+  itemId,
+  variantId,
+  hideTradingMetrics = false,
+}: ItemValueChartProps) => {
   const [history, setHistory] = useState<ValueHistory[]>([]);
   const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
     "all",
@@ -638,7 +643,7 @@ const ItemValueChart = ({ itemId, variantId }: ItemValueChartProps) => {
       </div>
 
       {/* Trading Metrics Chart */}
-      {tradingData.length > 0 && (
+      {!hideTradingMetrics && tradingData.length > 0 && (
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-bold text-primary-text">

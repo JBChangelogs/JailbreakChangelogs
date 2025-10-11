@@ -39,14 +39,20 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
     if (adRef.current) {
       const container = adRef.current.parentElement;
       if (container) {
+        // Ensure container has explicit width and height
+        container.style.display = "block";
+        container.style.width = "100%";
+
         if (adFormat === "auto") {
           // Auto ads need minimum dimensions for proper rendering
           container.style.minHeight = "250px";
-          container.style.minWidth = "300px";
+          container.style.minWidth = "250px";
+          container.style.maxWidth = "100%";
         } else if (adFormat === "fluid") {
           // Fluid ads have height constraints to prevent excessive sizing
           container.style.minHeight = "450px";
           container.style.maxHeight = "500px";
+          container.style.minWidth = "250px";
           container.style.overflow = "hidden";
         }
       }
@@ -223,6 +229,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         display: "block",
         width: "100%",
         height: "100%",
+        minWidth: "250px",
         minHeight:
           adFormat === "auto"
             ? "250px"

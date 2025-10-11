@@ -23,30 +23,42 @@ export default function InventoryAdSection({
     <>
       <style jsx>{`
         .responsive-ad-container-inventory {
-          width: 320px;
+          width: 100%;
+          max-width: 320px;
           height: 100px;
+          min-width: 250px;
           border-radius: 8px;
           overflow: hidden;
+          display: block;
         }
 
         @media (min-width: 500px) {
           .responsive-ad-container-inventory {
-            width: 336px;
+            width: 100%;
+            max-width: 336px;
             height: 280px;
+            min-width: 250px;
+            display: block;
           }
         }
 
         @media (min-width: 700px) {
           .responsive-ad-container-inventory {
-            width: 300px;
+            width: 100%;
+            max-width: 300px;
             height: 250px;
+            min-width: 250px;
+            display: block;
           }
         }
 
         @media (min-width: 800px) {
           .responsive-ad-container-inventory {
-            width: 728px;
+            width: 100%;
+            max-width: 728px;
             height: 90px;
+            min-width: 250px;
+            display: block;
           }
         }
       `}</style>

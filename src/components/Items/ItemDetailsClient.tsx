@@ -152,7 +152,13 @@ export default function ItemDetailsClient({
   useEffect(() => {
     if (item?.type && isDriftItem(item.type) && videoRef.current) {
       if (isHovered) {
-        videoRef.current.play();
+        // Handle video play promise properly to avoid race conditions
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Error playing drift video:", error);
+          });
+        }
       } else {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
@@ -255,10 +261,41 @@ export default function ItemDetailsClient({
     if (isPlaying) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+
+      // Add a small delay to prevent race conditions
+      setTimeout(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+          audioRef.current.pause();
+        }
+      }, 150);
     } else {
-      audioRef.current.play();
+      // Check if audio is truly ready to play
+      const isAudioReady =
+        audioRef.current.currentTime > 0 &&
+        !audioRef.current.paused &&
+        !audioRef.current.ended &&
+        audioRef.current.readyState > audioRef.current.HAVE_CURRENT_DATA;
+
+      if (!isAudioReady) {
+        // Reset the audio to start
+        audioRef.current.currentTime = 0;
+
+        // Use a promise to handle play() properly and avoid race conditions
+        const playPromise = audioRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((error) => {
+              console.error("Error playing audio:", error);
+              setIsPlaying(false);
+            });
+        }
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -804,6 +841,7 @@ export default function ItemDetailsClient({
                         <ItemValueChart
                           itemId={String(currentItem.id)}
                           variantId={variantId}
+                          hideTradingMetrics={currentItem.id === 587}
                         />
                       );
                     })()}

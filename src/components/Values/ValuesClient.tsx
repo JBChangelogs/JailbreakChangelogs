@@ -190,19 +190,15 @@ export default function ValuesClient({
         .sidebar-ad-container {
           width: 320px;
           height: 100px;
-          min-width: 320px;
           border-radius: 8px;
           overflow: hidden;
           transition: all 0.3s ease;
-          max-width: 100%;
         }
 
         @media (min-width: 768px) {
           .sidebar-ad-container {
             width: 300px;
             height: 600px;
-            min-width: 300px;
-            max-width: 100%;
           }
         }
 
@@ -210,8 +206,6 @@ export default function ValuesClient({
           .sidebar-ad-container {
             width: 160px;
             height: 600px;
-            min-width: 160px;
-            max-width: 100%;
           }
         }
       `}</style>
@@ -378,7 +372,7 @@ export default function ValuesClient({
                 <span className="text-secondary-text mb-2 block text-center text-xs w-full">
                   ADVERTISEMENT
                 </span>
-                <div className="sidebar-ad-container max-w-full">
+                <div className="sidebar-ad-container">
                   <DisplayAd
                     adSlot="8162235433"
                     adFormat="auto"

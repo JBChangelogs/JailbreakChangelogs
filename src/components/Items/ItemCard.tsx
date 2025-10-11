@@ -141,7 +141,13 @@ export default function ItemCard({
       ([entry]) => {
         if (isVideoItem(item.name) && videoRef.current) {
           if (entry.isIntersecting) {
-            videoRef.current.play();
+            // Check if video is ready to play and handle promise properly
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch((error) => {
+                console.error("Error playing video:", error);
+              });
+            }
           } else {
             videoRef.current.pause();
           }
@@ -168,7 +174,13 @@ export default function ItemCard({
   useEffect(() => {
     if (isDriftItem(item.type) && videoRef.current) {
       if (isHovered) {
-        videoRef.current.play();
+        // Handle video play promise properly to avoid race conditions
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Error playing drift video:", error);
+          });
+        }
       } else {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
@@ -228,21 +240,38 @@ export default function ItemCard({
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
-    } else {
-      // Reset the audio to start
-      audioRef.current.currentTime = 0;
-      // Use a promise to handle play() properly
-      const playPromise = audioRef.current.play();
 
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch((error) => {
-            console.error("Error playing audio:", error);
-            setIsPlaying(false);
-          });
+      // Add a small delay to prevent race conditions
+      setTimeout(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+          audioRef.current.pause();
+        }
+      }, 150);
+    } else {
+      // Check if audio is truly ready to play
+      const isAudioReady =
+        audioRef.current.currentTime > 0 &&
+        !audioRef.current.paused &&
+        !audioRef.current.ended &&
+        audioRef.current.readyState > audioRef.current.HAVE_CURRENT_DATA;
+
+      if (!isAudioReady) {
+        // Reset the audio to start
+        audioRef.current.currentTime = 0;
+
+        // Use a promise to handle play() properly and avoid race conditions
+        const playPromise = audioRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((error) => {
+              console.error("Error playing audio:", error);
+              setIsPlaying(false);
+            });
+        }
       }
     }
   };
