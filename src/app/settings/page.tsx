@@ -24,6 +24,7 @@ import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
+import { safeSetJSON } from "@/utils/safeStorage";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -84,7 +85,7 @@ export default function SettingsPage() {
         ...userData,
         custom_banner: newBannerUrl,
       };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      safeSetJSON("user", updatedUser);
       setUserData(updatedUser);
     }
   };
@@ -95,7 +96,7 @@ export default function SettingsPage() {
         ...userData,
         custom_avatar: newAvatarUrl,
       };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      safeSetJSON("user", updatedUser);
       setUserData(updatedUser);
       window.dispatchEvent(
         new CustomEvent("authStateChanged", { detail: updatedUser }),

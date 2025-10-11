@@ -6,6 +6,7 @@ import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -183,7 +184,7 @@ export default function ValuesSearchControls({
                       if (!option) {
                         // Reset to original value when cleared
                         setFilterSort("name-all-items");
-                        localStorage.setItem(
+                        safeLocalStorage.setItem(
                           "valuesFilterSort",
                           "name-all-items",
                         );
@@ -197,7 +198,7 @@ export default function ValuesSearchControls({
                         }
                       }
                       setFilterSort(newValue);
-                      localStorage.setItem("valuesFilterSort", newValue);
+                      safeLocalStorage.setItem("valuesFilterSort", newValue);
                     }}
                     options={[
                       { value: "name-all-items", label: "All Items" },
@@ -336,12 +337,15 @@ export default function ValuesSearchControls({
                       if (!option) {
                         // Reset to original value when cleared
                         setValueSort("cash-desc");
-                        localStorage.setItem("valuesValueSort", "cash-desc");
+                        safeLocalStorage.setItem(
+                          "valuesValueSort",
+                          "cash-desc",
+                        );
                         return;
                       }
                       const newValue = (option as { value: ValueSort }).value;
                       setValueSort(newValue);
-                      localStorage.setItem("valuesValueSort", newValue);
+                      safeLocalStorage.setItem("valuesValueSort", newValue);
                     }}
                     options={[
                       {

@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
 import { UserData, AuthResponse } from "../types/auth";
+import { safeLocalStorage, safeSetJSON } from "./safeStorage";
 // import { PUBLIC_API_URL } from '@/utils/api';
 // Removed removeCookie import - using server-side logout instead
 
@@ -209,9 +210,9 @@ export async function logout() {
 function clearAuthData(reason: string) {
   console.log(`Clearing auth data. Reason: ${reason}`);
 
-  localStorage.removeItem("user");
-  localStorage.removeItem("userid");
-  localStorage.removeItem("avatar");
+  safeLocalStorage.removeItem("user");
+  safeLocalStorage.removeItem("userid");
+  safeLocalStorage.removeItem("avatar");
 
   window.dispatchEvent(new CustomEvent("authStateChanged"));
 }
@@ -232,7 +233,7 @@ export async function validateAuth(): Promise<boolean> {
   // If we validated recently, return cached result
   if (now - lastAuthValidation < AUTH_VALIDATION_COOLDOWN) {
     // Check localStorage for user data as a quick check
-    const userData = localStorage.getItem("user");
+    const userData = safeLocalStorage.getItem("user");
     return !!userData;
   }
 
@@ -268,11 +269,11 @@ async function performAuthValidation(): Promise<boolean> {
 
     const { user } = (await response.json()) as { user: UserData | null };
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userid", user.id);
+      safeSetJSON("user", user);
+      safeLocalStorage.setItem("userid", user.id);
       if (user.avatar) {
         const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`;
-        localStorage.setItem("avatar", avatarURL);
+        safeLocalStorage.setItem("avatar", avatarURL);
       }
       window.dispatchEvent(
         new CustomEvent("authStateChanged", { detail: user }),
@@ -333,13 +334,13 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
     const userData: UserData = await response.json();
 
     // Set local storage
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("userid", userData.id);
+    safeSetJSON("user", userData);
+    safeLocalStorage.setItem("userid", userData.id);
 
     // Set avatar if available
     if (userData.avatar) {
       const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-      localStorage.setItem("avatar", avatarURL);
+      safeLocalStorage.setItem("avatar", avatarURL);
     }
 
     // Dispatch custom event for components to listen to
@@ -383,7 +384,7 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
 export function isAuthenticated(): boolean {
   // Check localStorage for user data as a quick check
   // The actual validation happens through the session API
-  const userData = localStorage.getItem("user");
+  const userData = safeLocalStorage.getItem("user");
   return !!userData;
 }
 

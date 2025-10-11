@@ -14,6 +14,11 @@ import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import dynamic from "next/dynamic";
 import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  safeLocalStorage,
+  safeGetJSON,
+  safeSetJSON,
+} from "@/utils/safeStorage";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -107,10 +112,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   ) => {
     if (editMode) return; // Don't save to localStorage when editing
     if (isAuthenticated) {
-      localStorage.setItem(
-        "tradeAdFormItems",
-        JSON.stringify({ offering, requesting }),
-      );
+      safeSetJSON("tradeAdFormItems", { offering, requesting });
     }
   };
 
@@ -142,25 +144,31 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       if (!isAuthenticated) return;
 
       try {
-        const storedItems = localStorage.getItem("tradeAdFormItems");
+        const storedItems = safeGetJSON("tradeAdFormItems", {
+          offering: [],
+          requesting: [],
+        });
         if (storedItems) {
-          const { offering, requesting } = JSON.parse(storedItems);
+          const { offering = [], requesting = [] } = storedItems;
           if (offering.length > 0 || requesting.length > 0) {
             setShowRestoreModal(true);
           }
         }
       } catch (error) {
         console.error("Failed to parse stored items from localStorage:", error);
-        localStorage.removeItem("tradeAdFormItems");
+        safeLocalStorage.removeItem("tradeAdFormItems");
       }
     }
   }, [editMode, tradeAd, userPremiumTier.durations, isAuthenticated]);
 
   const handleRestoreItems = () => {
     try {
-      const storedItems = localStorage.getItem("tradeAdFormItems");
+      const storedItems = safeGetJSON("tradeAdFormItems", {
+        offering: [],
+        requesting: [],
+      });
       if (storedItems) {
-        const { offering, requesting } = JSON.parse(storedItems);
+        const { offering = [], requesting = [] } = storedItems;
         setOfferingItems(offering || []);
         setRequestingItems(requesting || []);
       }
@@ -172,7 +180,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const handleStartNewTradeAd = () => {
-    localStorage.removeItem("tradeAdFormItems");
+    safeLocalStorage.removeItem("tradeAdFormItems");
     setOfferingItems([]);
     setRequestingItems([]);
     setShowRestoreModal(false);
@@ -389,7 +397,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             ? "Trade ad updated successfully!"
             : "Trade ad created successfully!",
         );
-        localStorage.removeItem("tradeAdFormItems");
+        safeLocalStorage.removeItem("tradeAdFormItems");
         setOfferingItems([]);
         setRequestingItems([]);
 
@@ -582,7 +590,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     onClick={() => {
                       setOfferingItems([]);
                       if (requestingItems.length === 0) {
-                        localStorage.removeItem("tradeAdFormItems");
+                        safeLocalStorage.removeItem("tradeAdFormItems");
                       } else {
                         saveItemsToLocalStorage([], requestingItems);
                       }
@@ -596,7 +604,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     onClick={() => {
                       setRequestingItems([]);
                       if (offeringItems.length === 0) {
-                        localStorage.removeItem("tradeAdFormItems");
+                        safeLocalStorage.removeItem("tradeAdFormItems");
                       } else {
                         saveItemsToLocalStorage(offeringItems, []);
                       }

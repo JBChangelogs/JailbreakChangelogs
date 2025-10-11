@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 type Theme = "light" | "dark";
 
@@ -18,12 +19,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get theme from localStorage on mount
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = safeLocalStorage.getItem("theme");
 
     if (savedTheme === "system") {
       // Migrate users who had system theme to light mode
       setTheme("light");
-      localStorage.setItem("theme", "light");
+      safeLocalStorage.setItem("theme", "light");
     } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
       setTheme(savedTheme as Theme);
     }
@@ -40,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setResolvedTheme(theme);
 
     // Save to localStorage
-    localStorage.setItem("theme", theme);
+    safeLocalStorage.setItem("theme", theme);
   }, [theme]);
 
   return (

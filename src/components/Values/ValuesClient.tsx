@@ -20,6 +20,7 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -62,19 +63,19 @@ export default function ValuesClient({
 
     if (urlFilterSort || urlValueSort) {
       if (urlFilterSort) {
-        localStorage.setItem("valuesFilterSort", urlFilterSort);
+        safeLocalStorage.setItem("valuesFilterSort", urlFilterSort);
         setFilterSort(urlFilterSort as FilterSort);
       }
       if (urlValueSort) {
-        localStorage.setItem("valuesValueSort", urlValueSort);
+        safeLocalStorage.setItem("valuesValueSort", urlValueSort);
         setValueSort(urlValueSort as ValueSort);
       }
     } else {
       // Only load from localStorage if there are no URL parameters
-      const savedFilterSort = localStorage.getItem(
+      const savedFilterSort = safeLocalStorage.getItem(
         "valuesFilterSort",
       ) as FilterSort;
-      const savedValueSort = localStorage.getItem(
+      const savedValueSort = safeLocalStorage.getItem(
         "valuesValueSort",
       ) as ValueSort;
 
@@ -109,10 +110,10 @@ export default function ValuesClient({
     // If clicking the same category, reset to "All Items"
     if (filterSort === filter) {
       setFilterSort("name-all-items");
-      localStorage.setItem("valuesFilterSort", "name-all-items");
+      safeLocalStorage.setItem("valuesFilterSort", "name-all-items");
     } else {
       setFilterSort(filter);
-      localStorage.setItem("valuesFilterSort", filter);
+      safeLocalStorage.setItem("valuesFilterSort", filter);
     }
 
     if (searchSectionRef.current) {

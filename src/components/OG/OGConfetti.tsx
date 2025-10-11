@@ -2,13 +2,14 @@
 
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 export default function OGConfetti() {
   useEffect(() => {
-    const hasVisitedOG = localStorage.getItem("og-page-visited");
+    const hasVisitedOG = safeLocalStorage.getItem("og-page-visited");
 
     if (!hasVisitedOG) {
-      localStorage.setItem("og-page-visited", "true");
+      safeLocalStorage.setItem("og-page-visited", "true");
 
       // Trigger side cannons confetti
       const end = Date.now() + 5 * 1000; // 5 seconds

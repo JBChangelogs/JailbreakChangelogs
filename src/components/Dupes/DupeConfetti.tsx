@@ -2,13 +2,16 @@
 
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 export default function DupeConfetti() {
   useEffect(() => {
-    const hasVisitedDupeFinder = localStorage.getItem("dupe-finder-visited");
+    const hasVisitedDupeFinder = safeLocalStorage.getItem(
+      "dupe-finder-visited",
+    );
 
     if (!hasVisitedDupeFinder) {
-      localStorage.setItem("dupe-finder-visited", "true");
+      safeLocalStorage.setItem("dupe-finder-visited", "true");
 
       // Trigger side cannons confetti
       const end = Date.now() + 5 * 1000; // 5 seconds

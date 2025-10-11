@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 export default function NewsTicker() {
   const [isVisible, setIsVisible] = useState(true);
@@ -8,12 +9,15 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    localStorage.setItem("inventory-release-announcement-dismissed", "true");
+    safeLocalStorage.setItem(
+      "inventory-release-announcement-dismissed",
+      "true",
+    );
   };
 
   useEffect(() => {
     // Check if user has previously dismissed this announcement
-    const dismissed = localStorage.getItem(
+    const dismissed = safeLocalStorage.getItem(
       "inventory-release-announcement-dismissed",
     );
     if (dismissed === "true") {

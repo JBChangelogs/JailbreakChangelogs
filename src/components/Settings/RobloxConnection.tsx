@@ -3,6 +3,8 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
+import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
+import { UserData } from "@/types/auth";
 
 interface RobloxConnectionProps {
   userData: {
@@ -39,16 +41,18 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       }
 
       // Update local storage
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        delete user.roblox_id;
-        delete user.roblox_username;
-        localStorage.setItem("user", JSON.stringify(user));
+      const user = safeGetJSON<UserData>("user", null);
+      if (user) {
+        const updatedUser = { ...user };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (updatedUser as any).roblox_id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (updatedUser as any).roblox_username;
+        safeSetJSON("user", updatedUser);
 
         // Dispatch authStateChanged event to notify other components
         window.dispatchEvent(
-          new CustomEvent("authStateChanged", { detail: user }),
+          new CustomEvent("authStateChanged", { detail: updatedUser }),
         );
       }
 

@@ -2,13 +2,16 @@
 
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 export default function InventoryConfetti() {
   useEffect(() => {
-    const hasVisitedInventory = localStorage.getItem("inventory-page-visited");
+    const hasVisitedInventory = safeLocalStorage.getItem(
+      "inventory-page-visited",
+    );
 
     if (!hasVisitedInventory) {
-      localStorage.setItem("inventory-page-visited", "true");
+      safeLocalStorage.setItem("inventory-page-visited", "true");
 
       // Trigger side cannons confetti
       const end = Date.now() + 5 * 1000; // 5 seconds

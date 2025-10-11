@@ -5,6 +5,7 @@ import { Icon } from "./IconWrapper";
 import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { safeLocalStorage } from "@/utils/safeStorage";
 
 interface AnimatedThemeTogglerProps
   extends React.ComponentPropsWithoutRef<"div"> {
@@ -36,7 +37,7 @@ export const AnimatedThemeToggler = ({
           // Direct DOM manipulation for immediate effect
           document.documentElement.classList.remove("light", "dark");
           document.documentElement.classList.add(newTheme);
-          localStorage.setItem("theme", newTheme);
+          safeLocalStorage.setItem("theme", newTheme);
 
           // Update React state
           setIsDark(!isDark);

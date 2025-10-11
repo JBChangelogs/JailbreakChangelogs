@@ -21,6 +21,11 @@ import { getCategoryColor } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import TotalSimilarItems from "./TotalSimilarItems";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
+import {
+  safeLocalStorage,
+  safeGetJSON,
+  safeSetJSON,
+} from "@/utils/safeStorage";
 
 /**
  * Parses numeric strings like "1.2m", "450k", "12,345", or "N/A".
@@ -993,9 +998,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
    */
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("calculatorItems");
+      const saved = safeGetJSON("calculatorItems", {
+        offering: [],
+        requesting: [],
+      });
       if (saved) {
-        const { offering, requesting } = JSON.parse(saved);
+        const { offering = [], requesting = [] } = saved;
         if (
           (offering && offering.length > 0) ||
           (requesting && requesting.length > 0)
@@ -1008,7 +1016,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         "Failed to parse stored calculator items from localStorage:",
         error,
       );
-      localStorage.removeItem("calculatorItems");
+      safeLocalStorage.removeItem("calculatorItems");
     }
   }, []);
 
@@ -1038,17 +1046,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     offering: TradeItem[],
     requesting: TradeItem[],
   ) => {
-    localStorage.setItem(
-      "calculatorItems",
-      JSON.stringify({ offering, requesting }),
-    );
+    safeSetJSON("calculatorItems", { offering, requesting });
   };
 
   const handleRestoreItems = () => {
-    const saved = localStorage.getItem("calculatorItems");
+    const saved = safeGetJSON("calculatorItems", {
+      offering: [],
+      requesting: [],
+    });
     if (saved) {
       try {
-        const { offering, requesting } = JSON.parse(saved);
+        const { offering = [], requesting = [] } = saved;
         setOfferingItems(offering || []);
         setRequestingItems(requesting || []);
         setShowRestoreModal(false);
@@ -1062,7 +1070,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     setOfferingItems([]);
     setRequestingItems([]);
     setItemValueTypes({});
-    localStorage.removeItem("calculatorItems");
+    safeLocalStorage.removeItem("calculatorItems");
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
   };
@@ -1326,7 +1334,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                       return next;
                     });
                     if (requestingItems.length === 0) {
-                      localStorage.removeItem("calculatorItems");
+                      safeLocalStorage.removeItem("calculatorItems");
                     } else {
                       saveItemsToLocalStorage([], requestingItems);
                     }
@@ -1349,7 +1357,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                       return next;
                     });
                     if (offeringItems.length === 0) {
-                      localStorage.removeItem("calculatorItems");
+                      safeLocalStorage.removeItem("calculatorItems");
                     } else {
                       saveItemsToLocalStorage(offeringItems, []);
                     }

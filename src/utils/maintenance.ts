@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { UserData, UserFlag } from "@/types/auth";
+import { safeGetJSON } from "@/utils/safeStorage";
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
@@ -16,10 +17,8 @@ export function canBypassMaintenance(): boolean {
   if (typeof window === "undefined") return false;
 
   try {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return false;
-
-    const userData: UserData = JSON.parse(storedUser);
+    const userData = safeGetJSON<UserData>("user", null);
+    if (!userData) return false;
     const flags = userData.flags || [];
 
     // Check if user has tester flag enabled

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 // import { PUBLIC_API_URL } from '@/utils/api';
+import { safeLocalStorage, safeSetJSON } from "@/utils/safeStorage";
 
 const ESCAPE_COUNT_THRESHOLD = 5;
 const ESCAPE_TIMEOUT = 2000; // 2 seconds
@@ -65,16 +66,16 @@ export function useEscapeLogin() {
         : result.data;
 
       // Store user data in localStorage
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("userid", userData.id);
-      localStorage.setItem("avatar", userData.avatar);
+      safeSetJSON("user", userData);
+      safeLocalStorage.setItem("userid", userData.id);
+      safeLocalStorage.setItem("avatar", userData.avatar);
 
       // Cookie is set by server route
 
       // Set avatar if available
       if (userData.avatar) {
         const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-        localStorage.setItem("avatar", avatarURL);
+        safeLocalStorage.setItem("avatar", avatarURL);
       }
 
       // Dispatch custom event for components to listen to

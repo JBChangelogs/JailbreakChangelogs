@@ -9,7 +9,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { AuthState, AuthResponse } from "@/types/auth";
+import { AuthState, AuthResponse, UserData } from "@/types/auth";
 import {
   validateAuth,
   logout as authLogout,
@@ -26,6 +26,7 @@ import {
   countCampaignVisit,
   storeCampaign,
 } from "@/utils/campaign";
+import { safeGetJSON } from "@/utils/safeStorage";
 import toast from "react-hot-toast";
 
 // Helper function to track user status in Clarity
@@ -69,14 +70,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const initializeAuth = useCallback(async () => {
     try {
       // Check if we have user data in localStorage first
-      const userData = localStorage.getItem("user");
+      const userData = safeGetJSON("user", null);
       if (userData) {
         // Validate the session to ensure it's still valid
         const isValid = await validateAuth();
         if (isValid) {
           setAuthState({
             isAuthenticated: true,
-            user: JSON.parse(userData),
+            user: userData,
             isLoading: false,
             error: null,
           });
@@ -94,11 +95,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // This will check the HttpOnly cookie via the session API
       const isValid = await validateAuth();
       if (isValid) {
-        const freshUserData = localStorage.getItem("user");
+        const freshUserData = safeGetJSON("user", null);
         if (freshUserData) {
           setAuthState({
             isAuthenticated: true,
-            user: JSON.parse(freshUserData),
+            user: freshUserData,
             isLoading: false,
             error: null,
           });
@@ -391,9 +392,8 @@ export const getCurrentUserPremiumType = (): number => {
   if (typeof window === "undefined") return 0;
 
   try {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
+    const userData = safeGetJSON<UserData>("user", null);
+    if (userData) {
       return userData.premiumtype || 0;
     }
   } catch (error) {
