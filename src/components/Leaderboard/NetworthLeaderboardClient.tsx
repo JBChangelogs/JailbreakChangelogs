@@ -297,6 +297,9 @@ export default function NetworthLeaderboardClient({
                                   href={`/inventories/${user.user_id}`}
                                   prefetch={false}
                                   className="text-primary-text hover:text-link truncate text-sm font-medium transition-colors sm:text-base cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
                                 >
                                   {userDisplay}
                                 </Link>
@@ -304,6 +307,9 @@ export default function NetworthLeaderboardClient({
                                   href={`/inventories/${user.user_id}`}
                                   prefetch={false}
                                   className="text-secondary-text hover:text-link truncate text-xs transition-colors sm:text-sm cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
                                 >
                                   @{username}
                                 </Link>

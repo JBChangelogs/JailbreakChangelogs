@@ -2,9 +2,7 @@ import { fetchNetworthLeaderboard } from "@/utils/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import NetworthLeaderboardClient from "@/components/Leaderboard/NetworthLeaderboardClient";
 
-// Cache this page for 5 minutes
-export const revalidate = 300;
-
+export const revalidate = 1800;
 export default async function NetworthLeaderboardPage() {
   const leaderboard = await fetchNetworthLeaderboard();
 
@@ -26,6 +24,12 @@ export default async function NetworthLeaderboardPage() {
             Top players ranked by their total inventory networth in Roblox
             Jailbreak
           </p>
+          <div className="mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 dark:bg-blue-900/20 dark:border-blue-800">
+            <p className="text-blue-800 dark:text-blue-200 text-sm">
+              <span className="font-semibold">Note:</span> Leaderboard updates
+              every 30 minutes.
+            </p>
+          </div>
         </div>
 
         <NetworthLeaderboardClient initialLeaderboard={leaderboard} />
