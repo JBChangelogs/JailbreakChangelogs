@@ -43,6 +43,7 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
           <div className="mb-1">
             <Link
               href={`/users/${user.id}`}
+              prefetch={false}
               className="block transition-opacity hover:opacity-80"
             >
               <div className="flex items-center gap-2">

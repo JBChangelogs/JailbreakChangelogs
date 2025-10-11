@@ -63,7 +63,7 @@ export default function SupportersSection({
                   settings={{ avatar_discord: 1 }}
                 />
                 <div className="min-w-0 flex-1 text-center">
-                  <Link href={`/users/${supporter.id}`}>
+                  <Link href={`/users/${supporter.id}`} prefetch={false}>
                     <h3 className="text-link hover:text-link-hover truncate text-sm font-semibold transition-colors">
                       {supporter.global_name && supporter.global_name !== "None"
                         ? supporter.global_name

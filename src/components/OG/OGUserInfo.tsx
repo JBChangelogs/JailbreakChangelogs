@@ -156,6 +156,7 @@ export default function OGUserInfo({
               >
                 <Link
                   href={`/users/${userConnectionData.id}`}
+                  prefetch={false}
                   className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <Image

@@ -1001,6 +1001,7 @@ export default function ChangelogDetailsClient({
                           Changed by{" "}
                           <Link
                             href={`/users/${change.changed_by_id}`}
+                            prefetch={false}
                             className="text-link hover:text-link-hover hover:underline"
                           >
                             {change.changed_by}

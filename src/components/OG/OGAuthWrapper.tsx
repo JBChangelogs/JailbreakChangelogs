@@ -15,10 +15,8 @@ export default function OGAuthWrapper({ children }: OGAuthWrapperProps) {
   useEffect(() => {
     // Only redirect if auth is done loading and user is not authenticated
     if (!isLoading && !isAuthenticated) {
-      setTimeout(() => {
-        setShowLoginModal(true);
-        router.push("/og");
-      }, 100);
+      setShowLoginModal(true);
+      router.push("/og");
     }
   }, [isAuthenticated, isLoading, setShowLoginModal, router]);
 

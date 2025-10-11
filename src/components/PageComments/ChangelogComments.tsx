@@ -858,6 +858,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         >
                                           <Link
                                             href={`/users/${comment.user_id}`}
+                                            prefetch={false}
                                             className={`${inter.className} text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline`}
                                           >
                                             {userData[comment.user_id]

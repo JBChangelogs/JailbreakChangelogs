@@ -226,7 +226,11 @@ export default function ContributorsClient({
       key={user.id}
       className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
     >
-      <Link href={`/users/${user.id}`} className="flex flex-col items-center">
+      <Link
+        href={`/users/${user.id}`}
+        prefetch={false}
+        className="flex flex-col items-center"
+      >
         <div
           className="relative flex-shrink-0 overflow-hidden rounded-full"
           style={{

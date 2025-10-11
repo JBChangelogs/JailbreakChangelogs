@@ -536,6 +536,7 @@ const ServerList: React.FC = () => {
                     >
                       <Link
                         href={`/users/${server.owner}`}
+                        prefetch={false}
                         className="text-link hover:text-link-hover hover:underline"
                       >
                         @{userData[server.owner].username}
