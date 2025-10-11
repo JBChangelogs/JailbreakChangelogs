@@ -843,6 +843,14 @@ export async function fetchItemFavorites(id: string) {
 }
 
 export async function fetchUserFavorites(userId: string) {
+  // Create AbortController for request cancellation
+  const abortController = new AbortController();
+
+  // Set a timeout to abort the request after 10 seconds
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, 10000);
+
   try {
     const response = await fetch(
       `${PUBLIC_API_URL}/favorites/get?user=${userId}`,
@@ -850,8 +858,12 @@ export async function fetchUserFavorites(userId: string) {
         headers: {
           "User-Agent": "JailbreakChangelogs-Favorites/1.0",
         },
+        signal: abortController.signal,
       },
     );
+
+    // Clear timeout since request completed
+    clearTimeout(timeoutId);
 
     if (response.status === 404) {
       console.log(`[CLIENT] User favorites ${userId} not found`);
@@ -865,6 +877,15 @@ export async function fetchUserFavorites(userId: string) {
     const data = await response.json();
     return data;
   } catch (err) {
+    // Clear timeout in case of error
+    clearTimeout(timeoutId);
+
+    // Handle AbortError specifically - don't treat it as a real error
+    if (err instanceof Error && err.name === "AbortError") {
+      console.log("User favorites request was aborted");
+      return null; // Return null for aborted requests
+    }
+
     console.error("[CLIENT] Error fetching user favorites:", err);
     return null;
   }

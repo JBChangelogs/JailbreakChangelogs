@@ -150,6 +150,8 @@ export function trackLogoutSource(source: string) {
 
 export async function logout() {
   const source = lastLogoutSource || "Direct API Call";
+  let timeoutId: NodeJS.Timeout | undefined;
+
   try {
     console.group("🔐 Logout Process");
     console.log("📝 Logout Details:", {
@@ -157,7 +159,22 @@ export async function logout() {
       Timestamp: new Date().toISOString(),
     });
 
-    const response = await fetch("/api/auth/logout", { method: "POST" });
+    // Create AbortController for request cancellation
+    const abortController = new AbortController();
+
+    // Set a timeout to abort the request after 10 seconds
+    timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, 10000);
+
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      signal: abortController.signal,
+    });
+
+    // Clear timeout since request completed
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       throw new Error("Failed to clear session");
     }
@@ -165,6 +182,19 @@ export async function logout() {
     clearAuthData("user-initiated logout");
     console.groupEnd();
   } catch (error) {
+    // Clear timeout in case of error
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    // Handle AbortError specifically - still clear auth data locally
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("Logout request was aborted, clearing auth data locally");
+      clearAuthData("logout request aborted");
+      console.groupEnd();
+      return; // Don't throw error for aborted logout
+    }
+
     console.error("❌ Error During Logout:", {
       Source: source,
       Timestamp: new Date().toISOString(),
@@ -219,8 +249,23 @@ export async function validateAuth(): Promise<boolean> {
 }
 
 async function performAuthValidation(): Promise<boolean> {
+  // Create AbortController for request cancellation
+  const abortController = new AbortController();
+
+  // Set a timeout to abort the request after 10 seconds
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, 10000);
+
   try {
-    const response = await fetch("/api/session", { cache: "no-store" });
+    const response = await fetch("/api/session", {
+      cache: "no-store",
+      signal: abortController.signal,
+    });
+
+    // Clear timeout since request completed
+    clearTimeout(timeoutId);
+
     const { user } = (await response.json()) as { user: UserData | null };
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
@@ -236,25 +281,50 @@ async function performAuthValidation(): Promise<boolean> {
     }
     clearAuthData("session not found");
     return false;
-  } catch {
-    // On errors, do not log out; keep previous state
+  } catch (error) {
+    // Clear timeout in case of error
+    clearTimeout(timeoutId);
+
+    // Handle AbortError specifically - don't treat it as a real error
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log(
+        "Auth validation request was aborted, keeping previous state",
+      );
+      return true; // Keep previous state when request is aborted
+    }
+
+    // For other errors, log them but don't log out; keep previous state
+    console.error("Auth validation error:", error);
     return true;
   }
 }
 
 export async function handleTokenAuth(token: string): Promise<AuthResponse> {
   let loadingToast: string | undefined;
+  let timeoutId: NodeJS.Timeout | undefined;
 
   try {
     // Show loading toast with deduplication
     loadingToast = showLoginLoadingToast();
+
+    // Create AbortController for request cancellation
+    const abortController = new AbortController();
+
+    // Set a timeout to abort the request after 15 seconds
+    timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, 15000);
 
     // Validate token and set cookie via server route
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
+      signal: abortController.signal,
     });
+
+    // Clear timeout since request completed
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error("Failed to validate token");
@@ -283,6 +353,21 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
 
     return { success: true, data: userData };
   } catch (error) {
+    // Clear timeout in case of error
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    // Handle AbortError specifically
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("Login request was aborted");
+      toast.error("Login request was cancelled. Please try again.", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+      return { success: false, error: "Request was cancelled" };
+    }
+
     console.error("Token authentication error:", error);
     toast.error("Failed to log in. Please try again.", {
       duration: 3000,
