@@ -26,7 +26,23 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
     case "video":
       return (
         <div className="my-4 w-full max-w-2xl">
-          <video src={url} controls className="w-full" />
+          <video
+            src={url}
+            controls
+            className="w-full"
+            onError={(e) => {
+              console.log("Video error:", e);
+            }}
+            onAbort={(e) => {
+              console.log("Video aborted by browser power saving:", e);
+            }}
+            onPause={(e) => {
+              console.log("Video paused:", e);
+            }}
+            onPlay={(e) => {
+              console.log("Video play attempted:", e);
+            }}
+          />
         </div>
       );
     case "audio":

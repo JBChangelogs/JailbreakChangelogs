@@ -612,7 +612,21 @@ export default function ChangelogDetailsClient({
                             className="h-full w-full object-cover"
                             muted
                             loop
-                            onError={() => {}}
+                            onError={(e) => {
+                              console.log("Video error:", e);
+                            }}
+                            onAbort={(e) => {
+                              console.log(
+                                "Video aborted by browser power saving:",
+                                e,
+                              );
+                            }}
+                            onPause={(e) => {
+                              console.log("Video paused:", e);
+                            }}
+                            onPlay={(e) => {
+                              console.log("Video play attempted:", e);
+                            }}
                           />
                         ) : (
                           <Image

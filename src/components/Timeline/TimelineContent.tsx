@@ -94,6 +94,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
             {/* Card */}
             <Link
               href={`/changelogs/${changelog.id}`}
+              prefetch={false}
               className={`group relative z-10 ml-8 w-full md:ml-0 md:w-[calc(45%-2rem)]`}
             >
               <motion.div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border">
