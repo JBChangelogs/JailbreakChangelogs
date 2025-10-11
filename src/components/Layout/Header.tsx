@@ -21,7 +21,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Icon } from "@iconify/react";
+import dynamic from "next/dynamic";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState, useEffect } from "react";
 import {
@@ -42,7 +42,6 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
-import dynamic from "next/dynamic";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -59,6 +58,13 @@ const AnimatedThemeToggler = dynamic(
   },
 );
 import { NavbarModern } from "@/components/UI/navbar";
+
+const Icon = dynamic(() => import("@iconify/react").then((mod) => mod.Icon), {
+  ssr: false,
+  loading: () => (
+    <span className="inline-block h-5 w-5 animate-pulse bg-tertiary-bg rounded" />
+  ),
+});
 
 export default function Header() {
   const pathname = usePathname();
