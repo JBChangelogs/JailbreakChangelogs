@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { BASE_API_URL } from "@/utils/api";
+import { fetchItem } from "@/utils/api";
 import { getItemImagePath } from "@/utils/images";
 import { getMaintenanceMetadata } from "@/utils/maintenance";
 import { formatFullValue, formatPrice } from "@/utils/values";
@@ -14,23 +14,6 @@ interface Props {
     type: string;
     name: string;
   }>;
-}
-
-async function fetchItem(
-  type: string,
-  name: string,
-): Promise<ItemDetails | null> {
-  const itemName = decodeURIComponent(name);
-  const itemType = decodeURIComponent(type);
-  try {
-    const response = await fetch(
-      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
-    );
-    if (!response.ok) return null;
-    return (await response.json()) as ItemDetails;
-  } catch {
-    return null;
-  }
 }
 
 function sanitizeJsonLd(jsonLd: WithContext<FAQPage | BreadcrumbList>): string {

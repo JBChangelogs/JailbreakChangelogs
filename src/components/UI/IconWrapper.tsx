@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 const Icon = dynamic(() => import("@iconify/react").then((mod) => mod.Icon), {

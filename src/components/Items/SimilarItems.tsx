@@ -390,6 +390,7 @@ const SimilarItems = ({
               key={item.id}
               href={`/item/${item.type.toLowerCase()}/${item.name}`}
               className="group block"
+              prefetch={false}
             >
               <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
                 {/* Media Section */}
