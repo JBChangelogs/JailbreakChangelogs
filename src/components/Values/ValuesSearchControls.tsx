@@ -67,7 +67,10 @@ export default function ValuesSearchControls({
 
   // Set selectLoaded to true after mount to ensure client-side rendering
   useEffect(() => {
-    setSelectLoaded(true);
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      setSelectLoaded(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -212,6 +215,7 @@ export default function ValuesSearchControls({
                 >
                   {selectLoaded ? (
                     <Select
+                      key="filter-select"
                       value={{
                         value: filterSort,
                         label: (() => {
@@ -335,6 +339,7 @@ export default function ValuesSearchControls({
                 >
                   {selectLoaded ? (
                     <Select
+                      key="sort-select"
                       value={{
                         value: valueSort,
                         label: (() => {
@@ -610,6 +615,7 @@ export default function ValuesSearchControls({
                 </div>
                 <div className="px-1">
                   <Slider
+                    key="value-range-slider"
                     value={rangeValue}
                     onChange={(_, newValue, activeThumb) => {
                       if (!Array.isArray(newValue)) return;

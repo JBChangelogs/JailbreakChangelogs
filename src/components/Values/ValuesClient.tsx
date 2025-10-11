@@ -16,6 +16,7 @@ import TradingGuides from "./TradingGuides";
 import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorModal";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
+import ValuesErrorBoundary from "./ValuesErrorBoundary";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -162,8 +163,8 @@ export default function ValuesClient({
   }, [items, debouncedSearchTerm, filterSort, valueSort, favorites]);
 
   return (
-    <>
-      <Suspense fallback={null}>
+    <ValuesErrorBoundary>
+      <Suspense fallback={<div style={{ display: "none" }} />}>
         <SearchParamsHandler
           setFilterSort={setFilterSort}
           setValueSort={setValueSort}
@@ -289,7 +290,7 @@ export default function ValuesClient({
         valueSort={valueSort}
         debouncedSearchTerm={debouncedSearchTerm}
       />
-    </>
+    </ValuesErrorBoundary>
   );
 }
 
