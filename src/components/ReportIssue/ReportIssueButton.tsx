@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";

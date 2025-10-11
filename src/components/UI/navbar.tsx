@@ -26,7 +26,7 @@ const AnimatedThemeToggler = dynamic(
     ),
   },
 );
-import { Icon } from "@iconify/react";
+import { Icon } from "./IconWrapper";
 
 const menuTransition = {
   type: "spring" as const,

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "./IconWrapper";
 
 interface RetryErrorDisplayProps {
   error: string;

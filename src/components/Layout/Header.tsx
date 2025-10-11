@@ -59,12 +59,7 @@ const AnimatedThemeToggler = dynamic(
 );
 import { NavbarModern } from "@/components/UI/navbar";
 
-const Icon = dynamic(() => import("@iconify/react").then((mod) => mod.Icon), {
-  ssr: false,
-  loading: () => (
-    <span className="inline-block h-5 w-5 animate-pulse bg-tertiary-bg rounded" />
-  ),
-});
+import { Icon } from "../UI/IconWrapper";
 
 export default function Header() {
   const pathname = usePathname();

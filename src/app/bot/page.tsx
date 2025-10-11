@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "../../components/UI/IconWrapper";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 export default function BotPage() {

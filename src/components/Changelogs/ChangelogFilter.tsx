@@ -3,7 +3,7 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { ClockIcon as ClockIconSolid } from "@heroicons/react/24/solid";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import dynamic from "next/dynamic";
 import ChangelogSearchInput from "./ChangelogSearchInput";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "./IconWrapper";
 import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";

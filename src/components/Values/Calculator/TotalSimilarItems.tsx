@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TradeItem } from "@/types/trading";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { Icon } from "@iconify/react";
+import { Icon } from "../../UI/IconWrapper";
 import { formatFullValue, demandOrder } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { getCategoryColor } from "@/utils/categoryIcons";

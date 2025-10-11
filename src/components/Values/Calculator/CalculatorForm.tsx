@@ -15,7 +15,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { Icon } from "@iconify/react";
+import { Icon } from "../../UI/IconWrapper";
 import { TradeAdTooltip } from "../../trading/TradeAdTooltip";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";

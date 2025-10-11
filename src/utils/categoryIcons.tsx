@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "../components/UI/IconWrapper";
 
 interface CategoryIcon {
   Icon: React.ComponentType<{

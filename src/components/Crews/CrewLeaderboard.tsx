@@ -8,7 +8,7 @@ import { RobloxUser } from "@/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const bangers = localFont({

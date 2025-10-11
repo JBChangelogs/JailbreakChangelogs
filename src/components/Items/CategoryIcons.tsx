@@ -1,15 +1,9 @@
 import { FilterSort, ValueSort } from "@/types";
-import dynamic from "next/dynamic";
 import { toast } from "react-hot-toast";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
-const Icon = dynamic(() => import("@iconify/react").then((mod) => mod.Icon), {
-  ssr: false,
-  loading: () => (
-    <span className="inline-block h-5 w-5 sm:h-6 sm:w-6 animate-pulse bg-tertiary-bg rounded" />
-  ),
-});
+import { Icon } from "../UI/IconWrapper";
 
 interface CategoryIconsProps {
   onSelect: (filter: FilterSort) => void;

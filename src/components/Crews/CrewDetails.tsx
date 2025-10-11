@@ -8,7 +8,7 @@ import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",

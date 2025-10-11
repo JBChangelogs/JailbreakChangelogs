@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
 });
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api";
-import { Icon } from "@iconify/react";
+import { Icon } from "./IconWrapper";
 import Image from "next/image";
 import CopyButton from "@/app/inventories/CopyButton";
 

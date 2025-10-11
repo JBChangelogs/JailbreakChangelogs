@@ -5,7 +5,7 @@ import {
   XMarkIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import Link from "next/link";
 import { formatTimestamp, formatRelativeDate } from "@/utils/timestamp";
 import ReportDupeModal from "./ReportDupeModal";

@@ -24,7 +24,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 
 interface Item {
   id: number;

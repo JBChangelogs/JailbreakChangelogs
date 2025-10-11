@@ -10,7 +10,7 @@ import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
 import type { UserData } from "@/types/auth";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 
 type ItemChangeValue = string | number | boolean | null;
 

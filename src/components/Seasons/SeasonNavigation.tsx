@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import dynamic from "next/dynamic";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });

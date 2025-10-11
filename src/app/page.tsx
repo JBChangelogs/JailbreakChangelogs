@@ -3,15 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import dynamic from "next/dynamic";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
-const Icon = dynamic(() => import("@iconify/react").then((mod) => mod.Icon), {
-  ssr: false,
-  loading: () => (
-    <span className="inline-block h-6 w-6 animate-pulse bg-tertiary-bg rounded" />
-  ),
-});
+import { Icon } from "../components/UI/IconWrapper";
 
 export default function Home() {
   const [backgroundImages, setBackgroundImages] = useState<string[]>([]);

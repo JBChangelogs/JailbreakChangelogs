@@ -6,7 +6,7 @@ import {
   ChartBarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import { toast } from "react-hot-toast";
 import type { UserFlag } from "@/types/auth";
 import Image from "next/image";

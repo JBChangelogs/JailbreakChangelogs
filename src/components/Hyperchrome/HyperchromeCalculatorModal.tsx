@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../UI/IconWrapper";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   calculateRobberiesToLevelUp,
