@@ -30,10 +30,45 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   const observerRef = useRef<MutationObserver | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const finishedRef = useRef<boolean>(false);
+  const scriptLoadedRef = useRef<boolean>(false);
+
+  // Load AdSense script directly to avoid data-nscript attribute
+  useEffect(() => {
+    if (scriptLoadedRef.current) return;
+
+    // Check if script is already loaded
+    if (window.adsbygoogle) {
+      scriptLoadedRef.current = true;
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+
+    script.onload = () => {
+      scriptLoadedRef.current = true;
+    };
+
+    script.onerror = () => {
+      console.error("Failed to load AdSense script");
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount if needed
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!currentPath) return;
     if (initializedPath === currentPath) return;
+    if (!scriptLoadedRef.current) return; // Wait for script to load
 
     // Configure container dimensions based on ad format
     if (adRef.current) {
@@ -58,72 +93,77 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
       }
     }
 
-    // Initialize AdSense ad only once per path
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      setInitializedPath(currentPath);
-      // Start monitoring ad status via MutationObserver
-      const element = adRef.current;
-      if (element) {
-        finishedRef.current = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Initialize AdSense ad only once per path
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          setInitializedPath(currentPath);
+          // Start monitoring ad status via MutationObserver
+          const element = adRef.current;
+          if (element) {
+            finishedRef.current = false;
 
-        const evaluateStatus = () => {
-          if (!element || finishedRef.current) return;
-          const adStatus = element.getAttribute("data-ad-status");
-          if (adStatus === "filled") {
-            finishedRef.current = true;
-            setAdLoaded(true);
-            setShowSupportMessage(false);
-            if (observerRef.current) observerRef.current.disconnect();
-            if (timeoutRef.current) {
-              window.clearTimeout(timeoutRef.current);
+            const evaluateStatus = () => {
+              if (!element || finishedRef.current) return;
+              const adStatus = element.getAttribute("data-ad-status");
+              if (adStatus === "filled") {
+                finishedRef.current = true;
+                setAdLoaded(true);
+                setShowSupportMessage(false);
+                if (observerRef.current) observerRef.current.disconnect();
+                if (timeoutRef.current) {
+                  window.clearTimeout(timeoutRef.current);
+                  timeoutRef.current = null;
+                }
+              } else if (adStatus === "unfilled") {
+                finishedRef.current = true;
+                if (showFallback) setShowSupportMessage(true);
+                if (observerRef.current) observerRef.current.disconnect();
+                if (timeoutRef.current) {
+                  window.clearTimeout(timeoutRef.current);
+                  timeoutRef.current = null;
+                }
+              }
+            };
+
+            // Observe attribute changes for immediate reaction
+            observerRef.current = new MutationObserver((mutations) => {
+              for (const mutation of mutations) {
+                if (
+                  mutation.type === "attributes" &&
+                  mutation.attributeName === "data-ad-status"
+                ) {
+                  evaluateStatus();
+                }
+              }
+            });
+            observerRef.current.observe(element, {
+              attributes: true,
+              attributeFilter: ["data-ad-status"],
+            });
+
+            // Evaluate immediately in case the attribute is already set by the time we attach
+            evaluateStatus();
+
+            // Safety timeout in case the attribute never appears (e.g., script blocked)
+            timeoutRef.current = window.setTimeout(() => {
+              if (!finishedRef.current && showFallback) {
+                setShowSupportMessage(true);
+              }
+              if (observerRef.current) observerRef.current.disconnect();
               timeoutRef.current = null;
-            }
-          } else if (adStatus === "unfilled") {
-            finishedRef.current = true;
-            if (showFallback) setShowSupportMessage(true);
-            if (observerRef.current) observerRef.current.disconnect();
-            if (timeoutRef.current) {
-              window.clearTimeout(timeoutRef.current);
-              timeoutRef.current = null;
-            }
+            }, 9000);
           }
-        };
-
-        // Observe attribute changes for immediate reaction
-        observerRef.current = new MutationObserver((mutations) => {
-          for (const mutation of mutations) {
-            if (
-              mutation.type === "attributes" &&
-              mutation.attributeName === "data-ad-status"
-            ) {
-              evaluateStatus();
-            }
-          }
-        });
-        observerRef.current.observe(element, {
-          attributes: true,
-          attributeFilter: ["data-ad-status"],
-        });
-
-        // Evaluate immediately in case the attribute is already set by the time we attach
-        evaluateStatus();
-
-        // Safety timeout in case the attribute never appears (e.g., script blocked)
-        timeoutRef.current = window.setTimeout(() => {
-          if (!finishedRef.current && showFallback) {
+        } catch {
+          // AdSense blocked or unavailable - show support message immediately
+          if (showFallback) {
             setShowSupportMessage(true);
           }
-          if (observerRef.current) observerRef.current.disconnect();
-          timeoutRef.current = null;
-        }, 9000);
-      }
-    } catch {
-      // AdSense blocked or unavailable - show support message immediately
-      if (showFallback) {
-        setShowSupportMessage(true);
-      }
-    }
+        }
+      });
+    });
+
     return () => {
       // Cleanup observer and timeout on unmount or path change
       if (observerRef.current) {

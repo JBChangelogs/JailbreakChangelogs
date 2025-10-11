@@ -1,7 +1,6 @@
 node_modules
 .next
 .vercel
-.vscode
 
 # Env
 .env
@@ -14,6 +13,8 @@ tsconfig.tsbuildinfo
 .DS_Store
 .idea
 .eslintcache
+.vscode
+.cursor
 
 # Build artifacts
 coverage/
