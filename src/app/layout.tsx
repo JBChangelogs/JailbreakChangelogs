@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
           width: 1200,
           height: 630,
           alt: "Jailbreak Changelogs Banner",
@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
       images: [
-        "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
       ],
     },
   };

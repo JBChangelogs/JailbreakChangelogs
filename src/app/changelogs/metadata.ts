@@ -14,7 +14,7 @@ export const defaultMetadata: Metadata = {
     url: "/changelogs",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Banner",
@@ -27,7 +27,7 @@ export const defaultMetadata: Metadata = {
     description:
       "Track every update, feature release, and game modification in Jailbreak's history. Browse through our comprehensive collection of Roblox Jailbreak changelogs.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
     ],
   },
 };

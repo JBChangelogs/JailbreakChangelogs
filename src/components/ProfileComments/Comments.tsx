@@ -115,7 +115,7 @@ export default function Comment({
       return (
         <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Dark_Background_Small.webp"
+            src="https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.webp"
             alt="Trade Ad"
             fill
             className="object-cover"

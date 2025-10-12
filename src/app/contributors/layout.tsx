@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/contributors",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Banner",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description:
       "Meet the team behind Jailbreak Changelogs. Our contributors, value list managers, and team members who help keep the platform running smoothly.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
     ],
   },
 };

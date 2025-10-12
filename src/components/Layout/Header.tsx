@@ -42,6 +42,7 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme as useCustomTheme } from "@/contexts/ThemeContext";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -69,15 +70,18 @@ export default function Header() {
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"), { noSsr: true });
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("lg"), {
+    noSsr: true,
+  });
+  const isSmallScreen = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const {
     showLoginModal,
     setShowLoginModal,
     user: authUser,
     isAuthenticated,
   } = useAuthContext();
+  const { resolvedTheme } = useCustomTheme();
   const userData = isAuthenticated ? authUser : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<null | HTMLElement>(
@@ -630,7 +634,7 @@ export default function Header() {
                 <Image
                   src={
                     isCollabPage
-                      ? "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent.webp"
+                      ? `https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
                       : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
                   }
                   alt="Jailbreak Changelogs Logo"

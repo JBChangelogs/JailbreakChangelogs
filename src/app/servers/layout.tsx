@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/servers",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Banner",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description:
       "Find and join community servers for Roblox Jailbreak. Connect with other players, join trading communities, and stay updated with the latest game news.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Dark_Background.webp",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
     ],
   },
 };
