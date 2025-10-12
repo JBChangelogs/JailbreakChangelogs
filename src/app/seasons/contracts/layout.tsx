@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Check the latest weekly contracts for Roblox Jailbreak.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
         width: 1200,
         height: 630,
         alt: "Jailbreak Weekly Contracts",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "Weekly Contracts | Jailbreak Seasons",
     description: "Check the latest weekly contracts for Roblox Jailbreak.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
     ],
   },
 };

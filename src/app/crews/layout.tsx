@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: "https://jailbreakchangelogs.xyz/crews",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
         width: 1200,
         height: 630,
         alt: "Jailbreak Changelogs Crew Leaderboard",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description:
       "View the top crews in Roblox Jailbreak based on their battle performance and rating. See crew rankings, win rates, and member counts.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.webp",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
     ],
   },
 };
