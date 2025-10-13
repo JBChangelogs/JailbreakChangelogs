@@ -267,6 +267,52 @@ export async function POST(request: Request) {
       const errorText = await response.text();
       console.error("vgy.me upload failed:", errorText);
 
+      // Handle specific HTTP status codes
+      if (response.status === 502) {
+        return NextResponse.json(
+          {
+            message:
+              "vgy.me is currently experiencing issues. Please try again later or use a direct image URL from another service.",
+          },
+          { status: 503 },
+        );
+      }
+
+      if (response.status === 503) {
+        return NextResponse.json(
+          {
+            message:
+              "vgy.me is temporarily unavailable. Please try again later or use a direct image URL from another service.",
+          },
+          { status: 503 },
+        );
+      }
+
+      if (response.status === 504) {
+        return NextResponse.json(
+          {
+            message:
+              "vgy.me is taking too long to respond. Please try again later or use a direct image URL from another service.",
+          },
+          { status: 504 },
+        );
+      }
+
+      // Check if the error response is an HTML error page (like Cloudflare 502 page)
+      if (
+        errorText.includes("<!DOCTYPE html>") ||
+        errorText.includes("502: Bad gateway") ||
+        errorText.includes("Bad gateway")
+      ) {
+        return NextResponse.json(
+          {
+            message:
+              "vgy.me is currently experiencing issues. Please try again later or use a direct image URL from another service.",
+          },
+          { status: 503 },
+        );
+      }
+
       // Handle authentication errors specifically
       try {
         const errorJson = JSON.parse(errorText);
@@ -327,7 +373,25 @@ export async function POST(request: Request) {
 
     if (error instanceof Error && error.message.includes("fetch")) {
       return NextResponse.json(
-        { message: "Network error - unable to connect to vgy.me" },
+        {
+          message:
+            "Unable to connect to vgy.me. Please try again later or use a direct image URL from another service.",
+        },
+        { status: 503 },
+      );
+    }
+
+    // Handle network connectivity issues
+    if (
+      error instanceof Error &&
+      (error.message.includes("ENOTFOUND") ||
+        error.message.includes("ECONNREFUSED"))
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "vgy.me is currently unreachable. Please try again later or use a direct image URL from another service.",
+        },
         { status: 503 },
       );
     }

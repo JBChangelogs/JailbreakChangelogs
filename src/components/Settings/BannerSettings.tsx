@@ -181,6 +181,11 @@ export const BannerSettings = ({
         error instanceof Error ? error.message : "Failed to upload file";
       setBannerError(errorMessage);
       toast.error(errorMessage);
+
+      // Reset file input to allow selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } finally {
       setIsUploading(false);
     }
