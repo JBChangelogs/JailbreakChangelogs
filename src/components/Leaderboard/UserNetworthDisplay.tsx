@@ -110,10 +110,10 @@ export default function UserNetworthDisplay() {
                 alt={`${user.roblox_display_name || user.roblox_username || `User ${user.roblox_id}`} avatar`}
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-full bg-primary-bg"
+                className="bg-primary-bg h-8 w-8 rounded-full"
               />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-primary-bg" />
+              <div className="bg-primary-bg h-8 w-8 rounded-full" />
             )}
             <div>
               <div className="text-primary-text text-sm font-medium">

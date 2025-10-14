@@ -41,13 +41,13 @@ export default function InventoryBreakdownModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[600px] min-w-[320px] max-h-[80vh] rounded-lg border shadow-lg overflow-hidden flex flex-col">
-          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold flex items-center justify-between">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[80vh] w-full max-w-[600px] min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>{username}&apos;s Inventory Breakdown</span>
             <button
               type="button"
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text transition-colors p-1 cursor-pointer"
+              className="text-secondary-text hover:text-primary-text cursor-pointer p-1 transition-colors"
               aria-label="Close modal"
             >
               <svg
@@ -66,9 +66,9 @@ export default function InventoryBreakdownModal({
             </button>
           </div>
 
-          <div className="modal-content p-6 overflow-y-auto flex-1">
+          <div className="modal-content flex-1 overflow-y-auto p-6">
             {/* Networth Summary */}
-            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="bg-primary-bg border-border-primary rounded-lg border p-4 text-center">
                 <div className="text-secondary-text mb-1 text-sm">
                   Total Networth
@@ -90,7 +90,7 @@ export default function InventoryBreakdownModal({
             {/* Networth Breakdown */}
             {money !== undefined && inventoryValue !== undefined && (
               <div className="mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="bg-primary-bg border-border-primary rounded-lg border p-4 text-center">
                     <div className="text-secondary-text mb-1 text-sm">Cash</div>
                     <div className="text-button-success text-lg font-bold">
@@ -118,13 +118,13 @@ export default function InventoryBreakdownModal({
               {Object.keys(percentages).length > 0 ? (
                 <>
                   {/* Stacked bar chart showing category percentages */}
-                  <div className="mb-4 h-8 w-full overflow-hidden rounded bg-secondary-bg flex">
+                  <div className="bg-secondary-bg mb-4 flex h-8 w-full overflow-hidden rounded">
                     {Object.entries(percentages)
                       .sort(([, a], [, b]) => b - a)
                       .map(([category, percentage]) => (
                         <div
                           key={category}
-                          className="relative group"
+                          className="group relative"
                           style={{
                             width: `${percentage}%`,
                             backgroundColor: getCategoryColor(category),
@@ -135,17 +135,17 @@ export default function InventoryBreakdownModal({
                   </div>
 
                   {/* Category grid with color indicators */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {Object.entries(percentages)
                       .sort(([, a], [, b]) => b - a)
                       .map(([category, percentage]) => (
                         <div
                           key={category}
-                          className="flex items-center justify-between gap-2 text-sm p-2 bg-primary-bg rounded border border-border-primary"
+                          className="bg-primary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
                         >
                           <div className="flex items-center gap-2">
                             <div
-                              className="w-3 h-3 rounded-sm flex-shrink-0"
+                              className="h-3 w-3 flex-shrink-0 rounded-sm"
                               style={{
                                 backgroundColor: getCategoryColor(category),
                               }}
@@ -162,7 +162,7 @@ export default function InventoryBreakdownModal({
                   </div>
                 </>
               ) : (
-                <div className="text-center py-8">
+                <div className="py-8 text-center">
                   <p className="text-secondary-text">
                     No breakdown available for this inventory
                   </p>

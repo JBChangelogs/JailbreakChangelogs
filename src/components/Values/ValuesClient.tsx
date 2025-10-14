@@ -367,10 +367,10 @@ export default function ValuesClient({
 
         {/* Sidebar - responsive width, only show for non-premium users */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
-          <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-1 pl-2">
+          <div className="pl-2 lg:col-span-1 xl:col-span-1 2xl:col-span-1">
             <div className="sticky top-6">
               <div className="flex flex-col items-center">
-                <span className="text-secondary-text mb-2 block text-center text-xs w-full">
+                <span className="text-secondary-text mb-2 block w-full text-center text-xs">
                   ADVERTISEMENT
                 </span>
                 <div className="sidebar-ad-container">

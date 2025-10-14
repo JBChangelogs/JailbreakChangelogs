@@ -60,13 +60,13 @@ export default function RetryErrorDisplay({
         <div className="relative">
           {isRetrying ? (
             // Spinner when retrying
-            <div className="h-8 w-8 rounded-full border-2 border-button-info border-t-transparent animate-spin"></div>
+            <div className="border-button-info h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"></div>
           ) : (
             // Offline status icon when not retrying
-            <div className="h-8 w-8 rounded-full bg-status-error/10 flex items-center justify-center">
+            <div className="bg-status-error/10 flex h-8 w-8 items-center justify-center rounded-full">
               <Icon
                 icon="heroicons-solid:status-offline"
-                className="h-5 w-5 text-status-error"
+                className="text-status-error h-5 w-5"
                 inline={true}
               />
             </div>
@@ -75,7 +75,7 @@ export default function RetryErrorDisplay({
       </div>
 
       {/* Error message */}
-      <div className="text-primary-text text-sm font-medium mb-2">
+      <div className="text-primary-text mb-2 text-sm font-medium">
         {isRetrying
           ? "Retrying..."
           : isFailed

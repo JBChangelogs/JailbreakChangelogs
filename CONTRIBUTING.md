@@ -13,6 +13,8 @@ To get access to the required environment variables and API endpoints, you'll ne
 
 Once you have the environment file (.env.local) set up, you can proceed with the contribution process outlined below.
 
+**Note:** You can reference the [`.env.example`](.env.example) file to see the structure and required environment variables for the project.
+
 ## Where do I go from here?
 
 If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.xyz) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.xyz?report-issue)!

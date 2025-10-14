@@ -142,7 +142,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-primary-text transition-colors cursor-pointer"
+            className="text-muted hover:text-primary-text cursor-pointer transition-colors"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>

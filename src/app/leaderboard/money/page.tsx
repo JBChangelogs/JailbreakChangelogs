@@ -22,8 +22,8 @@ export default async function MoneyLeaderboardPage() {
           <p className="text-secondary-text mt-2">
             Top players ranked by their total money in Jailbreak
           </p>
-          <div className="mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 dark:bg-blue-900/20 dark:border-blue-800">
-            <p className="text-blue-800 dark:text-blue-200 text-sm">
+          <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               <span className="font-semibold">Note:</span> Leaderboard updates
               every 30 minutes.
             </p>

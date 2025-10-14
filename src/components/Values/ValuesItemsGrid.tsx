@@ -212,7 +212,7 @@ export default function ValuesItemsGrid({
                   }}
                 >
                   <div
-                    className="grid gap-4 mb-4"
+                    className="mb-4 grid gap-4"
                     style={{
                       gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
                     }}

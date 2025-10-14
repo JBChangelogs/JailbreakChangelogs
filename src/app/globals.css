@@ -5,7 +5,7 @@
 @theme {
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
-  --color-primary-bg: hsl(228, 13%, 8%); /* Main page background */
+  --color-primary-bg: #121317; /* Main page background */
   --color-secondary-bg: hsl(216, 6%, 15%); /* Card background - Cards, modals */
   --color-tertiary-bg: hsl(
     220,

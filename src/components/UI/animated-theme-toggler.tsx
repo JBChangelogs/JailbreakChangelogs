@@ -86,13 +86,13 @@ export const AnimatedThemeToggler = ({
       {isDark ? (
         <Icon
           icon="solar:sun-bold-duotone"
-          className="h-5 w-5 text-primary-text"
+          className="text-primary-text h-5 w-5"
           inline={true}
         />
       ) : (
         <Icon
           icon="line-md:moon-filled"
-          className="h-5 w-5 text-primary-text"
+          className="text-primary-text h-5 w-5"
           inline={true}
         />
       )}

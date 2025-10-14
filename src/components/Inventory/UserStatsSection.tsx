@@ -457,7 +457,7 @@ export default function UserStatsSection({
         <button
           onClick={handleOpenScanHistory}
           disabled={isLoadingScanHistory}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoadingScanHistory ? "Loading..." : "View Scan History"}
         </button>

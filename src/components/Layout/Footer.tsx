@@ -49,7 +49,7 @@ export default function Footer() {
                 >
                   <Icon
                     icon="prime:twitter"
-                    className="h-6 w-6 text-primary-text"
+                    className="text-primary-text h-6 w-6"
                     inline={true}
                   />
                 </a>
@@ -109,7 +109,7 @@ export default function Footer() {
                 >
                   <Icon
                     icon="simple-icons:roblox"
-                    className="h-6 w-6 text-primary-text"
+                    className="text-primary-text h-6 w-6"
                     inline={true}
                   />
                 </a>

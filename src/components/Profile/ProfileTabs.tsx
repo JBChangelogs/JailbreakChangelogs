@@ -351,7 +351,7 @@ function ProfileOverflowTabs({
           ref={scrollerRef}
           role="tablist"
           aria-label="profile tabs"
-          className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap"
+          className="overflow-x-auto whitespace-nowrap md:flex md:flex-wrap md:overflow-visible md:whitespace-normal"
           style={{
             scrollbarWidth: "thin",
             WebkitOverflowScrolling: "touch",
@@ -372,7 +372,7 @@ function ProfileOverflowTabs({
                 (value === idx
                   ? "text-button-info border-button-info border-b-2 font-semibold "
                   : "text-secondary-text hover:text-primary-text ") +
-                "px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+                "hover:bg-button-info/10 mr-1 cursor-pointer rounded-t-md px-4 py-2"
               }
               style={{ display: "inline-block" }}
             >

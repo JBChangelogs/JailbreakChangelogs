@@ -224,7 +224,7 @@ export default function NetworthLeaderboardClient({
                         }}
                       >
                         <div
-                          className={`rounded-lg border p-3 transition-all duration-200 mb-4 cursor-pointer hover:shadow-lg ${
+                          className={`mb-4 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg ${
                             originalRank <= 3
                               ? ""
                               : "border-border-primary hover:border-border-focus bg-primary-bg"
@@ -279,7 +279,7 @@ export default function NetworthLeaderboardClient({
                                   alt={`${userDisplay} avatar`}
                                   width={32}
                                   height={32}
-                                  className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8"
+                                  className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
                                   onError={() => {
                                     setAvatarErrorMap((prev) => ({
                                       ...prev,
@@ -288,7 +288,7 @@ export default function NetworthLeaderboardClient({
                                   }}
                                 />
                               ) : (
-                                <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8">
+                                <div className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8">
                                   <DefaultAvatar />
                                 </div>
                               )}
@@ -296,7 +296,7 @@ export default function NetworthLeaderboardClient({
                                 <Link
                                   href={`/inventories/${user.user_id}`}
                                   prefetch={false}
-                                  className="text-primary-text hover:text-link truncate text-sm font-medium transition-colors sm:text-base cursor-pointer"
+                                  className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                   }}
@@ -306,7 +306,7 @@ export default function NetworthLeaderboardClient({
                                 <Link
                                   href={`/inventories/${user.user_id}`}
                                   prefetch={false}
-                                  className="text-secondary-text hover:text-link truncate text-xs transition-colors sm:text-sm cursor-pointer"
+                                  className="text-secondary-text hover:text-link cursor-pointer truncate text-xs transition-colors sm:text-sm"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                   }}
@@ -324,8 +324,8 @@ export default function NetworthLeaderboardClient({
                                   {formatInventoryCount(user.inventory_count)}{" "}
                                   items
                                 </div>
-                                <div className="flex justify-center sm:justify-end mt-1">
-                                  <div className="text-secondary-text text-xs bg-secondary-bg px-2 py-1 rounded border border-border-primary">
+                                <div className="mt-1 flex justify-center sm:justify-end">
+                                  <div className="text-secondary-text bg-secondary-bg border-border-primary rounded border px-2 py-1 text-xs">
                                     Click to view breakdown
                                   </div>
                                 </div>

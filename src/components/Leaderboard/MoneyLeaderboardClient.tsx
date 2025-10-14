@@ -205,7 +205,7 @@ export default function MoneyLeaderboardClient({
                         }}
                       >
                         <div
-                          className={`rounded-lg border p-3 transition-colors mb-4 ${
+                          className={`mb-4 rounded-lg border p-3 transition-colors ${
                             originalRank <= 3
                               ? ""
                               : "border-border-primary hover:border-border-focus bg-primary-bg"
@@ -259,7 +259,7 @@ export default function MoneyLeaderboardClient({
                                   alt={`${userDisplay} avatar`}
                                   width={32}
                                   height={32}
-                                  className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8"
+                                  className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
                                   onError={() => {
                                     setAvatarErrorMap((prev) => ({
                                       ...prev,
@@ -268,7 +268,7 @@ export default function MoneyLeaderboardClient({
                                   }}
                                 />
                               ) : (
-                                <div className="h-7 w-7 rounded-full bg-secondary-bg sm:h-8 sm:w-8">
+                                <div className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8">
                                   <DefaultAvatar />
                                 </div>
                               )}

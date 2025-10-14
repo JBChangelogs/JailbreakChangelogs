@@ -242,7 +242,7 @@ export default function BotPage() {
               Bot made with{" "}
               <Icon
                 icon="line-md:heart-filled"
-                className="inline w-4 h-4 text-blue-500"
+                className="inline h-4 w-4 text-blue-500"
                 style={{ color: "#1d80e2" }}
               />
               {" by "}

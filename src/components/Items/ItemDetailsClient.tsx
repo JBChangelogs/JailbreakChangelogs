@@ -392,7 +392,7 @@ export default function ItemDetailsClient({
                   WebkitOverflowScrolling: "touch",
                   flex: 1,
                 }}
-                className="overflow-x-auto whitespace-nowrap md:overflow-visible md:whitespace-normal md:flex md:flex-wrap border-b-2 border-secondary-text"
+                className="border-secondary-text overflow-x-auto border-b-2 whitespace-nowrap md:flex md:flex-wrap md:overflow-visible md:whitespace-normal"
               >
                 {labels.map((label, idx) => (
                   <button
@@ -409,7 +409,7 @@ export default function ItemDetailsClient({
                       (value === idx
                         ? "text-button-info border-button-info border-b-2 font-semibold"
                         : "text-secondary-text hover:text-primary-text") +
-                      " px-4 py-2 mr-1 cursor-pointer hover:bg-button-info/10 rounded-t-md"
+                      " hover:bg-button-info/10 mr-1 cursor-pointer rounded-t-md px-4 py-2"
                     }
                   >
                     {label}
@@ -712,7 +712,7 @@ export default function ItemDetailsClient({
                           {typeof currentItem.metadata.UniqueCirculation ===
                             "number" && (
                             <div className="border-button-info/30 rounded-md border p-3">
-                              <div className="text-secondary-text text-xs flex items-center gap-1">
+                              <div className="text-secondary-text flex items-center gap-1 text-xs">
                                 Unique Circulation
                                 <Tooltip
                                   title={
@@ -971,7 +971,7 @@ export default function ItemDetailsClient({
                                 setOwnerSearchTerm("");
                                 setDupedOwnersPage(1);
                               }}
-                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transition-colors cursor-pointer"
+                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer transition-colors"
                               aria-label="Clear search"
                             >
                               <XMarkIcon />

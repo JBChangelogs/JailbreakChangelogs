@@ -19,11 +19,11 @@ export default function Error({
     <div className="container mx-auto px-4 py-8">
       <div className="mx-auto max-w-md text-center">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-red-500 mb-2">⚠️</h1>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="mb-2 text-4xl font-bold text-red-500">⚠️</h1>
+          <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Failed to Load Values
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
             We encountered an error while loading the item values. This might be
             due to a temporary API issue.
           </p>
@@ -32,7 +32,7 @@ export default function Error({
         <div className="space-y-4">
           <Button
             onClick={reset}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 text-white hover:bg-blue-700"
           >
             Try Again
           </Button>
@@ -51,7 +51,7 @@ export default function Error({
             <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
               Error Details (Development)
             </summary>
-            <pre className="mt-2 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto">
+            <pre className="mt-2 overflow-auto rounded bg-gray-100 p-4 text-xs dark:bg-gray-800">
               {error.message}
               {error.stack && `\n\nStack trace:\n${error.stack}`}
             </pre>

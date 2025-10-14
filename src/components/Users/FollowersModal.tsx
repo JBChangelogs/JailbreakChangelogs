@@ -270,7 +270,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
             <span>Followers ({followers.length})</span>
             <button
               onClick={onClose}
-              className="text-primary-text hover:text-primary-text transition-colors cursor-pointer"
+              className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

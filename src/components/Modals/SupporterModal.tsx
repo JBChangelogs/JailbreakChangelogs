@@ -158,7 +158,7 @@ export default function SupporterModal({
             </div>
             <button
               onClick={onClose}
-              className="text-secondary-text rounded-lg p-2 transition-colors cursor-pointer"
+              className="text-secondary-text cursor-pointer rounded-lg p-2 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

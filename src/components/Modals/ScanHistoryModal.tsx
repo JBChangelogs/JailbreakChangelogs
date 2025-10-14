@@ -59,20 +59,20 @@ export default function ScanHistoryModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] max-h-[60vh] rounded-lg border shadow-lg flex flex-col">
-          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold flex-shrink-0 flex items-center justify-between">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[60vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <DialogTitle className="text-primary-text text-xl font-semibold">
               Scan History
             </DialogTitle>
             <button
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text rounded-full p-1 transition-colors cursor-pointer"
+              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1 transition-colors"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="modal-content p-6 flex-1 overflow-y-auto">
+          <div className="modal-content flex-1 overflow-y-auto p-6">
             {/* Notice for users with 1000+ scan history entries */}
             {scanHistory.length >= 1000 && (
               <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-4">

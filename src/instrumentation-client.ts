@@ -5,7 +5,56 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://472c1eb8713106ddc86876d1342dd275@o4509958493962240.ingest.de.sentry.io/4510170902233168",
+  dsn:
+    process.env.NODE_ENV === "production"
+      ? "https://472c1eb8713106ddc86876d1342dd275@o4509958493962240.ingest.de.sentry.io/4510170902233168"
+      : undefined,
+
+  // Filter out Microsoft Clarity DOM manipulation errors
+  ignoreErrors: [
+    "Failed to execute 'insertBefore' on 'Node'",
+    "NotFoundError: Failed to execute 'insertBefore' on 'Node'",
+    /insertBefore.*not a child of this node/i,
+    /NotFoundError.*insertBefore/i,
+  ],
+
+  // Additional filtering with beforeSend for more control
+  beforeSend(event) {
+    // Filter out Microsoft Clarity related DOM errors
+    if (event.exception?.values?.[0]) {
+      const error = event.exception.values[0];
+      if (
+        error &&
+        error.value &&
+        (error.value.includes("insertBefore") ||
+          error.value.includes("NotFoundError"))
+      ) {
+        return null; // Don't send this event
+      }
+    }
+
+    // Filter out errors from third-party scripts (Microsoft Clarity)
+    if (event.exception?.values?.[0]) {
+      const stacktrace = event.exception.values[0]?.stacktrace;
+      if (stacktrace?.frames) {
+        const hasThirdPartyFrame = stacktrace.frames.some(
+          (frame) =>
+            frame.filename &&
+            (frame.filename.includes("clarity.ms") ||
+              frame.filename.includes("microsoft") ||
+              frame.filename.includes("clarity")),
+        );
+        if (hasThirdPartyFrame) {
+          return null;
+        }
+      }
+    }
+
+    return event;
+  },
+
+  // Block specific URLs that might cause DOM conflicts
+  denyUrls: [/clarity\.ms/, /microsoft.*clarity/i, /clarity.*microsoft/i],
 
   integrations: [
     Sentry.replayIntegration({
@@ -43,20 +92,20 @@ Sentry.init({
   ],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 1 : 0,
   // Enable logs to be sent to Sentry
-  enableLogs: true,
+  enableLogs: process.env.NODE_ENV === "production",
 
   // Define how likely Replay events are sampled.
   // This sets the sample rate to be 10%. You may want this to be 100% while
   // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+  replaysSessionSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 0,
 
   // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
+  replaysOnErrorSampleRate: process.env.NODE_ENV === "production" ? 1.0 : 0,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  debug: process.env.NODE_ENV === "development",
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

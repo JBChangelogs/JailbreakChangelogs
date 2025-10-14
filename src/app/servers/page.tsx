@@ -6,8 +6,16 @@ import ServerHeader from "@/components/Servers/ServerHeader";
 import ServerList from "@/components/Servers/ServerList";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
+type SortOption =
+  | "date_added_asc"
+  | "date_added_desc"
+  | "date_expires_asc"
+  | "date_expires_desc";
+
 export default function ServersPage() {
   const [showBackToTop, setShowBackToTop] = React.useState(false);
+  const [sortOption, setSortOption] =
+    React.useState<SortOption>("date_added_desc");
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -30,7 +38,7 @@ export default function ServersPage() {
       <div className="container mx-auto mb-8">
         <Breadcrumb />
         <ServerHeader />
-        <ServerList />
+        <ServerList sortOption={sortOption} onSortChange={setSortOption} />
       </div>
 
       {showBackToTop && (

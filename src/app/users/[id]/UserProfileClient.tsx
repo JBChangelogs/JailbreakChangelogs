@@ -92,7 +92,7 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
     <div className="fixed right-4 bottom-4 z-50">
       <button
         onClick={handlePlayClick}
-        className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300 cursor-pointer"
+        className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
         title="Lin is a super idol"
       >
         <Icon

@@ -552,11 +552,11 @@ const ItemValueChart = ({
   };
 
   return (
-    <div className="mb-8 rounded-lg p-2 space-y-8">
+    <div className="mb-8 space-y-8 rounded-lg p-2">
       {/* Value History Chart */}
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-primary-text">Value History</h3>
+          <h3 className="text-primary-text text-sm font-bold">Value History</h3>
           <ButtonGroup size="small" variant="outlined">
             <Button
               onClick={() => handleDateRangeChange("1w")}
@@ -646,7 +646,7 @@ const ItemValueChart = ({
       {!hideTradingMetrics && tradingData.length > 0 && (
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-primary-text">
+            <h3 className="text-primary-text text-sm font-bold">
               Trading Metrics
             </h3>
           </div>

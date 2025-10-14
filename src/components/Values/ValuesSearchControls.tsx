@@ -133,7 +133,7 @@ export default function ValuesSearchControls({
             </div>
 
             {/* Filter and Sort dropdowns */}
-            <div className="flex flex-col gap-4 lg:flex-row lg:gap-4 lg:flex-1">
+            <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
               {/* Filter dropdown */}
               <div className="w-full lg:w-1/2">
                 {selectLoaded ? (

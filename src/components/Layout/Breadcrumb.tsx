@@ -299,9 +299,9 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   className="inline-flex items-center"
                 >
                   {isLast ? (
-                    <span className="inline-flex items-center text-sm font-medium text-secondary-text">
+                    <span className="text-secondary-text inline-flex items-center text-sm font-medium">
                       <svg
-                        className="w-3 h-3 mr-2.5"
+                        className="mr-2.5 h-3 w-3"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -314,10 +314,10 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   ) : (
                     <Link
                       href={item.href}
-                      className="inline-flex items-center text-sm font-medium text-secondary-text hover:text-link-hover"
+                      className="text-secondary-text hover:text-link-hover inline-flex items-center text-sm font-medium"
                     >
                       <svg
-                        className="w-3 h-3 mr-2.5"
+                        className="mr-2.5 h-3 w-3"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -339,7 +339,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
               >
                 <div className="flex items-center">
                   <svg
-                    className="w-3 h-3 text-secondary-text mx-1"
+                    className="text-secondary-text mx-1 h-3 w-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -354,13 +354,13 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                     />
                   </svg>
                   {isLast ? (
-                    <span className="ml-1 text-sm font-medium text-secondary-text md:ml-2">
+                    <span className="text-secondary-text ml-1 text-sm font-medium md:ml-2">
                       {item.label}
                     </span>
                   ) : (
                     <Link
                       href={item.href}
-                      className="ml-1 text-sm font-medium text-secondary-text hover:text-link-hover md:ml-2"
+                      className="text-secondary-text hover:text-link-hover ml-1 text-sm font-medium md:ml-2"
                     >
                       {item.label}
                     </Link>

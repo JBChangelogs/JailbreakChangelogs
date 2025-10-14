@@ -114,7 +114,7 @@ export default function Loading() {
               </div>
 
               {/* Filter and Sort dropdowns skeleton */}
-              <div className="flex flex-col gap-4 lg:flex-row lg:gap-4 lg:flex-1">
+              <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
                 {/* Filter dropdown skeleton */}
                 <div className="w-full lg:w-1/2">
                   <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-2">
