@@ -814,7 +814,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             <Button
               variant="contained"
               onClick={handleSwapSides}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover"
             >
               <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
               Swap Sides

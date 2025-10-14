@@ -31,8 +31,8 @@ interface UseScanWebSocketReturn {
   isConnected: boolean;
   startScan: () => void;
   stopScan: () => void;
-  forceShowError: boolean; // Add this to force error display
-  resetForceShowError: () => void; // Add this to reset the flag
+  forceShowError: boolean;
+  resetForceShowError: () => void;
 }
 
 export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
@@ -44,7 +44,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [forceShowError, setForceShowError] = useState(false);
 
-  // Add logging for state changes
   useEffect(() => {
     console.log("[SCAN WS] Status changed to:", status);
   }, [status]);
@@ -63,6 +62,18 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const scanningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
 
+  const connectionQualityRef = useRef<{
+    messagesReceived: number;
+    lastMessageTime: number;
+    connectionStartTime: number;
+    compressionEnabled: boolean;
+  }>({
+    messagesReceived: 0,
+    lastMessageTime: 0,
+    connectionStartTime: 0,
+    compressionEnabled: false,
+  });
+
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
@@ -73,15 +84,30 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
     try {
       const wsUrl = `${INVENTORY_WS_URL}/scan?user_id=${userId}`;
+
       const ws = new WebSocket(wsUrl);
+
       wsRef.current = ws;
 
-      ws.onopen = () => {
+      ws.addEventListener("open", () => {
         console.log("[SCAN WS] Connected");
         setStatus("connected");
         setIsConnected(true);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
+
+        connectionQualityRef.current = {
+          messagesReceived: 0,
+          lastMessageTime: Date.now(),
+          connectionStartTime: Date.now(),
+          compressionEnabled:
+            ws.extensions?.includes("permessage-deflate") || false,
+        };
+
+        console.log("[SCAN WS] Connection quality:", {
+          compression: connectionQualityRef.current.compressionEnabled,
+          extensions: ws.extensions,
+        });
 
         ws.send(JSON.stringify({ action: "request" }));
         setStatus("scanning");
@@ -102,19 +128,36 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         heartbeatIntervalRef.current = setInterval(() => {
           if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             try {
-              wsRef.current.send(JSON.stringify({ action: "status" }));
+              const heartbeatMsg = JSON.stringify({
+                action: "status",
+                timestamp: Date.now(),
+              });
+              wsRef.current.send(heartbeatMsg);
               console.log("[SCAN WS] Sent status check");
             } catch (err) {
               console.error("[SCAN WS] Status check send failed:", err);
             }
           }
         }, 30000);
-      };
+      });
 
-      ws.onmessage = (event) => {
+      ws.addEventListener("message", (event) => {
         try {
-          const data = JSON.parse(event.data);
-          console.log("[SCAN WS] Received:", data);
+          const messageData = event.data;
+          const isCompressed = event.data instanceof ArrayBuffer;
+
+          connectionQualityRef.current.messagesReceived++;
+          connectionQualityRef.current.lastMessageTime = Date.now();
+
+          let data;
+          if (isCompressed) {
+            const decoder = new TextDecoder();
+            data = JSON.parse(decoder.decode(messageData));
+            console.log("[SCAN WS] Received compressed message:", data);
+          } else {
+            data = JSON.parse(messageData);
+            console.log("[SCAN WS] Received:", data);
+          }
 
           if (data.error && data.attempt && data.total_attempts) {
             setStatus("scanning");
@@ -140,7 +183,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setMessage(data.status || "Scan requested successfully");
             setProgress(10);
 
-            // Reset scanning timeout on real progress
             if (scanningTimeoutRef.current) {
               clearTimeout(scanningTimeoutRef.current);
               scanningTimeoutRef.current = setTimeout(() => {
@@ -197,7 +239,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setMessage(data.message);
               setProgress(50);
 
-              // Reset scanning timeout on real progress
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
                 scanningTimeoutRef.current = setTimeout(() => {
@@ -222,7 +263,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setMessage(data.message);
               setProgress(75);
 
-              // Reset scanning timeout on real progress
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
                 scanningTimeoutRef.current = setTimeout(() => {
@@ -304,7 +344,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setProgress(100);
             setMessage("Scan completed successfully!");
 
-            // Clear scanning timeout on completion
             if (scanningTimeoutRef.current) {
               clearTimeout(scanningTimeoutRef.current);
               scanningTimeoutRef.current = null;
@@ -312,14 +351,36 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           }
         } catch (err) {
           console.error("[SCAN WS] Parse error:", err);
-          setError("Invalid response from server");
+
+          const quality = connectionQualityRef.current;
+          const connectionDuration = Date.now() - quality.connectionStartTime;
+
+          console.error("[SCAN WS] Connection quality at error:", {
+            messagesReceived: quality.messagesReceived,
+            connectionDuration: `${connectionDuration}ms`,
+            compressionEnabled: quality.compressionEnabled,
+            lastMessageAge: `${Date.now() - quality.lastMessageTime}ms`,
+          });
+
+          setError("Invalid response from server - connection may be unstable");
           setStatus("error");
         }
-      };
+      });
 
-      ws.onclose = (event) => {
+      ws.addEventListener("close", (event) => {
         console.log("[SCAN WS] Closed:", event.code, event.reason);
         setIsConnected(false);
+
+        const quality = connectionQualityRef.current;
+        const connectionDuration = Date.now() - quality.connectionStartTime;
+
+        console.log("[SCAN WS] Connection quality summary:", {
+          duration: `${connectionDuration}ms`,
+          messagesReceived: quality.messagesReceived,
+          compressionEnabled: quality.compressionEnabled,
+          closeCode: event.code,
+          closeReason: event.reason,
+        });
 
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
@@ -364,14 +425,14 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           setError("Connection lost");
           setStatus("error");
         }
-      };
+      });
 
-      ws.onerror = (err) => {
+      ws.addEventListener("error", (err) => {
         console.error("[SCAN WS] Error:", err);
         setError("WebSocket connection error");
         setStatus("error");
         setIsConnected(false);
-      };
+      });
     } catch (err) {
       console.error("[SCAN WS] Connection error:", err);
       setError("Failed to connect to scan service");

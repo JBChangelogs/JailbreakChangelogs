@@ -19,11 +19,11 @@ export default function Error({
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <Breadcrumb />
-        <div className="py-16 text-center text-white">
+        <div className="text-primary-text py-16 text-center">
           <div className="mx-auto max-w-md">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-red-500/30 bg-red-500/20">
+            <div className="border-button-danger/30 bg-button-danger/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
               <svg
-                className="h-8 w-8 text-red-500"
+                className="text-button-danger h-8 w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -36,8 +36,10 @@ export default function Error({
                 />
               </svg>
             </div>
-            <h2 className="mb-4 text-2xl font-bold">Something went wrong!</h2>
-            <p className="mb-6 text-[#D3D9D4]">
+            <h2 className="text-primary-text mb-4 text-2xl font-bold">
+              Something went wrong!
+            </h2>
+            <p className="text-secondary-text mb-6">
               {error.message === "Changelog not found"
                 ? "The changelog you're looking for doesn't exist or has been removed."
                 : "An unexpected error occurred while loading the changelog details."}
@@ -45,13 +47,13 @@ export default function Error({
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <button
                 onClick={reset}
-                className="rounded-lg bg-[#5865F2] px-6 py-3 font-medium text-white transition-colors hover:bg-[#4752C4]"
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text border-border-primary hover:border-border-focus rounded-lg border px-6 py-3 font-medium transition-colors"
               >
                 Try again
               </button>
               <Link
                 href="/values/changelogs"
-                className="rounded-lg bg-[#37424D] px-6 py-3 text-center font-medium text-white transition-colors hover:bg-[#2A3441]"
+                className="bg-secondary-bg hover:bg-quaternary-bg text-primary-text border-border-primary hover:border-border-focus rounded-lg border px-6 py-3 text-center font-medium transition-colors"
               >
                 View all changelogs
               </Link>

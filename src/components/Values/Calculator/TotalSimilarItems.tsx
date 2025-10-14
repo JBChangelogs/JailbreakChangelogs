@@ -121,7 +121,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
     : -1;
 
   return (
-    <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 transition-colors duration-200 hover:shadow-lg">
+    <div className="bg-primary-bg rounded-lg p-8 transition-colors duration-200">
       {/* Header Section */}
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -197,7 +197,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                 href={`/item/${item.type.toLowerCase()}/${item.name}${item.sub_name ? `?variant=${item.sub_name}` : ""}`}
                 className="group"
               >
-                <div className="bg-primary/5 border-primary/10 hover:border-primary/20 hover:bg-primary/10 overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+                <div className="bg-primary-bg overflow-hidden rounded-xl transition-all duration-200 hover:shadow-lg">
                   {/* Image Section */}
                   <div className="relative aspect-video">
                     <Image
@@ -210,7 +210,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   </div>
 
                   {/* Content Section */}
-                  <div className="space-y-4 p-6">
+                  <div className="bg-secondary-bg space-y-4 p-6">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
                       <h4 className="text-primary-text group-hover:text-link line-clamp-2 text-base font-semibold transition-colors">

@@ -199,46 +199,55 @@ export const ItemGrid: React.FC<ItemGridProps> = ({ items, title }) => {
                     },
                   }}
                 >
-                  <div className="relative aspect-square">
-                    <div className="relative h-full w-full overflow-hidden rounded-lg">
-                      {isVideoItem(item.name) ? (
-                        <video
-                          src={getVideoPath(item.type, item.name)}
-                          className="h-full w-full object-cover"
-                          muted
-                          playsInline
-                          loop
-                          autoPlay
-                          onError={(e) => {
-                            console.log("Video error:", e);
-                          }}
-                          onAbort={(e) => {
-                            console.log(
-                              "Video aborted by browser power saving:",
-                              e,
-                            );
-                          }}
-                          onPause={(e) => {
-                            console.log("Video paused:", e);
-                          }}
-                          onPlay={(e) => {
-                            console.log("Video play attempted:", e);
-                          }}
-                        />
-                      ) : (
-                        <Image
-                          src={getItemImagePath(item.type, item.name, true)}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          onError={handleImageError}
-                        />
-                      )}
-                      {item.count > 1 && (
-                        <div className="border-button-info bg-button-info/90 text-form-button-text absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs">
-                          ×{item.count}
-                        </div>
-                      )}
+                  <div>
+                    <div className="relative aspect-square">
+                      <div className="relative h-full w-full overflow-hidden rounded-lg">
+                        {isVideoItem(item.name) ? (
+                          <video
+                            src={getVideoPath(item.type, item.name)}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                            onError={(e) => {
+                              console.log("Video error:", e);
+                            }}
+                            onAbort={(e) => {
+                              console.log(
+                                "Video aborted by browser power saving:",
+                                e,
+                              );
+                            }}
+                            onPause={(e) => {
+                              console.log("Video paused:", e);
+                            }}
+                            onPlay={(e) => {
+                              console.log("Video play attempted:", e);
+                            }}
+                          />
+                        ) : (
+                          <Image
+                            src={getItemImagePath(item.type, item.name, true)}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            onError={handleImageError}
+                          />
+                        )}
+                        {item.count > 1 && (
+                          <div className="border-button-info bg-button-info/90 text-form-button-text absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs">
+                            ×{item.count}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Item Name */}
+                    <div className="mt-2 text-center">
+                      <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
+                        {displayName}
+                      </p>
                     </div>
                   </div>
                 </Tooltip>

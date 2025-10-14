@@ -14,7 +14,7 @@ import {
   ListItem,
   ListItemText,
   useMediaQuery,
-  useTheme,
+  useTheme as useMuiTheme,
   Typography,
   ListItemIcon,
   Divider,
@@ -42,6 +42,7 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -69,15 +70,18 @@ export default function Header() {
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"), { noSsr: true });
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const muiTheme = useMuiTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("lg"), {
+    noSsr: true,
+  });
+  const isSmallScreen = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const {
     showLoginModal,
     setShowLoginModal,
     user: authUser,
     isAuthenticated,
   } = useAuthContext();
+  const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<null | HTMLElement>(
@@ -556,16 +560,7 @@ export default function Header() {
         onClick={handleDrawerToggle}
         className="cursor-pointer pl-4"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Networth Leaderboard</span>
-              <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                New
-              </span>
-            </Box>
-          }
-        />
+        <ListItemText primary="Networth Leaderboard" />
       </ListItem>
       <ListItem
         component={Link}
@@ -630,7 +625,7 @@ export default function Header() {
                 <Image
                   src={
                     isCollabPage
-                      ? "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent.webp"
+                      ? `https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
                       : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
                   }
                   alt="Jailbreak Changelogs Logo"
@@ -949,12 +944,7 @@ export default function Header() {
                               className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
                               onClick={handleCommunityMenuClose}
                             >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Networth Leaderboard</span>
-                                <span className="bg-button-info border-border-primary text-form-button-text rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                  New
-                                </span>
-                              </div>
+                              Networth Leaderboard
                             </Link>
                             <Link
                               href="/servers"

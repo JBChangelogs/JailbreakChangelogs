@@ -9,9 +9,8 @@ function useWindowWidth() {
   return width;
 }
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
-import { Pagination } from "@mui/material";
 import toast from "react-hot-toast";
 import {
   getItemImagePath,
@@ -34,6 +33,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
@@ -50,8 +50,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   onSelect,
 }) => {
   const windowWidth = useWindowWidth();
+  const parentRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<
@@ -66,7 +66,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const router = useRouter();
-  const ITEMS_PER_PAGE = 24; // Fixed value to prevent hydration mismatch
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
   const displayDebouncedSearchQuery =
@@ -82,10 +81,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   useEffect(() => {
     setSelectLoaded(true);
   }, []);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery]);
 
   useEffect(() => {
     const handleShowError = (event: CustomEvent) => {
@@ -249,19 +244,32 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
       }
     });
 
-  const startIndex = (page - 1) * ITEMS_PER_PAGE;
-  const paginatedItems = filteredItems.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    value: number,
-  ) => {
-    setPage(value);
+  // Organize items into rows for grid virtualization
+  // Each row contains multiple items based on screen size
+  const getItemsPerRow = () => {
+    if (typeof window === "undefined") return 6; // Default for SSR
+    const width = window.innerWidth;
+    if (width < 375) return 1;
+    if (width < 768) return 2;
+    if (width < 1024) return 3;
+    if (width < 1280) return 5;
+    return 6;
   };
+
+  const itemsPerRow = getItemsPerRow();
+  const rows: TradeItem[][] = [];
+  for (let i = 0; i < filteredItems.length; i += itemsPerRow) {
+    rows.push(filteredItems.slice(i, i + itemsPerRow));
+  }
+
+  // TanStack Virtual setup for performance with large item datasets
+  // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 300, // Estimate height for each row
+    overscan: 5, // Render 5 extra rows above/below viewport for smooth scrolling
+  });
 
   const handleVariantSelect = (itemId: number, variant: string) => {
     setSelectedVariants((prev) => ({
@@ -439,12 +447,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     if (!option) {
                       // Reset to original value when cleared
                       setFilterSort("name-all-items");
-                      setPage(1);
                       return;
                     }
                     const newValue = (option as { value: FilterSort }).value;
                     setFilterSort(newValue);
-                    setPage(1);
                   }}
                   options={[
                     { value: "name-all-items", label: "All Items" },
@@ -533,12 +539,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     if (!option) {
                       // Reset to original value when cleared
                       setValueSort("cash-desc");
-                      setPage(1);
                       return;
                     }
                     const newValue = (option as { value: ValueSort }).value;
                     setValueSort(newValue);
-                    setPage(1);
                   }}
                   options={[
                     {
@@ -632,38 +636,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             </div>
           </div>
 
-          {/* Top Pagination */}
-          {totalPages > 1 && filteredItems.length > 0 && (
-            <div className="mb-4 flex justify-center">
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    color: "var(--color-primary-text)",
-                    "&.Mui-selected": {
-                      backgroundColor: "var(--color-button-info)",
-                      color: "var(--color-form-button-text)",
-                      "&:hover": {
-                        backgroundColor: "var(--color-button-info-hover)",
-                      },
-                    },
-                    "&:hover": {
-                      backgroundColor: "var(--color-quaternary-bg)",
-                    },
-                  },
-                  "& .MuiPaginationItem-icon": {
-                    color: "var(--color-primary-text)",
-                  },
-                }}
-              />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-            {paginatedItems.length === 0 ? (
-              <div className="col-span-full py-8 text-center">
+          {/* Virtualized items container with fixed height for performance */}
+          <div ref={parentRef} className="mb-8 h-[60rem] overflow-y-auto">
+            {filteredItems.length === 0 ? (
+              <div className="py-8 text-center">
                 <p className="text-tertiary-text">
                   {searchQuery
                     ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
@@ -681,364 +657,401 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </button>
               </div>
             ) : (
-              paginatedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
-                    item.tradable === 1
-                      ? "hover:border-border-focus"
-                      : "cursor-not-allowed opacity-50"
-                  }`}
-                  tabIndex={0}
-                  role="button"
-                  style={{ cursor: "pointer" }}
-                  onClick={(e) => {
-                    // Only navigate if not clicking a button or dropdown
-                    if (
-                      e.target instanceof HTMLElement &&
-                      !e.target.closest("button") &&
-                      !e.target.closest("a") &&
-                      !e.target.closest(".dropdown")
-                    ) {
-                      router.push(
-                        `/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`,
-                      );
-                    }
-                  }}
-                >
-                  <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
-                    {isVideoItem(item.name) ? (
-                      <video
-                        src={getVideoPath(item.type, item.name)}
-                        className="h-full w-full object-cover"
-                        muted
-                        playsInline
-                        loop
-                        autoPlay
-                        onError={(e) => {
-                          console.log("Video error:", e);
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const rowItems = rows[virtualRow.index];
+                  const rowIndex = virtualRow.index;
+
+                  return (
+                    <div
+                      key={`row-${rowIndex}`}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                    >
+                      <div
+                        className="mb-4 grid gap-4"
+                        style={{
+                          gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
                         }}
-                        onAbort={(e) => {
-                          console.log(
-                            "Video aborted by browser power saving:",
-                            e,
-                          );
-                        }}
-                        onPause={(e) => {
-                          console.log("Video paused:", e);
-                        }}
-                        onPlay={(e) => {
-                          console.log("Video play attempted:", e);
-                        }}
-                      />
-                    ) : (
-                      <Image
-                        src={getItemImagePath(item.type, item.name, true)}
-                        alt={item.name}
-                        className="h-full w-full object-cover"
-                        onError={handleImageError}
-                        fill
-                      />
-                    )}
-                    <div className="absolute top-2 right-2 z-5">
-                      <CategoryIconBadge
-                        type={item.type}
-                        isLimited={item.is_limited === 1}
-                        isSeasonal={item.is_seasonal === 1}
-                        hasChildren={!!item.children?.length}
-                        showCategoryForVariants={true}
-                        className="h-4 w-4"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-grow flex-col p-2">
-                    <div className="space-y-1.5">
-                      <span className="text-link hover:text-link-hover max-w-full text-sm font-semibold transition-colors">
-                        {item.name}
-                      </span>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span
-                          className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                          style={{
-                            borderColor: getCategoryColor(item.type),
-                            backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
-                          }}
-                        >
-                          {item.type}
-                        </span>
-                        {item.is_limited === 1 && (
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                            Limited
-                          </span>
-                        )}
-                        {item.is_seasonal === 1 && (
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                            Seasonal
-                          </span>
-                        )}
-                        {item.tradable !== 1 && (
-                          <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
-                            Not Tradable
-                          </span>
-                        )}
-                      </div>
-                      {item.tradable === 1 && (
-                        <>
-                          <div className="text-secondary-text space-y-1 text-xs">
-                            <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                              <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                Cash
-                              </span>
-                              <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                {selectedVariants[item.id] &&
-                                selectedVariants[item.id] !== "2025"
-                                  ? item.children?.find(
-                                      (child) =>
-                                        child.sub_name ===
-                                        selectedVariants[item.id],
-                                    )?.data.cash_value === null ||
-                                    item.children?.find(
-                                      (child) =>
-                                        child.sub_name ===
-                                        selectedVariants[item.id],
-                                    )?.data.cash_value === "N/A"
-                                    ? "N/A"
-                                    : (() => {
-                                        const value =
-                                          item.children?.find(
-                                            (child) =>
-                                              child.sub_name ===
-                                              selectedVariants[item.id],
-                                          )?.data.cash_value ?? null;
-                                        if (value === null || value === "N/A")
-                                          return "N/A";
-                                        return windowWidth <= 640
-                                          ? value
-                                          : formatFullValue(value);
-                                      })()
-                                  : (() => {
-                                      if (
-                                        item.cash_value === null ||
-                                        item.cash_value === "N/A"
-                                      )
-                                        return "N/A";
-                                      return windowWidth <= 640
-                                        ? item.cash_value
-                                        : formatFullValue(item.cash_value);
-                                    })()}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                              <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                Duped
-                              </span>
-                              <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                {selectedVariants[item.id] &&
-                                selectedVariants[item.id] !== "2025"
-                                  ? item.children?.find(
-                                      (child) =>
-                                        child.sub_name ===
-                                        selectedVariants[item.id],
-                                    )?.data.duped_value === null ||
-                                    item.children?.find(
-                                      (child) =>
-                                        child.sub_name ===
-                                        selectedVariants[item.id],
-                                    )?.data.duped_value === "N/A"
-                                    ? "N/A"
-                                    : (() => {
-                                        const value =
-                                          item.children?.find(
-                                            (child) =>
-                                              child.sub_name ===
-                                              selectedVariants[item.id],
-                                          )?.data.duped_value ?? null;
-                                        if (value === null || value === "N/A")
-                                          return "N/A";
-                                        return windowWidth <= 640
-                                          ? value
-                                          : formatFullValue(value);
-                                      })()
-                                  : (() => {
-                                      if (
-                                        item.duped_value === null ||
-                                        item.duped_value === "N/A"
-                                      )
-                                        return "N/A";
-                                      return windowWidth <= 640
-                                        ? item.duped_value
-                                        : formatFullValue(item.duped_value);
-                                    })()}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                              <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                Demand
-                              </span>
-                              {(() => {
-                                const d =
-                                  selectedVariants[item.id] &&
-                                  selectedVariants[item.id] !== "2025"
-                                    ? (item.children?.find(
-                                        (child) =>
-                                          child.sub_name ===
-                                          selectedVariants[item.id],
-                                      )?.data.demand ?? "N/A")
-                                    : (item.demand ?? "N/A");
-                                return (
-                                  <span
-                                    className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                                  >
-                                    {d === "N/A" ? "Unknown" : d}
-                                  </span>
+                      >
+                        {rowItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
+                              item.tradable === 1
+                                ? "hover:border-border-focus"
+                                : "cursor-not-allowed opacity-50"
+                            }`}
+                            tabIndex={0}
+                            role="button"
+                            style={{ cursor: "pointer" }}
+                            onClick={(e) => {
+                              // Only navigate if not clicking a button or dropdown
+                              if (
+                                e.target instanceof HTMLElement &&
+                                !e.target.closest("button") &&
+                                !e.target.closest("a") &&
+                                !e.target.closest(".dropdown")
+                              ) {
+                                router.push(
+                                  `/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`,
                                 );
-                              })()}
+                              }
+                            }}
+                          >
+                            <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
+                              {isVideoItem(item.name) ? (
+                                <video
+                                  src={getVideoPath(item.type, item.name)}
+                                  className="h-full w-full object-cover"
+                                  muted
+                                  playsInline
+                                  loop
+                                  autoPlay
+                                  onError={(e) => {
+                                    console.log("Video error:", e);
+                                  }}
+                                  onAbort={(e) => {
+                                    console.log(
+                                      "Video aborted by browser power saving:",
+                                      e,
+                                    );
+                                  }}
+                                  onPause={(e) => {
+                                    console.log("Video paused:", e);
+                                  }}
+                                  onPlay={(e) => {
+                                    console.log("Video play attempted:", e);
+                                  }}
+                                />
+                              ) : (
+                                <Image
+                                  src={getItemImagePath(
+                                    item.type,
+                                    item.name,
+                                    true,
+                                  )}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                  onError={handleImageError}
+                                  fill
+                                />
+                              )}
+                              <div className="absolute top-2 right-2 z-5">
+                                <CategoryIconBadge
+                                  type={item.type}
+                                  isLimited={item.is_limited === 1}
+                                  isSeasonal={item.is_seasonal === 1}
+                                  hasChildren={!!item.children?.length}
+                                  showCategoryForVariants={true}
+                                  className="h-4 w-4"
+                                />
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                              <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                Trend
-                              </span>
-                              <span
-                                className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                              >
-                                {!item.trend || item.trend === "N/A"
-                                  ? "Unknown"
-                                  : item.trend}
-                              </span>
+                            <div className="flex flex-grow flex-col p-2">
+                              <div className="space-y-1.5">
+                                <span className="text-primary-text hover:text-link max-w-full text-sm font-semibold transition-colors">
+                                  {item.name}
+                                </span>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                                    style={{
+                                      borderColor: getCategoryColor(item.type),
+                                      backgroundColor:
+                                        getCategoryColor(item.type) + "20", // Add 20% opacity
+                                    }}
+                                  >
+                                    {item.type}
+                                  </span>
+                                  {item.is_limited === 1 && (
+                                    <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+                                      Limited
+                                    </span>
+                                  )}
+                                  {item.is_seasonal === 1 && (
+                                    <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+                                      Seasonal
+                                    </span>
+                                  )}
+                                  {item.tradable !== 1 && (
+                                    <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+                                      Not Tradable
+                                    </span>
+                                  )}
+                                </div>
+                                {item.tradable === 1 && (
+                                  <>
+                                    <div className="text-secondary-text space-y-1 text-xs">
+                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Cash
+                                        </span>
+                                        <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
+                                          {selectedVariants[item.id] &&
+                                          selectedVariants[item.id] !== "2025"
+                                            ? item.children?.find(
+                                                (child) =>
+                                                  child.sub_name ===
+                                                  selectedVariants[item.id],
+                                              )?.data.cash_value === null ||
+                                              item.children?.find(
+                                                (child) =>
+                                                  child.sub_name ===
+                                                  selectedVariants[item.id],
+                                              )?.data.cash_value === "N/A"
+                                              ? "N/A"
+                                              : (() => {
+                                                  const value =
+                                                    item.children?.find(
+                                                      (child) =>
+                                                        child.sub_name ===
+                                                        selectedVariants[
+                                                          item.id
+                                                        ],
+                                                    )?.data.cash_value ?? null;
+                                                  if (
+                                                    value === null ||
+                                                    value === "N/A"
+                                                  )
+                                                    return "N/A";
+                                                  return windowWidth <= 640
+                                                    ? value
+                                                    : formatFullValue(value);
+                                                })()
+                                            : (() => {
+                                                if (
+                                                  item.cash_value === null ||
+                                                  item.cash_value === "N/A"
+                                                )
+                                                  return "N/A";
+                                                return windowWidth <= 640
+                                                  ? item.cash_value
+                                                  : formatFullValue(
+                                                      item.cash_value,
+                                                    );
+                                              })()}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Duped
+                                        </span>
+                                        <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
+                                          {selectedVariants[item.id] &&
+                                          selectedVariants[item.id] !== "2025"
+                                            ? item.children?.find(
+                                                (child) =>
+                                                  child.sub_name ===
+                                                  selectedVariants[item.id],
+                                              )?.data.duped_value === null ||
+                                              item.children?.find(
+                                                (child) =>
+                                                  child.sub_name ===
+                                                  selectedVariants[item.id],
+                                              )?.data.duped_value === "N/A"
+                                              ? "N/A"
+                                              : (() => {
+                                                  const value =
+                                                    item.children?.find(
+                                                      (child) =>
+                                                        child.sub_name ===
+                                                        selectedVariants[
+                                                          item.id
+                                                        ],
+                                                    )?.data.duped_value ?? null;
+                                                  if (
+                                                    value === null ||
+                                                    value === "N/A"
+                                                  )
+                                                    return "N/A";
+                                                  return windowWidth <= 640
+                                                    ? value
+                                                    : formatFullValue(value);
+                                                })()
+                                            : (() => {
+                                                if (
+                                                  item.duped_value === null ||
+                                                  item.duped_value === "N/A"
+                                                )
+                                                  return "N/A";
+                                                return windowWidth <= 640
+                                                  ? item.duped_value
+                                                  : formatFullValue(
+                                                      item.duped_value,
+                                                    );
+                                              })()}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Demand
+                                        </span>
+                                        {(() => {
+                                          const d =
+                                            selectedVariants[item.id] &&
+                                            selectedVariants[item.id] !== "2025"
+                                              ? (item.children?.find(
+                                                  (child) =>
+                                                    child.sub_name ===
+                                                    selectedVariants[item.id],
+                                                )?.data.demand ?? "N/A")
+                                              : (item.demand ?? "N/A");
+                                          return (
+                                            <span
+                                              className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
+                                            >
+                                              {d === "N/A" ? "Unknown" : d}
+                                            </span>
+                                          );
+                                        })()}
+                                      </div>
+                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Trend
+                                        </span>
+                                        <span
+                                          className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
+                                        >
+                                          {!item.trend || item.trend === "N/A"
+                                            ? "Unknown"
+                                            : item.trend}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    {item.children &&
+                                      item.children.length > 0 && (
+                                        <div className="relative">
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              setOpenDropdownId(
+                                                openDropdownId === item.id
+                                                  ? null
+                                                  : item.id,
+                                              );
+                                            }}
+                                            className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
+                                          >
+                                            {selectedVariants[item.id] ||
+                                              "2025"}
+                                            <ChevronDownIcon
+                                              className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
+                                            />
+                                          </button>
+                                          <AnimatePresence>
+                                            {openDropdownId === item.id && (
+                                              <motion.div
+                                                key="dropdown"
+                                                initial={{ opacity: 0, y: -8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -8 }}
+                                                transition={{
+                                                  duration: 0.18,
+                                                  ease: "easeOut",
+                                                }}
+                                                className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
+                                              >
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    handleVariantSelect(
+                                                      item.id,
+                                                      "2025",
+                                                    );
+                                                    setOpenDropdownId(null);
+                                                  }}
+                                                  className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
+                                                    selectedVariants[
+                                                      item.id
+                                                    ] === "2025" ||
+                                                    !selectedVariants[item.id]
+                                                      ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                                      : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                                  }`}
+                                                >
+                                                  2025
+                                                </button>
+                                                {item.children?.map((child) => (
+                                                  <button
+                                                    key={child.id}
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      e.preventDefault();
+                                                      handleVariantSelect(
+                                                        item.id,
+                                                        child.sub_name,
+                                                      );
+                                                      setOpenDropdownId(null);
+                                                    }}
+                                                    className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
+                                                      selectedVariants[
+                                                        item.id
+                                                      ] === child.sub_name
+                                                        ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                                        : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                                    }`}
+                                                  >
+                                                    {child.sub_name}
+                                                  </button>
+                                                ))}
+                                              </motion.div>
+                                            )}
+                                          </AnimatePresence>
+                                        </div>
+                                      )}
+                                  </>
+                                )}
+                              </div>
+                              {item.tradable === 1 && (
+                                <div className="mt-auto flex gap-2 pt-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleAddItem(item, "offering");
+                                    }}
+                                    className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
+                                  >
+                                    Offer
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleAddItem(item, "requesting");
+                                    }}
+                                    className="bg-status-error/80 text-form-button-text flex-1 rounded-md px-2 py-1 text-xs transition-colors hover:cursor-pointer hover:bg-red-600"
+                                  >
+                                    Request
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
-                          {item.children && item.children.length > 0 && (
-                            <div className="relative">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  setOpenDropdownId(
-                                    openDropdownId === item.id ? null : item.id,
-                                  );
-                                }}
-                                className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
-                              >
-                                {selectedVariants[item.id] || "2025"}
-                                <ChevronDownIcon
-                                  className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
-                                />
-                              </button>
-                              <AnimatePresence>
-                                {openDropdownId === item.id && (
-                                  <motion.div
-                                    key="dropdown"
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    transition={{
-                                      duration: 0.18,
-                                      ease: "easeOut",
-                                    }}
-                                    className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
-                                  >
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        handleVariantSelect(item.id, "2025");
-                                        setOpenDropdownId(null);
-                                      }}
-                                      className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                        selectedVariants[item.id] === "2025" ||
-                                        !selectedVariants[item.id]
-                                          ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                          : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                      }`}
-                                    >
-                                      2025
-                                    </button>
-                                    {item.children?.map((child) => (
-                                      <button
-                                        key={child.id}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          handleVariantSelect(
-                                            item.id,
-                                            child.sub_name,
-                                          );
-                                          setOpenDropdownId(null);
-                                        }}
-                                        className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                          selectedVariants[item.id] ===
-                                          child.sub_name
-                                            ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                            : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                        }`}
-                                      >
-                                        {child.sub_name}
-                                      </button>
-                                    ))}
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {item.tradable === 1 && (
-                      <div className="mt-auto flex gap-2 pt-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            handleAddItem(item, "offering");
-                          }}
-                          className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
-                        >
-                          Offer
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            handleAddItem(item, "requesting");
-                          }}
-                          className="flex-1 rounded-md bg-red-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-red-700"
-                        >
-                          Request
-                        </button>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
-          {totalPages > 1 && filteredItems.length > 0 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    color: "var(--color-primary-text)",
-                    "&.Mui-selected": {
-                      backgroundColor: "var(--color-button-info)",
-                      color: "var(--color-form-button-text)",
-                      "&:hover": {
-                        backgroundColor: "var(--color-button-info-hover)",
-                      },
-                    },
-                    "&:hover": {
-                      backgroundColor: "var(--color-quaternary-bg)",
-                    },
-                  },
-                  "& .MuiPaginationItem-icon": {
-                    color: "var(--color-primary-text)",
-                  },
-                }}
-              />
-            </div>
-          )}
         </div>
 
         <TradeAdErrorModal
