@@ -419,6 +419,19 @@ export default function Header() {
       </ListItem>
       <ListItem>
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
+          Calculators
+        </Typography>
+      </ListItem>
+      <ListItem
+        component={Link}
+        href="/calculators"
+        onClick={handleDrawerToggle}
+        className="cursor-pointer pl-4"
+      >
+        <ListItemText primary="All Calculators" />
+      </ListItem>
+      <ListItem>
+        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Values
         </Typography>
       </ListItem>

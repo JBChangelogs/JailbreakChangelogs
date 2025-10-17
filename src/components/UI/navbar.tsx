@@ -264,6 +264,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             </HoveredLink>
           </MenuItem>
 
+          {/* Calculators */}
+          <NavLink href="/calculators" setActive={setActive}>
+            Calculators
+          </NavLink>
+
           {/* Values */}
           <MenuItem setActive={setActive} active={active} item="Values">
             <HoveredLink href="/values">Value List</HoveredLink>

@@ -116,6 +116,7 @@ export default function ItemDetailsClient({
   );
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
+  const [activeChartTab, setActiveChartTab] = useState(0);
   const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
   const [ownerSearchTerm, setOwnerSearchTerm] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -837,26 +838,56 @@ export default function ItemDetailsClient({
 
               {activeTab === 1 && (
                 <div className="mb-8 space-y-6">
+                  {/* Chart Sub-tabs */}
                   <div className="bg-secondary-bg rounded-lg p-4">
-                    {(() => {
-                      const urlVariant = new URLSearchParams(
-                        window.location.search,
-                      ).get("variant");
+                    <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+                      <button
+                        onClick={() => setActiveChartTab(0)}
+                        className={`${
+                          activeChartTab === 0
+                            ? "bg-button-info text-form-button-text shadow-sm"
+                            : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+                        } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                      >
+                        Value History
+                      </button>
+                      <button
+                        onClick={() => setActiveChartTab(1)}
+                        className={`${
+                          activeChartTab === 1
+                            ? "bg-button-info text-form-button-text shadow-sm"
+                            : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+                        } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                      >
+                        Trading Metrics
+                      </button>
+                    </div>
 
-                      const variantId = urlVariant
-                        ? item?.children?.find(
-                            (child) => child.sub_name === urlVariant,
-                          )?.id
-                        : undefined;
+                    {/* Chart Content */}
+                    <div className="mt-4">
+                      {(() => {
+                        const urlVariant = new URLSearchParams(
+                          window.location.search,
+                        ).get("variant");
+                        const variantId = urlVariant
+                          ? item?.children?.find(
+                              (child) => child.sub_name === urlVariant,
+                            )?.id
+                          : undefined;
 
-                      return (
-                        <ItemValueChart
-                          itemId={String(currentItem.id)}
-                          variantId={variantId}
-                          hideTradingMetrics={currentItem.id === 587}
-                        />
-                      );
-                    })()}
+                        return (
+                          <ItemValueChart
+                            itemId={String(currentItem.id)}
+                            variantId={variantId}
+                            hideTradingMetrics={
+                              activeChartTab === 0 || currentItem.id === 587
+                            }
+                            showOnlyValueHistory={activeChartTab === 0}
+                            showOnlyTradingMetrics={activeChartTab === 1}
+                          />
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               )}

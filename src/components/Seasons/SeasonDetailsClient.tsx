@@ -243,27 +243,29 @@ export default function SeasonDetailsClient({
                 </div>
               )}
 
-              {/* Weekly Contracts Promo */}
-              <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                      📋 Weekly Contracts
-                    </h3>
-                    <p className="text-secondary-text text-sm">
-                      View your weekly contracts and their xp rewards.
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <Link
-                      href="/seasons/contracts"
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
-                    >
-                      View Contracts
-                    </Link>
+              {/* Weekly Contracts Promo - Only show for highest season */}
+              {season.season === latestSeasonNumber && (
+                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
+                        📋 Weekly Contracts
+                      </h3>
+                      <p className="text-secondary-text text-sm">
+                        View your weekly contracts and their xp rewards.
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Link
+                        href="/seasons/contracts"
+                        className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
+                      >
+                        View Contracts
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">

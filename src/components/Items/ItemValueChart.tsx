@@ -56,12 +56,16 @@ interface ItemValueChartProps {
   itemId: string;
   variantId?: number;
   hideTradingMetrics?: boolean;
+  showOnlyValueHistory?: boolean;
+  showOnlyTradingMetrics?: boolean;
 }
 
 const ItemValueChart = ({
   itemId,
   variantId,
   hideTradingMetrics = false,
+  showOnlyValueHistory = false,
+  showOnlyTradingMetrics = false,
 }: ItemValueChartProps) => {
   const [history, setHistory] = useState<ValueHistory[]>([]);
   const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
@@ -566,119 +570,136 @@ const ItemValueChart = ({
   return (
     <div className="mb-8 space-y-8 rounded-lg p-2">
       {/* Value History Chart */}
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-primary-text text-sm font-bold">Value History</h3>
-          <ButtonGroup size="small" variant="outlined">
-            <Button
-              onClick={() => handleDateRangeChange("1w")}
-              className={`border-secondary hover:border-border-focus transition-colors ${
-                hasDataForRange("1w") ? "cursor-pointer" : "cursor-not-allowed"
-              } ${dateRange === "1w" ? "text-button-info" : "text-primary-text"}`}
-            >
-              1W
-            </Button>
-            <Button
-              onClick={() => handleDateRangeChange("1m")}
-              className={`border-secondary hover:border-border-focus transition-colors ${
-                hasDataForRange("1m") ? "cursor-pointer" : "cursor-not-allowed"
-              } ${dateRange === "1m" ? "text-button-info" : "text-primary-text"}`}
-            >
-              1M
-            </Button>
-            <Button
-              onClick={() => handleDateRangeChange("6m")}
-              className={`border-secondary hover:border-border-focus transition-colors ${
-                hasDataForRange("6m") ? "cursor-pointer" : "cursor-not-allowed"
-              } ${dateRange === "6m" ? "text-button-info" : "text-primary-text"}`}
-            >
-              6M
-            </Button>
-            <Button
-              onClick={() => handleDateRangeChange("1y")}
-              className={`border-secondary hover:border-border-focus transition-colors ${
-                hasDataForRange("1y") ? "cursor-pointer" : "cursor-not-allowed"
-              } ${dateRange === "1y" ? "text-button-info" : "text-primary-text"}`}
-            >
-              1Y
-            </Button>
-            <Button
-              onClick={() => handleDateRangeChange("all")}
-              className={`border-secondary hover:border-border-focus transition-colors ${
-                hasDataForRange("all") ? "cursor-pointer" : "cursor-not-allowed"
-              } ${dateRange === "all" ? "text-button-info" : "text-primary-text"}`}
-            >
-              All
-            </Button>
-          </ButtonGroup>
+      {!showOnlyTradingMetrics && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-primary-text text-sm font-bold">
+              Value History
+            </h3>
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                onClick={() => handleDateRangeChange("1w")}
+                className={`border-secondary hover:border-border-focus transition-colors ${
+                  hasDataForRange("1w")
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                } ${dateRange === "1w" ? "text-button-info" : "text-primary-text"}`}
+              >
+                1W
+              </Button>
+              <Button
+                onClick={() => handleDateRangeChange("1m")}
+                className={`border-secondary hover:border-border-focus transition-colors ${
+                  hasDataForRange("1m")
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                } ${dateRange === "1m" ? "text-button-info" : "text-primary-text"}`}
+              >
+                1M
+              </Button>
+              <Button
+                onClick={() => handleDateRangeChange("6m")}
+                className={`border-secondary hover:border-border-focus transition-colors ${
+                  hasDataForRange("6m")
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                } ${dateRange === "6m" ? "text-button-info" : "text-primary-text"}`}
+              >
+                6M
+              </Button>
+              <Button
+                onClick={() => handleDateRangeChange("1y")}
+                className={`border-secondary hover:border-border-focus transition-colors ${
+                  hasDataForRange("1y")
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                } ${dateRange === "1y" ? "text-button-info" : "text-primary-text"}`}
+              >
+                1Y
+              </Button>
+              <Button
+                onClick={() => handleDateRangeChange("all")}
+                className={`border-secondary hover:border-border-focus transition-colors ${
+                  hasDataForRange("all")
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                } ${dateRange === "all" ? "text-button-info" : "text-primary-text"}`}
+              >
+                All
+              </Button>
+            </ButtonGroup>
+          </div>
+          {shouldShowValueChart ? (
+            <>
+              <div className="h-[350px]">
+                <Line ref={chartRef} data={chartData} options={options} />
+              </div>
+              <div className="mt-2 flex justify-end">
+                <button
+                  onClick={() => chartRef.current?.resetZoom()}
+                  className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+                >
+                  Reset Zoom
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="bg-secondary-bg rounded-lg p-8 text-center">
+              <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+                <svg
+                  className="text-button-info h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-primary-text mb-2 text-xl font-semibold">
+                No Value History Available
+              </h3>
+              <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+                This item doesn&apos;t have any recorded value changes yet.
+                Value history will appear here once the item&apos;s value is
+                updated.
+              </p>
+            </div>
+          )}
         </div>
-        {shouldShowValueChart ? (
-          <>
+      )}
+
+      {/* Trading Metrics Chart */}
+      {!hideTradingMetrics &&
+        !showOnlyValueHistory &&
+        tradingData.length > 0 && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-primary-text text-sm font-bold">
+                Trading Metrics
+              </h3>
+            </div>
             <div className="h-[350px]">
-              <Line ref={chartRef} data={chartData} options={options} />
+              <Line
+                ref={tradingChartRef}
+                data={tradingChartData}
+                options={tradingOptions}
+              />
             </div>
             <div className="mt-2 flex justify-end">
               <button
-                onClick={() => chartRef.current?.resetZoom()}
+                onClick={() => tradingChartRef.current?.resetZoom()}
                 className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
               >
                 Reset Zoom
               </button>
             </div>
-          </>
-        ) : (
-          <div className="bg-secondary-bg rounded-lg p-8 text-center">
-            <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-              <svg
-                className="text-button-info h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-primary-text mb-2 text-xl font-semibold">
-              No Value History Available
-            </h3>
-            <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-              This item doesn&apos;t have any recorded value changes yet. Value
-              history will appear here once the item&apos;s value is updated.
-            </p>
           </div>
         )}
-      </div>
-
-      {/* Trading Metrics Chart */}
-      {!hideTradingMetrics && tradingData.length > 0 && (
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-primary-text text-sm font-bold">
-              Trading Metrics
-            </h3>
-          </div>
-          <div className="h-[350px]">
-            <Line
-              ref={tradingChartRef}
-              data={tradingChartData}
-              options={tradingOptions}
-            />
-          </div>
-          <div className="mt-2 flex justify-end">
-            <button
-              onClick={() => tradingChartRef.current?.resetZoom()}
-              className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-            >
-              Reset Zoom
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

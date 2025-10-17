@@ -217,6 +217,16 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         }
       }
 
+      // Special handling for calculators route
+      if (pathSegments[0] === "calculators") {
+        if (index === 0) {
+          return {
+            label: "Calculators",
+            href: "/calculators",
+          };
+        }
+      }
+
       return {
         label: segment.charAt(0).toUpperCase() + segment.slice(1),
         href: `/${pathSegments.slice(0, index + 1).join("/")}`,

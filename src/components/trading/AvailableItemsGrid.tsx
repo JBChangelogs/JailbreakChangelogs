@@ -793,6 +793,85 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     </span>
                                   )}
                                 </div>
+                                {item.children && item.children.length > 0 && (
+                                  <div className="relative">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        setOpenDropdownId(
+                                          openDropdownId === item.id
+                                            ? null
+                                            : item.id,
+                                        );
+                                      }}
+                                      className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
+                                    >
+                                      {selectedVariants[item.id] || "2025"}
+                                      <ChevronDownIcon
+                                        className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
+                                      />
+                                    </button>
+                                    <AnimatePresence>
+                                      {openDropdownId === item.id && (
+                                        <motion.div
+                                          key="dropdown"
+                                          initial={{ opacity: 0, y: -8 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -8 }}
+                                          transition={{
+                                            duration: 0.18,
+                                            ease: "easeOut",
+                                          }}
+                                          className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
+                                        >
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              handleVariantSelect(
+                                                item.id,
+                                                "2025",
+                                              );
+                                              setOpenDropdownId(null);
+                                            }}
+                                            className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
+                                              selectedVariants[item.id] ===
+                                                "2025" ||
+                                              !selectedVariants[item.id]
+                                                ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                                : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                            }`}
+                                          >
+                                            2025
+                                          </button>
+                                          {item.children?.map((child) => (
+                                            <button
+                                              key={child.id}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.preventDefault();
+                                                handleVariantSelect(
+                                                  item.id,
+                                                  child.sub_name,
+                                                );
+                                                setOpenDropdownId(null);
+                                              }}
+                                              className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
+                                                selectedVariants[item.id] ===
+                                                child.sub_name
+                                                  ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
+                                                  : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                              }`}
+                                            >
+                                              {child.sub_name}
+                                            </button>
+                                          ))}
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
+                                )}
                                 {item.tradable === 1 && (
                                   <>
                                     <div className="text-secondary-text space-y-1 text-xs">
@@ -932,89 +1011,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                         </span>
                                       </div>
                                     </div>
-                                    {item.children &&
-                                      item.children.length > 0 && (
-                                        <div className="relative">
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              e.preventDefault();
-                                              setOpenDropdownId(
-                                                openDropdownId === item.id
-                                                  ? null
-                                                  : item.id,
-                                              );
-                                            }}
-                                            className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
-                                          >
-                                            {selectedVariants[item.id] ||
-                                              "2025"}
-                                            <ChevronDownIcon
-                                              className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
-                                            />
-                                          </button>
-                                          <AnimatePresence>
-                                            {openDropdownId === item.id && (
-                                              <motion.div
-                                                key="dropdown"
-                                                initial={{ opacity: 0, y: -8 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -8 }}
-                                                transition={{
-                                                  duration: 0.18,
-                                                  ease: "easeOut",
-                                                }}
-                                                className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
-                                              >
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    e.preventDefault();
-                                                    handleVariantSelect(
-                                                      item.id,
-                                                      "2025",
-                                                    );
-                                                    setOpenDropdownId(null);
-                                                  }}
-                                                  className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                                    selectedVariants[
-                                                      item.id
-                                                    ] === "2025" ||
-                                                    !selectedVariants[item.id]
-                                                      ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                                      : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                                  }`}
-                                                >
-                                                  2025
-                                                </button>
-                                                {item.children?.map((child) => (
-                                                  <button
-                                                    key={child.id}
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      e.preventDefault();
-                                                      handleVariantSelect(
-                                                        item.id,
-                                                        child.sub_name,
-                                                      );
-                                                      setOpenDropdownId(null);
-                                                    }}
-                                                    className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                                      selectedVariants[
-                                                        item.id
-                                                      ] === child.sub_name
-                                                        ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                                        : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                                    }`}
-                                                  >
-                                                    {child.sub_name}
-                                                  </button>
-                                                ))}
-                                              </motion.div>
-                                            )}
-                                          </AnimatePresence>
-                                        </div>
-                                      )}
                                   </>
                                 )}
                               </div>

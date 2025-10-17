@@ -164,7 +164,8 @@ export default function XpCalculatorForm({
             <div className="h-10 w-full animate-pulse rounded-md border"></div>
           )}
           <div className="text-secondary-text mt-1 text-xs">
-            Select your current level (1-{targetLevel - 1})
+            Select your current level (
+            <span className="font-bold">1-{targetLevel - 1}</span>)
           </div>
         </div>
 
@@ -187,9 +188,13 @@ export default function XpCalculatorForm({
             placeholder={`0-${maxXpForCurrentLevel}`}
           />
           <div className="text-secondary-text mt-1 text-xs">
-            XP progress within Level {currentLevel} (0-
-            {maxXpForCurrentLevel.toLocaleString()} XP needed to reach Level{" "}
-            {currentLevel + 1})
+            XP progress within{" "}
+            <span className="font-bold">Level {currentLevel}</span> (0-
+            <span className="font-bold">
+              {maxXpForCurrentLevel.toLocaleString()} XP
+            </span>{" "}
+            needed to reach{" "}
+            <span className="font-bold">Level {currentLevel + 1}</span>)
           </div>
         </div>
       </div>

@@ -154,6 +154,51 @@ export default function ValuesClient({
     }
   }, [user, loadFavorites]);
 
+  // Handle hash fragment for hyper pity calculator
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === "#hyper-pity-calc") {
+        setShowHcModal(true);
+      }
+    };
+
+    // Check hash on initial load
+    if (window.location.hash === "#hyper-pity-calc") {
+      setShowHcModal(true);
+    }
+
+    // Listen for hash changes
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
+  // Handle opening modal and adding hash fragment
+  const handleOpenHcModal = () => {
+    setShowHcModal(true);
+    // Add hash fragment without triggering page reload
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search + "#hyper-pity-calc",
+    );
+  };
+
+  // Clean up hash when modal is closed
+  const handleCloseHcModal = () => {
+    setShowHcModal(false);
+    if (window.location.hash === "#hyper-pity-calc") {
+      // Remove hash without triggering page reload
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    }
+  };
+
   // Load premium status
   useEffect(() => {
     setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -247,7 +292,7 @@ export default function ValuesClient({
             <span className="text-sm sm:text-base">Random Item</span>
           </button>
           <button
-            onClick={() => setShowHcModal(true)}
+            onClick={handleOpenHcModal}
             className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
             <span className="text-sm sm:text-base">
@@ -289,7 +334,7 @@ export default function ValuesClient({
 
       <HyperchromeCalculatorModal
         open={showHcModal}
-        onClose={() => setShowHcModal(false)}
+        onClose={handleCloseHcModal}
       />
 
       <ValuesSearchControls

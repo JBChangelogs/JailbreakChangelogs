@@ -1,6 +1,7 @@
 import { CalculationResults, Season } from "@/types/seasons";
 import { Icon } from "../UI/IconWrapper";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
+import { useState } from "react";
 
 interface XpResultsSummaryProps {
   results: CalculationResults;
@@ -11,6 +12,19 @@ export default function XpResultsSummary({
   results,
   season,
 }: XpResultsSummaryProps) {
+  // Check if Double XP is currently live
+  const currentTime = Date.now();
+  const doubleXpStartTime = new Date(
+    results.importantDates.doubleXpStart,
+  ).getTime();
+  const seasonEndTime = new Date(results.importantDates.seasonEnds).getTime();
+  const isDoubleXpLive =
+    currentTime >= doubleXpStartTime && currentTime <= seasonEndTime;
+
+  const [xpMode, setXpMode] = useState<"normal" | "double">(
+    isDoubleXpLive ? "double" : "normal",
+  );
+
   const getStatusIcon = (achievable: boolean) =>
     achievable ? (
       <Icon icon="fa:check" className="text-green-400" inline={true} />
@@ -76,118 +90,186 @@ export default function XpResultsSummary({
     return results.currentXp - totalXpForCurrentLevel;
   };
 
-  const getRecommendation = () => {
-    if (results.achievableWithPass && results.achievableNoPass) {
+  // Get current mode results
+  const getCurrentModeResults = () => {
+    if (xpMode === "double") {
       return {
-        type: "success",
-        message:
-          "Great news! You can reach the target level with or without a Season Pass.",
-        details:
-          "Consider if the Season Pass is worth the cost for faster progression.",
-        tips: [
-          "Complete daily contracts for consistent XP gains",
-          "Log in daily to maximize daily XP bonuses",
-          "Focus on high-value contracts when available",
-        ],
-      };
-    } else if (results.achievableWithPass && !results.achievableNoPass) {
-      return {
-        type: "warning",
-        message: "You can reach the target level, but only with a Season Pass.",
-        details: "The Season Pass is essential for your success this season.",
-        tips: [
-          "Consider purchasing the Season Pass for guaranteed success",
-          "Focus on maximizing daily XP limits",
-          "Complete all available contracts daily",
-        ],
-      };
-    } else if (results.doubleXpResults?.withPass.achievable) {
-      return {
-        type: "info",
-        message:
-          "You can reach the target level using Double XP + Season Pass.",
-        details:
-          "Focus on maximizing Double XP periods and consider the Season Pass investment.",
-        tips: [
-          "Mark Double XP start date on your calendar",
-          "Consider the Season Pass for better Double XP gains",
-          "Prepare to grind intensively during Double XP periods",
-        ],
-      };
-    } else {
-      return {
-        type: "error",
-        message:
-          "Unfortunately, reaching the target level this season is not achievable.",
-        details:
-          "Focus on getting as close as possible and prepare for next season.",
-        tips: [
-          "Aim to get as close to the target as possible",
-          "Learn from this season to prepare better next time",
-          "Focus on completing contracts for rewards",
-        ],
+        noPass: results.doubleXpResults?.noPass
+          ? {
+              ...results.doubleXpResults.noPass,
+              days: Math.ceil(
+                (new Date(
+                  results.doubleXpResults.noPass.completionDate,
+                ).getTime() -
+                  Date.now()) /
+                  (1000 * 60 * 60 * 24),
+              ),
+            }
+          : undefined,
+        withPass: results.doubleXpResults?.withPass
+          ? {
+              ...results.doubleXpResults.withPass,
+              days: Math.ceil(
+                (new Date(
+                  results.doubleXpResults.withPass.completionDate,
+                ).getTime() -
+                  Date.now()) /
+                  (1000 * 60 * 60 * 24),
+              ),
+            }
+          : undefined,
       };
     }
+    return {
+      noPass: {
+        achievable: results.achievableNoPass,
+        completionDate: results.timeNoPass.completionDate,
+        days: results.timeNoPass.days,
+      },
+      withPass: {
+        achievable: results.achievableWithPass,
+        completionDate: results.timeWithPass.completionDate,
+        days: results.timeWithPass.days,
+      },
+    };
   };
 
-  const recommendation = getRecommendation();
+  const currentResults = getCurrentModeResults();
+
+  // Determine overall status
+  const getOverallStatus = () => {
+    const canReachWithoutPass = currentResults.noPass?.achievable;
+    const canReachWithPass = currentResults.withPass?.achievable;
+
+    if (canReachWithoutPass && canReachWithPass) {
+      return {
+        type: "success",
+        message: "You can reach your target level!",
+        icon: (
+          <Icon
+            icon="mdi:party-popper"
+            className="text-green-400"
+            inline={true}
+          />
+        ),
+      };
+    } else if (!canReachWithoutPass && canReachWithPass) {
+      return {
+        type: "warning",
+        message: "Season Pass required",
+        subtitle: "You can reach your target, but only with a Season Pass.",
+        icon: (
+          <Icon
+            icon="si:alert-fill"
+            className="text-yellow-400"
+            inline={true}
+          />
+        ),
+      };
+    } else if (!canReachWithoutPass && !canReachWithPass) {
+      return {
+        type: "error",
+        message: "Target not achievable",
+        subtitle: "Consider focusing on getting as close as possible.",
+        icon: <Icon icon="fa:times" className="text-red-400" inline={true} />,
+      };
+    }
+    return {
+      type: "info",
+      message: "Check your progress",
+      subtitle: "Review the options below to plan your strategy.",
+      icon: (
+        <Icon icon="mdi:chart-line" className="text-blue-400" inline={true} />
+      ),
+    };
+  };
+
+  const status = getOverallStatus();
 
   return (
     <div className="space-y-6">
-      {/* Main Summary Card */}
+      {/* Main Status Card */}
       <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
-        <h3
-          id="season-progress-summary"
-          className="text-primary-text mb-4 text-2xl font-bold"
-        >
-          🎯 Your Season Progress Summary
-        </h3>
-
-        {/* Recommendation */}
-        <div
-          className={`mb-6 rounded-lg p-4 ${
-            recommendation.type === "success"
-              ? "border-button-success bg-secondary-bg border"
-              : recommendation.type === "warning"
-                ? "border-warning bg-secondary-bg border"
-                : recommendation.type === "info"
-                  ? "border-button-info bg-secondary-bg border"
-                  : "border-button-danger bg-secondary-bg border"
-          }`}
-        >
-          <div className="text-primary-text mb-2 text-lg font-semibold">
-            {recommendation.message}
+        <div className="mb-6 text-center">
+          <div className="mb-2 flex items-center justify-center gap-2">
+            <span className="text-2xl">{status.icon}</span>
+            <h3
+              id="season-progress-summary"
+              className="text-primary-text text-2xl font-bold"
+            >
+              {status.message}
+            </h3>
           </div>
-          <div className="text-secondary-text mb-3">
-            {recommendation.details}
+          <p className="text-secondary-text">{status.subtitle}</p>
+          {isDoubleXpLive && (
+            <div
+              className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2"
+              style={{
+                backgroundColor: "var(--color-status-success)",
+                color: "white",
+              }}
+            >
+              <Icon
+                icon="mdi:lightning-bolt"
+                style={{ color: "white" }}
+                inline={true}
+              />
+              <span className="text-sm font-semibold">Double XP is LIVE!</span>
+            </div>
+          )}
+        </div>
+
+        {/* XP Mode Toggle */}
+        <div className="mb-6">
+          <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+            <button
+              onClick={() => setXpMode("normal")}
+              className={`${
+                xpMode === "normal"
+                  ? "bg-button-info text-form-button-text shadow-sm"
+                  : "bg-primary-bg text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+            >
+              Normal XP
+            </button>
+            <button
+              onClick={() => setXpMode("double")}
+              className={`${
+                xpMode === "double"
+                  ? "bg-button-info text-form-button-text shadow-sm"
+                  : "bg-primary-bg text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
+              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+            >
+              Double XP Weekend
+            </button>
           </div>
         </div>
 
         {/* Progress Overview */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="text-center">
-            <div className="text-primary-text text-2xl font-bold">
+            <div className="text-secondary-text text-xs">Current Level</div>
+            <div className="text-primary-text text-xl font-bold">
               {results.currentLevel}
             </div>
-            <div className="text-secondary-text text-sm">Current Level</div>
           </div>
           <div className="text-center">
-            <div className="text-primary-text text-2xl font-bold">
+            <div className="text-secondary-text text-xs">Total XP</div>
+            <div className="text-primary-text text-xl font-bold">
               {results.currentXp.toLocaleString()}
             </div>
-            <div className="text-secondary-text text-sm">Total XP</div>
           </div>
           <div className="text-center">
-            <div className="text-primary-text text-2xl font-bold">
+            <div className="text-secondary-text text-xs">XP Needed</div>
+            <div className="text-primary-text text-xl font-bold">
               {results.xpNeeded.toLocaleString()}
             </div>
-            <div className="text-secondary-text text-sm">XP Needed</div>
           </div>
           <div className="text-center">
-            <div className="text-primary-text text-2xl font-bold">
+            <div className="text-secondary-text text-xs">Target XP</div>
+            <div className="text-primary-text text-xl font-bold">
               {results.requiredXp.toLocaleString()}
             </div>
-            <div className="text-secondary-text text-sm">Target XP</div>
           </div>
         </div>
 
@@ -200,304 +282,109 @@ export default function XpResultsSummary({
           />
         </div>
 
-        {/* Time Estimates */}
+        {/* Results Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-primary-text flex items-center gap-2 font-semibold">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-blue-400"
-                  inline={true}
-                />
-                Without Season Pass
+          {/* Without Season Pass */}
+          <div
+            className={`rounded-lg border p-3 ${
+              currentResults.noPass?.achievable
+                ? "border-green-400 bg-green-400/10"
+                : "border-red-400 bg-red-400/10"
+            }`}
+          >
+            <div className="mb-3">
+              <h4 className="text-primary-text font-semibold">
+                Non-Season Pass Owner
+                <span className="text-secondary-text ml-2 text-sm font-normal">
+                  ({xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})
+                </span>
               </h4>
-              <span className="text-lg">
-                {getStatusIcon(results.achievableNoPass)}
-              </span>
             </div>
             <div className="text-center">
-              <div className="text-primary-text text-2xl font-bold">
-                {results.timeNoPass.days}
-              </div>
-              <div className="text-secondary-text text-sm">
-                {results.timeNoPass.days === 1 ? "day" : "days"}
-                {results.timeNoPass.days === 2 && results.xpNeeded < 1000 && (
-                  <div className="mt-1 text-xs text-gray-400">
-                    (minimum realistic time)
+              {currentResults.noPass?.achievable ? (
+                <>
+                  <div className="mb-2 flex items-center justify-center gap-2">
+                    <span className="text-lg">{getStatusIcon(true)}</span>
+                    <div className="text-primary-text text-xl font-bold">
+                      {currentResults.noPass.days}{" "}
+                      {currentResults.noPass.days === 1 ? "day" : "days"}
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="mt-1 text-xs text-gray-500">
-                Results may vary (±1 day)
-              </div>
-              {results.achievableNoPass ? (
-                <div className="text-secondary-text mt-1 text-xs">
-                  {results.timeNoPass.completionDate}
-                </div>
+                  <div className="text-secondary-text text-sm">
+                    Complete by: {currentResults.noPass.completionDate}
+                  </div>
+                  <div className="text-secondary-text mt-1 text-xs">
+                    Results may vary (±1 day)
+                  </div>
+                </>
               ) : (
-                <div className="mt-1 text-xs text-red-400">
-                  Past season end date
-                  <br />
-                  <span className="text-muted">
-                    Would complete: {results.timeNoPass.completionDate}
-                  </span>
-                </div>
+                <>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-lg">{getStatusIcon(false)}</span>
+                    <div className="text-lg font-bold text-red-400">
+                      Not Achievable
+                    </div>
+                  </div>
+                  <div className="text-secondary-text text-sm">
+                    Would complete: {currentResults.noPass?.completionDate}
+                  </div>
+                  <div className="mt-1 text-xs text-red-400">
+                    Past season end date
+                  </div>
+                </>
               )}
             </div>
           </div>
 
-          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-primary-text flex items-center gap-2 font-semibold">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-green-400"
-                  inline={true}
-                />
-                With Season Pass
+          {/* With Season Pass */}
+          <div
+            className={`rounded-lg border p-3 ${
+              currentResults.withPass?.achievable
+                ? "border-green-400 bg-green-400/10"
+                : "border-red-400 bg-red-400/10"
+            }`}
+          >
+            <div className="mb-3">
+              <h4 className="text-primary-text font-semibold">
+                Season Pass Owner
+                <span className="text-secondary-text ml-2 text-sm font-normal">
+                  ({xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})
+                </span>
               </h4>
-              <span className="text-lg">
-                {getStatusIcon(results.achievableWithPass)}
-              </span>
             </div>
             <div className="text-center">
-              <div className="text-primary-text text-2xl font-bold">
-                {results.timeWithPass.days}
-              </div>
-              <div className="text-secondary-text text-sm">
-                {results.timeWithPass.days === 1 ? "day" : "days"}
-                {results.timeWithPass.days === 2 && results.xpNeeded < 1000 && (
-                  <div className="mt-1 text-xs text-gray-400">
-                    (minimum realistic time)
+              {currentResults.withPass?.achievable ? (
+                <>
+                  <div className="mb-2 flex items-center justify-center gap-2">
+                    <span className="text-lg">{getStatusIcon(true)}</span>
+                    <div className="text-primary-text text-xl font-bold">
+                      {currentResults.withPass.days}{" "}
+                      {currentResults.withPass.days === 1 ? "day" : "days"}
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="mt-1 text-xs text-gray-500">
-                Results may vary (±1 day)
-              </div>
-              {results.achievableWithPass ? (
-                <div className="text-secondary-text mt-1 text-xs">
-                  {results.timeWithPass.completionDate}
-                </div>
+                  <div className="text-secondary-text text-sm">
+                    Complete by: {currentResults.withPass.completionDate}
+                  </div>
+                  <div className="text-secondary-text mt-1 text-xs">
+                    Results may vary (±1 day)
+                  </div>
+                </>
               ) : (
-                <div className="mt-1 text-xs text-red-400">
-                  Past season end date
-                  <br />
-                  <span className="text-muted">
-                    Would complete: {results.timeWithPass.completionDate}
-                  </span>
-                </div>
+                <>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-lg">{getStatusIcon(false)}</span>
+                    <div className="text-lg font-bold text-red-400">
+                      Not Achievable
+                    </div>
+                  </div>
+                  <div className="text-secondary-text text-sm">
+                    Would complete: {currentResults.withPass?.completionDate}
+                  </div>
+                  <div className="mt-1 text-xs text-red-400">
+                    Past season end date
+                  </div>
+                </>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* XP Options Analysis */}
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
-        <h3 className="text-primary-text mb-4 text-xl font-semibold">
-          XP Options Analysis
-        </h3>
-        {new Date() < new Date(results.importantDates.doubleXpStart) && (
-          <div className="mb-4 text-sm text-gray-400 italic">
-            💡 Double XP analysis will be available starting{" "}
-            {results.importantDates.doubleXpStart}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {/* Without Season Pass Analysis */}
-          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-            <h4 className="text-primary-text mb-3 font-semibold">
-              Without Season Pass
-            </h4>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-2">
-                  <span className="flex-shrink-0 text-lg">
-                    {results.achievableNoPass ? (
-                      <Icon
-                        icon="fa:check"
-                        className="text-green-400"
-                        inline={true}
-                      />
-                    ) : (
-                      <Icon
-                        icon="fa:times"
-                        className="text-red-400"
-                        inline={true}
-                      />
-                    )}
-                  </span>
-                  <span className="text-primary-text text-sm sm:text-base">
-                    Normal XP:{" "}
-                    {results.achievableNoPass ? (
-                      "Achievable"
-                    ) : (
-                      <span className="text-button-danger">Not achievable</span>
-                    )}
-                  </span>
-                </div>
-                {results.achievableNoPass && (
-                  <span className="text-xs text-green-400 sm:text-sm">
-                    ({results.timeNoPass.days}{" "}
-                    {results.timeNoPass.days === 1 ? "day" : "days"} - Complete
-                    by: {results.timeNoPass.completionDate})
-                  </span>
-                )}
-              </div>
-              {/* Double XP option - only show after Double XP starts */}
-              {results.doubleXpResults?.noPass &&
-                new Date() >=
-                  new Date(results.importantDates.doubleXpStart) && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">
-                      {results.doubleXpResults.noPass.achievable ? (
-                        <Icon
-                          icon="fa:check"
-                          className="text-green-400"
-                          inline={true}
-                        />
-                      ) : (
-                        <Icon
-                          icon="fa:times"
-                          className="text-red-400"
-                          inline={true}
-                        />
-                      )}
-                    </span>
-                    <span className="text-primary-text">
-                      With Double XP:{" "}
-                      {results.doubleXpResults.noPass.achievable
-                        ? "Achievable (faster completion)"
-                        : "Still not achievable"}
-                    </span>
-                    {results.doubleXpResults.noPass.achievable && (
-                      <span className="text-sm text-green-400">
-                        (
-                        {Math.ceil(
-                          (new Date(
-                            results.doubleXpResults.noPass.completionDate,
-                          ).getTime() -
-                            Date.now()) /
-                            (1000 * 60 * 60 * 24),
-                        )}{" "}
-                        {Math.ceil(
-                          (new Date(
-                            results.doubleXpResults.noPass.completionDate,
-                          ).getTime() -
-                            Date.now()) /
-                            (1000 * 60 * 60 * 24),
-                        ) === 1
-                          ? "day"
-                          : "days"}{" "}
-                        - Complete by:{" "}
-                        {results.doubleXpResults.noPass.completionDate})
-                        <div className="mt-1 text-xs text-gray-500">
-                          Results may vary (±1 day)
-                        </div>
-                      </span>
-                    )}
-                  </div>
-                )}
-            </div>
-          </div>
-
-          {/* With Season Pass Analysis */}
-          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-            <h4 className="text-primary-text mb-3 font-semibold">
-              With Season Pass
-            </h4>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-2">
-                  <span className="flex-shrink-0 text-lg">
-                    {results.achievableWithPass ? (
-                      <Icon
-                        icon="fa:check"
-                        className="text-green-400"
-                        inline={true}
-                      />
-                    ) : (
-                      <Icon
-                        icon="fa:times"
-                        className="text-red-400"
-                        inline={true}
-                      />
-                    )}
-                  </span>
-                  <span className="text-primary-text text-sm sm:text-base">
-                    Normal XP:{" "}
-                    {results.achievableWithPass ? (
-                      "Achievable"
-                    ) : (
-                      <span className="text-button-danger">Not achievable</span>
-                    )}
-                  </span>
-                </div>
-                {results.achievableWithPass && (
-                  <span className="text-xs text-green-400 sm:text-sm">
-                    ({results.timeWithPass.days}{" "}
-                    {results.timeWithPass.days === 1 ? "day" : "days"} -
-                    Complete by: {results.timeWithPass.completionDate})
-                  </span>
-                )}
-              </div>
-              {/* Double XP option - only show after Double XP starts */}
-              {results.doubleXpResults?.withPass &&
-                new Date() >=
-                  new Date(results.importantDates.doubleXpStart) && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">
-                      {results.doubleXpResults.withPass.achievable ? (
-                        <Icon
-                          icon="fa:check"
-                          className="text-green-400"
-                          inline={true}
-                        />
-                      ) : (
-                        <Icon
-                          icon="fa:times"
-                          className="text-red-400"
-                          inline={true}
-                        />
-                      )}
-                    </span>
-                    <span className="text-primary-text">
-                      With Double XP:{" "}
-                      {results.doubleXpResults.withPass.achievable
-                        ? "Achievable (faster completion)"
-                        : "Still not achievable"}
-                    </span>
-                    {results.doubleXpResults.withPass.achievable && (
-                      <span className="text-sm text-green-400">
-                        (
-                        {Math.ceil(
-                          (new Date(
-                            results.doubleXpResults.withPass.completionDate,
-                          ).getTime() -
-                            Date.now()) /
-                            (1000 * 60 * 60 * 24),
-                        )}{" "}
-                        {Math.ceil(
-                          (new Date(
-                            results.doubleXpResults.withPass.completionDate,
-                          ).getTime() -
-                            Date.now()) /
-                            (1000 * 60 * 60 * 24),
-                        ) === 1
-                          ? "day"
-                          : "days"}{" "}
-                        - Complete by:{" "}
-                        {results.doubleXpResults.withPass.completionDate})
-                        <div className="mt-1 text-xs text-gray-500">
-                          Results may vary (±1 day)
-                        </div>
-                      </span>
-                    )}
-                  </div>
-                )}
             </div>
           </div>
         </div>
@@ -514,7 +401,7 @@ export default function XpResultsSummary({
               <div className="text-primary-text text-lg font-semibold">
                 Double XP Starts
               </div>
-              <div className="text-primary-text text-2xl font-bold">
+              <div className="text-primary-text text-xl font-bold">
                 {results.importantDates.doubleXpStart}
               </div>
               <div className="text-secondary-text mt-1 text-sm">
@@ -527,7 +414,7 @@ export default function XpResultsSummary({
               <div className="text-primary-text text-lg font-semibold">
                 Season Ends
               </div>
-              <div className="text-primary-text text-2xl font-bold">
+              <div className="text-primary-text text-xl font-bold">
                 {results.importantDates.seasonEnds}
               </div>
               <div className="text-secondary-text mt-1 text-sm">

@@ -22,7 +22,8 @@ export default function ServiceAvailabilityTicker() {
             <span className="text-primary-text text-center text-xs lg:text-sm">
               <strong>Infrastructure Upgrades:</strong> Inventory logging will
               be down as we perform infrastructure upgrades. The following are
-              affected - OG Finder, Dupe Finder, polling bots and inventories
+              affected - OG Finder, Dupe Finder, polling bots, inventories and
+              contracts.
             </span>
           </div>
         </div>
