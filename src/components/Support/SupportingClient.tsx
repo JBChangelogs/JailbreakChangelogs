@@ -15,7 +15,7 @@ export default function SupportingClient({
 }: SupportingClientProps) {
   return (
     <div className="min-h-screen pb-8">
-      <div className="container mx-auto mb-4 px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <Breadcrumb />
       </div>
       <ModernPricingSection />

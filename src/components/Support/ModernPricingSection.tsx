@@ -7,6 +7,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { getAllowedFileExtensions } from "@/config/settings";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Icon } from "@/components/UI/IconWrapper";
+import ImageModal from "@/components/UI/ImageModal";
 
 interface SupporterTier {
   name: string;
@@ -41,6 +43,7 @@ const supporterTiers: SupporterTier[] = [
       "Discord Role: Supporter",
       "Comments highlighted with Bronze border and badge",
       "Get your trade ads featured in our Discord for maximum reach (highlighted to stand out)",
+      "Extra entries in our Discord giveaways",
     ],
     tierNumber: 1,
   },
@@ -76,9 +79,16 @@ const supporterTiers: SupporterTier[] = [
   },
 ];
 
+const CRYPTO_ADDRESSES = {
+  BTC: "32d8fB55R4QCcg3KevrnjLHCfBwjgg1gE5",
+  ETH: "0xDfc2427F6dFe87A52F7B127Bc08Beea689617BfB",
+  LTC: "MMYQv8tBHRBbFhQnLaXUXfrjUz2XwCx4DK",
+} as const;
+
 export default function ModernPricingSection() {
   const [isYearly, setIsYearly] = useState(false);
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { resolvedTheme } = useTheme();
@@ -93,6 +103,16 @@ export default function ModernPricingSection() {
     resolvedTheme === "dark"
       ? "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/dark/roblox-dark.png"
       : "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/roblox-light.png";
+
+  const copyToClipboard = async (address: string, cryptoType: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedAddress(cryptoType);
+      setTimeout(() => setCopiedAddress(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
+    }
+  };
 
   useEffect(() => {
     const tierParam = searchParams.get("tier");
@@ -281,18 +301,23 @@ export default function ModernPricingSection() {
               </div>
 
               {tier.name !== "Free" ? (
-                <a
-                  href={
-                    isYearly
-                      ? "https://www.roblox.com/games/104188650191561/Support-Us"
-                      : "https://ko-fi.com/jailbreakchangelogs"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => {
+                    const targetElement = document.querySelector(
+                      ".support-methods-section",
+                    ) as HTMLElement;
+                    if (targetElement) {
+                      const elementTop = targetElement.offsetTop;
+                      window.scrollTo({
+                        top: elementTop - 80,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
                   className="bg-button-info hover:bg-button-info-hover focus:bg-button-info-hover mt-10 inline-block w-full transform rounded-md px-4 py-2 text-center font-medium tracking-wide text-white capitalize transition-colors duration-300 focus:outline-none"
                 >
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
-                </a>
+                </button>
               ) : (
                 <div className="text-primary-text bg-primary-bg border-border-primary mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
                   Already included
@@ -303,15 +328,15 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Important Information Section */}
-        <div className="bg-button-info/10 border-border-primary mt-16 rounded-lg border p-6">
+        <div className="bg-button-info/10 border-border-primary mt-8 rounded-lg border p-6">
           <h3 className="text-primary-text mb-4 text-lg font-semibold">
             Important Information
           </h3>
           <div className="text-secondary-text space-y-2">
             <p>
               <strong>One-time purchases:</strong> All supporter purchases are
-              one-time only and non-refundable! Once you purchase, you keep the
-              perks forever.
+              one-time only and non-refundable! Once you redeem your code, you
+              keep the perks forever.
             </p>
             <p>
               <strong>Ko-fi Supporters:</strong> If you&apos;re buying a
@@ -344,22 +369,44 @@ export default function ModernPricingSection() {
               </Link>
               .
             </p>
+            <p>
+              <strong>Need help?</strong> Didn&apos;t receive a code? Need
+              assistance with your donation? Reach out to us at{" "}
+              <a
+                href="mailto:support@jailbreakchangelogs.xyz"
+                className="text-link hover:text-link-hover font-semibold underline transition-colors"
+              >
+                support@jailbreakchangelogs.xyz
+              </a>{" "}
+              or join our{" "}
+              <a
+                href="https://discord.jailbreakchangelogs.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover underline"
+              >
+                Discord
+              </a>{" "}
+              for assistance.
+            </p>
           </div>
         </div>
 
         {/* Support Methods */}
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center">
+        <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
+          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center flex flex-col justify-center items-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Ko-fi Donations
             </h3>
-            <Image
-              src={kofiImagePath}
-              alt="Ko-fi Support QR Code"
-              width={192}
-              height={192}
-              className="mx-auto rounded-lg shadow"
-            />
+            <div className="flex-1 flex items-center justify-center">
+              <ImageModal
+                src={kofiImagePath}
+                alt="Ko-fi Support QR Code"
+                width={240}
+                height={240}
+                className="mx-auto w-60 h-60"
+              />
+            </div>
             <a
               href="https://ko-fi.com/jailbreakchangelogs"
               target="_blank"
@@ -370,17 +417,19 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center">
+          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center flex flex-col justify-center items-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
-            <Image
-              src={robloxImagePath}
-              alt="Roblox Support QR Code"
-              width={192}
-              height={192}
-              className="mx-auto rounded-lg shadow"
-            />
+            <div className="flex-1 flex items-center justify-center">
+              <ImageModal
+                src={robloxImagePath}
+                alt="Roblox Support QR Code"
+                width={240}
+                height={240}
+                className="mx-auto w-60 h-60"
+              />
+            </div>
             <a
               href="https://www.roblox.com/games/104188650191561/Support-Us"
               target="_blank"
@@ -389,6 +438,139 @@ export default function ModernPricingSection() {
             >
               Can&apos;t scan? Click here
             </a>
+          </div>
+
+          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center">
+            <h3 className="text-primary-text mb-4 text-lg font-semibold">
+              Crypto Donations
+            </h3>
+            <div className="space-y-4">
+              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+                <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
+                  <Icon
+                    icon="logos:bitcoin"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
+                  <span className="font-semibold">Bitcoin (BTC)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-secondary-text break-all text-xs flex-1">
+                    {CRYPTO_ADDRESSES.BTC}
+                    <button
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
+                      }
+                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      title={
+                        copiedAddress === "BTC"
+                          ? "Copied!"
+                          : "Copy Bitcoin address"
+                      }
+                    >
+                      <Icon
+                        icon={
+                          copiedAddress === "BTC"
+                            ? "heroicons:check"
+                            : "heroicons:clipboard"
+                        }
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </code>
+                </div>
+              </div>
+
+              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+                <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
+                  <Icon
+                    icon="logos:ethereum"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
+                  <span className="font-semibold">Ethereum (ETH)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-secondary-text break-all text-xs flex-1">
+                    {CRYPTO_ADDRESSES.ETH}
+                    <button
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")
+                      }
+                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      title={
+                        copiedAddress === "ETH"
+                          ? "Copied!"
+                          : "Copy Ethereum address"
+                      }
+                    >
+                      <Icon
+                        icon={
+                          copiedAddress === "ETH"
+                            ? "heroicons:check"
+                            : "heroicons:clipboard"
+                        }
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </code>
+                </div>
+              </div>
+
+              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+                <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
+                  <Icon
+                    icon="token-branded:ltc"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
+                  <span className="font-semibold">Litecoin (LTC)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-secondary-text break-all text-xs flex-1">
+                    {CRYPTO_ADDRESSES.LTC}
+                    <button
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
+                      }
+                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      title={
+                        copiedAddress === "LTC"
+                          ? "Copied!"
+                          : "Copy Litecoin address"
+                      }
+                    >
+                      <Icon
+                        icon={
+                          copiedAddress === "LTC"
+                            ? "heroicons:check"
+                            : "heroicons:clipboard"
+                        }
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Long-term Sponsor Section */}
+        <div className="bg-secondary-bg border-border-primary mt-4 rounded-lg border p-4">
+          <div className="text-center">
+            <h3 className="text-primary-text mb-2 text-lg font-semibold">
+              Want to become a long-term sponsor?
+            </h3>
+            <p className="text-secondary-text mb-3 text-sm">
+              Reach out via email:{" "}
+              <a
+                href="mailto:support@jailbreakchangelogs.xyz"
+                className="text-link hover:text-link-hover font-semibold underline transition-colors"
+              >
+                support@jailbreakchangelogs.xyz
+              </a>
+            </p>
           </div>
         </div>
       </div>

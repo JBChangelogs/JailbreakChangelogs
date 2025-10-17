@@ -74,7 +74,7 @@ export default function SupportersSection({
   }
 
   return (
-    <div className="mt-16">
+    <div className="mt-4">
       <h2 className="text-primary-text mb-8 text-center text-3xl font-bold">
         Made possible by{" "}
         <span className="text-button-info underline">supporters</span>
@@ -128,7 +128,7 @@ export default function SupportersSection({
                               href={`/users/${supporter.id}`}
                               prefetch={false}
                             >
-                              <h3 className="text-link hover:text-link-hover truncate text-sm font-semibold transition-colors">
+                              <h3 className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors">
                                 {supporter.global_name &&
                                 supporter.global_name !== "None"
                                   ? supporter.global_name
