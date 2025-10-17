@@ -5,14 +5,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
   title: "Dupe Calculator",
   description:
-    "Check for duplicated items in your inventory using our dupe calculator tool.",
+    "View all items that have been reported as duped in our comprehensive database.",
   alternates: {
     canonical: "/dupes/calculator",
   },
   openGraph: {
     title: "Dupe Calculator",
     description:
-      "Check for duplicated items in your inventory using our dupe calculator tool.",
+      "View all items that have been reported as duped in our comprehensive database.",
     type: "website",
     url: "https://jailbreakchangelogs.xyz/dupes/calculator",
     siteName: "Jailbreak Changelogs",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Dupe Calculator",
     description:
-      "Check for duplicated items in your inventory using our dupe calculator tool.",
+      "View all items that have been reported as duped in our comprehensive database.",
     images: [
       "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
     ],

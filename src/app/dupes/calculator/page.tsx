@@ -1,8 +1,8 @@
 import React, { Suspense } from "react";
 import { Metadata } from "next";
+import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import DupeReportHeader from "@/components/Dupes/DupeReportHeader";
-import DupeSearchForm from "@/components/Dupes/DupeSearchForm";
+import DupeTable from "@/components/Dupes/DupeTable";
 import { fetchItems, fetchDupes } from "@/utils/api";
 import { formatTimestamp } from "@/utils/timestamp";
 import Loading from "./loading";
@@ -20,13 +20,42 @@ export default function DupeCalculatorPage() {
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <Breadcrumb />
-        <DupeReportHeader />
 
         <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
           <div className="mb-6">
-            <h2 className="text-secondary-text text-xl font-semibold">
-              Search for Duped Items
-            </h2>
+            <h1 className="text-secondary-text text-2xl font-semibold">
+              Roblox Jailbreak Dupe Calculator
+            </h1>
+            <p className="text-secondary-text mt-2 text-sm">
+              View all items that have been reported as duped. Use the search
+              and filters to find specific items.
+            </p>
+          </div>
+
+          {/* Deprecated Notice */}
+          <div className="border-button-info bg-button-info/10 mb-6 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="relative z-10">
+              <span className="text-primary-text text-base font-bold">
+                Important Notice
+              </span>
+              <div className="text-secondary-text mt-1">
+                This dupe calculator is{" "}
+                <span className="text-primary-text font-semibold">
+                  deprecated and no longer maintained
+                </span>
+                .
+                <br />
+                For the most accurate and up-to-date dupe detection, please use
+                our new{" "}
+                <Link
+                  href="/dupes"
+                  className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors"
+                >
+                  Dupe Finder
+                </Link>
+                .
+              </div>
+            </div>
           </div>
 
           {/* Stats Card */}
@@ -51,7 +80,7 @@ export default function DupeCalculatorPage() {
           </div>
 
           <Suspense fallback={<Loading />}>
-            <DupeSearchFormWrapper />
+            <DupeTableWrapper />
           </Suspense>
         </div>
       </div>
@@ -86,10 +115,10 @@ async function DupeStatsWrapper() {
   );
 }
 
-async function DupeSearchFormWrapper() {
+async function DupeTableWrapper() {
   const [items, dupes] = await Promise.all([fetchItems(), fetchDupes()]);
   const safeDupes = Array.isArray(dupes) ? (dupes as DupeResult[]) : [];
   const safeItems = Array.isArray(items) ? (items as Item[]) : [];
 
-  return <DupeSearchForm initialItems={safeItems} initialDupes={safeDupes} />;
+  return <DupeTable initialItems={safeItems} initialDupes={safeDupes} />;
 }
