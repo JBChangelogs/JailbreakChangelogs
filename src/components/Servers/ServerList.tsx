@@ -32,6 +32,12 @@ type SortOption =
   | "date_expires_asc"
   | "date_expires_desc";
 
+const processMentions = (text: string): string => {
+  return text.replace(/@(\w+)/g, (_, username) => {
+    return `<span class="text-link-hover">@${username}</span>`;
+  });
+};
+
 const ServerList: React.FC<{
   sortOption?: SortOption;
   onSortChange?: (sortOption: SortOption) => void;
@@ -64,52 +70,63 @@ const ServerList: React.FC<{
       return num < 10000000000 ? num * 1000 : num;
     };
 
-    switch (sortOption) {
-      case "date_added_asc":
-        return sorted.sort((a, b) => {
-          const aTime = normalizeTimestamp(a.created_at);
-          const bTime = normalizeTimestamp(b.created_at);
-          return aTime - bTime;
-        });
-      case "date_added_desc":
-        return sorted.sort((a, b) => {
-          const aTime = normalizeTimestamp(a.created_at);
-          const bTime = normalizeTimestamp(b.created_at);
-          return bTime - aTime;
-        });
-      case "date_expires_asc":
-        return sorted.sort((a, b) => {
-          // Handle "Never" expiration dates
-          if (a.expires === "Never" && b.expires === "Never") return 0;
-          if (a.expires === "Never") return 1; // Never expires goes to end
-          if (b.expires === "Never") return -1;
-          const aTime = normalizeTimestamp(a.expires);
-          const bTime = normalizeTimestamp(b.expires);
-          return aTime - bTime;
-        });
-      case "date_expires_desc":
-        return sorted.sort((a, b) => {
-          // Handle "Never" expiration dates
-          if (a.expires === "Never" && b.expires === "Never") return 0;
-          if (a.expires === "Never") return -1; // Never expires goes to beginning
-          if (b.expires === "Never") return 1;
-          const aTime = normalizeTimestamp(a.expires);
-          const bTime = normalizeTimestamp(b.expires);
-          return bTime - aTime;
-        });
-      default:
-        return sorted;
-    }
-  }, [servers, sortOption]);
+    // Separate user's servers from others
+    const userServers = sorted.filter(
+      (server) => server.owner === loggedInUserId,
+    );
+    const otherServers = sorted.filter(
+      (server) => server.owner !== loggedInUserId,
+    );
 
-  // Organize servers into rows for grid virtualization
-  // Each row contains multiple servers based on screen size
+    // Sort each group based on the selected option
+    const sortGroup = (group: Server[]) => {
+      switch (sortOption) {
+        case "date_added_asc":
+          return group.sort((a, b) => a.id - b.id);
+        case "date_added_desc":
+          return group.sort((a, b) => b.id - a.id);
+        case "date_expires_asc":
+          return group.sort((a, b) => {
+            if (a.expires === "Never" && b.expires === "Never") return 0;
+            if (a.expires === "Never") return 1;
+            if (b.expires === "Never") return -1;
+            const aTime = normalizeTimestamp(a.expires);
+            const bTime = normalizeTimestamp(b.expires);
+            return aTime - bTime;
+          });
+        case "date_expires_desc":
+          return group.sort((a, b) => {
+            if (a.expires === "Never" && b.expires === "Never") return 0;
+            if (a.expires === "Never") return -1;
+            if (b.expires === "Never") return 1;
+            const aTime = normalizeTimestamp(a.expires);
+            const bTime = normalizeTimestamp(b.expires);
+            return bTime - aTime;
+          });
+        default:
+          return group;
+      }
+    };
+
+    // Return user's servers first, then others
+    return [...sortGroup(userServers), ...sortGroup(otherServers)];
+  }, [servers, sortOption, loggedInUserId]);
+
+  const serverNumberMap = React.useMemo(() => {
+    const idToNumber: Record<number, number> = {};
+    const sortedByIds = [...servers].sort((a, b) => a.id - b.id);
+    sortedByIds.forEach((server, index) => {
+      idToNumber[server.id] = index + 1;
+    });
+    return idToNumber;
+  }, [servers]);
+
   const getServersPerRow = () => {
-    if (typeof window === "undefined") return 3; // Default for SSR
+    if (typeof window === "undefined") return 3;
     const width = window.innerWidth;
-    if (width < 768) return 1; // md
-    if (width < 1280) return 2; // xl
-    return 3; // 2xl
+    if (width < 768) return 1;
+    if (width < 1280) return 2;
+    return 3;
   };
 
   const serversPerRow = getServersPerRow();
@@ -121,7 +138,7 @@ const ServerList: React.FC<{
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 400, // Simple estimate - let TanStack measure actual content
+    estimateSize: () => 400,
     overscan: 2,
   });
 
@@ -148,12 +165,10 @@ const ServerList: React.FC<{
         const data = (await serversResponse.json()) as Server[];
         setServers(data);
 
-        // Fetch user data for each server owner
         const uniqueOwnerIds = [
           ...new Set(data.map((server: Server) => server.owner)),
         ];
 
-        // Use batch endpoint to fetch all user data at once
         if (uniqueOwnerIds.length > 0) {
           try {
             const userResponse = await fetch(
@@ -192,7 +207,6 @@ const ServerList: React.FC<{
 
     fetchServersAndUser();
 
-    // Event listener for auth state changes
     const handleAuthChange = (event: CustomEvent) => {
       const userData = event.detail;
       if (!userData) {
@@ -216,7 +230,6 @@ const ServerList: React.FC<{
   }, [user]);
 
   const handleServerAdded = async () => {
-    // Fetch updated server list
     try {
       const serversResponse = await fetch(
         `${PUBLIC_API_URL}/servers/list?nocache=true`,
@@ -232,7 +245,6 @@ const ServerList: React.FC<{
       const data = (await serversResponse.json()) as Server[];
       setServers(data);
 
-      // Only fetch user data for new owner IDs
       const uniqueOwnerIds = [
         ...new Set(data.map((server: Server) => server.owner)),
       ];
@@ -583,7 +595,7 @@ const ServerList: React.FC<{
                 }}
               >
                 <div className="grid grid-cols-1 gap-4 gap-y-6 pb-4 md:grid-cols-2 xl:grid-cols-3">
-                  {row.map((server, index) => (
+                  {row.map((server) => (
                     <div
                       key={server.id}
                       className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6"
@@ -595,8 +607,7 @@ const ServerList: React.FC<{
                             className="text-button-info h-5 w-5"
                           />
                           <span className="text-secondary-text">
-                            Server #
-                            {virtualRow.index * serversPerRow + index + 1}
+                            Server #{serverNumberMap[server.id]}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -608,13 +619,13 @@ const ServerList: React.FC<{
                                 aria-label="Copy Server Link"
                               >
                                 <Icon
-                                  icon="heroicons:clipboard-solid"
+                                  icon="heroicons:clipboard"
                                   className="h-4 w-4"
                                 />
                               </button>
                               <button
                                 onClick={() => handleEditServer(server)}
-                                className="border-button-warning bg-button-warning text-form-button-text hover:bg-button-warning-hover rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                className="border-button-warning bg-button-warning text-form-button-text hover:bg-button-warning-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 aria-label="Edit Server"
                               >
                                 <Icon
@@ -624,7 +635,7 @@ const ServerList: React.FC<{
                               </button>
                               <button
                                 onClick={() => handleDeleteServer(server)}
-                                className="border-button-danger bg-button-danger text-form-button-text hover:bg-button-danger-hover rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                className="border-button-danger bg-button-danger text-form-button-text hover:bg-button-danger-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 aria-label="Delete Server"
                               >
                                 <Icon
@@ -757,11 +768,15 @@ const ServerList: React.FC<{
                           <h3 className="text-primary-text mb-2 text-sm font-semibold">
                             Server Rules
                           </h3>
-                          <p className="text-secondary-text text-xs break-words whitespace-pre-wrap sm:text-sm">
-                            {server.rules === "N/A"
-                              ? "No Rules set by owner"
-                              : server.rules}
-                          </p>
+                          <p
+                            className="text-secondary-text text-xs break-words whitespace-pre-wrap sm:text-sm"
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                server.rules === "N/A"
+                                  ? "No Rules set by owner"
+                                  : processMentions(server.rules),
+                            }}
+                          />
                         </div>
                       </div>
                     </div>

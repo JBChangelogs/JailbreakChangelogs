@@ -1,5 +1,6 @@
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import { Icon } from "@/components/UI/IconWrapper";
 import { fetchLatestSeason } from "@/utils/api";
 import XpCalculator from "@/components/Seasons/XpCalculator";
 import XpImportantDates from "@/components/Seasons/XpImportantDates";
@@ -61,8 +62,12 @@ export default async function WillIMakeItPage() {
 
           {/* Calculator Info Section */}
           <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
-            <h3 className="text-primary-text mb-3 text-lg font-semibold">
-              💡 How This Calculator Works
+            <h3 className="text-primary-text mb-3 flex items-center gap-2 text-lg font-semibold">
+              <Icon
+                icon="emojione:light-bulb"
+                className="text-lg text-yellow-500"
+              />
+              How This Calculator Works
             </h3>
             <ul className="text-secondary-text list-inside list-disc space-y-2 text-sm">
               <li>

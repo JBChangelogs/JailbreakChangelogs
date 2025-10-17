@@ -21,7 +21,7 @@ export const metadata = {
     canonical: "/values",
   },
   openGraph: {
-    title: "Roblox Jailbreak Values",
+    title: "Roblox Jailbreak Values | Jailbreak Changelogs",
     description:
       "Regularly updated Roblox Jailbreak values for vehicles, textures, colors, rims, spoilers, hyperchromes, and more. Community driven.",
     images: [
@@ -38,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Roblox Jailbreak Values",
+    title: "Roblox Jailbreak Values | Jailbreak Changelogs",
     description:
       "Regularly updated Roblox Jailbreak values for vehicles, textures, colors, rims, spoilers, hyperchromes, and more. Community driven.",
     images: [
@@ -55,7 +55,7 @@ export default function ValuesLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Roblox Jailbreak Values",
+    name: "Roblox Jailbreak Values | Jailbreak Changelogs",
     description: `Comprehensive and regularly updated Roblox Jailbreak values list for ${new Date().getFullYear()}. Find current trading values for vehicles, spoilers, rims, body colors, hyperchromes, textures, tire stickers, tire styles, drifts, furniture, horns, and weapon skins.`,
     url: "https://jailbreakchangelogs.xyz/values",
     publisher: {
@@ -71,7 +71,7 @@ export default function ValuesLayout({
     },
     mainEntity: {
       "@type": "ItemList",
-      name: "Jailbreak Trading Values",
+      name: "Roblox Jailbreak Trading Values | Jailbreak Changelogs",
       description:
         "Complete list of Roblox Jailbreak trading values including vehicles, spoilers, rims, body colors, hyperchromes, textures, tire stickers, tire styles, drifts, furniture, horns, and weapon skins",
       numberOfItems: "500+",

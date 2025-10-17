@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "../UI/IconWrapper";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -9,8 +8,6 @@ import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
 } from "@/utils/hyperchrome";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface HyperchromeCalculatorModalProps {
   open: boolean;
@@ -23,11 +20,8 @@ export default function HyperchromeCalculatorModal({
 }: HyperchromeCalculatorModalProps) {
   const [level, setLevel] = useState(0);
   const [pity, setPity] = useState(0);
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
-
-  useEffect(() => setSelectLoaded(true), []);
   useEffect(() => {
     if (!open) {
       // reset when closing
@@ -58,8 +52,8 @@ export default function HyperchromeCalculatorModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[70vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
+          <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Hyperchrome Pity Calculator</span>
             <button
               aria-label="Close"
@@ -70,7 +64,7 @@ export default function HyperchromeCalculatorModal({
             </button>
           </div>
 
-          <div className="modal-content p-6">
+          <div className="modal-content flex-1 overflow-y-auto p-6">
             <div className="mb-4">
               <p className="text-secondary-text text-sm">
                 Answer a few questions to calculate robberies needed to reach
@@ -92,58 +86,22 @@ export default function HyperchromeCalculatorModal({
                 <div className="text-secondary-text mb-2 text-xs">
                   Level 0 means you have no hyperchrome yet.
                 </div>
-                {selectLoaded ? (
-                  <Select
-                    value={{ value: level, label: `Level ${level}` }}
-                    onChange={(option: unknown) => {
-                      const newLevel = option
-                        ? (option as { value: number }).value
-                        : 0;
-                      setLevel(newLevel);
-                    }}
-                    options={[0, 1, 2, 3, 4].map((v) => ({
-                      value: v,
-                      label: `Level ${v}`,
-                    }))}
-                    classNamePrefix="react-select"
-                    className="w-full"
-                    isClearable={false}
-                    isSearchable={false}
-                    styles={{
-                      control: (base, state) => ({
-                        ...base,
-                        backgroundColor: "var(--color-form-input)",
-                        borderColor: "var(--color-stroke)",
-                        color: "var(--color-primary-text)",
-                        cursor: state.isFocused ? "pointer" : "pointer",
-                      }),
-                      singleValue: (base) => ({
-                        ...base,
-                        color: "var(--color-primary-text)",
-                      }),
-                      menu: (base) => ({
-                        ...base,
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        zIndex: 3000,
-                      }),
-                      option: (base, state) => ({
-                        ...base,
-                        backgroundColor: state.isSelected
-                          ? "var(--color-button-info)"
-                          : state.isFocused
-                            ? "var(--color-primary-bg)"
-                            : "var(--color-secondary-bg)",
-                        color:
-                          state.isSelected || state.isFocused
-                            ? "var(--color-primary-text)"
-                            : "var(--color-secondary-text)",
-                      }),
-                    }}
-                  />
-                ) : (
-                  <div className="bg-form-input h-10 w-full animate-pulse rounded-md border"></div>
-                )}
+                <input
+                  type="number"
+                  id="level"
+                  min={0}
+                  max={4}
+                  className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  placeholder="Enter your hyperchrome level (0-4)"
+                  value={level}
+                  onChange={(e) => {
+                    const raw = parseInt(e.target.value);
+                    const clamped = Number.isNaN(raw)
+                      ? 0
+                      : Math.max(0, Math.min(4, raw));
+                    setLevel(clamped);
+                  }}
+                />
               </div>
             )}
 
@@ -177,26 +135,47 @@ export default function HyperchromeCalculatorModal({
             {hasCalculated && step === 2 && (
               <div className="mb-4">
                 <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-                  <div className="text-secondary-text mb-1 text-sm">Result</div>
-                  <div className="flex items-baseline gap-2">
-                    <div className="text-primary-text text-3xl font-extrabold">
-                      {robberiesNeeded}
+                  <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
+                    Result
+                  </div>
+
+                  <div className="bg-secondary-bg mb-4 rounded-lg p-4">
+                    <div className="mb-2 flex items-center justify-center gap-3">
+                      <div className="text-primary-text text-4xl font-black">
+                        {robberiesNeeded}
+                      </div>
+                      <div className="text-secondary-text text-lg font-medium">
+                        robberies
+                      </div>
                     </div>
-                    <div className="text-secondary-text text-base">
-                      robberies to reach HyperChrome Level{" "}
-                      {Math.min(level + 1, 5)}
+                    <div className="text-secondary-text text-center text-sm">
+                      to reach{" "}
+                      <span className="text-primary-text font-semibold">
+                        HyperChrome Level {Math.min(level + 1, 5)}
+                      </span>
                     </div>
                   </div>
-                  <div className="text-secondary-text mt-2 text-xs">
-                    💡Pro tip: After {robberiesNeeded} robberies, pity reaches
-                    <span className="text-primary-text px-1 font-semibold">
-                      66.6%
-                    </span>
-                    in private servers. Robbing in a public server at that point
-                    guarantees an instant level-up
+
+                  <div className="bg-secondary-bg border-warning/20 mb-3 rounded-lg border p-3">
+                    <div className="flex items-start gap-2">
+                      <Icon
+                        icon="emojione:light-bulb"
+                        className="text-warning text-3xl"
+                      />
+                      <div className="text-secondary-text text-xs leading-relaxed">
+                        <span className="font-semibold">Pro tip:</span> After{" "}
+                        {robberiesNeeded} robberies, pity reaches{" "}
+                        <span className="text-primary-text font-bold">
+                          66.6%
+                        </span>{" "}
+                        in private servers. Robbing in a public server at that
+                        point guarantees an instant level-up!
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-secondary-text mt-2 text-xs">
-                    Based on Level {level}, {pity}% pity.
+
+                  <div className="text-secondary-text text-center text-xs">
+                    Based on Level {level}, {pity}% pity
                   </div>
                 </div>
               </div>
@@ -204,60 +183,62 @@ export default function HyperchromeCalculatorModal({
             {hasCalculated && step === 2 && (
               <div className="mb-4">
                 <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
-                  <div className="text-secondary-text mb-2 text-xs">
-                    If you trade to a different level, here&apos;s what your
-                    pity would be for each level-up.
+                  <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
+                    Alternative Level Calculations
                   </div>
-                  {parseFloat(otherPity[1]) <= 100 && (
-                    <div className="text-secondary-text text-base">
-                      Level 1{" "}
-                      <Icon
-                        icon="mingcute:arrow-right-fill"
-                        className="mx-1 inline"
-                        inline={true}
-                      />{" "}
-                      Level 2: {otherPity[1]}%
-                    </div>
-                  )}
-                  {parseFloat(otherPity[2]) <= 100 && (
-                    <div className="text-secondary-text text-base">
-                      Level 2{" "}
-                      <Icon
-                        icon="mingcute:arrow-right-fill"
-                        className="mx-1 inline"
-                        inline={true}
-                      />{" "}
-                      Level 3: {otherPity[2]}%
-                    </div>
-                  )}
-                  {parseFloat(otherPity[3]) <= 100 && (
-                    <div className="text-secondary-text text-base">
-                      Level 3{" "}
-                      <Icon
-                        icon="mingcute:arrow-right-fill"
-                        className="mx-1 inline"
-                        inline={true}
-                      />{" "}
-                      Level 4: {otherPity[3]}%
-                    </div>
-                  )}
-                  {parseFloat(otherPity[4]) <= 100 && (
-                    <div className="text-secondary-text text-base">
-                      Level 4{" "}
-                      <Icon
-                        icon="mingcute:arrow-right-fill"
-                        className="mx-1 inline"
-                        inline={true}
-                      />{" "}
-                      Level 5: {otherPity[4]}%
-                    </div>
-                  )}
+                  <div className="text-secondary-text mb-4 text-xs">
+                    If you trade to a different level, here&apos;s what your
+                    pity would be for each level-up:
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {parseFloat(otherPity[1]) <= 100 && (
+                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
+                        <div className="text-primary-text text-lg font-bold">
+                          Level 1
+                        </div>
+                        <div className="text-secondary-text text-sm">
+                          {otherPity[1]}% pity
+                        </div>
+                      </div>
+                    )}
+                    {parseFloat(otherPity[2]) <= 100 && (
+                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
+                        <div className="text-primary-text text-lg font-bold">
+                          Level 2
+                        </div>
+                        <div className="text-secondary-text text-sm">
+                          {otherPity[2]}% pity
+                        </div>
+                      </div>
+                    )}
+                    {parseFloat(otherPity[3]) <= 100 && (
+                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
+                        <div className="text-primary-text text-lg font-bold">
+                          Level 3
+                        </div>
+                        <div className="text-secondary-text text-sm">
+                          {otherPity[3]}% pity
+                        </div>
+                      </div>
+                    )}
+                    {parseFloat(otherPity[4]) <= 100 && (
+                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
+                        <div className="text-primary-text text-lg font-bold">
+                          Level 4
+                        </div>
+                        <div className="text-secondary-text text-sm">
+                          {otherPity[4]}% pity
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+          <div className="modal-footer flex flex-shrink-0 justify-end gap-2 px-6 py-4">
             {step > 1 && (
               <button
                 type="button"

@@ -71,7 +71,7 @@ export default function ReportIssueModal({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"

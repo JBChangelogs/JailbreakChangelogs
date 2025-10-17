@@ -1,10 +1,10 @@
 import React from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Dialog, DialogPanel } from "@headlessui/react";
 
 interface AddServerModalProps {
   isOpen: boolean;
@@ -52,18 +52,6 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       .join("\n")
       .replace(/\n\n+/g, "\n\n"); // Collapse multiple consecutive newlines to just two
   };
-
-  // Prevent background scrolling when modal is open
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   // Reset form when modal opens/closes or editingServer changes
   React.useEffect(() => {
@@ -196,180 +184,312 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        aria-hidden="true"
       />
 
-      {/* Modal */}
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg relative w-full max-w-md rounded-lg border shadow-xl">
-        {/* Header */}
-        <div className="border-border-primary flex items-center justify-between border-b p-4">
-          <h2 className="text-primary-text text-xl font-semibold">
-            {editingServer ? "Edit Server" : "Add New Server"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="border-border-primary hover:border-border-focus bg-secondary-bg relative w-full max-w-md rounded-lg border shadow-xl">
+          {/* Header */}
+          <div className="border-border-primary flex items-center border-b p-4">
+            <h2 className="text-primary-text text-xl font-semibold">
+              {editingServer ? "Edit Server" : "Add New Server"}
+            </h2>
+          </div>
 
-        {/* Content */}
-        <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="server-link"
-                className="text-primary-text mb-2 block text-sm font-medium"
-              >
-                Server Link <span className="text-button-danger">*</span>
-              </label>
-              <input
-                id="server-link"
-                type="text"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
-                placeholder="Enter the server link"
-              />
-              <p className="text-secondary-text mt-1 text-sm">
-                Enter the full private server link from Roblox
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="server-rules"
-                className="text-primary-text mb-2 block text-sm font-medium"
-              >
-                Server Rules
-              </label>
-              <textarea
-                id="server-rules"
-                value={rules}
-                onChange={(e) => handleRulesChange(e.target.value)}
-                rows={4}
-                maxLength={MAX_RULES_LENGTH}
-                className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
-                placeholder="Enter the server rules"
-              />
-              <p className="text-secondary-text mt-1 text-sm">
-                Optional: Add any specific rules or requirements for joining the
-                server
-              </p>
-            </div>
-
-            <div>
-              <label className="flex items-center space-x-2">
+          {/* Content */}
+          <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+            <div className="space-y-6">
+              <div>
+                <label
+                  htmlFor="server-link"
+                  className="text-primary-text mb-2 block text-sm font-medium"
+                >
+                  Server Link <span className="text-button-danger">*</span>
+                </label>
                 <input
-                  type="checkbox"
-                  checked={neverExpires}
-                  onChange={(e) => {
-                    setNeverExpires(e.target.checked);
-                    if (e.target.checked) {
-                      setExpires(null);
-                    } else {
-                      setExpires(originalExpires);
-                    }
-                  }}
-                  className="text-button-info focus:ring-button-info h-4 w-4 rounded"
+                  id="server-link"
+                  type="text"
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                  className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                  placeholder="https://www.roblox.com/share?code=..."
                 />
-                <span className="text-primary-text text-sm">Never Expires</span>
-              </label>
-              <p className="text-secondary-text mt-1 text-sm">
-                Check this if the server link should remain active indefinitely
-              </p>
-            </div>
-
-            <div>
-              <div className="text-primary-text mb-2 flex items-center text-sm font-medium">
-                Expires <span className="text-button-danger">*</span>
+                <p className="text-secondary-text mt-1 text-sm">
+                  Enter your full private server link
+                </p>
               </div>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  value={expires}
-                  onChange={(date) => setExpires(date)}
-                  minDate={new Date()}
-                  disabled={neverExpires}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      variant: "outlined",
-                      placeholder: "Select expiration date",
-                      sx: {
-                        backgroundColor: "var(--color-primary-bg) !important",
-                        "& .MuiOutlinedInput-root": {
-                          color: "var(--color-primary-text)",
+
+              <div>
+                <label
+                  htmlFor="server-rules"
+                  className="text-primary-text mb-2 block text-sm font-medium"
+                >
+                  Server Rules
+                </label>
+                <textarea
+                  id="server-rules"
+                  value={rules}
+                  onChange={(e) => handleRulesChange(e.target.value)}
+                  rows={4}
+                  maxLength={MAX_RULES_LENGTH}
+                  className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                  placeholder="What are the rules for this server?"
+                />
+                <p className="text-secondary-text mt-1 text-sm">
+                  Optional: Add any specific rules or requirements
+                </p>
+              </div>
+
+              <div>
+                <div className="text-primary-text mb-2 flex items-center text-sm font-medium">
+                  Expires <span className="text-button-danger">*</span>
+                </div>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    value={expires}
+                    onChange={(date) => setExpires(date)}
+                    minDate={new Date()}
+                    disabled={neverExpires}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        placeholder: "Select expiration date",
+                        sx: {
                           backgroundColor: "var(--color-primary-bg) !important",
-                          "& fieldset": {
+                          "& .MuiOutlinedInput-root": {
+                            color: "var(--color-primary-text)",
+                            backgroundColor:
+                              "var(--color-primary-bg) !important",
+                            "& fieldset": {
+                              borderColor: "var(--color-border-primary)",
+                            },
+                            "&:hover fieldset": {
+                              borderColor: "var(--color-button-info)",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "var(--color-button-info)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "var(--color-primary-text)",
+                          },
+                          "& .MuiInputBase-input": {
+                            backgroundColor:
+                              "var(--color-primary-bg) !important",
+                            "&::placeholder": {
+                              color: "var(--color-secondary-text) !important",
+                              opacity: "1 !important",
+                            },
+                          },
+                          "& .MuiInputBase-root": {
+                            backgroundColor:
+                              "var(--color-primary-bg) !important",
+                            "& .MuiInputAdornment-root": {
+                              "& .MuiIconButton-root": {
+                                color: "var(--color-secondary-text) !important",
+                                "&:hover": {
+                                  backgroundColor: "var(--color-quaternary-bg)",
+                                },
+                                "& svg": {
+                                  color:
+                                    "var(--color-secondary-text) !important",
+                                },
+                              },
+                            },
+                          },
+                          "& .MuiPickersInputBase-root": {
+                            "& .MuiInputAdornment-root": {
+                              "& .MuiIconButton-root": {
+                                color: "var(--color-secondary-text) !important",
+                                "&:hover": {
+                                  backgroundColor: "var(--color-quaternary-bg)",
+                                },
+                                "& svg": {
+                                  color:
+                                    "var(--color-secondary-text) !important",
+                                },
+                              },
+                            },
+                          },
+                          "& .MuiPickersSectionList-root": {
+                            "& .MuiPickersSectionList-section": {
+                              color: "var(--color-secondary-text) !important",
+                              "&::placeholder": {
+                                color: "var(--color-secondary-text) !important",
+                                opacity: "1 !important",
+                              },
+                            },
+                          },
+                          "& .mui-joz0rk-MuiPickersSectionList-section-MuiPickersInputBase-section":
+                            {
+                              color: "var(--color-secondary-text) !important",
+                              "&::placeholder": {
+                                color: "var(--color-secondary-text) !important",
+                                opacity: "1 !important",
+                              },
+                            },
+                          "& .MuiOutlinedInput-notchedOutline": {
                             borderColor: "var(--color-border-primary)",
                           },
-                          "&:hover fieldset": {
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
                             borderColor: "var(--color-button-info)",
                           },
-                          "&.Mui-focused fieldset": {
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                             borderColor: "var(--color-button-info)",
                           },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "var(--color-primary-text)",
-                        },
-                        "& .MuiInputBase-input": {
-                          backgroundColor: "var(--color-primary-bg) !important",
-                        },
-                        "& .MuiInputBase-root": {
-                          backgroundColor: "var(--color-primary-bg) !important",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "var(--color-border-primary)",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "var(--color-button-info)",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "var(--color-button-info)",
                         },
                       },
-                    },
-                  }}
-                />
-              </LocalizationProvider>
-              <p className="text-secondary-text mt-1 text-sm">
-                When will this server link expire? Must be at least 7 days from
-                now
-              </p>
-            </div>
+                      popper: {
+                        sx: {
+                          "& .MuiPaper-root": {
+                            backgroundColor: "var(--color-secondary-bg)",
+                            color: "var(--color-primary-text)",
+                            border: "1px solid var(--color-border-primary)",
+                            "& .MuiPickersCalendarHeader-root": {
+                              color: "var(--color-primary-text)",
+                              "& .MuiIconButton-root": {
+                                color: "var(--color-primary-text)",
+                                "&:hover": {
+                                  backgroundColor: "var(--color-quaternary-bg)",
+                                },
+                                "& svg": {
+                                  color: "var(--color-primary-text) !important",
+                                },
+                              },
+                              "& .MuiPickersArrowSwitcher-root": {
+                                "& .MuiIconButton-root": {
+                                  color: "var(--color-primary-text)",
+                                  "&:hover": {
+                                    backgroundColor:
+                                      "var(--color-quaternary-bg)",
+                                  },
+                                  "& svg": {
+                                    color:
+                                      "var(--color-primary-text) !important",
+                                  },
+                                },
+                              },
+                              "& .MuiPickersCalendarHeader-labelContainer": {
+                                "& .MuiIconButton-root": {
+                                  color: "var(--color-primary-text)",
+                                  "&:hover": {
+                                    backgroundColor:
+                                      "var(--color-quaternary-bg)",
+                                  },
+                                  "& svg": {
+                                    color:
+                                      "var(--color-primary-text) !important",
+                                  },
+                                },
+                              },
+                            },
+                            "& .MuiDayCalendar-root": {
+                              "& .MuiPickersDay-root": {
+                                color: "var(--color-primary-text)",
+                                backgroundColor: "transparent",
+                                "&:hover": {
+                                  backgroundColor: "var(--color-quaternary-bg)",
+                                },
+                                "&.Mui-selected": {
+                                  backgroundColor: "var(--color-button-info)",
+                                  color: "var(--color-form-button-text)",
+                                  "&:hover": {
+                                    backgroundColor:
+                                      "var(--color-button-info-hover)",
+                                  },
+                                },
+                                "&.Mui-disabled": {
+                                  color: "var(--color-secondary-text)",
+                                },
+                              },
+                            },
+                            "& .MuiPickersMonth-root": {
+                              color: "var(--color-primary-text)",
+                              "&:hover": {
+                                backgroundColor: "var(--color-quaternary-bg)",
+                              },
+                              "&.Mui-selected": {
+                                backgroundColor: "var(--color-button-info)",
+                                color: "var(--color-form-button-text)",
+                              },
+                            },
+                            "& .MuiPickersYear-root": {
+                              color: "var(--color-primary-text)",
+                              "&:hover": {
+                                backgroundColor: "var(--color-quaternary-bg)",
+                              },
+                              "&.Mui-selected": {
+                                backgroundColor: "var(--color-button-info)",
+                                color: "var(--color-form-button-text)",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+                <p className="text-secondary-text mt-1 text-sm">
+                  When will this server link expire? <br />
+                  (Must be at least 7 days from now)
+                </p>
+              </div>
 
-            {/* Actions */}
-            <div className="border-border-primary mt-8 flex justify-end space-x-4 border-t pt-6">
-              <button
-                onClick={onClose}
-                className="text-secondary-text hover:text-primary-text rounded-md px-4 py-2 text-sm font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading
-                  ? editingServer
-                    ? "Saving Changes..."
-                    : "Adding Server..."
-                  : editingServer
-                    ? "Edit Server"
-                    : "Add Server"}
-              </button>
+              <div>
+                <label className="flex cursor-pointer items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={neverExpires}
+                    onChange={(e) => {
+                      setNeverExpires(e.target.checked);
+                      if (e.target.checked) {
+                        setExpires(null);
+                      } else {
+                        setExpires(originalExpires);
+                      }
+                    }}
+                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+                  />
+                  <span className="text-primary-text text-sm">
+                    Never Expires
+                  </span>
+                </label>
+                <p className="text-secondary-text mt-1 text-sm">
+                  Toggle this if the server will remain active indefinitely
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="border-border-primary mt-8 flex justify-end space-x-4 border-t pt-6">
+                <button
+                  onClick={onClose}
+                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md px-4 py-2 text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading
+                    ? editingServer
+                      ? "Saving Changes..."
+                      : "Adding Server..."
+                    : editingServer
+                      ? "Edit Server"
+                      : "Add Server"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </DialogPanel>
       </div>
-    </div>
+    </Dialog>
   );
 };
 

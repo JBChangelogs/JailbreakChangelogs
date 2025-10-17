@@ -25,6 +25,9 @@ import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../UI/IconWrapper";
+import dynamic from "next/dynamic";
+
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface Item {
   id: number;
@@ -165,6 +168,9 @@ export default function ChangelogDetailsClient({
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedSuggestionType, setSelectedSuggestionType] =
+    useState<string>("");
+  const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
@@ -239,6 +245,11 @@ export default function ChangelogDetailsClient({
     setCurrentUserPremiumType(getCurrentUserPremiumType());
     setPremiumStatusLoaded(true);
 
+    // Set selectLoaded to true after mount to ensure client-side rendering
+    requestAnimationFrame(() => {
+      setSelectLoaded(true);
+    });
+
     // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -250,13 +261,17 @@ export default function ChangelogDetailsClient({
     };
   }, []);
 
-  // Filter changes based on search query and selected type
+  // Filter changes based on search query, selected type, and suggestion type
   const filteredChanges = changelog.change_data
     .filter((change) => {
       if (searchQuery === "") {
         const matchesType =
           selectedType === "" || change.item.type === selectedType;
-        return matchesType;
+        const matchesSuggestionType =
+          selectedSuggestionType === "" ||
+          change.suggestion?.metadata?.suggestion_type ===
+            selectedSuggestionType;
+        return matchesType && matchesSuggestionType;
       }
 
       const searchLower = searchQuery.trim().toLowerCase();
@@ -342,12 +357,24 @@ export default function ChangelogDetailsClient({
     .filter((change) => {
       const matchesType =
         selectedType === "" || change.item.type === selectedType;
-      return matchesType;
+      const matchesSuggestionType =
+        selectedSuggestionType === "" ||
+        change.suggestion?.metadata?.suggestion_type === selectedSuggestionType;
+      return matchesType && matchesSuggestionType;
     });
 
   // Get unique item types for filter
   const itemTypes = Array.from(
     new Set(changelog.change_data.map((change) => change.item.type)),
+  ).sort();
+
+  // Get unique suggestion types for filter
+  const suggestionTypes = Array.from(
+    new Set(
+      changelog.change_data
+        .filter((change) => change.suggestion?.metadata?.suggestion_type)
+        .map((change) => change.suggestion?.metadata?.suggestion_type),
+    ),
   ).sort();
 
   // Calculate pagination
@@ -369,6 +396,7 @@ export default function ChangelogDetailsClient({
   const clearSearch = () => {
     setSearchQuery("");
     setSelectedType("");
+    setSelectedSuggestionType("");
     setPage(1);
   };
 
@@ -433,82 +461,128 @@ export default function ChangelogDetailsClient({
             )}
           </div>
 
-          {/* Filter by Item Type - Chip Style */}
-          <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
-            <div className="mb-3">
-              <h3 className="text-secondary-text mb-2 text-sm font-medium">
-                Filter by item type:
-              </h3>
+          {/* Filter Dropdowns */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">
+            {/* Item Type Filter */}
+            <div className="w-full lg:w-1/2">
+              <div className="mb-2">
+                <h3 className="text-secondary-text text-sm font-medium">
+                  Filter by item type:
+                </h3>
+              </div>
+              {selectLoaded ? (
+                <Select
+                  value={{
+                    value: selectedType,
+                    label: selectedType === "" ? "All Types" : selectedType,
+                  }}
+                  onChange={(option: unknown) => {
+                    if (!option) {
+                      setSelectedType("");
+                      return;
+                    }
+                    const newValue = (option as { value: string }).value;
+                    setSelectedType(newValue);
+                  }}
+                  options={[
+                    { value: "", label: "All Types" },
+                    ...itemTypes.map((type) => ({ value: type, label: type })),
+                  ]}
+                  className="w-full"
+                  isClearable={true}
+                  unstyled
+                  classNames={{
+                    control: () =>
+                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                    singleValue: () => "text-secondary-text",
+                    placeholder: () => "text-secondary-text",
+                    menu: () =>
+                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
+                    option: ({ isSelected, isFocused }) =>
+                      `px-4 py-3 cursor-pointer ${
+                        isSelected
+                          ? "bg-button-info text-form-button-text"
+                          : isFocused
+                            ? "bg-quaternary-bg text-primary-text"
+                            : "bg-secondary-bg text-secondary-text"
+                      }`,
+                    clearIndicator: () =>
+                      "text-secondary-text hover:text-primary-text cursor-pointer",
+                    dropdownIndicator: () =>
+                      "text-secondary-text hover:text-primary-text cursor-pointer",
+                  }}
+                  isSearchable={false}
+                />
+              ) : (
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+              )}
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Chip
-                label="All Types"
-                onClick={() => setSelectedType("")}
-                variant={selectedType === "" ? "filled" : "outlined"}
-                sx={{
-                  backgroundColor:
-                    selectedType === ""
-                      ? "var(--color-button-info)"
-                      : "transparent",
-                  borderColor:
-                    selectedType === ""
-                      ? "var(--color-button-info)"
-                      : "var(--color-secondary-text)",
-                  color:
-                    selectedType === ""
-                      ? "var(--color-form-button-text)"
-                      : "var(--color-primary-text)",
-                  "&:hover": {
-                    backgroundColor:
-                      selectedType === ""
-                        ? "var(--color-button-info-hover)"
-                        : "var(--color-button-info)",
-                    borderColor:
-                      selectedType === ""
-                        ? "var(--color-button-info-hover)"
-                        : "var(--color-button-info)",
-                    color:
-                      selectedType === ""
-                        ? "var(--color-form-button-text)"
-                        : "var(--color-primary-text)",
-                  },
-                }}
-              />
-              {itemTypes.map((type) => {
-                const categoryColor = getCategoryColor(type);
-                return (
-                  <Chip
-                    key={type}
-                    label={type}
-                    onClick={() => setSelectedType(type)}
-                    variant={selectedType === type ? "filled" : "outlined"}
-                    sx={{
-                      backgroundColor:
-                        selectedType === type ? categoryColor : "transparent",
-                      borderColor:
-                        selectedType === type
-                          ? categoryColor
-                          : "var(--color-secondary-text)",
-                      color:
-                        selectedType === type
-                          ? "#ffffff"
-                          : "var(--color-primary-text)",
-                      "&:hover": {
-                        backgroundColor:
-                          selectedType === type
-                            ? categoryColor
-                            : categoryColor + "40",
-                        borderColor:
-                          selectedType === type ? categoryColor : categoryColor,
-                        color:
-                          selectedType === type
-                            ? "#ffffff"
-                            : "var(--color-primary-text)",
-                      },
-                    }}
-                  />
-                );
-              })}
+
+            {/* Suggestion Type Filter */}
+            <div className="w-full lg:w-1/2">
+              <div className="mb-2">
+                <h3 className="text-secondary-text text-sm font-medium">
+                  Filter by suggestion type:
+                </h3>
+              </div>
+              {selectLoaded ? (
+                <Select
+                  value={{
+                    value: selectedSuggestionType,
+                    label:
+                      selectedSuggestionType === ""
+                        ? "All Suggestion Types"
+                        : selectedSuggestionType
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase()),
+                  }}
+                  onChange={(option: unknown) => {
+                    if (!option) {
+                      setSelectedSuggestionType("");
+                      return;
+                    }
+                    const newValue = (option as { value: string }).value;
+                    setSelectedSuggestionType(newValue);
+                  }}
+                  options={[
+                    { value: "", label: "All Suggestion Types" },
+                    ...suggestionTypes.map((type) => ({
+                      value: type || "",
+                      label: type
+                        ? type
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())
+                        : "Unknown",
+                    })),
+                  ]}
+                  className="w-full"
+                  isClearable={true}
+                  unstyled
+                  classNames={{
+                    control: () =>
+                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
+                    singleValue: () => "text-secondary-text",
+                    placeholder: () => "text-secondary-text",
+                    menu: () =>
+                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
+                    option: ({ isSelected, isFocused }) =>
+                      `px-4 py-3 cursor-pointer ${
+                        isSelected
+                          ? "bg-button-info text-form-button-text"
+                          : isFocused
+                            ? "bg-quaternary-bg text-primary-text"
+                            : "bg-secondary-bg text-secondary-text"
+                      }`,
+                    clearIndicator: () =>
+                      "text-secondary-text hover:text-primary-text cursor-pointer",
+                    dropdownIndicator: () =>
+                      "text-secondary-text hover:text-primary-text cursor-pointer",
+                  }}
+                  isSearchable={false}
+                />
+              ) : (
+                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
+              )}
             </div>
           </div>
 
@@ -534,8 +608,8 @@ export default function ChangelogDetailsClient({
           <div className="mb-2">
             <p className="text-secondary-text">
               {searchQuery
-                ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}`
-                : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}`}
+                ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}${selectedSuggestionType ? ` with ${selectedSuggestionType.replace(/_/g, " ")} suggestions` : ""}`
+                : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}${selectedSuggestionType ? ` (${selectedSuggestionType.replace(/_/g, " ")} suggestions)` : ""}`}
             </p>
           </div>
         </div>
@@ -1020,14 +1094,20 @@ export default function ChangelogDetailsClient({
                 <p className="mb-2 text-lg font-medium">No changes found</p>
                 <p className="text-secondary-text text-sm">
                   {searchQuery && `No changes match "${displayQuery}"`}
-                  {searchQuery && selectedType && " and "}
+                  {searchQuery &&
+                    (selectedType || selectedSuggestionType) &&
+                    " and "}
                   {selectedType &&
                     `No changes found for item type "${selectedType}"`}
+                  {selectedType && selectedSuggestionType && " and "}
+                  {selectedSuggestionType &&
+                    `No changes found for suggestion type "${selectedSuggestionType.replace(/_/g, " ")}"`}
                   {!searchQuery &&
                     !selectedType &&
+                    !selectedSuggestionType &&
                     "No changes available in this changelog"}
                 </p>
-                {(searchQuery || selectedType) && (
+                {(searchQuery || selectedType || selectedSuggestionType) && (
                   <button
                     onClick={clearSearch}
                     className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 rounded-lg px-4 py-2 transition-colors duration-200"

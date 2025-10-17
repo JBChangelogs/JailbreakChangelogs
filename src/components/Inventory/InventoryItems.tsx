@@ -7,6 +7,7 @@ import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
+import { Icon } from "../UI/IconWrapper";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
@@ -539,7 +540,10 @@ export default function InventoryItems({
       {!isFiltering && filteredAndSortedItems.length > 0 && (
         <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
           <div className="text-primary-text flex items-start gap-2 text-sm">
-            <span className="text-button-info flex-shrink-0">💡</span>
+            <Icon
+              icon="emojione:light-bulb"
+              className="text-button-info flex-shrink-0 text-lg"
+            />
             <span className="font-medium">
               Pro Tip: Click on any item card to view its ownership history.
             </span>

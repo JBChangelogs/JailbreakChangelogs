@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { use } from "react";
-import { SparklesIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/UI/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
 import toast from "react-hot-toast";
@@ -34,7 +34,6 @@ export default function ValuesClient({
   const router = useRouter();
   const { user } = useAuthContext();
 
-  // Use the use hook to resolve promises
   const items = use(itemsPromise);
   const lastUpdated = use(lastUpdatedPromise);
 
@@ -55,7 +54,6 @@ export default function ValuesClient({
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
 
-  // Load saved preferences after mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const urlFilterSort = searchParams.get("filterSort");
@@ -71,7 +69,6 @@ export default function ValuesClient({
         setValueSort(urlValueSort as ValueSort);
       }
     } else {
-      // Only load from localStorage if there are no URL parameters
       const savedFilterSort = safeLocalStorage.getItem(
         "valuesFilterSort",
       ) as FilterSort;
@@ -107,7 +104,6 @@ export default function ValuesClient({
   };
 
   const handleCategorySelect = (filter: FilterSort) => {
-    // If clicking the same category, reset to "All Items"
     if (filterSort === filter) {
       setFilterSort("name-all-items");
       safeLocalStorage.setItem("valuesFilterSort", "name-all-items");
@@ -117,7 +113,7 @@ export default function ValuesClient({
     }
 
     if (searchSectionRef.current) {
-      const headerOffset = 80; // Value based on header height
+      const headerOffset = 80;
       const elementPosition =
         searchSectionRef.current.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
@@ -129,13 +125,11 @@ export default function ValuesClient({
     }
   };
 
-  // Load favorites when user is authenticated
   const loadFavorites = useCallback(async () => {
     if (user && user.id) {
       try {
         const favoritesData = await fetchUserFavorites(user.id);
         if (favoritesData !== null && Array.isArray(favoritesData)) {
-          // Extract item_id values and convert to numbers
           const favoriteIds = favoritesData.map((fav: FavoriteItem) =>
             parseInt(fav.item_id, 10),
           );
@@ -147,14 +141,12 @@ export default function ValuesClient({
     }
   }, [user]);
 
-  // Load favorites when user is authenticated
   useEffect(() => {
     if (user && user.id) {
       loadFavorites();
     }
   }, [user, loadFavorites]);
 
-  // Handle hash fragment for hyper pity calculator
   useEffect(() => {
     const handleHashChange = () => {
       if (window.location.hash === "#hyper-pity-calc") {
@@ -162,12 +154,10 @@ export default function ValuesClient({
       }
     };
 
-    // Check hash on initial load
     if (window.location.hash === "#hyper-pity-calc") {
       setShowHcModal(true);
     }
 
-    // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
 
     return () => {
@@ -175,10 +165,8 @@ export default function ValuesClient({
     };
   }, []);
 
-  // Handle opening modal and adding hash fragment
   const handleOpenHcModal = () => {
     setShowHcModal(true);
-    // Add hash fragment without triggering page reload
     window.history.replaceState(
       null,
       "",
@@ -186,11 +174,9 @@ export default function ValuesClient({
     );
   };
 
-  // Clean up hash when modal is closed
   const handleCloseHcModal = () => {
     setShowHcModal(false);
     if (window.location.hash === "#hyper-pity-calc") {
-      // Remove hash without triggering page reload
       window.history.replaceState(
         null,
         "",
@@ -199,12 +185,10 @@ export default function ValuesClient({
     }
   };
 
-  // Load premium status
   useEffect(() => {
     setCurrentUserPremiumType(getCurrentUserPremiumType());
     setPremiumStatusLoaded(true);
 
-    // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
     };
@@ -288,7 +272,11 @@ export default function ValuesClient({
             onClick={handleRandomItem}
             className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
           >
-            <SparklesIcon className="h-4 w-4 sm:h-6 sm:w-6" />
+            <Icon
+              icon="material-symbols:auto-awesome"
+              className="h-4 w-4 sm:h-6 sm:w-6"
+              inline={true}
+            />
             <span className="text-sm sm:text-base">Random Item</span>
           </button>
           <button
@@ -351,7 +339,6 @@ export default function ValuesClient({
         searchSectionRef={searchSectionRef}
       />
 
-      {/* Mobile Sidebar - Show below search controls on mobile */}
       {premiumStatusLoaded && currentUserPremiumType === 0 && (
         <div className="lg:hidden">
           <div className="flex flex-col items-center">
@@ -370,11 +357,9 @@ export default function ValuesClient({
         </div>
       )}
 
-      {/* Main content with sidebar layout */}
       <div
         className={`grid gap-8 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "grid-cols-1"}`}
       >
-        {/* Items Grid - responsive width based on premium status */}
         <div
           className={`space-y-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "lg:col-span-3 xl:col-span-4 2xl:col-span-5" : ""}`}
         >
@@ -410,7 +395,6 @@ export default function ValuesClient({
           />
         </div>
 
-        {/* Sidebar - responsive width, only show for non-premium users */}
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
           <div className="pl-2 lg:col-span-1 xl:col-span-1 2xl:col-span-1">
             <div className="sticky top-6">
@@ -439,12 +423,10 @@ export default function ValuesClient({
   );
 }
 
-// Format the date client-side in the user's local timezone
 function formatClientDate(timestamp: number): string {
   if (!timestamp) return "";
   const date = new Date(timestamp);
 
-  // Format date and time separately to avoid locale-specific "at" duplication
   const dateStr = date.toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
@@ -458,6 +440,5 @@ function formatClientDate(timestamp: number): string {
     hour12: true,
   });
 
-  // Remove comma after weekday and combine with "at"
   return dateStr.replace(",", "") + " at " + timeStr;
 }

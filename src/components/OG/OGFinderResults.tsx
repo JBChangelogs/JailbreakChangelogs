@@ -13,6 +13,7 @@ import SearchForm from "./SearchForm";
 import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "../UI/IconWrapper";
 import { logError } from "@/services/logger";
 import { formatMessageDate } from "@/utils/timestamp";
 import OGUserInfo from "./OGUserInfo";
@@ -537,7 +538,10 @@ export default function OGFinderResults({
             {sortedData.length > 0 && (
               <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
                 <div className="text-primary-text flex items-start gap-2 text-sm">
-                  <span className="text-button-info flex-shrink-0">💡</span>
+                  <Icon
+                    icon="emojione:light-bulb"
+                    className="text-button-info flex-shrink-0 text-lg"
+                  />
                   <span className="font-medium">
                     Pro Tip: Click on any item card to view its ownership
                     history.

@@ -14,6 +14,7 @@ import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import dynamic from "next/dynamic";
 import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Icon } from "../UI/IconWrapper";
 import {
   safeLocalStorage,
   safeGetJSON,
@@ -850,7 +851,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         {/* Pro tip about Shift+Clear */}
         <div className="text-center">
           <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
-            💡 Pro tip: Hold Shift while clicking Clear to clear both sides
+            <Icon
+              icon="emojione:light-bulb"
+              className="text-sm text-yellow-500"
+            />
+            Pro tip: Hold Shift while clicking Clear to clear both sides
             instantly without confirmation
           </div>
         </div>
