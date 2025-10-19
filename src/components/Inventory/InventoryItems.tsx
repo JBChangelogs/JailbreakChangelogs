@@ -274,9 +274,25 @@ export default function InventoryItems({
       const ownedItemIds = new Set(
         initialData.data.map((item) => item.item_id),
       );
+
+      /*
+       * Items that bots don't log - exclude from missing items:
+       * 142: Camaro
+       * 467: Heli
+       * 171: Jeep
+       * 640: VIP Chrome
+       * 634: VIP Radio
+       * 152: Cruiser
+       */
+      const excludedItemIds = new Set([142, 467, 171, 640, 634, 152]);
+
       const missingItems = itemsData.filter((itemData) => {
-        // Skip if user already owns this item
         if (ownedItemIds.has(itemData.id)) {
+          return false;
+        }
+
+        // Skip items that bots don't log
+        if (excludedItemIds.has(itemData.id)) {
           return false;
         }
         if (searchTerm) {
