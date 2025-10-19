@@ -186,7 +186,14 @@ export default function ValuesChangelogPage() {
 
               {/* Virtualized changelogs container */}
               <div className="bg-secondary-bg border-border-primary rounded-lg border">
-                <div ref={parentRef} className="h-[60rem] overflow-y-auto">
+                <div
+                  ref={parentRef}
+                  className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-y-auto"
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "var(--color-border-primary) transparent",
+                  }}
+                >
                   {sortedChangelogs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <div className="relative mb-6">

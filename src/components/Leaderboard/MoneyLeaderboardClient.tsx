@@ -160,7 +160,14 @@ export default function MoneyLeaderboardClient({
 
           {/* Virtualized leaderboard container with fixed height for performance */}
           <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mt-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
-            <div ref={parentRef} className="h-[48rem] overflow-y-auto pr-2">
+            <div
+              ref={parentRef}
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "var(--color-border-primary) transparent",
+              }}
+            >
               {filteredLeaderboard.length === 0 && searchTerm ? (
                 <div className="py-8 text-center">
                   <p className="text-secondary-text">

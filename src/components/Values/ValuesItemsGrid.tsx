@@ -163,7 +163,14 @@ export default function ValuesItemsGrid({
       </div>
 
       {/* Virtualized items container with fixed height for performance */}
-      <div ref={parentRef} className="mb-8 h-[60rem] overflow-y-auto">
+      <div
+        ref={parentRef}
+        className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-[60rem] overflow-y-auto"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--color-border-primary) transparent",
+        }}
+      >
         {rangeFilteredItems.length === 0 ? (
           <div className="bg-secondary-bg border-border-primary hover:border-border-focus rounded-lg border p-8 text-center">
             <p className="text-secondary-text text-lg">

@@ -714,7 +714,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           ) : (
             <>
               {/* Virtualized comments container with fixed height for performance */}
-              <div ref={parentRef} className="h-[48rem] overflow-y-auto pr-2">
+              <div
+                ref={parentRef}
+                className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "var(--color-border-primary) transparent",
+                }}
+              >
                 <div
                   style={{
                     height: `${virtualizer.getTotalSize()}px`,

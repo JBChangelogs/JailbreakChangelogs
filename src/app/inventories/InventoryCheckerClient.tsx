@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ThemeProvider, Box } from "@mui/material";
 import React from "react";
-import { fetchMissingRobloxData, fetchOriginalOwnerAvatars } from "./actions";
+import { fetchMissingRobloxData } from "./actions";
 import { ENABLE_WS_SCAN } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
@@ -17,6 +17,7 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
+import { formatMessageDate } from "@/utils/timestamp";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
@@ -77,9 +78,6 @@ export default function InventoryCheckerClient({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const progressiveLoadingRef = useRef<Set<string>>(new Set());
-  const loadedPagesRef = useRef<Set<number>>(new Set());
-  const preloadingPagesRef = useRef<Set<number>>(new Set());
   const forceShowErrorHandledRef = useRef<boolean>(false);
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
@@ -88,7 +86,6 @@ export default function InventoryCheckerClient({
     initialRobloxAvatars || {},
   );
   const [itemsData] = useState<Item[]>(items);
-  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
   const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
     null,
   );
@@ -296,120 +293,6 @@ export default function InventoryCheckerClient({
     [robloxAvatars, initialRobloxAvatars],
   );
 
-  // Progressive loading of missing user data (only for trade history users)
-  const fetchMissingUserData = useCallback(
-    async (userIds: string[]) => {
-      const missingIds = userIds.filter(
-        (id) => !robloxUsers[id] && !initialRobloxUsers?.[id],
-      );
-
-      if (missingIds.length === 0) {
-        return;
-      }
-
-      // Check if we're already loading these IDs
-      const newIds = missingIds.filter(
-        (id) => !progressiveLoadingRef.current.has(id),
-      );
-      if (newIds.length === 0) {
-        return;
-      }
-
-      // Mark as loading
-      newIds.forEach((id) => progressiveLoadingRef.current.add(id));
-
-      // Update loading state for UI
-      setLoadingUserIds((prev) => {
-        const newSet = new Set(prev);
-        newIds.forEach((id) => newSet.add(id));
-        return newSet;
-      });
-
-      try {
-        const result = await fetchMissingRobloxData(newIds);
-
-        // Update state with new user data immediately
-        if (result.userData && typeof result.userData === "object") {
-          setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
-        }
-
-        // Update state with new avatar data immediately
-        if (result.avatarData && typeof result.avatarData === "object") {
-          setRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
-        }
-      } catch (error) {
-        console.error("[INVENTORY] Failed to fetch missing user data:", error);
-      } finally {
-        // Remove from loading set
-        newIds.forEach((id) => progressiveLoadingRef.current.delete(id));
-
-        // Update loading state for UI
-        setLoadingUserIds((prev) => {
-          const newSet = new Set(prev);
-          newIds.forEach((id) => newSet.delete(id));
-          return newSet;
-        });
-      }
-    },
-    [robloxUsers, initialRobloxUsers, setRobloxUsers, setRobloxAvatars],
-  );
-
-  // Fetch avatars for trade history users (not original owners since they're loaded server-side)
-  const fetchTradeHistoryAvatarsData = useCallback(
-    async (userIds: string[]) => {
-      const missingIds = userIds.filter(
-        (id) => !robloxAvatars[id] && !initialRobloxAvatars?.[id],
-      );
-
-      if (missingIds.length === 0) {
-        return;
-      }
-
-      // Check if we're already loading these IDs
-      const newIds = missingIds.filter(
-        (id) => !progressiveLoadingRef.current.has(id),
-      );
-      if (newIds.length === 0) {
-        return;
-      }
-
-      // Mark as loading
-      newIds.forEach((id) => progressiveLoadingRef.current.add(id));
-
-      // Update loading state for UI
-      setLoadingUserIds((prev) => {
-        const newSet = new Set(prev);
-        newIds.forEach((id) => newSet.add(id));
-        return newSet;
-      });
-
-      try {
-        const avatarData = await fetchOriginalOwnerAvatars(newIds);
-
-        // Update state with new avatar data
-        if (avatarData && typeof avatarData === "object") {
-          setRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
-        }
-      } catch (error) {
-        console.error(
-          "[INVENTORY] Failed to fetch trade history avatars:",
-          error,
-        );
-      } finally {
-        // Remove from loading set
-        newIds.forEach((id) => progressiveLoadingRef.current.delete(id));
-
-        // Update loading state for UI
-        setLoadingUserIds((prev) => {
-          const newSet = new Set(prev);
-          newIds.forEach((id) => newSet.delete(id));
-          return newSet;
-        });
-      }
-    },
-    [robloxAvatars, initialRobloxAvatars, setRobloxAvatars],
-  );
-
   // Background loading for remaining original owners (after initial 1000)
   useEffect(() => {
     if (remainingUserIds.length === 0) return;
@@ -473,134 +356,6 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  // Progressive loading for trade history users and missing original owners
-  const loadPageData = useCallback(
-    (pageNumber: number, isPreload = false) => {
-      if (!initialData?.data || initialData.data.length === 0) return;
-
-      // Check if we've already loaded this page
-      if (loadedPagesRef.current.has(pageNumber)) {
-        return;
-      }
-
-      // Check if we're already preloading this page
-      if (isPreload && preloadingPagesRef.current.has(pageNumber)) {
-        return;
-      }
-
-      const itemsPerPage = 20;
-
-      // Calculate which items are on the current page
-      const startIndex = (pageNumber - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const currentPageItems = initialData.data.slice(startIndex, endIndex);
-
-      const userIdsToLoad: string[] = [];
-      const avatarIdsToLoad: string[] = [];
-
-      // Collect user IDs from trade history only (original owner avatars no longer needed)
-      currentPageItems.forEach((item) => {
-        // Check trade history users
-        if (item.history && item.history.length > 0) {
-          item.history.forEach((trade) => {
-            if (trade.UserId) {
-              const tradeUserId = trade.UserId.toString();
-              // Check if we already have this user's data
-              const hasUserData =
-                robloxUsers[tradeUserId] || initialRobloxUsers?.[tradeUserId];
-              const hasAvatarData =
-                robloxAvatars[tradeUserId] ||
-                initialRobloxAvatars?.[tradeUserId];
-
-              if (!hasUserData) {
-                userIdsToLoad.push(tradeUserId);
-              }
-
-              if (!hasAvatarData) {
-                avatarIdsToLoad.push(tradeUserId);
-              }
-            }
-          });
-        }
-      });
-
-      // Remove duplicates
-      const uniqueUserIds = [...new Set(userIdsToLoad)];
-      const uniqueAvatarIds = [...new Set(avatarIdsToLoad)];
-
-      // Mark this page as loaded or preloading
-      if (isPreload) {
-        preloadingPagesRef.current.add(pageNumber);
-      } else {
-        loadedPagesRef.current.add(pageNumber);
-      }
-
-      // Only fetch if we have IDs to load
-      if (uniqueUserIds.length > 0) {
-        fetchMissingUserData(uniqueUserIds);
-      }
-
-      if (uniqueAvatarIds.length > 0) {
-        fetchTradeHistoryAvatarsData(uniqueAvatarIds);
-      }
-    },
-    [
-      initialData?.data,
-      robloxUsers,
-      initialRobloxUsers,
-      robloxAvatars,
-      initialRobloxAvatars,
-      fetchMissingUserData,
-      fetchTradeHistoryAvatarsData,
-    ],
-  );
-
-  // Preload next page for smoother experience
-  const preloadNextPage = useCallback(
-    (currentPage: number) => {
-      if (!initialData?.data || initialData.data.length === 0) return;
-
-      const itemsPerPage = 20;
-      const totalPages = Math.ceil(initialData.data.length / itemsPerPage);
-      const nextPage = currentPage + 1;
-
-      // Only preload if next page exists and we haven't loaded it yet
-      if (
-        nextPage <= totalPages &&
-        !loadedPagesRef.current.has(nextPage) &&
-        !preloadingPagesRef.current.has(nextPage)
-      ) {
-        loadPageData(nextPage, true);
-      }
-    },
-    [initialData?.data, loadPageData],
-  );
-
-  // Load data for page 1 initially and preload page 2 - but only after itemsData is loaded for sorting
-  useEffect(() => {
-    if (
-      initialData?.data &&
-      initialData.data.length > 0 &&
-      itemsData.length > 0
-    ) {
-      loadPageData(1);
-      // Preload page 2 for smoother experience
-      setTimeout(() => preloadNextPage(1), 1000);
-    }
-  }, [initialData?.data, itemsData, loadPageData, preloadNextPage]);
-
-  // Enhanced page change handler with preloading
-  const handlePageChangeWithPreload = useCallback(
-    (pageNumber: number) => {
-      // Load current page data
-      loadPageData(pageNumber);
-
-      // Preload next page for smoother experience
-      setTimeout(() => preloadNextPage(pageNumber), 500);
-    },
-    [loadPageData, preloadNextPage],
-  );
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchId.trim()) return;
@@ -631,57 +386,12 @@ export default function InventoryCheckerClient({
   }, [robloxId, isLoading, searchId]);
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatMessageDate(timestamp);
   };
 
   const handleItemClick = (item: InventoryItem) => {
     setSelectedItem(item);
     setShowHistoryModal(true);
-
-    // Load Roblox data for history users if not already loaded
-    if (item.history && item.history.length > 0) {
-      const historyUserIds: string[] = [];
-      const historyAvatarIds: string[] = [];
-
-      item.history.forEach((trade) => {
-        if (trade.UserId) {
-          const tradeUserId = trade.UserId.toString();
-
-          // Check if we need user data
-          const hasUserData =
-            robloxUsers[tradeUserId] || initialRobloxUsers?.[tradeUserId];
-          if (!hasUserData) {
-            historyUserIds.push(tradeUserId);
-          }
-
-          // Check if we need avatar data
-          const hasAvatarData =
-            robloxAvatars[tradeUserId] || initialRobloxAvatars?.[tradeUserId];
-          if (!hasAvatarData) {
-            historyAvatarIds.push(tradeUserId);
-          }
-        }
-      });
-
-      // Remove duplicates
-      const uniqueUserIds = [...new Set(historyUserIds)];
-      const uniqueAvatarIds = [...new Set(historyAvatarIds)];
-
-      // Load missing data
-      if (uniqueUserIds.length > 0) {
-        fetchMissingUserData(uniqueUserIds);
-      }
-
-      if (uniqueAvatarIds.length > 0) {
-        fetchTradeHistoryAvatarsData(uniqueAvatarIds);
-      }
-    }
   };
 
   const closeHistoryModal = () => {
@@ -995,7 +705,6 @@ export default function InventoryCheckerClient({
                     robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
                     itemsData={itemsData}
-                    onPageChange={handlePageChangeWithPreload}
                     isOwnInventory={isOwnInventory}
                   />
                 )}
@@ -1031,7 +740,6 @@ export default function InventoryCheckerClient({
                 return Boolean(user?.hasVerifiedBadge);
               }}
               formatDate={formatDate}
-              loadingUserIds={loadingUserIds}
             />
           </>
         )}

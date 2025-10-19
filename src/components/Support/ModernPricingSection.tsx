@@ -314,7 +314,7 @@ export default function ModernPricingSection() {
                       });
                     }
                   }}
-                  className="bg-button-info hover:bg-button-info-hover focus:bg-button-info-hover mt-10 inline-block w-full transform rounded-md px-4 py-2 text-center font-medium tracking-wide text-white capitalize transition-colors duration-300 focus:outline-none"
+                  className="bg-button-info hover:bg-button-info-hover focus:bg-button-info-hover mt-10 inline-block w-full transform cursor-pointer rounded-md px-4 py-2 text-center font-medium tracking-wide text-white capitalize transition-colors duration-300 focus:outline-none"
                 >
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
                 </button>
@@ -394,17 +394,17 @@ export default function ModernPricingSection() {
 
         {/* Support Methods */}
         <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
-          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center flex flex-col justify-center items-center">
+          <div className="bg-secondary-bg border-border-primary flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Ko-fi Donations
             </h3>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               <ImageModal
                 src={kofiImagePath}
                 alt="Ko-fi Support QR Code"
                 width={240}
                 height={240}
-                className="mx-auto w-60 h-60"
+                className="mx-auto h-60 w-60"
               />
             </div>
             <a
@@ -417,17 +417,17 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center flex flex-col justify-center items-center">
+          <div className="bg-secondary-bg border-border-primary flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               <ImageModal
                 src={robloxImagePath}
                 alt="Roblox Support QR Code"
                 width={240}
                 height={240}
-                className="mx-auto w-60 h-60"
+                className="mx-auto h-60 w-60"
               />
             </div>
             <a
@@ -455,13 +455,13 @@ export default function ModernPricingSection() {
                   <span className="font-semibold">Bitcoin (BTC)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <code className="text-secondary-text break-all text-xs flex-1">
+                  <code className="text-secondary-text flex-1 text-xs break-all">
                     {CRYPTO_ADDRESSES.BTC}
                     <button
                       onClick={() =>
                         copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
                       }
-                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
                       title={
                         copiedAddress === "BTC"
                           ? "Copied!"
@@ -491,13 +491,13 @@ export default function ModernPricingSection() {
                   <span className="font-semibold">Ethereum (ETH)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <code className="text-secondary-text break-all text-xs flex-1">
+                  <code className="text-secondary-text flex-1 text-xs break-all">
                     {CRYPTO_ADDRESSES.ETH}
                     <button
                       onClick={() =>
                         copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")
                       }
-                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
                       title={
                         copiedAddress === "ETH"
                           ? "Copied!"
@@ -527,13 +527,13 @@ export default function ModernPricingSection() {
                   <span className="font-semibold">Litecoin (LTC)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <code className="text-secondary-text break-all text-xs flex-1">
+                  <code className="text-secondary-text flex-1 text-xs break-all">
                     {CRYPTO_ADDRESSES.LTC}
                     <button
                       onClick={() =>
                         copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
                       }
-                      className="text-button-info hover:text-button-info-hover cursor-pointer transition-colors ml-1"
+                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
                       title={
                         copiedAddress === "LTC"
                           ? "Copied!"

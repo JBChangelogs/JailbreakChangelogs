@@ -11,7 +11,7 @@ export default function ServiceAvailabilityTicker() {
   return (
     <div className="from-status-warning/10 to-status-warning/5 bg-gradient-to-r">
       <div className="container mx-auto px-4 py-3">
-        <div className="relative flex flex-col items-center justify-center gap-3 pr-8 lg:flex-row lg:gap-4 lg:pr-12">
+        <div className="relative flex flex-col items-center justify-center gap-3 lg:flex-row lg:gap-4 lg:pr-12">
           <div className="flex items-center gap-2">
             <span className="text-status-warning text-xs font-semibold lg:text-sm">
               SERVICE ALERT

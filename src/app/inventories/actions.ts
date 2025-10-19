@@ -10,33 +10,13 @@ export async function fetchMissingRobloxData(userIds: string[]) {
       return { userData: {}, avatarData: {} };
     }
 
-    // Fetch both usernames and avatars for all batches
-    const [userData, avatarData] = await Promise.all([
-      fetchRobloxUsersBatch(numericUserIds),
-      fetchRobloxAvatars(numericUserIds),
-    ]);
-
-    // Process avatar data to extract imageUrl strings
-    const processedAvatarData: Record<string, string> = {};
-    if (avatarData && typeof avatarData === "object") {
-      Object.values(avatarData).forEach((avatar) => {
-        const avatarData = avatar as {
-          targetId: number;
-          state: string;
-          imageUrl?: string;
-          version: string;
-        };
-        if (avatarData && avatarData.targetId && avatarData.imageUrl) {
-          // Include both completed and blocked avatars since blocked avatars still have valid images
-          processedAvatarData[avatarData.targetId.toString()] =
-            avatarData.imageUrl;
-        }
-      });
-    }
+    // Only fetch usernames since avatars aren't displayed in inventory cards
+    // (avatars are only needed for the main user profile, which is fetched separately)
+    const userData = await fetchRobloxUsersBatch(numericUserIds);
 
     return {
       userData: userData || {},
-      avatarData: processedAvatarData,
+      avatarData: {}, // No avatar data needed for original owners
     };
   } catch (error) {
     console.error(

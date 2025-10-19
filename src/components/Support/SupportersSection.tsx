@@ -82,9 +82,11 @@ export default function SupportersSection({
       <div className="p-8">
         <div
           ref={parentRef}
-          className="h-[800px] overflow-auto"
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[800px] overflow-auto"
           style={{
             contain: "strict",
+            scrollbarWidth: "thin",
+            scrollbarColor: "var(--color-border-primary) transparent",
           }}
         >
           <div

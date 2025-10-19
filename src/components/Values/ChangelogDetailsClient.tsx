@@ -167,10 +167,9 @@ export default function ChangelogDetailsClient({
 }: ChangelogDetailsClientProps) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedSuggestionType, setSelectedSuggestionType] =
-    useState<string>("");
-  const [selectLoaded, setSelectLoaded] = useState(false);
+    useState<string>("all");
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
@@ -245,11 +244,6 @@ export default function ChangelogDetailsClient({
     setCurrentUserPremiumType(getCurrentUserPremiumType());
     setPremiumStatusLoaded(true);
 
-    // Set selectLoaded to true after mount to ensure client-side rendering
-    requestAnimationFrame(() => {
-      setSelectLoaded(true);
-    });
-
     // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -266,9 +260,9 @@ export default function ChangelogDetailsClient({
     .filter((change) => {
       if (searchQuery === "") {
         const matchesType =
-          selectedType === "" || change.item.type === selectedType;
+          selectedType === "all" || change.item.type === selectedType;
         const matchesSuggestionType =
-          selectedSuggestionType === "" ||
+          selectedSuggestionType === "all" ||
           change.suggestion?.metadata?.suggestion_type ===
             selectedSuggestionType;
         return matchesType && matchesSuggestionType;
@@ -356,9 +350,9 @@ export default function ChangelogDetailsClient({
     })
     .filter((change) => {
       const matchesType =
-        selectedType === "" || change.item.type === selectedType;
+        selectedType === "all" || change.item.type === selectedType;
       const matchesSuggestionType =
-        selectedSuggestionType === "" ||
+        selectedSuggestionType === "all" ||
         change.suggestion?.metadata?.suggestion_type === selectedSuggestionType;
       return matchesType && matchesSuggestionType;
     });
@@ -470,52 +464,49 @@ export default function ChangelogDetailsClient({
                   Filter by item type:
                 </h3>
               </div>
-              {selectLoaded ? (
-                <Select
-                  value={{
-                    value: selectedType,
-                    label: selectedType === "" ? "All Types" : selectedType,
-                  }}
-                  onChange={(option: unknown) => {
-                    if (!option) {
-                      setSelectedType("");
-                      return;
-                    }
-                    const newValue = (option as { value: string }).value;
-                    setSelectedType(newValue);
-                  }}
-                  options={[
-                    { value: "", label: "All Types" },
-                    ...itemTypes.map((type) => ({ value: type, label: type })),
-                  ]}
-                  className="w-full"
-                  isClearable={true}
-                  unstyled
-                  classNames={{
-                    control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                    singleValue: () => "text-secondary-text",
-                    placeholder: () => "text-secondary-text",
-                    menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                    option: ({ isSelected, isFocused }) =>
-                      `px-4 py-3 cursor-pointer ${
-                        isSelected
-                          ? "bg-button-info text-form-button-text"
-                          : isFocused
-                            ? "bg-quaternary-bg text-primary-text"
-                            : "bg-secondary-bg text-secondary-text"
-                      }`,
-                    clearIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    dropdownIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-              )}
+              <Select
+                value={
+                  selectedType
+                    ? { value: selectedType, label: selectedType }
+                    : null
+                }
+                onChange={(option) =>
+                  setSelectedType((option as { value: string })?.value || "")
+                }
+                options={[
+                  { value: "", label: "All Types" },
+                  ...itemTypes.map((type) => ({ value: type, label: type })),
+                ]}
+                className="w-full"
+                isClearable={true}
+                placeholder="All Types"
+                classNamePrefix="react-select"
+                unstyled
+                classNames={{
+                  control: () =>
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[40px] hover:cursor-pointer focus-within:border-button-info",
+                  singleValue: () => "text-secondary-text",
+                  placeholder: () => "text-secondary-text",
+                  menu: () =>
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused, isDisabled }) =>
+                    `px-4 py-3 ${
+                      isDisabled
+                        ? "cursor-not-allowed text-secondary-text opacity-50"
+                        : "cursor-pointer"
+                    } ${
+                      isSelected
+                        ? "bg-button-info text-form-button-text"
+                        : isFocused
+                          ? "bg-quaternary-bg text-primary-text"
+                          : "bg-secondary-bg text-secondary-text"
+                    }`,
+                  clearIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  dropdownIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                }}
+              />
             </div>
 
             {/* Suggestion Type Filter */}
@@ -525,64 +516,63 @@ export default function ChangelogDetailsClient({
                   Filter by suggestion type:
                 </h3>
               </div>
-              {selectLoaded ? (
-                <Select
-                  value={{
-                    value: selectedSuggestionType,
-                    label:
-                      selectedSuggestionType === ""
-                        ? "All Suggestion Types"
-                        : selectedSuggestionType
-                            .replace(/_/g, " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase()),
-                  }}
-                  onChange={(option: unknown) => {
-                    if (!option) {
-                      setSelectedSuggestionType("");
-                      return;
-                    }
-                    const newValue = (option as { value: string }).value;
-                    setSelectedSuggestionType(newValue);
-                  }}
-                  options={[
-                    { value: "", label: "All Suggestion Types" },
-                    ...suggestionTypes.map((type) => ({
-                      value: type || "",
-                      label: type
-                        ? type
-                            .replace(/_/g, " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())
-                        : "Unknown",
-                    })),
-                  ]}
-                  className="w-full"
-                  isClearable={true}
-                  unstyled
-                  classNames={{
-                    control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                    singleValue: () => "text-secondary-text",
-                    placeholder: () => "text-secondary-text",
-                    menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                    option: ({ isSelected, isFocused }) =>
-                      `px-4 py-3 cursor-pointer ${
-                        isSelected
-                          ? "bg-button-info text-form-button-text"
-                          : isFocused
-                            ? "bg-quaternary-bg text-primary-text"
-                            : "bg-secondary-bg text-secondary-text"
-                      }`,
-                    clearIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    dropdownIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-              )}
+              <Select
+                value={
+                  selectedSuggestionType
+                    ? {
+                        value: selectedSuggestionType,
+                        label: selectedSuggestionType
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase()),
+                      }
+                    : null
+                }
+                onChange={(option) =>
+                  setSelectedSuggestionType(
+                    (option as { value: string })?.value || "",
+                  )
+                }
+                options={[
+                  { value: "", label: "All Suggestion Types" },
+                  ...suggestionTypes.map((type) => ({
+                    value: type || "",
+                    label: type
+                      ? type
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())
+                      : "Unknown",
+                  })),
+                ]}
+                className="w-full"
+                isClearable={true}
+                placeholder="All Suggestion Types"
+                classNamePrefix="react-select"
+                unstyled
+                classNames={{
+                  control: () =>
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[40px] hover:cursor-pointer focus-within:border-button-info",
+                  singleValue: () => "text-secondary-text",
+                  placeholder: () => "text-secondary-text",
+                  menu: () =>
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused, isDisabled }) =>
+                    `px-4 py-3 ${
+                      isDisabled
+                        ? "cursor-not-allowed text-secondary-text opacity-50"
+                        : "cursor-pointer"
+                    } ${
+                      isSelected
+                        ? "bg-button-info text-form-button-text"
+                        : isFocused
+                          ? "bg-quaternary-bg text-primary-text"
+                          : "bg-secondary-bg text-secondary-text"
+                    }`,
+                  clearIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                  dropdownIndicator: () =>
+                    "text-secondary-text hover:text-primary-text cursor-pointer",
+                }}
+              />
             </div>
           </div>
 

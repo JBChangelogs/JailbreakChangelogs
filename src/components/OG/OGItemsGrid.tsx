@@ -1,6 +1,7 @@
 "use client";
 
-import { Pagination } from "@mui/material";
+import { useRef, useMemo, useEffect } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import OGItemCard from "./OGItemCard";
 
 interface OGItem {
@@ -23,31 +24,107 @@ interface OGItem {
 }
 
 interface OGItemsGridProps {
-  paginatedData: OGItem[];
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  filteredItems: OGItem[];
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   onCardClick: (item: OGItem) => void;
+  isLoading?: boolean;
   itemCounts?: Map<string, number>;
   duplicateOrders?: Map<string, number>;
+  onVisibleUserIdsChange?: (userIds: string[]) => void;
 }
 
 export default function OGItemsGrid({
-  paginatedData,
-  currentPage,
-  totalPages,
-  onPageChange,
+  filteredItems,
   getUserDisplay,
   getUserAvatar,
   getHasVerifiedBadge,
   onCardClick,
+  isLoading = false,
   itemCounts = new Map(),
   duplicateOrders = new Map(),
+  onVisibleUserIdsChange,
 }: OGItemsGridProps) {
-  if (paginatedData.length === 0) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Organize items into rows for grid virtualization
+  // Each row contains multiple items based on screen size
+  const getItemsPerRow = () => {
+    if (typeof window === "undefined") return 4; // Default for SSR
+    const width = window.innerWidth;
+    if (width < 375) return 1;
+    if (width < 768) return 2;
+    if (width < 1024) return 2;
+    if (width < 1280) return 2;
+    return 4;
+  };
+
+  const itemsPerRow = getItemsPerRow();
+  const rows = useMemo(() => {
+    const rowArray: OGItem[][] = [];
+    for (let i = 0; i < filteredItems.length; i += itemsPerRow) {
+      rowArray.push(filteredItems.slice(i, i + itemsPerRow));
+    }
+    return rowArray;
+  }, [filteredItems, itemsPerRow]);
+
+  // TanStack Virtual setup for performance with large item datasets
+  // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 300, // Estimate height for each row
+    overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
+  });
+
+  // Extract user IDs from ONLY the visible items
+  const virtualItems = virtualizer.getVirtualItems();
+  const visibleUserIds = useMemo(() => {
+    const userIds = new Set<string>();
+
+    virtualItems.forEach((virtualRow) => {
+      const rowItems = rows[virtualRow.index];
+      rowItems.forEach((item) => {
+        // Extract user IDs from this specific item
+        if (item.user_id && /^\d+$/.test(item.user_id)) {
+          userIds.add(item.user_id);
+        }
+      });
+    });
+
+    return Array.from(userIds);
+  }, [virtualItems, rows]);
+
+  // Notify parent component when visible user IDs change
+  useEffect(() => {
+    if (onVisibleUserIdsChange) {
+      onVisibleUserIdsChange(visibleUserIds);
+    }
+  }, [visibleUserIds, onVisibleUserIdsChange]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="animate-pulse">
+            <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
+              <div className="flex items-start gap-4">
+                <div className="bg-surface-bg h-16 w-16 rounded-lg"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="bg-surface-bg h-4 w-3/4 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/2 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/3 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (filteredItems.length === 0) {
     return (
       <div className="py-8 text-center">
         <p className="text-secondary-text">
@@ -58,59 +135,68 @@ export default function OGItemsGrid({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Items Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {paginatedData.map((item, index) => {
-          const itemKey = `${item.categoryTitle}-${item.title}`;
-          const duplicateCount = itemCounts.get(itemKey) || 1;
-          const uniqueKey = `${item.id}-${item.user_id}-${item.logged_at}`;
-          const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
+    <div
+      ref={parentRef}
+      className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-auto" // Fixed height container for virtualization with custom scrollbar
+      style={{
+        scrollbarWidth: "thin",
+        scrollbarColor: "var(--color-border-primary) transparent",
+      }}
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const rowItems = rows[virtualRow.index];
+          const rowIndex = virtualRow.index;
 
           return (
-            <OGItemCard
-              key={`${item.id}-${item.user_id}-${item.timesTraded}-${item.uniqueCirculation}-${index}`}
-              item={item}
-              getUserDisplay={getUserDisplay}
-              getUserAvatar={getUserAvatar}
-              getHasVerifiedBadge={getHasVerifiedBadge}
-              onCardClick={onCardClick}
-              duplicateCount={duplicateCount}
-              duplicateOrder={duplicateOrder}
-            />
+            <div
+              key={`row-${rowIndex}`}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              <div
+                className="mb-4 grid gap-4"
+                style={{
+                  gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
+                }}
+              >
+                {rowItems.map((item, index) => {
+                  const itemKey = `${item.categoryTitle}-${item.title}`;
+                  const duplicateCount = itemCounts.get(itemKey) || 1;
+                  const uniqueKey = `${item.id}-${item.user_id}-${item.logged_at}`;
+                  const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
+
+                  return (
+                    <OGItemCard
+                      key={`${item.id}-${item.user_id}-${item.timesTraded}-${item.uniqueCirculation}-${index}`}
+                      item={item}
+                      getUserDisplay={getUserDisplay}
+                      getUserAvatar={getUserAvatar}
+                      getHasVerifiedBadge={getHasVerifiedBadge}
+                      onCardClick={onCardClick}
+                      duplicateCount={duplicateCount}
+                      duplicateOrder={duplicateOrder}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(_, page) => onPageChange(page)}
-            color="primary"
-            sx={{
-              "& .MuiPaginationItem-root": {
-                color: "var(--color-primary-text)",
-                "&.Mui-selected": {
-                  backgroundColor: "var(--color-button-info)",
-                  color: "var(--color-form-button-text)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                },
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-              "& .MuiPaginationItem-icon": {
-                color: "var(--color-primary-text)",
-              },
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
 } from "@/utils/maintenance";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import QueryProvider from "@/components/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
@@ -124,39 +125,41 @@ export default async function RootLayout({
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <CustomThemeProvider>
               <ThemeProvider>
-                <MaintenanceBypass>
-                  <NextTopLoader
-                    color="var(--color-button-info)"
-                    initialPosition={0.08}
-                    crawlSpeed={200}
-                    height={3}
-                    crawl={true}
-                    showSpinner={false}
-                    easing="ease"
-                    speed={200}
-                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                    zIndex={1600}
-                  />
-                  <OfflineDetector />
-                  <AuthCheck />
-                  <AuthProvider>
-                    <SurveyProvider>
-                      <div className="flex min-h-screen flex-col">
-                        <Suspense
-                          fallback={
-                            <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
-                          }
-                        >
-                          <Header />
-                        </Suspense>
-                        <ServiceAvailabilityTicker />
-                        {/* <NewsTicker /> */}
-                        <main className="flex-1">{children}</main>
-                        <Footer />
-                      </div>
-                    </SurveyProvider>
-                  </AuthProvider>
-                </MaintenanceBypass>
+                <QueryProvider>
+                  <MaintenanceBypass>
+                    <NextTopLoader
+                      color="var(--color-button-info)"
+                      initialPosition={0.08}
+                      crawlSpeed={200}
+                      height={3}
+                      crawl={true}
+                      showSpinner={false}
+                      easing="ease"
+                      speed={200}
+                      shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                      zIndex={1600}
+                    />
+                    <OfflineDetector />
+                    <AuthCheck />
+                    <AuthProvider>
+                      <SurveyProvider>
+                        <div className="flex min-h-screen flex-col">
+                          <Suspense
+                            fallback={
+                              <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                            }
+                          >
+                            <Header />
+                          </Suspense>
+                          <ServiceAvailabilityTicker />
+                          {/* <NewsTicker /> */}
+                          <main className="flex-1">{children}</main>
+                          <Footer />
+                        </div>
+                      </SurveyProvider>
+                    </AuthProvider>
+                  </MaintenanceBypass>
+                </QueryProvider>
               </ThemeProvider>
             </CustomThemeProvider>
           </AppRouterCacheProvider>
@@ -213,87 +216,89 @@ export default async function RootLayout({
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <CustomThemeProvider>
             <ThemeProvider>
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  success: {
-                    style: {
-                      background: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-border-primary)",
-                      borderRadius: "16px",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              <QueryProvider>
+                <Toaster
+                  position="bottom-right"
+                  toastOptions={{
+                    success: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
                     },
-                    iconTheme: {
-                      primary: "var(--color-button-info)",
-                      secondary: "var(--color-secondary-bg)",
+                    error: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
                     },
-                  },
-                  error: {
-                    style: {
-                      background: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-border-primary)",
-                      borderRadius: "16px",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                    loading: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
                     },
-                    iconTheme: {
-                      primary: "var(--color-button-info)",
-                      secondary: "var(--color-secondary-bg)",
-                    },
-                  },
-                  loading: {
-                    style: {
-                      background: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-border-primary)",
-                      borderRadius: "16px",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                    },
-                    iconTheme: {
-                      primary: "var(--color-button-info)",
-                      secondary: "var(--color-secondary-bg)",
-                    },
-                  },
-                }}
-              />
-              <NextTopLoader
-                color="var(--color-button-info)"
-                initialPosition={0.08}
-                crawlSpeed={200}
-                height={3}
-                crawl={true}
-                showSpinner={false}
-                easing="ease"
-                speed={200}
-                shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                zIndex={1600}
-              />
-              <OfflineDetector />
-              <AuthCheck />
-              <AuthProvider>
-                <SurveyProvider>
-                  <div className="flex min-h-screen flex-col">
-                    <Suspense
-                      fallback={
-                        <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
-                      }
-                    >
-                      <Header />
-                    </Suspense>
-                    <ServiceAvailabilityTicker />
-                    {/* <NewsTicker /> */}
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                  </div>
-                </SurveyProvider>
-              </AuthProvider>
+                  }}
+                />
+                <NextTopLoader
+                  color="var(--color-button-info)"
+                  initialPosition={0.08}
+                  crawlSpeed={200}
+                  height={3}
+                  crawl={true}
+                  showSpinner={false}
+                  easing="ease"
+                  speed={200}
+                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                  zIndex={1600}
+                />
+                <OfflineDetector />
+                <AuthCheck />
+                <AuthProvider>
+                  <SurveyProvider>
+                    <div className="flex min-h-screen flex-col">
+                      <Suspense
+                        fallback={
+                          <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                        }
+                      >
+                        <Header />
+                      </Suspense>
+                      <ServiceAvailabilityTicker />
+                      {/* <NewsTicker /> */}
+                      <main className="flex-1">{children}</main>
+                      <Footer />
+                    </div>
+                  </SurveyProvider>
+                </AuthProvider>
+              </QueryProvider>
             </ThemeProvider>
           </CustomThemeProvider>
         </AppRouterCacheProvider>

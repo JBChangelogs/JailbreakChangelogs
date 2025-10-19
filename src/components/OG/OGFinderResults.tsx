@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { RobloxUser } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
@@ -82,7 +83,6 @@ export default function OGFinderResults({
     | "duplicates"
   >("created-desc");
 
-  const [page, setPage] = useState(1);
   const [localRobloxUsers, setLocalRobloxUsers] =
     useState<Record<string, RobloxUser>>(robloxUsers);
   const [localRobloxAvatars, setLocalRobloxAvatars] =
@@ -94,9 +94,30 @@ export default function OGFinderResults({
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<OGItem | null>(null);
-  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
+  const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
 
-  const itemsPerPage = 20;
+  // Fetch user data for visible items only using TanStack Query
+  const { data: fetchedUserData } = useQuery({
+    queryKey: ["userData", visibleUserIds.sort()],
+    queryFn: () => fetchMissingRobloxData(visibleUserIds),
+    enabled: visibleUserIds.length > 0,
+  });
+
+  // Merge fetched user data with existing data
+  useEffect(() => {
+    if (fetchedUserData && "userData" in fetchedUserData) {
+      setLocalRobloxUsers((prev) => ({
+        ...prev,
+        ...fetchedUserData.userData,
+      }));
+      // Note: avatarData is empty for original owners since they're not displayed
+    }
+  }, [fetchedUserData]);
+
+  // Handle visible user IDs changes from virtual scrolling
+  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
+    setVisibleUserIds(userIds);
+  }, []);
 
   // Helper functions
   const getUserDisplay = useCallback(
@@ -130,36 +151,6 @@ export default function OGFinderResults({
     [localRobloxUsers],
   );
 
-  // Fetch missing user data function
-  const fetchMissingUserData = useCallback(
-    async (userIds: string[]) => {
-      // Filter out users that are already available
-      const missingIds = userIds.filter(
-        (id) => !localRobloxUsers[id] && !robloxUsers[id],
-      );
-
-      if (missingIds.length === 0) {
-        return;
-      }
-
-      try {
-        const { userData, avatarData } =
-          await fetchMissingRobloxData(missingIds);
-
-        if (userData && Object.keys(userData).length > 0) {
-          setLocalRobloxUsers((prev) => ({ ...prev, ...userData }));
-        }
-
-        if (avatarData && Object.keys(avatarData).length > 0) {
-          setLocalRobloxAvatars((prev) => ({ ...prev, ...avatarData }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch missing user data:", error);
-      }
-    },
-    [robloxUsers, localRobloxUsers],
-  );
-
   // Effects
   useEffect(() => {
     setLocalRobloxUsers(robloxUsers);
@@ -167,10 +158,6 @@ export default function OGFinderResults({
     localRobloxUsersRef.current = robloxUsers;
     localRobloxAvatarsRef.current = robloxAvatars;
   }, [robloxUsers, robloxAvatars]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchTerm, selectedCategories, sortOrder]);
 
   // Handle search
   const handleSearch = async (searchValue: string) => {
@@ -251,14 +238,8 @@ export default function OGFinderResults({
     });
   }, [filteredData, sortOrder]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (page - 1) * itemsPerPage;
-    return sortedData.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedData, page, itemsPerPage]);
-
-  const totalPages = useMemo(() => {
-    return Math.ceil(sortedData.length / itemsPerPage);
-  }, [sortedData.length, itemsPerPage]);
+  // Use sortedData directly instead of pagination
+  const filteredAndSortedItems = sortedData;
 
   // Check if there are any duplicates in the filtered data
   const hasDuplicates = useMemo(() => {
@@ -277,39 +258,11 @@ export default function OGFinderResults({
     }
   }, [sortOrder, hasDuplicates]);
 
-  // Progressive loading for user data
+  // Update local state when props change
   useEffect(() => {
-    if (!initialData?.results || initialData.results.length === 0) return;
-
-    const userIdsToLoad: string[] = [];
-
-    // Add main user ID if missing
-    if (robloxId && !localRobloxUsers[robloxId]) {
-      userIdsToLoad.push(robloxId);
-    }
-
-    // Add current owner IDs from current page items
-    paginatedData.forEach((item) => {
-      if (item.user_id && /^\d+$/.test(item.user_id)) {
-        const user = localRobloxUsers[item.user_id];
-        if (!user?.displayName && !user?.name) {
-          userIdsToLoad.push(item.user_id);
-        }
-      }
-    });
-
-    // Fetch missing user data if any (deduplicate arrays)
-    if (userIdsToLoad.length > 0) {
-      const uniqueUserIds = [...new Set(userIdsToLoad)];
-      fetchMissingUserData(uniqueUserIds);
-    }
-  }, [
-    initialData?.results,
-    paginatedData,
-    fetchMissingUserData,
-    localRobloxUsers,
-    robloxId,
-  ]);
+    setLocalRobloxUsers(robloxUsers);
+    setLocalRobloxAvatars(robloxAvatars);
+  }, [robloxUsers, robloxAvatars]);
 
   // Event handlers
   const handleCardClick = (item: OGItem) => {
@@ -335,10 +288,6 @@ export default function OGFinderResults({
     setSelectedItem(null);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
   // Pre-calculate duplicate counts from FULL inventory (not filtered) for consistent numbering
   const duplicateCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -350,36 +299,6 @@ export default function OGFinderResults({
     }
     return counts;
   }, [initialData?.results]);
-
-  // Progressive load trade history user data when opening modal
-  useEffect(() => {
-    if (!showHistoryModal || !selectedItem) return;
-    if (!selectedItem.history || typeof selectedItem.history === "string") {
-      return;
-    }
-
-    const missingIds: string[] = [];
-    selectedItem.history.forEach((entry) => {
-      const idStr = entry.UserId.toString();
-      const user = localRobloxUsers[idStr];
-      if (!user?.name && !user?.displayName) {
-        missingIds.push(idStr);
-      }
-    });
-
-    if (missingIds.length === 0) return;
-
-    const uniqueMissing = Array.from(new Set(missingIds));
-    setLoadingUserIds(new Set(uniqueMissing));
-
-    (async () => {
-      try {
-        await fetchMissingUserData(uniqueMissing);
-      } finally {
-        setLoadingUserIds(new Set());
-      }
-    })();
-  }, [showHistoryModal, selectedItem, localRobloxUsers, fetchMissingUserData]);
 
   // Use the pre-calculated duplicate counts
   const itemCounts = duplicateCounts;
@@ -551,16 +470,14 @@ export default function OGFinderResults({
             )}
 
             <OGItemsGrid
-              paginatedData={paginatedData}
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+              filteredItems={filteredAndSortedItems}
               getUserDisplay={getUserDisplay}
               getUserAvatar={getUserAvatar}
               getHasVerifiedBadge={getHasVerifiedBadge}
               onCardClick={handleCardClick}
               itemCounts={itemCounts}
               duplicateOrders={duplicateOrders}
+              onVisibleUserIdsChange={handleVisibleUserIdsChange}
             />
           </div>
         </>
@@ -585,7 +502,6 @@ export default function OGFinderResults({
           getUserAvatar={getUserAvatar}
           getUsername={getUsername}
           getHasVerifiedBadge={getHasVerifiedBadge}
-          loadingUserIds={loadingUserIds}
           formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
