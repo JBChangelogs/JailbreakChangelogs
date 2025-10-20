@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ThemeProvider, Box, Pagination } from "@mui/material";
+import { ThemeProvider, Pagination } from "@mui/material";
 import React from "react";
 import dynamic from "next/dynamic";
 
@@ -323,7 +323,7 @@ export default function ItemDetailsClient({
     }
   };
 
-  // Custom horizontal scroll tabs to avoid MUI auto-centering behavior
+  // DaisyUI v5 button-based tabs
   const ItemDetailsTabs = React.useMemo(() => {
     const TabsInner = React.memo(
       function TabsInner({
@@ -333,35 +333,6 @@ export default function ItemDetailsClient({
         value: number;
         onChange: (e: React.SyntheticEvent, v: number) => void;
       }) {
-        const scrollerRef = React.useRef<HTMLDivElement | null>(null);
-        const [showArrows, setShowArrows] = React.useState(false);
-
-        const scrollByAmount = (delta: number) => {
-          const node = scrollerRef.current;
-          if (!node) return;
-          node.scrollBy({ left: delta, behavior: "smooth" });
-        };
-
-        const updateArrowVisibility = React.useCallback(() => {
-          const node = scrollerRef.current;
-          if (!node) return setShowArrows(false);
-          // When wrapping is enabled on desktop, overflow-x is visible and widths are similar
-          const hasOverflow = node.scrollWidth > node.clientWidth + 1;
-          setShowArrows(hasOverflow);
-        }, []);
-
-        React.useEffect(() => {
-          updateArrowVisibility();
-          const onResize = () => updateArrowVisibility();
-          window.addEventListener("resize", onResize);
-          return () => window.removeEventListener("resize", onResize);
-        }, [updateArrowVisibility]);
-
-        React.useEffect(() => {
-          // Re-evaluate when active tab changes (sizes can shift slightly)
-          updateArrowVisibility();
-        }, [value, updateArrowVisibility]);
-
         const labels = [
           "Details",
           "Charts",
@@ -372,63 +343,25 @@ export default function ItemDetailsClient({
         ];
 
         return (
-          <Box>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button
-                type="button"
-                aria-label="scroll left"
-                onClick={() => scrollByAmount(-200)}
-                className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
-                  showArrows ? "" : "hidden"
-                }`}
-              >
-                ‹
-              </button>
-              <div
-                ref={scrollerRef}
-                role="tablist"
-                aria-label="item details tabs"
-                style={{
-                  scrollbarWidth: "thin",
-                  WebkitOverflowScrolling: "touch",
-                  flex: 1,
-                }}
-                className="border-secondary-text overflow-x-auto border-b-2 whitespace-nowrap md:flex md:flex-wrap md:overflow-visible md:whitespace-normal"
-              >
-                {labels.map((label, idx) => (
-                  <button
-                    key={label}
-                    role="tab"
-                    aria-selected={value === idx}
-                    aria-controls={`item-tabpanel-${idx}`}
-                    id={`item-tab-${idx}`}
-                    onClick={(e) =>
-                      onChange(e as unknown as React.SyntheticEvent, idx)
-                    }
-                    style={{ display: "inline-block" }}
-                    className={
-                      (value === idx
-                        ? "text-button-info border-button-info border-b-2 font-semibold"
-                        : "text-secondary-text hover:text-primary-text") +
-                      " hover:bg-button-info/10 mr-1 cursor-pointer rounded-t-md px-4 py-2"
-                    }
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                aria-label="scroll right"
-                onClick={() => scrollByAmount(200)}
-                className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
-                  showArrows ? "" : "hidden"
-                }`}
-              >
-                ›
-              </button>
+          <div className="overflow-x-auto">
+            <div role="tablist" className="tabs min-w-max">
+              {labels.map((label, idx) => (
+                <button
+                  key={label}
+                  role="tab"
+                  aria-selected={value === idx}
+                  aria-controls={`item-tabpanel-${idx}`}
+                  id={`item-tab-${idx}`}
+                  onClick={(e) =>
+                    onChange(e as unknown as React.SyntheticEvent, idx)
+                  }
+                  className={`tab ${value === idx ? "tab-active" : ""}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-          </Box>
+          </div>
         );
       },
       (prev, next) => prev.value === next.value,
@@ -840,24 +773,20 @@ export default function ItemDetailsClient({
                 <div className="mb-8 space-y-6">
                   {/* Chart Sub-tabs */}
                   <div className="bg-secondary-bg rounded-lg p-4">
-                    <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+                    <div role="tablist" className="tabs">
                       <button
+                        role="tab"
+                        aria-selected={activeChartTab === 0}
                         onClick={() => setActiveChartTab(0)}
-                        className={`${
-                          activeChartTab === 0
-                            ? "bg-button-info text-form-button-text shadow-sm"
-                            : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-                        } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                        className={`tab ${activeChartTab === 0 ? "tab-active" : ""}`}
                       >
                         Value History
                       </button>
                       <button
+                        role="tab"
+                        aria-selected={activeChartTab === 1}
                         onClick={() => setActiveChartTab(1)}
-                        className={`${
-                          activeChartTab === 1
-                            ? "bg-button-info text-form-button-text shadow-sm"
-                            : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-                        } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+                        className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
                       >
                         Trading Metrics
                       </button>

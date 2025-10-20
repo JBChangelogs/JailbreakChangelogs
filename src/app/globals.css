@@ -483,3 +483,27 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-primary) transparent;
 }
+
+.tabs {
+  --tab-bg: var(--color-secondary-bg);
+  --tab-border-color: var(--color-border-primary);
+  --tab-radius: 0.5rem;
+}
+
+.tab {
+  color: var(--color-secondary-text);
+  background-color: var(--color-secondary-bg);
+  border-color: var(--color-border-primary);
+}
+
+.tab:hover {
+  color: var(--color-primary-text);
+  background-color: var(--color-quaternary-bg);
+}
+
+.tab-active {
+  color: var(--color-status-info);
+  background-color: var(--color-secondary-bg);
+  border-bottom-color: var(--color-status-info);
+  border-bottom-width: 2px;
+}

@@ -1,8 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { fetchItemHistory } from "@/utils/api";
-import { Button, ButtonGroup, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import toast from "react-hot-toast";
 import { useTheme } from "@/contexts/ThemeContext";
+import {
+  CustomButtonGroup,
+  CustomButton,
+} from "@/components/UI/CustomButtonGroup";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -258,6 +262,12 @@ const ItemValueChart = ({
     return oldestDate <= ranges[range];
   };
 
+  // Check if each range has trading data (same logic as value history)
+  const hasTradingDataForRange = (range: keyof typeof ranges) => {
+    if (range === "all") return allTradingData.length > 0;
+    return oldestTradingDate <= ranges[range];
+  };
+
   // Handle date range change
   const handleDateRangeChange = (range: "1w" | "1m" | "6m" | "1y" | "all") => {
     if (!hasDataForRange(range)) {
@@ -278,6 +288,15 @@ const ItemValueChart = ({
 
   // Filter data that has metadata for trading metrics
   const tradingData = filteredData.filter((item) => item.metadata !== null);
+
+  // Get all trading data (unfiltered) for range availability checks
+  const allTradingData = sortedHistory.filter((item) => item.metadata !== null);
+
+  // Get the oldest trading data date (same approach as value history)
+  const oldestTradingDate =
+    allTradingData.length > 0
+      ? new Date(parseInt(allTradingData[0].date) * 1000)
+      : new Date();
 
   const cashSeries = filteredData.map((item) => parseRawValue(item.cash_value));
   const dupedSeries = filteredData.map((item) =>
@@ -572,62 +591,44 @@ const ItemValueChart = ({
       {/* Value History Chart */}
       {!showOnlyTradingMetrics && (
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-primary-text text-sm font-bold">
-              Value History
-            </h3>
-            <ButtonGroup size="small" variant="outlined">
-              <Button
+          <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <CustomButtonGroup>
+              <CustomButton
                 onClick={() => handleDateRangeChange("1w")}
-                className={`border-secondary hover:border-border-focus transition-colors ${
-                  hasDataForRange("1w")
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed"
-                } ${dateRange === "1w" ? "text-button-info" : "text-primary-text"}`}
+                selected={dateRange === "1w"}
+                disabled={!hasDataForRange("1w")}
               >
                 1W
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 onClick={() => handleDateRangeChange("1m")}
-                className={`border-secondary hover:border-border-focus transition-colors ${
-                  hasDataForRange("1m")
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed"
-                } ${dateRange === "1m" ? "text-button-info" : "text-primary-text"}`}
+                selected={dateRange === "1m"}
+                disabled={!hasDataForRange("1m")}
               >
                 1M
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 onClick={() => handleDateRangeChange("6m")}
-                className={`border-secondary hover:border-border-focus transition-colors ${
-                  hasDataForRange("6m")
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed"
-                } ${dateRange === "6m" ? "text-button-info" : "text-primary-text"}`}
+                selected={dateRange === "6m"}
+                disabled={!hasDataForRange("6m")}
               >
                 6M
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 onClick={() => handleDateRangeChange("1y")}
-                className={`border-secondary hover:border-border-focus transition-colors ${
-                  hasDataForRange("1y")
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed"
-                } ${dateRange === "1y" ? "text-button-info" : "text-primary-text"}`}
+                selected={dateRange === "1y"}
+                disabled={!hasDataForRange("1y")}
               >
                 1Y
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 onClick={() => handleDateRangeChange("all")}
-                className={`border-secondary hover:border-border-focus transition-colors ${
-                  hasDataForRange("all")
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed"
-                } ${dateRange === "all" ? "text-button-info" : "text-primary-text"}`}
+                selected={dateRange === "all"}
+                disabled={!hasDataForRange("all")}
               >
                 All
-              </Button>
-            </ButtonGroup>
+              </CustomButton>
+            </CustomButtonGroup>
           </div>
           {shouldShowValueChart ? (
             <>
@@ -678,10 +679,44 @@ const ItemValueChart = ({
         !showOnlyValueHistory &&
         tradingData.length > 0 && (
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-primary-text text-sm font-bold">
-                Trading Metrics
-              </h3>
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <CustomButtonGroup>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1w")}
+                  selected={dateRange === "1w"}
+                  disabled={!hasTradingDataForRange("1w")}
+                >
+                  1W
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1m")}
+                  selected={dateRange === "1m"}
+                  disabled={!hasTradingDataForRange("1m")}
+                >
+                  1M
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("6m")}
+                  selected={dateRange === "6m"}
+                  disabled={!hasTradingDataForRange("6m")}
+                >
+                  6M
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1y")}
+                  selected={dateRange === "1y"}
+                  disabled={!hasTradingDataForRange("1y")}
+                >
+                  1Y
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("all")}
+                  selected={dateRange === "all"}
+                  disabled={!hasTradingDataForRange("all")}
+                >
+                  All
+                </CustomButton>
+              </CustomButtonGroup>
             </div>
             <div className="h-[350px]">
               <Line
