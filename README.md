@@ -3,6 +3,11 @@
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz)
 [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1ofdv.svg)](https://status.jailbreakchangelogs.xyz)
 
+[![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
+[![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)
+[![PR Title Validation](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/pr-title-validation.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/pr-title-validation.yml)
+[![Type Check](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml)
+
 > [!CAUTION]
 > The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
