@@ -46,10 +46,10 @@ export default function DupeUserInfo({
             alt="Roblox Avatar"
             width={64}
             height={64}
-            className="flex-shrink-0 rounded-full"
+            className="flex-shrink-0 rounded-full bg-tertiary-bg"
           />
         ) : (
-          <div className="bg-surface-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
+          <div className="bg-tertiary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-tertiary-bg">
             <DefaultAvatar />
           </div>
         )}

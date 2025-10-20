@@ -1,31 +1,12 @@
+import Image from "next/image";
+
 export const VerifiedBadgeIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className || ""}
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 28 28"
-    fill="none"
-  >
-    <g clipPath="url(#clip0_8_46)">
-      <rect
-        x="5.88818"
-        width="22.89"
-        height="22.89"
-        transform="rotate(15 5.88818 0)"
-        fill="#0066FF"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M20.543 8.7508L20.549 8.7568C21.15 9.3578 21.15 10.3318 20.549 10.9328L11.817 19.6648L7.45 15.2968C6.85 14.6958 6.85 13.7218 7.45 13.1218L7.457 13.1148C8.058 12.5138 9.031 12.5138 9.633 13.1148L11.817 15.2998L18.367 8.7508C18.968 8.1498 19.942 8.1498 20.543 8.7508Z"
-        fill="white"
-      />
-    </g>
-    <defs>
-      <clipPath id="clip0_8_46">
-        <rect width="28" height="28" fill="white" />
-      </clipPath>
-    </defs>
-  </svg>
+  <Image
+    className={`inline-block ${className || ""}`}
+    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'%3E%3Cpath d='M10.1641 3.06852C9.09906 2.78315 8.00434 3.41518 7.71897 4.48022L3.06852 21.8359C2.78315 22.9009 3.41518 23.9957 4.48022 24.281L21.8359 28.9315C22.9009 29.2169 23.9957 28.5848 24.281 27.5198L28.9315 10.1641C29.2169 9.09906 28.5848 8.00434 27.5198 7.71897L10.1641 3.06852ZM21.7071 12.2929C22.0976 12.6834 22.0976 13.3166 21.7071 13.7071L14.7071 20.7071C14.3166 21.0976 13.6834 21.0976 13.2929 20.7071L10.2929 17.7071C9.90237 17.3166 9.90237 16.6834 10.2929 16.2929C10.6834 15.9024 11.3166 15.9024 11.7071 16.2929L14 18.5858L20.2929 12.2929C20.6834 11.9024 21.3166 11.9024 21.7071 12.2929Z' fill='%23335fff'/%3E%3C/svg%3E"
+    alt="Verified Badge"
+    width={32}
+    height={32}
+    style={{ width: "1.2em", height: "1.2em" }}
+  />
 );

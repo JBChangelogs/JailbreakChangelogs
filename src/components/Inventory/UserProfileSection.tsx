@@ -187,42 +187,78 @@ export default function UserProfileSection({
   ]);
 
   return (
-    <div className="bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-center">
-      {/* Avatar */}
-      {getUserAvatar(userId) ? (
-        <Image
-          src={getUserAvatar(userId)!}
-          alt="Roblox Avatar"
-          width={64}
-          height={64}
-          className="flex-shrink-0 rounded-full"
-        />
-      ) : (
-        <div className="bg-primary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
-          <DefaultAvatar />
-        </div>
-      )}
+    <div className="bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-start xl:justify-between">
+      {/* Avatar and User Info */}
+      <div className="flex items-center gap-4">
+        {/* Avatar */}
+        {getUserAvatar(userId) ? (
+          <Image
+            src={getUserAvatar(userId)!}
+            alt="Roblox Avatar"
+            width={64}
+            height={64}
+            className="flex-shrink-0 rounded-full bg-tertiary-bg"
+          />
+        ) : (
+          <div className="bg-tertiary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-tertiary-bg">
+            <DefaultAvatar />
+          </div>
+        )}
 
-      {/* User Info */}
-      <div className="min-w-0 flex-1">
-        <h3 className="text-primary-text text-lg font-bold break-words">
-          <span className="inline-flex items-center gap-2">
-            {getUserDisplay(userId)}
-            {getHasVerifiedBadge(userId) && (
-              <VerifiedBadgeIcon className="h-4 w-4" />
+        {/* User Info */}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-primary-text text-lg font-bold break-words">
+            <span className="inline-flex items-center gap-2">
+              {getUserDisplay(userId)}
+              {getHasVerifiedBadge(userId) && (
+                <VerifiedBadgeIcon className="h-4 w-4" />
+              )}
+            </span>
+          </h3>
+          <p className="text-primary-text text-sm break-words">
+            @{getUsername(userId)}
+          </p>
+
+          {/* Connection Icons */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {/* Discord Profile */}
+            {userConnectionData && (
+              <Tooltip
+                title="Visit Discord Profile"
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
+                    },
+                  },
+                }}
+              >
+                <a
+                  href={`https://discord.com/users/${userConnectionData.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                >
+                  <DiscordIcon className="text-button-info h-3 w-3 flex-shrink-0" />
+                  <span className="text-xs font-medium">Discord</span>
+                </a>
+              </Tooltip>
             )}
-          </span>
-        </h3>
-        <p className="text-primary-text text-sm break-words">
-          @{getUsername(userId)}
-        </p>
 
-        {/* Connection Icons */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {/* Discord Profile */}
-          {userConnectionData && (
+            {/* Roblox Profile */}
             <Tooltip
-              title="Visit Discord Profile"
+              title="Visit Roblox Profile"
               placement="top"
               arrow
               slotProps={{
@@ -243,95 +279,62 @@ export default function UserProfileSection({
               }}
             >
               <a
-                href={`https://discord.com/users/${userConnectionData.id}`}
+                href={`https://www.roblox.com/users/${userId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
-                <DiscordIcon className="text-button-info h-3 w-3 flex-shrink-0" />
-                <span className="text-xs font-medium">Discord</span>
+                <RobloxIcon className="text-button-info h-3 w-3 flex-shrink-0" />
+                <span className="text-xs font-medium">Roblox</span>
               </a>
             </Tooltip>
-          )}
 
-          {/* Roblox Profile */}
-          <Tooltip
-            title="Visit Roblox Profile"
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
+            {/* Website Profile */}
+            {userConnectionData && (
+              <Tooltip
+                title="Visit Website Profile"
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
 
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <a
-              href={`https://www.roblox.com/users/${userId}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
-            >
-              <RobloxIcon className="text-button-info h-3 w-3 flex-shrink-0" />
-              <span className="text-xs font-medium">Roblox</span>
-            </a>
-          </Tooltip>
-
-          {/* Website Profile */}
-          {userConnectionData && (
-            <Tooltip
-              title="Visit Website Profile"
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
                     },
                   },
-                },
-              }}
-            >
-              <Link
-                href={`/users/${userConnectionData.id}`}
-                prefetch={false}
-                className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                }}
               >
-                <Image
-                  src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
-                  alt="JBCL Logo"
-                  width={16}
-                  height={16}
-                  className="h-3 w-3 flex-shrink-0"
-                />
-                <span className="text-xs font-medium">Website</span>
-              </Link>
-            </Tooltip>
-          )}
+                <Link
+                  href={`/users/${userConnectionData.id}`}
+                  prefetch={false}
+                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                >
+                  <Image
+                    src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                    alt="JBCL Logo"
+                    width={16}
+                    height={16}
+                    className="h-3 w-3 flex-shrink-0"
+                  />
+                  <span className="text-xs font-medium">Website</span>
+                </Link>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Scan Button or Login Prompt */}
       {isOwnInventory ? (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3 xl:mt-0 xl:flex-shrink-0">
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-3">
             <button

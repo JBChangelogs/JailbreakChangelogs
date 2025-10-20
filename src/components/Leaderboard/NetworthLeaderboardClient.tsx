@@ -286,7 +286,7 @@ export default function NetworthLeaderboardClient({
                                   alt={`${userDisplay} avatar`}
                                   width={32}
                                   height={32}
-                                  className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
+                                  className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
                                   onError={() => {
                                     setAvatarErrorMap((prev) => ({
                                       ...prev,
@@ -295,7 +295,7 @@ export default function NetworthLeaderboardClient({
                                   }}
                                 />
                               ) : (
-                                <div className="bg-secondary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8">
+                                <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8 text-tertiary-bg">
                                   <DefaultAvatar />
                                 </div>
                               )}

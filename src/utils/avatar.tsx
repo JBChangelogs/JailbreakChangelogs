@@ -31,7 +31,7 @@ export const DefaultAvatar = () => (
     xmlns="http://www.w3.org/2000/svg"
     preserveAspectRatio="xMidYMid meet"
   >
-    <circle cx="12" cy="12" r="12" fill="#121317" />
+    <circle cx="12" cy="12" r="12" fill="currentColor" />
     {/* Slightly inset the figure to avoid touching the outer circle edge at tiny sizes */}
     <g transform="translate(12,12) scale(0.92) translate(-12,-12)">
       <path
