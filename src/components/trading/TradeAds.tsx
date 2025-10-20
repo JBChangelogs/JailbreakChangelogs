@@ -261,54 +261,70 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={userTradeAds.length > 0}
         />
-        {activeTab === "view" && (
-          <div className="mb-8 rounded-lg border p-6 text-center">
-            <h3 className="text-tertiary-text mb-4 text-lg font-medium">
-              No Trade Ads Available
-            </h3>
-            <p className="text-tertiary-text/70 mb-8">
-              This page seems empty at the moment.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button
-                variant="contained"
-                onClick={refreshTradeAds}
-                sx={{
-                  backgroundColor: "var(--color-button-info)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                }}
-              >
-                Refresh List
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => handleTabChange("create")}
-                sx={{
-                  backgroundColor: "var(--color-button-info)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                }}
-              >
-                Create A Trade Ad
-              </Button>
+        {/* Tab Content */}
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "view"}
+          id="trading-tabpanel-view"
+          aria-labelledby="trading-tab-view"
+        >
+          {activeTab === "view" && (
+            <div className="mb-8 rounded-lg border p-6 text-center">
+              <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                No Trade Ads Available
+              </h3>
+              <p className="text-tertiary-text/70 mb-8">
+                This page seems empty at the moment.
+              </p>
+              <div className="flex justify-center gap-4">
+                <Button
+                  variant="contained"
+                  onClick={refreshTradeAds}
+                  sx={{
+                    backgroundColor: "var(--color-button-info)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-button-info-hover)",
+                    },
+                  }}
+                >
+                  Refresh List
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleTabChange("create")}
+                  sx={{
+                    backgroundColor: "var(--color-button-info)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-button-info-hover)",
+                    },
+                  }}
+                >
+                  Create A Trade Ad
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        {activeTab === "create" && (
-          <TradeAdForm
-            onSuccess={() => {
-              refreshTradeAds();
-              window.history.pushState(null, "", window.location.pathname);
-              setActiveTab("view");
-              setSelectedTradeAd(null);
-            }}
-            editMode={false}
-            items={items}
-          />
-        )}
+          )}
+        </div>
+
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "create"}
+          id="trading-tabpanel-create"
+          aria-labelledby="trading-tab-create"
+        >
+          {activeTab === "create" && (
+            <TradeAdForm
+              onSuccess={() => {
+                refreshTradeAds();
+                window.history.pushState(null, "", window.location.pathname);
+                setActiveTab("view");
+                setSelectedTradeAd(null);
+              }}
+              editMode={false}
+              items={items}
+            />
+          )}
+        </div>
       </div>
     );
   }
@@ -338,117 +354,159 @@ export default function TradeAds({
         hasTradeAds={userTradeAds.length > 0}
       />
 
-      {activeTab === "view" ? (
-        <>
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-secondary-text">
-              Showing {sortedTradeAds.length}{" "}
-              {sortedTradeAds.length === 1 ? "trade ad" : "trade ads"}
-            </p>
-            <button
-              onClick={toggleSortOrder}
-              className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+      {/* Tab Content */}
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "view"}
+        id="trading-tabpanel-view"
+        aria-labelledby="trading-tab-view"
+      >
+        {activeTab === "view" && (
+          <>
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-secondary-text">
+                Showing {sortedTradeAds.length}{" "}
+                {sortedTradeAds.length === 1 ? "trade ad" : "trade ads"}
+              </p>
+              <button
+                onClick={toggleSortOrder}
+                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+              >
+                {sortOrder === "newest" ? (
+                  <ArrowDownIcon className="h-4 w-4" />
+                ) : (
+                  <ArrowUpIcon className="h-4 w-4" />
+                )}
+                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+              </button>
+            </div>
+            <Masonry
+              columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+              spacing={2}
+              sx={{ width: "auto", margin: 0 }}
             >
-              {sortOrder === "newest" ? (
-                <ArrowDownIcon className="h-4 w-4" />
-              ) : (
-                <ArrowUpIcon className="h-4 w-4" />
-              )}
-              {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-            </button>
-          </div>
-          <Masonry
-            columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-            spacing={2}
-            sx={{ width: "auto", margin: 0 }}
-          >
-            {currentPageItems.map((trade) => {
-              const enrichedTrade: TradeAd = {
-                ...trade,
-                offering: trade.offering.map((it) => ({
-                  ...it,
-                  demand: getDemandForItem(it) || it.demand,
-                  trend: getTrendForItem(it) || it.trend,
-                })),
-                requesting: trade.requesting.map((it) => ({
-                  ...it,
-                  demand: getDemandForItem(it) || it.demand,
-                  trend: getTrendForItem(it) || it.trend,
-                })),
-              };
-              return (
-                <TradeAdCard
-                  key={trade.id}
-                  trade={enrichedTrade}
-                  onMakeOffer={() => handleOfferClick(trade.id)}
-                  offerStatus={offerStatuses[trade.id]}
-                  currentUserId={currentUserId}
-                  onDelete={() => handleDeleteTrade(trade.id)}
-                  onEdit={() => handleEditTrade(trade)}
-                />
-              );
-            })}
-          </Masonry>
-          {totalPages > 1 && (
-            <div className="mt-8 mb-8 flex justify-center">
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    color: "var(--color-primary-text)",
-                    "&.Mui-selected": {
-                      backgroundColor: "var(--color-button-info)",
-                      color: "var(--color-form-button-text)",
+              {currentPageItems.map((trade) => {
+                const enrichedTrade: TradeAd = {
+                  ...trade,
+                  offering: trade.offering.map((it) => ({
+                    ...it,
+                    demand: getDemandForItem(it) || it.demand,
+                    trend: getTrendForItem(it) || it.trend,
+                  })),
+                  requesting: trade.requesting.map((it) => ({
+                    ...it,
+                    demand: getDemandForItem(it) || it.demand,
+                    trend: getTrendForItem(it) || it.trend,
+                  })),
+                };
+                return (
+                  <TradeAdCard
+                    key={trade.id}
+                    trade={enrichedTrade}
+                    onMakeOffer={() => handleOfferClick(trade.id)}
+                    offerStatus={offerStatuses[trade.id]}
+                    currentUserId={currentUserId}
+                    onDelete={() => handleDeleteTrade(trade.id)}
+                    onEdit={() => handleEditTrade(trade)}
+                  />
+                );
+              })}
+            </Masonry>
+            {totalPages > 1 && (
+              <div className="mt-8 mb-8 flex justify-center">
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: "var(--color-primary-text)",
+                      "&.Mui-selected": {
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                        },
+                      },
                       "&:hover": {
-                        backgroundColor: "var(--color-button-info-hover)",
+                        backgroundColor: "var(--color-quaternary-bg)",
                       },
                     },
-                    "&:hover": {
-                      backgroundColor: "var(--color-quaternary-bg)",
+                    "& .MuiPaginationItem-icon": {
+                      color: "var(--color-primary-text)",
                     },
-                  },
-                  "& .MuiPaginationItem-icon": {
-                    color: "var(--color-primary-text)",
-                  },
-                }}
-              />
-            </div>
-          )}
-        </>
-      ) : activeTab === "edit" && !selectedTradeAd ? (
-        <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
-          <p className="text-secondary-text mb-4">
-            Please click the edit button on the trade ad you want to modify
-          </p>
-          <Button
-            variant="contained"
-            onClick={() => handleTabChange("view")}
-            sx={{
-              backgroundColor: "var(--color-button-info)",
-              color: "var(--color-form-button-text)",
-              "&:hover": {
-                backgroundColor: "var(--color-button-info-hover)",
-              },
+                  }}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "create"}
+        id="trading-tabpanel-create"
+        aria-labelledby="trading-tab-create"
+      >
+        {activeTab === "create" && (
+          <TradeAdForm
+            onSuccess={() => {
+              refreshTradeAds();
+              window.history.pushState(null, "", window.location.pathname);
+              setActiveTab("view");
+              setSelectedTradeAd(null);
             }}
-          >
-            Back to View
-          </Button>
-        </div>
-      ) : (
-        <TradeAdForm
-          onSuccess={() => {
-            refreshTradeAds();
-            window.history.pushState(null, "", window.location.pathname);
-            setActiveTab("view");
-            setSelectedTradeAd(null);
-          }}
-          editMode={activeTab === "edit"}
-          tradeAd={selectedTradeAd || undefined}
-          items={items}
-        />
-      )}
+            editMode={false}
+            items={items}
+          />
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "edit"}
+        id="trading-tabpanel-edit"
+        aria-labelledby="trading-tab-edit"
+      >
+        {activeTab === "edit" && (
+          <>
+            {!selectedTradeAd ? (
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
+                <p className="text-secondary-text mb-4">
+                  Please click the edit button on the trade ad you want to
+                  modify
+                </p>
+                <Button
+                  variant="contained"
+                  onClick={() => handleTabChange("view")}
+                  sx={{
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-button-info-hover)",
+                    },
+                  }}
+                >
+                  Back to View
+                </Button>
+              </div>
+            ) : (
+              <TradeAdForm
+                onSuccess={() => {
+                  refreshTradeAds();
+                  window.history.pushState(null, "", window.location.pathname);
+                  setActiveTab("view");
+                  setSelectedTradeAd(null);
+                }}
+                editMode={true}
+                tradeAd={selectedTradeAd}
+                items={items}
+              />
+            )}
+          </>
+        )}
+      </div>
 
       {/* Offer Confirmation Dialog */}
       <ConfirmDialog

@@ -1617,294 +1617,317 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border">
-        <nav className="px-6 py-4">
-          <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
-            <button
-              onClick={() => handleTabChange("items")}
-              className={`${
-                activeTab === "items"
-                  ? "bg-button-info text-form-button-text shadow-sm"
-                  : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-            >
-              Browse Items
-            </button>
-            <button
-              onClick={() => handleTabChange("similar")}
-              className={`${
-                activeTab === "similar"
-                  ? "bg-button-info text-form-button-text shadow-sm"
-                  : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-            >
-              Similar by Total
-            </button>
-            <button
-              onClick={() => handleTabChange("values")}
-              className={`${
-                activeTab === "values"
-                  ? "bg-button-info text-form-button-text shadow-sm"
-                  : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-            >
-              Value Comparison
-            </button>
-          </div>
-        </nav>
+      <div className="overflow-x-auto">
+        <div role="tablist" className="tabs min-w-max">
+          <button
+            role="tab"
+            aria-selected={activeTab === "items"}
+            aria-controls="calculator-tabpanel-items"
+            id="calculator-tab-items"
+            onClick={() => handleTabChange("items")}
+            className={`tab ${activeTab === "items" ? "tab-active" : ""}`}
+          >
+            Browse Items
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "similar"}
+            aria-controls="calculator-tabpanel-similar"
+            id="calculator-tab-similar"
+            onClick={() => handleTabChange("similar")}
+            className={`tab ${activeTab === "similar" ? "tab-active" : ""}`}
+          >
+            Similar by Total
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "values"}
+            aria-controls="calculator-tabpanel-values"
+            id="calculator-tab-values"
+            onClick={() => handleTabChange("values")}
+            className={`tab ${activeTab === "values" ? "tab-active" : ""}`}
+          >
+            Value Comparison
+          </button>
+        </div>
       </div>
 
       {/* Tab Content */}
-      {activeTab === "items" ? (
-        <div className="mb-8">
-          <AvailableItemsGrid
-            items={initialItems.filter((i) => !i.is_sub)}
-            onSelect={handleAddItem}
-            selectedItems={[...offeringItems, ...requestingItems]}
-            requireAuth={false}
-          />
-        </div>
-      ) : activeTab === "values" ? (
-        <div className="mb-8">
-          <CalculatorValueComparison
-            offering={offeringItems}
-            requesting={requestingItems}
-            getSelectedValueString={(item, side) =>
-              getSelectedValueString(item, side)
-            }
-            getSelectedValue={(item, side) => getSelectedValue(item, side)}
-            getSelectedValueType={(item, side) =>
-              getSelectedValueType(item, side)
-            }
-            onBrowseItems={() => handleTabChange("items")}
-          />
-        </div>
-      ) : (
-        <div className="mb-8">
-          {/* Similar Items Near Total - Selector and Results */}
-          {offeringItems.length === 0 && requestingItems.length === 0 ? (
-            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
-              <EmptyState
-                message={
-                  'Go to the "Browse Items" tab to select items and see similar items near your total.'
-                }
-                onBrowse={() => handleTabChange("items")}
-              />
-            </div>
-          ) : (
-            <>
-              {(offeringItems.length === 0 || requestingItems.length === 0) &&
-                !(
-                  offeringItems.length === 0 && requestingItems.length === 0
-                ) && (
-                  <div
-                    className={`bg-secondary-bg mb-4 rounded-lg border p-3 ${
-                      offeringItems.length === 0
-                        ? "border-status-success"
-                        : "border-status-error"
-                    }`}
-                  >
-                    <p className="text-secondary-text text-sm">
-                      {offeringItems.length === 0
-                        ? "Select at least 1 item for the Offering side."
-                        : "Select at least 1 item for the Requesting side."}
-                    </p>
-                  </div>
-                )}
-              <div className="mb-4 flex justify-center sm:justify-start">
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg inline-flex gap-1 rounded-lg border p-2">
-                  <button
-                    onClick={() => setTotalBasis("offering")}
-                    className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
-                      totalBasis === "offering"
-                        ? "bg-status-success text-form-button-text"
-                        : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
-                    }`}
-                  >
-                    Offering Total
-                  </button>
-                  <button
-                    onClick={() => setTotalBasis("requesting")}
-                    className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
-                      totalBasis === "requesting"
-                        ? "bg-status-error text-form-button-text"
-                        : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
-                    }`}
-                  >
-                    Requesting Total
-                  </button>
-                </div>
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "items"}
+        id="calculator-tabpanel-items"
+        aria-labelledby="calculator-tab-items"
+      >
+        {activeTab === "items" && (
+          <div className="mb-8">
+            <AvailableItemsGrid
+              items={initialItems.filter((i) => !i.is_sub)}
+              onSelect={handleAddItem}
+              selectedItems={[...offeringItems, ...requestingItems]}
+              requireAuth={false}
+            />
+          </div>
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "values"}
+        id="calculator-tabpanel-values"
+        aria-labelledby="calculator-tab-values"
+      >
+        {activeTab === "values" && (
+          <div className="mb-8">
+            <CalculatorValueComparison
+              offering={offeringItems}
+              requesting={requestingItems}
+              getSelectedValueString={(item, side) =>
+                getSelectedValueString(item, side)
+              }
+              getSelectedValue={(item, side) => getSelectedValue(item, side)}
+              getSelectedValueType={(item, side) =>
+                getSelectedValueType(item, side)
+              }
+              onBrowseItems={() => handleTabChange("items")}
+            />
+          </div>
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "similar"}
+        id="calculator-tabpanel-similar"
+        aria-labelledby="calculator-tab-similar"
+      >
+        {activeTab === "similar" && (
+          <div className="mb-8">
+            {/* Similar Items Near Total - Selector and Results */}
+            {offeringItems.length === 0 && requestingItems.length === 0 ? (
+              <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+                <EmptyState
+                  message={
+                    'Go to the "Browse Items" tab to select items and see similar items near your total.'
+                  }
+                  onBrowse={() => handleTabChange("items")}
+                />
               </div>
-
-              {(() => {
-                const offeringTotal = offeringItems.reduce(
-                  (sum, item) => sum + getSelectedValue(item, "offering"),
-                  0,
-                );
-                const requestingTotal = requestingItems.reduce(
-                  (sum, item) => sum + getSelectedValue(item, "requesting"),
-                  0,
-                );
-                const total =
-                  totalBasis === "offering" ? offeringTotal : requestingTotal;
-                const title =
-                  totalBasis === "offering"
-                    ? "Similar Items Near Offering Total"
-                    : "Similar Items Near Requesting Total";
-                const contextLabel =
-                  totalBasis === "offering" ? "Offering" : "Requesting";
-                const demandScale = [
-                  "Close to none",
-                  "Very Low",
-                  "Low",
-                  "Medium",
-                  "Decent",
-                  "High",
-                  "Very High",
-                  "Extremely High",
-                ];
-                const selectedSideItems =
-                  totalBasis === "offering" ? offeringItems : requestingItems;
-                const demandIndices = selectedSideItems
-                  .map((i) => i.demand ?? i.data?.demand ?? "N/A")
-                  .map((d) =>
-                    demandScale.indexOf(d as (typeof demandScale)[number]),
-                  )
-                  .filter((idx) => idx >= 0);
-                const avgDemandIndex =
-                  demandIndices.length > 0
-                    ? Math.round(
-                        demandIndices.reduce((a, b) => a + b, 0) /
-                          demandIndices.length,
-                      )
-                    : -1;
-                const baselineDemand =
-                  avgDemandIndex >= 0 ? demandScale[avgDemandIndex] : null;
-
-                // Summary of which values are used (Clean vs Duped)
-                const sideKey: "offering" | "requesting" = totalBasis;
-                let cleanCount = 0;
-                let dupedCount = 0;
-                selectedSideItems.forEach((it) => {
-                  const k = getItemKey(it.id, it.sub_name, sideKey);
-                  const vt = itemValueTypes[k] || "cash";
-                  const dupedAvailable = !!(
-                    it.duped_value && it.duped_value !== "N/A"
-                  );
-                  if (vt === "duped" && dupedAvailable) dupedCount++;
-                  else cleanCount++;
-                });
-
-                return (
-                  <>
-                    <div className="mb-3 flex flex-col items-center gap-2 text-xs sm:flex-row sm:text-sm">
-                      <span className="text-secondary-text">
-                        Using selected values
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                          {cleanCount} clean
-                        </span>
-                        <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                          {dupedCount} duped
-                        </span>
-                      </div>
+            ) : (
+              <>
+                {(offeringItems.length === 0 || requestingItems.length === 0) &&
+                  !(
+                    offeringItems.length === 0 && requestingItems.length === 0
+                  ) && (
+                    <div
+                      className={`bg-secondary-bg mb-4 rounded-lg border p-3 ${
+                        offeringItems.length === 0
+                          ? "border-status-success"
+                          : "border-status-error"
+                      }`}
+                    >
+                      <p className="text-secondary-text text-sm">
+                        {offeringItems.length === 0
+                          ? "Select at least 1 item for the Offering side."
+                          : "Select at least 1 item for the Requesting side."}
+                      </p>
                     </div>
+                  )}
+                <div className="mb-4 flex justify-center sm:justify-start">
+                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg inline-flex gap-1 rounded-lg border p-2">
+                    <button
+                      onClick={() => setTotalBasis("offering")}
+                      className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
+                        totalBasis === "offering"
+                          ? "bg-status-success text-form-button-text"
+                          : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
+                      }`}
+                    >
+                      Offering Total
+                    </button>
+                    <button
+                      onClick={() => setTotalBasis("requesting")}
+                      className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
+                        totalBasis === "requesting"
+                          ? "bg-status-error text-form-button-text"
+                          : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
+                      }`}
+                    >
+                      Requesting Total
+                    </button>
+                  </div>
+                </div>
 
-                    {/* Range controls */}
-                    <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-secondary-text text-sm">
-                              Range
-                            </span>
-                          </div>
+                {(() => {
+                  const offeringTotal = offeringItems.reduce(
+                    (sum, item) => sum + getSelectedValue(item, "offering"),
+                    0,
+                  );
+                  const requestingTotal = requestingItems.reduce(
+                    (sum, item) => sum + getSelectedValue(item, "requesting"),
+                    0,
+                  );
+                  const total =
+                    totalBasis === "offering" ? offeringTotal : requestingTotal;
+                  const title =
+                    totalBasis === "offering"
+                      ? "Similar Items Near Offering Total"
+                      : "Similar Items Near Requesting Total";
+                  const contextLabel =
+                    totalBasis === "offering" ? "Offering" : "Requesting";
+                  const demandScale = [
+                    "Close to none",
+                    "Very Low",
+                    "Low",
+                    "Medium",
+                    "Decent",
+                    "High",
+                    "Very High",
+                    "Extremely High",
+                  ];
+                  const selectedSideItems =
+                    totalBasis === "offering" ? offeringItems : requestingItems;
+                  const demandIndices = selectedSideItems
+                    .map((i) => i.demand ?? i.data?.demand ?? "N/A")
+                    .map((d) =>
+                      demandScale.indexOf(d as (typeof demandScale)[number]),
+                    )
+                    .filter((idx) => idx >= 0);
+                  const avgDemandIndex =
+                    demandIndices.length > 0
+                      ? Math.round(
+                          demandIndices.reduce((a, b) => a + b, 0) /
+                            demandIndices.length,
+                        )
+                      : -1;
+                  const baselineDemand =
+                    avgDemandIndex >= 0 ? demandScale[avgDemandIndex] : null;
+
+                  // Summary of which values are used (Clean vs Duped)
+                  const sideKey: "offering" | "requesting" = totalBasis;
+                  let cleanCount = 0;
+                  let dupedCount = 0;
+                  selectedSideItems.forEach((it) => {
+                    const k = getItemKey(it.id, it.sub_name, sideKey);
+                    const vt = itemValueTypes[k] || "cash";
+                    const dupedAvailable = !!(
+                      it.duped_value && it.duped_value !== "N/A"
+                    );
+                    if (vt === "duped" && dupedAvailable) dupedCount++;
+                    else cleanCount++;
+                  });
+
+                  return (
+                    <>
+                      <div className="mb-3 flex flex-col items-center gap-2 text-xs sm:flex-row sm:text-sm">
+                        <span className="text-secondary-text">
+                          Using selected values
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                            {cleanCount} clean
+                          </span>
+                          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                            {dupedCount} duped
+                          </span>
                         </div>
-                        <Slider
-                          value={
-                            totalBasis === "offering"
+                      </div>
+
+                      {/* Range controls */}
+                      <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-secondary-text text-sm">
+                                Range
+                              </span>
+                            </div>
+                          </div>
+                          <Slider
+                            value={
+                              totalBasis === "offering"
+                                ? offeringSimilarItemsRange
+                                : requestingSimilarItemsRange
+                            }
+                            min={0}
+                            max={MAX_SIMILAR_ITEMS_RANGE}
+                            step={50_000}
+                            onChange={(_, v) => {
+                              const val = Array.isArray(v) ? v[0] : v;
+                              if (typeof val === "number") {
+                                if (totalBasis === "offering")
+                                  setOfferingSimilarItemsRange(val);
+                                else setRequestingSimilarItemsRange(val);
+                              }
+                            }}
+                            sx={{
+                              color: "var(--color-button-info)",
+                              mt: 1,
+                              "& .MuiSlider-markLabel": {
+                                color: "var(--color-secondary-text)",
+                              },
+                              "& .MuiSlider-mark": {
+                                backgroundColor: "var(--color-secondary-text)",
+                              },
+                            }}
+                          />
+                          <div className="text-secondary-text text-xs">
+                            Current:{" "}
+                            {(totalBasis === "offering"
                               ? offeringSimilarItemsRange
                               : requestingSimilarItemsRange
-                          }
-                          min={0}
-                          max={MAX_SIMILAR_ITEMS_RANGE}
-                          step={50_000}
-                          onChange={(_, v) => {
-                            const val = Array.isArray(v) ? v[0] : v;
-                            if (typeof val === "number") {
-                              if (totalBasis === "offering")
-                                setOfferingSimilarItemsRange(val);
-                              else setRequestingSimilarItemsRange(val);
-                            }
-                          }}
-                          sx={{
-                            color: "var(--color-button-info)",
-                            mt: 1,
-                            "& .MuiSlider-markLabel": {
-                              color: "var(--color-secondary-text)",
-                            },
-                            "& .MuiSlider-mark": {
-                              backgroundColor: "var(--color-secondary-text)",
-                            },
-                          }}
-                        />
-                        <div className="text-secondary-text text-xs">
-                          Current:{" "}
-                          {(totalBasis === "offering"
-                            ? offeringSimilarItemsRange
-                            : requestingSimilarItemsRange
-                          ).toLocaleString()}
+                            ).toLocaleString()}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <TotalSimilarItems
-                      targetValue={total}
-                      items={initialItems}
-                      excludeItems={
-                        totalBasis === "offering"
-                          ? offeringItems
-                          : requestingItems
-                      }
-                      typeFilter={null}
-                      range={
-                        totalBasis === "offering"
-                          ? offeringSimilarItemsRange
-                          : requestingSimilarItemsRange
-                      }
-                      title={title}
-                      contextLabel={contextLabel}
-                      baselineDemand={baselineDemand}
-                      enableDemandSort={true}
-                      valuePreference={(function () {
-                        const sideItems =
+                      <TotalSimilarItems
+                        targetValue={total}
+                        items={initialItems}
+                        excludeItems={
                           totalBasis === "offering"
                             ? offeringItems
-                            : requestingItems;
-                        const sideKey: "offering" | "requesting" = totalBasis;
-                        // If ALL selected items on this side are duped, compare using duped values, else use cash
-                        if (sideItems.length > 0) {
-                          const allDuped = sideItems.every((it) => {
-                            const k = getItemKey(it.id, it.sub_name, sideKey);
-                            const vt = itemValueTypes[k] || "cash";
-                            const dupedAvailable = !!(
-                              it.duped_value && it.duped_value !== "N/A"
-                            );
-                            return vt === "duped" && dupedAvailable;
-                          });
-                          return allDuped ? "duped" : "cash";
+                            : requestingItems
                         }
-                        return "cash";
-                      })()}
-                    />
-                  </>
-                );
-              })()}
-            </>
-          )}
-        </div>
-      )}
+                        typeFilter={null}
+                        range={
+                          totalBasis === "offering"
+                            ? offeringSimilarItemsRange
+                            : requestingSimilarItemsRange
+                        }
+                        title={title}
+                        contextLabel={contextLabel}
+                        baselineDemand={baselineDemand}
+                        enableDemandSort={true}
+                        valuePreference={(function () {
+                          const sideItems =
+                            totalBasis === "offering"
+                              ? offeringItems
+                              : requestingItems;
+                          const sideKey: "offering" | "requesting" = totalBasis;
+                          // If ALL selected items on this side are duped, compare using duped values, else use cash
+                          if (sideItems.length > 0) {
+                            const allDuped = sideItems.every((it) => {
+                              const k = getItemKey(it.id, it.sub_name, sideKey);
+                              const vt = itemValueTypes[k] || "cash";
+                              const dupedAvailable = !!(
+                                it.duped_value && it.duped_value !== "N/A"
+                              );
+                              return vt === "duped" && dupedAvailable;
+                            });
+                            return allDuped ? "duped" : "cash";
+                          }
+                          return "cash";
+                        })()}
+                      />
+                    </>
+                  );
+                })()}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

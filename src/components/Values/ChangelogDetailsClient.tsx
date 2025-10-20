@@ -1104,8 +1104,14 @@ export default function ChangelogDetailsClient({
 
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-              <div className="modal-header text-primary-text px-6 py-4 text-2xl font-bold">
-                Voters
+              <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
+                <span>Voters</span>
+                <button
+                  onClick={() => setVotersOpen(false)}
+                  className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
               </div>
 
               <div className="modal-content px-6 pt-3 pb-6">
@@ -1219,15 +1225,6 @@ export default function ChangelogDetailsClient({
                     ))
                   )}
                 </div>
-              </div>
-
-              <div className="modal-footer flex justify-end gap-3 px-6 py-4">
-                <button
-                  onClick={() => setVotersOpen(false)}
-                  className="bg-button-info hover:bg-button-info-hover text-form-button-text border-border-primary min-w-[100px] cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold transition-colors"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

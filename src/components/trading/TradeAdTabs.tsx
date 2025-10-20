@@ -11,42 +11,40 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
   onTabChange,
   hasTradeAds,
 }) => (
-  <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border">
-    <nav className="px-6 py-4">
-      <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+  <div className="overflow-x-auto">
+    <div role="tablist" className="tabs min-w-max">
+      <button
+        role="tab"
+        aria-selected={activeTab === "view"}
+        aria-controls="trading-tabpanel-view"
+        id="trading-tab-view"
+        onClick={() => onTabChange("view")}
+        className={`tab ${activeTab === "view" ? "tab-active" : ""}`}
+      >
+        View Trade Ads
+      </button>
+      <button
+        role="tab"
+        aria-selected={activeTab === "create"}
+        aria-controls="trading-tabpanel-create"
+        id="trading-tab-create"
+        onClick={() => onTabChange("create")}
+        className={`tab ${activeTab === "create" ? "tab-active" : ""}`}
+      >
+        Create Trade Ad
+      </button>
+      {hasTradeAds && (
         <button
-          onClick={() => onTabChange("view")}
-          className={`${
-            activeTab === "view"
-              ? "bg-button-info text-form-button-text shadow-sm"
-              : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-          } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
+          role="tab"
+          aria-selected={activeTab === "edit"}
+          aria-controls="trading-tabpanel-edit"
+          id="trading-tab-edit"
+          onClick={() => onTabChange("edit")}
+          className={`tab ${activeTab === "edit" ? "tab-active" : ""}`}
         >
-          View Trade Ads
+          Edit Trade Ad
         </button>
-        <button
-          onClick={() => onTabChange("create")}
-          className={`${
-            activeTab === "create"
-              ? "bg-button-info text-form-button-text shadow-sm"
-              : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-          } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-        >
-          Create Trade Ad
-        </button>
-        {hasTradeAds && (
-          <button
-            onClick={() => onTabChange("edit")}
-            className={`${
-              activeTab === "edit"
-                ? "bg-button-info text-form-button-text shadow-sm"
-                : "text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-            } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-          >
-            Edit Trade Ad
-          </button>
-        )}
-      </div>
-    </nav>
+      )}
+    </div>
   </div>
 );

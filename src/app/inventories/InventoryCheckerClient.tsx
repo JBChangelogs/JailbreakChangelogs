@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { ThemeProvider, Box } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
 import { ENABLE_WS_SCAN } from "@/utils/api";
@@ -697,7 +697,7 @@ export default function InventoryCheckerClient({
               />
 
               {/* Tab Content */}
-              <Box className="mt-4">
+              <div className="mt-4">
                 {activeTab === 0 && (
                   <InventoryItems
                     initialData={currentData}
@@ -719,7 +719,7 @@ export default function InventoryCheckerClient({
                     initialUserMap={initialCommentUserMap}
                   />
                 )}
-              </Box>
+              </div>
             </div>
 
             {/* Trade History Modal */}
@@ -768,92 +768,25 @@ function InventoryOverflowTabs({
   onChange: (e: React.SyntheticEvent, v: number) => void;
   hasComments: boolean;
 }) {
-  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
-  const [showArrows, setShowArrows] = React.useState(false);
-
-  const updateArrowVisibility = React.useCallback(() => {
-    const node = scrollerRef.current;
-    if (!node) return setShowArrows(false);
-    const hasOverflow = node.scrollWidth > node.clientWidth + 1;
-    setShowArrows(hasOverflow);
-  }, []);
-
-  React.useEffect(() => {
-    updateArrowVisibility();
-    const onResize = () => updateArrowVisibility();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [updateArrowVisibility]);
-
-  React.useEffect(() => {
-    updateArrowVisibility();
-  }, [value, hasComments, updateArrowVisibility]);
-
-  const scrollByAmount = (delta: number) => {
-    const node = scrollerRef.current;
-    if (!node) return;
-    node.scrollBy({ left: delta, behavior: "smooth" });
-  };
-
   const labels = ["Inventory Items", ...(hasComments ? ["Comments"] : [])];
 
   return (
-    <Box>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <button
-          type="button"
-          aria-label="scroll left"
-          onClick={() => scrollByAmount(-200)}
-          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
-            showArrows ? "" : "hidden"
-          }`}
-        >
-          ‹
-        </button>
-        <div
-          ref={scrollerRef}
-          role="tablist"
-          aria-label="inventory tabs"
-          className="overflow-x-auto whitespace-nowrap md:flex md:flex-wrap md:overflow-visible md:whitespace-normal"
-          style={{
-            scrollbarWidth: "thin",
-            WebkitOverflowScrolling: "touch",
-            flex: 1,
-          }}
-        >
-          {labels.map((label, idx) => (
-            <button
-              key={label}
-              role="tab"
-              aria-selected={value === idx}
-              aria-controls={`inventory-tabpanel-${idx}`}
-              id={`inventory-tab-${idx}`}
-              onClick={(e) =>
-                onChange(e as unknown as React.SyntheticEvent, idx)
-              }
-              className={
-                (value === idx
-                  ? "text-button-info border-button-info border-b-2 font-semibold "
-                  : "text-secondary-text hover:text-primary-text ") +
-                "hover:bg-button-info/10 mr-1 cursor-pointer rounded-t-md px-4 py-2"
-              }
-              style={{ display: "inline-block" }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          aria-label="scroll right"
-          onClick={() => scrollByAmount(200)}
-          className={`text-primary-text hover:bg-button-info/10 rounded p-2 ${
-            showArrows ? "" : "hidden"
-          }`}
-        >
-          ›
-        </button>
+    <div className="overflow-x-auto">
+      <div role="tablist" className="tabs min-w-max">
+        {labels.map((label, idx) => (
+          <button
+            key={label}
+            role="tab"
+            aria-selected={value === idx}
+            aria-controls={`inventory-tabpanel-${idx}`}
+            id={`inventory-tab-${idx}`}
+            onClick={(e) => onChange(e as unknown as React.SyntheticEvent, idx)}
+            className={`tab ${value === idx ? "tab-active" : ""}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
-    </Box>
+    </div>
   );
 }

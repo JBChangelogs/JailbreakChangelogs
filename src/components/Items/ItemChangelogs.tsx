@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { Button, Pagination } from "@mui/material";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { formatFullValue } from "@/utils/values";
@@ -341,8 +345,14 @@ export default function ItemChangelogs({
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-            <div className="modal-header text-primary-text px-6 py-4 text-2xl font-bold">
-              Voters
+            <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
+              <span>Voters</span>
+              <button
+                onClick={() => setVotersOpen(false)}
+                className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="modal-content px-6 pt-3 pb-6">
@@ -457,15 +467,6 @@ export default function ItemChangelogs({
                   ))
                 )}
               </div>
-            </div>
-
-            <div className="modal-footer flex justify-end gap-3 px-6 py-4">
-              <button
-                onClick={() => setVotersOpen(false)}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text border-border-primary min-w-[100px] cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold transition-colors"
-              >
-                Close
-              </button>
             </div>
           </DialogPanel>
         </div>

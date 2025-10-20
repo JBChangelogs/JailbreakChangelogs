@@ -111,7 +111,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             <div className="flex items-center justify-between">
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
-                className="text-link hover:text-link-hover font-medium transition-colors"
+                className="text-primary-text hover:text-link font-medium transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 {item.name}
@@ -133,12 +133,12 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
                 {item.type}
               </span>
               {(item.is_limited === 1 || item.data?.is_limited === 1) && (
-                <span className="bg-primary/10 border-primary/30 text-primary-text rounded-lg border px-2 py-1 text-xs font-medium">
+                <span className="bg-transparent border-primary-text text-primary-text rounded-lg border px-2 py-1 text-xs font-medium">
                   Limited
                 </span>
               )}
               {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
-                <span className="bg-primary/10 border-primary/30 text-primary-text rounded-lg border px-2 py-1 text-xs font-medium">
+                <span className="bg-transparent border-primary-text text-primary-text rounded-lg border px-2 py-1 text-xs font-medium">
                   Seasonal
                 </span>
               )}
@@ -261,7 +261,7 @@ export default function TradeItemsWithValues({
               <span className="bg-status-success/20 border-status-success/30 text-primary-text hidden rounded-full border px-3 py-1 text-xs font-medium sm:block">
                 Offering
               </span>
-              <span className="bg-primary/10 border-primary/20 text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
+              <span className="bg-transparent border-primary-text text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
                 {offeringItems.reduce((sum, item) => sum + item.count, 0)} item
                 {offeringItems.reduce((sum, item) => sum + item.count, 0) !== 1
                   ? "s"
@@ -311,7 +311,7 @@ export default function TradeItemsWithValues({
               <span className="bg-status-error/20 border-status-error/30 text-primary-text hidden rounded-full border px-3 py-1 text-xs font-medium sm:block">
                 Requesting
               </span>
-              <span className="bg-primary/10 border-primary/20 text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
+              <span className="bg-transparent border-primary-text text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
                 {requestingItems.reduce((sum, item) => sum + item.count, 0)}{" "}
                 item
                 {requestingItems.reduce((sum, item) => sum + item.count, 0) !==
@@ -352,7 +352,7 @@ export default function TradeItemsWithValues({
       </div>
 
       {/* Overall Difference */}
-      <div className="from-primary/3 to-primary/5 rounded-xl bg-gradient-to-r p-6">
+      <div className="bg-primary-bg rounded-xl p-6">
         <h4 className="text-primary-text mb-4 text-lg font-semibold">
           Overall Difference
         </h4>
