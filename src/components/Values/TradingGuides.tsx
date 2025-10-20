@@ -143,7 +143,7 @@ export default function TradingGuides({
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="hover:bg-primary-bg border-border-primary hover:border-border-focus bg-secondary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+        className="hover:bg-primary-bg border-border-primary hover:border-border-focus bg-primary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <div className="flex items-center gap-3">
           <h3 className="text-primary-text text-xl font-semibold">

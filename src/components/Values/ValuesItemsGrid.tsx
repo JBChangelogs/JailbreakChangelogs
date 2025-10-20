@@ -36,6 +36,32 @@ export default function ValuesItemsGrid({
 }: ValuesItemsGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const getFilterDisplayName = (filterSort: string): string => {
+    const filterMap: Record<string, string> = {
+      "name-all-items": "All Items",
+      favorites: "My Favorites",
+      "name-limited-items": "Limited Items",
+      "name-seasonal-items": "Seasonal Items",
+      "name-vehicles": "Vehicles",
+      "name-spoilers": "Spoilers",
+      "name-rims": "Rims",
+      "name-body-colors": "Body Colors",
+      "name-hyperchromes": "HyperChromes",
+      "name-textures": "Body Textures",
+      "name-tire-stickers": "Tire Stickers",
+      "name-tire-styles": "Tire Styles",
+      "name-drifts": "Drifts",
+      "name-furnitures": "Furniture",
+      "name-horns": "Horns",
+      "name-weapon-skins": "Weapon Skins",
+    };
+
+    return (
+      filterMap[filterSort] ||
+      filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")
+    );
+  };
+
   const parseNumericValue = (value: string | null): number => {
     if (!value || value === "N/A") return -1;
     const lower = value.toLowerCase();
@@ -104,10 +130,7 @@ export default function ValuesItemsGrid({
     }
 
     if (hasCategoryFilter && hasDemandFilter) {
-      const categoryName = filterSort
-        .replace("name-", "")
-        .replace("-items", "")
-        .replace(/-/g, " ");
+      const categoryName = getFilterDisplayName(filterSort);
       const demandLevel = valueSort.replace("demand-", "").replace(/-/g, " ");
       const formattedDemand = demandLevel
         .split(" ")
@@ -116,10 +139,7 @@ export default function ValuesItemsGrid({
 
       message += ` in ${categoryName} with ${formattedDemand} demand`;
     } else if (hasCategoryFilter && hasTrendFilter) {
-      const categoryName = filterSort
-        .replace("name-", "")
-        .replace("-items", "")
-        .replace(/-/g, " ");
+      const categoryName = getFilterDisplayName(filterSort);
       const trendLevel = valueSort.replace("trend-", "").replace(/-/g, " ");
       const formattedTrend = trendLevel
         .split(" ")
@@ -128,10 +148,7 @@ export default function ValuesItemsGrid({
 
       message += ` in ${categoryName} with ${formattedTrend} trend`;
     } else if (hasCategoryFilter) {
-      const categoryName = filterSort
-        .replace("name-", "")
-        .replace("-items", "")
-        .replace(/-/g, " ");
+      const categoryName = getFilterDisplayName(filterSort);
       message += ` in ${categoryName}`;
     } else if (hasDemandFilter) {
       const demandLevel = valueSort.replace("demand-", "").replace(/-/g, " ");
@@ -157,8 +174,8 @@ export default function ValuesItemsGrid({
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {debouncedSearchTerm
-            ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? "item" : "items"} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-            : `Total ${filterSort !== "name-all-items" ? filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ") : "Items"}: ${rangeFilteredItems.length}`}
+            ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? "item" : "items"} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`
+            : `Total ${filterSort !== "name-all-items" ? getFilterDisplayName(filterSort) : "Items"}: ${rangeFilteredItems.length}`}
         </p>
       </div>
 
@@ -181,14 +198,14 @@ export default function ValuesItemsGrid({
             {rangeFilteredItems.length === 0 && items.length > 0 && (
               <button
                 onClick={onResetValueRange}
-                className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none"
+                className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
               >
                 Reset Value Range
               </button>
             )}
             <button
               onClick={onClearAllFilters}
-              className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
+              className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
             >
               Clear All Filters
             </button>

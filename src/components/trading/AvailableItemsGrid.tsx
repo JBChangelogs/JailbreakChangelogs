@@ -47,6 +47,32 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   onSelect,
 }) => {
   const windowWidth = useWindowWidth();
+
+  const getFilterDisplayName = (filterSort: string): string => {
+    const filterMap: Record<string, string> = {
+      "name-all-items": "All Items",
+      favorites: "My Favorites",
+      "name-limited-items": "Limited Items",
+      "name-seasonal-items": "Seasonal Items",
+      "name-vehicles": "Vehicles",
+      "name-spoilers": "Spoilers",
+      "name-rims": "Rims",
+      "name-body-colors": "Body Colors",
+      "name-hyperchromes": "HyperChromes",
+      "name-textures": "Body Textures",
+      "name-tire-stickers": "Tire Stickers",
+      "name-tire-styles": "Tire Styles",
+      "name-drifts": "Drifts",
+      "name-furnitures": "Furniture",
+      "name-horns": "Horns",
+      "name-weapon-skins": "Weapon Skins",
+    };
+
+    return (
+      filterMap[filterSort] ||
+      filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")
+    );
+  };
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -478,8 +504,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               <div className="py-8 text-center">
                 <p className="text-tertiary-text">
                   {searchQuery
-                    ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`
-                    : `No items found${filterSort !== "name-all-items" ? ` in ${filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")}` : ""}`}
+                    ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`
+                    : `No items found${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`}
                 </p>
                 <button
                   onClick={() => {
@@ -487,7 +513,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     setFilterSort("name-all-items");
                     setValueSort("cash-desc");
                   }}
-                  className="text-secondary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none"
+                  className="text-secondary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
                 >
                   Clear All Filters
                 </button>

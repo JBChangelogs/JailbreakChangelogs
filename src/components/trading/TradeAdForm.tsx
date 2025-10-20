@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
-import dynamic from "next/dynamic";
 import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import {
@@ -20,8 +19,6 @@ import {
   safeGetJSON,
   safeSetJSON,
 } from "@/utils/safeStorage";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface TradeAdFormProps {
   onSuccess?: () => void;
@@ -64,7 +61,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | undefined>(
     tradeAd,
   );
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -433,11 +429,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
   };
 
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -666,66 +657,26 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 </Link>
               </div>
               <div className="mt-3">
-                {selectLoaded ? (
-                  <Select
-                    value={
-                      expirationHours !== null
-                        ? {
-                            value: expirationHours,
-                            label: `${expirationHours} ${expirationHours === 1 ? "hour" : "hours"}`,
-                          }
-                        : { value: null, label: "Select expiration..." }
+                <select
+                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                  value={expirationHours || ""}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      setExpirationHours(null);
+                    } else {
+                      setExpirationHours(parseInt(value));
                     }
-                    onChange={(option: unknown) => {
-                      if (
-                        !option ||
-                        (option as { value: number | null }).value == null
-                      ) {
-                        setExpirationHours(null);
-                        return;
-                      }
-                      const newValue = (option as { value: number }).value;
-                      setExpirationHours(newValue);
-                    }}
-                    options={[
-                      { value: null, label: "Select expiration..." },
-                      ...[6, 12, 24, 48].map((hours) => ({
-                        value: hours,
-                        label: `${hours} ${hours === 1 ? "hour" : "hours"}`,
-                      })),
-                    ]}
-                    placeholder="Select expiration..."
-                    classNamePrefix="react-select"
-                    className="w-full"
-                    isClearable={false}
-                    unstyled
-                    classNames={{
-                      control: () =>
-                        "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
-                      singleValue: () => "text-secondary-text",
-                      placeholder: () => "text-secondary-text",
-                      menu: () =>
-                        "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                      option: ({ isSelected, isFocused }) =>
-                        `px-4 py-3 cursor-pointer ${
-                          isSelected
-                            ? "bg-button-info text-form-button-text"
-                            : isFocused
-                              ? "bg-quaternary-bg text-primary-text"
-                              : "bg-secondary-bg text-secondary-text"
-                        }`,
-                      clearIndicator: () =>
-                        "text-secondary-text hover:text-primary-text cursor-pointer",
-                      dropdownIndicator: () =>
-                        "text-secondary-text hover:text-primary-text cursor-pointer",
-                      groupHeading: () =>
-                        "px-4 py-2 text-primary-text font-semibold text-sm",
-                    }}
-                    isSearchable={false}
-                  />
-                ) : (
-                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-                )}
+                  }}
+                >
+                  <option value="" disabled>
+                    Select expiration...
+                  </option>
+                  <option value="6">6 hours</option>
+                  <option value="12">12 hours</option>
+                  <option value="24">24 hours</option>
+                  <option value="48">48 hours</option>
+                </select>
               </div>
             </div>
           </div>
@@ -737,60 +688,19 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             <h3 className="text-tertiary-text mb-4 font-medium">
               Trade Status
             </h3>
-            {selectLoaded ? (
-              <Select
-                value={{
-                  value: selectedTradeAd?.status || tradeAd.status,
-                  label: selectedTradeAd?.status || tradeAd.status,
-                }}
-                onChange={(option: unknown) => {
-                  if (!option) {
-                    const status = "Pending";
-                    setSelectedTradeAd((prev) =>
-                      prev ? { ...prev, status } : { ...tradeAd, status },
-                    );
-                    return;
-                  }
-                  const status = (option as { value: string }).value;
-                  setSelectedTradeAd((prev) =>
-                    prev ? { ...prev, status } : { ...tradeAd, status },
-                  );
-                }}
-                options={[
-                  { value: "Pending", label: "Pending" },
-                  { value: "Completed", label: "Completed" },
-                ]}
-                classNamePrefix="react-select"
-                className="w-full"
-                isClearable={false}
-                unstyled
-                classNames={{
-                  control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
-                  singleValue: () => "text-secondary-text",
-                  placeholder: () => "text-secondary-text",
-                  menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused }) =>
-                    `px-4 py-3 cursor-pointer ${
-                      isSelected
-                        ? "bg-button-info text-form-button-text"
-                        : isFocused
-                          ? "bg-primary-bg text-primary-text"
-                          : "bg-secondary-bg text-secondary-text"
-                    }`,
-                  clearIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                  dropdownIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                  groupHeading: () =>
-                    "px-4 py-2 text-primary-text font-semibold text-sm",
-                }}
-                isSearchable={false}
-              />
-            ) : (
-              <div className="bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
-            )}
+            <select
+              className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+              value={selectedTradeAd?.status || tradeAd.status}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                const status = e.target.value;
+                setSelectedTradeAd((prev) =>
+                  prev ? { ...prev, status } : { ...tradeAd, status },
+                );
+              }}
+            >
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+            </select>
           </div>
         )}
 
