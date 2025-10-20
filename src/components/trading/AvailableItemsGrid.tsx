@@ -26,7 +26,6 @@ import { TradeAdErrorModal } from "./TradeAdErrorModal";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { FilterSort, ValueSort } from "@/types";
-import dynamic from "next/dynamic";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -34,8 +33,6 @@ import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -61,7 +58,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
 
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
@@ -77,10 +73,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     searchQuery.length > MAX_QUERY_DISPLAY_LENGTH
       ? `${searchQuery.slice(0, MAX_QUERY_DISPLAY_LENGTH)}...`
       : searchQuery;
-
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
 
   useEffect(() => {
     const handleShowError = (event: CustomEvent) => {
@@ -402,237 +394,74 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
             {/* Dropdowns - Side by side on desktop */}
             <div className="flex gap-4 lg:col-span-2">
-              {selectLoaded ? (
-                <Select
-                  value={{
-                    value: filterSort,
-                    label: (() => {
-                      switch (filterSort) {
-                        case "name-all-items":
-                          return "All Items";
-                        case "name-limited-items":
-                          return "Limited Items";
-                        case "name-seasonal-items":
-                          return "Seasonal Items";
-                        case "name-vehicles":
-                          return "Vehicles";
-                        case "name-spoilers":
-                          return "Spoilers";
-                        case "name-rims":
-                          return "Rims";
-                        case "name-body-colors":
-                          return "Body Colors";
-                        case "name-hyperchromes":
-                          return "HyperChromes";
-                        case "name-textures":
-                          return "Body Textures";
-                        case "name-tire-stickers":
-                          return "Tire Stickers";
-                        case "name-tire-styles":
-                          return "Tire Styles";
-                        case "name-drifts":
-                          return "Drifts";
-                        case "name-furnitures":
-                          return "Furniture";
-                        case "name-horns":
-                          return "Horns";
-                        case "name-weapon-skins":
-                          return "Weapon Skins";
-                        default:
-                          return filterSort;
-                      }
-                    })(),
-                  }}
-                  onChange={(option: unknown) => {
-                    if (!option) {
-                      // Reset to original value when cleared
-                      setFilterSort("name-all-items");
-                      return;
-                    }
-                    const newValue = (option as { value: FilterSort }).value;
-                    setFilterSort(newValue);
-                  }}
-                  options={[
-                    { value: "name-all-items", label: "All Items" },
-                    { value: "name-limited-items", label: "Limited Items" },
-                    { value: "name-seasonal-items", label: "Seasonal Items" },
-                    { value: "name-vehicles", label: "Vehicles" },
-                    { value: "name-spoilers", label: "Spoilers" },
-                    { value: "name-rims", label: "Rims" },
-                    { value: "name-body-colors", label: "Body Colors" },
-                    { value: "name-hyperchromes", label: "HyperChromes" },
-                    { value: "name-textures", label: "Body Textures" },
-                    { value: "name-tire-stickers", label: "Tire Stickers" },
-                    { value: "name-tire-styles", label: "Tire Styles" },
-                    { value: "name-drifts", label: "Drifts" },
-                    { value: "name-furnitures", label: "Furniture" },
-                    { value: "name-horns", label: "Horns" },
-                    { value: "name-weapon-skins", label: "Weapon Skins" },
-                  ]}
-                  className="w-full"
-                  isClearable={false}
-                  unstyled
-                  classNames={{
-                    control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
-                    singleValue: () => "text-secondary-text",
-                    placeholder: () => "text-secondary-text",
-                    menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                    option: ({ isSelected, isFocused }) =>
-                      `px-4 py-3 cursor-pointer ${
-                        isSelected
-                          ? "bg-button-info text-form-button-text"
-                          : isFocused
-                            ? "bg-quaternary-bg text-primary-text"
-                            : "bg-secondary-bg text-secondary-text"
-                      }`,
-                    clearIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    dropdownIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    groupHeading: () =>
-                      "px-4 py-2 text-primary-text font-semibold text-sm",
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-              )}
+              <select
+                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+                value={filterSort}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setFilterSort(e.target.value as FilterSort);
+                }}
+              >
+                <option value="" disabled>
+                  Select category
+                </option>
+                <option value="name-all-items">All Items</option>
+                <option value="name-limited-items">Limited Items</option>
+                <option value="name-seasonal-items">Seasonal Items</option>
+                <option value="name-vehicles">Vehicles</option>
+                <option value="name-spoilers">Spoilers</option>
+                <option value="name-rims">Rims</option>
+                <option value="name-body-colors">Body Colors</option>
+                <option value="name-hyperchromes">HyperChromes</option>
+                <option value="name-textures">Body Textures</option>
+                <option value="name-tire-stickers">Tire Stickers</option>
+                <option value="name-tire-styles">Tire Styles</option>
+                <option value="name-drifts">Drifts</option>
+                <option value="name-furnitures">Furniture</option>
+                <option value="name-horns">Horns</option>
+                <option value="name-weapon-skins">Weapon Skins</option>
+              </select>
 
-              {selectLoaded ? (
-                <Select
-                  value={{
-                    value: valueSort,
-                    label: (() => {
-                      switch (valueSort) {
-                        case "cash-desc":
-                          return "Cash Value (High to Low)";
-                        case "cash-asc":
-                          return "Cash Value (Low to High)";
-                        case "duped-desc":
-                          return "Duped Value (High to Low)";
-                        case "duped-asc":
-                          return "Duped Value (Low to High)";
-                        case "demand-desc":
-                          return "Demand (High to Low)";
-                        case "demand-asc":
-                          return "Demand (Low to High)";
-                        case "times-traded-desc":
-                          return "Times Traded (High to Low)";
-                        case "times-traded-asc":
-                          return "Times Traded (Low to High)";
-                        case "unique-circulation-desc":
-                          return "Unique Circulation (High to Low)";
-                        case "unique-circulation-asc":
-                          return "Unique Circulation (Low to High)";
-                        case "demand-multiple-desc":
-                          return "Demand Multiple (High to Low)";
-                        case "demand-multiple-asc":
-                          return "Demand Multiple (Low to High)";
-                        default:
-                          return valueSort;
-                      }
-                    })(),
-                  }}
-                  onChange={(option: unknown) => {
-                    if (!option) {
-                      // Reset to original value when cleared
-                      setValueSort("cash-desc");
-                      return;
-                    }
-                    const newValue = (option as { value: ValueSort }).value;
-                    setValueSort(newValue);
-                  }}
-                  options={[
-                    {
-                      label: "Values",
-                      options: [
-                        {
-                          value: "cash-desc",
-                          label: "Cash Value (High to Low)",
-                        },
-                        {
-                          value: "cash-asc",
-                          label: "Cash Value (Low to High)",
-                        },
-                        {
-                          value: "duped-desc",
-                          label: "Duped Value (High to Low)",
-                        },
-                        {
-                          value: "duped-asc",
-                          label: "Duped Value (Low to High)",
-                        },
-                      ],
-                    },
-                    {
-                      label: "Trading Metrics",
-                      options: [
-                        {
-                          value: "times-traded-desc",
-                          label: "Times Traded (High to Low)",
-                        },
-                        {
-                          value: "times-traded-asc",
-                          label: "Times Traded (Low to High)",
-                        },
-                        {
-                          value: "unique-circulation-desc",
-                          label: "Unique Circulation (High to Low)",
-                        },
-                        {
-                          value: "unique-circulation-asc",
-                          label: "Unique Circulation (Low to High)",
-                        },
-                        {
-                          value: "demand-multiple-desc",
-                          label: "Demand Multiple (High to Low)",
-                        },
-                        {
-                          value: "demand-multiple-asc",
-                          label: "Demand Multiple (Low to High)",
-                        },
-                      ],
-                    },
-                    {
-                      label: "Demand",
-                      options: [
-                        { value: "demand-desc", label: "Demand (High to Low)" },
-                        { value: "demand-asc", label: "Demand (Low to High)" },
-                      ],
-                    },
-                  ]}
-                  className="w-full"
-                  isClearable={false}
-                  unstyled
-                  classNames={{
-                    control: () =>
-                      "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg focus-within:border-button-info",
-                    singleValue: () => "text-secondary-text",
-                    placeholder: () => "text-secondary-text",
-                    menu: () =>
-                      "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                    option: ({ isSelected, isFocused }) =>
-                      `px-4 py-3 cursor-pointer ${
-                        isSelected
-                          ? "bg-button-info text-form-button-text"
-                          : isFocused
-                            ? "bg-quaternary-bg text-primary-text"
-                            : "bg-secondary-bg text-secondary-text"
-                      }`,
-                    clearIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    dropdownIndicator: () =>
-                      "text-secondary-text hover:text-primary-text cursor-pointer",
-                    groupHeading: () =>
-                      "px-4 py-2 text-primary-text font-semibold text-sm",
-                  }}
-                  isSearchable={false}
-                />
-              ) : (
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-              )}
+              <select
+                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+                value={valueSort}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setValueSort(e.target.value as ValueSort);
+                }}
+              >
+                <option value="" disabled>
+                  Values
+                </option>
+                <option value="cash-desc">Cash Value (High to Low)</option>
+                <option value="cash-asc">Cash Value (Low to High)</option>
+                <option value="duped-desc">Duped Value (High to Low)</option>
+                <option value="duped-asc">Duped Value (Low to High)</option>
+                <option value="" disabled>
+                  Trading Metrics
+                </option>
+                <option value="times-traded-desc">
+                  Times Traded (High to Low)
+                </option>
+                <option value="times-traded-asc">
+                  Times Traded (Low to High)
+                </option>
+                <option value="unique-circulation-desc">
+                  Unique Circulation (High to Low)
+                </option>
+                <option value="unique-circulation-asc">
+                  Unique Circulation (Low to High)
+                </option>
+                <option value="demand-multiple-desc">
+                  Demand Multiple (High to Low)
+                </option>
+                <option value="demand-multiple-asc">
+                  Demand Multiple (Low to High)
+                </option>
+                <option value="" disabled>
+                  Demand
+                </option>
+                <option value="demand-desc">Demand (High to Low)</option>
+                <option value="demand-asc">Demand (Low to High)</option>
+              </select>
             </div>
           </div>
 

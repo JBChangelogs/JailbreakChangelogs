@@ -1,10 +1,6 @@
-import { useState, useEffect } from "react";
 import ImageModal from "@/components/UI/ImageModal";
 import { Icon } from "@/components/UI/IconWrapper";
-import dynamic from "next/dynamic";
 import { Season } from "@/types/seasons";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface XpCalculatorFormProps {
   currentLevel: number;
@@ -23,13 +19,6 @@ export default function XpCalculatorForm({
   onXpChange,
   season,
 }: XpCalculatorFormProps) {
-  const [selectLoaded, setSelectLoaded] = useState(false);
-
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
-
   // Calculate max XP for the current level (XP needed to reach the NEXT level)
   const getMaxXpForLevel = (level: number) => {
     if (!season || level <= 0) return 0;
@@ -123,51 +112,24 @@ export default function XpCalculatorForm({
           <label className="text-primary-text mb-2 block text-sm font-medium">
             Current Level
           </label>
-          {selectLoaded ? (
-            <Select
-              value={{ value: currentLevel, label: `Level ${currentLevel}` }}
-              onChange={(option: unknown) => {
-                if (!option) {
-                  onLevelChange(1);
-                  onXpChange(0); // Reset XP when level changes
-                  return;
-                }
-                const newLevel = (option as { value: number }).value;
-                onLevelChange(newLevel);
-                onXpChange(0); // Reset XP when level changes
-              }}
-              options={Array.from({ length: targetLevel - 1 }, (_, i) => ({
-                value: i + 1,
-                label: `Level ${i + 1}`,
-              }))}
-              className="w-full"
-              isClearable={false}
-              isSearchable={false}
-              unstyled
-              classNames={{
-                control: () =>
-                  "text-secondary-text flex items-center justify-between rounded-lg border border-button-info bg-primary-bg px-3 py-3 h-[56px] hover:cursor-pointer min-h-[56px]",
-                singleValue: () => "text-secondary-text",
-                placeholder: () => "text-secondary-text",
-                menu: () =>
-                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                option: ({ isSelected, isFocused }) =>
-                  `px-4 py-3 cursor-pointer ${
-                    isSelected
-                      ? "bg-button-info text-primary-text"
-                      : isFocused
-                        ? "bg-quaternary-bg text-primary-text"
-                        : "bg-secondary-bg text-secondary-text"
-                  }`,
-                clearIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-                dropdownIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-              }}
-            />
-          ) : (
-            <div className="h-10 w-full animate-pulse rounded-md border"></div>
-          )}
+          <select
+            className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+            value={currentLevel}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const newLevel = parseInt(e.target.value);
+              onLevelChange(newLevel);
+              onXpChange(0); // Reset XP when level changes
+            }}
+          >
+            <option value="" disabled>
+              Select your level
+            </option>
+            {Array.from({ length: targetLevel - 1 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                Level {i + 1}
+              </option>
+            ))}
+          </select>
           <div className="text-secondary-text mt-1 text-xs">
             Select your current level (
             <span className="font-bold">1-{targetLevel - 1}</span>)

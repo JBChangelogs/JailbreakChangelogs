@@ -1,12 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ClockIcon } from "@heroicons/react/24/outline";
+import React from "react";
 import { toast } from "react-hot-toast";
 import { Icon } from "../UI/IconWrapper";
-import dynamic from "next/dynamic";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;
@@ -23,67 +19,25 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
   onSeasonSelect,
   onGoToLatestSeason,
 }) => {
-  const [selectLoaded, setSelectLoaded] = useState(false);
-
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
-
-  // Create options for the select dropdown
-  const selectOptions = seasonList.map((item) => ({
-    value: item.season.toString(),
-    label: `Season ${item.season} - ${item.title}`,
-  }));
-
-  // Find the current selected option
-  const selectedOption =
-    selectOptions.find((option) => option.value === selectedId) || null;
-
   return (
     <div className="mb-8 grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {selectLoaded ? (
-          <Select
-            value={selectedOption}
-            onChange={(option: unknown) => {
-              if (!option) {
-                onSeasonSelect("");
-                return;
-              }
-              const newValue = (option as { value: string }).value;
-              onSeasonSelect(newValue);
-            }}
-            options={selectOptions}
-            placeholder="Select a season"
-            className="w-full"
-            isClearable={false}
-            isSearchable={false}
-            unstyled
-            classNames={{
-              control: () =>
-                "text-secondary-text flex items-center justify-between rounded-lg border border-button-info bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer",
-              singleValue: () => "text-secondary-text",
-              placeholder: () => "text-secondary-text",
-              menu: () =>
-                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-              option: ({ isSelected, isFocused }) =>
-                `px-4 py-3 cursor-pointer ${
-                  isSelected
-                    ? "bg-button-info text-primary-text"
-                    : isFocused
-                      ? "bg-quaternary-bg text-primary-text"
-                      : "bg-secondary-bg text-secondary-text"
-                }`,
-              clearIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
-              dropdownIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
-            }}
-          />
-        ) : (
-          <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
-        )}
+        <select
+          className="select w-full bg-secondary-bg text-primary-text"
+          value={selectedId}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            onSeasonSelect(e.target.value)
+          }
+        >
+          <option value="" disabled>
+            Select a season
+          </option>
+          {seasonList.map((item) => (
+            <option key={item.season} value={item.season.toString()}>
+              Season {item.season} - {item.title}
+            </option>
+          ))}
+        </select>
 
         {seasonList.length > 0 &&
         (() => {
@@ -96,19 +50,19 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
         })() ? (
           <button
             onClick={onGoToLatestSeason}
-            className="text-secondary-text border-button-info bg-secondary-bg flex items-center justify-between rounded-lg border p-3 hover:cursor-pointer focus:outline-none"
+            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
           >
             <span>Go to Current Season</span>
-            <ClockIcon className="text-button-info h-5 w-5" />
+            <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
           </button>
         ) : (
           <button
             onClick={() => toast.error("Already on the current season")}
-            className="text-secondary-text border-button-info bg-secondary-bg flex cursor-not-allowed items-center justify-between rounded-lg border p-3 opacity-50 focus:outline-none"
+            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-not-allowed items-center gap-2 rounded px-4 py-2 transition-colors opacity-50"
             aria-disabled="true"
           >
             <span>Go to Current Season</span>
-            <ClockIcon className="text-button-info h-5 w-5" />
+            <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
           </button>
         )}
 
@@ -119,12 +73,12 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
             onSeasonSelect(randomSeason.season.toString());
             toast.success(`Navigated to random season: ${randomSeason.title}`);
           }}
-          className="text-secondary-text border-button-info bg-secondary-bg flex items-center justify-between rounded-lg border p-3 hover:cursor-pointer focus:outline-none"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
         >
           <span>Random Season</span>
           <Icon
             icon="streamline-ultimate:dice-bold"
-            className="text-button-info h-5 w-5"
+            className="h-4 w-4"
             inline={true}
           />
         </button>

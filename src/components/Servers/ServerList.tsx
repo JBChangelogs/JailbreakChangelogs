@@ -11,7 +11,6 @@ import dynamic from "next/dynamic";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-const Select = dynamic(() => import("react-select"), { ssr: false });
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
@@ -511,44 +510,24 @@ const ServerList: React.FC<{
         <div className="flex flex-row items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-64 sm:w-80">
-              <Select
-                value={sortOptions.find(
-                  (option) => option.value === sortOption,
-                )}
-                onChange={(selectedOption) => {
-                  if (
-                    selectedOption &&
-                    typeof selectedOption === "object" &&
-                    "value" in selectedOption &&
-                    onSortChange
-                  ) {
-                    onSortChange(selectedOption.value as SortOption);
+              <select
+                className="select w-full bg-secondary-bg text-primary-text"
+                value={sortOption}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  if (onSortChange) {
+                    onSortChange(e.target.value as SortOption);
                   }
                 }}
-                options={sortOptions}
-                unstyled
-                classNames={{
-                  control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[40px] hover:cursor-pointer focus-within:border-button-info",
-                  singleValue: () => "text-secondary-text",
-                  placeholder: () => "text-secondary-text",
-                  menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused }) =>
-                    `px-4 py-3 cursor-pointer ${
-                      isSelected
-                        ? "bg-button-info text-form-button-text"
-                        : isFocused
-                          ? "bg-quaternary-bg text-primary-text"
-                          : "bg-primary-bg text-secondary-text"
-                    }`,
-                  clearIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                  dropdownIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                }}
-                isSearchable={false}
-              />
+              >
+                <option value="" disabled>
+                  Select sort option
+                </option>
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <button
