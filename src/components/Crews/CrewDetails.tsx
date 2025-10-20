@@ -7,8 +7,6 @@ import { RobloxUser } from "@/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
-import Link from "next/link";
-import { Icon } from "../UI/IconWrapper";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",
@@ -133,27 +131,6 @@ export default function CrewDetails({
 
   return (
     <div className="space-y-8">
-      {/* Historical Season Notice */}
-      {currentSeason !== 19 && (
-        <div className="bg-secondary-bg border-border-primary rounded-lg border p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-primary-text flex items-center gap-2">
-              <Icon icon="mdi:clock" className="h-5 w-5" inline={true} />
-              <span className="font-medium">Historical Data</span>
-            </div>
-            <Link
-              href="/crews"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-fit rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            >
-              Go to Current Season
-            </Link>
-          </div>
-          <p className="text-secondary-text mt-2 text-sm">
-            This is historical data from Season {currentSeason}.
-          </p>
-        </div>
-      )}
-
       {/* Crew Header with Flag, Rank, and Info */}
       <div
         className={`rounded-lg border p-4 sm:p-6 ${rank <= 3 ? "" : "border-border-primary hover:border-border-focus"}`}

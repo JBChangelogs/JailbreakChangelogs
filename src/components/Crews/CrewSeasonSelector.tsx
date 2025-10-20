@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AVAILABLE_CREW_SEASONS } from "@/utils/api";
-import dynamic from "next/dynamic";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface CrewSeasonSelectorProps {
   currentSeason: number;
@@ -14,32 +10,12 @@ interface CrewSeasonSelectorProps {
 export default function CrewSeasonSelector({
   currentSeason,
 }: CrewSeasonSelectorProps) {
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
-
-  const handleSeasonChange = (option: unknown) => {
-    if (!option) {
-      // Reset to current season (19)
-      const params = new URLSearchParams(searchParams);
-      params.delete("season");
-      const newUrl = params.toString() ? `?${params.toString()}` : "";
-
-      if (pathname.startsWith("/crews/") && pathname !== "/crews") {
-        router.push(`/crews${newUrl}`);
-      } else {
-        router.push(`${pathname}${newUrl}`);
-      }
-      return;
-    }
-
-    const season = (option as { value: number }).value;
+  const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const season = parseInt(e.target.value);
     const params = new URLSearchParams(searchParams);
 
     if (season === 19) {
@@ -73,45 +49,20 @@ export default function CrewSeasonSelector({
   return (
     <div className="mb-6">
       <div className="w-full sm:w-64">
-        {selectLoaded ? (
-          <Select
-            value={{
-              value: currentSeason,
-              label: getSeasonLabel(currentSeason),
-            }}
-            onChange={handleSeasonChange}
-            options={AVAILABLE_CREW_SEASONS.map((season) => ({
-              value: season,
-              label: getSeasonLabel(season),
-            }))}
-            classNamePrefix="react-select"
-            className="w-full"
-            isClearable={false}
-            isSearchable={false}
-            unstyled
-            classNames={{
-              control: () =>
-                "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-              singleValue: () => "text-secondary-text",
-              placeholder: () => "text-secondary-text",
-              menu: () =>
-                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
-              option: ({ isSelected, isFocused }) =>
-                `px-4 py-3 cursor-pointer ${
-                  isSelected
-                    ? "bg-button-info text-form-button-text"
-                    : isFocused
-                      ? "bg-quaternary-bg text-primary-text"
-                      : "bg-secondary-bg text-secondary-text"
-                }`,
-              clearIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
-              dropdownIndicator: () => "text-secondary-text cursor-pointer",
-            }}
-          />
-        ) : (
-          <div className="border-border-primary bg-secondary-bg h-12 w-full animate-pulse rounded-lg border"></div>
-        )}
+        <select
+          className="select w-full bg-secondary-bg text-primary-text"
+          value={currentSeason}
+          onChange={handleSeasonChange}
+        >
+          <option value="" disabled>
+            Select a season
+          </option>
+          {AVAILABLE_CREW_SEASONS.map((season) => (
+            <option key={season} value={season}>
+              {getSeasonLabel(season)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Season Info */}

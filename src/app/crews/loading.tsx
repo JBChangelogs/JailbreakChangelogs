@@ -11,7 +11,6 @@ export default function Loading() {
           <div className="mb-8">
             <div className="mb-4 flex items-center gap-3">
               <div className="bg-secondary-bg h-10 w-64 animate-pulse rounded"></div>
-              <div className="bg-button-info h-5 w-12 animate-pulse rounded"></div>
             </div>
             <div className="bg-secondary-bg h-6 w-96 animate-pulse rounded"></div>
           </div>

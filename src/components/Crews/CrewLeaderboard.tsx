@@ -8,7 +8,6 @@ import { RobloxUser } from "@/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const bangers = localFont({
@@ -155,27 +154,6 @@ export default function CrewLeaderboard({
           )}
         </div>
       </div>
-
-      {/* Historical Season Notice */}
-      {currentSeason !== 19 && (
-        <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-primary-text flex items-center gap-2">
-              <Icon icon="mdi:clock" className="h-5 w-5" inline={true} />
-              <span className="font-medium">Historical Data</span>
-            </div>
-            <Link
-              href="/crews"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-fit rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            >
-              Go to Current Season
-            </Link>
-          </div>
-          <p className="text-secondary-text mt-2 text-sm">
-            This is historical data from Season {currentSeason}.
-          </p>
-        </div>
-      )}
 
       <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 shadow-sm">
         <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
