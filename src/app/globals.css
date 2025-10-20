@@ -1,5 +1,6 @@
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss";
+@plugin "daisyui";
 @import "tw-animate-css";
 
 @theme {

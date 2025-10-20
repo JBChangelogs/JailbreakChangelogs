@@ -25,9 +25,6 @@ import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../UI/IconWrapper";
-import dynamic from "next/dynamic";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface Item {
   id: number;
@@ -263,6 +260,7 @@ export default function ChangelogDetailsClient({
           selectedType === "All Items" || change.item.type === selectedType;
         const matchesSuggestionType =
           selectedSuggestionType === "all" ||
+          selectedSuggestionType === "" ||
           change.suggestion?.metadata?.suggestion_type ===
             selectedSuggestionType;
         return matchesType && matchesSuggestionType;
@@ -353,6 +351,7 @@ export default function ChangelogDetailsClient({
         selectedType === "All Items" || change.item.type === selectedType;
       const matchesSuggestionType =
         selectedSuggestionType === "all" ||
+        selectedSuggestionType === "" ||
         change.suggestion?.metadata?.suggestion_type === selectedSuggestionType;
       return matchesType && matchesSuggestionType;
     });
@@ -390,7 +389,7 @@ export default function ChangelogDetailsClient({
   const clearSearch = () => {
     setSearchQuery("");
     setSelectedType("All Items");
-    setSelectedSuggestionType("");
+    setSelectedSuggestionType("all");
     setPage(1);
   };
 
@@ -464,46 +463,18 @@ export default function ChangelogDetailsClient({
                   Filter by item type:
                 </h3>
               </div>
-              <Select
-                value={
-                  selectedType
-                    ? { value: selectedType, label: selectedType }
-                    : null
-                }
-                onChange={(option) =>
-                  setSelectedType((option as { value: string })?.value || "")
-                }
-                options={[
-                  { value: "All Items", label: "All Items" },
-                  ...itemTypes.map((type) => ({ value: type, label: type })),
-                ]}
-                className="w-full"
-                isClearable={false}
-                isSearchable={false}
-                placeholder="All Items"
-                classNamePrefix="react-select"
-                unstyled
-                classNames={{
-                  control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                  singleValue: () => "text-secondary-text",
-                  placeholder: () => "text-secondary-text",
-                  menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused }) =>
-                    `px-4 py-3 cursor-pointer ${
-                      isSelected
-                        ? "bg-button-info text-form-button-text"
-                        : isFocused
-                          ? "bg-quaternary-bg text-primary-text"
-                          : "bg-secondary-bg text-secondary-text"
-                    }`,
-                  clearIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                  dropdownIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                }}
-              />
+              <select
+                className="select w-full bg-secondary-bg text-primary-text"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                <option value="All Items">All Items</option>
+                {itemTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Suggestion Type Filter */}
@@ -513,60 +484,22 @@ export default function ChangelogDetailsClient({
                   Filter by suggestion type:
                 </h3>
               </div>
-              <Select
-                value={
-                  selectedSuggestionType
-                    ? {
-                        value: selectedSuggestionType,
-                        label: selectedSuggestionType
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (l) => l.toUpperCase()),
-                      }
-                    : null
-                }
-                onChange={(option) =>
-                  setSelectedSuggestionType(
-                    (option as { value: string })?.value || "",
-                  )
-                }
-                options={[
-                  { value: "", label: "All Suggestion Types" },
-                  ...suggestionTypes.map((type) => ({
-                    value: type || "",
-                    label: type
+              <select
+                className="select w-full bg-secondary-bg text-primary-text"
+                value={selectedSuggestionType}
+                onChange={(e) => setSelectedSuggestionType(e.target.value)}
+              >
+                <option value="all">All Suggestion Types</option>
+                {suggestionTypes.map((type) => (
+                  <option key={type || ""} value={type || ""}>
+                    {type
                       ? type
                           .replace(/_/g, " ")
                           .replace(/\b\w/g, (l) => l.toUpperCase())
-                      : "Unknown",
-                  })),
-                ]}
-                className="w-full"
-                isClearable={true}
-                isSearchable={false}
-                placeholder="All Suggestion Types"
-                classNamePrefix="react-select"
-                unstyled
-                classNames={{
-                  control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                  singleValue: () => "text-secondary-text",
-                  placeholder: () => "text-secondary-text",
-                  menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused }) =>
-                    `px-4 py-3 cursor-pointer ${
-                      isSelected
-                        ? "bg-button-info text-form-button-text"
-                        : isFocused
-                          ? "bg-quaternary-bg text-primary-text"
-                          : "bg-secondary-bg text-secondary-text"
-                    }`,
-                  clearIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                  dropdownIndicator: () =>
-                    "text-secondary-text hover:text-primary-text cursor-pointer",
-                }}
-              />
+                      : "Unknown"}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1094,7 +1027,7 @@ export default function ChangelogDetailsClient({
                 {(searchQuery || selectedType || selectedSuggestionType) && (
                   <button
                     onClick={clearSearch}
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 rounded-lg px-4 py-2 transition-colors duration-200"
+                    className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 rounded-lg px-4 py-2 transition-colors duration-200 cursor-pointer"
                   >
                     Clear filters
                   </button>
