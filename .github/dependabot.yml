@@ -1,7 +1,7 @@
 version: 2
 updates:
-  # Enable version updates for npm (Bun uses npm registry)
-  - package-ecosystem: "npm"
+  # Enable version updates for Bun
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "daily"

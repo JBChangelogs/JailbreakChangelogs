@@ -14,17 +14,21 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light"); // Default to light mode
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<Theme>("dark"); // Default to dark mode
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
     // Get theme from localStorage on mount
     const savedTheme = safeLocalStorage.getItem("theme");
 
     if (savedTheme === "system") {
-      // Migrate users who had system theme to light mode
-      setTheme("light");
-      safeLocalStorage.setItem("theme", "light");
+      // Migrate users who had system theme to their current OS preference
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      const migratedTheme = prefersDark ? "dark" : "light";
+      setTheme(migratedTheme);
+      safeLocalStorage.setItem("theme", migratedTheme);
     } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
       setTheme(savedTheme as Theme);
     }
