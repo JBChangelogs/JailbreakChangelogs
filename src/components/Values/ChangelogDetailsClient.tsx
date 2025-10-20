@@ -167,7 +167,7 @@ export default function ChangelogDetailsClient({
 }: ChangelogDetailsClientProps) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("All Items");
   const [selectedSuggestionType, setSelectedSuggestionType] =
     useState<string>("all");
   const [currentUserPremiumType, setCurrentUserPremiumType] =
@@ -260,7 +260,7 @@ export default function ChangelogDetailsClient({
     .filter((change) => {
       if (searchQuery === "") {
         const matchesType =
-          selectedType === "all" || change.item.type === selectedType;
+          selectedType === "All Items" || change.item.type === selectedType;
         const matchesSuggestionType =
           selectedSuggestionType === "all" ||
           change.suggestion?.metadata?.suggestion_type ===
@@ -350,7 +350,7 @@ export default function ChangelogDetailsClient({
     })
     .filter((change) => {
       const matchesType =
-        selectedType === "all" || change.item.type === selectedType;
+        selectedType === "All Items" || change.item.type === selectedType;
       const matchesSuggestionType =
         selectedSuggestionType === "all" ||
         change.suggestion?.metadata?.suggestion_type === selectedSuggestionType;
@@ -389,7 +389,7 @@ export default function ChangelogDetailsClient({
 
   const clearSearch = () => {
     setSearchQuery("");
-    setSelectedType("");
+    setSelectedType("All Items");
     setSelectedSuggestionType("");
     setPage(1);
   };
@@ -474,27 +474,24 @@ export default function ChangelogDetailsClient({
                   setSelectedType((option as { value: string })?.value || "")
                 }
                 options={[
-                  { value: "", label: "All Types" },
+                  { value: "All Items", label: "All Items" },
                   ...itemTypes.map((type) => ({ value: type, label: type })),
                 ]}
                 className="w-full"
-                isClearable={true}
-                placeholder="All Types"
+                isClearable={false}
+                isSearchable={false}
+                placeholder="All Items"
                 classNamePrefix="react-select"
                 unstyled
                 classNames={{
                   control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[40px] hover:cursor-pointer focus-within:border-button-info",
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
                   singleValue: () => "text-secondary-text",
                   placeholder: () => "text-secondary-text",
                   menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused, isDisabled }) =>
-                    `px-4 py-3 ${
-                      isDisabled
-                        ? "cursor-not-allowed text-secondary-text opacity-50"
-                        : "cursor-pointer"
-                    } ${
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused }) =>
+                    `px-4 py-3 cursor-pointer ${
                       isSelected
                         ? "bg-button-info text-form-button-text"
                         : isFocused
@@ -545,22 +542,19 @@ export default function ChangelogDetailsClient({
                 ]}
                 className="w-full"
                 isClearable={true}
+                isSearchable={false}
                 placeholder="All Suggestion Types"
                 classNamePrefix="react-select"
                 unstyled
                 classNames={{
                   control: () =>
-                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[40px] hover:cursor-pointer focus-within:border-button-info",
+                    "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
                   singleValue: () => "text-secondary-text",
                   placeholder: () => "text-secondary-text",
                   menu: () =>
-                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
-                  option: ({ isSelected, isFocused, isDisabled }) =>
-                    `px-4 py-3 ${
-                      isDisabled
-                        ? "cursor-not-allowed text-secondary-text opacity-50"
-                        : "cursor-pointer"
-                    } ${
+                    "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
+                  option: ({ isSelected, isFocused }) =>
+                    `px-4 py-3 cursor-pointer ${
                       isSelected
                         ? "bg-button-info text-form-button-text"
                         : isFocused
@@ -598,8 +592,8 @@ export default function ChangelogDetailsClient({
           <div className="mb-2">
             <p className="text-secondary-text">
               {searchQuery
-                ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}${selectedSuggestionType ? ` with ${selectedSuggestionType.replace(/_/g, " ")} suggestions` : ""}`
-                : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}${selectedSuggestionType ? ` (${selectedSuggestionType.replace(/_/g, " ")} suggestions)` : ""}`}
+                ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}${selectedSuggestionType && selectedSuggestionType !== "all" ? ` with ${selectedSuggestionType.replace(/_/g, " ")} suggestions` : ""}`
+                : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}${selectedSuggestionType && selectedSuggestionType !== "all" ? ` (${selectedSuggestionType.replace(/_/g, " ")} suggestions)` : ""}`}
             </p>
           </div>
         </div>
