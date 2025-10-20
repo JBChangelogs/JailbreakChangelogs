@@ -5,7 +5,6 @@
 
 [![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
 [![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)
-[![PR Title Validation](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/pr-title-validation.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/pr-title-validation.yml)
 [![Type Check](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml)
 
 > [!CAUTION]
