@@ -22,9 +22,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = safeLocalStorage.getItem("theme");
 
     if (savedTheme === "system") {
-      // Migrate users who had system theme to dark mode
-      setTheme("dark");
-      safeLocalStorage.setItem("theme", "dark");
+      // Migrate users who had system theme to their current OS preference
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      const migratedTheme = prefersDark ? "dark" : "light";
+      setTheme(migratedTheme);
+      safeLocalStorage.setItem("theme", migratedTheme);
     } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
       setTheme(savedTheme as Theme);
     }
