@@ -7,36 +7,35 @@ on:
 jobs:
   validate-pr-title:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
-      - name: Check PR Title
-        run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+      - name: Validate PR Title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            const prAuthor = context.payload.pull_request.user.login;
 
-          # Allow Dependabot PRs to pass through (they're automated)
-          if [[ "$PR_AUTHOR" == "dependabot[bot]" ]]; then
-            echo "✅ Dependabot PR detected - allowing automated dependency updates"
-            exit 0
-          fi
+            // Allow Dependabot PRs to pass through (they're automated)
+            if (prAuthor === 'dependabot[bot]') {
+              console.log('✅ Dependabot PR detected - allowing automated dependency updates');
+              return;
+            }
 
-          # Block PRs with Dependabot-style naming patterns from human contributors
-          if [[ "$PR_TITLE" =~ ^(chore|ci)\(deps\): ]]; then
-            echo "❌ PR title follows Dependabot naming pattern: $PR_TITLE"
-            echo "This naming pattern is reserved for automated dependency updates."
-            echo "Please use a more descriptive title for your changes."
-            exit 1
-          fi
+            // Block PRs with Dependabot-style naming patterns from human contributors
+            if (prTitle.match(/^(chore|ci)\(deps\):/)) {
+              const message = `❌ PR title follows Dependabot naming pattern: ${prTitle}\nThis naming pattern is reserved for automated dependency updates.\nPlease use a more descriptive title for your changes.`;
+              core.setFailed(message);
+              return;
+            }
 
-          # Require conventional commit format for human PRs
-          if [[ ! "$PR_TITLE" =~ ^(feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert):\ .+ ]]; then
-            echo "❌ PR title does not follow conventional commit format: $PR_TITLE"
-            echo "Expected format: type(scope): description"
-            echo "Examples:"
-            echo "  feat: add user authentication"
-            echo "  fix: resolve login bug"
-            echo "  docs: update README"
-            echo "  chore: update dependencies"
-            exit 1
-          fi
+            // Require conventional commit format for human PRs
+            const conventionalCommitPattern = /^(feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert):\s.+$/;
+            if (!conventionalCommitPattern.test(prTitle)) {
+              const message = `❌ PR title does not follow conventional commit format: ${prTitle}\nExpected format: type(scope): description\nExamples:\n  feat: add user authentication\n  fix: resolve login bug\n  docs: update README\n  chore: update dependencies`;
+              core.setFailed(message);
+              return;
+            }
 
-          echo "✅ PR title validation passed: $PR_TITLE"
+            console.log(`✅ PR title validation passed: ${prTitle}`);
