@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import dynamic from "next/dynamic";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 type SortOrder =
   | "duplicates"
@@ -62,13 +58,7 @@ export default function InventoryFilters({
   setSortOrder,
   hasDuplicates,
 }: InventoryFiltersProps) {
-  const [selectLoaded, setSelectLoaded] = useState(false);
   const MAX_SEARCH_LENGTH = 50;
-
-  // Load Select component
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
 
   return (
     <div className="mb-4 flex flex-col gap-4">
@@ -143,165 +133,50 @@ export default function InventoryFilters({
 
         {/* Category Filter - Second */}
         <div className="w-full sm:w-1/3">
-          {selectLoaded ? (
-            <Select
-              value={
-                selectedCategories.length > 0
-                  ? {
-                      value: selectedCategories[0],
-                      label: selectedCategories[0],
-                    }
-                  : null
+          <select
+            className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+            value={selectedCategories.length > 0 ? selectedCategories[0] : ""}
+            onChange={(e) => {
+              if (e.target.value === "") {
+                setSelectedCategories([]);
+              } else {
+                setSelectedCategories([e.target.value]);
               }
-              onChange={(option) => {
-                if (!option) {
-                  setSelectedCategories([]);
-                  return;
-                }
-                setSelectedCategories([(option as { value: string }).value]);
-              }}
-              options={availableCategories.map((cat) => ({
-                value: cat,
-                label: cat,
-              }))}
-              classNamePrefix="react-select"
-              className="w-full"
-              isMulti={false}
-              isClearable={true}
-              isSearchable={false}
-              placeholder="Filter by category..."
-              unstyled
-              classNames={{
-                control: () =>
-                  "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                singleValue: () => "text-secondary-text",
-                placeholder: () => "text-secondary-text",
-                menu: () =>
-                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
-                option: ({ isSelected, isFocused, isDisabled }) =>
-                  `px-4 py-3 ${
-                    isDisabled
-                      ? "cursor-not-allowed text-secondary-text opacity-50"
-                      : "cursor-pointer"
-                  } ${
-                    isSelected
-                      ? "bg-button-info text-form-button-text"
-                      : isFocused
-                        ? "bg-quaternary-bg text-primary-text"
-                        : "bg-secondary-bg text-secondary-text"
-                  }`,
-                clearIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-                dropdownIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-                groupHeading: () =>
-                  "px-4 py-2 text-primary-text font-semibold text-sm",
-              }}
-            />
-          ) : (
-            <div className="border-border-primary bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-          )}
+            }}
+          >
+            <option value="">All categories</option>
+            {availableCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Sort Filter - Third */}
         <div className="w-full sm:w-1/3">
-          {selectLoaded ? (
-            <Select
-              value={{
-                value: sortOrder,
-                label:
-                  sortOrder === "duplicates"
-                    ? "Duplicates First"
-                    : sortOrder === "alpha-asc"
-                      ? "A-Z"
-                      : sortOrder === "alpha-desc"
-                        ? "Z-A"
-                        : sortOrder === "created-asc"
-                          ? "Oldest First"
-                          : sortOrder === "created-desc"
-                            ? "Newest First"
-                            : sortOrder === "cash-desc"
-                              ? "Cash Value (High to Low)"
-                              : sortOrder === "cash-asc"
-                                ? "Cash Value (Low to High)"
-                                : sortOrder === "duped-desc"
-                                  ? "Duped Value (High to Low)"
-                                  : sortOrder === "duped-asc"
-                                    ? "Duped Value (Low to High)"
-                                    : "Sort by...",
-              }}
-              onChange={(option) => {
-                if (option) {
-                  setSortOrder((option as { value: SortOrder }).value);
-                } else {
-                  setSortOrder("created-desc");
-                }
-              }}
-              options={[
-                ...(hasDuplicates
-                  ? [{ value: "duplicates", label: "Group Duplicates" }]
-                  : []),
-                {
-                  label: "Date",
-                  options: [
-                    { value: "created-asc", label: "Oldest First" },
-                    { value: "created-desc", label: "Newest First" },
-                  ],
-                },
-                {
-                  label: "Values",
-                  options: [
-                    { value: "cash-desc", label: "Cash Value (High to Low)" },
-                    { value: "cash-asc", label: "Cash Value (Low to High)" },
-                    { value: "duped-desc", label: "Duped Value (High to Low)" },
-                    { value: "duped-asc", label: "Duped Value (Low to High)" },
-                  ],
-                },
-                {
-                  label: "Alphabetically",
-                  options: [
-                    { value: "alpha-asc", label: "A-Z" },
-                    { value: "alpha-desc", label: "Z-A" },
-                  ],
-                },
-              ]}
-              classNamePrefix="react-select"
-              className="w-full"
-              isMulti={false}
-              isClearable={true}
-              isSearchable={false}
-              placeholder="Sort by..."
-              unstyled
-              classNames={{
-                control: () =>
-                  "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary bg-primary-bg p-3 min-h-[56px] hover:cursor-pointer focus-within:border-button-info",
-                singleValue: () => "text-secondary-text",
-                placeholder: () => "text-secondary-text",
-                menu: () =>
-                  "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary bg-secondary-bg shadow-lg",
-                option: ({ isSelected, isFocused, isDisabled }) =>
-                  `px-4 py-3 ${
-                    isDisabled
-                      ? "cursor-not-allowed text-secondary-text opacity-50"
-                      : "cursor-pointer"
-                  } ${
-                    isSelected
-                      ? "bg-button-info text-form-button-text"
-                      : isFocused
-                        ? "bg-quaternary-bg text-primary-text"
-                        : "bg-secondary-bg text-secondary-text"
-                  }`,
-                clearIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-                dropdownIndicator: () =>
-                  "text-secondary-text hover:text-primary-text cursor-pointer",
-                groupHeading: () =>
-                  "px-4 py-2 text-primary-text font-semibold text-sm",
-              }}
-            />
-          ) : (
-            <div className="border-border-primary bg-secondary-bg h-10 w-full animate-pulse rounded-md border"></div>
-          )}
+          <select
+            className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+            value={sortOrder}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setSortOrder(e.target.value as SortOrder)
+            }
+          >
+            {hasDuplicates && (
+              <option value="duplicates">Group Duplicates</option>
+            )}
+            <option disabled>Date</option>
+            <option value="created-asc">Oldest First</option>
+            <option value="created-desc">Newest First</option>
+            <option disabled>Values</option>
+            <option value="cash-desc">Cash Value (High to Low)</option>
+            <option value="cash-asc">Cash Value (Low to High)</option>
+            <option value="duped-desc">Duped Value (High to Low)</option>
+            <option value="duped-asc">Duped Value (Low to High)</option>
+            <option disabled>Alphabetically</option>
+            <option value="alpha-asc">A-Z</option>
+            <option value="alpha-desc">Z-A</option>
+          </select>
         </div>
       </div>
     </div>

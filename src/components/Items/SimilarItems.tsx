@@ -11,12 +11,9 @@ import {
 } from "@/utils/images";
 import Link from "next/link";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import dynamic from "next/dynamic";
 import { formatFullValue } from "@/utils/values";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
-
-const Select = dynamic(() => import("react-select"), { ssr: false });
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
@@ -24,11 +21,6 @@ interface SimilarItemsProps {
 }
 
 type SortCriteria = "similarity" | "creator" | "trading_metrics" | "trend";
-
-interface SortOption {
-  value: SortCriteria;
-  label: string;
-}
 
 const SimilarItems = ({
   currentItem,
@@ -44,24 +36,6 @@ const SimilarItems = ({
   const [similarItems, setSimilarItems] = useState<ItemDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortCriteria>("similarity");
-  const [selectLoaded, setSelectLoaded] = useState(false);
-
-  // Set selectLoaded to true after mount to ensure client-side rendering
-  useEffect(() => {
-    setSelectLoaded(true);
-  }, []);
-
-  // Create options for the select dropdown
-  const sortOptions: SortOption[] = [
-    { value: "similarity", label: "Sort by Similarity" },
-    { value: "trading_metrics", label: "Sort by Trading Metrics" },
-    { value: "trend", label: "Sort by Trend" },
-    { value: "creator", label: "Sort by Creator" },
-  ];
-
-  // Find the current selected option
-  const selectedOption =
-    sortOptions.find((option) => option.value === sortBy) || sortOptions[0];
 
   const calculateSimilarityScore = useCallback(
     (item1: ItemDetails, item2: ItemDetails): number => {
@@ -304,46 +278,18 @@ const SimilarItems = ({
           </div>
         </div>
 
-        {selectLoaded ? (
-          <Select
-            value={selectedOption}
-            onChange={(option: unknown) => {
-              if (!option) {
-                setSortBy("similarity");
-                return;
-              }
-              const newValue = (option as { value: SortCriteria }).value;
-              setSortBy(newValue);
-            }}
-            options={sortOptions}
-            className="w-full"
-            isClearable={false}
-            isSearchable={false}
-            unstyled
-            classNames={{
-              control: () =>
-                "text-secondary-text flex items-center justify-between rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg p-3 min-h-[56px] hover:cursor-pointer hover:bg-primary-bg",
-              singleValue: () => "text-secondary-text",
-              placeholder: () => "text-secondary-text",
-              menu: () =>
-                "absolute z-[3000] mt-1 w-full rounded-lg border border-border-primary hover:border-border-focus bg-secondary-bg shadow-lg",
-              option: ({ isSelected, isFocused }) =>
-                `px-4 py-3 cursor-pointer ${
-                  isSelected
-                    ? "bg-button-info text-form-button-text"
-                    : isFocused
-                      ? "bg-quaternary-bg text-primary-text"
-                      : "bg-secondary-bg text-secondary-text"
-                }`,
-              clearIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
-              dropdownIndicator: () =>
-                "text-secondary-text hover:text-primary-text cursor-pointer",
-            }}
-          />
-        ) : (
-          <div className="border-border-primary hover:border-border-focus bg-secondary-bg h-10 w-full animate-pulse rounded-lg border"></div>
-        )}
+        <select
+          className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+          value={sortBy}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setSortBy(e.target.value as SortCriteria)
+          }
+        >
+          <option value="similarity">Sort by Similarity</option>
+          <option value="trading_metrics">Sort by Trading Metrics</option>
+          <option value="trend">Sort by Trend</option>
+          <option value="creator">Sort by Creator</option>
+        </select>
       </div>
 
       {/* Content Section */}
