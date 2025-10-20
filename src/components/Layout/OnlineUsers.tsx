@@ -77,7 +77,7 @@ export default function OnlineUsers({
                 draggable={false}
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-primary-bg rounded-full">
+              <div className="flex h-full w-full items-center justify-center bg-tertiary-bg rounded-full">
                 <DefaultAvatar />
               </div>
             )}

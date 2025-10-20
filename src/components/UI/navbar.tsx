@@ -365,7 +365,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               onMouseEnter={() => setUserMenuOpen(true)}
               onMouseLeave={() => setUserMenuOpen(false)}
             >
-              <button className="hover:bg-quaternary-bg flex items-center gap-2 rounded-full p-1 transition-colors">
+              <button className="flex items-center gap-2 rounded-full p-1 transition-colors">
                 <UserAvatar
                   userId={userData.id}
                   avatarHash={userData.avatar}
@@ -418,7 +418,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                       >
                         <div className="h-6 w-6 flex-shrink-0">
-                          <DefaultAvatar />
+                          <DefaultAvatar premiumType={userData.premiumtype} />
                         </div>
                         My Account
                       </Link>

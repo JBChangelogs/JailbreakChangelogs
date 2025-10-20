@@ -273,7 +273,7 @@ export default function Header() {
           >
             <ListItemIcon>
               <div className="h-6 w-6">
-                <DefaultAvatar />
+                <DefaultAvatar premiumType={userData.premiumtype} />
               </div>
             </ListItemIcon>
             <ListItemText primary="My account" />
