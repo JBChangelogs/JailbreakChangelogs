@@ -63,10 +63,13 @@ Notes:
 
 - Install Prettier and ESLint extensions in your editor.
   - VS Code: "Prettier - Code Formatter" (esbenp.prettier-vscode) and "ESLint" (dbaeumer.vscode-eslint)
-- The project includes a `.vscode/extensions.json` file that will prompt you to install recommended extensions when you open the project in VS Code.
-- Add these to your VS Code User Settings (Settings JSON):
 
-```
+#### VS Code Configuration
+
+**Settings (User Settings JSON):**
+Add these to your VS Code User Settings (Settings JSON):
+
+```json
 {
   "editor.formatOnSave": true,
   "eslint.validate": [
@@ -79,6 +82,15 @@ Notes:
   "tailwindCSS.experimental.classRegex": [
     ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
   ]
+}
+```
+
+**Extensions (Workspace Recommendations):**
+If you want VS Code to prompt you to install recommended extensions when opening this project, create a `.vscode/extensions.json` file in the project root:
+
+```json
+{
+  "recommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
 }
 ```
 
