@@ -63,6 +63,7 @@ Notes:
 
 - Install Prettier and ESLint extensions in your editor.
   - VS Code: "Prettier - Code Formatter" (esbenp.prettier-vscode) and "ESLint" (dbaeumer.vscode-eslint)
+- The project includes a `.vscode/extensions.json` file that will prompt you to install recommended extensions when you open the project in VS Code.
 - Add these to your VS Code User Settings (Settings JSON):
 
 ```
@@ -74,7 +75,10 @@ Notes:
     "typescript",
     "typescriptreact"
   ],
-  "eslint.format.enable": true
+  "eslint.format.enable": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
+  ]
 }
 ```
 
