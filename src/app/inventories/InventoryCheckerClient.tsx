@@ -677,15 +677,16 @@ export default function InventoryCheckerClient({
                     </Link>
                   ) : (
                     <p className="text-secondary-text text-sm">
-                      <a
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setLoginModalOpen(true);
-                        }}
-                        className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
-                      >
-                        Login
-                      </a>{" "}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setLoginModalOpen(true);
+                      }}
+                      className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
+                    >
+                      Login
+                    </button>{" "}
                       to request a scan.
                     </p>
                   )}
