@@ -40,9 +40,6 @@ export default function InventoryItems({
   const [isFiltering, setIsFiltering] = useState(false);
   const [localRobloxUsers, setLocalRobloxUsers] =
     useState<Record<string, RobloxUser>>(robloxUsers);
-  const [localRobloxAvatars, setLocalRobloxAvatars] =
-    useState<Record<string, string>>(robloxAvatars);
-  const [itemsData, setItemsData] = useState<Item[]>(propItemsData || []);
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<InventoryItem | null>(null);
@@ -196,15 +193,12 @@ export default function InventoryItems({
     }, 300);
   };
 
-  const currentItemsData = propItemsData || itemsData;
+  const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
   const currentRobloxUsers = useMemo(
     () => ({ ...robloxUsers, ...localRobloxUsers }),
     [robloxUsers, localRobloxUsers],
   );
-  const currentRobloxAvatars = useMemo(
-    () => ({ ...robloxAvatars, ...localRobloxAvatars }),
-    [robloxAvatars, localRobloxAvatars],
-  );
+  const currentRobloxAvatars = robloxAvatars;
 
   const getUserDisplay = useCallback(
     (userId: string) => {

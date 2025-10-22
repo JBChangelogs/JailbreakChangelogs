@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
@@ -37,43 +36,12 @@ export default function DupeFinderClient({
   isUserFound = true,
   items = [],
 }: DupeFinderClientProps) {
-  const [isLoading, setIsLoading] = useState(externalIsLoading || false);
-  const [localRobloxUsers, setLocalRobloxUsers] = useState<
-    Record<string, RobloxUser>
-  >(initialRobloxUsers || {});
-  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<
-    Record<string, string>
-  >(initialRobloxAvatars || {});
+  // Transform data during render instead of using useEffect
+  const localRobloxUsers = initialRobloxUsers || {};
+  const localRobloxAvatars = initialRobloxAvatars || {};
 
-  // Update local state when props change
-  useEffect(() => {
-    setLocalRobloxUsers(initialRobloxUsers || {});
-  }, [initialRobloxUsers]);
-
-  useEffect(() => {
-    setLocalRobloxAvatars(initialRobloxAvatars || {});
-  }, [initialRobloxAvatars]);
-
-  // Reset loading state when new data is received or when there's an error
-  useEffect(() => {
-    if (initialData || error) {
-      setIsLoading(false);
-    }
-  }, [initialData, error]);
-
-  // Sync with external loading state
-  useEffect(() => {
-    setIsLoading(externalIsLoading || false);
-  }, [externalIsLoading]);
-
-  // Reset loading state when robloxId changes (navigation to same URL)
-  useEffect(() => {
-    // If we're loading and the robloxId matches our search, reset loading state
-    // This handles the case where user searches for the same user again
-    if (isLoading && robloxId) {
-      setIsLoading(false);
-    }
-  }, [robloxId, isLoading]);
+  // Derive loading state from props instead of managing in effects
+  const isLoading = externalIsLoading && !initialData && !error;
 
   return (
     <div className="space-y-6">

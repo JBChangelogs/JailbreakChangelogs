@@ -29,11 +29,11 @@ export default function Loading() {
                   className="bg-secondary-bg"
                 />
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {[...Array(8)].map((_, i) => (
+                  {[45, 65, 50, 80, 55, 70, 60, 75].map((width, i) => (
                     <Skeleton
                       key={i}
                       variant="text"
-                      width={Math.random() * 60 + 40}
+                      width={width}
                       height={16}
                       className="bg-secondary-bg"
                     />

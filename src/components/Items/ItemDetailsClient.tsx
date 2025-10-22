@@ -175,7 +175,7 @@ export default function ItemDetailsClient({
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
     () => getCurrentUserPremiumType(),
   );
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(true);
+  const [premiumStatusLoaded] = useState(true);
   const { isAuthenticated, user } = useAuthContext();
 
   // Use optimized real-time relative date for last updated timestamp

@@ -21,14 +21,10 @@ export default function ChangelogsClient({
   const changelogList = use(changelogListPromise);
 
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [sortedChangelogs, setSortedChangelogs] = useState<Changelog[]>([]);
   const backToTopRef = useRef<HTMLDivElement>(null);
 
   // Sort changelogs by newest first
-  useEffect(() => {
-    const sorted = [...changelogList].sort((a, b) => b.id - a.id);
-    setSortedChangelogs(sorted);
-  }, [changelogList]);
+  const sortedChangelogs = [...changelogList].sort((a, b) => b.id - a.id);
 
   // Handle scroll to show/hide back to top button
   useEffect(() => {

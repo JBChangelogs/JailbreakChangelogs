@@ -31,6 +31,7 @@ export default function CrewDetails({
   const [robloxAvatars, setRobloxAvatars] = useState<Record<string, string>>(
     {},
   );
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   // Load all crew member data
   useEffect(() => {
@@ -57,6 +58,15 @@ export default function CrewDetails({
 
     fetchAllUserData();
   }, [crew.MemberUserIds]); // Only depend on crew.MemberUserIds, not robloxUsers
+
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Helper function to get user display name
   const getUserDisplay = (userId: string) => {
@@ -107,9 +117,8 @@ export default function CrewDetails({
 
   // Helper function to get time since last battle
   const getTimeSinceLastBattle = (utc: number) => {
-    const now = Date.now();
     const lastBattle = utc * 1000; // Convert to milliseconds
-    const diffMs = now - lastBattle;
+    const diffMs = currentTime - lastBattle;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
       (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),

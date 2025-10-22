@@ -21,7 +21,7 @@ export const useSettings = (
   const [settings, setSettings] = useState<UserSettings | null>(
     getInitialSettings,
   );
-  const [loading, setLoading] = useState(!userData);
+  const [loading] = useState(!userData);
 
   const handleSettingChange = async (
     name: keyof UserSettings,

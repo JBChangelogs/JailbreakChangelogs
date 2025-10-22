@@ -49,6 +49,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 }) => {
   const windowWidth = useWindowWidth();
 
+  // Get current year for default variant display
+  const currentYear = new Date().getFullYear().toString();
+
   const getFilterDisplayName = (filterSort: string): string => {
     const filterMap: Record<string, string> = {
       "name-all-items": "All Items",
@@ -302,7 +305,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     const selectedVariant = selectedVariants[item.id];
     let itemToAdd = { ...item, side };
 
-    if (selectedVariant && selectedVariant !== "2025") {
+    if (selectedVariant && selectedVariant !== currentYear) {
       // If a specific variant is selected, use its values
       const selectedChild = item.children?.find(
         (child) => child.sub_name === selectedVariant,
@@ -319,7 +322,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         };
       }
     } else {
-      // For 2025 or no variant selected, use parent item values
+      // For current year or no variant selected, use parent item values
       itemToAdd = {
         ...item,
         sub_name: undefined,
@@ -671,7 +674,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       }}
                                       className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
                                     >
-                                      {selectedVariants[item.id] || "2025"}
+                                      {selectedVariants[item.id] || currentYear}
                                       <ChevronDownIcon
                                         className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
                                       />
@@ -695,19 +698,19 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                               e.preventDefault();
                                               handleVariantSelect(
                                                 item.id,
-                                                "2025",
+                                                currentYear,
                                               );
                                               setOpenDropdownId(null);
                                             }}
                                             className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
                                               selectedVariants[item.id] ===
-                                                "2025" ||
+                                                currentYear ||
                                               !selectedVariants[item.id]
                                                 ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
                                                 : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
                                             }`}
                                           >
-                                            2025
+                                            {currentYear}
                                           </button>
                                           {item.children?.map((child) => (
                                             <button
@@ -745,7 +748,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                         </span>
                                         <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
                                           {selectedVariants[item.id] &&
-                                          selectedVariants[item.id] !== "2025"
+                                          selectedVariants[item.id] !==
+                                            currentYear
                                             ? item.children?.find(
                                                 (child) =>
                                                   child.sub_name ===
@@ -795,7 +799,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                         </span>
                                         <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
                                           {selectedVariants[item.id] &&
-                                          selectedVariants[item.id] !== "2025"
+                                          selectedVariants[item.id] !==
+                                            currentYear
                                             ? item.children?.find(
                                                 (child) =>
                                                   child.sub_name ===

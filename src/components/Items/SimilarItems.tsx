@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, use, useMemo } from "react";
+import { useState, useCallback, use, useMemo } from "react";
 
 import { ItemDetails } from "@/types";
 import { demandOrder } from "@/utils/values";

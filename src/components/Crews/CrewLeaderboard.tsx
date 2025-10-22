@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CrewLeaderboardEntry as CrewLeaderboardEntryType } from "@/utils/api";
@@ -58,17 +58,13 @@ export default function CrewLeaderboard({
     [robloxUsers],
   );
 
-  // Load all crew data
-  useEffect(() => {
-    if (leaderboard.length === 0) return;
-
+  // Load all crew data during render
+  if (leaderboard.length > 0) {
     const userIdsToLoad = leaderboard.map((crew) =>
       crew.OwnerUserId.toString(),
     );
-
-    // Fetch user data for all crew owners
     fetchMissingUserData(userIdsToLoad);
-  }, [leaderboard, fetchMissingUserData]);
+  }
 
   // Filter crews based on search term
   const filteredLeaderboard = leaderboard.filter((crew) => {

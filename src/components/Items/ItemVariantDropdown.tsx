@@ -14,9 +14,12 @@ export default function ItemVariantDropdown({
   onVariantSelect,
 }: ItemVariantDropdownProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<string>("2025");
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Derive selectedYear from URL params instead of setting in effect
+  const currentYear = new Date().getFullYear().toString();
+  const selectedYear = searchParams.get("variant") || currentYear;
 
   useEffect(() => {
     const variant = searchParams.get("variant");
@@ -26,7 +29,6 @@ export default function ItemVariantDropdown({
         (child) => child.sub_name === variant,
       );
       if (matchingChild) {
-        setSelectedYear(variant);
         const variantData = {
           ...item,
           cash_value: matchingChild.data.cash_value,
@@ -41,12 +43,10 @@ export default function ItemVariantDropdown({
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete("variant");
         router.replace(newUrl.pathname + newUrl.search);
-        setSelectedYear("2025");
         onVariantSelect(item);
       }
     } else if (!variant) {
       // Reset to base item when no variant in URL
-      setSelectedYear("2025");
       onVariantSelect(item);
     }
   }, [searchParams, item.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -80,7 +80,6 @@ export default function ItemVariantDropdown({
             <button
               onClick={() => {
                 onVariantSelect(item);
-                setSelectedYear("2025");
                 setIsDropdownOpen(false);
                 // Remove variant from URL when selecting default
                 const newUrl = new URL(window.location.href);
@@ -88,12 +87,12 @@ export default function ItemVariantDropdown({
                 router.replace(newUrl.pathname + newUrl.search);
               }}
               className={`w-full cursor-pointer px-4 py-3 text-left ${
-                selectedYear === "2025"
+                selectedYear === currentYear
                   ? "bg-button-info text-form-button-text hover:bg-primary-bg hover:text-primary-text"
                   : "bg-secondary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text"
               }`}
             >
-              2025
+              {currentYear}
             </button>
             {item.children.map((child) => (
               <button
@@ -109,7 +108,6 @@ export default function ItemVariantDropdown({
                   };
 
                   onVariantSelect(variantData);
-                  setSelectedYear(child.sub_name);
                   setIsDropdownOpen(false);
                   // Update URL with selected variant
                   const newUrl = new URL(window.location.href);

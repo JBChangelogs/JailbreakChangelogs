@@ -156,42 +156,36 @@ async function AdditionalDataFetcher({
   userId: string;
   user: User;
 }) {
+  let profileData;
+  let error: string | undefined = undefined;
+
   try {
     // Fetch additional data using the shared service
-    const profileData = await ProfileDataService.fetchProfileData(userId);
-
-    const additionalData: UserProfileData = {
-      user,
-      ...profileData,
-    };
-
-    return (
-      <UserProfileClient
-        userId={userId}
-        initialData={additionalData}
-        isLoadingAdditionalData={false}
-      />
-    );
-  } catch (error: unknown) {
-    logError("Error fetching additional user data", error, {
+    profileData = await ProfileDataService.fetchProfileData(userId);
+  } catch (err: unknown) {
+    logError("Error fetching additional user data", err, {
       component: "UserProfileDataStreamer",
       action: "fetch_additional_data",
     });
 
-    // Return with basic data if additional data fails
-    const defaultProfileData = ProfileDataService.getDefaultProfileData();
-    return (
-      <UserProfileClient
-        userId={userId}
-        initialData={{
-          user,
-          ...defaultProfileData,
-        }}
-        isLoadingAdditionalData={false}
-        additionalDataError="Failed to load some profile data"
-      />
-    );
+    // Use default data if fetching fails
+    profileData = ProfileDataService.getDefaultProfileData();
+    error = "Failed to load some profile data";
   }
+
+  const additionalData: UserProfileData = {
+    user,
+    ...profileData,
+  };
+
+  return (
+    <UserProfileClient
+      userId={userId}
+      initialData={additionalData}
+      isLoadingAdditionalData={false}
+      additionalDataError={error}
+    />
+  );
 }
 
 // Main component that fetches user data first, then streams additional data

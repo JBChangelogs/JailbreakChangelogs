@@ -26,7 +26,7 @@ import { PauseIcon } from "@heroicons/react/24/solid";
 import SubItemsDropdown from "./SubItemsDropdown";
 import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 
 interface ItemCardProps {
@@ -66,15 +66,51 @@ export default function ItemCard({
 }: ItemCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedSubItem, setSelectedSubItem] = useState<SubItem | null>(null);
-  const [hasChildren, setHasChildren] = useState(false);
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
+
+  // Derive hasChildren from props instead of setting in effect
+  const hasChildren = Boolean(
+    item.children && Array.isArray(item.children) && item.children.length > 0,
+  );
+
+  // Derive selectedSubItem from props instead of setting in effect
+  const selectedSubItem = (() => {
+    if (!hasChildren || !item.children) return null;
+
+    const variant = searchParams.get("variant");
+    if (variant) {
+      // Find the sub-item that matches the variant
+      const matchingSubItem = item.children.find(
+        (child) => child.sub_name === variant,
+      );
+      if (matchingSubItem) {
+        return matchingSubItem;
+      }
+    }
+
+    // If variant doesn't exist, try to find 2023 variant or use the first child
+    return (
+      item.children.find((child) => child.sub_name === "2023") ||
+      item.children[0]
+    );
+  })();
+
+  const handleSubItemSelect = (subItem: SubItem | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (subItem) {
+      params.set("variant", subItem.sub_name);
+    } else {
+      params.delete("variant");
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -96,44 +132,6 @@ export default function ItemCard({
       return;
     }
   };
-
-  // Check for children and set initial state
-  useEffect(() => {
-    if (
-      item.children &&
-      Array.isArray(item.children) &&
-      item.children.length > 0
-    ) {
-      setHasChildren(true);
-
-      // Check for variant in URL
-      const variant = searchParams.get("variant");
-      if (variant) {
-        // Find the sub-item that matches the variant
-        const matchingSubItem = item.children.find(
-          (child) => child.sub_name === variant,
-        );
-        if (matchingSubItem) {
-          setSelectedSubItem(matchingSubItem);
-        } else {
-          // If variant doesn't exist, try to find 2023 variant or use the first child
-          const defaultVariant =
-            item.children.find((child) => child.sub_name === "2023") ||
-            item.children[0];
-          setSelectedSubItem(defaultVariant);
-        }
-      } else {
-        // If no variant in URL, try to find 2023 variant or use the first child
-        const defaultVariant =
-          item.children.find((child) => child.sub_name === "2023") ||
-          item.children[0];
-        setSelectedSubItem(defaultVariant);
-      }
-    } else {
-      setHasChildren(false);
-      setSelectedSubItem(null);
-    }
-  }, [item, item.children, searchParams]);
 
   useEffect(() => {
     const currentMediaRef = mediaRef.current;
@@ -315,7 +313,7 @@ export default function ItemCard({
         {hasChildren && item.children && (
           <div className="absolute top-2 right-2 z-20">
             <SubItemsDropdown
-              onSelect={setSelectedSubItem}
+              onSelect={handleSubItemSelect}
               selectedSubItem={selectedSubItem}
             >
               {item.children}
