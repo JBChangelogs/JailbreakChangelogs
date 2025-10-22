@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -43,13 +42,8 @@ export default function ScanHistoryModal({
   onClose,
   initialScanHistory = [],
 }: ScanHistoryModalProps) {
-  const [scanHistory, setScanHistory] =
-    useState<ScanHistoryEntry[]>(initialScanHistory);
-
-  // Use the pre-fetched scan history data
-  useEffect(() => {
-    setScanHistory(initialScanHistory);
-  }, [initialScanHistory, isOpen]);
+  // Use the pre-fetched scan history data directly
+  const scanHistory = initialScanHistory;
 
   return (
     <Dialog open={isOpen} onClose={() => {}} className="relative z-50">

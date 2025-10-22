@@ -5,16 +5,11 @@ import { Alert } from "@mui/material";
 import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
 
 export default function OfflineDetector() {
-  const [isOffline, setIsOffline] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
 
   useEffect(() => {
-    setMounted(true);
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
-
-    // Set initial state
-    setIsOffline(!navigator.onLine);
 
     // Add event listeners
     window.addEventListener("online", handleOnline);
@@ -26,11 +21,6 @@ export default function OfflineDetector() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
-  // Don't render anything until after hydration
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <Alert

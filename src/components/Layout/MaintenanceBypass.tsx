@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Maintenance from "@/theme/Maintenance";
 import Header from "./Header";
 import { canBypassMaintenance } from "@/utils/maintenance";
@@ -13,17 +13,9 @@ interface MaintenanceBypassProps {
 export default function MaintenanceBypass({
   children,
 }: MaintenanceBypassProps) {
-  const [canBypass, setCanBypass] = useState<boolean | null>(null);
-  const [isClient, setIsClient] = useState(false);
-
   useEffect(() => {
-    setIsClient(true);
-
-    // Check if user can bypass maintenance
-    const bypassCheck = canBypassMaintenance();
-    setCanBypass(bypassCheck);
-
     // Update document title based on bypass status
+    const bypassCheck = canBypassMaintenance();
     if (bypassCheck) {
       // Reset to normal title for testers
       document.title = "Latest Updates & Patch Notes | Changelogs";
@@ -35,7 +27,6 @@ export default function MaintenanceBypass({
     // Listen for auth changes to re-check bypass status
     const handleAuthChange = () => {
       const newBypassCheck = canBypassMaintenance();
-      setCanBypass(newBypassCheck);
 
       // Update title when auth changes
       if (newBypassCheck) {
@@ -52,14 +43,8 @@ export default function MaintenanceBypass({
     };
   }, []);
 
-  // Show loading state while checking
-  if (!isClient || canBypass === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg text-white">Loading...</div>
-      </div>
-    );
-  }
+  // Compute bypass status during render
+  const canBypass = canBypassMaintenance();
 
   // If user can bypass maintenance, show normal content
   if (canBypass) {

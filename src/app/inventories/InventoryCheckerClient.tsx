@@ -75,7 +75,7 @@ export default function InventoryCheckerClient({
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalIsLoading, setInternalIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
@@ -110,6 +110,14 @@ export default function InventoryCheckerClient({
   const handleDataRefresh = async (newData: InventoryData) => {
     setRefreshedData(newData);
   };
+
+  // Derive active tab from robloxId to avoid setState in effect
+  const effectiveActiveTab = !robloxId && activeTab === 1 ? 0 : activeTab;
+
+  // Derive loading state to avoid setState in effects
+  // Reset internal loading when data arrives or there's an error
+  const isLoading =
+    (internalIsLoading && !initialData && !error) || externalIsLoading || false;
 
   // Handle scan status updates (for error state scanning)
   useEffect(() => {
@@ -265,14 +273,6 @@ export default function InventoryCheckerClient({
   // Comments are provided server-side via initialComments prop
   // No need for client-side fetching
 
-  // Reset activeTab when robloxId changes to ensure we don't get stuck on non-existent tabs
-  // Only reset if robloxId is actually missing, not just when there are data fetching errors
-  useEffect(() => {
-    if (!robloxId && activeTab === 1) {
-      setActiveTab(0);
-    }
-  }, [robloxId, activeTab]);
-
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
     (userId: string) => {
@@ -360,30 +360,9 @@ export default function InventoryCheckerClient({
     e.preventDefault();
     if (!searchId.trim()) return;
 
-    setIsLoading(true);
+    setInternalIsLoading(true);
     router.push(`/inventories/${searchId.trim()}`);
   };
-
-  // Reset loading state when new data is received or when there's an error
-  useEffect(() => {
-    if (initialData || error) {
-      setIsLoading(false);
-    }
-  }, [initialData, error]);
-
-  // Sync with external loading state
-  useEffect(() => {
-    setIsLoading(externalIsLoading || false);
-  }, [externalIsLoading]);
-
-  // Reset loading state when robloxId changes (navigation to same URL)
-  useEffect(() => {
-    // If we're loading and the robloxId matches our search, reset loading state
-    // This handles the case where user searches for the same user again
-    if (isLoading && robloxId === searchId.trim()) {
-      setIsLoading(false);
-    }
-  }, [robloxId, isLoading, searchId]);
 
   const formatDate = (timestamp: number) => {
     return formatMessageDate(timestamp);
@@ -689,7 +668,7 @@ export default function InventoryCheckerClient({
             {/* Tabbed Interface */}
             <div className="mt-6">
               <InventoryOverflowTabs
-                value={activeTab}
+                value={effectiveActiveTab}
                 onChange={(e, idx) =>
                   handleTabChange(e as unknown as React.SyntheticEvent, idx)
                 }
@@ -698,7 +677,7 @@ export default function InventoryCheckerClient({
 
               {/* Tab Content */}
               <div className="mt-4">
-                {activeTab === 0 && (
+                {effectiveActiveTab === 0 && (
                   <InventoryItems
                     initialData={currentData}
                     robloxUsers={robloxUsers}
@@ -709,7 +688,7 @@ export default function InventoryCheckerClient({
                   />
                 )}
 
-                {activeTab === 1 && robloxId && (
+                {effectiveActiveTab === 1 && robloxId && (
                   <ChangelogComments
                     changelogId={robloxId}
                     changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
