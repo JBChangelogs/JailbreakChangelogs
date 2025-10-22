@@ -1,22 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
+import { useState, useMemo } from "react";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import {
   XMarkIcon,
   ArrowDownIcon,
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
-import { DefaultAvatar } from "@/utils/avatar";
+import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { fetchRobloxAvatars, fetchRobloxUsersBatch } from "@/utils/api";
 
 interface TradeHistoryEntry {
   UserId: number;
   TradeTime: number;
+}
+
+interface AvatarData {
+  targetId: number;
+  state: string;
+  imageUrl?: string;
+  version: string;
+}
+
+interface UserData {
+  id: number;
+  name: string;
+  displayName: string;
+  hasVerifiedBadge: boolean;
 }
 
 interface Item {
@@ -29,108 +42,148 @@ interface TradeHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: Item | null;
-  getUserAvatar: (userId: string) => string | null;
-  getUserDisplay: (userId: string) => string;
-  formatDate: (timestamp: number) => string;
-  getUsername?: (userId: string) => string;
-  getHasVerifiedBadge?: (userId: string) => boolean;
 }
 
 export default function TradeHistoryModal({
   isOpen,
   onClose,
   item,
-  getUserAvatar,
-  getUserDisplay,
-  formatDate,
-  getUsername,
-  getHasVerifiedBadge,
 }: TradeHistoryModalProps) {
   const [tradeSortOrder, setTradeSortOrder] = useState<"newest" | "oldest">(
     "newest",
   );
-  // Extract user IDs from trade history when modal opens
-  const userIds = (() => {
-    if (!item?.history || !Array.isArray(item.history)) return [];
 
-    const ids = new Set<string>();
+  const tradeHistoryUserIds = useMemo(() => {
+    if (!item?.history || !Array.isArray(item.history)) {
+      return [];
+    }
+
+    const userIds = new Set<string>();
     item.history.forEach((entry) => {
-      ids.add(entry.UserId.toString());
+      userIds.add(entry.UserId.toString());
     });
-    return Array.from(ids);
-  })();
 
-  // Fetch user data using TanStack Query
-  const { data: fetchedUserData, isLoading } = useQuery({
-    queryKey: ["userData", userIds.sort()],
-    queryFn: () => fetchMissingRobloxData(userIds),
-    enabled: isOpen && userIds.length > 0,
+    return Array.from(userIds);
+  }, [item]);
+
+  const { data: tradeHistoryAvatars } = useQuery({
+    queryKey: ["tradeHistoryAvatars", tradeHistoryUserIds.sort()],
+    queryFn: async () => {
+      if (tradeHistoryUserIds.length === 0) {
+        return {};
+      }
+
+      const avatarData = await fetchRobloxAvatars(tradeHistoryUserIds);
+      if (!avatarData) {
+        return {};
+      }
+
+      const processedAvatars: Record<string, string> = {};
+      Object.values(avatarData).forEach((avatar) => {
+        if (
+          avatar &&
+          typeof avatar === "object" &&
+          "targetId" in avatar &&
+          "state" in avatar &&
+          "imageUrl" in avatar
+        ) {
+          const typedAvatar = avatar as AvatarData;
+          if (
+            typedAvatar.targetId &&
+            typedAvatar.state === "Completed" &&
+            typedAvatar.imageUrl
+          ) {
+            processedAvatars[typedAvatar.targetId.toString()] =
+              typedAvatar.imageUrl;
+          }
+        }
+      });
+
+      return processedAvatars;
+    },
+    enabled: tradeHistoryUserIds.length > 0 && isOpen,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
-  const mergedUserData =
-    fetchedUserData && "userData" in fetchedUserData
-      ? (fetchedUserData.userData as Record<
-          string,
-          { name?: string; displayName?: string; hasVerifiedBadge?: boolean }
-        >)
-      : ({} as Record<
-          string,
-          { name?: string; displayName?: string; hasVerifiedBadge?: boolean }
-        >);
-  const mergedAvatarData =
-    fetchedUserData && "avatarData" in fetchedUserData
-      ? (fetchedUserData.avatarData as Record<string, string>)
-      : ({} as Record<string, string>);
-
-  // Enhanced user avatar function that prioritizes passed-in data over merged data
-  const enhancedGetUserAvatar = (userId: string) => {
-    // First check passed-in function (this has priority - it contains data from parent components)
-    const passedInAvatar = getUserAvatar(userId);
-    if (passedInAvatar) {
-      return passedInAvatar;
-    }
-    // Then check if we have merged data
-    const mergedAvatar = mergedAvatarData[userId];
-    if (mergedAvatar) {
-      return mergedAvatar;
-    }
-    return null;
-  };
-
-  // Enhanced username function that prioritizes passed-in data over merged data
-  const enhancedGetUsername = (userId: string) => {
-    // First check passed-in functions (these have priority - they contain data from parent components)
-    if (getUsername) {
-      const username = getUsername(userId);
-      if (username && username !== userId) {
-        return username;
+  const { data: tradeHistoryUsers } = useQuery({
+    queryKey: ["tradeHistoryUsers", tradeHistoryUserIds.sort()],
+    queryFn: async () => {
+      if (tradeHistoryUserIds.length === 0) {
+        return {};
       }
+
+      const userData = await fetchRobloxUsersBatch(tradeHistoryUserIds);
+      if (!userData) {
+        return {};
+      }
+
+      const processedUsers: Record<
+        string,
+        { name: string; displayName: string; hasVerifiedBadge: boolean }
+      > = {};
+      Object.values(userData).forEach((user: UserData) => {
+        if (user && user.id) {
+          processedUsers[user.id.toString()] = {
+            name: user.name || user.id.toString(),
+            displayName: user.displayName || user.name || user.id.toString(),
+            hasVerifiedBadge: Boolean(user.hasVerifiedBadge),
+          };
+        }
+      });
+
+      return processedUsers;
+    },
+    enabled: tradeHistoryUserIds.length > 0 && isOpen,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+  });
+
+  const getUsername = (userId: string) => {
+    const cachedUser = tradeHistoryUsers?.[userId];
+    if (cachedUser) {
+      return cachedUser.name;
     }
-    const displayName = getUserDisplay(userId);
-    if (displayName && displayName !== userId) {
-      return displayName;
-    }
-    // Then check if we have merged data
-    const mergedUser = mergedUserData[userId];
-    if (mergedUser?.name) {
-      return mergedUser.name;
-    }
-    // Fallback to user ID
+
     return userId;
   };
 
-  // Enhanced verified badge function that prioritizes passed-in data over merged data
-  const enhancedGetHasVerifiedBadge = (userId: string) => {
-    // First check passed-in function (this has priority - it contains data from parent components)
-    if (getHasVerifiedBadge) {
-      return getHasVerifiedBadge(userId);
+  const getHasVerifiedBadge = (userId: string) => {
+    const cachedUser = tradeHistoryUsers?.[userId];
+    if (cachedUser) {
+      return cachedUser.hasVerifiedBadge;
     }
-    // Then check if we have merged data
-    const mergedUser = mergedUserData[userId];
-    if (mergedUser?.hasVerifiedBadge !== undefined) {
-      return Boolean(mergedUser.hasVerifiedBadge);
-    }
+
     return false;
+  };
+
+  const getUserAvatar = (userId: string) => {
+    return tradeHistoryAvatars?.[userId] || "";
+  };
+
+  const DefaultAvatar = () => (
+    <svg
+      className="h-6 w-6 text-tertiary-text"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <path
+        fillRule="evenodd"
+        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const toggleTradeSortOrder = () => {
@@ -148,7 +201,6 @@ export default function TradeHistoryModal({
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div className="border-border-primary bg-secondary-bg mx-auto max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg border">
-          {/* Modal Header */}
           <div className="border-border-primary border-b p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
@@ -165,41 +217,13 @@ export default function TradeHistoryModal({
                       style={{
                         borderColor: getCategoryColor(item.categoryTitle),
                         backgroundColor:
-                          getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
+                          getCategoryColor(item.categoryTitle) + "20",
                       }}
                     >
                       {item.categoryTitle}
                     </span>
                   )}
                 </div>
-                {/* Loading indicator in header */}
-                {isLoading && (
-                  <div className="text-button-info mt-2 flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4 animate-spin"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    <span className="text-secondary-text text-sm">
-                      Loading user profiles...
-                    </span>
-                  </div>
-                )}
               </div>
               <button
                 onClick={onClose}
@@ -209,7 +233,6 @@ export default function TradeHistoryModal({
               </button>
             </div>
 
-            {/* Sort button - below on mobile, inline on desktop */}
             {item.history &&
               Array.isArray(item.history) &&
               item.history.length > 1 && (
@@ -231,9 +254,7 @@ export default function TradeHistoryModal({
               )}
           </div>
 
-          {/* Modal Content */}
           <div className="max-h-[60vh] overflow-y-auto p-6">
-            {/* Notice for items with 49+ history entries */}
             {item.history &&
               Array.isArray(item.history) &&
               item.history.length >= 49 && (
@@ -250,7 +271,6 @@ export default function TradeHistoryModal({
               )}
 
             {(() => {
-              // Check if we have valid history data
               if (
                 !item.history ||
                 !Array.isArray(item.history) ||
@@ -265,10 +285,8 @@ export default function TradeHistoryModal({
                 );
               }
 
-              // Process history to show actual trades between users
               const history = item.history.slice().reverse();
 
-              // If there's only one history entry, show no ownership history message
               if (history.length === 1) {
                 return (
                   <div className="py-8 text-center">
@@ -279,7 +297,6 @@ export default function TradeHistoryModal({
                 );
               }
 
-              // Group history into trades between users
               const trades = [];
               for (let i = 0; i < history.length - 1; i++) {
                 const toUser = history[i];
@@ -291,7 +308,6 @@ export default function TradeHistoryModal({
                 });
               }
 
-              // Sort trades based on sort order
               const sortedTrades = [...trades].sort((a, b) => {
                 const dateA = a.toUser.TradeTime;
                 const dateB = b.toUser.TradeTime;
@@ -300,7 +316,6 @@ export default function TradeHistoryModal({
                   : dateA - dateB;
               });
 
-              // Find the first trade (lowest trade number = chronologically oldest)
               const firstTradeNumber = Math.min(
                 ...trades.map((trade) => trade.tradeNumber),
               );
@@ -321,25 +336,26 @@ export default function TradeHistoryModal({
                           <div className="flex items-center gap-3">
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                {/* From User */}
                                 <div className="flex items-center gap-2">
-                                  <div className="border-border-primary flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
-                                    {enhancedGetUserAvatar(
+                                  <div className="flex-shrink-0">
+                                    {getUserAvatar(
                                       trade.fromUser.UserId.toString(),
                                     ) ? (
                                       <Image
                                         src={
-                                          enhancedGetUserAvatar(
+                                          getUserAvatar(
                                             trade.fromUser.UserId.toString(),
                                           )!
                                         }
                                         alt="User Avatar"
                                         width={24}
                                         height={24}
-                                        className="rounded-full"
+                                        className="rounded-full bg-tertiary-bg"
                                       />
                                     ) : (
-                                      <DefaultAvatar />
+                                      <div className="bg-tertiary-bg flex h-6 w-6 items-center justify-center rounded-full">
+                                        <DefaultAvatar />
+                                      </div>
                                     )}
                                   </div>
                                   <a
@@ -349,10 +365,10 @@ export default function TradeHistoryModal({
                                     className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
                                   >
                                     <span className="inline-flex items-center gap-1.5">
-                                      {enhancedGetUsername(
+                                      {getUsername(
                                         trade.fromUser.UserId.toString(),
                                       )}
-                                      {enhancedGetHasVerifiedBadge(
+                                      {getHasVerifiedBadge(
                                         trade.fromUser.UserId.toString(),
                                       ) && (
                                         <VerifiedBadgeIcon className="h-4 w-4" />
@@ -361,7 +377,6 @@ export default function TradeHistoryModal({
                                   </a>
                                 </div>
 
-                                {/* Arrow */}
                                 <div className="text-secondary-text flex items-center gap-1">
                                   <svg
                                     className="h-4 w-4"
@@ -383,25 +398,26 @@ export default function TradeHistoryModal({
                                   </span>
                                 </div>
 
-                                {/* To User */}
                                 <div className="flex items-center gap-2">
-                                  <div className="border-border-primary flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border">
-                                    {enhancedGetUserAvatar(
+                                  <div className="flex-shrink-0">
+                                    {getUserAvatar(
                                       trade.toUser.UserId.toString(),
                                     ) ? (
                                       <Image
                                         src={
-                                          enhancedGetUserAvatar(
+                                          getUserAvatar(
                                             trade.toUser.UserId.toString(),
                                           )!
                                         }
                                         alt="User Avatar"
                                         width={24}
                                         height={24}
-                                        className="rounded-full"
+                                        className="rounded-full bg-tertiary-bg"
                                       />
                                     ) : (
-                                      <DefaultAvatar />
+                                      <div className="bg-tertiary-bg flex h-6 w-6 items-center justify-center rounded-full">
+                                        <DefaultAvatar />
+                                      </div>
                                     )}
                                   </div>
                                   <a
@@ -411,10 +427,10 @@ export default function TradeHistoryModal({
                                     className="text-link hover:text-link-hover truncate font-medium transition-colors hover:underline"
                                   >
                                     <span className="inline-flex items-center gap-1.5">
-                                      {enhancedGetUsername(
+                                      {getUsername(
                                         trade.toUser.UserId.toString(),
                                       )}
-                                      {enhancedGetHasVerifiedBadge(
+                                      {getHasVerifiedBadge(
                                         trade.toUser.UserId.toString(),
                                       ) && (
                                         <VerifiedBadgeIcon className="h-4 w-4" />
@@ -426,7 +442,6 @@ export default function TradeHistoryModal({
                             </div>
                           </div>
 
-                          {/* Trade Date */}
                           <div className="text-secondary-text flex-shrink-0 text-sm">
                             {formatDate(trade.toUser.TradeTime)}
                           </div>

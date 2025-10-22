@@ -13,7 +13,6 @@ import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "../UI/IconWrapper";
 import { logError } from "@/services/logger";
-import { formatMessageDate } from "@/utils/timestamp";
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
@@ -456,11 +455,6 @@ export default function DupeFinderResults({
           isOpen={showHistoryModal}
           onClose={closeHistoryModal}
           item={selectedItem}
-          getUserDisplay={getUserDisplay}
-          getUserAvatar={getUserAvatar}
-          getUsername={getUsername}
-          getHasVerifiedBadge={getHasVerifiedBadge}
-          formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
     </div>

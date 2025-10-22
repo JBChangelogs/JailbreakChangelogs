@@ -16,7 +16,6 @@ import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import { logError } from "@/services/logger";
-import { formatMessageDate } from "@/utils/timestamp";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
@@ -498,11 +497,6 @@ export default function OGFinderResults({
           isOpen={showHistoryModal}
           onClose={closeHistoryModal}
           item={selectedItem}
-          getUserDisplay={getUserDisplay}
-          getUserAvatar={getUserAvatar}
-          getUsername={getUsername}
-          getHasVerifiedBadge={getHasVerifiedBadge}
-          formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
     </div>

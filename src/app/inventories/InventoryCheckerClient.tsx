@@ -17,7 +17,6 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
-import { formatMessageDate } from "@/utils/timestamp";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
@@ -282,17 +281,6 @@ export default function InventoryCheckerClient({
     [robloxUsers, initialRobloxUsers],
   );
 
-  // Helper function to get user avatar with progressive loading
-  const getUserAvatar = useCallback(
-    (userId: string) => {
-      const avatar = robloxAvatars[userId] || initialRobloxAvatars?.[userId];
-      return avatar && typeof avatar === "string" && avatar.trim() !== ""
-        ? avatar
-        : null;
-    },
-    [robloxAvatars, initialRobloxAvatars],
-  );
-
   // Background loading for remaining original owners (after initial 1000)
   useEffect(() => {
     if (remainingUserIds.length === 0) return;
@@ -362,10 +350,6 @@ export default function InventoryCheckerClient({
 
     setInternalIsLoading(true);
     router.push(`/inventories/${searchId.trim()}`);
-  };
-
-  const formatDate = (timestamp: number) => {
-    return formatMessageDate(timestamp);
   };
 
   const handleItemClick = (item: InventoryItem) => {
@@ -706,19 +690,6 @@ export default function InventoryCheckerClient({
               isOpen={showHistoryModal}
               onClose={closeHistoryModal}
               item={selectedItem}
-              getUserAvatar={getUserAvatar}
-              getUserDisplay={getUserDisplay}
-              getUsername={(userId) => {
-                const user =
-                  robloxUsers[userId] || initialRobloxUsers?.[userId];
-                return user?.name || userId;
-              }}
-              getHasVerifiedBadge={(userId) => {
-                const user =
-                  robloxUsers[userId] || initialRobloxUsers?.[userId];
-                return Boolean(user?.hasVerifiedBadge);
-              }}
-              formatDate={formatDate}
             />
           </>
         )}
