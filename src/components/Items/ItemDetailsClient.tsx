@@ -97,6 +97,8 @@ interface ItemDetailsClientProps {
 }
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+
+// Move ItemDetailsTabs outside to avoid creating components during render
 const ItemDetailsTabs = React.memo(
   function ItemDetailsTabs({
     value,
@@ -156,26 +158,15 @@ export default function ItemDetailsClient({
     null,
   );
   const [visibleLength, setVisibleLength] = useState(500);
-  const [activeTab, setActiveTab] = useState(() => {
-    // Initialize tab based on hash navigation
-    if (typeof window !== "undefined") {
-      if (window.location.hash === "#comments") return 5;
-      if (window.location.hash === "#charts") return 1;
-      if (window.location.hash === "#changes") return 2;
-      if (window.location.hash === "#dupes") return 3;
-      if (window.location.hash === "#similar") return 4;
-    }
-    return 0;
-  });
+  const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
   const [ownerSearchTerm, setOwnerSearchTerm] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
-    () => getCurrentUserPremiumType(),
-  );
-  const [premiumStatusLoaded] = useState(true);
+  const [currentUserPremiumType, setCurrentUserPremiumType] =
+    useState<number>(0);
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
 
   // Use optimized real-time relative date for last updated timestamp
@@ -187,6 +178,12 @@ export default function ItemDetailsClient({
   const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
+    // Get current user's premium type
+    setTimeout(() => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+      setPremiumStatusLoaded(true);
+    }, 0);
+
     // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -216,6 +213,23 @@ export default function ItemDetailsClient({
   }, [isHovered, item?.type]);
 
   const INITIAL_DESCRIPTION_LENGTH = 500;
+
+  useEffect(() => {
+    // Hash navigation
+    if (window.location.hash === "#comments") {
+      setTimeout(() => setActiveTab(5), 0);
+    } else if (window.location.hash === "#charts") {
+      setTimeout(() => setActiveTab(1), 0);
+    } else if (window.location.hash === "#changes") {
+      setTimeout(() => setActiveTab(2), 0);
+    } else if (window.location.hash === "#dupes") {
+      setTimeout(() => setActiveTab(3), 0);
+    } else if (window.location.hash === "#similar") {
+      setTimeout(() => setActiveTab(4), 0);
+    } else {
+      setTimeout(() => setActiveTab(0), 0);
+    }
+  }, []);
 
   const handleVariantSelect = useCallback((variant: ItemDetails) => {
     setSelectedVariant(variant);

@@ -260,11 +260,26 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   }, []);
 
   // Calculate results when inputs change
-  const shouldCalculate =
-    currentLevel && currentLevel < season.xp_data.targetLevel;
-  if (shouldCalculate && !results) {
-    calculateXp();
-  }
+  useEffect(() => {
+    const shouldCalculate =
+      currentLevel &&
+      currentLevel < season.xp_data.targetLevel &&
+      !seasonHasEnded;
+    if (shouldCalculate && !results) {
+      // Use setTimeout to defer the calculation and avoid setState in effect
+      const timeoutId = setTimeout(() => {
+        calculateXp();
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [
+    currentLevel,
+    season.xp_data.targetLevel,
+    results,
+    calculateXp,
+    seasonHasEnded,
+  ]);
 
   // If season has ended, show a different UI
   if (seasonHasEnded) {
@@ -295,7 +310,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
             </p>
           </div>
 
-          <div className="border-border-primary hover:border-border-focus bg-secondary-bg/50 rounded-lg border p-4">
+          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-center gap-3">
               <svg
                 className="text-button-info h-5 w-5"
@@ -314,7 +329,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
                 Check Back Soon!
               </span>
             </div>
-            <p className="bg-secondary-bg text-secondary-text text-sm">
+            <p className="bg-primary-bg text-secondary-text text-sm">
               The XP calculator will be available again when Season{" "}
               {season.season + 1} begins.
             </p>

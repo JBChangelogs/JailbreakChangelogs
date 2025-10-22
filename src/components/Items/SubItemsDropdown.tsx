@@ -50,13 +50,10 @@ export default function SubItemsDropdown({
     (child) => child.sub_name === "2023",
   );
 
-  // Get current year for default display
-  const currentYear = new Date().getFullYear().toString();
-
   // Get the display text for the dropdown button
   const getDisplayText = () => {
     if (selectedSubItem === null) {
-      return currentYear; // Show current year when parent item details are shown
+      return "2025"; // Show 2025 when parent item details are shown
     }
     return selectedSubItem.sub_name;
   };
@@ -102,7 +99,7 @@ export default function SubItemsDropdown({
                   : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
               }`}
             >
-              {currentYear}
+              2025
             </button>
             {sortedChildren.map((child) => (
               <button

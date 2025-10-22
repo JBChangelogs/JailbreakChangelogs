@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ItemDetails } from "@/types";
 
 interface ItemVariantDropdownProps {
@@ -14,12 +14,8 @@ export default function ItemVariantDropdown({
   onVariantSelect,
 }: ItemVariantDropdownProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>("2025");
   const searchParams = useSearchParams();
-  const router = useRouter();
-
-  // Derive selectedYear from URL params instead of setting in effect
-  const currentYear = new Date().getFullYear().toString();
-  const selectedYear = searchParams.get("variant") || currentYear;
 
   useEffect(() => {
     const variant = searchParams.get("variant");
@@ -29,6 +25,7 @@ export default function ItemVariantDropdown({
         (child) => child.sub_name === variant,
       );
       if (matchingChild) {
+        setTimeout(() => setSelectedYear(variant), 0);
         const variantData = {
           ...item,
           cash_value: matchingChild.data.cash_value,
@@ -42,11 +39,13 @@ export default function ItemVariantDropdown({
         // If variant doesn't exist, remove it from URL and show default item
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete("variant");
-        router.replace(newUrl.pathname + newUrl.search);
+        window.history.replaceState(null, "", newUrl.pathname + newUrl.search);
+        setTimeout(() => setSelectedYear("2025"), 0);
         onVariantSelect(item);
       }
     } else if (!variant) {
       // Reset to base item when no variant in URL
+      setTimeout(() => setSelectedYear("2025"), 0);
       onVariantSelect(item);
     }
   }, [searchParams, item.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -80,19 +79,24 @@ export default function ItemVariantDropdown({
             <button
               onClick={() => {
                 onVariantSelect(item);
+                setTimeout(() => setSelectedYear("2025"), 0);
                 setIsDropdownOpen(false);
                 // Remove variant from URL when selecting default
                 const newUrl = new URL(window.location.href);
                 newUrl.searchParams.delete("variant");
-                router.replace(newUrl.pathname + newUrl.search);
+                window.history.replaceState(
+                  null,
+                  "",
+                  newUrl.pathname + newUrl.search,
+                );
               }}
               className={`w-full cursor-pointer px-4 py-3 text-left ${
-                selectedYear === currentYear
+                selectedYear === "2025"
                   ? "bg-button-info text-form-button-text hover:bg-primary-bg hover:text-primary-text"
                   : "bg-secondary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text"
               }`}
             >
-              {currentYear}
+              2025
             </button>
             {item.children.map((child) => (
               <button
@@ -108,11 +112,16 @@ export default function ItemVariantDropdown({
                   };
 
                   onVariantSelect(variantData);
+                  setSelectedYear(child.sub_name);
                   setIsDropdownOpen(false);
                   // Update URL with selected variant
                   const newUrl = new URL(window.location.href);
                   newUrl.searchParams.set("variant", child.sub_name);
-                  router.replace(newUrl.pathname + newUrl.search);
+                  window.history.replaceState(
+                    null,
+                    "",
+                    newUrl.pathname + newUrl.search,
+                  );
                 }}
                 className={`w-full cursor-pointer px-4 py-3 text-left ${
                   selectedYear === child.sub_name

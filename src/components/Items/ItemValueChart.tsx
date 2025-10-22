@@ -197,11 +197,11 @@ const ItemValueChart = ({
           </svg>
         </div>
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Value History Available
+          No Data Available
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          This item doesn&apos;t have any recorded value changes yet. Value
-          history will appear here once the item&apos;s value is updated.
+          This item doesn&apos;t have any recorded data yet. Charts will appear
+          here once data becomes available.
         </p>
       </div>
     );
@@ -591,45 +591,47 @@ const ItemValueChart = ({
       {/* Value History Chart */}
       {!showOnlyTradingMetrics && (
         <div>
-          <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-            <CustomButtonGroup>
-              <CustomButton
-                onClick={() => handleDateRangeChange("1w")}
-                selected={dateRange === "1w"}
-                disabled={!hasDataForRange("1w")}
-              >
-                1W
-              </CustomButton>
-              <CustomButton
-                onClick={() => handleDateRangeChange("1m")}
-                selected={dateRange === "1m"}
-                disabled={!hasDataForRange("1m")}
-              >
-                1M
-              </CustomButton>
-              <CustomButton
-                onClick={() => handleDateRangeChange("6m")}
-                selected={dateRange === "6m"}
-                disabled={!hasDataForRange("6m")}
-              >
-                6M
-              </CustomButton>
-              <CustomButton
-                onClick={() => handleDateRangeChange("1y")}
-                selected={dateRange === "1y"}
-                disabled={!hasDataForRange("1y")}
-              >
-                1Y
-              </CustomButton>
-              <CustomButton
-                onClick={() => handleDateRangeChange("all")}
-                selected={dateRange === "all"}
-                disabled={!hasDataForRange("all")}
-              >
-                All
-              </CustomButton>
-            </CustomButtonGroup>
-          </div>
+          {shouldShowValueChart && (
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <CustomButtonGroup>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1w")}
+                  selected={dateRange === "1w"}
+                  disabled={!hasDataForRange("1w")}
+                >
+                  1W
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1m")}
+                  selected={dateRange === "1m"}
+                  disabled={!hasDataForRange("1m")}
+                >
+                  1M
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("6m")}
+                  selected={dateRange === "6m"}
+                  disabled={!hasDataForRange("6m")}
+                >
+                  6M
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("1y")}
+                  selected={dateRange === "1y"}
+                  disabled={!hasDataForRange("1y")}
+                >
+                  1Y
+                </CustomButton>
+                <CustomButton
+                  onClick={() => handleDateRangeChange("all")}
+                  selected={dateRange === "all"}
+                  disabled={!hasDataForRange("all")}
+                >
+                  All
+                </CustomButton>
+              </CustomButtonGroup>
+            </div>
+          )}
           {shouldShowValueChart ? (
             <>
               <div className="h-[350px]">
@@ -662,12 +664,11 @@ const ItemValueChart = ({
                 </svg>
               </div>
               <h3 className="text-primary-text mb-2 text-xl font-semibold">
-                No Value History Available
+                No Data Available
               </h3>
               <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-                This item doesn&apos;t have any recorded value changes yet.
-                Value history will appear here once the item&apos;s value is
-                updated.
+                This item doesn&apos;t have any recorded data yet. Charts will
+                appear here once data becomes available.
               </p>
             </div>
           )}
@@ -733,6 +734,36 @@ const ItemValueChart = ({
                 Reset Zoom
               </button>
             </div>
+          </div>
+        )}
+
+      {/* Show generic "no data" message when only trading metrics tab is active and no data */}
+      {showOnlyTradingMetrics &&
+        !hideTradingMetrics &&
+        tradingData.length === 0 && (
+          <div className="bg-secondary-bg rounded-lg p-8 text-center">
+            <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+              <svg
+                className="text-button-info h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-primary-text mb-2 text-xl font-semibold">
+              No Data Available
+            </h3>
+            <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+              This item doesn&apos;t have any recorded data yet. Charts will
+              appear here once data becomes available.
+            </p>
           </div>
         )}
     </div>
