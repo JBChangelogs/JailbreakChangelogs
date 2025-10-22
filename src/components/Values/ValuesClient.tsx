@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
 import { Icon } from "@/components/UI/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
@@ -38,8 +38,38 @@ export default function ValuesClient({
   const lastUpdated = use(lastUpdatedPromise);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
-  const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+
+  // Derive initial state from URL params and localStorage
+  const getInitialFilterSort = (): FilterSort => {
+    if (typeof window === "undefined") return "name-all-items";
+    const searchParams = new URLSearchParams(window.location.search);
+    const urlFilterSort = searchParams.get("filterSort");
+    if (urlFilterSort) {
+      safeLocalStorage.setItem("valuesFilterSort", urlFilterSort);
+      return urlFilterSort as FilterSort;
+    }
+    return (
+      (safeLocalStorage.getItem("valuesFilterSort") as FilterSort) ||
+      "name-all-items"
+    );
+  };
+
+  const getInitialValueSort = (): ValueSort => {
+    if (typeof window === "undefined") return "cash-desc";
+    const searchParams = new URLSearchParams(window.location.search);
+    const urlValueSort = searchParams.get("valueSort");
+    if (urlValueSort) {
+      safeLocalStorage.setItem("valuesValueSort", urlValueSort);
+      return urlValueSort as ValueSort;
+    }
+    return (
+      (safeLocalStorage.getItem("valuesValueSort") as ValueSort) || "cash-desc"
+    );
+  };
+
+  const [filterSort, setFilterSort] =
+    useState<FilterSort>(getInitialFilterSort);
+  const [valueSort, setValueSort] = useState<ValueSort>(getInitialValueSort);
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
@@ -49,41 +79,14 @@ export default function ValuesClient({
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =
     useState<number>(MAX_VALUE_RANGE);
-  const [showHcModal, setShowHcModal] = useState(false);
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const urlFilterSort = searchParams.get("filterSort");
-    const urlValueSort = searchParams.get("valueSort");
-
-    if (urlFilterSort || urlValueSort) {
-      if (urlFilterSort) {
-        safeLocalStorage.setItem("valuesFilterSort", urlFilterSort);
-        setFilterSort(urlFilterSort as FilterSort);
-      }
-      if (urlValueSort) {
-        safeLocalStorage.setItem("valuesValueSort", urlValueSort);
-        setValueSort(urlValueSort as ValueSort);
-      }
-    } else {
-      const savedFilterSort = safeLocalStorage.getItem(
-        "valuesFilterSort",
-      ) as FilterSort;
-      const savedValueSort = safeLocalStorage.getItem(
-        "valuesValueSort",
-      ) as ValueSort;
-
-      if (savedFilterSort) {
-        setFilterSort(savedFilterSort);
-      }
-      if (savedValueSort) {
-        setValueSort(savedValueSort);
-      }
-    }
-  }, []);
+  const [showHcModal, setShowHcModal] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.location.hash === "#hyper-pity-calc";
+  });
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
+    () => getCurrentUserPremiumType(),
+  );
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(true);
 
   const handleRandomItem = async () => {
     try {
@@ -125,27 +128,25 @@ export default function ValuesClient({
     }
   };
 
-  const loadFavorites = useCallback(async () => {
-    if (user && user.id) {
-      try {
-        const favoritesData = await fetchUserFavorites(user.id);
-        if (favoritesData !== null && Array.isArray(favoritesData)) {
-          const favoriteIds = favoritesData.map((fav: FavoriteItem) =>
-            parseInt(fav.item_id, 10),
-          );
-          setFavorites(favoriteIds);
-        }
-      } catch (err) {
-        console.error("Error loading favorites:", err);
-      }
-    }
-  }, [user]);
-
   useEffect(() => {
-    if (user && user.id) {
-      loadFavorites();
-    }
-  }, [user, loadFavorites]);
+    const loadFavorites = async () => {
+      if (user && user.id) {
+        try {
+          const favoritesData = await fetchUserFavorites(user.id);
+          if (favoritesData !== null && Array.isArray(favoritesData)) {
+            const favoriteIds = favoritesData.map((fav: FavoriteItem) =>
+              parseInt(fav.item_id, 10),
+            );
+            setFavorites(favoriteIds);
+          }
+        } catch (err) {
+          console.error("Error loading favorites:", err);
+        }
+      }
+    };
+
+    loadFavorites();
+  }, [user]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -153,10 +154,6 @@ export default function ValuesClient({
         setShowHcModal(true);
       }
     };
-
-    if (window.location.hash === "#hyper-pity-calc") {
-      setShowHcModal(true);
-    }
 
     window.addEventListener("hashchange", handleHashChange);
 
@@ -186,9 +183,6 @@ export default function ValuesClient({
   };
 
   useEffect(() => {
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
     };

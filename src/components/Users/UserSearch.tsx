@@ -23,19 +23,11 @@ export default function UserSearch({ initialUsers }: UserSearchProps) {
   const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userType, setUserType] = useState<"discord" | "roblox">("discord");
   const usersPerPage = 21;
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  useEffect(() => {
-    if (user) {
-      setCurrentUserId(user.id);
-    } else {
-      setCurrentUserId(null);
-    }
-  }, [user]);
+  const currentUserId = user?.id || null;
 
   const filteredUsers = initialUsers.filter((user) => {
     const searchLower = debouncedSearchQuery.trim().toLowerCase();
