@@ -436,7 +436,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   // TanStack Virtual setup for performance with large comment datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
-   
+
   const virtualizer = useVirtualizer({
     count: filteredComments.length,
     getScrollElement: () => parentRef.current,

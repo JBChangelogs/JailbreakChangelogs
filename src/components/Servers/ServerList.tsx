@@ -134,7 +134,6 @@ const ServerList: React.FC<{
     rows.push(sortedServers.slice(i, i + serversPerRow));
   }
 
-   
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
