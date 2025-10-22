@@ -114,6 +114,7 @@ export default function NetworthLeaderboardClient({
 
   // TanStack Virtual setup for performance with large datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredLeaderboard.length,
     getScrollElement: () => parentRef.current,

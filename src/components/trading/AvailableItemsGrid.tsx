@@ -1,7 +1,8 @@
 function useWindowWidth() {
-  const [width, setWidth] = useState(1024);
+  const [width, setWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
   useEffect(() => {
-    setWidth(window.innerWidth);
     const handleResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -282,6 +283,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   // TanStack Virtual setup for performance with large item datasets
   // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

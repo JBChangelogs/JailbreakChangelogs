@@ -59,6 +59,7 @@ export default function InventoryItemsGrid({
 
   // TanStack Virtual setup for performance with large item datasets
   // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+   
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

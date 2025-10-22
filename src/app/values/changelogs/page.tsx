@@ -117,6 +117,7 @@ export default function ValuesChangelogPage() {
 
   // TanStack Virtual setup for performance with large changelog datasets
   // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+   
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

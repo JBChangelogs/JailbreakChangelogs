@@ -103,6 +103,7 @@ export default function ValuesItemsGrid({
 
   // TanStack Virtual setup for performance with large item datasets
   // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

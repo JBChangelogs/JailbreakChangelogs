@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Dialog, DialogTitle } from "@headlessui/react";
@@ -49,18 +49,8 @@ export default function TradeHistoryModal({
   const [tradeSortOrder, setTradeSortOrder] = useState<"newest" | "oldest">(
     "newest",
   );
-  const [localUserData, setLocalUserData] = useState<
-    Record<
-      string,
-      { name?: string; displayName?: string; hasVerifiedBadge?: boolean }
-    >
-  >({});
-  const [localAvatarData, setLocalAvatarData] = useState<
-    Record<string, string>
-  >({});
-
   // Extract user IDs from trade history when modal opens
-  const userIds = useMemo(() => {
+  const userIds = (() => {
     if (!item?.history || !Array.isArray(item.history)) return [];
 
     const ids = new Set<string>();
@@ -68,7 +58,7 @@ export default function TradeHistoryModal({
       ids.add(entry.UserId.toString());
     });
     return Array.from(ids);
-  }, [item?.history]);
+  })();
 
   // Fetch user data using TanStack Query
   const { data: fetchedUserData, isLoading } = useQuery({
@@ -77,38 +67,37 @@ export default function TradeHistoryModal({
     enabled: isOpen && userIds.length > 0,
   });
 
-  // Merge fetched user data with existing data
-  useEffect(() => {
-    if (fetchedUserData && "userData" in fetchedUserData) {
-      setLocalUserData((prev) => ({
-        ...prev,
-        ...fetchedUserData.userData,
-      }));
-    }
-    if (fetchedUserData && "avatarData" in fetchedUserData) {
-      setLocalAvatarData((prev) => ({
-        ...prev,
-        ...fetchedUserData.avatarData,
-      }));
-    }
-  }, [fetchedUserData]);
+  const mergedUserData =
+    fetchedUserData && "userData" in fetchedUserData
+      ? (fetchedUserData.userData as Record<
+          string,
+          { name?: string; displayName?: string; hasVerifiedBadge?: boolean }
+        >)
+      : ({} as Record<
+          string,
+          { name?: string; displayName?: string; hasVerifiedBadge?: boolean }
+        >);
+  const mergedAvatarData =
+    fetchedUserData && "avatarData" in fetchedUserData
+      ? (fetchedUserData.avatarData as Record<string, string>)
+      : ({} as Record<string, string>);
 
-  // Enhanced user avatar function that prioritizes passed-in data over local data
+  // Enhanced user avatar function that prioritizes passed-in data over merged data
   const enhancedGetUserAvatar = (userId: string) => {
     // First check passed-in function (this has priority - it contains data from parent components)
     const passedInAvatar = getUserAvatar(userId);
     if (passedInAvatar) {
       return passedInAvatar;
     }
-    // Then check if we have local data
-    const localAvatar = localAvatarData[userId];
-    if (localAvatar) {
-      return localAvatar;
+    // Then check if we have merged data
+    const mergedAvatar = mergedAvatarData[userId];
+    if (mergedAvatar) {
+      return mergedAvatar;
     }
     return null;
   };
 
-  // Enhanced username function that prioritizes passed-in data over local data
+  // Enhanced username function that prioritizes passed-in data over merged data
   const enhancedGetUsername = (userId: string) => {
     // First check passed-in functions (these have priority - they contain data from parent components)
     if (getUsername) {
@@ -121,25 +110,25 @@ export default function TradeHistoryModal({
     if (displayName && displayName !== userId) {
       return displayName;
     }
-    // Then check if we have local data
-    const localUser = localUserData[userId];
-    if (localUser?.name) {
-      return localUser.name;
+    // Then check if we have merged data
+    const mergedUser = mergedUserData[userId];
+    if (mergedUser?.name) {
+      return mergedUser.name;
     }
     // Fallback to user ID
     return userId;
   };
 
-  // Enhanced verified badge function that prioritizes passed-in data over local data
+  // Enhanced verified badge function that prioritizes passed-in data over merged data
   const enhancedGetHasVerifiedBadge = (userId: string) => {
     // First check passed-in function (this has priority - it contains data from parent components)
     if (getHasVerifiedBadge) {
       return getHasVerifiedBadge(userId);
     }
-    // Then check if we have local data
-    const localUser = localUserData[userId];
-    if (localUser?.hasVerifiedBadge !== undefined) {
-      return Boolean(localUser.hasVerifiedBadge);
+    // Then check if we have merged data
+    const mergedUser = mergedUserData[userId];
+    if (mergedUser?.hasVerifiedBadge !== undefined) {
+      return Boolean(mergedUser.hasVerifiedBadge);
     }
     return false;
   };

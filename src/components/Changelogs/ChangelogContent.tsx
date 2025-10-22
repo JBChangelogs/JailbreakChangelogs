@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   ArrowRightIcon,
@@ -65,9 +65,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 }) => {
   const [imageAspectRatio, setImageAspectRatio] =
     useState<string>("aspect-[4/3]");
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
+    () => getCurrentUserPremiumType(),
+  );
 
   const currentIndex = changelogList.findIndex((c) => c.id === changelogId);
   const prevChangelog =
@@ -77,14 +77,10 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   const nextChangelog =
     currentIndex > 0 ? changelogList[currentIndex - 1] : null;
 
-  // Memoize parsed markdown to prevent hydration mismatches
-  const parsedSections = useMemo(() => parseMarkdown(sections), [sections]);
+  // Parse markdown sections
+  const parsedSections = parseMarkdown(sections);
 
   useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
     // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -222,7 +218,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 
           {/* Comments Section */}
           <div>
-            {premiumStatusLoaded && currentUserPremiumType === 0 && (
+            {currentUserPremiumType === 0 && (
               <div className="my-8 flex flex-col items-center">
                 <span className="text-secondary-text mb-2 block text-center text-xs">
                   ADVERTISEMENT

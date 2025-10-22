@@ -5,7 +5,6 @@ const Skeleton = dynamic(() => import("@mui/material/Skeleton"), {
   ssr: false,
 });
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FilterSort } from "@/types";
 
@@ -44,23 +43,19 @@ const itemTypeToFilterSort: Record<string, FilterSort> = {
 
 export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   const pathname = usePathname();
-  const [username, setUsername] = useState<string | null>(null);
 
   // Check if we're on a user profile page
   const isUserProfilePage =
     pathname.startsWith("/users/") && pathname.split("/").length === 3;
   const userId = isUserProfilePage ? pathname.split("/")[2] : null;
 
-  // Set username if we're on a user profile page and have user data
-  useEffect(() => {
-    if (userId && userData) {
-      setUsername(
-        userData.global_name && userData.global_name !== "None"
-          ? `@${userData.global_name}`
-          : `@${userData.username}`,
-      );
-    }
-  }, [userId, userData]);
+  // Derive username directly from userData during render
+  const username =
+    userId && userData
+      ? userData.global_name && userData.global_name !== "None"
+        ? `@${userData.global_name}`
+        : `@${userData.username}`
+      : null;
 
   // Split the pathname and create breadcrumb items
   const pathSegments = pathname.split("/").filter(Boolean);

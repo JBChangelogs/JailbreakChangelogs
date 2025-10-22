@@ -49,8 +49,6 @@ export default function DupeFinderResults({
     | "created-desc"
   >("duplicates");
 
-  const [localRobloxUsers, setLocalRobloxUsers] =
-    useState<Record<string, RobloxUser>>(robloxUsers);
   const [localRobloxAvatars, setLocalRobloxAvatars] =
     useState<Record<string, string>>(robloxAvatars);
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
@@ -72,16 +70,20 @@ export default function DupeFinderResults({
     enabled: visibleUserIds.length > 0,
   });
 
-  // Merge fetched user data with existing data
-  useEffect(() => {
-    if (fetchedUserData && "userData" in fetchedUserData) {
-      setLocalRobloxUsers((prev) => ({
-        ...prev,
+  // Transform data during render instead of using useEffect
+  const localRobloxUsers: Record<string, RobloxUser> = useMemo(() => {
+    if (
+      fetchedUserData &&
+      "userData" in fetchedUserData &&
+      typeof fetchedUserData.userData === "object"
+    ) {
+      return {
+        ...robloxUsers,
         ...fetchedUserData.userData,
-      }));
-      // Note: avatarData is empty for original owners since they're not displayed
+      } as Record<string, RobloxUser>;
     }
-  }, [fetchedUserData]);
+    return robloxUsers;
+  }, [robloxUsers, fetchedUserData]);
 
   // Handle visible user IDs changes from virtual scrolling
   const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
@@ -171,9 +173,8 @@ export default function DupeFinderResults({
 
   // Effects
   useEffect(() => {
-    setLocalRobloxUsers(robloxUsers);
     setLocalRobloxAvatars(robloxAvatars);
-  }, [robloxUsers, robloxAvatars]);
+  }, [robloxAvatars]);
 
   // Calculate total duped value
   useEffect(() => {

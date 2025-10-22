@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "../UI/IconWrapper";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -22,30 +22,23 @@ export default function HyperchromeCalculatorModal({
   const [pity, setPity] = useState(0);
   const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
-  useEffect(() => {
-    if (!open) {
-      // reset when closing
-      setLevel(0);
-      setPity(0);
-      setStep(1);
-      setHasCalculated(false);
-    }
-  }, [open]);
 
-  const robberiesNeeded = useMemo(() => {
-    const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
-    const pityPercent = Math.min(Math.max(pity, 0), 100);
-    return calculateRobberiesToLevelUp(lvl, pityPercent);
-  }, [level, pity]);
+  const handleClose = useCallback(() => {
+    // reset when closing
+    setLevel(0);
+    setPity(0);
+    setStep(1);
+    setHasCalculated(false);
+    onClose();
+  }, [onClose]);
 
-  const otherPity = useMemo(() => {
-    const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
-    const pityPercent = Math.min(Math.max(pity, 0), 100);
-    return calculateAllLevelPercentages(lvl, pityPercent);
-  }, [level, pity]);
+  const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
+  const pityPercent = Math.min(Math.max(pity, 0), 100);
+  const robberiesNeeded = calculateRobberiesToLevelUp(lvl, pityPercent);
+  const otherPity = calculateAllLevelPercentages(lvl, pityPercent);
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
+    <Dialog open={open} onClose={handleClose} className="relative z-50">
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"
@@ -57,7 +50,7 @@ export default function HyperchromeCalculatorModal({
             <span>Hyperchrome Pity Calculator</span>
             <button
               aria-label="Close"
-              onClick={onClose}
+              onClick={handleClose}
               className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10"
             >
               <XMarkIcon className="h-5 w-5" />
