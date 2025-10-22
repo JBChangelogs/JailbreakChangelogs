@@ -97,6 +97,47 @@ interface ItemDetailsClientProps {
 }
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+const ItemDetailsTabs = React.memo(
+  function ItemDetailsTabs({
+    value,
+    onChange,
+  }: {
+    value: number;
+    onChange: (e: React.SyntheticEvent, v: number) => void;
+  }) {
+    const labels = [
+      "Details",
+      "Charts",
+      "Changes",
+      "Dupes",
+      "Similar Items",
+      "Comments",
+    ];
+
+    return (
+      <div className="overflow-x-auto">
+        <div role="tablist" className="tabs min-w-max">
+          {labels.map((label, idx) => (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={value === idx}
+              aria-controls={`item-tabpanel-${idx}`}
+              id={`item-tab-${idx}`}
+              onClick={(e) =>
+                onChange(e as unknown as React.SyntheticEvent, idx)
+              }
+              className={`tab ${value === idx ? "tab-active" : ""}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  },
+  (prev, next) => prev.value === next.value,
+);
 
 export default function ItemDetailsClient({
   item,
@@ -115,15 +156,26 @@ export default function ItemDetailsClient({
     null,
   );
   const [visibleLength, setVisibleLength] = useState(500);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(() => {
+    // Initialize tab based on hash navigation
+    if (typeof window !== "undefined") {
+      if (window.location.hash === "#comments") return 5;
+      if (window.location.hash === "#charts") return 1;
+      if (window.location.hash === "#changes") return 2;
+      if (window.location.hash === "#dupes") return 3;
+      if (window.location.hash === "#similar") return 4;
+    }
+    return 0;
+  });
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
   const [ownerSearchTerm, setOwnerSearchTerm] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
+  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
+    () => getCurrentUserPremiumType(),
+  );
+  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(true);
   const { isAuthenticated, user } = useAuthContext();
 
   // Use optimized real-time relative date for last updated timestamp
@@ -135,10 +187,6 @@ export default function ItemDetailsClient({
   const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
     // Listen for auth changes
     const handleAuthChange = () => {
       setCurrentUserPremiumType(getCurrentUserPremiumType());
@@ -168,23 +216,6 @@ export default function ItemDetailsClient({
   }, [isHovered, item?.type]);
 
   const INITIAL_DESCRIPTION_LENGTH = 500;
-
-  useEffect(() => {
-    // Hash navigation
-    if (window.location.hash === "#comments") {
-      setActiveTab(5);
-    } else if (window.location.hash === "#charts") {
-      setActiveTab(1);
-    } else if (window.location.hash === "#changes") {
-      setActiveTab(2);
-    } else if (window.location.hash === "#dupes") {
-      setActiveTab(3);
-    } else if (window.location.hash === "#similar") {
-      setActiveTab(4);
-    } else {
-      setActiveTab(0);
-    }
-  }, []);
 
   const handleVariantSelect = useCallback((variant: ItemDetails) => {
     setSelectedVariant(variant);
@@ -322,53 +353,6 @@ export default function ItemDetailsClient({
       window.location.hash = "comments";
     }
   };
-
-  // DaisyUI v5 button-based tabs
-  const ItemDetailsTabs = React.useMemo(() => {
-    const TabsInner = React.memo(
-      function TabsInner({
-        value,
-        onChange,
-      }: {
-        value: number;
-        onChange: (e: React.SyntheticEvent, v: number) => void;
-      }) {
-        const labels = [
-          "Details",
-          "Charts",
-          "Changes",
-          "Dupes",
-          "Similar Items",
-          "Comments",
-        ];
-
-        return (
-          <div className="overflow-x-auto">
-            <div role="tablist" className="tabs min-w-max">
-              {labels.map((label, idx) => (
-                <button
-                  key={label}
-                  role="tab"
-                  aria-selected={value === idx}
-                  aria-controls={`item-tabpanel-${idx}`}
-                  id={`item-tab-${idx}`}
-                  onClick={(e) =>
-                    onChange(e as unknown as React.SyntheticEvent, idx)
-                  }
-                  className={`tab ${value === idx ? "tab-active" : ""}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      },
-      (prev, next) => prev.value === next.value,
-    );
-
-    return TabsInner;
-  }, []);
 
   const currentItem = selectedVariant || item;
 

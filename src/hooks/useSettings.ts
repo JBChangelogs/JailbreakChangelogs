@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UserData, UserSettings } from "@/types/auth";
 import { updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
@@ -14,15 +14,14 @@ export const useSettings = (
     requiredLimit?: string | number;
   }) => void,
 ) => {
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const getInitialSettings = () => {
+    return userData?.settings || null;
+  };
 
-  useEffect(() => {
-    if (userData?.settings) {
-      setSettings(userData.settings);
-    }
-    setLoading(false);
-  }, [userData]);
+  const [settings, setSettings] = useState<UserSettings | null>(
+    getInitialSettings,
+  );
+  const [loading, setLoading] = useState(!userData);
 
   const handleSettingChange = async (
     name: keyof UserSettings,

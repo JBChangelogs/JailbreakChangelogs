@@ -69,10 +69,12 @@ export default function InventoryItems({
   // Merge fetched user data with existing data
   useEffect(() => {
     if (fetchedUserData && "userData" in fetchedUserData) {
-      setLocalRobloxUsers((prev) => ({
-        ...prev,
-        ...fetchedUserData.userData,
-      }));
+      setTimeout(() => {
+        setLocalRobloxUsers((prev) => ({
+          ...prev,
+          ...fetchedUserData.userData,
+        }));
+      }, 0);
       // Note: avatarData is empty for original owners since they're not displayed
     }
   }, [fetchedUserData]);
@@ -194,40 +196,39 @@ export default function InventoryItems({
     }, 300);
   };
 
+  const currentItemsData = propItemsData || itemsData;
+  const currentRobloxUsers = useMemo(
+    () => ({ ...robloxUsers, ...localRobloxUsers }),
+    [robloxUsers, localRobloxUsers],
+  );
+  const currentRobloxAvatars = useMemo(
+    () => ({ ...robloxAvatars, ...localRobloxAvatars }),
+    [robloxAvatars, localRobloxAvatars],
+  );
+
   const getUserDisplay = useCallback(
     (userId: string) => {
-      const user = localRobloxUsers[userId];
+      const user = currentRobloxUsers[userId];
       if (!user) return userId;
       return user.name || user.displayName || userId;
     },
-    [localRobloxUsers],
+    [currentRobloxUsers],
   );
 
   const getUserAvatar = useCallback(
     (userId: string) => {
-      return localRobloxAvatars[userId] || "";
+      return currentRobloxAvatars[userId] || "";
     },
-    [localRobloxAvatars],
+    [currentRobloxAvatars],
   );
 
   const getHasVerifiedBadge = useCallback(
     (userId: string) => {
-      const user = localRobloxUsers[userId];
+      const user = currentRobloxUsers[userId];
       return Boolean(user?.hasVerifiedBadge);
     },
-    [localRobloxUsers],
+    [currentRobloxUsers],
   );
-
-  useEffect(() => {
-    if (propItemsData) {
-      setItemsData(propItemsData);
-    }
-  }, [propItemsData]);
-
-  useEffect(() => {
-    setLocalRobloxUsers(robloxUsers);
-    setLocalRobloxAvatars(robloxAvatars);
-  }, [robloxUsers, robloxAvatars]);
 
   // Count duplicates across entire inventory for consistent numbering
   const duplicateCounts = useMemo(() => {
@@ -286,7 +287,7 @@ export default function InventoryItems({
        */
       const excludedItemIds = new Set([142, 467, 171, 640, 634, 152]);
 
-      const missingItems = itemsData.filter((itemData) => {
+      const missingItems = currentItemsData.filter((itemData) => {
         if (ownedItemIds.has(itemData.id)) {
           return false;
         }
@@ -378,7 +379,9 @@ export default function InventoryItems({
 
     // Original logic for showing owned items
     const filtered = initialData.data.filter((item) => {
-      const itemData = itemsData.find((data) => data.id === item.item_id);
+      const itemData = currentItemsData.find(
+        (data) => data.id === item.item_id,
+      );
       if (!itemData) return false;
 
       // Search filter
@@ -429,7 +432,9 @@ export default function InventoryItems({
     }
 
     const mappedItems = finalFiltered.map((item) => {
-      const baseItemData = itemsData.find((data) => data.id === item.item_id)!;
+      const baseItemData = currentItemsData.find(
+        (data) => data.id === item.item_id,
+      )!;
       const variantValues = getVariantSpecificValues(item, baseItemData);
 
       // Create a modified item data object with variant-specific values
@@ -523,7 +528,7 @@ export default function InventoryItems({
     });
   }, [
     initialData.data,
-    itemsData,
+    currentItemsData,
     searchTerm,
     selectedCategories,
     showOnlyOriginal,
@@ -575,13 +580,13 @@ export default function InventoryItems({
   // Available categories
   const availableCategories = useMemo(() => {
     const categories = new Set<string>();
-    itemsData.forEach((item) => {
+    currentItemsData.forEach((item) => {
       if (item.type) {
         categories.add(item.type);
       }
     });
     return Array.from(categories).sort();
-  }, [itemsData]);
+  }, [currentItemsData]);
 
   // Calculate duplicate statistics for all inventories
   const inventoryStats = useMemo(() => {

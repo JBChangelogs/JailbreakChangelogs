@@ -14,37 +14,32 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark"); // Default to dark mode
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
+  const getInitialTheme = (): Theme => {
+    if (typeof window === "undefined") return "dark";
 
-  useEffect(() => {
-    // Get theme from localStorage on mount
     const savedTheme = safeLocalStorage.getItem("theme");
 
     if (savedTheme === "system") {
-      // Migrate users who had system theme to their current OS preference
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)",
       ).matches;
       const migratedTheme = prefersDark ? "dark" : "light";
-      setTheme(migratedTheme);
       safeLocalStorage.setItem("theme", migratedTheme);
+      return migratedTheme;
     } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
-      setTheme(savedTheme as Theme);
+      return savedTheme as Theme;
     }
-  }, []);
+
+    return "dark";
+  };
+
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const resolvedTheme = theme;
 
   useEffect(() => {
     const root = document.documentElement;
-
-    // Remove existing theme classes
     root.classList.remove("light", "dark");
-
-    // Apply the theme class
     root.classList.add(theme);
-    setResolvedTheme(theme);
-
-    // Save to localStorage
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);
 

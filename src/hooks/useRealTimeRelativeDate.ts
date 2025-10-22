@@ -11,13 +11,14 @@ import { formatRelativeDate } from "@/utils/timestamp";
 export const useRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
 ) => {
-  const [relativeTime, setRelativeTime] = useState<string>("");
+  const [relativeTime, setRelativeTime] = useState<string>(() =>
+    timestamp ? formatRelativeDate(timestamp) : "",
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (!timestamp) {
-      setRelativeTime("");
       return;
     }
 

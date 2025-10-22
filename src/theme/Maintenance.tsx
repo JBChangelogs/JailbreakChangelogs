@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canBypassMaintenance } from "@/utils/maintenance";
 import Image from "next/image";
@@ -12,21 +12,18 @@ const bangers = localFont({
 
 export default function Maintenance() {
   const { isAuthenticated, user, isLoading } = useAuthContext();
-  const [shouldShowMaintenance, setShouldShowMaintenance] = useState(true);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (isAuthenticated && user) {
-        const canBypass = canBypassMaintenance();
-        if (canBypass) {
-          setShouldShowMaintenance(false);
-          window.location.href = "/";
-          return;
-        }
+    if (!isLoading && isAuthenticated && user) {
+      const canBypass = canBypassMaintenance();
+      if (canBypass) {
+        window.location.href = "/";
       }
-      setShouldShowMaintenance(true);
     }
   }, [isAuthenticated, user, isLoading]);
+
+  const shouldShowMaintenance =
+    isLoading || !isAuthenticated || !user || !canBypassMaintenance();
 
   if (isLoading) {
     return (

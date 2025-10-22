@@ -61,6 +61,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const scanningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
+  const connectRef = useRef<(() => void) | null>(null);
 
   const connectionQualityRef = useRef<{
     messagesReceived: number;
@@ -407,7 +408,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setMessage(`Reconnecting... (${reconnectAttemptsRef.current}/2)`);
 
               reconnectTimeoutRef.current = setTimeout(() => {
-                connect();
+                connectRef.current?.();
               }, 3000);
             } else {
               setError("Connection lost - please try again");
@@ -439,6 +440,10 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       setStatus("error");
     }
   }, [userId, status]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const startScan = useCallback(() => {
     console.log("[SCAN WS] startScan called with userId:", userId);

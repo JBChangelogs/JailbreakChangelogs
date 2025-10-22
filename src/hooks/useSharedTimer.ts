@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { formatRelativeDate } from "@/utils/timestamp";
 
 interface TimerSubscriber {
   id: string;
@@ -103,24 +104,22 @@ export const useOptimizedRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
   id: string,
 ) => {
-  const [relativeTime, setRelativeTime] = useState<string>("");
+  const getInitialRelativeTime = () => {
+    if (!timestamp) return "";
+    return formatRelativeDate(timestamp);
+  };
 
-  useEffect(() => {
-    if (!timestamp) {
-      setRelativeTime("");
-      return;
-    }
-    setRelativeTime(formatRelativeDate(timestamp));
-  }, [timestamp]);
+  const [relativeTime, setRelativeTime] = useState<string>(
+    getInitialRelativeTime,
+  );
 
-  useSharedTimer(id, () => {
+  const updateRelativeTime = useCallback(() => {
     if (timestamp) {
       setRelativeTime(formatRelativeDate(timestamp));
     }
-  });
+  }, [timestamp]);
+
+  useSharedTimer(id, updateRelativeTime);
 
   return relativeTime;
 };
-
-// Import formatRelativeDate for the optimized hook
-import { formatRelativeDate } from "@/utils/timestamp";
