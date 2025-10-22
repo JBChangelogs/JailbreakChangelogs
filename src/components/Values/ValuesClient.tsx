@@ -86,7 +86,7 @@ export default function ValuesClient({
   const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
     () => getCurrentUserPremiumType(),
   );
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(true);
+  const premiumStatusLoaded = useState(true);
 
   const handleRandomItem = async () => {
     try {
