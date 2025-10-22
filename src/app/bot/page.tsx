@@ -7,10 +7,14 @@ import { Icon } from "../../components/UI/IconWrapper";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 export default function BotPage() {
+  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Generate shuffled array of background images during render
-  const backgroundImages = generateShuffledBackgroundImages();
+  useEffect(() => {
+    setTimeout(() => {
+      setBackgroundImages(generateShuffledBackgroundImages());
+    }, 0);
+  }, []);
 
   // Function to cycle to the next image
   const nextImage = useCallback(() => {

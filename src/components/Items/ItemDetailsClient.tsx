@@ -780,14 +780,48 @@ export default function ItemDetailsClient({
                       >
                         Value History
                       </button>
-                      <button
-                        role="tab"
-                        aria-selected={activeChartTab === 1}
-                        onClick={() => setActiveChartTab(1)}
-                        className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
-                      >
-                        Trading Metrics
-                      </button>
+                      {item.id !== 587 && (
+                        <button
+                          role="tab"
+                          aria-selected={activeChartTab === 1}
+                          onClick={() => setActiveChartTab(1)}
+                          className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
+                        >
+                          Trading Metrics
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Chart Update Notice */}
+                    <div className="mt-4 mb-4">
+                      <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
+                        <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
+                          Chart Update Schedule
+                        </div>
+                        <div className="text-secondary-text text-xs mt-1">
+                          Charts update daily at{" "}
+                          {(() => {
+                            // Create 6 PM Eastern Time and convert to user's local timezone
+                            const today = new Date();
+                            const year = today.getFullYear();
+                            const month = today.getMonth();
+                            const day = today.getDate();
+
+                            // Create 6 PM Eastern Time (18:00 ET) - create UTC time directly
+                            const utcTime = new Date(
+                              Date.UTC(year, month, day, 22, 0, 0),
+                            ); // 6 PM EST = 10 PM UTC
+
+                            // Format in user's local timezone
+                            return utcTime.toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                              timeZoneName: "short",
+                            });
+                          })()}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Chart Content */}

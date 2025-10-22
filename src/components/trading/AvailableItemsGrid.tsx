@@ -24,7 +24,6 @@ import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { FilterSort, ValueSort } from "@/types";
 import DisplayAd from "@/components/Ads/DisplayAd";
@@ -32,7 +31,6 @@ import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface AvailableItemsGridProps {
@@ -81,7 +79,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [selectedVariants, setSelectedVariants] = useState<
     Record<number, string>
   >({});
-  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
 
@@ -659,81 +656,34 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                 </div>
                                 {item.children && item.children.length > 0 && (
                                   <div className="relative">
-                                    <button
+                                    <select
+                                      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer"
+                                      value={
+                                        selectedVariants[item.id] || "2025"
+                                      }
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        handleVariantSelect(
+                                          item.id,
+                                          e.target.value,
+                                        );
+                                      }}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
-                                        setOpenDropdownId(
-                                          openDropdownId === item.id
-                                            ? null
-                                            : item.id,
-                                        );
                                       }}
-                                      className="text-secondary-text border-border-primary hover:border-border-focus bg-quaternary-bg hover:bg-quaternary-bg flex w-full items-center justify-between gap-1 rounded-lg border px-2 py-0.5 text-xs hover:cursor-pointer focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
                                     >
-                                      {selectedVariants[item.id] || "2025"}
-                                      <ChevronDownIcon
-                                        className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${openDropdownId === item.id ? "rotate-180" : ""}`}
-                                      />
-                                    </button>
-                                    <AnimatePresence>
-                                      {openDropdownId === item.id && (
-                                        <motion.div
-                                          key="dropdown"
-                                          initial={{ opacity: 0, y: -8 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          exit={{ opacity: 0, y: -8 }}
-                                          transition={{
-                                            duration: 0.18,
-                                            ease: "easeOut",
-                                          }}
-                                          className="border-border-primary hover:border-border-focus bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg"
+                                      <option value="2025">2025</option>
+                                      {item.children.map((child) => (
+                                        <option
+                                          key={child.id}
+                                          value={child.sub_name}
                                         >
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              e.preventDefault();
-                                              handleVariantSelect(
-                                                item.id,
-                                                "2025",
-                                              );
-                                              setOpenDropdownId(null);
-                                            }}
-                                            className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                              selectedVariants[item.id] ===
-                                                "2025" ||
-                                              !selectedVariants[item.id]
-                                                ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                                : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                            }`}
-                                          >
-                                            2025
-                                          </button>
-                                          {item.children?.map((child) => (
-                                            <button
-                                              key={child.id}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                                handleVariantSelect(
-                                                  item.id,
-                                                  child.sub_name,
-                                                );
-                                                setOpenDropdownId(null);
-                                              }}
-                                              className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                                                selectedVariants[item.id] ===
-                                                child.sub_name
-                                                  ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                                                  : "bg-secondary-bg text-primary-text hover:bg-quaternary-bg hover:text-primary-text"
-                                              }`}
-                                            >
-                                              {child.sub_name}
-                                            </button>
-                                          ))}
-                                        </motion.div>
-                                      )}
-                                    </AnimatePresence>
+                                          {child.sub_name}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </div>
                                 )}
                                 {item.tradable === 1 && (

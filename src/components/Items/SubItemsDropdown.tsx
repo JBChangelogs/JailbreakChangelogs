@@ -1,6 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef } from "react";
 
 interface SubItem {
   id: number;
@@ -37,7 +35,6 @@ export default function SubItemsDropdown({
   onSelect,
   selectedSubItem,
 }: SubItemsDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const hasInitialized = useRef(false);
 
   // Sort children by sub_name in descending order (newest first)
@@ -50,8 +47,8 @@ export default function SubItemsDropdown({
     (child) => child.sub_name === "2023",
   );
 
-  // Get the display text for the dropdown button
-  const getDisplayText = () => {
+  // Get the current value for the select
+  const getCurrentValue = () => {
     if (selectedSubItem === null) {
       return "2025"; // Show 2025 when parent item details are shown
     }
@@ -66,60 +63,32 @@ export default function SubItemsDropdown({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-secondary-text border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-quaternary-bg flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs focus:outline-none sm:px-3 sm:py-1.5 sm:text-sm"
-      >
-        {getDisplayText()}
-        <ChevronDownIcon
-          className={`h-3 w-3 transition-transform sm:h-4 sm:w-4 ${isOpen ? "rotate-180" : ""}`}
-        />
-      </button>
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === "2025") {
+      onSelect(null);
+    } else {
+      const selectedChild = sortedChildren.find(
+        (child) => child.sub_name === value,
+      );
+      if (selectedChild) {
+        onSelect(selectedChild);
+      }
+    }
+  };
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            key="dropdown"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="border-border-primary hover:border-border-focus bg-secondary-bg absolute right-0 z-10 mt-1 w-24 rounded-lg border shadow-lg sm:w-32"
-          >
-            <button
-              onClick={() => {
-                onSelect(null);
-                setIsOpen(false);
-              }}
-              className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                selectedSubItem === null
-                  ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                  : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
-              }`}
-            >
-              2025
-            </button>
-            {sortedChildren.map((child) => (
-              <button
-                key={child.id}
-                onClick={() => {
-                  onSelect(child);
-                  setIsOpen(false);
-                }}
-                className={`w-full px-2 py-1 text-left text-xs sm:px-3 sm:py-2 sm:text-sm ${
-                  selectedSubItem?.id === child.id
-                    ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                    : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
-                }`}
-              >
-                {child.sub_name}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+  return (
+    <select
+      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer"
+      value={getCurrentValue()}
+      onChange={handleSelectChange}
+    >
+      <option value="2025">2025</option>
+      {sortedChildren.map((child) => (
+        <option key={child.id} value={child.sub_name}>
+          {child.sub_name}
+        </option>
+      ))}
+    </select>
   );
 }

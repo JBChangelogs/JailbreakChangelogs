@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
@@ -220,6 +221,15 @@ export default function Footer() {
                 <Icon icon="bx:bot" className="h-5 w-5" inline={true} />
                 Discord Bot
               </Link>
+              <a
+                href="https://status.jailbreakchangelogs.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
+              >
+                <CheckCircleIcon className="h-5 w-5" />
+                Uptime Status
+              </a>
               <Suspense
                 fallback={
                   <div className="text-link hover:text-link-hover flex w-full cursor-pointer items-center gap-2">
@@ -234,18 +244,6 @@ export default function Footer() {
               >
                 <ReportIssueButton />
               </Suspense>
-              <div className="pt-2">
-                <iframe
-                  key={resolvedTheme}
-                  src={`https://status.jailbreakchangelogs.xyz/badge?theme=${resolvedTheme}`}
-                  width="250"
-                  height="30"
-                  frameBorder="0"
-                  scrolling="no"
-                  style={{ colorScheme: "normal" }}
-                  title="Service Status Badge"
-                />
-              </div>
             </div>
           </div>
 

@@ -87,7 +87,7 @@ export default function CategoryIcons({
   return (
     <div className="mb-8">
       <h3 className="text-primary-text mb-6 text-2xl font-bold">Categories</h3>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 max-h-96 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
           return (
