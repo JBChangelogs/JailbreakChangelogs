@@ -15,11 +15,13 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentXp, setCurrentXp] = useState(0);
   const [results, setResults] = useState<CalculationResults | null>(null);
+  const [currentTime, setCurrentTime] = useState(() =>
+    Math.floor(Date.now() / 1000),
+  );
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const debouncedXp = useDebounce(currentXp, 800);
 
   // Check if season has ended
-  const currentTime = Math.floor(Date.now() / 1000);
   const seasonHasEnded = currentTime >= season.end_date;
 
   const calculateXp = useCallback(() => {
@@ -248,12 +250,21 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     toast.success("Results updated below.");
   }, [currentLevel, debouncedXp, season]);
 
-  // Auto-calculate when inputs change (using debounced XP)
+  // Update current time every minute
   useEffect(() => {
-    if (currentLevel && currentLevel < season.xp_data.targetLevel) {
-      calculateXp();
-    }
-  }, [currentLevel, debouncedXp, calculateXp, season.xp_data.targetLevel]);
+    const interval = setInterval(() => {
+      setCurrentTime(Math.floor(Date.now() / 1000));
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate results when inputs change
+  const shouldCalculate =
+    currentLevel && currentLevel < season.xp_data.targetLevel;
+  if (shouldCalculate && !results) {
+    calculateXp();
+  }
 
   // If season has ended, show a different UI
   if (seasonHasEnded) {
@@ -303,7 +314,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
                 Check Back Soon!
               </span>
             </div>
-            <p className="text-secondary-text text-sm">
+            <p className="bg-secondary-bg text-secondary-text text-sm">
               The XP calculator will be available again when Season{" "}
               {season.season + 1} begins.
             </p>

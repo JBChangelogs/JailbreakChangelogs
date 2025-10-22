@@ -45,10 +45,13 @@ export default function ValuesSearchControls({
 }: ValuesSearchControlsProps) {
   const isAuthenticated = useIsAuthenticated();
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
-  const [isItemIdSearch, setIsItemIdSearch] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const MAX_VALUE_RANGE = 100_000_000;
   const MIN_VALUE_DISTANCE = 4_000_000;
+
+  // Derive isItemIdSearch from searchTerm instead of using useEffect
+  const isItemIdSearch =
+    /^id:\s*\d*$/i.test(searchTerm.trim()) && searchTerm.trim() !== "";
 
   const getFilterDisplayName = (filterSort: string): string => {
     const filterMap: Record<string, string> = {
@@ -87,12 +90,6 @@ export default function ValuesSearchControls({
     { value: 75_000_000, label: "75M" },
     { value: 100_000_000 },
   ];
-
-  // Detect if search term uses id: syntax (item ID search)
-  useEffect(() => {
-    const isIdSearch = /^id:\s*\d*$/i.test(searchTerm.trim());
-    setIsItemIdSearch(isIdSearch && searchTerm.trim() !== "");
-  }, [searchTerm]);
 
   // Handle Ctrl+F to focus search input
   useEffect(() => {

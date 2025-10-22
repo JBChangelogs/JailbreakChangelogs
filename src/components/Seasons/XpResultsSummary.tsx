@@ -1,7 +1,7 @@
 import { CalculationResults, Season } from "@/types/seasons";
 import { Icon } from "../UI/IconWrapper";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface XpResultsSummaryProps {
   results: CalculationResults;
@@ -12,8 +12,17 @@ export default function XpResultsSummary({
   results,
   season,
 }: XpResultsSummaryProps) {
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [xpMode, setXpMode] = useState<"normal" | "double">(() => {
+    const now = Date.now();
+    const doubleXpStart = new Date(
+      results.importantDates.doubleXpStart,
+    ).getTime();
+    const seasonEnd = new Date(results.importantDates.seasonEnds).getTime();
+    return now >= doubleXpStart && now <= seasonEnd ? "double" : "normal";
+  });
+
   // Check if Double XP is currently live
-  const currentTime = Date.now();
   const doubleXpStartTime = new Date(
     results.importantDates.doubleXpStart,
   ).getTime();
@@ -21,9 +30,14 @@ export default function XpResultsSummary({
   const isDoubleXpLive =
     currentTime >= doubleXpStartTime && currentTime <= seasonEndTime;
 
-  const [xpMode, setXpMode] = useState<"normal" | "double">(
-    isDoubleXpLive ? "double" : "normal",
-  );
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getStatusIcon = (achievable: boolean) =>
     achievable ? (
@@ -101,7 +115,7 @@ export default function XpResultsSummary({
                 (new Date(
                   results.doubleXpResults.noPass.completionDate,
                 ).getTime() -
-                  Date.now()) /
+                  currentTime) /
                   (1000 * 60 * 60 * 24),
               ),
             }
@@ -113,7 +127,7 @@ export default function XpResultsSummary({
                 (new Date(
                   results.doubleXpResults.withPass.completionDate,
                 ).getTime() -
-                  Date.now()) /
+                  currentTime) /
                   (1000 * 60 * 60 * 24),
               ),
             }

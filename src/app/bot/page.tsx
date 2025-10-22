@@ -7,14 +7,10 @@ import { Icon } from "../../components/UI/IconWrapper";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 export default function BotPage() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
-    // Generate shuffled array of background images
-    const shuffledImages = generateShuffledBackgroundImages();
-    setBackgroundImages(shuffledImages);
-  }, []);
+  // Generate shuffled array of background images during render
+  const backgroundImages = generateShuffledBackgroundImages();
 
   // Function to cycle to the next image
   const nextImage = useCallback(() => {
@@ -25,11 +21,9 @@ export default function BotPage() {
 
   // Auto-cycle through images every 10 seconds
   useEffect(() => {
-    if (backgroundImages.length === 0) return;
-
     const interval = setInterval(nextImage, 10000);
     return () => clearInterval(interval);
-  }, [backgroundImages.length, nextImage]);
+  }, [nextImage]);
 
   const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
 

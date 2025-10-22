@@ -61,14 +61,17 @@ export function useOnlineUsersPolling(intervalMs: number = 30000) {
   }, []);
 
   useEffect(() => {
-    // Initial fetch
-    fetchData();
+    // Initial fetch - wrap in setTimeout to avoid synchronous setState
+    const initialTimeout = setTimeout(fetchData, 0);
 
     // Set up polling interval
     const interval = setInterval(fetchData, intervalMs);
 
     // Cleanup interval on unmount
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [fetchData, intervalMs]);
 
   return {

@@ -8,14 +8,10 @@ import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 import { Icon } from "../components/UI/IconWrapper";
 
 export default function Home() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
+  const [backgroundImages] = useState<string[]>(() =>
+    generateShuffledBackgroundImages(),
+  );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    // Generate shuffled array of background images
-    const shuffledImages = generateShuffledBackgroundImages();
-    setBackgroundImages(shuffledImages);
-  }, []);
 
   // Function to cycle to the next image
   const nextImage = useCallback(() => {

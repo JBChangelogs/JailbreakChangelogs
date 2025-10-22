@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -51,6 +51,9 @@ export default function UserProfileSection({
   const { modalState, openModal, closeModal } = useSupporterModal();
   const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
   const scanCompletedRef = useRef(false);
+  const [currentTime, setCurrentTime] = useState(() =>
+    Math.floor(Date.now() / 1000),
+  );
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
@@ -58,8 +61,7 @@ export default function UserProfileSection({
 
   const isDataFresh = () => {
     if (!currentData) return false;
-    const now = Date.now() / 1000;
-    const dataAge = now - currentData.updated_at;
+    const dataAge = currentTime - currentData.updated_at;
     return dataAge < 300; // 5 minutes
   };
 
@@ -67,6 +69,14 @@ export default function UserProfileSection({
     if (isRefreshing) return;
     onRefresh();
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Math.floor(Date.now() / 1000));
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (scanWebSocket.status === "connecting") {

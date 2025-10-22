@@ -24,6 +24,28 @@ export default function XpImportantDates({
   const [doubleXpStatus, setDoubleXpStatus] = useState<string>("");
   const [seasonEndStatus, setSeasonEndStatus] = useState<string>("");
 
+  const formatTime = (seconds: number): string => {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((seconds % (60 * 60)) / 60);
+    const secs = seconds % 60;
+
+    const dLabel = days === 1 ? "day" : "days";
+    const hLabel = hours === 1 ? "hour" : "hours";
+    const mLabel = minutes === 1 ? "minute" : "minutes";
+    const sLabel = secs === 1 ? "second" : "seconds";
+
+    if (days > 0) {
+      return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
+    } else if (hours > 0) {
+      return `${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
+    } else if (minutes > 0) {
+      return `${minutes} ${mLabel} ${secs} ${sLabel}`;
+    } else {
+      return `${secs} ${sLabel}`;
+    }
+  };
+
   useEffect(() => {
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
@@ -68,28 +90,6 @@ export default function XpImportantDates({
 
     return () => clearInterval(interval);
   }, [doubleXpStart, seasonEnds]);
-
-  const formatTime = (seconds: number): string => {
-    const days = Math.floor(seconds / (24 * 60 * 60));
-    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    const secs = seconds % 60;
-
-    const dLabel = days === 1 ? "day" : "days";
-    const hLabel = hours === 1 ? "hour" : "hours";
-    const mLabel = minutes === 1 ? "minute" : "minutes";
-    const sLabel = secs === 1 ? "second" : "seconds";
-
-    if (days > 0) {
-      return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else if (hours > 0) {
-      return `${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else if (minutes > 0) {
-      return `${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else {
-      return `${secs} ${sLabel}`;
-    }
-  };
 
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {

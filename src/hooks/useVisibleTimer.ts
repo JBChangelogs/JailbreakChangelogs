@@ -24,12 +24,12 @@ export const useVisibleRealTimeRelativeDate = (
 
   useEffect(() => {
     if (!timestamp) {
-      setRelativeTime("");
+      setTimeout(() => setRelativeTime(""), 0);
       return;
     }
 
-    // Initial update
-    setRelativeTime(formatRelativeDate(timestamp));
+    // Initial update - wrap in setTimeout to avoid synchronous setState
+    setTimeout(() => setRelativeTime(formatRelativeDate(timestamp)), 0);
 
     // Set up intersection observer to detect visibility
     const observer = new IntersectionObserver(

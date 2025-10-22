@@ -81,13 +81,16 @@ export function useBotsPolling(intervalMs: number = 30000) {
   }, []);
 
   useEffect(() => {
-    // Initial fetch
-    fetchData();
+    // Initial fetch - wrap in setTimeout to avoid synchronous setState
+    const initialTimeout = setTimeout(fetchData, 0);
 
     // Set up polling interval
     const interval = setInterval(fetchData, intervalMs);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [fetchData, intervalMs]);
 
   // Auto-retry on error
