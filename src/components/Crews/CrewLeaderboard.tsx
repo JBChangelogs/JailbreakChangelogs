@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CrewLeaderboardEntry as CrewLeaderboardEntryType } from "@/utils/api";
 import { RobloxUser } from "@/types";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { fetchCrewUserData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useQuery } from "@tanstack/react-query";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",
@@ -23,48 +24,42 @@ export default function CrewLeaderboard({
   leaderboard,
   currentSeason,
 }: CrewLeaderboardProps) {
-  const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
-    {},
-  );
-  const [robloxAvatars, setRobloxAvatars] = useState<Record<string, string>>(
-    {},
-  );
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Progressive loading of missing user data
-  const fetchMissingUserData = useCallback(
-    async (userIds: string[]) => {
-      const missingIds = userIds.filter((id) => !robloxUsers[id]);
+  // Extract user IDs from leaderboard data
+  const userIdsToLoad = leaderboard.map((crew) => crew.OwnerUserId.toString());
 
-      if (missingIds.length === 0) return;
+  // Use TanStack Query for fetching user data with caching
+  const { data: fetchedUserData } = useQuery({
+    queryKey: ["crewUserData", userIdsToLoad.sort()],
+    queryFn: () => fetchCrewUserData(userIdsToLoad),
+    enabled: userIdsToLoad.length > 0,
+    staleTime: 60 * 60 * 1000, // 1 hour cache
+  });
 
-      try {
-        const result = await fetchMissingRobloxData(missingIds);
+  // Transform data during render instead of using useEffect
+  const robloxUsers: Record<string, RobloxUser> = (() => {
+    if (
+      fetchedUserData &&
+      "userData" in fetchedUserData &&
+      typeof fetchedUserData.userData === "object"
+    ) {
+      return fetchedUserData.userData as Record<string, RobloxUser>;
+    }
+    return {};
+  })();
 
-        // Update state with new user data
-        if (result.userData && typeof result.userData === "object") {
-          setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
-        }
-
-        // Update state with new avatar data
-        if (result.avatarData && typeof result.avatarData === "object") {
-          setRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch missing user data:", error);
-      }
-    },
-    [robloxUsers],
-  );
-
-  // Load all crew data during render
-  if (leaderboard.length > 0) {
-    const userIdsToLoad = leaderboard.map((crew) =>
-      crew.OwnerUserId.toString(),
-    );
-    fetchMissingUserData(userIdsToLoad);
-  }
+  const robloxAvatars: Record<string, string> = (() => {
+    if (
+      fetchedUserData &&
+      "avatarData" in fetchedUserData &&
+      typeof fetchedUserData.avatarData === "object"
+    ) {
+      return fetchedUserData.avatarData as Record<string, string>;
+    }
+    return {};
+  })();
 
   // Filter crews based on search term
   const filteredLeaderboard = leaderboard.filter((crew) => {
@@ -89,7 +84,7 @@ export default function CrewLeaderboard({
   // Helper function to get username
   const getUsername = (userId: string) => {
     const user = robloxUsers[userId];
-    return user?.name || userId;
+    return user?.name || `User ${userId}`;
   };
 
   // Helper function to get user avatar
@@ -276,7 +271,10 @@ function CrewLeaderboardEntry({
       </div>
 
       {/* Crew Flag with Owner Avatar */}
-      <div className="relative h-20 w-32 overflow-hidden rounded">
+      <div
+        className="relative h-20 w-32 overflow-hidden rounded"
+        suppressHydrationWarning
+      >
         <Image
           src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
           alt="Crew flag"
@@ -308,6 +306,7 @@ function CrewLeaderboardEntry({
               target="_blank"
               rel="noopener noreferrer"
               className="text-link hover:text-link-hover transition-colors"
+              suppressHydrationWarning
             >
               {username}
             </a>

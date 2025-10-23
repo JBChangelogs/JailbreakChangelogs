@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CrewLeaderboardEntry as CrewLeaderboardEntryType } from "@/utils/api";
 import { RobloxUser } from "@/types";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { fetchCrewUserData } from "@/app/inventories/actions";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
+import { useQuery } from "@tanstack/react-query";
+import { DefaultAvatar } from "@/utils/avatar";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",
@@ -25,39 +27,41 @@ export default function CrewDetails({
   rank,
   currentSeason,
 }: CrewDetailsProps) {
-  const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
-    {},
-  );
-  const [robloxAvatars, setRobloxAvatars] = useState<Record<string, string>>(
-    {},
-  );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
-  // Load all crew member data
-  useEffect(() => {
-    const userIdsToLoad = crew.MemberUserIds.map((userId) => userId.toString());
+  // Extract user IDs from crew members
+  const userIdsToLoad = crew.MemberUserIds.map((userId) => userId.toString());
 
-    // Fetch user data for all crew members
-    const fetchAllUserData = async () => {
-      try {
-        const result = await fetchMissingRobloxData(userIdsToLoad);
+  // Use TanStack Query for fetching user data with caching
+  const { data: fetchedUserData } = useQuery({
+    queryKey: ["crewUserData", userIdsToLoad.sort()],
+    queryFn: () => fetchCrewUserData(userIdsToLoad),
+    enabled: userIdsToLoad.length > 0,
+    staleTime: 60 * 60 * 1000, // 1 hour cache
+  });
 
-        // Update state with new user data
-        if (result.userData && typeof result.userData === "object") {
-          setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
-        }
+  // Transform data during render instead of using useEffect
+  const robloxUsers: Record<string, RobloxUser> = (() => {
+    if (
+      fetchedUserData &&
+      "userData" in fetchedUserData &&
+      typeof fetchedUserData.userData === "object"
+    ) {
+      return fetchedUserData.userData as Record<string, RobloxUser>;
+    }
+    return {};
+  })();
 
-        // Update state with new avatar data
-        if (result.avatarData && typeof result.avatarData === "object") {
-          setRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      }
-    };
-
-    fetchAllUserData();
-  }, [crew.MemberUserIds]); // Only depend on crew.MemberUserIds, not robloxUsers
+  const robloxAvatars: Record<string, string> = (() => {
+    if (
+      fetchedUserData &&
+      "avatarData" in fetchedUserData &&
+      typeof fetchedUserData.avatarData === "object"
+    ) {
+      return fetchedUserData.avatarData as Record<string, string>;
+    }
+    return {};
+  })();
 
   // Update current time every minute
   useEffect(() => {
@@ -77,7 +81,7 @@ export default function CrewDetails({
   // Helper function to get username
   const getUsername = (userId: string) => {
     const user = robloxUsers[userId];
-    return user?.name || userId;
+    return user?.name || `User ${userId}`;
   };
 
   // Helper function to get user avatar
@@ -142,7 +146,11 @@ export default function CrewDetails({
     <div className="space-y-8">
       {/* Crew Header with Flag, Rank, and Info */}
       <div
-        className={`rounded-lg border p-4 sm:p-6 ${rank <= 3 ? "" : "border-border-primary hover:border-border-focus"}`}
+        className={`rounded-lg border p-4 sm:p-6 ${
+          rank <= 3
+            ? ""
+            : "bg-secondary-bg border-border-primary hover:border-border-focus"
+        }`}
         style={{
           ...(rank === 1 && {
             background:
@@ -163,7 +171,10 @@ export default function CrewDetails({
       >
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           {/* Crew Flag with Owner Avatar */}
-          <div className="relative h-28 w-40 flex-shrink-0 overflow-hidden rounded sm:h-32 sm:w-48">
+          <div
+            className="relative h-28 w-40 flex-shrink-0 overflow-hidden rounded sm:h-32 sm:w-48"
+            suppressHydrationWarning
+          >
             <Image
               src="https://assets.jailbreakchangelogs.xyz/assets/images/crews/flags/Flag_3.png"
               alt="Crew flag"
@@ -173,17 +184,26 @@ export default function CrewDetails({
             />
             {(() => {
               const ownerAvatarUrl = getUserAvatar(crew.OwnerUserId.toString());
-              return ownerAvatarUrl ? (
-                <div className="absolute inset-0 flex items-center justify-start pl-3 sm:pl-4">
-                  <Image
-                    src={ownerAvatarUrl}
-                    alt={`${getUserDisplay(crew.OwnerUserId.toString())}'s avatar`}
-                    width={48}
-                    height={48}
-                    className="rounded-full shadow-lg sm:h-16 sm:w-16"
-                  />
+              return (
+                <div
+                  className="absolute inset-0 flex items-center justify-start pl-3 sm:pl-4"
+                  suppressHydrationWarning
+                >
+                  {ownerAvatarUrl ? (
+                    <Image
+                      src={ownerAvatarUrl}
+                      alt={`${getUserDisplay(crew.OwnerUserId.toString())}'s avatar`}
+                      width={48}
+                      height={48}
+                      className="rounded-full shadow-lg sm:h-16 sm:w-16"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-primary-bg flex items-center justify-center shadow-lg sm:h-16 sm:w-16">
+                      <DefaultAvatar shape="circle" />
+                    </div>
+                  )}
                 </div>
-              ) : null;
+              );
             })()}
           </div>
 
@@ -224,6 +244,7 @@ export default function CrewDetails({
             <div className="mb-2 flex items-center gap-3">
               <h2
                 className={`${bangers.className} text-primary-text text-2xl break-words sm:text-3xl lg:text-4xl xl:text-5xl`}
+                suppressHydrationWarning
               >
                 {getUsername(crew.OwnerUserId.toString())}&apos;s{" "}
                 {crew.ClanName}
@@ -485,22 +506,29 @@ function CrewMember({
   const avatarUrl = getUserAvatar(memberIdStr);
 
   return (
-    <div className="border-border-primary hover:border-border-focus flex items-center gap-2 rounded-lg border p-3 transition-colors sm:gap-3">
+    <div className="border-border-primary hover:border-border-focus bg-primary-bg flex items-center gap-2 rounded-lg border p-3 transition-colors sm:gap-3">
       {/* Member Number */}
       <div className="bg-button-info text-form-button-text flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 sm:text-sm">
         {index + 1}
       </div>
 
       {/* Member Avatar */}
-      {avatarUrl && (
-        <Image
-          src={avatarUrl}
-          alt={`${displayName}'s avatar`}
-          width={24}
-          height={24}
-          className="flex-shrink-0 rounded-full sm:h-8 sm:w-8"
-        />
-      )}
+      <div className="flex-shrink-0 rounded-full sm:h-8 sm:w-8 h-6 w-6">
+        {avatarUrl ? (
+          <Image
+            src={avatarUrl}
+            alt={`${displayName}'s avatar`}
+            width={24}
+            height={24}
+            className="h-full w-full rounded-full"
+            suppressHydrationWarning
+          />
+        ) : (
+          <div className="h-full w-full rounded-full bg-primary-bg flex items-center justify-center">
+            <DefaultAvatar shape="circle" />
+          </div>
+        )}
+      </div>
 
       {/* Member Info */}
       <div className="min-w-0 flex-1">
@@ -510,11 +538,15 @@ function CrewMember({
             target="_blank"
             rel="noopener noreferrer"
             className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors sm:text-base"
+            suppressHydrationWarning
           >
             {displayName}
           </a>
           {username && (
-            <span className="text-secondary-text truncate text-xs sm:text-sm">
+            <span
+              className="text-secondary-text truncate text-xs sm:text-sm"
+              suppressHydrationWarning
+            >
               (@{username})
             </span>
           )}
