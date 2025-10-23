@@ -69,7 +69,7 @@ export default function DupeItemCard({
       {/* Duplicate Indicator */}
       {isDuplicate && duplicateNumber && (
         <div
-          className="bg-button-danger text-form-button-text absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-lg"
+          className="bg-button-danger text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-lg"
           aria-label={`Duplicate item number ${duplicateNumber}`}
         >
           #{duplicateNumber}
