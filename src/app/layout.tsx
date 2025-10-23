@@ -21,6 +21,7 @@ import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
 } from "@/utils/maintenance";
+import { getWebsiteVersion, getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
@@ -82,6 +83,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
+  const versionInfo = await getWebsiteVersion();
+  const githubUrl = getGitHubUrl();
 
   if (isMaintenanceMode) {
     return (
@@ -154,7 +157,10 @@ export default async function RootLayout({
                           <ServiceAvailabilityTicker />
                           {/* <NewsTicker /> */}
                           <main className="flex-1">{children}</main>
-                          <Footer />
+                          <Footer
+                            githubUrl={githubUrl}
+                            versionInfo={versionInfo}
+                          />
                         </div>
                       </SurveyProvider>
                     </AuthProvider>
@@ -294,7 +300,7 @@ export default async function RootLayout({
                       <ServiceAvailabilityTicker />
                       {/* <NewsTicker /> */}
                       <main className="flex-1">{children}</main>
-                      <Footer />
+                      <Footer githubUrl={githubUrl} versionInfo={versionInfo} />
                     </div>
                   </SurveyProvider>
                 </AuthProvider>

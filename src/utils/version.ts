@@ -29,6 +29,7 @@ export function getGitHubUrl(): string {
 export async function getWebsiteVersion() {
   try {
     const branch = getGitBranch();
+    const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME || "unknown";
     const response = await fetch(
       `https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/${branch}`,
     );
@@ -36,7 +37,7 @@ export async function getWebsiteVersion() {
     return {
       version: data.sha.substring(0, 7),
       date: formatFullDate(new Date(data.commit.committer.date).getTime()),
-      branch: branch,
+      branch: railwayEnv,
     };
   } catch (error) {
     console.error("Failed to fetch version data:", error);

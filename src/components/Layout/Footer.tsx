@@ -8,11 +8,18 @@ import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
-import { getGitHubUrl } from "@/utils/version";
-
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
-export default function Footer() {
+interface FooterProps {
+  githubUrl: string;
+  versionInfo: {
+    version: string;
+    date: string;
+    branch: string;
+  };
+}
+
+export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   return (
     <footer className="bg-secondary-bg border-border-primary border-t py-8">
       <div className="container mx-auto px-4">
@@ -275,7 +282,11 @@ export default function Footer() {
                   Jalenzz16
                 </a>
               </p>
-              <VersionInfo />
+              <VersionInfo
+                version={versionInfo.version}
+                date={versionInfo.date}
+                branch={versionInfo.branch}
+              />
               <div className="flex flex-col gap-2 pt-4">
                 <Link
                   href="/supporting"
@@ -291,7 +302,7 @@ export default function Footer() {
                   <strong>Support Us</strong>
                 </Link>
                 <a
-                  href={getGitHubUrl()}
+                  href={githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus flex items-center justify-center gap-2 rounded-lg border-none px-4 py-2 transition-colors duration-200 focus:ring-2 focus:outline-none"
