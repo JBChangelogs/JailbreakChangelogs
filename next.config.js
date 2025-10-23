@@ -3,6 +3,9 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1"],
+  reactCompiler: {
+    compilationMode: "annotation",
+  },
   experimental: {
     webpackMemoryOptimizations: true,
     optimizePackageImports: [

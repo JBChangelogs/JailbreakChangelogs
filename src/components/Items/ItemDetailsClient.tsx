@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -151,6 +151,7 @@ export default function ItemDetailsClient({
   initialComments = [],
   initialCommentUserMap = {},
 }: ItemDetailsClientProps) {
+  "use memo";
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -232,9 +233,9 @@ export default function ItemDetailsClient({
     }
   }, []);
 
-  const handleVariantSelect = useCallback((variant: ItemDetails) => {
+  const handleVariantSelect = (variant: ItemDetails) => {
     setSelectedVariant(variant);
-  }, []);
+  };
 
   useEffect(() => {
     // Check if item is favorited

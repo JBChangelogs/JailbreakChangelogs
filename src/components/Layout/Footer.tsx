@@ -8,6 +8,7 @@ import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
+import { getGitHubUrl } from "@/utils/version";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
@@ -290,7 +291,7 @@ export default function Footer() {
                   <strong>Support Us</strong>
                 </Link>
                 <a
-                  href="https://github.com/JBChangelogs/JailbreakChangelogs"
+                  href={getGitHubUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus flex items-center justify-center gap-2 rounded-lg border-none px-4 py-2 transition-colors duration-200 focus:ring-2 focus:outline-none"

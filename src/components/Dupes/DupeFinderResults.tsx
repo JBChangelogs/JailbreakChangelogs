@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
@@ -17,6 +17,53 @@ import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
+
+// Move pure function outside component to avoid dependency issues
+const getDupedValueForItem = (
+  itemData: Item,
+  dupeItem: DupeFinderItem,
+): number => {
+  let dupedValue = parseCurrencyValue(itemData.duped_value);
+
+  if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
+    const createdAtInfo = dupeItem.info.find(
+      (info) => info.title === "Created At",
+    );
+    const createdYear = createdAtInfo
+      ? new Date(createdAtInfo.value).getFullYear().toString()
+      : null;
+
+    const matchingChild = createdYear
+      ? itemData.children.find(
+          (child) =>
+            child.sub_name === createdYear &&
+            child.data &&
+            child.data.duped_value &&
+            child.data.duped_value !== "N/A" &&
+            child.data.duped_value !== null,
+        )
+      : null;
+
+    if (matchingChild) {
+      dupedValue = parseCurrencyValue(matchingChild.data.duped_value);
+    } else {
+      // If no matching year found, fall back to first child with valid duped value
+      const childWithDupedValue = itemData.children.find(
+        (child) =>
+          child.data &&
+          child.data.duped_value &&
+          child.data.duped_value !== "N/A" &&
+          child.data.duped_value !== null,
+      );
+
+      if (childWithDupedValue) {
+        dupedValue = parseCurrencyValue(childWithDupedValue.data.duped_value);
+      }
+    }
+  }
+
+  return isNaN(dupedValue) ? 0 : dupedValue;
+};
 
 interface DupeFinderResultsProps {
   initialData: DupeFinderItem[];
@@ -35,6 +82,7 @@ export default function DupeFinderResults({
   userConnectionData,
   items,
 }: DupeFinderResultsProps) {
+  "use memo";
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -70,7 +118,7 @@ export default function DupeFinderResults({
   });
 
   // Transform data during render instead of using useEffect
-  const localRobloxUsers: Record<string, RobloxUser> = useMemo(() => {
+  const localRobloxUsers: Record<string, RobloxUser> = (() => {
     if (
       fetchedUserData &&
       "userData" in fetchedUserData &&
@@ -82,93 +130,33 @@ export default function DupeFinderResults({
       } as Record<string, RobloxUser>;
     }
     return robloxUsers;
-  }, [robloxUsers, fetchedUserData]);
+  })();
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
+  const handleVisibleUserIdsChange = (userIds: string[]) => {
     setVisibleUserIds(userIds);
-  }, []);
+  };
 
   // Helper functions
-  const getUserDisplay = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return user?.name || user?.displayName || userId;
-    },
-    [localRobloxUsers],
-  );
+  const getUserDisplay = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    return user?.name || user?.displayName || userId;
+  };
 
-  const getUsername = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      if (!user) return userId;
-      return user.name || userId;
-    },
-    [localRobloxUsers],
-  );
+  const getUsername = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    if (!user) return userId;
+    return user.name || userId;
+  };
 
-  const getUserAvatar = useCallback(
-    (userId: string) => {
-      return localRobloxAvatars[userId] || "";
-    },
-    [localRobloxAvatars],
-  );
+  const getUserAvatar = (userId: string) => {
+    return localRobloxAvatars[userId] || "";
+  };
 
-  const getHasVerifiedBadge = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return Boolean(user?.hasVerifiedBadge);
-    },
-    [localRobloxUsers],
-  );
-
-  const getDupedValueForItem = useCallback(
-    (itemData: Item, dupeItem: DupeFinderItem): number => {
-      let dupedValue = parseCurrencyValue(itemData.duped_value);
-
-      if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
-        const createdAtInfo = dupeItem.info.find(
-          (info) => info.title === "Created At",
-        );
-        const createdYear = createdAtInfo
-          ? new Date(createdAtInfo.value).getFullYear().toString()
-          : null;
-
-        const matchingChild = createdYear
-          ? itemData.children.find(
-              (child) =>
-                child.sub_name === createdYear &&
-                child.data &&
-                child.data.duped_value &&
-                child.data.duped_value !== "N/A" &&
-                child.data.duped_value !== null,
-            )
-          : null;
-
-        if (matchingChild) {
-          dupedValue = parseCurrencyValue(matchingChild.data.duped_value);
-        } else {
-          // If no matching year found, fall back to first child with valid duped value
-          const childWithDupedValue = itemData.children.find(
-            (child) =>
-              child.data &&
-              child.data.duped_value &&
-              child.data.duped_value !== "N/A" &&
-              child.data.duped_value !== null,
-          );
-
-          if (childWithDupedValue) {
-            dupedValue = parseCurrencyValue(
-              childWithDupedValue.data.duped_value,
-            );
-          }
-        }
-      }
-
-      return isNaN(dupedValue) ? 0 : dupedValue;
-    },
-    [],
-  );
+  const getHasVerifiedBadge = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    return Boolean(user?.hasVerifiedBadge);
+  };
 
   // Effects
   useEffect(() => {
@@ -203,10 +191,10 @@ export default function DupeFinderResults({
     };
 
     calculateTotalDupedValue();
-  }, [initialData, itemsData, getDupedValueForItem]);
+  }, [initialData, itemsData]);
 
   // Filter and sort logic
-  const filteredData = useMemo(() => {
+  const filteredData = (() => {
     return initialData.filter((item) => {
       const itemData = itemsData.find((data) => data.id === item.item_id);
       if (!itemData) return false;
@@ -223,9 +211,9 @@ export default function DupeFinderResults({
 
       return matchesSearch && matchesCategory;
     });
-  }, [initialData, searchTerm, selectedCategories, itemsData]);
+  })();
 
-  const sortedData = useMemo(() => {
+  const sortedData = (() => {
     return [...filteredData].sort((a, b) => {
       switch (sortOrder) {
         case "duplicates":
@@ -259,20 +247,20 @@ export default function DupeFinderResults({
           return 0;
       }
     });
-  }, [filteredData, sortOrder]);
+  })();
 
   // Use sortedData directly instead of pagination
   const filteredAndSortedItems = sortedData;
 
   // Check if there are any duplicates
-  const hasDuplicates = useMemo(() => {
+  const hasDuplicates = (() => {
     const itemCounts = new Map<string, number>();
     filteredData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
     });
     return Array.from(itemCounts.values()).some((count) => count > 1);
-  }, [filteredData]);
+  })();
 
   // Reset sort order if duplicates option is selected but no duplicates exist
   useEffect(() => {
@@ -282,19 +270,19 @@ export default function DupeFinderResults({
   }, [sortOrder, hasDuplicates]);
 
   // Pre-calculate duplicate counts from FULL inventory (not paginated) for consistent numbering
-  const duplicateCounts = useMemo(() => {
+  const duplicateCounts = (() => {
     const counts = new Map<string, number>();
     initialData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return counts;
-  }, [initialData]);
+  })();
 
   // Use the pre-calculated duplicate counts
   const itemCounts = duplicateCounts;
 
-  const duplicateOrders = useMemo(() => {
+  const duplicateOrders = (() => {
     const orders = new Map<string, number>();
     const itemGroups = new Map<string, DupeFinderItem[]>();
 
@@ -322,7 +310,7 @@ export default function DupeFinderResults({
     });
 
     return orders;
-  }, [initialData]);
+  })();
 
   // Event handlers
   const handleCardClick = (item: DupeFinderItem) => {
