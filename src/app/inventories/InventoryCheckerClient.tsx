@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
@@ -20,6 +21,7 @@ import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
+import LoginModalWrapper from "@/components/Auth/LoginModalWrapper";
 import {
   showScanLoadingToast,
   updateScanLoadingToast,
@@ -98,6 +100,7 @@ export default function InventoryCheckerClient({
   const { user, isAuthenticated } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -393,6 +396,12 @@ export default function InventoryCheckerClient({
   return (
     <ThemeProvider theme={{}}>
       <div className="space-y-6">
+        {/* Login Modal Wrapper */}
+        <LoginModalWrapper
+          open={loginModalOpen}
+          onClose={() => setLoginModalOpen(false)}
+        />
+
         {/* Search Form */}
         <SearchForm
           searchId={searchId}
@@ -414,7 +423,7 @@ export default function InventoryCheckerClient({
               <h3 className="text-status-error mb-2 text-lg font-semibold">
                 {error.includes("Server error")
                   ? "Server Error"
-                  : "Unable to Fetch Inventory Data"}
+                  : "Unable to Load Inventory"}
               </h3>
               <p className="text-secondary-text mb-4 break-words">{error}</p>
 
@@ -620,11 +629,29 @@ export default function InventoryCheckerClient({
               ) : (
                 <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
                   <p className="text-primary-text mb-1 text-sm font-medium">
-                    Are you the owner of this profile?
+                    Looking for your inventory?
                   </p>
-                  <p className="text-secondary-text text-sm">
-                    Login to request an inventory scan.
-                  </p>
+                  {isAuthenticated && user?.roblox_id ? (
+                    <Link
+                      href={`/inventories/${user.roblox_id}`}
+                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 mt-2 text-xs font-medium transition-colors"
+                    >
+                      View My Inventory
+                    </Link>
+                  ) : (
+                    <p className="text-secondary-text text-sm">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginModalOpen(true);
+                        }}
+                        className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
+                      >
+                        Login
+                      </button>{" "}
+                      to request a scan.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
