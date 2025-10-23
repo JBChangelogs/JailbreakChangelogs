@@ -29,7 +29,9 @@ export function getGitHubUrl(): string {
 export async function getWebsiteVersion() {
   try {
     const branch = getGitBranch();
-    const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME || "unknown";
+    const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
+    const environment = railwayEnv || "development";
+
     const response = await fetch(
       `https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/${branch}`,
     );
@@ -37,14 +39,14 @@ export async function getWebsiteVersion() {
     return {
       version: data.sha.substring(0, 7),
       date: formatFullDate(new Date(data.commit.committer.date).getTime()),
-      branch: railwayEnv,
+      branch: environment,
     };
   } catch (error) {
     console.error("Failed to fetch version data:", error);
     return {
       version: "unknown",
       date: "unknown",
-      branch: "unknown",
+      branch: "development",
     };
   }
 }

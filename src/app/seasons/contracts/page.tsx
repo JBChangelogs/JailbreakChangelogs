@@ -5,6 +5,7 @@ import SeasonContractsClient from "@/components/Seasons/SeasonContractsClient";
 import WeeklyContractsCountdown from "@/components/Seasons/WeeklyContractsCountdown";
 import { fetchLatestSeason } from "@/utils/api";
 import { fetchSeasonContracts } from "@/utils/api";
+import { Icon } from "@iconify/react";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -17,24 +18,140 @@ export default async function SeasonContractsPage() {
     fetchLatestSeason(),
   ]);
 
+  // Check if season has ended first (prioritize this over no contracts)
+  const seasonEnded = latestSeason?.end_date
+    ? getCurrentTimestamp() >= latestSeason.end_date
+    : false;
+
+  if (seasonEnded) {
+    return (
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 pb-16">
+          <Breadcrumb />
+
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="bg-secondary-bg border-border-primary rounded-lg border p-12 text-center max-w-2xl">
+              {/* Icon */}
+              <div className="mb-8">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-button-info/20 border border-button-info/30">
+                  <Icon
+                    icon="line-md:calendar"
+                    className="text-button-info h-10 w-10"
+                  />
+                </div>
+              </div>
+
+              {/* Main heading */}
+              <h2 className="text-primary-text mb-4 text-2xl font-bold">
+                {latestSeason?.title
+                  ? `Season ${latestSeason.season} / ${latestSeason.title}`
+                  : "Season"}{" "}
+                Has Ended
+              </h2>
+
+              {/* Simple message */}
+              <div className="text-secondary-text mb-8 text-lg leading-relaxed">
+                <p>Check back next season for new weekly contracts.</p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-center">
+                <Link
+                  href="/seasons"
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
+                >
+                  <Icon icon="line-md:calendar" className="h-5 w-5" />
+                  View Seasons
+                </Link>
+              </div>
+
+              {/* Additional helpful info */}
+              <div className="mt-8">
+                <div className="border-button-info bg-button-info/10 rounded-lg border p-3 sm:p-4">
+                  <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
+                    <Icon
+                      icon="emojione:light-bulb"
+                      className="text-button-info flex-shrink-0 text-base sm:text-lg"
+                    />
+                    <span className="font-medium leading-relaxed">
+                      Pro Tip: New seasons typically start shortly after the
+                      previous one ends.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (
     !contractsData ||
     !contractsData.data ||
     contractsData.data.length === 0
   ) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-primary-text text-xl">
-          No contracts available right now.
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 pb-16">
+          <Breadcrumb />
+
+          {/* Enhanced Empty State */}
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="bg-secondary-bg border-border-primary rounded-lg border p-12 text-center max-w-2xl">
+              {/* Icon */}
+              <div className="mb-8">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-button-info/20 border border-button-info/30">
+                  <Icon
+                    icon="line-md:document"
+                    className="text-button-info h-10 w-10"
+                  />
+                </div>
+              </div>
+
+              {/* Main heading */}
+              <h2 className="text-primary-text mb-4 text-2xl font-bold">
+                No Contracts Available
+              </h2>
+
+              {/* Simple message */}
+              <div className="text-secondary-text mb-8 text-lg leading-relaxed">
+                <p>Check back later for the latest weekly contracts.</p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-center">
+                <Link
+                  href="/seasons"
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
+                >
+                  <Icon icon="line-md:calendar" className="h-5 w-5" />
+                  View Seasons
+                </Link>
+              </div>
+
+              {/* Additional helpful info */}
+              <div className="mt-8">
+                <div className="border-button-info bg-button-info/10 rounded-lg border p-3 sm:p-4">
+                  <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
+                    <Icon
+                      icon="emojione:light-bulb"
+                      className="text-button-info flex-shrink-0 text-base sm:text-lg"
+                    />
+                    <span className="font-medium leading-relaxed">
+                      Pro Tip: Contracts are updated weekly during active
+                      seasons.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
-
-  // If no season data, or season is over, do not show contracts
-  const seasonEnded = latestSeason?.end_date
-    ? getCurrentTimestamp() >= latestSeason.end_date
-    : false;
 
   return (
     <div className="min-h-screen">
@@ -42,60 +159,14 @@ export default async function SeasonContractsPage() {
         <Breadcrumb />
 
         {/* Countdown Section */}
-        {!seasonEnded && (
-          <div className="mb-12">
-            <WeeklyContractsCountdown season={latestSeason} />
-          </div>
-        )}
-        {!seasonEnded && (
-          <SeasonContractsClient
-            contracts={contractsData.data}
-            updatedAt={contractsData.updated_at}
-          />
-        )}
-        {seasonEnded && (
-          <div className="bg-secondary-bg rounded-lg border p-6">
-            <div className="flex items-start gap-4">
-              <div className="text-secondary-text mt-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8 7V3m8 4V3m-9 8h10M4 21h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1Z"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="mb-2 inline-flex items-center gap-2">
-                  <span className="text-primary-text/90 rounded px-2 py-1 text-[10px] font-semibold tracking-wider uppercase">
-                    Season Ended
-                  </span>
-                </div>
-                <h2 className="text-primary-text mb-1 text-xl font-bold">
-                  Season has ended
-                </h2>
-                <p className="text-secondary-text mb-4">
-                  Weekly contracts are unavailable. Check back next season.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href="/seasons"
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded px-4 py-2 transition-colors"
-                  >
-                    View Season Summary
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="mb-12">
+          <WeeklyContractsCountdown season={latestSeason} />
+        </div>
+
+        <SeasonContractsClient
+          contracts={contractsData.data}
+          updatedAt={contractsData.updated_at}
+        />
       </div>
     </div>
   );
