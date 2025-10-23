@@ -5,7 +5,6 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import {
   getItemImagePath,
   isVideoItem,
@@ -54,33 +53,14 @@ export default function Comment({
   seasonDetails: propSeasonDetails,
   isLoading: propIsLoading,
 }: CommentProps) {
-  const [itemDetails, setItemDetails] = useState<ItemDetails | null>(
-    (propItemDetails as ItemDetails) || null,
-  );
-  const [changelogDetails, setChangelogDetails] =
-    useState<ChangelogDetails | null>(
-      (propChangelogDetails as ChangelogDetails) || null,
-    );
-  const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(
-    (propSeasonDetails as SeasonDetails) || null,
-  );
-  const [isLoading, setIsLoading] = useState(propIsLoading || false);
+  // Derive state from props directly
+  const itemDetails = (propItemDetails as ItemDetails) || null;
+  const changelogDetails = (propChangelogDetails as ChangelogDetails) || null;
+  const seasonDetails = (propSeasonDetails as SeasonDetails) || null;
+  const isLoading = propIsLoading || false;
 
   const formattedDate = formatRelativeDate(parseInt(date));
   const contentType = item_type.charAt(0).toUpperCase() + item_type.slice(1);
-
-  useEffect(() => {
-    if (propChangelogDetails) {
-      setChangelogDetails(propChangelogDetails as ChangelogDetails);
-    }
-    if (propItemDetails) {
-      setItemDetails(propItemDetails as ItemDetails);
-    }
-    if (propSeasonDetails) {
-      setSeasonDetails(propSeasonDetails as SeasonDetails);
-    }
-    setIsLoading(propIsLoading || false);
-  }, [propChangelogDetails, propItemDetails, propSeasonDetails, propIsLoading]);
 
   const renderThumbnail = () => {
     if (item_type.toLowerCase() === "changelog") {

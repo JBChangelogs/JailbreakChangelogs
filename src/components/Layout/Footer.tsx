@@ -4,16 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
-import { useTheme } from "@/contexts/ThemeContext";
+import { getGitHubUrl } from "@/utils/version";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
 export default function Footer() {
-  const { resolvedTheme } = useTheme();
-
   return (
     <footer className="bg-secondary-bg border-border-primary border-t py-8">
       <div className="container mx-auto px-4">
@@ -220,6 +219,15 @@ export default function Footer() {
                 <Icon icon="bx:bot" className="h-5 w-5" inline={true} />
                 Discord Bot
               </Link>
+              <a
+                href="https://status.jailbreakchangelogs.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200"
+              >
+                <CheckCircleIcon className="h-5 w-5" />
+                Uptime Status
+              </a>
               <Suspense
                 fallback={
                   <div className="text-link hover:text-link-hover flex w-full cursor-pointer items-center gap-2">
@@ -234,18 +242,6 @@ export default function Footer() {
               >
                 <ReportIssueButton />
               </Suspense>
-              <div className="pt-2">
-                <iframe
-                  key={resolvedTheme}
-                  src={`https://status.jailbreakchangelogs.xyz/badge?theme=${resolvedTheme}`}
-                  width="250"
-                  height="30"
-                  frameBorder="0"
-                  scrolling="no"
-                  style={{ colorScheme: "normal" }}
-                  title="Service Status Badge"
-                />
-              </div>
             </div>
           </div>
 
@@ -295,7 +291,7 @@ export default function Footer() {
                   <strong>Support Us</strong>
                 </Link>
                 <a
-                  href="https://github.com/JBChangelogs/JailbreakChangelogs"
+                  href={getGitHubUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus flex items-center justify-center gap-2 rounded-lg border-none px-4 py-2 transition-colors duration-200 focus:ring-2 focus:outline-none"

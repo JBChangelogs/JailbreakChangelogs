@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -85,6 +85,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import type { UserData } from "@/types/auth";
+import { Icon } from "@/components/UI/IconWrapper";
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
@@ -98,6 +99,49 @@ interface ItemDetailsClientProps {
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
+// Move ItemDetailsTabs outside to avoid creating components during render
+const ItemDetailsTabs = React.memo(
+  function ItemDetailsTabs({
+    value,
+    onChange,
+  }: {
+    value: number;
+    onChange: (e: React.SyntheticEvent, v: number) => void;
+  }) {
+    const labels = [
+      "Details",
+      "Charts",
+      "Changes",
+      "Dupes",
+      "Similar Items",
+      "Comments",
+    ];
+
+    return (
+      <div className="overflow-x-auto">
+        <div role="tablist" className="tabs min-w-max">
+          {labels.map((label, idx) => (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={value === idx}
+              aria-controls={`item-tabpanel-${idx}`}
+              id={`item-tab-${idx}`}
+              onClick={(e) =>
+                onChange(e as unknown as React.SyntheticEvent, idx)
+              }
+              className={`tab ${value === idx ? "tab-active" : ""}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  },
+  (prev, next) => prev.value === next.value,
+);
+
 export default function ItemDetailsClient({
   item,
   initialChanges,
@@ -107,6 +151,7 @@ export default function ItemDetailsClient({
   initialComments = [],
   initialCommentUserMap = {},
 }: ItemDetailsClientProps) {
+  "use memo";
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -136,8 +181,10 @@ export default function ItemDetailsClient({
 
   useEffect(() => {
     // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
+    setTimeout(() => {
+      setCurrentUserPremiumType(getCurrentUserPremiumType());
+      setPremiumStatusLoaded(true);
+    }, 0);
 
     // Listen for auth changes
     const handleAuthChange = () => {
@@ -172,23 +219,23 @@ export default function ItemDetailsClient({
   useEffect(() => {
     // Hash navigation
     if (window.location.hash === "#comments") {
-      setActiveTab(5);
+      setTimeout(() => setActiveTab(5), 0);
     } else if (window.location.hash === "#charts") {
-      setActiveTab(1);
+      setTimeout(() => setActiveTab(1), 0);
     } else if (window.location.hash === "#changes") {
-      setActiveTab(2);
+      setTimeout(() => setActiveTab(2), 0);
     } else if (window.location.hash === "#dupes") {
-      setActiveTab(3);
+      setTimeout(() => setActiveTab(3), 0);
     } else if (window.location.hash === "#similar") {
-      setActiveTab(4);
+      setTimeout(() => setActiveTab(4), 0);
     } else {
-      setActiveTab(0);
+      setTimeout(() => setActiveTab(0), 0);
     }
   }, []);
 
-  const handleVariantSelect = useCallback((variant: ItemDetails) => {
+  const handleVariantSelect = (variant: ItemDetails) => {
     setSelectedVariant(variant);
-  }, []);
+  };
 
   useEffect(() => {
     // Check if item is favorited
@@ -322,53 +369,6 @@ export default function ItemDetailsClient({
       window.location.hash = "comments";
     }
   };
-
-  // DaisyUI v5 button-based tabs
-  const ItemDetailsTabs = React.useMemo(() => {
-    const TabsInner = React.memo(
-      function TabsInner({
-        value,
-        onChange,
-      }: {
-        value: number;
-        onChange: (e: React.SyntheticEvent, v: number) => void;
-      }) {
-        const labels = [
-          "Details",
-          "Charts",
-          "Changes",
-          "Dupes",
-          "Similar Items",
-          "Comments",
-        ];
-
-        return (
-          <div className="overflow-x-auto">
-            <div role="tablist" className="tabs min-w-max">
-              {labels.map((label, idx) => (
-                <button
-                  key={label}
-                  role="tab"
-                  aria-selected={value === idx}
-                  aria-controls={`item-tabpanel-${idx}`}
-                  id={`item-tab-${idx}`}
-                  onClick={(e) =>
-                    onChange(e as unknown as React.SyntheticEvent, idx)
-                  }
-                  className={`tab ${value === idx ? "tab-active" : ""}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      },
-      (prev, next) => prev.value === next.value,
-    );
-
-    return TabsInner;
-  }, []);
 
   const currentItem = selectedVariant || item;
 
@@ -526,32 +526,53 @@ export default function ItemDetailsClient({
                 </div>
               )}
 
-              <div className="bg-secondary-bg border-border-primary mt-4 rounded-lg border p-6 shadow-lg">
-                <div className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                      Don&apos;t agree with the value?
-                    </h3>
-                    <p className="text-secondary-text mb-4 text-sm leading-relaxed">
-                      Help us keep our values accurate by suggesting a new value
-                      for {currentItem.name}.
-                    </p>
+              <div
+                className="bg-secondary-bg mt-4 rounded-lg p-4 shadow-lg"
+                style={{
+                  border: "2px solid",
+                  borderImage: "linear-gradient(45deg, #076bb6, #ca4a0d) 1",
+                  borderRadius: "8px",
+                }}
+              >
+                <div className="text-center">
+                  <div className="mb-3 flex justify-center">
                     <a
                       href="https://discord.com/invite/baHCsb8N5A"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                      className="transition-transform hover:scale-105"
                     >
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z" />
-                      </svg>
-                      Join Trading Core
+                      <Image
+                        src="https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Transparent_Small.webp"
+                        alt="Trading Core Logo"
+                        width={120}
+                        height={120}
+                        className="rounded-lg"
+                      />
                     </a>
                   </div>
+                  <h3 className="text-primary-text mb-1 text-lg font-semibold">
+                    Help make a better value list
+                  </h3>
+                  <p className="text-secondary-text mb-3 text-sm leading-relaxed">
+                    Jailbreak Changelogs has partnered with Trading Core to
+                    build our value list through community engagement. Share
+                    your insights about this {currentItem.type.toLowerCase()} -{" "}
+                    {currentItem.name}.
+                  </p>
+                  <a
+                    href="https://discord.com/invite/baHCsb8N5A"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                  >
+                    <Icon
+                      icon="ic:baseline-discord"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                    Join Trading Core
+                  </a>
                 </div>
               </div>
             </div>
@@ -782,14 +803,48 @@ export default function ItemDetailsClient({
                       >
                         Value History
                       </button>
-                      <button
-                        role="tab"
-                        aria-selected={activeChartTab === 1}
-                        onClick={() => setActiveChartTab(1)}
-                        className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
-                      >
-                        Trading Metrics
-                      </button>
+                      {item.id !== 587 && (
+                        <button
+                          role="tab"
+                          aria-selected={activeChartTab === 1}
+                          onClick={() => setActiveChartTab(1)}
+                          className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
+                        >
+                          Trading Metrics
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Chart Update Notice */}
+                    <div className="mt-4 mb-4">
+                      <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
+                        <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
+                          Chart Update Schedule
+                        </div>
+                        <div className="text-secondary-text text-xs mt-1">
+                          Charts update daily at{" "}
+                          {(() => {
+                            // Create 6 PM Eastern Time and convert to user's local timezone
+                            const today = new Date();
+                            const year = today.getFullYear();
+                            const month = today.getMonth();
+                            const day = today.getDate();
+
+                            // Create 6 PM Eastern Time (18:00 ET) - create UTC time directly
+                            const utcTime = new Date(
+                              Date.UTC(year, month, day, 22, 0, 0),
+                            ); // 6 PM EST = 10 PM UTC
+
+                            // Format in user's local timezone
+                            return utcTime.toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                              timeZoneName: "short",
+                            });
+                          })()}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Chart Content */}

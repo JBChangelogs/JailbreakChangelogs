@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Pagination, Chip, useMediaQuery } from "@mui/material";
 import { Dialog } from "@headlessui/react";
 import { Masonry } from "@mui/lab";
@@ -167,9 +167,6 @@ export default function ChangelogDetailsClient({
   const [selectedType, setSelectedType] = useState<string>("All Items");
   const [selectedSuggestionType, setSelectedSuggestionType] =
     useState<string>("all");
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
   const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
@@ -236,21 +233,7 @@ export default function ChangelogDetailsClient({
     return "Value";
   };
 
-  useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
+  const currentUserPremiumType = getCurrentUserPremiumType();
 
   // Filter changes based on search query, selected type, and suggestion type
   const filteredChanges = changelog.change_data
@@ -464,7 +447,7 @@ export default function ChangelogDetailsClient({
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text"
+                className="select w-full bg-secondary-bg text-primary-text font-inter"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -485,7 +468,7 @@ export default function ChangelogDetailsClient({
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text"
+                className="select w-full bg-secondary-bg text-primary-text font-inter"
                 value={selectedSuggestionType}
                 onChange={(e) => setSelectedSuggestionType(e.target.value)}
               >
@@ -504,7 +487,7 @@ export default function ChangelogDetailsClient({
           </div>
 
           {/* Mobile Sidebar - Show below filter on mobile */}
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
+          {currentUserPremiumType === 0 && (
             <div className="lg:hidden">
               <div className="flex flex-col items-center">
                 <span className="text-secondary-text mb-2 block text-center text-xs">
@@ -533,11 +516,11 @@ export default function ChangelogDetailsClient({
 
         {/* Main Content with Sidebar Layout */}
         <div
-          className={`grid gap-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "grid-cols-1"}`}
+          className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "grid-cols-1"}`}
         >
           {/* Main Content - Takes up full width for premium users, responsive for non-premium */}
           <div
-            className={`space-y-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "lg:col-span-3 xl:col-span-4 2xl:col-span-5" : ""}`}
+            className={`space-y-6 ${currentUserPremiumType === 0 ? "lg:col-span-3 xl:col-span-4 2xl:col-span-5" : ""}`}
           >
             {/* Top Pagination */}
             {totalPages > 1 && (
@@ -1066,7 +1049,7 @@ export default function ChangelogDetailsClient({
           </div>
 
           {/* Sidebar - Responsive width, only show for non-premium users */}
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
+          {currentUserPremiumType === 0 && (
             <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-1">
               <div className="sticky top-6">
                 <div className="flex flex-col items-center">

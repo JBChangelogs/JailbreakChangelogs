@@ -67,10 +67,10 @@ export default function ItemCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedSubItem, setSelectedSubItem] = useState<SubItem | null>(null);
-  const [hasChildren, setHasChildren] = useState(false);
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hasInitialized = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isValuesPage = pathname === "/values";
@@ -97,43 +97,42 @@ export default function ItemCard({
     }
   };
 
-  // Check for children and set initial state
-  useEffect(() => {
-    if (
-      item.children &&
-      Array.isArray(item.children) &&
-      item.children.length > 0
-    ) {
-      setHasChildren(true);
+  // Derive hasChildren from item data
+  const hasChildren = Boolean(
+    item.children && Array.isArray(item.children) && item.children.length > 0,
+  );
 
+  // Initialize selectedSubItem based on URL and item data
+  useEffect(() => {
+    if (hasChildren && !hasInitialized.current) {
       // Check for variant in URL
       const variant = searchParams.get("variant");
       if (variant) {
         // Find the sub-item that matches the variant
-        const matchingSubItem = item.children.find(
+        const matchingSubItem = item.children!.find(
           (child) => child.sub_name === variant,
         );
         if (matchingSubItem) {
-          setSelectedSubItem(matchingSubItem);
+          setTimeout(() => setSelectedSubItem(matchingSubItem), 0);
         } else {
           // If variant doesn't exist, try to find 2023 variant or use the first child
           const defaultVariant =
-            item.children.find((child) => child.sub_name === "2023") ||
-            item.children[0];
-          setSelectedSubItem(defaultVariant);
+            item.children!.find((child) => child.sub_name === "2023") ||
+            item.children![0];
+          setTimeout(() => setSelectedSubItem(defaultVariant), 0);
         }
       } else {
         // If no variant in URL, try to find 2023 variant or use the first child
         const defaultVariant =
-          item.children.find((child) => child.sub_name === "2023") ||
-          item.children[0];
-        setSelectedSubItem(defaultVariant);
+          item.children!.find((child) => child.sub_name === "2023") ||
+          item.children![0];
+        setTimeout(() => setSelectedSubItem(defaultVariant), 0);
       }
-    } else {
-      setHasChildren(false);
-      setSelectedSubItem(null);
+      hasInitialized.current = true;
+    } else if (!hasChildren) {
+      setTimeout(() => setSelectedSubItem(null), 0);
     }
-  }, [item, item.children, searchParams]);
+  }, [hasChildren, searchParams, item.children]);
 
   useEffect(() => {
     const currentMediaRef = mediaRef.current;

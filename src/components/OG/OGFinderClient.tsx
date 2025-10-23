@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -59,36 +59,12 @@ export default function OGFinderClient({
   isLoading: externalIsLoading,
 }: OGFinderClientProps) {
   const [searchId, setSearchId] = useState(robloxId || "");
-  const [isLoading, setIsLoading] = useState(externalIsLoading || false);
-  const [localRobloxUsers, setLocalRobloxUsers] = useState<
-    Record<string, RobloxUser>
-  >(initialRobloxUsers || {});
-  const [localRobloxAvatars, setLocalRobloxAvatars] = useState<
-    Record<string, string>
-  >(initialRobloxAvatars || {});
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const { isAuthenticated, setShowLoginModal } = useAuthContext();
 
-  // Update local state when props change
-  useEffect(() => {
-    setLocalRobloxUsers(initialRobloxUsers || {});
-  }, [initialRobloxUsers]);
-
-  useEffect(() => {
-    setLocalRobloxAvatars(initialRobloxAvatars || {});
-  }, [initialRobloxAvatars]);
-
-  // Reset loading state when new data is received or when there's an error
-  useEffect(() => {
-    if (initialData || error) {
-      setIsLoading(false);
-    }
-  }, [initialData, error]);
-
-  // Sync with external loading state
-  useEffect(() => {
-    setIsLoading(externalIsLoading || false);
-  }, [externalIsLoading]);
+  // Compute loading state during render
+  const isLoading = externalIsLoading || isSearching;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +80,7 @@ export default function OGFinderClient({
       return;
     }
 
-    setIsLoading(true);
+    setIsSearching(true);
     router.push(`/og/${searchId.trim()}`);
   };
 
@@ -182,8 +158,8 @@ export default function OGFinderClient({
           robloxId={robloxId}
           originalSearchTerm={originalSearchTerm}
           initialData={initialData}
-          robloxUsers={localRobloxUsers}
-          robloxAvatars={localRobloxAvatars}
+          robloxUsers={initialRobloxUsers || {}}
+          robloxAvatars={initialRobloxAvatars || {}}
           error={error}
           isLoading={isLoading}
         />

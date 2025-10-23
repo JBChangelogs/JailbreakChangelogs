@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser } from "@/types";
@@ -16,7 +16,6 @@ import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import { logError } from "@/services/logger";
-import { formatMessageDate } from "@/utils/timestamp";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
@@ -64,6 +63,7 @@ export default function OGFinderResults({
   userConnectionData,
   error,
 }: OGFinderResultsProps) {
+  "use memo";
   const router = useRouter();
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
@@ -115,41 +115,29 @@ export default function OGFinderResults({
   }, [fetchedUserData]);
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
+  const handleVisibleUserIdsChange = (userIds: string[]) => {
     setVisibleUserIds(userIds);
-  }, []);
+  };
 
   // Helper functions
-  const getUserDisplay = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return user?.name || user?.displayName || userId;
-    },
-    [localRobloxUsers],
-  );
+  const getUserDisplay = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    return user?.name || user?.displayName || userId;
+  };
 
-  const getUsername = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return user?.name || userId;
-    },
-    [localRobloxUsers],
-  );
+  const getUsername = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    return user?.name || userId;
+  };
 
-  const getUserAvatar = useCallback(
-    (userId: string) => {
-      return localRobloxAvatars[userId] || "";
-    },
-    [localRobloxAvatars],
-  );
+  const getUserAvatar = (userId: string) => {
+    return localRobloxAvatars[userId] || "";
+  };
 
-  const getHasVerifiedBadge = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return Boolean(user?.hasVerifiedBadge);
-    },
-    [localRobloxUsers],
-  );
+  const getHasVerifiedBadge = (userId: string) => {
+    const user = localRobloxUsers[userId];
+    return Boolean(user?.hasVerifiedBadge);
+  };
 
   // Effects
   useEffect(() => {
@@ -177,7 +165,7 @@ export default function OGFinderResults({
   };
 
   // Filter and sort logic
-  const filteredData = useMemo(() => {
+  const filteredData = (() => {
     if (!initialData?.results) return [];
 
     return initialData.results.filter((item) => {
@@ -192,9 +180,9 @@ export default function OGFinderResults({
 
       return matchesSearch && matchesCategory;
     });
-  }, [initialData?.results, searchTerm, selectedCategories]);
+  })();
 
-  const sortedData = useMemo(() => {
+  const sortedData = (() => {
     return [...filteredData].sort((a, b) => {
       switch (sortOrder) {
         case "duplicates":
@@ -236,20 +224,20 @@ export default function OGFinderResults({
           return 0;
       }
     });
-  }, [filteredData, sortOrder]);
+  })();
 
   // Use sortedData directly instead of pagination
   const filteredAndSortedItems = sortedData;
 
   // Check if there are any duplicates in the filtered data
-  const hasDuplicates = useMemo(() => {
+  const hasDuplicates = (() => {
     const itemCounts = new Map<string, number>();
     filteredData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
     });
     return Array.from(itemCounts.values()).some((count) => count > 1);
-  }, [filteredData]);
+  })();
 
   // Reset sort order if duplicates option is selected but no duplicates exist
   useEffect(() => {
@@ -289,7 +277,7 @@ export default function OGFinderResults({
   };
 
   // Pre-calculate duplicate counts from FULL inventory (not filtered) for consistent numbering
-  const duplicateCounts = useMemo(() => {
+  const duplicateCounts = (() => {
     const counts = new Map<string, number>();
     if (initialData?.results) {
       initialData.results.forEach((item: OGItem) => {
@@ -298,13 +286,13 @@ export default function OGFinderResults({
       });
     }
     return counts;
-  }, [initialData?.results]);
+  })();
 
   // Use the pre-calculated duplicate counts
   const itemCounts = duplicateCounts;
 
   // Create a map to track the order of duplicates (using ALL items from full inventory)
-  const duplicateOrders = useMemo(() => {
+  const duplicateOrders = (() => {
     const orders = new Map<string, number>();
 
     // Group items by name using ALL items from full inventory
@@ -336,7 +324,7 @@ export default function OGFinderResults({
     });
 
     return orders;
-  }, [initialData?.results]);
+  })();
 
   return (
     <div className="space-y-6">
@@ -498,11 +486,6 @@ export default function OGFinderResults({
           isOpen={showHistoryModal}
           onClose={closeHistoryModal}
           item={selectedItem}
-          getUserDisplay={getUserDisplay}
-          getUserAvatar={getUserAvatar}
-          getUsername={getUsername}
-          getHasVerifiedBadge={getHasVerifiedBadge}
-          formatDate={(timestamp) => formatMessageDate(timestamp)}
         />
       )}
     </div>

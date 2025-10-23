@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonHeader from "@/components/Seasons/SeasonHeader";
@@ -12,7 +12,7 @@ import { Inter } from "next/font/google";
 import { formatProfileDate } from "@/utils/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useAdReloader } from "@/hooks/useAdReloader";
 import { triggerAdReload } from "@/utils/adUtils";
 import { Season, CommentData } from "@/utils/api";
@@ -37,6 +37,7 @@ export default function SeasonDetailsClient({
   initialUserMap = {},
 }: SeasonDetailsClientProps) {
   const router = useRouter();
+  const { user } = useAuthContext();
 
   // Initialize ad reloader for route changes
   useAdReloader({
@@ -51,11 +52,11 @@ export default function SeasonDetailsClient({
 
   // Use state to manage the current season
   const [currentSeasonState, setCurrentSeasonState] = useState(currentSeason);
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
 
   const season = currentSeasonState;
+
+  // Derive premium type from auth context instead of using state
+  const currentUserPremiumType = user?.premiumtype || 0;
 
   // Get filtered season list for navigation
   const filteredSeasonList = seasonList
@@ -79,22 +80,6 @@ export default function SeasonDetailsClient({
     seasonList.find((s: Season) => s.season === latestSeasonNumber) || null;
   const nextSeasonForHeader =
     seasonList.find((s: Season) => s.season === latestSeasonNumber + 1) || null;
-
-  useEffect(() => {
-    // Get current user's premium type
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
 
   const handleSeasonSelect = async (selectedId: string) => {
     // Find the selected season from the already fetched data
@@ -369,7 +354,7 @@ export default function SeasonDetailsClient({
             {/* Right side - Image Gallery and Comments */}
             <div className="space-y-8 sm:col-span-12 xl:col-span-4">
               <ImageGallery rewards={season.rewards} />
-              {premiumStatusLoaded && currentUserPremiumType === 0 && (
+              {currentUserPremiumType === 0 && (
                 <div className="my-8 flex flex-col items-center">
                   <span className="text-secondary-text mb-2 block text-center text-xs">
                     ADVERTISEMENT

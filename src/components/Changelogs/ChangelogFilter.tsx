@@ -42,7 +42,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
         {/* Changelog Selector */}
         <div className="flex-1">
           <select
-            className="select w-full bg-secondary-bg text-primary-text"
+            className="select w-full bg-secondary-bg text-primary-text font-inter"
             value={selectedId}
             onChange={(e) => onChangelogSelect(e.target.value)}
           >

@@ -33,7 +33,6 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
   onItemSelect,
   initialItems = [],
 }) => {
-  const [items, setItems] = useState<Item[]>(initialItems);
   const [loading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -48,17 +47,15 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (initialItems.length > 0) {
-      // Sort items by cash value high to low
-      const sortedData = [...initialItems].sort((a: Item, b: Item) => {
-        const aValue = parseCashValue(a.cash_value);
-        const bValue = parseCashValue(b.cash_value);
-        return bValue - aValue;
-      });
-      setItems(sortedData);
-    }
-  }, [initialItems]);
+  // Transform data during render instead of using useEffect
+  const items =
+    initialItems.length > 0
+      ? [...initialItems].sort((a: Item, b: Item) => {
+          const aValue = parseCashValue(a.cash_value);
+          const bValue = parseCashValue(b.cash_value);
+          return bValue - aValue;
+        })
+      : [];
 
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),

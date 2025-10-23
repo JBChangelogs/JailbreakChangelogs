@@ -221,6 +221,7 @@ const DupeTable: React.FC<DupeTableProps> = ({
     [],
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: tableData,
     columns,

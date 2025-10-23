@@ -5,7 +5,6 @@ const Skeleton = dynamic(() => import("@mui/material/Skeleton"), {
   ssr: false,
 });
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FilterSort } from "@/types";
 
@@ -44,23 +43,19 @@ const itemTypeToFilterSort: Record<string, FilterSort> = {
 
 export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   const pathname = usePathname();
-  const [username, setUsername] = useState<string | null>(null);
 
   // Check if we're on a user profile page
   const isUserProfilePage =
     pathname.startsWith("/users/") && pathname.split("/").length === 3;
   const userId = isUserProfilePage ? pathname.split("/")[2] : null;
 
-  // Set username if we're on a user profile page and have user data
-  useEffect(() => {
-    if (userId && userData) {
-      setUsername(
-        userData.global_name && userData.global_name !== "None"
-          ? `@${userData.global_name}`
-          : `@${userData.username}`,
-      );
-    }
-  }, [userId, userData]);
+  // Derive username directly from userData during render
+  const username =
+    userId && userData
+      ? userData.global_name && userData.global_name !== "None"
+        ? `@${userData.global_name}`
+        : `@${userData.username}`
+      : null;
 
   // Split the pathname and create breadcrumb items
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -298,20 +293,17 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   return (
     <div className="container mx-auto px-4 py-4">
       <nav className="flex" aria-label="Breadcrumb">
-        <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+        <ol className="flex flex-wrap items-center gap-1 md:gap-2 rtl:space-x-reverse">
           {breadcrumbItems.map((item, index) => {
             const isLast = index === breadcrumbItems.length - 1;
 
             if (index === 0) {
               return (
-                <li
-                  key={`${index}-${item.href}`}
-                  className="inline-flex items-center"
-                >
+                <li key={`${index}-${item.href}`} className="flex items-center">
                   {isLast ? (
-                    <span className="text-secondary-text inline-flex items-center text-sm font-medium">
+                    <span className="text-secondary-text flex items-center text-sm font-medium">
                       <svg
-                        className="mr-2.5 h-3 w-3"
+                        className="mr-2.5 h-3 w-3 flex-shrink-0"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -319,15 +311,15 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                       >
                         <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
                       </svg>
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
                     </span>
                   ) : (
                     <Link
                       href={item.href}
-                      className="text-secondary-text hover:text-link-hover inline-flex items-center text-sm font-medium"
+                      className="text-secondary-text hover:text-link-hover flex items-center text-sm font-medium"
                     >
                       <svg
-                        className="mr-2.5 h-3 w-3"
+                        className="mr-2.5 h-3 w-3 flex-shrink-0"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -335,7 +327,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                       >
                         <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
                       </svg>
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
                     </Link>
                   )}
                 </li>
@@ -345,37 +337,36 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
             return (
               <li
                 key={`${index}-${item.href}`}
+                className="flex items-center"
                 aria-current={isLast ? "page" : undefined}
               >
-                <div className="flex items-center">
-                  <svg
-                    className="text-secondary-text mx-1 h-3 w-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 6 10"
+                <svg
+                  className="text-secondary-text h-3 w-3 flex-shrink-0"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 9 4-4-4-4"
+                  />
+                </svg>
+                {isLast ? (
+                  <span className="text-secondary-text ml-1 text-sm font-medium md:ml-2 truncate">
+                    {item.label}
+                  </span>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="text-secondary-text hover:text-link-hover ml-1 text-sm font-medium md:ml-2 truncate"
                   >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 9 4-4-4-4"
-                    />
-                  </svg>
-                  {isLast ? (
-                    <span className="text-secondary-text ml-1 text-sm font-medium md:ml-2">
-                      {item.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className="text-secondary-text hover:text-link-hover ml-1 text-sm font-medium md:ml-2"
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </div>
+                    {item.label}
+                  </Link>
+                )}
               </li>
             );
           })}

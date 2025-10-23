@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
@@ -31,6 +31,7 @@ export default function InventoryItems({
   itemsData: propItemsData,
   isOwnInventory = false,
 }: InventoryItemsProps) {
+  "use memo";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
@@ -40,9 +41,6 @@ export default function InventoryItems({
   const [isFiltering, setIsFiltering] = useState(false);
   const [localRobloxUsers, setLocalRobloxUsers] =
     useState<Record<string, RobloxUser>>(robloxUsers);
-  const [localRobloxAvatars, setLocalRobloxAvatars] =
-    useState<Record<string, string>>(robloxAvatars);
-  const [itemsData, setItemsData] = useState<Item[]>(propItemsData || []);
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<InventoryItem | null>(null);
@@ -69,18 +67,20 @@ export default function InventoryItems({
   // Merge fetched user data with existing data
   useEffect(() => {
     if (fetchedUserData && "userData" in fetchedUserData) {
-      setLocalRobloxUsers((prev) => ({
-        ...prev,
-        ...fetchedUserData.userData,
-      }));
+      setTimeout(() => {
+        setLocalRobloxUsers((prev) => ({
+          ...prev,
+          ...fetchedUserData.userData,
+        }));
+      }, 0);
       // Note: avatarData is empty for original owners since they're not displayed
     }
   }, [fetchedUserData]);
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
+  const handleVisibleUserIdsChange = (userIds: string[]) => {
     setVisibleUserIds(userIds);
-  }, []);
+  };
 
   // Get variant-specific values (e.g., different hyperchrome colors by year)
   const getVariantSpecificValues = (
@@ -194,53 +194,37 @@ export default function InventoryItems({
     }, 300);
   };
 
-  const getUserDisplay = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      if (!user) return userId;
-      return user.name || user.displayName || userId;
-    },
-    [localRobloxUsers],
-  );
+  const currentItemsData = propItemsData || [];
+  const currentRobloxUsers = { ...robloxUsers, ...localRobloxUsers };
+  const currentRobloxAvatars = robloxAvatars;
 
-  const getUserAvatar = useCallback(
-    (userId: string) => {
-      return localRobloxAvatars[userId] || "";
-    },
-    [localRobloxAvatars],
-  );
+  const getUserDisplay = (userId: string) => {
+    const user = currentRobloxUsers[userId];
+    if (!user) return userId;
+    return user.name || user.displayName || userId;
+  };
 
-  const getHasVerifiedBadge = useCallback(
-    (userId: string) => {
-      const user = localRobloxUsers[userId];
-      return Boolean(user?.hasVerifiedBadge);
-    },
-    [localRobloxUsers],
-  );
+  const getUserAvatar = (userId: string) => {
+    return currentRobloxAvatars[userId] || "";
+  };
 
-  useEffect(() => {
-    if (propItemsData) {
-      setItemsData(propItemsData);
-    }
-  }, [propItemsData]);
-
-  useEffect(() => {
-    setLocalRobloxUsers(robloxUsers);
-    setLocalRobloxAvatars(robloxAvatars);
-  }, [robloxUsers, robloxAvatars]);
+  const getHasVerifiedBadge = (userId: string) => {
+    const user = currentRobloxUsers[userId];
+    return Boolean(user?.hasVerifiedBadge);
+  };
 
   // Count duplicates across entire inventory for consistent numbering
-  const duplicateCounts = useMemo(() => {
+  const duplicateCounts = (() => {
     const counts = new Map<string, number>();
     initialData.data.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return counts;
-  }, [initialData.data]);
+  })();
 
   // Recalculate counts when hiding duplicates
-  const filteredDuplicateCounts = useMemo(() => {
+  const filteredDuplicateCounts = (() => {
     if (!hideDuplicates) return duplicateCounts;
 
     const counts = new Map<string, number>();
@@ -254,7 +238,7 @@ export default function InventoryItems({
       }
     });
     return counts;
-  }, [initialData.data, hideDuplicates, duplicateCounts]);
+  })();
 
   // Parse values like "23.4m" -> 23400000
   const parseNumericValue = (value: string | null): number => {
@@ -269,7 +253,7 @@ export default function InventoryItems({
   };
 
   // Filter and sort logic
-  const filteredAndSortedItems = useMemo(() => {
+  const filteredAndSortedItems = (() => {
     if (showMissingItems) {
       const ownedItemIds = new Set(
         initialData.data.map((item) => item.item_id),
@@ -286,7 +270,7 @@ export default function InventoryItems({
        */
       const excludedItemIds = new Set([142, 467, 171, 640, 634, 152]);
 
-      const missingItems = itemsData.filter((itemData) => {
+      const missingItems = currentItemsData.filter((itemData) => {
         if (ownedItemIds.has(itemData.id)) {
           return false;
         }
@@ -378,7 +362,9 @@ export default function InventoryItems({
 
     // Original logic for showing owned items
     const filtered = initialData.data.filter((item) => {
-      const itemData = itemsData.find((data) => data.id === item.item_id);
+      const itemData = currentItemsData.find(
+        (data) => data.id === item.item_id,
+      );
       if (!itemData) return false;
 
       // Search filter
@@ -429,7 +415,9 @@ export default function InventoryItems({
     }
 
     const mappedItems = finalFiltered.map((item) => {
-      const baseItemData = itemsData.find((data) => data.id === item.item_id)!;
+      const baseItemData = currentItemsData.find(
+        (data) => data.id === item.item_id,
+      )!;
       const variantValues = getVariantSpecificValues(item, baseItemData);
 
       // Create a modified item data object with variant-specific values
@@ -521,25 +509,13 @@ export default function InventoryItems({
           return 0;
       }
     });
-  }, [
-    initialData.data,
-    itemsData,
-    searchTerm,
-    selectedCategories,
-    showOnlyOriginal,
-    showOnlyNonOriginal,
-    hideDuplicates,
-    showMissingItems,
-    sortOrder,
-    duplicateCounts,
-    filteredDuplicateCounts,
-  ]);
+  })();
 
   // Use the pre-calculated duplicate counts from full inventory
   const itemCounts = hideDuplicates ? filteredDuplicateCounts : duplicateCounts;
 
   // Create a map to track the order of duplicates based on creation date (using ALL items from full inventory)
-  const duplicateOrders = useMemo(() => {
+  const duplicateOrders = (() => {
     const orders = new Map<string, number>();
 
     // Group items by name using ALL items from full inventory
@@ -570,21 +546,21 @@ export default function InventoryItems({
     });
 
     return orders;
-  }, [initialData.data]);
+  })();
 
   // Available categories
-  const availableCategories = useMemo(() => {
+  const availableCategories = (() => {
     const categories = new Set<string>();
-    itemsData.forEach((item) => {
+    currentItemsData.forEach((item) => {
       if (item.type) {
         categories.add(item.type);
       }
     });
     return Array.from(categories).sort();
-  }, [itemsData]);
+  })();
 
   // Calculate duplicate statistics for all inventories
-  const inventoryStats = useMemo(() => {
+  const inventoryStats = (() => {
     const totalItems = initialData.data.length;
 
     // Calculate duplicate statistics
@@ -605,12 +581,10 @@ export default function InventoryItems({
       totalDuplicates: duplicates.reduce((sum, [, count]) => sum + count, 0),
       uniqueItems: duplicateCounts.size,
     };
-  }, [initialData.data]);
+  })();
 
   // Check if there are any duplicates
-  const hasDuplicates = useMemo(() => {
-    return inventoryStats.duplicates.length > 0;
-  }, [inventoryStats.duplicates]);
+  const hasDuplicates = inventoryStats.duplicates.length > 0;
 
   return (
     <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">

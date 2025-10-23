@@ -25,10 +25,7 @@ export default function SeasonContractsClient({
   contracts,
   updatedAt,
 }: SeasonContractProps) {
-  const formatUpdatedAt = React.useMemo(() => {
-    if (!updatedAt) return null;
-    return formatMessageDate(updatedAt);
-  }, [updatedAt]);
+  const formatUpdatedAt = updatedAt ? formatMessageDate(updatedAt) : null;
 
   const grouped = React.useMemo(() => {
     const byTeam: Record<

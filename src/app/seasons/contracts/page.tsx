@@ -8,6 +8,9 @@ import { fetchSeasonContracts } from "@/utils/api";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
+// Calculate current timestamp outside component to avoid impure function during render
+const getCurrentTimestamp = () => Math.floor(Date.now() / 1000);
+
 export default async function SeasonContractsPage() {
   const [contractsData, latestSeason] = await Promise.all([
     fetchSeasonContracts(),
@@ -29,9 +32,8 @@ export default async function SeasonContractsPage() {
   }
 
   // If no season data, or season is over, do not show contracts
-  const now = Math.floor(Date.now() / 1000);
   const seasonEnded = latestSeason?.end_date
-    ? now >= latestSeason.end_date
+    ? getCurrentTimestamp() >= latestSeason.end_date
     : false;
 
   return (

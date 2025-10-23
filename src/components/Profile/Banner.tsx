@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { UserSettings } from "@/types/auth";
 
@@ -12,7 +12,7 @@ interface BannerProps {
 }
 
 // Move static data outside component
-const BACKGROUND_COUNT = 27;
+const BACKGROUND_COUNT = 30;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>
@@ -41,30 +41,22 @@ export const Banner = ({
   settings,
   premiumType,
 }: BannerProps) => {
-  const [fallbackBanner, setFallbackBanner] = useState<string | null>(null);
   const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
 
-  // Memoize the background selection
-  useEffect(() => {
-    const seed = calculateSeed(userId);
-    const index = seed % BACKGROUND_COUNT;
-    setFallbackBanner(BACKGROUNDS[index]);
-  }, [userId]);
+  // Calculate fallback banner during render
+  const seed = calculateSeed(userId);
+  const index = seed % BACKGROUND_COUNT;
+  const fallbackBanner = BACKGROUNDS[index];
 
   const handleBannerError = () => {
     setPrimaryBannerFailed(true);
   };
 
   const getBannerSource = () => {
-    // Calculate the background index for this user
-    const seed = calculateSeed(userId);
-    const index = seed % BACKGROUND_COUNT;
-    const calculatedBackground = BACKGROUNDS[index];
-
     // If primary banner failed to load, use calculated fallback
     if (primaryBannerFailed) {
       return {
-        src: fallbackBanner || calculatedBackground,
+        src: fallbackBanner,
         alt: "Profile banner",
       };
     }
@@ -81,7 +73,7 @@ export const Banner = ({
       }
       // If no Discord banner available, use the calculated fallback
       return {
-        src: fallbackBanner || calculatedBackground,
+        src: fallbackBanner,
         alt: "Profile banner",
       };
     }
@@ -116,18 +108,13 @@ export const Banner = ({
 
     // Default to the calculated fallback
     return {
-      src: fallbackBanner || calculatedBackground,
+      src: fallbackBanner,
       alt: "Profile banner",
     };
   };
 
-  // Reset primaryBannerFailed when userId changes
-  useEffect(() => {
-    setPrimaryBannerFailed(false);
-  }, [userId]);
-
   return (
-    <div className="relative h-48 md:h-80">
+    <div className="relative h-48 md:h-80" key={userId}>
       <Image
         {...getBannerSource()}
         fill

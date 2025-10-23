@@ -58,17 +58,21 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
     if (userId === "231616789979594754") {
       const newAudio = new Audio("/assets/images/super_idol.mp3");
       newAudio.volume = 0.7;
-      setAudio(newAudio);
-      newAudio
-        .play()
-        .then(() => {
-          console.log("Lin successfully became a super idol!");
-          setShowPlayButton(false);
-        })
-        .catch((error) => {
-          console.log("Lin refused to be a super idol:", error);
-          setShowPlayButton(true);
-        });
+
+      // Defer state updates to avoid cascading renders
+      setTimeout(() => {
+        setAudio(newAudio);
+        newAudio
+          .play()
+          .then(() => {
+            console.log("Lin successfully became a super idol!");
+            setShowPlayButton(false);
+          })
+          .catch((error) => {
+            console.log("Lin refused to be a super idol:", error);
+            setShowPlayButton(true);
+          });
+      }, 0);
 
       return () => {
         newAudio.pause();

@@ -149,76 +149,27 @@ async function StatsSection() {
 
 // Component for leaderboard section
 async function LeaderboardSection() {
+  let leaderboard: UserScan[] | null = null;
+  let userDataResult: Record<string, unknown> | null = null;
+  let avatarData: Record<string, unknown> | null = null;
+
   try {
-    const leaderboard = await fetchUserScansLeaderboard();
+    leaderboard = await fetchUserScansLeaderboard();
 
-    if (!leaderboard || leaderboard.length === 0) {
-      return (
-        <div className="mt-8">
-          <h2 className="text-primary-text mb-4 text-xl font-bold">
-            Most Scanned Players
-          </h2>
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="bg-status-error/10 rounded-full p-3">
-                  <svg
-                    className="text-status-error h-8 w-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-status-error mb-2 text-lg font-semibold">
-                Leaderboard Unavailable
-              </h3>
-              <p className="text-secondary-text">
-                Unable to load the leaderboard data. Please try refreshing the
-                page.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
+    if (leaderboard && leaderboard.length > 0) {
+      // Batch fetch all user data and avatars at once
+      const userIds = leaderboard.map((user) => user.user_id);
+      [userDataResult, avatarData] = await Promise.all([
+        fetchRobloxUsersBatchLeaderboard(userIds),
+        fetchRobloxAvatars(userIds),
+      ]);
     }
-
-    // Batch fetch all user data and avatars at once
-    const userIds = leaderboard.map((user) => user.user_id);
-    const [userDataResult, avatarData] = await Promise.all([
-      fetchRobloxUsersBatchLeaderboard(userIds),
-      fetchRobloxAvatars(userIds),
-    ]);
-
-    return (
-      <div className="mt-8">
-        <h2 className="text-primary-text mb-4 text-xl font-bold">
-          Most Scanned Players ({leaderboard.length})
-        </h2>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-          <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2">
-            {leaderboard.map((user, index) => (
-              <LeaderboardUser
-                key={user.user_id}
-                user={user}
-                index={index}
-                userDataResult={userDataResult}
-                avatarData={avatarData}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
   } catch (error) {
     console.error("[SERVER] Error in LeaderboardSection:", error);
+    leaderboard = null;
+  }
+
+  if (!leaderboard || leaderboard.length === 0) {
     return (
       <div className="mt-8">
         <h2 className="text-primary-text mb-4 text-xl font-bold">
@@ -244,16 +195,38 @@ async function LeaderboardSection() {
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">
-              Leaderboard Error
+              Leaderboard Unavailable
             </h3>
             <p className="text-secondary-text">
-              Failed to load leaderboard data. Please try refreshing the page.
+              Unable to load the leaderboard data. Please try refreshing the
+              page.
             </p>
           </div>
         </div>
       </div>
     );
   }
+
+  return (
+    <div className="mt-8">
+      <h2 className="text-primary-text mb-4 text-xl font-bold">
+        Most Scanned Players ({leaderboard.length})
+      </h2>
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2">
+          {leaderboard.map((user, index) => (
+            <LeaderboardUser
+              key={user.user_id}
+              user={user}
+              index={index}
+              userDataResult={userDataResult}
+              avatarData={avatarData}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Component for individual user with their Roblox data

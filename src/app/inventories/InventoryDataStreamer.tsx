@@ -27,6 +27,7 @@ async function InventoryDataFetcher({
   const isUsername = !/^\d+$/.test(robloxId);
 
   let actualRobloxId = robloxId;
+  let usernameError: string | null = null;
 
   // If it's a username, try to get the Roblox ID first
   if (isUsername) {
@@ -44,14 +45,7 @@ async function InventoryDataFetcher({
       } else {
         const truncatedUsername =
           robloxId.length > 50 ? `${robloxId.substring(0, 47)}...` : robloxId;
-        return (
-          <InventoryCheckerClient
-            robloxId={robloxId}
-            error={`Username "${truncatedUsername}" not found. Please check the spelling and try again.`}
-            initialComments={initialComments}
-            initialCommentUserMap={initialCommentUserMap}
-          />
-        );
+        usernameError = `Username "${truncatedUsername}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
       console.error("Error fetching user by username:", error);
@@ -63,19 +57,22 @@ async function InventoryDataFetcher({
         error instanceof Error &&
         error.message.includes("Failed to fetch user: 502");
 
-      const errorMessage = isServerError
+      usernameError = isServerError
         ? `Server error while searching for "${truncatedUsername}". Please try searching by Roblox ID instead, or try again later.`
         : `Failed to find user "${truncatedUsername}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
-
-      return (
-        <InventoryCheckerClient
-          robloxId={robloxId}
-          error={errorMessage}
-          initialComments={initialComments}
-          initialCommentUserMap={initialCommentUserMap}
-        />
-      );
     }
+  }
+
+  // Return error component if username lookup failed
+  if (usernameError) {
+    return (
+      <InventoryCheckerClient
+        robloxId={robloxId}
+        error={usernameError}
+        initialComments={initialComments}
+        initialCommentUserMap={initialCommentUserMap}
+      />
+    );
   }
 
   const [result, currentSeason, items] = await Promise.all([

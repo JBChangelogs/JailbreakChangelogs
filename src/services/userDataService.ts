@@ -293,6 +293,7 @@ export class UserDataService {
 
   /**
    * Extracts user IDs from dupe finder data (for DupeUserDataStreamer)
+   * Only extracts main user ID and current owners, not trade history users
    */
   static extractUserIdsFromDupeData(
     dupeData: DupeFinderResponse,
@@ -311,30 +312,8 @@ export class UserDataService {
         }
       });
 
-      // Add all trade history user IDs from all items
-      dupeData.forEach((item) => {
-        if (item.history) {
-          try {
-            const historyData =
-              typeof item.history === "string"
-                ? JSON.parse(item.history)
-                : item.history;
-
-            if (Array.isArray(historyData)) {
-              historyData.forEach((trade: { UserId: number }) => {
-                if (trade.UserId) {
-                  userIdsToFetch.add(trade.UserId.toString());
-                }
-              });
-            }
-          } catch (error) {
-            logError("Error parsing history data for user fetching", error, {
-              component: "UserDataService",
-              action: "parse_history",
-            });
-          }
-        }
-      });
+      // Note: Trade history user IDs are no longer fetched to avoid showing avatars
+      // in ownership history modals. Only current owners are fetched.
     }
 
     return Array.from(userIdsToFetch);
@@ -342,6 +321,7 @@ export class UserDataService {
 
   /**
    * Extracts user IDs from OG search data (for OGUserDataStreamer)
+   * Only extracts main user ID and current owners, not trade history users
    */
   static extractUserIdsFromOGData(
     ogData: OGSearchData,
@@ -360,30 +340,8 @@ export class UserDataService {
         }
       });
 
-      // Add all trade history user IDs from all items
-      ogData.results.forEach((item) => {
-        if (item.history) {
-          try {
-            const historyData =
-              typeof item.history === "string"
-                ? JSON.parse(item.history)
-                : item.history;
-
-            if (Array.isArray(historyData)) {
-              historyData.forEach((trade: { UserId: number }) => {
-                if (trade.UserId) {
-                  userIdsToFetch.add(trade.UserId.toString());
-                }
-              });
-            }
-          } catch (error) {
-            logError("Error parsing history data for user fetching", error, {
-              component: "UserDataService",
-              action: "parse_history",
-            });
-          }
-        }
-      });
+      // Note: Trade history user IDs are no longer fetched to avoid showing avatars
+      // in ownership history modals. Only current owners are fetched.
     }
 
     return Array.from(userIdsToFetch);

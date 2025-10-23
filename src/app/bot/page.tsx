@@ -11,9 +11,9 @@ export default function BotPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Generate shuffled array of background images
-    const shuffledImages = generateShuffledBackgroundImages();
-    setBackgroundImages(shuffledImages);
+    setTimeout(() => {
+      setBackgroundImages(generateShuffledBackgroundImages());
+    }, 0);
   }, []);
 
   // Function to cycle to the next image
@@ -25,11 +25,9 @@ export default function BotPage() {
 
   // Auto-cycle through images every 10 seconds
   useEffect(() => {
-    if (backgroundImages.length === 0) return;
-
     const interval = setInterval(nextImage, 10000);
     return () => clearInterval(interval);
-  }, [backgroundImages.length, nextImage]);
+  }, [nextImage]);
 
   const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
 

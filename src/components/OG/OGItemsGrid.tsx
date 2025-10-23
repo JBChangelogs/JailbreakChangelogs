@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import OGItemCard from "./OGItemCard";
 
@@ -46,6 +46,7 @@ export default function OGItemsGrid({
   duplicateOrders = new Map(),
   onVisibleUserIdsChange,
 }: OGItemsGridProps) {
+  "use memo";
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Organize items into rows for grid virtualization
@@ -61,16 +62,17 @@ export default function OGItemsGrid({
   };
 
   const itemsPerRow = getItemsPerRow();
-  const rows = useMemo(() => {
+  const rows = (() => {
     const rowArray: OGItem[][] = [];
     for (let i = 0; i < filteredItems.length; i += itemsPerRow) {
       rowArray.push(filteredItems.slice(i, i + itemsPerRow));
     }
     return rowArray;
-  }, [filteredItems, itemsPerRow]);
+  })();
 
   // TanStack Virtual setup for performance with large item datasets
   // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
+
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -80,7 +82,7 @@ export default function OGItemsGrid({
 
   // Extract user IDs from ONLY the visible items
   const virtualItems = virtualizer.getVirtualItems();
-  const visibleUserIds = useMemo(() => {
+  const visibleUserIds = (() => {
     const userIds = new Set<string>();
 
     virtualItems.forEach((virtualRow) => {
@@ -94,7 +96,7 @@ export default function OGItemsGrid({
     });
 
     return Array.from(userIds);
-  }, [virtualItems, rows]);
+  })();
 
   // Notify parent component when visible user IDs change
   useEffect(() => {

@@ -54,6 +54,7 @@ export default function SupportersSection({
     rows.push(sortedSupporters.slice(i, i + supportersPerRow));
   }
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

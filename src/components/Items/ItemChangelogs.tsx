@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { Button, Pagination } from "@mui/material";
 import { Dialog, DialogPanel } from "@headlessui/react";
@@ -193,10 +193,8 @@ export default function ItemChangelogs({
   initialChanges,
   initialUserMap,
 }: ItemChangelogsProps) {
-  const changes: Change[] = useMemo(
-    () => initialChanges ?? [],
-    [initialChanges],
-  );
+  "use memo";
+  const changes: Change[] = initialChanges ?? [];
   const loading = false;
   const error: string | null = null;
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");

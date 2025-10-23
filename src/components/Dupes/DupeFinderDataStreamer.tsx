@@ -48,6 +48,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
   const isUsername = !/^\d+$/.test(robloxId);
 
   let actualRobloxId = robloxId;
+  let usernameError: string | null = null;
 
   // If it's a username, try to get the Roblox ID first
   if (isUsername) {
@@ -56,14 +57,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       if (userData && userData.id) {
         actualRobloxId = userData.id.toString();
       } else {
-        return (
-          <DupeFinderClient
-            robloxId={robloxId}
-            error={`Username "${robloxId}" not found. Please check the spelling and try again.`}
-            isUserFound={false}
-            items={[]}
-          />
-        );
+        usernameError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
       console.error("Error fetching user by username:", error);
@@ -73,19 +67,22 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
         error instanceof Error &&
         error.message.includes("Failed to fetch user: 502");
 
-      const errorMessage = isServerError
+      usernameError = isServerError
         ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
         : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
-
-      return (
-        <DupeFinderClient
-          robloxId={robloxId}
-          error={errorMessage}
-          isUserFound={false}
-          items={[]}
-        />
-      );
     }
+  }
+
+  // Return error component if username lookup failed
+  if (usernameError) {
+    return (
+      <DupeFinderClient
+        robloxId={robloxId}
+        error={usernameError}
+        isUserFound={false}
+        items={[]}
+      />
+    );
   }
 
   const result = await fetchDupeFinderData(actualRobloxId);

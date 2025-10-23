@@ -28,12 +28,14 @@ import { safeSetJSON } from "@/utils/safeStorage";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
-  const [userData, setUserData] = useState<UserData | null>(null);
   const { modalState, closeModal, openModal } = useSupporterModal();
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [showHighlight, setShowHighlight] = useState(false);
   const [highlightSetting, setHighlightSetting] = useState<string | null>(null);
+
+  // Derive state from props instead of setting in useEffect
+  const userData = user;
+  const loading = isLoading;
 
   useEffect(() => {
     // Check for highlight parameter in URL
@@ -41,17 +43,22 @@ export default function SettingsPage() {
     const highlight = urlParams.get("highlight");
 
     if (highlight) {
-      setHighlightSetting(highlight);
-      setShowHighlight(true);
-
-      // Clear highlight after 10 seconds
+      // Use setTimeout to defer state updates
       const timer = setTimeout(() => {
-        setShowHighlight(false);
-        setHighlightSetting(null);
-        // Remove the highlight parameter from URL
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, "", newUrl);
-      }, 10000);
+        setHighlightSetting(highlight);
+        setShowHighlight(true);
+
+        // Clear highlight after 10 seconds
+        const clearTimer = setTimeout(() => {
+          setShowHighlight(false);
+          setHighlightSetting(null);
+          // Remove the highlight parameter from URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, "", newUrl);
+        }, 10000);
+
+        return () => clearTimeout(clearTimer);
+      }, 0);
 
       return () => clearTimeout(timer);
     }
@@ -64,20 +71,11 @@ export default function SettingsPage() {
   } = useSettings(userData, openModal);
 
   useEffect(() => {
-    if (user) {
-      setUserData(user);
-      setLoading(false);
-    } else if (!isLoading) {
+    if (!isLoading && !user) {
       // User is not authenticated and auth is not loading
       router.push("/");
     }
   }, [user, isLoading, router]);
-
-  useEffect(() => {
-    if (!loading && !userData) {
-      router.push("/");
-    }
-  }, [loading, userData, router]);
 
   const handleBannerUpdate = (newBannerUrl: string) => {
     if (userData) {
@@ -86,7 +84,9 @@ export default function SettingsPage() {
         custom_banner: newBannerUrl,
       };
       safeSetJSON("user", updatedUser);
-      setUserData(updatedUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedUser }),
+      );
     }
   };
 
@@ -97,7 +97,6 @@ export default function SettingsPage() {
         custom_avatar: newAvatarUrl,
       };
       safeSetJSON("user", updatedUser);
-      setUserData(updatedUser);
       window.dispatchEvent(
         new CustomEvent("authStateChanged", { detail: updatedUser }),
       );

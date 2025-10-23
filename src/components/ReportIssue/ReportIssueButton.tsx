@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Icon } from "../UI/IconWrapper";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
@@ -20,11 +20,9 @@ export default function ReportIssueButton() {
     setIsOpen(true);
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (searchParams.get("report-issue") === "true") {
-      handleOpenModal();
-    }
-  }, [searchParams, handleOpenModal]);
+  // Check URL parameter during render instead of in useEffect
+  const shouldOpenFromUrl =
+    searchParams.get("report-issue") === "true" && isAuthenticated;
 
   return (
     <>
@@ -35,7 +33,10 @@ export default function ReportIssueButton() {
         <Icon icon="solar:bug-linear" className="h-5 w-5" inline={true} />
         Report an Issue
       </button>
-      <ReportIssueModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ReportIssueModal
+        isOpen={isOpen || shouldOpenFromUrl}
+        onClose={() => setIsOpen(false)}
+      />
     </>
   );
 }

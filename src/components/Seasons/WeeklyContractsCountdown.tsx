@@ -95,7 +95,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
     getNextDailyResetTimestamp(new Date()),
   );
 
-  const localResetTime = React.useMemo(() => {
+  const localResetTime = (() => {
     try {
       const date = new Date(nextResetUnix * 1000);
       return new Intl.DateTimeFormat(undefined, {
@@ -106,9 +106,9 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
     } catch {
       return "5:00 PM";
     }
-  }, [nextResetUnix]);
+  })();
 
-  const localDailyResetTime = React.useMemo(() => {
+  const localDailyResetTime = (() => {
     try {
       const date = new Date(nextDailyResetUnix * 1000);
       return new Intl.DateTimeFormat(undefined, {
@@ -119,7 +119,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
     } catch {
       return "1:00 PM";
     }
-  }, [nextDailyResetUnix]);
+  })();
 
   useEffect(() => {
     const tick = () => {

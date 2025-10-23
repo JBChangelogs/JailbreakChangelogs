@@ -12,9 +12,9 @@ export default function Home() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Generate shuffled array of background images
-    const shuffledImages = generateShuffledBackgroundImages();
-    setBackgroundImages(shuffledImages);
+    setTimeout(() => {
+      setBackgroundImages(generateShuffledBackgroundImages());
+    }, 0);
   }, []);
 
   // Function to cycle to the next image

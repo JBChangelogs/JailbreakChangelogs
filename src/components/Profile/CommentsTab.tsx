@@ -70,8 +70,6 @@ export default function CommentsTab({
       Object.keys(commentDetails.trades).length === 0 &&
       Object.keys(commentDetails.inventories).length === 0
     ) {
-      setDetailsLoading(true);
-
       // Check if we already have some item details from shared cache
       const commentsNeedingDetails = comments.filter((comment) => {
         const itemId = comment.item_id.toString();
@@ -80,12 +78,14 @@ export default function CommentsTab({
 
       if (commentsNeedingDetails.length === 0) {
         // All items are already in shared cache, no need to fetch
-        setDetailsLoading(false);
         return;
       }
 
-      fetchCommentDetails(commentsNeedingDetails)
-        .then((details) => {
+      // Start loading and fetch details
+      const fetchDetails = async () => {
+        setDetailsLoading(true);
+        try {
+          const details = await fetchCommentDetails(commentsNeedingDetails);
           // Merge with shared cache
           const mergedDetails = {
             changelogs: { ...sharedItemDetails, ...details.changelogs },
@@ -95,12 +95,14 @@ export default function CommentsTab({
             inventories: { ...sharedItemDetails, ...details.inventories },
           };
           setCommentDetails(mergedDetails);
-          setDetailsLoading(false);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error fetching comment details:", error);
+        } finally {
           setDetailsLoading(false);
-        });
+        }
+      };
+
+      fetchDetails();
     }
   }, [comments, commentDetails, sharedItemDetails]);
 

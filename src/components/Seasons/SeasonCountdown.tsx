@@ -38,6 +38,20 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
   const [nextSeasonStatusColor, setNextSeasonStatusColor] =
     useState<string>("");
 
+  const formatTime = (seconds: number): string => {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((seconds % (60 * 60)) / 60);
+    const secs = seconds % 60;
+
+    const dLabel = days === 1 ? "day" : "days";
+    const hLabel = hours === 1 ? "hour" : "hours";
+    const mLabel = minutes === 1 ? "minute" : "minutes";
+    const sLabel = secs === 1 ? "second" : "seconds";
+
+    return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
+  };
+
   useEffect(() => {
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
@@ -130,20 +144,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
 
     return () => clearInterval(interval);
   }, [currentSeason, nextSeason]);
-
-  const formatTime = (seconds: number): string => {
-    const days = Math.floor(seconds / (24 * 60 * 60));
-    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    const secs = seconds % 60;
-
-    const dLabel = days === 1 ? "day" : "days";
-    const hLabel = hours === 1 ? "hour" : "hours";
-    const mLabel = minutes === 1 ? "minute" : "minutes";
-    const sLabel = secs === 1 ? "second" : "seconds";
-
-    return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
-  };
 
   return (
     <div className="flex flex-col gap-4">

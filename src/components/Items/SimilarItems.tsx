@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, use, useMemo } from "react";
+import { useState, useCallback, use, useMemo } from "react";
 
 import { ItemDetails } from "@/types";
 import { demandOrder } from "@/utils/values";
@@ -33,9 +33,15 @@ const SimilarItems = ({
     [serverItems],
   );
 
-  const [similarItems, setSimilarItems] = useState<ItemDetails[]>([]);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortCriteria>("similarity");
+
+  const parseValue = (value: string): number => {
+    if (value === "N/A") return 0;
+    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
+    if (value.toLowerCase().includes("k")) return num * 1000;
+    if (value.toLowerCase().includes("m")) return num * 1000000;
+    return num;
+  };
 
   const calculateSimilarityScore = useCallback(
     (item1: ItemDetails, item2: ItemDetails): number => {
@@ -190,7 +196,7 @@ const SimilarItems = ({
     [],
   );
 
-  useEffect(() => {
+  const similarItems = useMemo(() => {
     // Calculate similarity scores and sort based on selected criteria
     const itemsWithScores = typeItems
       .filter((item) => item.id !== currentItem.id) // Exclude current item
@@ -244,8 +250,7 @@ const SimilarItems = ({
           .map(({ item }) => item);
     }
 
-    setSimilarItems(sortedItems.slice(0, 6)); // Get top 6
-    setLoading(false);
+    return sortedItems.slice(0, 6); // Get top 6
   }, [
     currentItem,
     sortBy,
@@ -254,14 +259,6 @@ const SimilarItems = ({
     calculateTrendSimilarityScore,
     typeItems,
   ]);
-
-  const parseValue = (value: string): number => {
-    if (value === "N/A") return 0;
-    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
-    if (value.toLowerCase().includes("k")) return num * 1000;
-    if (value.toLowerCase().includes("m")) return num * 1000000;
-    return num;
-  };
 
   return (
     <div className="bg-secondary-bg border-border-primary hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
@@ -293,7 +290,7 @@ const SimilarItems = ({
       </div>
 
       {/* Content Section */}
-      {loading ? (
+      {!typeItems.length ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
