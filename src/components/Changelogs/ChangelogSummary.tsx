@@ -264,14 +264,14 @@ export default function ChangelogSummary({
   // Show generate button (default state)
   return (
     <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
           <span className="text-primary-text font-medium">AI Summary</span>
         </div>
         <button
           onClick={generateSummary}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center justify-center gap-2 rounded px-4 py-2 transition-colors sm:w-auto w-full"
         >
           <Icon icon="solar:magic-stick-3-bold" className="h-4 w-4" />
           Generate Summary

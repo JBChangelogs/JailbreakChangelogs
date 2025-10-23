@@ -85,7 +85,7 @@ export default function ItemVariantDropdown({
 
   return (
     <select
-      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer"
+      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer font-inter"
       value={selectedYear}
       onChange={handleSelectChange}
     >

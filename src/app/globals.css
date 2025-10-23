@@ -435,6 +435,12 @@
       0.3
     ); /* Button info color with opacity */
   }
+
+  /* Ensure Inter font applies to select elements and their options */
+  select,
+  select option {
+    font-family: "Inter", sans-serif;
+  }
 }
 
 ::view-transition-old(root),

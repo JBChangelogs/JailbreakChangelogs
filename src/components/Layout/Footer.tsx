@@ -8,13 +8,10 @@ import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
-import { useTheme } from "@/contexts/ThemeContext";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
 export default function Footer() {
-  const { resolvedTheme } = useTheme();
-
   return (
     <footer className="bg-secondary-bg border-border-primary border-t py-8">
       <div className="container mx-auto px-4">

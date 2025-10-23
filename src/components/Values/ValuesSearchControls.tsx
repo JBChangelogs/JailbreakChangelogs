@@ -154,7 +154,7 @@ export default function ValuesSearchControls({
               {/* Filter dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
                   value={filterSort}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const newValue = e.target.value as FilterSort;
@@ -193,7 +193,7 @@ export default function ValuesSearchControls({
               {/* Sort dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
                   value={valueSort}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const newValue = e.target.value as ValueSort;

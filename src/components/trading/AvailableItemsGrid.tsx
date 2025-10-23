@@ -420,7 +420,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             {/* Dropdowns - Side by side on desktop */}
             <div className="flex gap-4 lg:col-span-2">
               <select
-                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
                 value={filterSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFilterSort(e.target.value as FilterSort);
@@ -447,7 +447,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               </select>
 
               <select
-                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
                 value={valueSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setValueSort(e.target.value as ValueSort);

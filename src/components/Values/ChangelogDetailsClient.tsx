@@ -447,7 +447,7 @@ export default function ChangelogDetailsClient({
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text"
+                className="select w-full bg-secondary-bg text-primary-text font-inter"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -468,7 +468,7 @@ export default function ChangelogDetailsClient({
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text"
+                className="select w-full bg-secondary-bg text-primary-text font-inter"
                 value={selectedSuggestionType}
                 onChange={(e) => setSelectedSuggestionType(e.target.value)}
               >

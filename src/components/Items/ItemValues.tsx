@@ -2,7 +2,7 @@ import React from "react";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { formatFullValue, formatPrice } from "@/utils/values";
-import { getDemandColor } from "@/utils/badgeColors";
+import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 
 interface ItemValuesProps {
   cashValue: string | null;
@@ -127,9 +127,11 @@ export default function ItemValues({
               Trend
             </h4>
           </div>
-          <p className="text-primary-text text-3xl font-bold">
+          <span
+            className={`${getTrendColor(trend || "N/A")} inline-block rounded-lg px-3 py-2 text-lg font-bold`}
+          >
             {!trend || trend === "Unknown" ? "Unknown" : trend}
-          </p>
+          </span>
         </div>
       </div>
 
