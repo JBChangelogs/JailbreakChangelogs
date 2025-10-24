@@ -10,7 +10,7 @@ import { notFound, redirect } from "next/navigation";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
-const LATEST_SEASON = 28;
+const LATEST_SEASON = 29;
 
 interface Props {
   params: Promise<{
@@ -79,3 +79,5 @@ export default async function SeasonDetailsPage({ params }: Props) {
     />
   );
 }
+
+// This is a Server Component - it handles async operations
