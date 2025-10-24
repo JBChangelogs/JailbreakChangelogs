@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -57,6 +57,7 @@ const DupeTable: React.FC<DupeTableProps> = ({
   initialItems,
   initialDupes,
 }) => {
+  "use memo";
   const [sorting, setSorting] = useState<SortingState>([
     {
       id: "name",
@@ -66,7 +67,7 @@ const DupeTable: React.FC<DupeTableProps> = ({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const tableData = useMemo(() => {
+  const tableData = (() => {
     const itemMap = new Map<number, Item>();
     initialItems.forEach((item) => {
       itemMap.set(item.id, item);
@@ -99,127 +100,124 @@ const DupeTable: React.FC<DupeTableProps> = ({
         };
       })
       .filter(Boolean) as DupeTableRow[];
-  }, [initialItems, initialDupes]);
+  })();
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("name", {
-        header: "Item",
-        cell: ({ row }) => {
-          const item = row.original;
-          return (
-            <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-                {isVideoItem(item.name) ? (
-                  <video
-                    src={getVideoPath(item.type, item.name)}
-                    className="h-full w-full object-cover"
-                    muted
-                    playsInline
-                    loop
-                    autoPlay
-                    onError={(e) => {
-                      console.log("Video error:", e);
-                    }}
-                  />
-                ) : (
-                  <Image
-                    src={getItemImagePath(item.type, item.name, true)}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                    onError={handleImageError}
-                  />
-                )}
-              </div>
+  const columns = (() => [
+    columnHelper.accessor("name", {
+      header: "Item",
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+              {isVideoItem(item.name) ? (
+                <video
+                  src={getVideoPath(item.type, item.name)}
+                  className="h-full w-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                  onError={(e) => {
+                    console.log("Video error:", e);
+                  }}
+                />
+              ) : (
+                <Image
+                  src={getItemImagePath(item.type, item.name, true)}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  onError={handleImageError}
+                />
+              )}
+            </div>
 
-              <div className="flex items-center gap-2">
-                <Tooltip
-                  title={
-                    <TradeAdTooltip
-                      item={{
-                        id: item.item_id,
+            <div className="flex items-center gap-2">
+              <Tooltip
+                title={
+                  <TradeAdTooltip
+                    item={{
+                      id: item.item_id,
+                      name: item.name,
+                      type: item.type,
+                      is_seasonal: item.is_seasonal || 0,
+                      is_limited: item.is_limited || 0,
+                      cash_value: item.cash_value,
+                      duped_value: item.duped_value,
+                      trend: item.trend,
+                      tradable: item.tradable ? 1 : 0,
+                      base_name: item.name,
+                      is_sub: false,
+                      demand: item.demand,
+                      data: {
                         name: item.name,
                         type: item.type,
-                        is_seasonal: item.is_seasonal || 0,
-                        is_limited: item.is_limited || 0,
+                        creator: item.creator,
+                        is_seasonal: item.is_seasonal,
                         cash_value: item.cash_value,
                         duped_value: item.duped_value,
-                        trend: item.trend,
-                        tradable: item.tradable ? 1 : 0,
-                        base_name: item.name,
-                        is_sub: false,
+                        price: item.price,
+                        is_limited: item.is_limited,
+                        duped_owners: "",
+                        notes: "",
                         demand: item.demand,
-                        data: {
-                          name: item.name,
-                          type: item.type,
-                          creator: item.creator,
-                          is_seasonal: item.is_seasonal,
-                          cash_value: item.cash_value,
-                          duped_value: item.duped_value,
-                          price: item.price,
-                          is_limited: item.is_limited,
-                          duped_owners: "",
-                          notes: "",
-                          demand: item.demand,
-                          trend: item.trend,
-                          description: "",
-                          health: 0,
-                          tradable: item.tradable,
-                          last_updated: item.last_updated,
-                        },
-                      }}
-                    />
-                  }
-                  arrow
-                  placement="bottom"
-                  disableTouchListener
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        maxWidth: "400px",
-                        width: "auto",
-                        minWidth: "300px",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
+                        trend: item.trend,
+                        description: "",
+                        health: 0,
+                        tradable: item.tradable,
+                        last_updated: item.last_updated,
+                      },
+                    }}
+                  />
+                }
+                arrow
+                placement="bottom"
+                disableTouchListener
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      maxWidth: "400px",
+                      width: "auto",
+                      minWidth: "300px",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
                       },
                     },
-                  }}
+                  },
+                }}
+              >
+                <Link
+                  href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                  className="text-primary-text hover:text-link-hover font-medium transition-colors hover:underline"
                 >
-                  <Link
-                    href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                    className="text-primary-text hover:text-link-hover font-medium transition-colors hover:underline"
-                  >
-                    {item.name}
-                  </Link>
-                </Tooltip>
-                <span
-                  className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                  style={{
-                    borderColor: getCategoryColor(item.type),
-                    backgroundColor: getCategoryColor(item.type) + "20",
-                  }}
-                >
-                  {item.type}
-                </span>
-              </div>
+                  {item.name}
+                </Link>
+              </Tooltip>
+              <span
+                className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                style={{
+                  borderColor: getCategoryColor(item.type),
+                  backgroundColor: getCategoryColor(item.type) + "20",
+                }}
+              >
+                {item.type}
+              </span>
             </div>
-          );
-        },
-      }),
-      columnHelper.accessor("owner", {
-        header: "Dupe Owner",
-        cell: ({ row }) => {
-          const owner = row.original.owner;
-          return <span className="text-primary-text font-medium">{owner}</span>;
-        },
-      }),
-    ],
-    [],
-  );
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("owner", {
+      header: "Dupe Owner",
+      cell: ({ row }) => {
+        const owner = row.original.owner;
+        return <span className="text-primary-text font-medium">{owner}</span>;
+      },
+    }),
+  ])();
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

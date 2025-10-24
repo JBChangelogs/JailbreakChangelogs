@@ -32,9 +32,6 @@ export default function InventoryCheckerLoading() {
 
       {/* Leaderboard Skeleton */}
       <div className="mt-8">
-        <h2 className="text-primary-text mb-4 text-xl font-bold">
-          Most Scanned Players
-        </h2>
         <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="space-y-3">
             {[...Array(10)].map((_, index) => (

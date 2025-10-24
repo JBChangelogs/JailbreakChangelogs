@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useBotsPolling } from "@/hooks/useBotsPolling";
-import { type ConnectedBot } from "@/utils/api";
+import { useBotsPollingQuery } from "@/hooks/useBotsPollingQuery";
 import {
-  fetchRobloxDataForBots,
-  fetchRobloxDataForUser,
-} from "@/app/api/bots/actions";
+  useRobloxBotsDataQuery,
+  useRobloxUserDataQuery,
+} from "@/hooks/useRobloxDataQuery";
+import { type ConnectedBot } from "@/utils/api";
 import { type RobloxUser, type RobloxAvatar } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
@@ -15,136 +14,64 @@ import { DefaultAvatar } from "@/utils/avatar";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 
 export default function ConnectedBotsPolling() {
-  const { botsData, queueInfo, error, isLoading, retryCount, pollingStopped } =
-    useBotsPolling(30000);
-  const [botUsersData, setBotUsersData] = useState<Record<
-    string,
-    RobloxUser
-  > | null>(null);
-  const [botAvatarsData, setBotAvatarsData] = useState<
-    Record<string, RobloxAvatar>
-  >({});
-  const [lastProcessedUserData, setLastProcessedUserData] = useState<Record<
-    string,
-    RobloxUser
-  > | null>(null);
-  const [lastProcessedAvatarData, setLastProcessedAvatarData] = useState<
-    Record<string, RobloxAvatar>
-  >({});
-  const [loading, setLoading] = useState(true);
+  "use memo";
+  const {
+    data: pollingData,
+    error: pollingError,
+    isLoading: isPollingLoading,
+    failureCount,
+  } = useBotsPollingQuery(30000);
+
+  const botsData = pollingData?.botsData;
+  const queueInfo = pollingData?.queueInfo;
+
+  // Get bot IDs for fetching Roblox data
+  const botIds = (() => {
+    if (
+      !botsData?.recent_heartbeats ||
+      botsData.recent_heartbeats.length === 0
+    ) {
+      return null;
+    }
+    return [...new Set(botsData.recent_heartbeats.map((bot) => bot.id))].sort();
+  })();
+
+  // Fetch Roblox data for bots (cached)
+  const { data: botRobloxData, isLoading: isBotDataLoading } =
+    useRobloxBotsDataQuery(botIds);
+
+  // Get last processed user ID
+  const lastProcessedUserId = queueInfo?.last_dequeue?.user_id || null;
+
+  // Fetch Roblox data for last processed user (cached)
+  const { data: lastProcessedRobloxData } =
+    useRobloxUserDataQuery(lastProcessedUserId);
+
   const lastScannedRelativeTime = useOptimizedRealTimeRelativeDate(
     queueInfo?.last_dequeue?.data?.last_updated || 0,
     "last-scanned",
   );
 
   // Show all bots and sort alphabetically by display name
-  const allBots =
-    botsData?.recent_heartbeats?.sort((a, b) => {
+  const allBots = (() => {
+    if (!botsData?.recent_heartbeats) return [];
+
+    return [...botsData.recent_heartbeats].sort((a, b) => {
       const nameA =
-        botUsersData?.[a.id]?.displayName || botUsersData?.[a.id]?.name || a.id;
+        botRobloxData?.usersData?.[a.id]?.displayName ||
+        botRobloxData?.usersData?.[a.id]?.name ||
+        a.id;
       const nameB =
-        botUsersData?.[b.id]?.displayName || botUsersData?.[b.id]?.name || b.id;
+        botRobloxData?.usersData?.[b.id]?.displayName ||
+        botRobloxData?.usersData?.[b.id]?.name ||
+        b.id;
       return nameA.localeCompare(nameB);
-    }) || [];
+    });
+  })();
 
-  // Fetch Roblox data for bots only once (they don't change)
-  useEffect(() => {
-    const fetchBotRobloxData = async () => {
-      if (
-        !botsData ||
-        !botsData.recent_heartbeats ||
-        botsData.recent_heartbeats.length === 0
-      ) {
-        setBotUsersData(null);
-        setBotAvatarsData({});
-        setLoading(false);
-        return;
-      }
-
-      // Create a stable set of bot IDs (sorted to avoid re-fetching due to order changes)
-      const botIds = [
-        ...new Set(botsData.recent_heartbeats.map((bot) => bot.id)),
-      ].sort();
-
-      // Check if we already have data for these bots
-      if (botUsersData && Object.keys(botUsersData).length > 0) {
-        const existingBotIds = Object.keys(botUsersData).sort();
-        if (JSON.stringify(existingBotIds) === JSON.stringify(botIds)) {
-          console.log("[CLIENT] Bot data already cached, skipping fetch");
-          setLoading(false);
-          return;
-        }
-      }
-
-      console.log("[CLIENT] Fetching bot data (one-time):", botIds);
-      setLoading(true);
-
-      if (botIds.length > 0) {
-        try {
-          const result = await fetchRobloxDataForBots(botIds);
-
-          if (result.success && result.data) {
-            setBotUsersData(result.data.usersData);
-            setBotAvatarsData(result.data.avatarsData);
-            console.log("[CLIENT] Bot data fetched successfully");
-          } else {
-            console.error("[CLIENT] Failed to fetch bot data:", result.error);
-            setBotUsersData(null);
-            setBotAvatarsData({});
-          }
-        } catch (error) {
-          console.error("[CLIENT] Failed to fetch bot Roblox data:", error);
-          setBotUsersData(null);
-          setBotAvatarsData({});
-        }
-      }
-
-      setLoading(false);
-    };
-
-    fetchBotRobloxData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [botsData?.recent_heartbeats?.length]); // Only depend on the number of bots, not the data itself
-
-  // Fetch Roblox data for last processed user (changes every 30s)
-  useEffect(() => {
-    const fetchLastProcessedData = async () => {
-      if (!queueInfo?.last_dequeue?.user_id) {
-        setLastProcessedUserData(null);
-        setLastProcessedAvatarData({});
-        return;
-      }
-
-      const userId = queueInfo.last_dequeue!.user_id;
-      console.log("[CLIENT] Fetching last processed user data:", userId);
-
-      try {
-        const result = await fetchRobloxDataForUser(userId);
-
-        if (result.success && result.data) {
-          setLastProcessedUserData(result.data.usersData);
-          setLastProcessedAvatarData(result.data.avatarsData);
-          console.log("[CLIENT] Last processed user data fetched successfully");
-        } else {
-          console.error(
-            "[CLIENT] Failed to fetch last processed user data:",
-            result.error,
-          );
-          setLastProcessedUserData(null);
-          setLastProcessedAvatarData({});
-        }
-      } catch (error) {
-        console.error(
-          "[CLIENT] Failed to fetch last processed Roblox data:",
-          error,
-        );
-        setLastProcessedUserData(null);
-        setLastProcessedAvatarData({});
-      }
-    };
-
-    fetchLastProcessedData();
-  }, [queueInfo?.last_dequeue]); // Only when last processed user changes
+  const error = pollingError?.message || null;
+  const isLoading = isPollingLoading || isBotDataLoading;
+  const pollingStopped = failureCount >= 3;
 
   if (error) {
     return (
@@ -162,7 +89,7 @@ export default function ConnectedBotsPolling() {
         </div>
         <RetryErrorDisplay
           error={error}
-          retryCount={retryCount}
+          retryCount={failureCount}
           maxRetries={3}
           retryDelay={5}
         />
@@ -170,7 +97,7 @@ export default function ConnectedBotsPolling() {
     );
   }
 
-  if (loading && !botsData) {
+  if (isLoading && !botsData) {
     return (
       <div className="mt-6">
         <div className="mb-4 flex items-center gap-3">
@@ -267,29 +194,48 @@ export default function ConnectedBotsPolling() {
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-secondary-text">Last Updated:</span>
-                      <div className="bg-surface-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
-                        {lastProcessedAvatarData &&
-                        Object.values(lastProcessedAvatarData).find(
-                          (avatar: RobloxAvatar) =>
-                            avatar?.targetId?.toString() ===
-                            queueInfo.last_dequeue!.user_id,
-                        )?.imageUrl ? (
-                          <Image
-                            src={
-                              Object.values(lastProcessedAvatarData).find(
-                                (avatar: RobloxAvatar) =>
-                                  avatar?.targetId?.toString() ===
-                                  queueInfo.last_dequeue!.user_id,
-                              )?.imageUrl || ""
-                            }
-                            alt="Last processed user avatar"
-                            width={24}
-                            height={24}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <DefaultAvatar />
-                        )}
+                      <div className="bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
+                        {(() => {
+                          const avatarData =
+                            lastProcessedRobloxData?.avatarsData;
+                          if (!avatarData || typeof avatarData !== "object") {
+                            return <DefaultAvatar />;
+                          }
+
+                          const avatar = Object.values(avatarData).find(
+                            (av): av is RobloxAvatar =>
+                              typeof av === "object" &&
+                              av !== null &&
+                              "targetId" in av &&
+                              av.targetId?.toString() ===
+                                queueInfo.last_dequeue!.user_id,
+                          );
+
+                          if (avatar?.imageUrl) {
+                            return (
+                              <Image
+                                src={avatar.imageUrl}
+                                alt="Last processed user avatar"
+                                width={24}
+                                height={24}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    const fallback =
+                                      document.createElement("div");
+                                    fallback.className =
+                                      "flex h-full w-full items-center justify-center";
+                                    parent.appendChild(fallback);
+                                  }
+                                }}
+                              />
+                            );
+                          }
+
+                          return <DefaultAvatar />;
+                        })()}
                       </div>
                       <a
                         href={`https://www.roblox.com/users/${queueInfo.last_dequeue!.user_id}/profile`}
@@ -297,10 +243,10 @@ export default function ConnectedBotsPolling() {
                         rel="noopener noreferrer"
                         className="text-primary-text hover:text-link-hover font-bold transition-colors"
                       >
-                        {lastProcessedUserData?.[
+                        {lastProcessedRobloxData?.usersData?.[
                           queueInfo.last_dequeue!.user_id
                         ]?.displayName ||
-                          lastProcessedUserData?.[
+                          lastProcessedRobloxData?.usersData?.[
                             queueInfo.last_dequeue!.user_id
                           ]?.name ||
                           queueInfo.last_dequeue!.user_id}
@@ -308,7 +254,7 @@ export default function ConnectedBotsPolling() {
                     </div>
                     {(() => {
                       const botId = queueInfo.last_dequeue!.data.bot_id;
-                      const botUserData = botUsersData?.[botId];
+                      const botUserData = botRobloxData?.usersData?.[botId];
                       if (botUserData) {
                         const botDisplayName =
                           botUserData.displayName ||
@@ -352,8 +298,8 @@ export default function ConnectedBotsPolling() {
                 <BotStatusCard
                   key={bot.id}
                   bot={bot}
-                  usersData={botUsersData}
-                  avatarsData={botAvatarsData}
+                  usersData={botRobloxData?.usersData || null}
+                  avatarsData={botRobloxData?.avatarsData || {}}
                 />
               ))}
             </div>
@@ -402,7 +348,7 @@ function BotStatusCard({
     <div className="border-border-primary bg-primary-bg rounded-lg border p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-surface-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
+          <div className="bg-tertiary-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
@@ -410,6 +356,16 @@ function BotStatusCard({
                 width={32}
                 height={32}
                 className="h-full w-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    const fallback = document.createElement("div");
+                    fallback.className =
+                      "flex h-full w-full items-center justify-center";
+                    parent.appendChild(fallback);
+                  }
+                }}
               />
             ) : (
               <DefaultAvatar />

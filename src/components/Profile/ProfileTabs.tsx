@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 
 import AboutTab from "./AboutTab";
@@ -160,10 +160,11 @@ export default function ProfileTabs({
   favoriteItemDetails = {},
   tradeAds = [],
 }: ProfileTabsProps) {
+  "use memo";
   const [value, setValue] = useState(0);
 
   // Create a shared cache of item details from both comments and favorites
-  const sharedItemDetails = useMemo(() => {
+  const sharedItemDetails = (() => {
     const cache: Record<string, unknown> = {};
 
     // Add favorite item details to cache
@@ -174,7 +175,7 @@ export default function ProfileTabs({
     });
 
     return cache;
-  }, [favoriteItemDetails]);
+  })();
 
   // Hash navigation
   useEffect(() => {

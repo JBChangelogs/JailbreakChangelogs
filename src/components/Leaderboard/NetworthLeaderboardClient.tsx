@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useQuery } from "@tanstack/react-query";
 import NetworthLeaderboardSearch from "./NetworthLeaderboardSearch";
 import UserNetworthDisplay from "./UserNetworthDisplay";
 import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
@@ -27,15 +28,8 @@ interface NetworthLeaderboardClientProps {
 export default function NetworthLeaderboardClient({
   initialLeaderboard,
 }: NetworthLeaderboardClientProps) {
-  const [filteredLeaderboard, setFilteredLeaderboard] =
-    useState(initialLeaderboard);
+  "use memo";
   const [searchTerm, setSearchTerm] = useState("");
-  const [userDataMap, setUserDataMap] = useState<
-    Record<string, { displayName?: string; name?: string }>
-  >({});
-  const [avatarDataMap, setAvatarDataMap] = useState<Record<string, string>>(
-    {},
-  );
   const [avatarErrorMap, setAvatarErrorMap] = useState<Record<string, boolean>>(
     {},
   );
@@ -45,57 +39,73 @@ export default function NetworthLeaderboardClient({
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Load user data and avatars
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (initialLeaderboard.length === 0) return;
+  // Extract user IDs from leaderboard data
+  const userIds = initialLeaderboard.map((user) => user.user_id);
 
-      try {
-        const userIds = initialLeaderboard.map((user) => user.user_id);
-        const BATCH_SIZE = 500;
-
-        const batches = [];
-        for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
-          batches.push(userIds.slice(i, i + BATCH_SIZE));
-        }
-
-        for (const batch of batches) {
-          try {
-            const result = await fetchLeaderboardUserData(batch);
-
-            if (result.userData && typeof result.userData === "object") {
-              setUserDataMap((prev) => ({ ...prev, ...result.userData }));
-            }
-
-            if (result.avatarData && typeof result.avatarData === "object") {
-              setAvatarDataMap((prev) => ({ ...prev, ...result.avatarData }));
-            }
-          } catch (error) {
-            console.error(
-              `Failed to fetch batch for networth leaderboard:`,
-              error,
-            );
-          }
-        }
-      } catch (error) {
-        console.error(
-          "Failed to fetch user data for networth leaderboard:",
-          error,
-        );
+  // Use TanStack Query for fetching user data with caching
+  // Shared cache key across all leaderboards for user data reuse
+  const { data: fetchedUserData } = useQuery({
+    queryKey: ["leaderboardUserData", userIds.sort()],
+    queryFn: async () => {
+      // Fetch in batches of 500
+      const BATCH_SIZE = 500;
+      const batches = [];
+      for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+        batches.push(userIds.slice(i, i + BATCH_SIZE));
       }
-    };
 
-    loadUserData();
-  }, [initialLeaderboard]);
+      let allUserData: Record<string, unknown> = {};
+      let allAvatarData: Record<string, string> = {};
 
-  // Filter leaderboard based on search term
-  useEffect(() => {
+      for (const batch of batches) {
+        const result = await fetchLeaderboardUserData(batch);
+        if (result.userData && typeof result.userData === "object") {
+          allUserData = { ...allUserData, ...result.userData };
+        }
+        if (result.avatarData && typeof result.avatarData === "object") {
+          allAvatarData = { ...allAvatarData, ...result.avatarData };
+        }
+      }
+
+      return { userData: allUserData, avatarData: allAvatarData };
+    },
+    enabled: userIds.length > 0,
+  });
+
+  // Transform data during render - React compiler handles memoization
+  const userDataMap: Record<string, { displayName?: string; name?: string }> =
+    (() => {
+      if (
+        fetchedUserData &&
+        "userData" in fetchedUserData &&
+        typeof fetchedUserData.userData === "object"
+      ) {
+        return fetchedUserData.userData as Record<
+          string,
+          { displayName?: string; name?: string }
+        >;
+      }
+      return {};
+    })();
+
+  const avatarDataMap: Record<string, string> = (() => {
+    if (
+      fetchedUserData &&
+      "avatarData" in fetchedUserData &&
+      typeof fetchedUserData.avatarData === "object"
+    ) {
+      return fetchedUserData.avatarData as Record<string, string>;
+    }
+    return {};
+  })();
+
+  // Filter leaderboard based on debounced search term
+  const filteredLeaderboard = (() => {
     if (!debouncedSearchTerm.trim()) {
-      setFilteredLeaderboard(initialLeaderboard);
-      return;
+      return initialLeaderboard;
     }
 
-    const filtered = initialLeaderboard.filter((user) => {
+    return initialLeaderboard.filter((user) => {
       const userData = userDataMap[user.user_id];
       const userDisplay =
         userData?.displayName || userData?.name || `User ${user.user_id}`;
@@ -108,9 +118,7 @@ export default function NetworthLeaderboardClient({
         user.user_id.includes(debouncedSearchTerm)
       );
     });
-
-    setFilteredLeaderboard(filtered);
-  }, [debouncedSearchTerm, initialLeaderboard, userDataMap]);
+  })();
 
   // TanStack Virtual setup for performance with large datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
@@ -296,7 +304,7 @@ export default function NetworthLeaderboardClient({
                                   }}
                                 />
                               ) : (
-                                <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8 text-tertiary-bg">
+                                <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8">
                                   <DefaultAvatar />
                                 </div>
                               )}

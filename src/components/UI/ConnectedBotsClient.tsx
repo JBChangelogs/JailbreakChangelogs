@@ -5,6 +5,7 @@ import { type RobloxUser, type RobloxAvatar } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
+import { DefaultAvatar } from "@/utils/avatar";
 
 interface ConnectedBotsClientProps {
   activeBots: ConnectedBot[];
@@ -51,38 +52,38 @@ export default function ConnectedBotsClient({
               {queueInfo.last_dequeue ? (
                 <div className="flex items-center gap-2">
                   {/* Avatar for last processed user */}
-                  <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-gray-600">
-                    {avatarsData &&
-                    Object.values(avatarsData).find(
-                      (avatar: RobloxAvatar) =>
-                        avatar?.targetId?.toString() ===
-                        queueInfo.last_dequeue!.user_id,
-                    )?.imageUrl ? (
-                      <Image
-                        src={
-                          Object.values(avatarsData).find(
-                            (avatar: RobloxAvatar) =>
-                              avatar?.targetId?.toString() ===
-                              queueInfo.last_dequeue!.user_id,
-                          )?.imageUrl || ""
-                        }
-                        alt="Last processed user avatar"
-                        width={24}
-                        height={24}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xs font-bold text-white">
-                        {(
-                          usersData?.[queueInfo.last_dequeue!.user_id]
-                            ?.displayName ||
-                          usersData?.[queueInfo.last_dequeue!.user_id]?.name ||
-                          queueInfo.last_dequeue!.user_id
-                        )
-                          .charAt(0)
-                          .toUpperCase()}
-                      </span>
-                    )}
+                  <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-tertiary-bg">
+                    {(() => {
+                      const avatarUrl =
+                        avatarsData &&
+                        Object.values(avatarsData).find(
+                          (avatar: RobloxAvatar) =>
+                            avatar?.targetId?.toString() ===
+                            queueInfo.last_dequeue!.user_id,
+                        )?.imageUrl;
+
+                      return avatarUrl ? (
+                        <Image
+                          src={avatarUrl}
+                          alt="Last processed user avatar"
+                          width={24}
+                          height={24}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const fallback = document.createElement("div");
+                              fallback.className =
+                                "flex h-full w-full items-center justify-center";
+                              parent.appendChild(fallback);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <DefaultAvatar />
+                      );
+                    })()}
                   </div>
                   <a
                     href={`https://www.roblox.com/users/${queueInfo.last_dequeue!.user_id}/profile`}
@@ -166,7 +167,7 @@ function BotStatusCard({
     <div className="flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-600">
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-tertiary-bg">
           {avatarUrl ? (
             <Image
               src={avatarUrl}
@@ -174,11 +175,19 @@ function BotStatusCard({
               width={32}
               height={32}
               className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  const fallback = document.createElement("div");
+                  fallback.className =
+                    "flex h-full w-full items-center justify-center";
+                  parent.appendChild(fallback);
+                }
+              }}
             />
           ) : (
-            <span className="text-xs font-bold text-white">
-              {displayName.charAt(0).toUpperCase()}
-            </span>
+            <DefaultAvatar />
           )}
         </div>
 

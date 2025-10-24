@@ -1,8 +1,10 @@
-import { Suspense } from "react";
-import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api";
+"use client";
+
+import { useOfficialBotsQuery } from "@/hooks/useOfficialBotsQuery";
 import { Icon } from "./IconWrapper";
 import Image from "next/image";
 import CopyButton from "@/app/inventories/CopyButton";
+import { DefaultAvatar } from "@/utils/avatar";
 
 // Skeleton loader for official bots section
 function OfficialBotsSkeleton() {
@@ -59,18 +61,33 @@ function OfficialBotsSkeleton() {
 }
 
 // Component for official scan bots section
-async function OfficialBotsContent() {
-  const bots = await fetchOfficialScanBots();
-  const sortedBots = [...bots].sort((a, b) => {
-    const aName = (a.username || "").toLowerCase();
-    const bName = (b.username || "").toLowerCase();
-    return aName.localeCompare(bName);
-  });
-  const botIds = sortedBots.map((b) => String(b.userId));
+function OfficialBotsContent() {
+  const { data, isLoading, error } = useOfficialBotsQuery();
 
-  // Fetch avatar data for bots
-  const botAvatarData =
-    botIds.length > 0 ? await fetchRobloxAvatars(botIds) : {};
+  if (isLoading) {
+    return <OfficialBotsSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="mt-8">
+        <h2 className="text-primary-text mb-4 text-xl font-bold">
+          Official Scan Bots
+        </h2>
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+          <div className="text-secondary-text text-center">
+            Failed to load official bots. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const { bots: sortedBots, avatarData: botAvatarData } = data;
 
   return (
     <div className="mt-8">
@@ -122,7 +139,7 @@ async function OfficialBotsContent() {
                   </div>
 
                   {/* Bot Avatar */}
-                  <div className="bg-surface-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
+                  <div className="bg-tertiary-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
                     {avatarUrl ? (
                       <Image
                         src={avatarUrl}
@@ -130,14 +147,20 @@ async function OfficialBotsContent() {
                         width={40}
                         height={40}
                         className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            const fallback = document.createElement("div");
+                            fallback.className =
+                              "flex h-full w-full items-center justify-center";
+                            parent.appendChild(fallback);
+                          }
+                        }}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <div className="bg-button-info flex h-6 w-6 items-center justify-center rounded-full">
-                          <span className="text-form-button-text text-xs font-bold">
-                            {displayName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
+                        <DefaultAvatar />
                       </div>
                     )}
                   </div>
@@ -183,9 +206,5 @@ async function OfficialBotsContent() {
 }
 
 export default function OfficialBotsSection() {
-  return (
-    <Suspense fallback={<OfficialBotsSkeleton />}>
-      <OfficialBotsContent />
-    </Suspense>
-  );
+  return <OfficialBotsContent />;
 }
