@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
@@ -9,10 +8,7 @@ import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../UI/IconWrapper";
-import dynamic from "next/dynamic";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -29,7 +25,6 @@ export default function InventoryItems({
   robloxAvatars,
   onItemClick,
   itemsData: propItemsData,
-  isOwnInventory = false,
 }: InventoryItemsProps) {
   "use memo";
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,14 +34,11 @@ export default function InventoryItems({
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-  const [localRobloxUsers, setLocalRobloxUsers] =
-    useState<Record<string, RobloxUser>>(robloxUsers);
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
     useState<InventoryItem | null>(null);
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<
-    | "duplicates"
     | "alpha-asc"
     | "alpha-desc"
     | "created-asc"
@@ -57,25 +49,25 @@ export default function InventoryItems({
     | "duped-asc"
   >("created-desc");
 
+  // Filter out user IDs we already have data for
+  const missingUserIds = visibleUserIds.filter(
+    (userId) => !robloxUsers[userId],
+  );
+
   // Fetch user data for visible items only using TanStack Query
   const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", visibleUserIds.sort()],
-    queryFn: () => fetchMissingRobloxData(visibleUserIds),
-    enabled: visibleUserIds.length > 0,
+    queryKey: ["userData", [...missingUserIds].sort().join(",")],
+    queryFn: () => fetchMissingRobloxData(missingUserIds),
+    enabled: missingUserIds.length > 0,
   });
 
-  // Merge fetched user data with existing data
-  useEffect(() => {
-    if (fetchedUserData && "userData" in fetchedUserData) {
-      setTimeout(() => {
-        setLocalRobloxUsers((prev) => ({
-          ...prev,
-          ...fetchedUserData.userData,
-        }));
-      }, 0);
-      // Note: avatarData is empty for original owners since they're not displayed
-    }
-  }, [fetchedUserData]);
+  // Merge fetched user data with existing data during render
+  const mergedRobloxUsers: Record<string, RobloxUser> = {
+    ...robloxUsers,
+    ...(fetchedUserData && "userData" in fetchedUserData
+      ? fetchedUserData.userData
+      : {}),
+  };
 
   // Handle visible user IDs changes from virtual scrolling
   const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
@@ -195,7 +187,7 @@ export default function InventoryItems({
   };
 
   const currentItemsData = propItemsData || [];
-  const currentRobloxUsers = { ...robloxUsers, ...localRobloxUsers };
+  const currentRobloxUsers = mergedRobloxUsers;
   const currentRobloxAvatars = robloxAvatars;
 
   const getUserDisplay = (userId: string) => {
@@ -436,28 +428,6 @@ export default function InventoryItems({
     // Sort the items
     return [...mappedItems].sort((a, b) => {
       switch (sortOrder) {
-        case "duplicates":
-          // Group duplicates together and sort alphabetically by item name, then by creation date
-          const aKey = `${a.item.categoryTitle}-${a.item.title}`;
-          const bKey = `${b.item.categoryTitle}-${b.item.title}`;
-
-          // Use appropriate counts based on hideDuplicates setting
-          const countsToUse = hideDuplicates
-            ? filteredDuplicateCounts
-            : duplicateCounts;
-          const aCount = countsToUse.get(aKey) || 0;
-          const bCount = countsToUse.get(bKey) || 0;
-
-          // Prioritize duplicates (items with count > 1) over singles
-          if (aCount > 1 && bCount === 1) return -1; // a is duplicate, b is single
-          if (aCount === 1 && bCount > 1) return 1; // a is single, b is duplicate
-
-          // If both are duplicates or both are singles, sort by item name alphabetically
-          const itemNameCompare = a.item.title.localeCompare(b.item.title);
-          if (itemNameCompare !== 0) return itemNameCompare;
-
-          // If same item name, sort by ID to match duplicate numbering
-          return a.item.id.localeCompare(b.item.id);
         case "alpha-asc":
           return a.item.title.localeCompare(b.item.title);
         case "alpha-desc":
@@ -559,33 +529,6 @@ export default function InventoryItems({
     return Array.from(categories).sort();
   })();
 
-  // Calculate duplicate statistics for all inventories
-  const inventoryStats = (() => {
-    const totalItems = initialData.data.length;
-
-    // Calculate duplicate statistics
-    const duplicateCounts = new Map<string, number>();
-    initialData.data.forEach((item) => {
-      const key = `${item.categoryTitle}-${item.title}`;
-      duplicateCounts.set(key, (duplicateCounts.get(key) || 0) + 1);
-    });
-
-    const duplicates = Array.from(duplicateCounts.entries())
-      .filter(([, count]) => count > 1)
-      .sort((a, b) => b[1] - a[1]); // Sort by count descending
-
-    return {
-      isLargeInventory: false, // Always false now since we support all sizes
-      totalItems,
-      duplicates,
-      totalDuplicates: duplicates.reduce((sum, [, count]) => sum + count, 0),
-      uniqueItems: duplicateCounts.size,
-    };
-  })();
-
-  // Check if there are any duplicates
-  const hasDuplicates = inventoryStats.duplicates.length > 0;
-
   return (
     <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
       <h2 className="text-primary-text mb-4 text-xl font-semibold">
@@ -609,7 +552,6 @@ export default function InventoryItems({
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
-        hasDuplicates={hasDuplicates}
       />
 
       {/* Item Counter */}
@@ -635,75 +577,6 @@ export default function InventoryItems({
             : `Total Items: ${filteredAndSortedItems.length}`}
         </p>
       </div>
-
-      {/* Duplicate Info */}
-      {inventoryStats.duplicates.length > 0 && (
-        <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-4">
-          <div className="text-primary-text mb-3 flex items-center gap-2 text-sm">
-            <span className="font-medium">Multiple Copies Found</span>
-          </div>
-          <div className="text-secondary-text space-y-1 text-sm">
-            <div>
-              {isOwnInventory ? "You have" : "They have"}{" "}
-              <span className="text-primary-text font-semibold">
-                {inventoryStats.duplicates.length}
-              </span>{" "}
-              different items with multiple copies
-            </div>
-            <div>
-              Total copies:{" "}
-              <span className="text-primary-text font-semibold">
-                {inventoryStats.totalDuplicates}
-              </span>
-            </div>
-            <div className="mt-2 text-xs">
-              Items with most copies:{" "}
-              {inventoryStats.duplicates
-                .slice(0, 3)
-                .map(([itemName, count]) => {
-                  const [categoryTitle, title] = itemName.split("-");
-                  const href = `/item/${encodeURIComponent(categoryTitle.toLowerCase())}/${encodeURIComponent(title)}`;
-                  return (
-                    <span key={itemName}>
-                      <Tooltip
-                        title={`View ${title} details`}
-                        placement="top"
-                        arrow
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-secondary-bg)",
-                              color: "var(--color-primary-text)",
-                              fontSize: "0.75rem",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-secondary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <Link
-                          href={href}
-                          className="text-primary-text hover:text-button-primary cursor-pointer font-medium transition-colors hover:underline"
-                        >
-                          {title} ({count})
-                        </Link>
-                      </Tooltip>
-                    </span>
-                  );
-                })
-                .reduce(
-                  (acc, curr, index) =>
-                    acc.concat(index === 0 ? [curr] : [", ", curr]),
-                  [] as React.ReactNode[],
-                )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Items Grid */}
       {/* Pro Tip - Only show when there are results and not filtering */}

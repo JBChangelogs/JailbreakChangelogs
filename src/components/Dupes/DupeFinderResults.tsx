@@ -110,11 +110,16 @@ export default function DupeFinderResults({
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
 
+  // Filter out user IDs we already have data for
+  const missingUserIds = visibleUserIds.filter(
+    (userId) => !robloxUsers[userId],
+  );
+
   // Fetch user data for visible items only using TanStack Query
   const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", visibleUserIds.sort()],
-    queryFn: () => fetchMissingRobloxData(visibleUserIds),
-    enabled: visibleUserIds.length > 0,
+    queryKey: ["userData", [...missingUserIds].sort().join(",")],
+    queryFn: () => fetchMissingRobloxData(missingUserIds),
+    enabled: missingUserIds.length > 0,
   });
 
   // Transform data during render instead of using useEffect

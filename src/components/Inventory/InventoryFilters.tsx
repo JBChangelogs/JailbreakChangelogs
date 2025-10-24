@@ -3,7 +3,6 @@
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 type SortOrder =
-  | "duplicates"
   | "alpha-asc"
   | "alpha-desc"
   | "created-asc"
@@ -37,7 +36,6 @@ interface InventoryFiltersProps {
   onShowMissingItemsToggle: (checked: boolean) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
-  hasDuplicates: boolean;
 }
 
 export default function InventoryFilters({
@@ -56,7 +54,6 @@ export default function InventoryFilters({
   onShowMissingItemsToggle,
   sortOrder,
   setSortOrder,
-  hasDuplicates,
 }: InventoryFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
 
@@ -162,9 +159,6 @@ export default function InventoryFilters({
               setSortOrder(e.target.value as SortOrder)
             }
           >
-            {hasDuplicates && (
-              <option value="duplicates">Group Duplicates</option>
-            )}
             <option disabled>Date</option>
             <option value="created-asc">Oldest First</option>
             <option value="created-desc">Newest First</option>

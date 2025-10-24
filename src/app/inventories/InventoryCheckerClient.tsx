@@ -16,7 +16,9 @@ import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
+import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
+import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -91,6 +93,9 @@ export default function InventoryCheckerClient({
     null,
   );
   const [activeTab, setActiveTab] = useState(0);
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [selectedItemForAction, setSelectedItemForAction] =
+    useState<InventoryItem | null>(null);
   const dupedItems =
     initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
 
@@ -112,6 +117,41 @@ export default function InventoryCheckerClient({
   const handleDataRefresh = async (newData: InventoryData) => {
     setRefreshedData(newData);
   };
+
+  // Calculate if there are duplicates (needed for hash navigation)
+  const hasDuplicates = currentData
+    ? (() => {
+        const itemCounts = new Map<string, number>();
+        currentData.data.forEach((item) => {
+          const key = `${item.categoryTitle}-${item.title}`;
+          itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
+        });
+        return Array.from(itemCounts.values()).some((count) => count > 1);
+      })()
+    : false;
+
+  // Hash navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1); // Remove the # symbol
+      const hasComments = Boolean(robloxId);
+
+      if (hash === "copies" && hasDuplicates) {
+        setActiveTab(1);
+      } else if (hash === "comments" && hasComments) {
+        setActiveTab(hasDuplicates ? 2 : 1);
+      } else {
+        setActiveTab(0);
+      }
+    };
+
+    // Handle initial hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [robloxId, hasDuplicates]);
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = !robloxId && activeTab === 1 ? 0 : activeTab;
@@ -258,6 +298,19 @@ export default function InventoryCheckerClient({
   // Function to handle tab changes
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+
+    // Update hash based on selected tab
+    if (newValue === 0) {
+      // Remove hash completely for Inventory Items tab
+      history.pushState(null, "", window.location.pathname);
+    } else if (newValue === 1 && hasDuplicates) {
+      window.location.hash = "copies";
+    } else if (
+      (hasDuplicates && newValue === 2) ||
+      (!hasDuplicates && newValue === 1)
+    ) {
+      window.location.hash = "comments";
+    }
   };
 
   useEffect(() => {
@@ -356,8 +409,20 @@ export default function InventoryCheckerClient({
   };
 
   const handleItemClick = (item: InventoryItem) => {
-    setSelectedItem(item);
-    setShowHistoryModal(true);
+    setSelectedItemForAction(item);
+    setShowActionModal(true);
+  };
+
+  const handleViewTradeHistory = () => {
+    if (selectedItemForAction) {
+      setSelectedItem(selectedItemForAction);
+      setShowHistoryModal(true);
+    }
+  };
+
+  const closeActionModal = () => {
+    setShowActionModal(false);
+    setSelectedItemForAction(null);
   };
 
   const closeHistoryModal = () => {
@@ -701,6 +766,7 @@ export default function InventoryCheckerClient({
                   handleTabChange(e as unknown as React.SyntheticEvent, idx)
                 }
                 hasComments={Boolean(robloxId)}
+                hasDuplicates={hasDuplicates}
               />
 
               {/* Tab Content */}
@@ -716,18 +782,40 @@ export default function InventoryCheckerClient({
                   />
                 )}
 
-                {effectiveActiveTab === 1 && robloxId && (
-                  <ChangelogComments
-                    changelogId={robloxId}
-                    changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
-                    type="inventory"
-                    inventory={{ owner: robloxId }}
-                    initialComments={initialComments}
-                    initialUserMap={initialCommentUserMap}
+                {effectiveActiveTab === 1 && hasDuplicates && (
+                  <DuplicatesTab
+                    initialData={currentData}
+                    robloxUsers={robloxUsers}
+                    robloxAvatars={robloxAvatars}
+                    onItemClick={handleItemClick}
+                    itemsData={itemsData}
                   />
                 )}
+
+                {((hasDuplicates && effectiveActiveTab === 2) ||
+                  (!hasDuplicates && effectiveActiveTab === 1)) &&
+                  robloxId && (
+                    <ChangelogComments
+                      changelogId={robloxId}
+                      changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
+                      type="inventory"
+                      inventory={{ owner: robloxId }}
+                      initialComments={initialComments}
+                      initialUserMap={initialCommentUserMap}
+                    />
+                  )}
               </div>
             </div>
+
+            {/* Item Action Modal */}
+            {showActionModal && selectedItemForAction && (
+              <ItemActionModal
+                isOpen={showActionModal}
+                onClose={closeActionModal}
+                item={selectedItemForAction}
+                onViewTradeHistory={handleViewTradeHistory}
+              />
+            )}
 
             {/* Trade History Modal */}
             <TradeHistoryModal
@@ -757,12 +845,18 @@ function InventoryOverflowTabs({
   value,
   onChange,
   hasComments,
+  hasDuplicates,
 }: {
   value: number;
   onChange: (e: React.SyntheticEvent, v: number) => void;
   hasComments: boolean;
+  hasDuplicates: boolean;
 }) {
-  const labels = ["Inventory Items", ...(hasComments ? ["Comments"] : [])];
+  const labels = [
+    "Inventory Items",
+    ...(hasDuplicates ? ["Multiple Copies"] : []),
+    ...(hasComments ? ["Comments"] : []),
+  ];
 
   return (
     <div className="overflow-x-auto">

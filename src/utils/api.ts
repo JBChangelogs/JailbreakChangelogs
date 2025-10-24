@@ -55,6 +55,9 @@ export const CREW_LEADERBOARD_BASE_URL =
 export const INVENTORY_WS_URL = process.env
   .NEXT_PUBLIC_INVENTORY_WS_URL as string;
 export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
+export const INVENTORY_API_SOURCE_HEADER =
+  process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER || "JBCL-Frontend/1.0";
+
 export interface OnlineUser {
   id: string;
   username: string;
@@ -661,6 +664,7 @@ export async function fetchDupeFinderData(userId: string) {
     const response = await fetch(url, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
     if (!response.ok) {
@@ -684,6 +688,7 @@ export async function fetchDuplicatesCount() {
     const response = await fetch(url, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
     if (!response.ok) {
@@ -738,6 +743,7 @@ export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | 
     const response = await fetch(`${INVENTORY_API_URL}/seasons/contract`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1358,6 +1364,7 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
           {
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+              "X-Source": INVENTORY_API_SOURCE_HEADER,
             },
           },
         );
@@ -1440,6 +1447,7 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
         {
           headers: {
             "User-Agent": "JailbreakChangelogs-Leaderboard/1.0",
+            "X-Source": INVENTORY_API_SOURCE_HEADER,
           },
         },
       );
@@ -1515,6 +1523,7 @@ export async function fetchRobloxAvatars(userIds: string[]) {
           {
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+              "X-Source": INVENTORY_API_SOURCE_HEADER,
             },
           },
         );
@@ -1567,6 +1576,7 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
     const response = await fetch(`${INVENTORY_API_URL}/items/count`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1587,6 +1597,7 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
     const response = await fetch(`${INVENTORY_API_URL}/users/scans`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1611,6 +1622,7 @@ export async function fetchMoneyLeaderboard(): Promise<
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
     );
@@ -1636,6 +1648,7 @@ export async function fetchNetworthLeaderboard(): Promise<
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
     );
@@ -1667,6 +1680,7 @@ export async function fetchUserNetworth(
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
     );
@@ -1690,6 +1704,7 @@ export async function fetchUserMoneyRank(robloxId: string) {
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
     );
@@ -1723,6 +1738,7 @@ export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
     const response = await fetch(`${INVENTORY_API_URL}/proxy/users/bots`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1769,6 +1785,7 @@ export async function fetchConnectedBots(): Promise<ConnectedBotsResponse | null
     const response = await fetch(`${INVENTORY_API_URL}/bots/connected`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1824,6 +1841,7 @@ export async function fetchQueueInfo(): Promise<QueueInfo | null> {
     const response = await fetch(`${INVENTORY_API_URL}/queue/info`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
 
@@ -1967,6 +1985,7 @@ export async function fetchRobloxUserByUsername(username: string) {
       headers: {
         "Content-Type": "application/json",
         "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       body: JSON.stringify({
         usernames: [username],
@@ -2045,6 +2064,7 @@ export async function fetchOGSearchData(
         {
           headers: {
             "User-Agent": "JailbreakChangelogs-OGFinder/1.0",
+            "X-Source": INVENTORY_API_SOURCE_HEADER,
           },
           signal: controller.signal,
         },
@@ -2149,6 +2169,7 @@ export async function fetchInventoryDataRefresh(robloxId: string) {
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
     );
