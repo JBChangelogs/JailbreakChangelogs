@@ -18,10 +18,23 @@ import OfficialBotsSection from "@/components/UI/OfficialBotsSection";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
+import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
-export default function InventoriesPage() {
+export default async function InventoriesPage() {
+  // Check for inventory maintenance mode
+  const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
+  if (isInventoryMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Inventory Checker"
+        customMessage="We're performing infrastructure upgrades. The Inventory Checker is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
     return <ComingSoon />;
   }

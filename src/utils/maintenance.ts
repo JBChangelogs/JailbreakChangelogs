@@ -79,3 +79,81 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
 
   return null;
 }
+
+export async function checkInventoryMaintenanceMode(): Promise<{
+  isInventoryMaintenanceMode: boolean;
+}> {
+  const isInventoryMaintenanceMode =
+    process.env.NEXT_PUBLIC_INVENTORY_MAINTENANCE_MODE === "true";
+
+  return {
+    isInventoryMaintenanceMode,
+  };
+}
+
+export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null> {
+  const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
+
+  if (isInventoryMaintenanceMode) {
+    return {
+      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      title: "Inventory Checker - Under Maintenance",
+      description:
+        "The Inventory API is currently under maintenance. We'll be back soon!",
+      robots: {
+        index: false,
+        follow: false,
+      },
+      openGraph: {
+        title: "Inventory Checker - Under Maintenance",
+        description:
+          "The Inventory API is currently under maintenance. We'll be back soon!",
+        type: "website",
+        locale: "en_US",
+        siteName: "Jailbreak Changelogs",
+        url: "https://jailbreakchangelogs.xyz/inventories",
+        images: [
+          {
+            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            width: 1200,
+            height: 630,
+            alt: "Jailbreak Changelogs Inventory Maintenance Banner",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Inventory API - Under Maintenance",
+        description:
+          "The Inventory API is currently under maintenance. We'll be back soon!",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+        ],
+      },
+    };
+  }
+
+  return null;
+}
+
+export async function checkOGFinderMaintenanceMode(): Promise<{
+  isOGFinderMaintenanceMode: boolean;
+}> {
+  const isOGFinderMaintenanceMode =
+    process.env.NEXT_PUBLIC_OG_FINDER_MAINTENANCE_MODE === "true";
+
+  return {
+    isOGFinderMaintenanceMode,
+  };
+}
+
+export async function checkDupeFinderMaintenanceMode(): Promise<{
+  isDupeFinderMaintenanceMode: boolean;
+}> {
+  const isDupeFinderMaintenanceMode =
+    process.env.NEXT_PUBLIC_DUPE_FINDER_MAINTENANCE_MODE === "true";
+
+  return {
+    isDupeFinderMaintenanceMode,
+  };
+}

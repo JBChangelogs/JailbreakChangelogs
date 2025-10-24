@@ -7,6 +7,8 @@ import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner
 import ComingSoon from "@/components/UI/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { fetchComments } from "@/utils/api";
+import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,17 @@ interface InventoryCheckerPageProps {
 export default async function InventoryCheckerPage({
   params,
 }: InventoryCheckerPageProps) {
+  // Check for inventory maintenance mode
+  const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
+  if (isInventoryMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Inventory Checker"
+        customMessage="We're performing infrastructure upgrades. The Inventory Checker is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   // Check if Inventory Checker feature is enabled
   if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
     return <ComingSoon />;

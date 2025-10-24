@@ -9,10 +9,23 @@ import OfficialBotsSection from "@/components/UI/OfficialBotsSection";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { Suspense } from "react";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
+import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
-export default function OGFinderPage() {
+export default async function OGFinderPage() {
+  // Check for OG Finder maintenance mode
+  const { isOGFinderMaintenanceMode } = await checkOGFinderMaintenanceMode();
+  if (isOGFinderMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="OG Finder"
+        customMessage="We're performing infrastructure upgrades. The OG Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   // Check if OG Finder feature is enabled
   if (!isFeatureEnabled("OG_FINDER")) {
     return <ComingSoon />;

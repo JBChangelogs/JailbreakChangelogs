@@ -6,6 +6,8 @@ import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner
 import ComingSoon from "@/components/UI/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import OGAuthWrapper from "@/components/OG/OGAuthWrapper";
+import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,17 @@ interface OGFinderUserPageProps {
 export default async function OGFinderUserPage({
   params,
 }: OGFinderUserPageProps) {
+  // Check for OG Finder maintenance mode
+  const { isOGFinderMaintenanceMode } = await checkOGFinderMaintenanceMode();
+  if (isOGFinderMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="OG Finder"
+        customMessage="We're performing infrastructure upgrades. The OG Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   // Check if OG Finder feature is enabled
   if (!isFeatureEnabled("OG_FINDER")) {
     return <ComingSoon />;

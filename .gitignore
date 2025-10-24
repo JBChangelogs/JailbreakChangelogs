@@ -15,6 +15,7 @@ tsconfig.tsbuildinfo
 .eslintcache
 .vscode
 .cursor
+.augment
 
 # Build artifacts
 coverage/

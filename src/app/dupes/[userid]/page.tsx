@@ -6,6 +6,8 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/UI/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
+import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,18 @@ interface DupeFinderPageProps {
 }
 
 export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
+  // Check for Dupe Finder maintenance mode
+  const { isDupeFinderMaintenanceMode } =
+    await checkDupeFinderMaintenanceMode();
+  if (isDupeFinderMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Dupe Finder"
+        customMessage="We're performing infrastructure upgrades. The Dupe Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   // Check if Dupe Finder feature is enabled
   if (!isFeatureEnabled("DUPE_FINDER")) {
     return <ComingSoon />;

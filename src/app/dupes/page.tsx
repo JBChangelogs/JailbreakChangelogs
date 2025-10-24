@@ -8,10 +8,24 @@ import OfficialBotsSection from "@/components/UI/OfficialBotsSection";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { Suspense } from "react";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
+import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";
 
-export default function DupeFinderPage() {
+export default async function DupeFinderPage() {
+  // Check for Dupe Finder maintenance mode
+  const { isDupeFinderMaintenanceMode } =
+    await checkDupeFinderMaintenanceMode();
+  if (isDupeFinderMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Dupe Finder"
+        customMessage="We're performing infrastructure upgrades. The Dupe Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+      />
+    );
+  }
+
   // Check if Dupe Finder feature is enabled
   if (!isFeatureEnabled("DUPE_FINDER")) {
     return <ComingSoon />;
