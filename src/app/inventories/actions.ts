@@ -27,54 +27,6 @@ export async function fetchMissingRobloxData(userIds: string[]) {
   }
 }
 
-export async function fetchCrewUserData(userIds: string[]) {
-  try {
-    const numericUserIds = userIds.filter((id) => /^\d+$/.test(id));
-
-    if (numericUserIds.length === 0) {
-      return { userData: {}, avatarData: {} };
-    }
-
-    // Fetch both user data and avatars for crew pages
-    const [userData, avatarData] = await Promise.all([
-      fetchRobloxUsersBatch(numericUserIds),
-      fetchRobloxAvatars(numericUserIds),
-    ]);
-
-    // Process avatar data to extract imageUrl strings
-    const processedAvatarData: Record<string, string> = {};
-    if (avatarData && typeof avatarData === "object") {
-      Object.values(avatarData).forEach((avatar) => {
-        const avatarData = avatar as {
-          targetId: number;
-          state: string;
-          imageUrl?: string;
-          version: string;
-        };
-        if (
-          avatarData &&
-          avatarData.targetId &&
-          avatarData.state === "Completed" &&
-          avatarData.imageUrl
-        ) {
-          // Only add completed avatars to the data
-          processedAvatarData[avatarData.targetId.toString()] =
-            avatarData.imageUrl;
-        }
-        // For blocked avatars, don't add them to the data so components can use their own fallback
-      });
-    }
-
-    return {
-      userData: userData || {},
-      avatarData: processedAvatarData,
-    };
-  } catch (error) {
-    console.error("[SERVER ACTION] Failed to fetch crew user data:", error);
-    return { userData: {}, avatarData: {} };
-  }
-}
-
 export async function fetchOriginalOwnerAvatars(userIds: string[]) {
   try {
     const numericUserIds = userIds.filter((id) => /^\d+$/.test(id));

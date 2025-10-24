@@ -309,7 +309,6 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           {/* Community */}
           <MenuItem setActive={setActive} active={active} item="Community">
             <HoveredLink href="/users">User Search</HoveredLink>
-            <HoveredLink href="/crews">Crew Leaderboard</HoveredLink>
             <HoveredLink href="/leaderboard/money">
               Money Leaderboard
             </HoveredLink>

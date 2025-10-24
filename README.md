@@ -52,7 +52,6 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 
 ### Community Features
 
-- **Crew Leaderboard:** Track top crews based on their battle performance and rating across different seasons.
 - **Private Servers:** Browse and submit private servers for grinding, hanging out, trading, and more.
 - **User Profiles:** Create customizable profiles with avatars, banners, and community engagement.
 - **Community Engagement:** Join discussions by commenting on changelogs, seasons, trades and more with secure OAuth authentication.

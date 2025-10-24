@@ -160,8 +160,8 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Join discussions, create profiles, track crew leaderboards, and
-                browse private servers with OAuth-secured community engagement.
+                Join discussions, create profiles, browse private servers, and
+                engage with the community with OAuth-secured features.
               </p>
             </div>
 
@@ -196,8 +196,8 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-card-paragraph">
-                Access XP calculators, dupe detection, crew rankings, and money
-                leaderboards for comprehensive Jailbreak analytics and tracking.
+                Access XP calculators, dupe detection, money leaderboards, and
+                comprehensive Jailbreak analytics and tracking tools.
               </p>
             </div>
           </div>

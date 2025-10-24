@@ -553,14 +553,6 @@ export default function Header() {
       </ListItem>
       <ListItem
         component={Link}
-        href="/crews"
-        onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
-      >
-        <ListItemText primary="Crew Leaderboard" />
-      </ListItem>
-      <ListItem
-        component={Link}
         href="/leaderboard/money"
         onClick={handleDrawerToggle}
         className="cursor-pointer pl-4"
@@ -937,13 +929,6 @@ export default function Header() {
                               onClick={handleCommunityMenuClose}
                             >
                               User Search
-                            </Link>
-                            <Link
-                              href="/crews"
-                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Crew Leaderboard
                             </Link>
                             <Link
                               href="/leaderboard/money"

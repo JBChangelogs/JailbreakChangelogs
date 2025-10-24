@@ -50,8 +50,6 @@ export const BASE_API_URL =
 
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
-export const CREW_LEADERBOARD_BASE_URL =
-  process.env.NEXT_PUBLIC_CREW_LEADERBOARD_BASE_URL;
 export const INVENTORY_WS_URL = process.env
   .NEXT_PUBLIC_INVENTORY_WS_URL as string;
 export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
@@ -1857,124 +1855,6 @@ export async function fetchQueueInfo(): Promise<QueueInfo | null> {
   } catch (err) {
     console.error("[SERVER] fetchQueueInfo: Unexpected error:", err);
     return null;
-  }
-}
-
-export interface CrewLeaderboardEntry {
-  ClanId?: string; // Make ClanId optional since older seasons don't have it
-  ClanName: string;
-  OwnerUserId: number;
-  BattlesPlayed: number;
-  BattlesWon: number;
-  MemberUserIds: number[];
-  Rating: number;
-  LastBattlePlayedUTC: number;
-  LastBattlePlayedUTCStr: string;
-}
-
-const CREW_LEADERBOARD_URLS = {
-  2: `${CREW_LEADERBOARD_BASE_URL}/2/latest.json`,
-  3: `${CREW_LEADERBOARD_BASE_URL}/3/latest.json`,
-  4: `${CREW_LEADERBOARD_BASE_URL}/4/latest.json`,
-  5: `${CREW_LEADERBOARD_BASE_URL}/5/latest.json`,
-  6: `${CREW_LEADERBOARD_BASE_URL}/6/latest.json`,
-  7: `${CREW_LEADERBOARD_BASE_URL}/7/latest.json`,
-  8: `${CREW_LEADERBOARD_BASE_URL}/8/latest.json`,
-  9: `${CREW_LEADERBOARD_BASE_URL}/9/latest.json`,
-  10: `${CREW_LEADERBOARD_BASE_URL}/10/latest.json`,
-  11: `${CREW_LEADERBOARD_BASE_URL}/11/latest.json`,
-  12: `${CREW_LEADERBOARD_BASE_URL}/12/latest.json`,
-  13: `${CREW_LEADERBOARD_BASE_URL}/13/latest.json`,
-  14: `${CREW_LEADERBOARD_BASE_URL}/14/latest.json`,
-  15: `${CREW_LEADERBOARD_BASE_URL}/15/latest.json`,
-  16: `${CREW_LEADERBOARD_BASE_URL}/16/latest.json`,
-  17: `${CREW_LEADERBOARD_BASE_URL}/17/latest.json`,
-  18: `${CREW_LEADERBOARD_BASE_URL}/18/latest.json`,
-  19: `${CREW_LEADERBOARD_BASE_URL}/19/latest.json`,
-};
-
-export const AVAILABLE_CREW_SEASONS = Object.keys(CREW_LEADERBOARD_URLS)
-  .map(Number)
-  .sort((a, b) => b - a);
-
-export async function fetchCrewLeaderboard(
-  season?: number,
-): Promise<CrewLeaderboardEntry[]> {
-  try {
-    // Default to latest season (19) if no season specified
-    const targetSeason = season || 19;
-
-    if (
-      !CREW_LEADERBOARD_URLS[targetSeason as keyof typeof CREW_LEADERBOARD_URLS]
-    ) {
-      throw new Error(`Season ${targetSeason} not available`);
-    }
-
-    const url =
-      CREW_LEADERBOARD_URLS[targetSeason as keyof typeof CREW_LEADERBOARD_URLS];
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Crew/1.0",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch crew leaderboard for season ${targetSeason}`,
-      );
-    }
-
-    const data = await response.json();
-
-    // Validate that we got data
-    if (!Array.isArray(data) || data.length === 0) {
-      console.error(
-        `[ERROR] Season ${targetSeason} API returned invalid data:`,
-        data,
-      );
-      throw new Error(`Invalid data returned for season ${targetSeason}`);
-    }
-
-    // Normalize the data to ensure all entries have required fields
-    const normalizedData = data.map(
-      (
-        crew: {
-          ClanId?: string | number;
-          ClanName?: string;
-          OwnerUserId?: number;
-          BattlesPlayed?: number;
-          BattlesWon?: number;
-          MemberUserIds?: number[];
-          Rating?: number;
-          LastBattlePlayedUTC?: number;
-          LastBattlePlayedUTCStr?: string;
-        },
-        index: number,
-      ) => ({
-        ...crew,
-        // Generate a fallback ClanId for older seasons that don't have it
-        ClanId: crew.ClanId || `season_${targetSeason}_rank_${index + 1}`,
-        // Ensure all required fields exist
-        ClanName: crew.ClanName || "Unknown Crew",
-        OwnerUserId: crew.OwnerUserId || 0,
-        BattlesPlayed: crew.BattlesPlayed || 0,
-        BattlesWon: crew.BattlesWon || 0,
-        MemberUserIds: Array.isArray(crew.MemberUserIds)
-          ? crew.MemberUserIds
-          : [],
-        Rating: crew.Rating || 0,
-        LastBattlePlayedUTC: crew.LastBattlePlayedUTC || 0,
-        LastBattlePlayedUTCStr: crew.LastBattlePlayedUTCStr || "Unknown",
-      }),
-    );
-
-    return normalizedData as CrewLeaderboardEntry[];
-  } catch (err) {
-    console.error(
-      `[SERVER] Error fetching crew leaderboard for season ${season}:`,
-      err,
-    );
-    return [];
   }
 }
 
