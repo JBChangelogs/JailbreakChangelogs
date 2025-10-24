@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
@@ -78,9 +78,9 @@ export default function InventoryItems({
   }, [fetchedUserData]);
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = (userIds: string[]) => {
+  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
     setVisibleUserIds(userIds);
-  };
+  }, []);
 
   // Get variant-specific values (e.g., different hyperchrome colors by year)
   const getVariantSpecificValues = (

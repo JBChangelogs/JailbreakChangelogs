@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser } from "@/types";
@@ -115,9 +115,9 @@ export default function OGFinderResults({
   }, [fetchedUserData]);
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = (userIds: string[]) => {
+  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
     setVisibleUserIds(userIds);
-  };
+  }, []);
 
   // Helper functions
   const getUserDisplay = (userId: string) => {

@@ -206,7 +206,13 @@ export default function ChangelogSummary({
   if (hasGenerated && summary) {
     return (
       <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
-        <div className="max-h-80 overflow-y-auto">
+        <div
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-80 overflow-y-auto pr-2"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "var(--color-border-primary) transparent",
+          }}
+        >
           <div className="mb-3 flex items-center gap-2">
             <Icon
               icon="solar:magic-stick-3-bold"

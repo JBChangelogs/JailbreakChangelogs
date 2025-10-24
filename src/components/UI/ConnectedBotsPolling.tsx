@@ -245,10 +245,10 @@ export default function ConnectedBotsPolling() {
                       >
                         {lastProcessedRobloxData?.usersData?.[
                           queueInfo.last_dequeue!.user_id
-                        ]?.displayName ||
+                        ]?.name ||
                           lastProcessedRobloxData?.usersData?.[
                             queueInfo.last_dequeue!.user_id
-                          ]?.name ||
+                          ]?.displayName ||
                           queueInfo.last_dequeue!.user_id}
                       </a>
                     </div>

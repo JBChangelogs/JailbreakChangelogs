@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import OGItemCard from "./OGItemCard";
 
@@ -48,6 +48,7 @@ export default function OGItemsGrid({
 }: OGItemsGridProps) {
   "use memo";
   const parentRef = useRef<HTMLDivElement>(null);
+  const previousUserIdsRef = useRef<string>("");
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -82,26 +83,34 @@ export default function OGItemsGrid({
 
   // Extract user IDs from ONLY the visible items
   const virtualItems = virtualizer.getVirtualItems();
-  const visibleUserIds = (() => {
+  const visibleUserIds = useMemo(() => {
     const userIds = new Set<string>();
 
     virtualItems.forEach((virtualRow) => {
       const rowItems = rows[virtualRow.index];
-      rowItems.forEach((item) => {
-        // Extract user IDs from this specific item
-        if (item.user_id && /^\d+$/.test(item.user_id)) {
-          userIds.add(item.user_id);
-        }
-      });
+      if (rowItems) {
+        rowItems.forEach((item) => {
+          // Extract user IDs from this specific item
+          if (item.user_id && /^\d+$/.test(item.user_id)) {
+            userIds.add(item.user_id);
+          }
+        });
+      }
     });
 
-    return Array.from(userIds);
-  })();
+    return Array.from(userIds).sort(); // Sort for consistent comparison
+  }, [virtualItems, rows]);
 
   // Notify parent component when visible user IDs change
   useEffect(() => {
     if (onVisibleUserIdsChange) {
-      onVisibleUserIdsChange(visibleUserIds);
+      const currentUserIdsKey = visibleUserIds.join(",");
+
+      // Only call the callback if the user IDs have actually changed
+      if (currentUserIdsKey !== previousUserIdsRef.current) {
+        previousUserIdsRef.current = currentUserIdsKey;
+        onVisibleUserIdsChange(visibleUserIds);
+      }
     }
   }, [visibleUserIds, onVisibleUserIdsChange]);
 

@@ -447,7 +447,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   // Recalculate virtualizer when expanded comments change to update heights
   useEffect(() => {
     virtualizer.measure();
-  }, [expandedComments, virtualizer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandedComments]);
 
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {
@@ -457,7 +458,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [virtualizer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));

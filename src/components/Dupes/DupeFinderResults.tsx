@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
@@ -133,9 +133,9 @@ export default function DupeFinderResults({
   })();
 
   // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = (userIds: string[]) => {
+  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
     setVisibleUserIds(userIds);
-  };
+  }, []);
 
   // Helper functions
   const getUserDisplay = (userId: string) => {

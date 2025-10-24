@@ -122,7 +122,6 @@ export default function MoneyLeaderboardClient({
 
   // TanStack Virtual setup for performance with large datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
-  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredLeaderboard.length,
     getScrollElement: () => parentRef.current,
@@ -138,7 +137,8 @@ export default function MoneyLeaderboardClient({
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [virtualizer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Truncate very long queries for display purposes
   const MAX_QUERY_DISPLAY_LENGTH = 120;

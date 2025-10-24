@@ -33,6 +33,7 @@ export default function DupeItemsGrid({
   onVisibleUserIdsChange,
 }: DupeItemsGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const previousUserIdsRef = useRef<string>("");
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -72,21 +73,29 @@ export default function DupeItemsGrid({
 
     virtualItems.forEach((virtualRow) => {
       const rowItems = rows[virtualRow.index];
-      rowItems.forEach((item) => {
-        // Extract user IDs from this specific item
-        if (item.latest_owner && /^\d+$/.test(item.latest_owner)) {
-          userIds.add(item.latest_owner);
-        }
-      });
+      if (rowItems) {
+        rowItems.forEach((item) => {
+          // Extract user IDs from this specific item
+          if (item.latest_owner && /^\d+$/.test(item.latest_owner)) {
+            userIds.add(item.latest_owner);
+          }
+        });
+      }
     });
 
-    return Array.from(userIds);
+    return Array.from(userIds).sort(); // Sort for consistent comparison
   }, [virtualItems, rows]);
 
   // Notify parent component when visible user IDs change
   useEffect(() => {
     if (onVisibleUserIdsChange) {
-      onVisibleUserIdsChange(visibleUserIds);
+      const currentUserIdsKey = visibleUserIds.join(",");
+
+      // Only call the callback if the user IDs have actually changed
+      if (currentUserIdsKey !== previousUserIdsRef.current) {
+        previousUserIdsRef.current = currentUserIdsKey;
+        onVisibleUserIdsChange(visibleUserIds);
+      }
     }
   }, [visibleUserIds, onVisibleUserIdsChange]);
 

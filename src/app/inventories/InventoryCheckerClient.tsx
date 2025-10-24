@@ -627,7 +627,7 @@ export default function InventoryCheckerClient({
                   </div>
                 </div>
               ) : (
-                <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                <div className="border-border-primary bg-primary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
                   <p className="text-primary-text mb-1 text-sm font-medium">
                     Looking for your inventory?
                   </p>
@@ -638,6 +638,23 @@ export default function InventoryCheckerClient({
                     >
                       View My Inventory
                     </Link>
+                  ) : isAuthenticated ? (
+                    <p className="text-secondary-text text-sm">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginModalOpen(true);
+                          const event = new CustomEvent("setLoginTab", {
+                            detail: 1,
+                          });
+                          window.dispatchEvent(event);
+                        }}
+                        className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
+                      >
+                        Connect your Roblox account
+                      </button>{" "}
+                      to request a scan.
+                    </p>
                   ) : (
                     <p className="text-secondary-text text-sm">
                       <button
@@ -647,7 +664,7 @@ export default function InventoryCheckerClient({
                         }}
                         className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
                       >
-                        Login
+                        Login and connect Roblox
                       </button>{" "}
                       to request a scan.
                     </p>

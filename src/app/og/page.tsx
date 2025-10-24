@@ -6,11 +6,11 @@ import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner
 import ComingSoon from "@/components/UI/ComingSoon";
 import ConnectedBotsPolling from "@/components/UI/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/UI/OfficialBotsSection";
+import StatsPolling, { StatsSkeleton } from "@/components/UI/StatsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
-import { Suspense } from "react";
-import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
 import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +42,7 @@ export default async function OGFinderPage() {
       <OGFinderClient />
 
       <Suspense fallback={<StatsSkeleton />}>
-        <StatsSection />
+        <StatsPolling />
       </Suspense>
 
       <ConnectedBotsPolling />
@@ -50,59 +50,6 @@ export default async function OGFinderPage() {
       <OfficialBotsSection />
 
       <OGFinderFAQ />
-    </div>
-  );
-}
-
-// Skeleton loader for stats section
-function StatsSkeleton() {
-  return (
-    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
-        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
-      </div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
-        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
-      </div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
-        <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
-      </div>
-    </div>
-  );
-}
-
-// Component for stats that loads immediately
-async function StatsSection() {
-  const stats = await fetchItemCountStats();
-  const duplicatesStats = await fetchDuplicatesCount();
-
-  if (!stats) {
-    return null;
-  }
-
-  return (
-    <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="text-primary-text text-2xl font-bold">
-          {stats.item_count_str}
-        </div>
-        <div className="text-secondary-text text-sm">Items Tracked</div>
-      </div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="text-primary-text text-2xl font-bold">
-          {stats.user_count_str}
-        </div>
-        <div className="text-secondary-text text-sm">Users Scanned</div>
-      </div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div className="text-primary-text text-2xl font-bold">
-          {duplicatesStats.total_duplicates_str}
-        </div>
-        <div className="text-secondary-text text-sm">Total Duplicates</div>
-      </div>
     </div>
   );
 }
