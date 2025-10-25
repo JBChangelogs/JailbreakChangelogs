@@ -8,6 +8,7 @@ interface XpCalculatorFormProps {
   targetLevel: number;
   onLevelChange: (level: number) => void;
   onXpChange: (xp: number) => void;
+  onCalculate: () => void;
   season: Season; // Add season prop to access XP data
 }
 
@@ -17,6 +18,7 @@ export default function XpCalculatorForm({
   targetLevel,
   onLevelChange,
   onXpChange,
+  onCalculate,
   season,
 }: XpCalculatorFormProps) {
   // Calculate max XP for the current level (XP needed to reach the NEXT level)
@@ -164,6 +166,20 @@ export default function XpCalculatorForm({
             <span className="font-bold">Level {currentLevel + 1}</span>)
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <button
+          onClick={onCalculate}
+          disabled={!currentLevel}
+          className={`flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+            !currentLevel
+              ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
+              : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+          }`}
+        >
+          Will I Make It?
+        </button>
       </div>
     </div>
   );

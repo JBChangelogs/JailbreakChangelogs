@@ -204,6 +204,28 @@ export default function XpResultsSummary({
     <div className="space-y-6">
       {/* Main Status Card */}
       <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6">
+        {/* XP Mode Toggle */}
+        <div className="mb-6 overflow-x-auto">
+          <div role="tablist" className="tabs min-w-max">
+            <button
+              role="tab"
+              aria-selected={xpMode === "normal"}
+              onClick={() => setXpMode("normal")}
+              className={`tab ${xpMode === "normal" ? "tab-active" : ""}`}
+            >
+              Normal XP
+            </button>
+            <button
+              role="tab"
+              aria-selected={xpMode === "double"}
+              onClick={() => setXpMode("double")}
+              className={`tab ${xpMode === "double" ? "tab-active" : ""}`}
+            >
+              Double XP Weekend
+            </button>
+          </div>
+        </div>
+
         <div className="mb-6 text-center">
           <div className="mb-2 flex items-center justify-center gap-2">
             <span className="text-2xl">{status.icon}</span>
@@ -231,32 +253,6 @@ export default function XpResultsSummary({
               <span className="text-sm font-semibold">Double XP is LIVE!</span>
             </div>
           )}
-        </div>
-
-        {/* XP Mode Toggle */}
-        <div className="mb-6">
-          <div className="flex flex-col space-y-1 rounded-lg p-1 sm:flex-row sm:space-y-0 sm:space-x-1">
-            <button
-              onClick={() => setXpMode("normal")}
-              className={`${
-                xpMode === "normal"
-                  ? "bg-button-info text-form-button-text shadow-sm"
-                  : "bg-primary-bg text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-            >
-              Normal XP
-            </button>
-            <button
-              onClick={() => setXpMode("double")}
-              className={`${
-                xpMode === "double"
-                  ? "bg-button-info text-form-button-text shadow-sm"
-                  : "bg-primary-bg text-secondary-text hover:bg-button-info/20 hover:text-primary-text hover:cursor-pointer"
-              } flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 sm:flex-1`}
-            >
-              Double XP Weekend
-            </button>
-          </div>
         </div>
 
         {/* Progress Overview */}
