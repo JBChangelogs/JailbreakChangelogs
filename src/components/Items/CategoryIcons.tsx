@@ -96,7 +96,7 @@ export default function CategoryIcons({
               onClick={
                 category.onClick || (() => handleCategoryClick(category.id))
               }
-              className={`border-border-primary hover:border-border-focus flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all hover:scale-105 sm:p-4 ${
+              className={`border-2 flex cursor-pointer items-center gap-3 rounded-lg p-3 transition-all sm:p-4 ${
                 isSelected
                   ? "ring-border-focus bg-primary-bg ring-2"
                   : "bg-primary-bg"
@@ -106,6 +106,7 @@ export default function CategoryIcons({
                   backgroundColor: isSelected
                     ? category.bgColor
                     : category.bgColor,
+                  borderColor: category.iconColor,
                   "--tw-ring-color": isSelected
                     ? category.iconColor
                     : undefined,

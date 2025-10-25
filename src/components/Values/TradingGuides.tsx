@@ -49,6 +49,29 @@ export default function TradingGuides({
       "Items which are on a fast rise due to short lived hype created by the community.",
   };
 
+  const getDemandHexColor = (demand: string): string => {
+    switch (demand) {
+      case "Close to none":
+        return "#4b5563";
+      case "Very Low":
+        return "#dc2626";
+      case "Low":
+        return "#b45309";
+      case "Medium":
+        return "#b45309";
+      case "Decent":
+        return "#15803d";
+      case "High":
+        return "#2563eb";
+      case "Very High":
+        return "#9333ea";
+      case "Extremely High":
+        return "#db2777";
+      default:
+        return "#4b5563";
+    }
+  };
+
   const getDemandValue = (demand: string): string => {
     switch (demand) {
       case "Close to none":
@@ -80,6 +103,31 @@ export default function TradingGuides({
       onValueSortChange(demandValue as ValueSort);
     }
     onScrollToSearch();
+  };
+
+  const getTrendHexColor = (trend: string): string => {
+    switch (trend) {
+      case "Avoided":
+        return "#dc2626";
+      case "Dropping":
+        return "#e11d48";
+      case "Unstable":
+        return "#b45309";
+      case "Hoarded":
+        return "#7c3aed";
+      case "Projected":
+        return "#4f46e5";
+      case "Stable":
+        return "#6b7280";
+      case "Recovering":
+        return "#ea580c";
+      case "Rising":
+        return "#1d4ed8";
+      case "Hyped":
+        return "#ec4899";
+      default:
+        return "#6b7280";
+    }
   };
 
   const getTrendValue = (trend: string): string => {
@@ -189,11 +237,15 @@ export default function TradingGuides({
                 <button
                   key={demand}
                   onClick={() => handleDemandClick(demand)}
-                  className={`border-border-primary bg-primary-bg hover:border-border-focus flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 transition-all hover:scale-105 focus:outline-none ${
-                    valueSort === getDemandValue(demand)
-                      ? "ring-border-focus ring-2"
-                      : ""
+                  className={`border-2 bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg px-4 py-2 transition-all focus:outline-none ${
+                    valueSort === getDemandValue(demand) ? "ring-2" : ""
                   }`}
+                  style={
+                    {
+                      borderColor: getDemandHexColor(demand),
+                      "--tw-ring-color": getDemandHexColor(demand),
+                    } as React.CSSProperties
+                  }
                 >
                   <span
                     className={`inline-block h-2 w-2 rounded-full ${getDemandColor(demand)}`}
@@ -242,11 +294,15 @@ export default function TradingGuides({
                 >
                   <button
                     onClick={() => handleTrendClick(trend)}
-                    className={`border-border-primary bg-primary-bg hover:border-border-focus flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 transition-all hover:scale-105 focus:outline-none ${
-                      valueSort === getTrendValue(trend)
-                        ? "ring-border-focus ring-2"
-                        : ""
+                    className={`border-2 bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg px-4 py-2 transition-all focus:outline-none ${
+                      valueSort === getTrendValue(trend) ? "ring-2" : ""
                     }`}
+                    style={
+                      {
+                        borderColor: getTrendHexColor(trend),
+                        "--tw-ring-color": getTrendHexColor(trend),
+                      } as React.CSSProperties
+                    }
                   >
                     <span
                       className={`inline-block h-2 w-2 rounded-full ${getTrendColor(trend)}`}

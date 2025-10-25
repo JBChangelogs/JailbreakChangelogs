@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
@@ -40,6 +41,7 @@ export default function DuplicatesTab({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
+  const parentRef = useRef<HTMLDivElement>(null);
   const MAX_SEARCH_LENGTH = 50;
 
   // Filter out user IDs we already have data for
@@ -100,13 +102,21 @@ export default function DuplicatesTab({
     return counts;
   })();
 
-  // Create a map to track the order of duplicates based on creation date
+  // Filter to only show items with multiple copies
+  const itemsWithMultipleCopies = (() => {
+    return initialData.data.filter((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      return (duplicateCounts.get(key) || 0) > 1;
+    });
+  })();
+
+  // Create a map to track the order of duplicates based on creation date (only for items with multiple copies)
   const duplicateOrders = (() => {
     const orders = new Map<string, number>();
 
-    // Group items by name
+    // Group items by name (only from itemsWithMultipleCopies)
     const itemGroups = new Map<string, InventoryItem[]>();
-    initialData.data.forEach((item) => {
+    itemsWithMultipleCopies.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       const existing = itemGroups.get(key) || [];
       itemGroups.set(key, [...existing, item]);
@@ -123,19 +133,13 @@ export default function DuplicatesTab({
       });
 
       sortedItems.forEach((item, index) => {
-        orders.set(item.id, index + 1);
+        // Use a unique key that combines id and other unique properties to handle items with same id
+        const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
+        orders.set(uniqueKey, index + 1);
       });
     });
 
     return orders;
-  })();
-
-  // Filter to only show items with multiple copies
-  const itemsWithMultipleCopies = (() => {
-    return initialData.data.filter((item) => {
-      const key = `${item.categoryTitle}-${item.title}`;
-      return (duplicateCounts.get(key) || 0) > 1;
-    });
   })();
 
   // Calculate stats
@@ -170,6 +174,7 @@ export default function DuplicatesTab({
             count: topItem.count,
           }
         : null,
+      allDuplicateItems: itemCopyCounts.slice(0, 100),
     };
   })();
 
@@ -183,6 +188,25 @@ export default function DuplicatesTab({
     });
     return Array.from(categories).sort();
   })();
+
+  // TanStack Virtual setup for performance with large duplicate datasets
+  const virtualizer = useVirtualizer({
+    count: multiCopyStats.allDuplicateItems.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 80,
+    overscan: 5,
+  });
+
+  // Recalculate heights on window resize for responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      virtualizer.measure();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Parse numeric values
   const parseNumericValue = (value: string | null): number => {
@@ -278,47 +302,68 @@ export default function DuplicatesTab({
       {/* Stats Summary */}
       <div className="bg-secondary-bg border-border-primary shadow-card-shadow mb-6 rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
-          Multiple Copies Overview
+          Top Items by Copies
         </h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <div className="bg-tertiary-bg border-border-primary rounded-lg border p-4">
-            <p className="text-secondary-text text-sm">Unique Items</p>
-            <p className="text-primary-text text-2xl font-bold">
-              {multiCopyStats.uniqueItemsWithCopies}
-            </p>
-          </div>
-          <div className="bg-tertiary-bg border-border-primary rounded-lg border p-4">
-            <p className="text-secondary-text text-sm">Total Copies</p>
-            <p className="text-primary-text text-2xl font-bold">
-              {multiCopyStats.totalCopies}
-            </p>
-          </div>
-          <div className="bg-tertiary-bg border-border-primary col-span-2 rounded-lg border p-4 sm:col-span-1">
-            <p className="text-secondary-text text-sm">Most Copies</p>
-            {multiCopyStats.topItem ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/item/${encodeURIComponent(multiCopyStats.topItem.category.toLowerCase())}/${encodeURIComponent(multiCopyStats.topItem.title)}`}
-                    className="text-primary-text hover:text-link truncate text-lg font-bold transition-colors"
+
+        {/* All Duplicate Items - Virtualized Scrollable */}
+        {multiCopyStats.allDuplicateItems.length > 0 && (
+          <div
+            ref={parentRef}
+            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto pr-2"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "var(--color-border-primary) transparent",
+            }}
+          >
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: "100%",
+                position: "relative",
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualItem) => {
+                const item =
+                  multiCopyStats.allDuplicateItems[virtualItem.index];
+                const rank = virtualItem.index + 1;
+
+                return (
+                  <div
+                    key={`${item.category}-${item.title}`}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
                   >
-                    {multiCopyStats.topItem.title}
-                  </Link>
-                  <span className="text-primary-text text-sm font-semibold whitespace-nowrap">
-                    ({multiCopyStats.topItem.count})
-                  </span>
-                </div>
-                <span className="text-secondary-text text-xs capitalize">
-                  {multiCopyStats.topItem.category}
-                </span>
-              </div>
-            ) : (
-              <p className="text-primary-text truncate text-lg font-bold">
-                N/A
-              </p>
-            )}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-primary-text font-bold text-sm w-6 flex-shrink-0">
+                        #{rank}
+                      </span>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <Link
+                          href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
+                          className="text-primary-text hover:text-link font-semibold text-sm truncate transition-colors"
+                        >
+                          {item.title}
+                        </Link>
+                        <span className="text-secondary-text text-xs capitalize">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-primary-text font-bold text-sm whitespace-nowrap ml-2">
+                      {item.count}x
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Search and Filters */}
