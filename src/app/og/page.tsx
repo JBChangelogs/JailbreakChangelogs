@@ -21,7 +21,7 @@ export default async function OGFinderPage() {
     return (
       <FeatureMaintenance
         featureName="OG Finder"
-        customMessage="We're performing infrastructure upgrades. The OG Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+        customMessage="We're experiencing technical difficulties. The OG Finder is temporarily unavailable. Please try again later."
       />
     );
   }

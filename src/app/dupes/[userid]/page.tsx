@@ -25,7 +25,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
     return (
       <FeatureMaintenance
         featureName="Dupe Finder"
-        customMessage="We're performing infrastructure upgrades. The Dupe Finder is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+        customMessage="We're experiencing technical difficulties. The Dupe Finder is temporarily unavailable. Please try again later."
       />
     );
   }

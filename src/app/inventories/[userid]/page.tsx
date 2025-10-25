@@ -27,7 +27,7 @@ export default async function InventoryCheckerPage({
     return (
       <FeatureMaintenance
         featureName="Inventory Checker"
-        customMessage="We're performing infrastructure upgrades. The Inventory Checker is temporarily unavailable while we perform maintenance. We'll be back soon! 🚀"
+        customMessage="We're experiencing technical difficulties. The Inventory Checker is temporarily unavailable. Please try again later."
       />
     );
   }

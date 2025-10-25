@@ -1,11 +1,25 @@
 import { fetchMoneyLeaderboard } from "@/utils/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import MoneyLeaderboardClient from "@/components/Leaderboard/MoneyLeaderboardClient";
+import { checkMoneyLeaderboardMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 // Cache this page for 30 minutes
 export const revalidate = 1800;
 
 export default async function MoneyLeaderboardPage() {
+  // Check for money leaderboard maintenance mode
+  const { isMoneyLeaderboardMaintenanceMode } =
+    await checkMoneyLeaderboardMaintenanceMode();
+  if (isMoneyLeaderboardMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Money Leaderboard"
+        customMessage="We're experiencing technical difficulties. The Money Leaderboard is temporarily unavailable. Please try again later."
+      />
+    );
+  }
+
   const leaderboard = await fetchMoneyLeaderboard();
 
   return (

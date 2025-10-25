@@ -1,9 +1,23 @@
 import { fetchNetworthLeaderboard } from "@/utils/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import NetworthLeaderboardClient from "@/components/Leaderboard/NetworthLeaderboardClient";
+import { checkNetworthLeaderboardMaintenanceMode } from "@/utils/maintenance";
+import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const revalidate = 1800;
 export default async function NetworthLeaderboardPage() {
+  // Check for networth leaderboard maintenance mode
+  const { isNetworthLeaderboardMaintenanceMode } =
+    await checkNetworthLeaderboardMaintenanceMode();
+  if (isNetworthLeaderboardMaintenanceMode) {
+    return (
+      <FeatureMaintenance
+        featureName="Networth Leaderboard"
+        customMessage="We're experiencing technical difficulties. The Networth Leaderboard is temporarily unavailable. Please try again later."
+      />
+    );
+  }
+
   const leaderboard = await fetchNetworthLeaderboard();
 
   return (
