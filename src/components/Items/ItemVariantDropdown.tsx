@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ItemDetails } from "@/types";
+import FloatingDropdown from "@/components/common/FloatingDropdown";
 
 interface ItemVariantDropdownProps {
   item: ItemDetails;
@@ -51,8 +52,7 @@ export default function ItemVariantDropdown({
     return null;
   }
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleSelectChange = (value: string) => {
     setSelectedYear(value);
 
     if (value === "2025") {
@@ -84,17 +84,19 @@ export default function ItemVariantDropdown({
   };
 
   return (
-    <select
-      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer font-inter"
+    <FloatingDropdown
+      options={[
+        { value: "2025", label: "2025" },
+        ...(item.children || []).map((child) => ({
+          value: child.sub_name,
+          label: child.sub_name,
+        })),
+      ]}
       value={selectedYear}
       onChange={handleSelectChange}
-    >
-      <option value="2025">2025</option>
-      {item.children.map((child) => (
-        <option key={child.id} value={child.sub_name}>
-          {child.sub_name}
-        </option>
-      ))}
-    </select>
+      className="w-full"
+      buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer font-inter border-border-primary hover:border-border-focus"
+      stopPropagation={true}
+    />
   );
 }

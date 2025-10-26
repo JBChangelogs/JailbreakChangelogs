@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import FloatingDropdown from "@/components/common/FloatingDropdown";
 
 interface SubItem {
   id: number;
@@ -63,8 +64,7 @@ export default function SubItemsDropdown({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleSelectChange = (value: string) => {
     if (value === "2025") {
       onSelect(null);
     } else {
@@ -78,17 +78,19 @@ export default function SubItemsDropdown({
   };
 
   return (
-    <select
-      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer font-inter"
+    <FloatingDropdown
+      options={[
+        { value: "2025", label: "2025" },
+        ...sortedChildren.map((child) => ({
+          value: child.sub_name,
+          label: child.sub_name,
+        })),
+      ]}
       value={getCurrentValue()}
       onChange={handleSelectChange}
-    >
-      <option value="2025">2025</option>
-      {sortedChildren.map((child) => (
-        <option key={child.id} value={child.sub_name}>
-          {child.sub_name}
-        </option>
-      ))}
-    </select>
+      className="w-full"
+      buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer font-inter border-border-primary hover:border-border-focus"
+      stopPropagation={true}
+    />
   );
 }

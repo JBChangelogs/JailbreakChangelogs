@@ -32,6 +32,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import FloatingDropdown from "@/components/common/FloatingDropdown";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -655,36 +656,22 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   )}
                                 </div>
                                 {item.children && item.children.length > 0 && (
-                                  <div className="relative">
-                                    <select
-                                      className="select w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer"
-                                      value={
-                                        selectedVariants[item.id] || "2025"
-                                      }
-                                      onChange={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        handleVariantSelect(
-                                          item.id,
-                                          e.target.value,
-                                        );
-                                      }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                      }}
-                                    >
-                                      <option value="2025">2025</option>
-                                      {item.children.map((child) => (
-                                        <option
-                                          key={child.id}
-                                          value={child.sub_name}
-                                        >
-                                          {child.sub_name}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
+                                  <FloatingDropdown
+                                    options={[
+                                      { value: "2025", label: "2025" },
+                                      ...item.children.map((child) => ({
+                                        value: child.sub_name,
+                                        label: child.sub_name,
+                                      })),
+                                    ]}
+                                    value={selectedVariants[item.id] || "2025"}
+                                    onChange={(value) => {
+                                      handleVariantSelect(item.id, value);
+                                    }}
+                                    className="relative"
+                                    buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer border-border-primary hover:border-border-focus"
+                                    stopPropagation={true}
+                                  />
                                 )}
                                 {item.tradable === 1 && (
                                   <>

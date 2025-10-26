@@ -232,7 +232,7 @@ export default function ModernPricingSection() {
                           alt="Robux"
                           width={24}
                           height={24}
-                          className="h-6 w-6"
+                          className="h-6 w-6 object-contain flex-shrink-0"
                         />
                         <span>0R$</span>
                       </>
@@ -251,7 +251,7 @@ export default function ModernPricingSection() {
                       alt="Robux"
                       width={24}
                       height={24}
-                      className="h-6 w-6"
+                      className="h-6 w-6 object-contain flex-shrink-0"
                     />
                     <span>{tier.priceAlt.split(" ")[1]}</span>
                     <span className="text-secondary-text text-base font-normal">
