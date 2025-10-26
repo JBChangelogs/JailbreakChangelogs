@@ -269,7 +269,7 @@ export default function ValuesSearchControls({
                   <option value="trend-dropping">Dropping Trend</option>
                   <option value="trend-unstable">Unstable Trend</option>
                   <option value="trend-hoarded">Hoarded Trend</option>
-                  <option value="trend-projected">Projected Trend</option>
+                  <option value="trend-manipulated">Manipulated Trend</option>
                   <option value="trend-stable">Stable Trend</option>
                   <option value="trend-recovering">Recovering Trend</option>
                   <option value="trend-rising">Rising Trend</option>

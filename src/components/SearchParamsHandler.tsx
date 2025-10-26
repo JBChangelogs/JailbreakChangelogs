@@ -59,7 +59,7 @@ const validValueSorts = [
   "trend-dropping",
   "trend-unstable",
   "trend-hoarded",
-  "trend-projected",
+  "trend-manipulated",
   "trend-recovering",
 ] as const;
 

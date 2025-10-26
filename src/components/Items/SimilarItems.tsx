@@ -171,7 +171,7 @@ const SimilarItems = ({
       const positiveTrends = ["Rising", "Hyped", "Recovering"];
       const negativeTrends = ["Dropping", "Avoided"];
       const neutralTrends = ["Stable", "Unstable"];
-      const specialTrends = ["Hoarded", "Projected"];
+      const specialTrends = ["Hoarded", "Manipulated"];
 
       const isPositive1 = positiveTrends.includes(item1.trend);
       const isPositive2 = positiveTrends.includes(item2.trend);

@@ -63,7 +63,7 @@ export type ValueSort =
   | "trend-dropping"
   | "trend-unstable"
   | "trend-hoarded"
-  | "trend-projected"
+  | "trend-manipulated"
   | "trend-recovering";
 
 export interface DupedOwner {

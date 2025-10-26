@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { demandOrder, trendOrder } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { ValueSort } from "@/types";
 
 interface TradingGuidesProps {
@@ -24,9 +23,6 @@ export default function TradingGuides({
   const [isExpanded, setIsExpanded] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [selectedTrendForSnackbar, setSelectedTrendForSnackbar] = useState<
-    string | null
-  >(null);
 
   const trendDescriptions: Record<string, string> = {
     Avoided:
@@ -36,9 +32,8 @@ export default function TradingGuides({
     Unstable:
       "Items which inconsistently yet occasionally get a varying overpay/underpay from base.",
     Hoarded:
-      "Rare items which have been hoarded to create scarcity artificially.",
-    Projected:
-      "Items which aren't as rare/valuable as people make it out to be yet consistently are treated as such.",
+      "Items that have a significant amount of circulation in the hands of a conglomerate or an individual.",
+    Manipulated: "Items that only receive its value due to manipulation.",
     Stable:
       "Items which get a consistent amount of value. (Consistent underpay/base/overpay)",
     Recovering:
@@ -115,8 +110,8 @@ export default function TradingGuides({
         return "#b45309";
       case "Hoarded":
         return "#7c3aed";
-      case "Projected":
-        return "#4f46e5";
+      case "Manipulated":
+        return "#fcd34d";
       case "Stable":
         return "#6b7280";
       case "Recovering":
@@ -140,8 +135,8 @@ export default function TradingGuides({
         return "trend-unstable";
       case "Hoarded":
         return "trend-hoarded";
-      case "Projected":
-        return "trend-projected";
+      case "Manipulated":
+        return "trend-manipulated";
       case "Stable":
         return "trend-stable";
       case "Recovering":
@@ -164,7 +159,6 @@ export default function TradingGuides({
     ) {
       const description = trendDescriptions[trend];
       if (description) {
-        setSelectedTrendForSnackbar(trend);
         setSnackbarMessage(description);
         setSnackbarOpen(true);
       }
@@ -247,9 +241,6 @@ export default function TradingGuides({
                     } as React.CSSProperties
                   }
                 >
-                  <span
-                    className={`inline-block h-2 w-2 rounded-full ${getDemandColor(demand)}`}
-                  ></span>
                   <span className="text-primary-text text-sm font-semibold">
                     {demand}
                   </span>
@@ -304,9 +295,6 @@ export default function TradingGuides({
                       } as React.CSSProperties
                     }
                   >
-                    <span
-                      className={`inline-block h-2 w-2 rounded-full ${getTrendColor(trend)}`}
-                    ></span>
                     <span className="text-primary-text text-sm font-semibold">
                       {trend}
                     </span>
@@ -342,17 +330,6 @@ export default function TradingGuides({
       >
         <Alert
           severity="info"
-          icon={
-            selectedTrendForSnackbar ? (
-              <span
-                className={`inline-block h-2.5 w-2.5 rounded-full ${getTrendColor(
-                  selectedTrendForSnackbar,
-                )}`}
-              />
-            ) : (
-              false
-            )
-          }
           sx={{
             width: "100%",
             backgroundColor: "var(--color-primary-bg)",

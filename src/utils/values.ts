@@ -16,7 +16,7 @@ export const trendOrder = [
   "Dropping",
   "Unstable",
   "Hoarded",
-  "Projected",
+  "Manipulated",
   "Stable",
   "Recovering",
   "Rising",
@@ -343,7 +343,7 @@ export const sortAndFilterItems = async (
       "trend-dropping": "Dropping",
       "trend-unstable": "Unstable",
       "trend-hoarded": "Hoarded",
-      "trend-projected": "Projected",
+      "trend-manipulated": "Manipulated",
       "trend-recovering": "Recovering",
     };
 
@@ -502,7 +502,7 @@ export const sortAndFilterItems = async (
     case "trend-dropping":
     case "trend-unstable":
     case "trend-hoarded":
-    case "trend-projected":
+    case "trend-manipulated":
     case "trend-recovering":
       result = result.sort((a, b) =>
         sortByCashValue(
