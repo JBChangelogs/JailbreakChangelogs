@@ -1,6 +1,11 @@
 "use client";
 
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 
 type SortOrder =
   | "alpha-asc"
@@ -29,11 +34,15 @@ interface InventoryFiltersProps {
   showOnlyNonOriginal: boolean;
   hideDuplicates: boolean;
   showMissingItems: boolean;
+  showOnlyLimited: boolean;
+  showOnlySeasonal: boolean;
   availableCategories: string[];
   onFilterToggle: (checked: boolean) => void;
   onNonOriginalFilterToggle: (checked: boolean) => void;
   onHideDuplicatesToggle: (checked: boolean) => void;
   onShowMissingItemsToggle: (checked: boolean) => void;
+  onLimitedFilterToggle: (checked: boolean) => void;
+  onSeasonalFilterToggle: (checked: boolean) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
 }
@@ -47,62 +56,24 @@ export default function InventoryFilters({
   showOnlyNonOriginal,
   hideDuplicates,
   showMissingItems,
+  showOnlyLimited,
+  showOnlySeasonal,
   availableCategories,
   onFilterToggle,
   onNonOriginalFilterToggle,
   onHideDuplicatesToggle,
   onShowMissingItemsToggle,
+  onLimitedFilterToggle,
+  onSeasonalFilterToggle,
   sortOrder,
   setSortOrder,
 }: InventoryFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   return (
     <div className="mb-4 flex flex-col gap-4">
-      {/* Filter Checkboxes */}
-      <div className="flex flex-wrap gap-4">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={showOnlyOriginal}
-            onChange={(e) => onFilterToggle(e.target.checked)}
-            className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
-          />
-          <span className="text-primary-text text-sm">Original Items Only</span>
-        </label>
-
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={showOnlyNonOriginal}
-            onChange={(e) => onNonOriginalFilterToggle(e.target.checked)}
-            className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
-          />
-          <span className="text-primary-text text-sm">
-            Non-Original Items Only
-          </span>
-        </label>
-
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={hideDuplicates}
-            onChange={(e) => onHideDuplicatesToggle(e.target.checked)}
-            className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
-          />
-          <span className="text-primary-text text-sm">Hide Duplicates</span>
-        </label>
-
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={showMissingItems}
-            onChange={(e) => onShowMissingItemsToggle(e.target.checked)}
-            className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
-          />
-          <span className="text-primary-text text-sm">Show Missing Items</span>
-        </label>
-      </div>
+      {/* Main Filters Row */}
 
       {/* Search, Category, and Sort Filters */}
       <div className="flex w-full flex-col gap-4 sm:flex-row">
@@ -173,6 +144,157 @@ export default function InventoryFilters({
           </select>
         </div>
       </div>
+
+      {/* Advanced Filters Toggle Button */}
+      <button
+        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+        className="text-link0-hover flex items-center gap-2 text-sm font-medium"
+      >
+        <ChevronDownIcon
+          className={`h-4 w-4 transition-transform ${
+            showAdvancedFilters ? "rotate-180" : ""
+          }`}
+        />
+        Advanced Filters
+      </button>
+
+      {/* Advanced Filters Section */}
+      {showAdvancedFilters && (
+        <div className="border-border-primary bg-primary-bg/50 rounded-lg border p-4">
+          <div className="flex flex-col gap-4">
+            {/* Owner Type Radio Group */}
+            <div className="flex flex-col gap-2">
+              <span className="text-primary-text text-sm font-medium">
+                Owner Type:
+              </span>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="ownerType"
+                    checked={!showOnlyOriginal && !showOnlyNonOriginal}
+                    onChange={() => {
+                      onFilterToggle(false);
+                      onNonOriginalFilterToggle(false);
+                    }}
+                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                  />
+                  <span className="text-primary-text text-sm">All</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="ownerType"
+                    checked={showOnlyOriginal}
+                    onChange={() => onFilterToggle(true)}
+                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                  />
+                  <span className="text-primary-text text-sm">Original</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="ownerType"
+                    checked={showOnlyNonOriginal}
+                    onChange={() => onNonOriginalFilterToggle(true)}
+                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                  />
+                  <span className="text-primary-text text-sm">
+                    Non-Original
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Item Property Checkboxes */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-primary-text text-sm font-medium">
+                  Item Type:
+                </span>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="itemType"
+                      checked={!showOnlyLimited && !showOnlySeasonal}
+                      onChange={() => {
+                        onLimitedFilterToggle(false);
+                        onSeasonalFilterToggle(false);
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">All</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="itemType"
+                      checked={showOnlyLimited}
+                      onChange={() => {
+                        onLimitedFilterToggle(true);
+                        onSeasonalFilterToggle(false);
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Limited Only
+                    </span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="itemType"
+                      checked={showOnlySeasonal}
+                      onChange={() => {
+                        onLimitedFilterToggle(false);
+                        onSeasonalFilterToggle(true);
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Seasonal Only
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-primary-text text-sm font-medium">
+                  Other:
+                </span>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={hideDuplicates}
+                      onChange={(e) => onHideDuplicatesToggle(e.target.checked)}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Hide Duplicates
+                    </span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={showMissingItems}
+                      onChange={(e) =>
+                        onShowMissingItemsToggle(e.target.checked)
+                      }
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Show Missing Items
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

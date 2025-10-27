@@ -21,8 +21,8 @@ interface FooterProps {
 
 export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   return (
-    <footer className="bg-secondary-bg border-border-primary border-t py-8">
-      <div className="container mx-auto px-4">
+    <footer className="w-full bg-secondary-bg border-border-primary border-t py-8">
+      <div className="w-full px-4">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Follow Us */}
           <div className="space-y-4">
@@ -261,7 +261,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                   className="h-5 w-5"
                   inline={true}
                 />
-                Manage Cookies
+                Cookies
               </button>
             </div>
           </div>

@@ -33,6 +33,8 @@ export default function InventoryItems({
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
+  const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] =
@@ -186,6 +188,22 @@ export default function InventoryItems({
     }, 300);
   };
 
+  const handleLimitedFilterToggle = (checked: boolean) => {
+    setIsFiltering(true);
+    setShowOnlyLimited(checked);
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 300);
+  };
+
+  const handleSeasonalFilterToggle = (checked: boolean) => {
+    setIsFiltering(true);
+    setShowOnlySeasonal(checked);
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 300);
+  };
+
   const currentItemsData = propItemsData || [];
   const currentRobloxUsers = mergedRobloxUsers;
   const currentRobloxAvatars = robloxAvatars;
@@ -283,6 +301,20 @@ export default function InventoryItems({
         }
         if (selectedCategories.length > 0) {
           if (!selectedCategories.includes(itemData.type)) {
+            return false;
+          }
+        }
+
+        // Filter by limited items
+        if (showOnlyLimited) {
+          if (itemData.is_limited !== 1) {
+            return false;
+          }
+        }
+
+        // Filter by seasonal items
+        if (showOnlySeasonal) {
+          if (itemData.is_seasonal !== 1) {
             return false;
           }
         }
@@ -385,6 +417,20 @@ export default function InventoryItems({
         }
       } else if (showOnlyNonOriginal) {
         if (item.isOriginalOwner) {
+          return false;
+        }
+      }
+
+      // Filter by limited items
+      if (showOnlyLimited) {
+        if (itemData.is_limited !== 1) {
+          return false;
+        }
+      }
+
+      // Filter by seasonal items
+      if (showOnlySeasonal) {
+        if (itemData.is_seasonal !== 1) {
           return false;
         }
       }
@@ -545,11 +591,15 @@ export default function InventoryItems({
         showOnlyNonOriginal={showOnlyNonOriginal}
         hideDuplicates={hideDuplicates}
         showMissingItems={showMissingItems}
+        showOnlyLimited={showOnlyLimited}
+        showOnlySeasonal={showOnlySeasonal}
         availableCategories={availableCategories}
         onFilterToggle={handleOriginalFilterToggle}
         onNonOriginalFilterToggle={handleNonOriginalFilterToggle}
         onHideDuplicatesToggle={handleHideDuplicatesToggle}
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
+        onLimitedFilterToggle={handleLimitedFilterToggle}
+        onSeasonalFilterToggle={handleSeasonalFilterToggle}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
       />
@@ -562,6 +612,8 @@ export default function InventoryItems({
           showOnlyNonOriginal ||
           hideDuplicates ||
           showMissingItems ||
+          showOnlyLimited ||
+          showOnlySeasonal ||
           selectedCategories.length > 0
             ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
                 searchTerm ? ` matching "${searchTerm}"` : ""
@@ -573,6 +625,8 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
+              }${showOnlyLimited ? " (Limited only)" : ""}${
+                showOnlySeasonal ? " (Seasonal only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}
         </p>
