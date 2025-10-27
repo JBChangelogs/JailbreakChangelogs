@@ -113,6 +113,7 @@ interface HoveredLinkProps {
   children: React.ReactNode;
   href: string;
   className?: string;
+  setActive?: (item: string | null) => void;
   [key: string]: unknown;
 }
 
@@ -120,6 +121,7 @@ export const HoveredLink = ({
   children,
   href,
   className = "",
+  setActive,
   ...rest
 }: HoveredLinkProps) => {
   return (
@@ -127,6 +129,7 @@ export const HoveredLink = ({
       <Link
         href={href}
         className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
+        onClick={() => setActive?.(null)}
         {...rest}
       >
         {children}
@@ -251,13 +254,15 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
           {/* Seasons */}
           <MenuItem setActive={setActive} active={active} item="Seasons">
-            <HoveredLink href="/seasons">Browse Seasons</HoveredLink>
-            <HoveredLink href="/seasons/will-i-make-it">
+            <HoveredLink href="/seasons" setActive={setActive}>
+              Browse Seasons
+            </HoveredLink>
+            <HoveredLink href="/seasons/will-i-make-it" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Will I Make It</span>
               </div>
             </HoveredLink>
-            <HoveredLink href="/seasons/contracts">
+            <HoveredLink href="/seasons/contracts" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Weekly Contracts</span>
               </div>
@@ -271,14 +276,16 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
           {/* Values */}
           <MenuItem setActive={setActive} active={active} item="Values">
-            <HoveredLink href="/values">Value List</HoveredLink>
-            <HoveredLink href="/values/changelogs">
+            <HoveredLink href="/values" setActive={setActive}>
+              Value List
+            </HoveredLink>
+            <HoveredLink href="/values/changelogs" setActive={setActive}>
               Value Changelogs
             </HoveredLink>
-            <HoveredLink href="/values/calculator">
+            <HoveredLink href="/values/calculator" setActive={setActive}>
               Value Calculator
             </HoveredLink>
-            <HoveredLink href="/dupes">
+            <HoveredLink href="/dupes" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Dupe Finder</span>
                 {!isFeatureEnabled("DUPE_FINDER") && (
@@ -286,9 +293,13 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 )}
               </div>
             </HoveredLink>
-            <HoveredLink href="/dupes/calculator">Dupe Calculator</HoveredLink>
-            <HoveredLink href="/trading">Trade Ads</HoveredLink>
-            <HoveredLink href="/inventories">
+            <HoveredLink href="/dupes/calculator" setActive={setActive}>
+              Dupe Calculator
+            </HoveredLink>
+            <HoveredLink href="/trading" setActive={setActive}>
+              Trade Ads
+            </HoveredLink>
+            <HoveredLink href="/inventories" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Inventory Checker</span>
                 {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
@@ -296,7 +307,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 )}
               </div>
             </HoveredLink>
-            <HoveredLink href="/og">
+            <HoveredLink href="/og" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>OG Finder</span>
                 {!isFeatureEnabled("OG_FINDER") && (
@@ -308,17 +319,27 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
           {/* Community */}
           <MenuItem setActive={setActive} active={active} item="Community">
-            <HoveredLink href="/users">User Search</HoveredLink>
-            <HoveredLink href="/leaderboard/money">
+            <HoveredLink href="/users" setActive={setActive}>
+              User Search
+            </HoveredLink>
+            <HoveredLink href="/leaderboard/money" setActive={setActive}>
               Money Leaderboard
             </HoveredLink>
-            <HoveredLink href="/inventories/networth">
+            <HoveredLink href="/inventories/networth" setActive={setActive}>
               Networth Leaderboard
             </HoveredLink>
-            <HoveredLink href="/servers">Private Servers</HoveredLink>
-            <HoveredLink href="/bot">Discord Bot</HoveredLink>
-            <HoveredLink href="/faq">FAQ</HoveredLink>
-            <HoveredLink href="/contributors">Meet the team</HoveredLink>
+            <HoveredLink href="/servers" setActive={setActive}>
+              Private Servers
+            </HoveredLink>
+            <HoveredLink href="/bot" setActive={setActive}>
+              Discord Bot
+            </HoveredLink>
+            <HoveredLink href="/faq" setActive={setActive}>
+              FAQ
+            </HoveredLink>
+            <HoveredLink href="/contributors" setActive={setActive}>
+              Meet the team
+            </HoveredLink>
           </MenuItem>
         </div>
 

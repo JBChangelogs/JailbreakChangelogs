@@ -1,67 +1,71 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clearAdContent, reloadAds } from "@/utils/adUtils";
-
-interface AdReloaderOptions {
-  enabled?: boolean;
-  onRouteChangeStart?: () => void;
-  onRouteChangeComplete?: () => void;
-}
 
 /**
  * Custom hook to handle ad reloading on route changes
- * This hook listens for route changes and reloads ads by:
- * 1. Clearing existing ad content before route change
- * 2. Reloading the AdSense script after route change
+ * Based on best practices: only reload ads when route actually changes
+ * Avoids aggressive reloading that triggers invalid traffic concerns
+ *
+ * Uses debouncing (1000ms) to prevent rapid successive reloads from
+ * quick navigation (e.g., dropdown selections, quick nav links)
  */
-export function useAdReloader(options: AdReloaderOptions = {}) {
-  const { enabled = true, onRouteChangeStart, onRouteChangeComplete } = options;
-  const isNavigatingRef = useRef(false);
+export function useAdReloader() {
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!enabled) return;
+    // Debounced ad reload function
+    const debouncedReload = () => {
+      // Clear any pending reload
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
 
-    const handleRouteChangeStart = () => {
-      isNavigatingRef.current = true;
-
-      // Clear existing ad content before route change
-      clearAdContent();
-
-      onRouteChangeStart?.();
+      // Schedule reload after 1000ms of inactivity
+      debounceTimerRef.current = setTimeout(() => {
+        if (typeof window !== "undefined" && window.adsbygoogle) {
+          try {
+            window.adsbygoogle.push({});
+          } catch (err) {
+            // Expected error when ads are already loaded on the page
+            // This is safe to ignore and doesn't indicate a problem
+            if (
+              err instanceof Error &&
+              err.message?.includes("already have ads")
+            ) {
+              console.debug("Ads already loaded on this page, skipping reload");
+            } else {
+              console.error("Error reloading ads:", err);
+            }
+          }
+        }
+      }, 1000);
     };
 
-    const handleRouteChangeComplete = () => {
-      isNavigatingRef.current = false;
-
-      // Reload AdSense script and push new ads
-      setTimeout(() => {
-        reloadAds();
-      }, 100); // Small delay to ensure DOM is ready
-
-      onRouteChangeComplete?.();
+    // Listen for route changes via popstate (back/forward navigation)
+    const handlePopstate = () => {
+      debouncedReload();
     };
 
-    // Listen for popstate events (back/forward navigation)
-    const handlePopState = () => {
-      handleRouteChangeStart();
-      setTimeout(handleRouteChangeComplete, 50);
+    // Listen for URL changes via popstate
+    window.addEventListener("popstate", handlePopstate);
+
+    // Also listen for custom route change events (for client-side navigation)
+    // This handles window.history.pushState() calls
+    const originalPushState = window.history.pushState;
+    window.history.pushState = function (...args) {
+      originalPushState.apply(window.history, args);
+      debouncedReload();
     };
 
-    // Add event listeners
-    window.addEventListener("popstate", handlePopState);
-
-    // Cleanup
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("popstate", handlePopstate);
+      // Restore original pushState
+      window.history.pushState = originalPushState;
+      // Clear any pending debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
     };
-  }, [enabled, onRouteChangeStart, onRouteChangeComplete]);
-
-  // Function to manually trigger ad reload
-  const manualReloadAds = () => {
-    if (isNavigatingRef.current) return;
-    reloadAds();
-  };
-
-  return { reloadAds: manualReloadAds };
+  }, []);
 }

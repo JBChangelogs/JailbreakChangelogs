@@ -6,7 +6,6 @@ import { ThemeProvider } from "@mui/material";
 import { extractContentInfo, getContentPreview } from "@/utils/changelogs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAdReloader } from "@/hooks/useAdReloader";
-import { triggerAdReload } from "@/utils/adUtils";
 import { darkTheme } from "@/theme/darkTheme";
 import { Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
@@ -116,15 +115,7 @@ export default function ChangelogDetailsClient({
   const router = useRouter();
 
   // Initialize ad reloader for route changes
-  useAdReloader({
-    enabled: true,
-    onRouteChangeStart: () => {
-      console.log("Route change started - clearing ads");
-    },
-    onRouteChangeComplete: () => {
-      console.log("Route change completed - reloading ads");
-    },
-  });
+  useAdReloader();
 
   // Use state to manage the current changelog
   const [currentChangelogState, setCurrentChangelogState] =
@@ -260,11 +251,6 @@ export default function ChangelogDetailsClient({
 
       // Update the current changelog data directly
       setCurrentChangelogState(selectedChangelog);
-
-      // Trigger ad reload after state update
-      setTimeout(() => {
-        triggerAdReload();
-      }, 100);
     } else {
       // If the changelog is not in our list, navigate to fetch it
       router.replace(`/changelogs/${selectedId}`);

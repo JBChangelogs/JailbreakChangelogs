@@ -112,11 +112,8 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         .sidebar-ad-container-changelog {
           width: 320px;
           height: 100px;
-          border: 1px solid
-            var(--color-border-border-primary hover: border-border-focus);
           border-radius: 8px;
           overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
           transition: all 0.3s ease;
         }
 

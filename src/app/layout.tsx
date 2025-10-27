@@ -92,12 +92,12 @@ export default async function RootLayout({
         <head>
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
-          {/* Google AdSense */}
+          {/* Google AdSense - loaded once at app level */}
           <Script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
             crossOrigin="anonymous"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
         </head>
         <body className={`${inter.className} bg-primary-bg`}>
@@ -192,7 +192,13 @@ export default async function RootLayout({
       <head>
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
-        {/* Google AdSense script is now loaded directly in DisplayAd component to avoid data-nscript attribute */}
+        {/* Google AdSense - loaded once at app level */}
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
       </head>
       <body className={`${inter.className} bg-primary-bg`}>
         <noscript>
