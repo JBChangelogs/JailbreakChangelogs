@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: October 9th, 2025
+          Last updated: October 27th, 2025
         </p>
 
         <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
@@ -70,11 +70,49 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                Cookies
+                Cookies and Consent Management
               </h2>
+              <Typography className="text-secondary-text mb-4">
+                We use cookies and similar technologies to enhance your
+                experience on our website. This includes cookies from Microsoft
+                Clarity for analytics and Google services for advertising and
+                analytics purposes.
+              </Typography>
+              <Typography className="text-secondary-text mb-4">
+                <strong>Your Cookie Preferences:</strong> We respect your
+                privacy choices. You have full control over which types of
+                cookies we use:
+              </Typography>
+              <ul className="text-secondary-text list-inside list-disc space-y-2 mb-4">
+                <li>
+                  <strong>Analytics Storage:</strong> Allows us to analyze
+                  website usage and improve your experience
+                </li>
+                <li>
+                  <strong>Ad Storage:</strong> Stores information for
+                  advertising purposes
+                </li>
+                <li>
+                  <strong>Ad User Data:</strong> Allows personalized advertising
+                  based on your data
+                </li>
+                <li>
+                  <strong>Ad Personalization:</strong> Enables personalized ads
+                  based on your interests
+                </li>
+              </ul>
+              <Typography className="text-secondary-text mb-4">
+                You can manage your cookie preferences at any time by clicking
+                the <strong>&quot;Manage Cookies&quot;</strong> button in the
+                Resources section of our footer. Your preferences are stored
+                securely and will be respected across all your visits to our
+                website.
+              </Typography>
               <Typography className="text-secondary-text">
-                Our website may use cookies to enhance user experience. However,
-                we do not track or collect any information through cookies.
+                We use <strong>Google Consent Mode v2</strong> to ensure your
+                consent preferences are honored before any tracking cookies are
+                loaded. By default, all tracking is disabled until you
+                explicitly grant consent.
               </Typography>
             </div>
 
@@ -91,6 +129,13 @@ export default function PrivacyPage() {
                 technologies to determine the popularity of products/services
                 and online activity. Additionally, we use this information for
                 site optimization, fraud/security purposes, and advertising.
+              </Typography>
+              <Typography className="text-secondary-text mb-4">
+                <strong>Consent Required:</strong> Microsoft Clarity and
+                advertising cookies are only loaded after you grant explicit
+                consent through our cookie consent system. We respect your
+                privacy choices and will not load these services until you
+                opt-in.
               </Typography>
               <Typography className="text-secondary-text">
                 For more information about how Microsoft collects and uses your

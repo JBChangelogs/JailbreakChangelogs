@@ -249,6 +249,20 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               >
                 <ReportIssueButton />
               </Suspense>
+              <button
+                onClick={() => {
+                  const event = new CustomEvent("openCookieSettings");
+                  window.dispatchEvent(event);
+                }}
+                className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors duration-200 cursor-pointer bg-none border-none p-0"
+              >
+                <Icon
+                  icon="material-symbols:cookie-outline-rounded"
+                  className="h-5 w-5"
+                  inline={true}
+                />
+                Manage Cookies
+              </button>
             </div>
           </div>
 

@@ -17,6 +17,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import SurveyProvider from "@/components/Survey/SurveyProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ConsentProviderWrapper } from "@/components/Providers/ConsentProviderWrapper";
+import ConsentBannerWrapper from "@/components/Consent/ConsentBannerWrapper";
+import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -90,6 +93,24 @@ export default async function RootLayout({
     return (
       <html lang="en">
         <head>
+          {/* Google Consent Mode v2 - MUST be before Google Analytics */}
+          <Script
+            id="google-consent-mode"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  'ad_user_data': 'denied',
+                  'ad_personalization': 'denied',
+                  'ad_storage': 'denied',
+                  'analytics_storage': 'denied',
+                  'wait_for_update': 500
+                });
+              `,
+            }}
+          />
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
           {/* Google AdSense - loaded once at app level */}
@@ -127,48 +148,52 @@ export default async function RootLayout({
             </div>
           </noscript>
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-            <CustomThemeProvider>
-              <ThemeProvider>
-                <QueryProvider>
-                  <MaintenanceBypass>
-                    <NextTopLoader
-                      color="var(--color-button-info)"
-                      initialPosition={0.08}
-                      crawlSpeed={200}
-                      height={3}
-                      crawl={true}
-                      showSpinner={false}
-                      easing="ease"
-                      speed={200}
-                      shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                      zIndex={1600}
-                    />
-                    <OfflineDetector />
-                    <AuthCheck />
-                    <AuthProvider>
-                      <SurveyProvider>
-                        <div className="flex min-h-screen flex-col">
-                          <Suspense
-                            fallback={
-                              <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
-                            }
-                          >
-                            <Header />
-                          </Suspense>
-                          <ServiceAvailabilityTicker />
-                          {/* <NewsTicker /> */}
-                          <main className="flex-1">{children}</main>
-                          <Footer
-                            githubUrl={githubUrl}
-                            versionInfo={versionInfo}
-                          />
-                        </div>
-                      </SurveyProvider>
-                    </AuthProvider>
-                  </MaintenanceBypass>
-                </QueryProvider>
-              </ThemeProvider>
-            </CustomThemeProvider>
+            <ConsentProviderWrapper>
+              <CookieSettingsButton />
+              <CustomThemeProvider>
+                <ThemeProvider>
+                  <QueryProvider>
+                    <MaintenanceBypass>
+                      <NextTopLoader
+                        color="var(--color-button-info)"
+                        initialPosition={0.08}
+                        crawlSpeed={200}
+                        height={3}
+                        crawl={true}
+                        showSpinner={false}
+                        easing="ease"
+                        speed={200}
+                        shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                        zIndex={1600}
+                      />
+                      <OfflineDetector />
+                      <AuthCheck />
+                      <AuthProvider>
+                        <SurveyProvider>
+                          <div className="flex min-h-screen flex-col">
+                            <Suspense
+                              fallback={
+                                <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                              }
+                            >
+                              <Header />
+                            </Suspense>
+                            <ServiceAvailabilityTicker />
+                            {/* <NewsTicker /> */}
+                            <main className="flex-1">{children}</main>
+                            <Footer
+                              githubUrl={githubUrl}
+                              versionInfo={versionInfo}
+                            />
+                          </div>
+                        </SurveyProvider>
+                      </AuthProvider>
+                    </MaintenanceBypass>
+                  </QueryProvider>
+                </ThemeProvider>
+              </CustomThemeProvider>
+              <ConsentBannerWrapper />
+            </ConsentProviderWrapper>
           </AppRouterCacheProvider>
           <Script
             id="microsoft-clarity-analytics"
@@ -191,6 +216,24 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Google Consent Mode v2 - MUST be before Google Analytics */}
+        <Script
+          id="google-consent-mode"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'ad_storage': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+              });
+            `,
+          }}
+        />
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
         {/* Google AdSense - loaded once at app level */}
@@ -228,93 +271,100 @@ export default async function RootLayout({
           </div>
         </noscript>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <CustomThemeProvider>
-            <ThemeProvider>
-              <QueryProvider>
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    success: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+          <ConsentProviderWrapper>
+            <CookieSettingsButton />
+            <CustomThemeProvider>
+              <ThemeProvider>
+                <QueryProvider>
+                  <Toaster
+                    position="bottom-right"
+                    toastOptions={{
+                      success: {
+                        style: {
+                          background: "var(--color-secondary-bg)",
+                          color: "var(--color-primary-text)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "16px",
+                          backdropFilter: "blur(20px)",
+                          WebkitBackdropFilter: "blur(20px)",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                        },
+                        iconTheme: {
+                          primary: "var(--color-button-info)",
+                          secondary: "var(--color-secondary-bg)",
+                        },
                       },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
+                      error: {
+                        style: {
+                          background: "var(--color-secondary-bg)",
+                          color: "var(--color-primary-text)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "16px",
+                          backdropFilter: "blur(20px)",
+                          WebkitBackdropFilter: "blur(20px)",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                        },
+                        iconTheme: {
+                          primary: "var(--color-button-info)",
+                          secondary: "var(--color-secondary-bg)",
+                        },
                       },
-                    },
-                    error: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      loading: {
+                        style: {
+                          background: "var(--color-secondary-bg)",
+                          color: "var(--color-primary-text)",
+                          border: "1px solid var(--color-border-primary)",
+                          borderRadius: "16px",
+                          backdropFilter: "blur(20px)",
+                          WebkitBackdropFilter: "blur(20px)",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                        },
+                        iconTheme: {
+                          primary: "var(--color-button-info)",
+                          secondary: "var(--color-secondary-bg)",
+                        },
                       },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
-                      },
-                    },
-                    loading: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                      },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
-                      },
-                    },
-                  }}
-                />
-                <NextTopLoader
-                  color="var(--color-button-info)"
-                  initialPosition={0.08}
-                  crawlSpeed={200}
-                  height={3}
-                  crawl={true}
-                  showSpinner={false}
-                  easing="ease"
-                  speed={200}
-                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                  zIndex={1600}
-                />
-                <OfflineDetector />
-                <AuthCheck />
-                <AuthProvider>
-                  <SurveyProvider>
-                    <div className="flex min-h-screen flex-col">
-                      <Suspense
-                        fallback={
-                          <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
-                        }
-                      >
-                        <Header />
-                      </Suspense>
-                      <ServiceAvailabilityTicker />
-                      {/* <NewsTicker /> */}
-                      <main className="flex-1">{children}</main>
-                      <Footer githubUrl={githubUrl} versionInfo={versionInfo} />
-                    </div>
-                  </SurveyProvider>
-                </AuthProvider>
-              </QueryProvider>
-            </ThemeProvider>
-          </CustomThemeProvider>
+                    }}
+                  />
+                  <NextTopLoader
+                    color="var(--color-button-info)"
+                    initialPosition={0.08}
+                    crawlSpeed={200}
+                    height={3}
+                    crawl={true}
+                    showSpinner={false}
+                    easing="ease"
+                    speed={200}
+                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                    zIndex={1600}
+                  />
+                  <OfflineDetector />
+                  <AuthCheck />
+                  <AuthProvider>
+                    <SurveyProvider>
+                      <div className="flex min-h-screen flex-col">
+                        <Suspense
+                          fallback={
+                            <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                          }
+                        >
+                          <Header />
+                        </Suspense>
+                        <ServiceAvailabilityTicker />
+                        {/* <NewsTicker /> */}
+                        <main className="flex-1">{children}</main>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={versionInfo}
+                        />
+                      </div>
+                    </SurveyProvider>
+                  </AuthProvider>
+                </QueryProvider>
+              </ThemeProvider>
+            </CustomThemeProvider>
+            <ConsentBannerWrapper />
+          </ConsentProviderWrapper>
         </AppRouterCacheProvider>
         <Script
           id="microsoft-clarity-analytics"

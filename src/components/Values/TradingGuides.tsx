@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
 import dynamic from "next/dynamic";
+import { YouTubeEmbed } from "@next/third-parties/google";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
@@ -304,21 +305,19 @@ export default function TradingGuides({
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
-            <iframe
-              src="https://www.youtube.com/embed/yEsTOaJka3k?controls=0&rel=0"
-              width="100%"
-              height="315"
-              allowFullScreen
-              loading="lazy"
-              title="Jailbreak Trading Video"
+            <div
               style={{
-                border: 0,
                 borderRadius: "20px",
                 maxWidth: 560,
                 width: "100%",
-                height: 315,
               }}
-            />
+            >
+              <YouTubeEmbed
+                videoid="yEsTOaJka3k"
+                height={315}
+                params="controls=0&rel=0"
+              />
+            </div>
           </div>
         </div>
       )}
