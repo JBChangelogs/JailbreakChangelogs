@@ -23,7 +23,7 @@ import {
 } from "@/utils/maintenance";
 import { getWebsiteVersion, getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -101,6 +101,7 @@ export default async function RootLayout({
           />
         </head>
         <body className={`${inter.className} bg-primary-bg`}>
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <noscript>
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
@@ -201,6 +202,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.className} bg-primary-bg`}>
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
         <noscript>
           <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
             <div className="mx-auto max-w-md p-8 text-center">
