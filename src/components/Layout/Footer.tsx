@@ -144,7 +144,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border-primary flex gap-3">
+        <div className="mt-12 pt-8 border-t border-border-primary flex flex-wrap gap-3">
           <Tooltip
             title="Follow us on X (Twitter)"
             arrow
