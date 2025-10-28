@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Icon } from "../UI/IconWrapper";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -28,9 +27,8 @@ export default function ReportIssueButton() {
     <>
       <button
         onClick={handleOpenModal}
-        className="text-link hover:text-link-hover flex w-full cursor-pointer items-center gap-2"
+        className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 cursor-pointer bg-none border-none p-0 text-left"
       >
-        <Icon icon="solar:bug-linear" className="h-5 w-5" inline={true} />
         Report an Issue
       </button>
       <ReportIssueModal
