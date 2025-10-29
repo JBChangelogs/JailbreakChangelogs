@@ -70,8 +70,6 @@ export const getTrendColor = (trend: string): string => {
     trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
 
   switch (normalizedTrend) {
-    case "Avoided":
-      return "bg-red-600 text-white";
     case "Dropping":
       return "bg-rose-600 text-white";
     case "Unstable":

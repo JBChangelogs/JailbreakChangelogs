@@ -26,8 +26,6 @@ export default function TradingGuides({
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const trendDescriptions: Record<string, string> = {
-    Avoided:
-      "Items which are on a decline due to being generally avoided by the community.",
     Dropping:
       "Items which are consistently getting larger underpays from base overtime.",
     Unstable:
@@ -103,8 +101,6 @@ export default function TradingGuides({
 
   const getTrendHexColor = (trend: string): string => {
     switch (trend) {
-      case "Avoided":
-        return "#dc2626";
       case "Dropping":
         return "#e11d48";
       case "Unstable":
@@ -128,8 +124,6 @@ export default function TradingGuides({
 
   const getTrendValue = (trend: string): string => {
     switch (trend) {
-      case "Avoided":
-        return "trend-avoided";
       case "Dropping":
         return "trend-dropping";
       case "Unstable":

@@ -169,7 +169,7 @@ const SimilarItems = ({
 
       // Similar trend categories (40%)
       const positiveTrends = ["Rising", "Hyped", "Recovering"];
-      const negativeTrends = ["Dropping", "Avoided"];
+      const negativeTrends = ["Dropping"];
       const neutralTrends = ["Stable", "Unstable"];
       const specialTrends = ["Hoarded", "Manipulated"];
 

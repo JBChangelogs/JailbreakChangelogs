@@ -59,7 +59,6 @@ export type ValueSort =
   | "trend-stable"
   | "trend-rising"
   | "trend-hyped"
-  | "trend-avoided"
   | "trend-dropping"
   | "trend-unstable"
   | "trend-hoarded"

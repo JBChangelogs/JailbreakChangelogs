@@ -148,7 +148,7 @@ export default function InventoryFilters({
       {/* Advanced Filters Toggle Button */}
       <button
         onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        className="text-link0-hover flex items-center gap-2 text-sm font-medium"
+        className="text-link0-hover flex cursor-pointer items-center gap-2 text-sm font-medium"
       >
         <ChevronDownIcon
           className={`h-4 w-4 transition-transform ${

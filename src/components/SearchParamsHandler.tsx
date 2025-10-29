@@ -55,7 +55,6 @@ const validValueSorts = [
   "trend-stable",
   "trend-rising",
   "trend-hyped",
-  "trend-avoided",
   "trend-dropping",
   "trend-unstable",
   "trend-hoarded",

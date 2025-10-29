@@ -12,7 +12,6 @@ export const demandOrder = [
 ] as const;
 
 export const trendOrder = [
-  "Avoided",
   "Dropping",
   "Unstable",
   "Hoarded",
@@ -339,7 +338,6 @@ export const sortAndFilterItems = async (
       "trend-stable": "Stable",
       "trend-rising": "Rising",
       "trend-hyped": "Hyped",
-      "trend-avoided": "Avoided",
       "trend-dropping": "Dropping",
       "trend-unstable": "Unstable",
       "trend-hoarded": "Hoarded",
@@ -498,7 +496,6 @@ export const sortAndFilterItems = async (
     case "trend-stable":
     case "trend-rising":
     case "trend-hyped":
-    case "trend-avoided":
     case "trend-dropping":
     case "trend-unstable":
     case "trend-hoarded":

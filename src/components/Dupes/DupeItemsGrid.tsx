@@ -40,8 +40,7 @@ export default function DupeItemsGrid({
   const getItemsPerRow = () => {
     if (typeof window === "undefined") return 4; // Default for SSR
     const width = window.innerWidth;
-    if (width < 375) return 1;
-    if (width < 768) return 2;
+    if (width < 768) return 1;
     if (width < 1024) return 2;
     if (width < 1280) return 2;
     return 4;

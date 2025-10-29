@@ -265,7 +265,6 @@ export default function ValuesSearchControls({
                   <option value="" disabled>
                     Trend
                   </option>
-                  <option value="trend-avoided">Avoided Trend</option>
                   <option value="trend-dropping">Dropping Trend</option>
                   <option value="trend-unstable">Unstable Trend</option>
                   <option value="trend-hoarded">Hoarded Trend</option>
