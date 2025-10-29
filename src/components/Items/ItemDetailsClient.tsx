@@ -77,6 +77,7 @@ import {
 } from "@/utils/images";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { useAdReloader } from "@/hooks/useAdReloader";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
@@ -170,6 +171,9 @@ export default function ItemDetailsClient({
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
+
+  // Initialize ad reloader for route changes
+  useAdReloader();
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(

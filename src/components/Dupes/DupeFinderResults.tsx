@@ -11,6 +11,7 @@ import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useAdReloader } from "@/hooks/useAdReloader";
 import { Icon } from "../UI/IconWrapper";
 import { logError } from "@/services/logger";
 import DupeUserInfo from "./DupeUserInfo";
@@ -109,6 +110,9 @@ export default function DupeFinderResults({
 
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
+
+  // Initialize ad reloader for route changes
+  useAdReloader();
 
   // Filter out user IDs we already have data for
   const missingUserIds = visibleUserIds.filter(

@@ -18,10 +18,10 @@ export default function CookieSettingsModal({
 }: CookieSettingsModalProps) {
   const { updateConsent } = useConsent();
   const [settings, setSettings] = useState<Partial<ConsentConfig>>({
-    analytics_storage: "denied",
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
+    analytics_storage: "granted",
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
   });
 
   // Load current consent from cookie on mount

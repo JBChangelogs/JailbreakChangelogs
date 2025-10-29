@@ -1,12 +1,16 @@
+"use server";
+
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import type { ConsentConfig } from "@/utils/googleConsentMode";
+import { getDefaultConsentByRegion } from "@/utils/geolocation";
 
 const CONSENT_COOKIE_NAME = "gcm-consent";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 /**
  * GET - Retrieve consent from HttpOnly cookie
+ * If no cookie exists, returns the default consent based on geolocation
  */
 export async function GET() {
   try {
@@ -14,18 +18,52 @@ export async function GET() {
     const consentCookie = cookieStore.get(CONSENT_COOKIE_NAME)?.value;
 
     if (!consentCookie) {
-      return NextResponse.json({ consent: null }, { status: 200 });
+      // Return default consent based on geolocation instead of null
+      const defaultConsent = await getDefaultConsentByRegion();
+      const response = NextResponse.json(
+        { consent: defaultConsent },
+        { status: 200 },
+      );
+      response.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate",
+      );
+      return response;
     }
 
     try {
       const consent = JSON.parse(consentCookie) as Partial<ConsentConfig>;
-      return NextResponse.json({ consent }, { status: 200 });
+      const response = NextResponse.json({ consent }, { status: 200 });
+      response.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate",
+      );
+      return response;
     } catch {
-      // Invalid JSON in cookie, treat as no consent
-      return NextResponse.json({ consent: null }, { status: 200 });
+      // Invalid JSON in cookie, return default consent
+      const defaultConsent = await getDefaultConsentByRegion();
+      const response = NextResponse.json(
+        { consent: defaultConsent },
+        { status: 200 },
+      );
+      response.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate",
+      );
+      return response;
     }
   } catch {
-    return NextResponse.json({ consent: null }, { status: 200 });
+    // On error, return default consent
+    const defaultConsent = await getDefaultConsentByRegion();
+    const response = NextResponse.json(
+      { consent: defaultConsent },
+      { status: 200 },
+    );
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate",
+    );
+    return response;
   }
 }
 

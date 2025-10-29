@@ -33,6 +33,7 @@ const ConsentContext = createContext<ConsentContextType>(defaultContextValue);
 interface InitState {
   consentState: Partial<ConsentConfig> | null;
   isInitialized: boolean;
+  hasUserChosen: boolean; // Track if user explicitly made a choice
 }
 
 interface ConsentProviderProps {
@@ -47,16 +48,20 @@ export function ConsentProvider({
   const [state, setState] = useState<InitState>(() => {
     // Initialize with server-provided consent to avoid hydration mismatch
     if (initialConsent) {
+      // User has stored consent = they already made a choice
       updateGCMConsent(initialConsent);
       return {
         consentState: initialConsent,
         isInitialized: true,
+        hasUserChosen: true,
       };
     }
 
+    // No stored consent = first time, show banner
     return {
       consentState: null,
       isInitialized: true,
+      hasUserChosen: false,
     };
   });
 
@@ -71,7 +76,8 @@ export function ConsentProvider({
       state.consentState.ad_storage === "denied"
     : false;
 
-  const showBanner = state.isInitialized && !state.consentState;
+  // Show banner only if user hasn't made a choice yet
+  const showBanner = state.isInitialized && !state.hasUserChosen;
 
   const handleAcceptConsent = async () => {
     const consentConfig: Partial<ConsentConfig> = {
@@ -85,6 +91,7 @@ export function ConsentProvider({
     setState({
       consentState: consentConfig,
       isInitialized: true,
+      hasUserChosen: true,
     });
   };
 
@@ -100,6 +107,7 @@ export function ConsentProvider({
     setState({
       consentState: consentConfig,
       isInitialized: true,
+      hasUserChosen: true,
     });
   };
 
@@ -109,6 +117,7 @@ export function ConsentProvider({
     setState({
       consentState: config,
       isInitialized: true,
+      hasUserChosen: true,
     });
   };
 

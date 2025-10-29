@@ -21,23 +21,29 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
 }) => {
   const adRef = useRef<HTMLModElement>(null);
   const [showSupportMessage, setShowSupportMessage] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Monitor ad status and show fallback if needed
   useEffect(() => {
     const element = adRef.current;
     if (!element) return;
 
-    // Set a timeout to show fallback if ad doesn't load
-    timeoutRef.current = window.setTimeout(() => {
-      if (showFallback && element.getAttribute("data-ad-status") !== "filled") {
+    try {
+      if (typeof window !== "undefined" && window.adsbygoogle) {
+        window.adsbygoogle.push({});
+      }
+    } catch (error) {
+      console.warn("Failed to initialize ad:", error);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      if (showFallback && !element.querySelector("iframe")) {
         setShowSupportMessage(true);
       }
-    }, 8000);
+    }, 10000);
 
     return () => {
       if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
     };

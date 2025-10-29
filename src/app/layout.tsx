@@ -28,6 +28,7 @@ import { getWebsiteVersion, getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
+import { getDefaultConsent } from "@/utils/serverConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
@@ -88,6 +89,7 @@ export default async function RootLayout({
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const versionInfo = await getWebsiteVersion();
   const githubUrl = getGitHubUrl();
+  const defaultConsent = await getDefaultConsent();
 
   if (isMaintenanceMode) {
     return (
@@ -102,10 +104,10 @@ export default async function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('consent', 'default', {
-                  'ad_user_data': 'denied',
-                  'ad_personalization': 'denied',
-                  'ad_storage': 'denied',
-                  'analytics_storage': 'denied',
+                  'ad_user_data': '${defaultConsent.ad_user_data}',
+                  'ad_personalization': '${defaultConsent.ad_personalization}',
+                  'ad_storage': '${defaultConsent.ad_storage}',
+                  'analytics_storage': '${defaultConsent.analytics_storage}',
                   'wait_for_update': 500
                 });
               `,
@@ -114,11 +116,13 @@ export default async function RootLayout({
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
           {/* Google AdSense - loaded once at app level */}
+          {/* Using afterInteractive strategy ensures script loads before ads are rendered */}
+          {/* This prevents ads from failing to load on first page visit */}
           <Script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
             crossOrigin="anonymous"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
           />
         </head>
         <body className={`${inter.className} bg-primary-bg`}>
@@ -225,10 +229,10 @@ export default async function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('consent', 'default', {
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'ad_storage': 'denied',
-                'analytics_storage': 'denied',
+                'ad_user_data': '${defaultConsent.ad_user_data}',
+                'ad_personalization': '${defaultConsent.ad_personalization}',
+                'ad_storage': '${defaultConsent.ad_storage}',
+                'analytics_storage': '${defaultConsent.analytics_storage}',
                 'wait_for_update': 500
               });
             `,
@@ -237,11 +241,13 @@ export default async function RootLayout({
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
         {/* Google AdSense - loaded once at app level */}
+        {/* Using afterInteractive strategy ensures script loads before ads are rendered */}
+        {/* This prevents ads from failing to load on first page visit */}
         <Script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
           crossOrigin="anonymous"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
       </head>
       <body className={`${inter.className} bg-primary-bg`}>

@@ -29,6 +29,7 @@ import { FilterSort, ValueSort } from "@/types";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useAdReloader } from "@/hooks/useAdReloader";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -87,6 +88,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const router = useRouter();
+
+  // Initialize ad reloader for route changes
+  useAdReloader();
+
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
   const displayDebouncedSearchQuery =

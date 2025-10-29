@@ -83,36 +83,127 @@ export default function PrivacyPage() {
                 privacy choices. You have full control over which types of
                 cookies we use:
               </Typography>
-              <ul className="text-secondary-text list-inside list-disc space-y-2 mb-4">
+
+              <div className="bg-tertiary-bg rounded-lg p-4 mb-4 space-y-4">
+                <div>
+                  <h3 className="text-primary-text font-semibold mb-2">
+                    Analytics Storage
+                  </h3>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>What it does:</strong> Allows us to analyze website
+                    usage and improve your experience
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>Cookies used:</strong> Google Analytics (_ga, _gid,
+                    _gat), Microsoft Clarity (_clid)
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm">
+                    <strong>Purpose:</strong> Tracks page views, user behavior,
+                    and session duration to help us understand how you use our
+                    site and identify areas for improvement.
+                  </Typography>
+                </div>
+
+                <div>
+                  <h3 className="text-primary-text font-semibold mb-2">
+                    Ad Storage
+                  </h3>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>What it does:</strong> Stores information for
+                    advertising purposes
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>Cookies used:</strong> Google Ads cookies (NID, IDE,
+                    ANID)
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm">
+                    <strong>Purpose:</strong> Allows Google to store and
+                    remember your browsing behavior across websites. Without
+                    this, Google cannot track you for ad targeting purposes.
+                  </Typography>
+                </div>
+
+                <div>
+                  <h3 className="text-primary-text font-semibold mb-2">
+                    Ad User Data
+                  </h3>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>What it does:</strong> Allows personalized
+                    advertising based on your data
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>Cookies used:</strong> Google Ads conversion
+                    tracking, audience data
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm">
+                    <strong>Purpose:</strong> Sends your interests and browsing
+                    history to Google&apos;s ad network. This enables Google to
+                    build a profile of your interests (e.g., &quot;gaming
+                    enthusiast&quot;, &quot;tech interested&quot;) to show you
+                    more relevant ads.
+                  </Typography>
+                </div>
+
+                <div>
+                  <h3 className="text-primary-text font-semibold mb-2">
+                    Ad Personalization
+                  </h3>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>What it does:</strong> Enables personalized ads
+                    based on your interests
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm mb-2">
+                    <strong>Cookies used:</strong> Google Ads personalization
+                    signals
+                  </Typography>
+                  <Typography className="text-secondary-text text-sm">
+                    <strong>Purpose:</strong> Uses the data collected above to
+                    show you ads tailored to your interests. Without this, you
+                    see generic, non-personalized ads. With this enabled, you
+                    see ads more relevant to you.
+                  </Typography>
+                </div>
+              </div>
+
+              <Typography className="text-secondary-text mb-4">
+                <strong>How they work together:</strong> All four settings must
+                be enabled for personalized advertising to work. If any one is
+                disabled, ad personalization is limited and you&apos;ll see
+                generic ads instead.
+              </Typography>
+
+              <Typography className="text-secondary-text mb-4">
+                <strong>Your Consent Preferences:</strong> We respect your
+                privacy choices. You have full control over which types of
+                cookies we use:
+              </Typography>
+              <ul className="text-secondary-text list-inside list-disc space-y-1 mb-4">
                 <li>
-                  <strong>Analytics Storage:</strong> Allows us to analyze
-                  website usage and improve your experience
+                  <strong>
+                    In regulated regions (EU, Brazil, Australia, Canada):
+                  </strong>{" "}
+                  All cookies are disabled by default. You must actively opt-in
+                  to enable them.
                 </li>
                 <li>
-                  <strong>Ad Storage:</strong> Stores information for
-                  advertising purposes
-                </li>
-                <li>
-                  <strong>Ad User Data:</strong> Allows personalized advertising
-                  based on your data
-                </li>
-                <li>
-                  <strong>Ad Personalization:</strong> Enables personalized ads
-                  based on your interests
+                  <strong>In other regions:</strong> All cookies are enabled by
+                  default for the best experience, but you can opt-out at any
+                  time.
                 </li>
               </ul>
+
               <Typography className="text-secondary-text mb-4">
                 You can manage your cookie preferences at any time by clicking
                 the <strong>&quot;Manage Cookies&quot;</strong> button in the
                 Resources section of our footer. Your preferences are stored
-                securely and will be respected across all your visits to our
-                website.
+                securely in a cookie named <strong>gcm-consent</strong> and will
+                be respected across all your visits to our website.
               </Typography>
               <Typography className="text-secondary-text">
                 We use <strong>Google Consent Mode v2</strong> to ensure your
                 consent preferences are honored before any tracking cookies are
-                loaded. By default, all tracking is disabled until you
-                explicitly grant consent.
+                loaded. Your consent choices are communicated to Google and
+                other third-party services to respect your privacy decisions.
               </Typography>
             </div>
 

@@ -4,14 +4,24 @@ import { useEffect, useRef } from "react";
 
 /**
  * Custom hook to handle ad reloading on route changes
- * Based on best practices: only reload ads when route actually changes
- * Avoids aggressive reloading that triggers invalid traffic concerns
  *
- * Uses debouncing (1000ms) to prevent rapid successive reloads from
- * quick navigation (e.g., dropdown selections, quick nav links)
+ * Handles TWO types of navigation:
+ * 1. Full page navigation (Next.js router.push) - detected via popstate
+ * 2. Client-side navigation (window.history.pushState) - detected via custom event
+ *
+ * Best practices implemented:
+ * - Debounces reloads to prevent aggressive behavior that triggers invalid traffic warnings
+ * - Avoids reloading ads multiple times on the same page
+ * - Handles errors gracefully without breaking the app
+ *
+ * Google AdSense guidelines:
+ * - Never reload ads more than once per page view
+ * - Don't reload ads on every state change or re-render
+ * - Only reload when user navigates to a new page
  */
 export function useAdReloader() {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const adReloadedRef = useRef(false);
 
   useEffect(() => {
     // Debounced ad reload function
@@ -21,42 +31,54 @@ export function useAdReloader() {
         clearTimeout(debounceTimerRef.current);
       }
 
-      // Schedule reload after 1000ms of inactivity
+      // Reset reload flag for new navigation
+      adReloadedRef.current = false;
+
+      // Debounce ad reload to avoid rapid successive reloads
+      // This prevents Google from flagging as invalid traffic
       debounceTimerRef.current = setTimeout(() => {
-        if (typeof window !== "undefined" && window.adsbygoogle) {
+        if (
+          typeof window !== "undefined" &&
+          window.adsbygoogle &&
+          !adReloadedRef.current
+        ) {
           try {
             window.adsbygoogle.push({});
+            adReloadedRef.current = true;
           } catch (err) {
-            // Expected error when ads are already loaded on the page
-            // This is safe to ignore and doesn't indicate a problem
-            if (
-              err instanceof Error &&
-              err.message?.includes("already have ads")
-            ) {
-              console.debug("Ads already loaded on this page, skipping reload");
-            } else {
-              console.error("Error reloading ads:", err);
+            // Common errors that are safe to ignore:
+            // - "All ins elements in the DOM with class adsbygoogle already have ads"
+            // - "Only one 'enable_page_level_ads' allowed per page"
+            if (err instanceof Error) {
+              if (
+                err.message?.includes("already have ads") ||
+                err.message?.includes("enable_page_level_ads")
+              ) {
+                // These are expected and safe - ads are already loaded
+                console.debug("Ads already initialized on this page");
+              } else {
+                console.warn("Ad reload warning:", err.message);
+              }
             }
           }
         }
-      }, 1000);
+      }, 1200); // Slightly longer debounce to ensure DOM is ready
     };
 
-    // Listen for route changes via popstate (back/forward navigation)
+    // Listen for full page navigation (back/forward buttons)
     const handlePopstate = () => {
       debouncedReload();
     };
 
-    // Listen for URL changes via popstate
-    window.addEventListener("popstate", handlePopstate);
-
-    // Also listen for custom route change events (for client-side navigation)
-    // This handles window.history.pushState() calls
+    // Listen for client-side navigation via window.history.pushState
+    // This is used by pages like /changelogs and /seasons for switching items
     const originalPushState = window.history.pushState;
     window.history.pushState = function (...args) {
       originalPushState.apply(window.history, args);
       debouncedReload();
     };
+
+    window.addEventListener("popstate", handlePopstate);
 
     return () => {
       window.removeEventListener("popstate", handlePopstate);
