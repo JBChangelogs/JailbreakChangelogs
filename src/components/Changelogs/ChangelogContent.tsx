@@ -117,16 +117,23 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
           transition: all 0.3s ease;
         }
 
+        @media (min-width: 500px) {
+          .sidebar-ad-container-changelog {
+            width: 336px;
+            height: 280px;
+          }
+        }
+
         @media (min-width: 768px) {
           .sidebar-ad-container-changelog {
             width: 300px;
-            height: 600px;
+            height: 250px;
           }
         }
 
         @media (min-width: 1024px) {
           .sidebar-ad-container-changelog {
-            width: 160px;
+            width: 300px;
             height: 600px;
           }
         }

@@ -139,11 +139,21 @@ export default function SeasonDetailsClient({
           display: block;
         }
 
+        @media (min-width: 500px) {
+          .sidebar-ad-container-season {
+            width: 100%;
+            max-width: 336px;
+            height: 280px;
+            min-width: 250px;
+            display: block;
+          }
+        }
+
         @media (min-width: 768px) {
           .sidebar-ad-container-season {
             width: 100%;
             max-width: 300px;
-            height: 600px;
+            height: 250px;
             min-width: 250px;
             display: block;
           }
@@ -152,9 +162,9 @@ export default function SeasonDetailsClient({
         @media (min-width: 1024px) {
           .sidebar-ad-container-season {
             width: 100%;
-            max-width: 160px;
+            max-width: 300px;
             height: 600px;
-            min-width: 160px;
+            min-width: 300px;
             display: block;
           }
         }
