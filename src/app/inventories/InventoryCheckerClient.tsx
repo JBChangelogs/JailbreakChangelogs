@@ -18,7 +18,6 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -93,9 +92,6 @@ export default function InventoryCheckerClient({
     null,
   );
   const [activeTab, setActiveTab] = useState(0);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [selectedItemForAction, setSelectedItemForAction] =
-    useState<InventoryItem | null>(null);
   const dupedItems =
     initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
 
@@ -409,20 +405,8 @@ export default function InventoryCheckerClient({
   };
 
   const handleItemClick = (item: InventoryItem) => {
-    setSelectedItemForAction(item);
-    setShowActionModal(true);
-  };
-
-  const handleViewTradeHistory = () => {
-    if (selectedItemForAction) {
-      setSelectedItem(selectedItemForAction);
-      setShowHistoryModal(true);
-    }
-  };
-
-  const closeActionModal = () => {
-    setShowActionModal(false);
-    setSelectedItemForAction(null);
+    setSelectedItem(item);
+    setShowHistoryModal(true);
   };
 
   const closeHistoryModal = () => {
@@ -807,22 +791,14 @@ export default function InventoryCheckerClient({
               </div>
             </div>
 
-            {/* Item Action Modal */}
-            {showActionModal && selectedItemForAction && (
-              <ItemActionModal
-                isOpen={showActionModal}
-                onClose={closeActionModal}
-                item={selectedItemForAction}
-                onViewTradeHistory={handleViewTradeHistory}
+            {/* Trade History Modal */}
+            {showHistoryModal && selectedItem && (
+              <TradeHistoryModal
+                isOpen={showHistoryModal}
+                onClose={closeHistoryModal}
+                item={selectedItem}
               />
             )}
-
-            {/* Trade History Modal */}
-            <TradeHistoryModal
-              isOpen={showHistoryModal}
-              onClose={closeHistoryModal}
-              item={selectedItem}
-            />
           </>
         )}
 

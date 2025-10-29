@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import { DupeFinderItem, Item } from "@/types";
@@ -101,7 +102,14 @@ export default function DupeItemCard({
         <h2
           className={`${bangers.className} text-primary-text text-2xl tracking-wide break-words`}
         >
-          {item.title}
+          <Link
+            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:text-link-hover transition-colors"
+            prefetch={false}
+          >
+            {item.title}
+          </Link>
         </h2>
       </div>
 

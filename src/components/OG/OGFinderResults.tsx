@@ -12,7 +12,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useAdReloader } from "@/hooks/useAdReloader";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
-import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../UI/IconWrapper";
@@ -95,9 +94,6 @@ export default function OGFinderResults({
   const localRobloxAvatarsRef = useRef(localRobloxAvatars);
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [selectedItemForAction, setSelectedItemForAction] =
-    useState<OGItem | null>(null);
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
 
   // Filter out user IDs we already have data for
@@ -263,21 +259,8 @@ export default function OGFinderResults({
 
   // Event handlers
   const handleCardClick = (item: OGItem) => {
-    setSelectedItemForAction(item);
-    setShowActionModal(true);
-  };
-
-  const handleViewTradeHistory = () => {
-    if (selectedItemForAction) {
-      setSelectedItem(selectedItemForAction);
-      setShowHistoryModal(true);
-      setShowActionModal(false);
-    }
-  };
-
-  const closeActionModal = () => {
-    setShowActionModal(false);
-    setSelectedItemForAction(null);
+    setSelectedItem(item);
+    setShowHistoryModal(true);
   };
 
   const closeHistoryModal = () => {
@@ -481,15 +464,6 @@ export default function OGFinderResults({
       )}
 
       {/* Modals */}
-      {showActionModal && selectedItemForAction && (
-        <ItemActionModal
-          isOpen={showActionModal}
-          onClose={closeActionModal}
-          item={selectedItemForAction}
-          onViewTradeHistory={handleViewTradeHistory}
-        />
-      )}
-
       {showHistoryModal && selectedItem && (
         <TradeHistoryModal
           isOpen={showHistoryModal}

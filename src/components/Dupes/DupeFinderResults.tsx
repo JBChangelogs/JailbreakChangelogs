@@ -6,7 +6,6 @@ import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { parseCurrencyValue } from "@/utils/currency";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
-import ItemActionModal from "@/components/Modals/ItemActionModal";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
@@ -101,9 +100,6 @@ export default function DupeFinderResults({
     useState<Record<string, string>>(robloxAvatars);
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [selectedItemForAction, setSelectedItemForAction] =
-    useState<DupeFinderItem | null>(null);
   const [itemsData] = useState<Item[]>(items);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
@@ -323,21 +319,8 @@ export default function DupeFinderResults({
 
   // Event handlers
   const handleCardClick = (item: DupeFinderItem) => {
-    setSelectedItemForAction(item);
-    setShowActionModal(true);
-  };
-
-  const handleViewTradeHistory = () => {
-    if (selectedItemForAction) {
-      setSelectedItem(selectedItemForAction);
-      setShowHistoryModal(true);
-      setShowActionModal(false);
-    }
-  };
-
-  const closeActionModal = () => {
-    setShowActionModal(false);
-    setSelectedItemForAction(null);
+    setSelectedItem(item);
+    setShowHistoryModal(true);
   };
 
   const closeHistoryModal = () => {
@@ -438,15 +421,6 @@ export default function DupeFinderResults({
       </div>
 
       {/* Modals */}
-      {showActionModal && selectedItemForAction && (
-        <ItemActionModal
-          isOpen={showActionModal}
-          onClose={closeActionModal}
-          item={selectedItemForAction}
-          onViewTradeHistory={handleViewTradeHistory}
-        />
-      )}
-
       {showHistoryModal && selectedItem && (
         <TradeHistoryModal
           isOpen={showHistoryModal}

@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
-import ItemActionModal from "@/components/Modals/ItemActionModal";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../UI/IconWrapper";
@@ -36,9 +35,6 @@ export default function InventoryItems({
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [selectedItemForAction, setSelectedItemForAction] =
-    useState<InventoryItem | null>(null);
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
@@ -117,19 +113,7 @@ export default function InventoryItems({
   };
 
   const handleCardClick = (item: InventoryItem) => {
-    setSelectedItemForAction(item);
-    setShowActionModal(true);
-  };
-
-  const handleViewTradeHistory = () => {
-    if (selectedItemForAction) {
-      onItemClick(selectedItemForAction);
-    }
-  };
-
-  const closeActionModal = () => {
-    setShowActionModal(false);
-    setSelectedItemForAction(null);
+    onItemClick(item);
   };
 
   const handleOriginalFilterToggle = (checked: boolean) => {
@@ -662,14 +646,6 @@ export default function InventoryItems({
       />
 
       {/* Action Modal */}
-      {showActionModal && selectedItemForAction && (
-        <ItemActionModal
-          isOpen={showActionModal}
-          onClose={closeActionModal}
-          item={selectedItemForAction}
-          onViewTradeHistory={handleViewTradeHistory}
-        />
-      )}
     </div>
   );
 }
