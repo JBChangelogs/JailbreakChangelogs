@@ -43,6 +43,7 @@ export const UserBadges = ({
   };
 
   const currentSize = sizeConfig[size];
+  const badimoSize = { sm: 24, md: 36, lg: 40 }[size];
 
   // Sort flags by index (1 as first badge)
   const sortedFlags = flags
@@ -244,6 +245,8 @@ export const UserBadges = ({
       },
     );
   };
+
+  // Removed Badimo toast in favor of direct external link
 
   const handlePremiumBadgeClick = () => {
     const premiumMessages = {
@@ -499,6 +502,70 @@ export const UserBadges = ({
                 inline={true}
               />
             </div>
+          </Tooltip>
+        );
+      case "is_badimo":
+        return (
+          <Tooltip
+            key={`flag-${flag.flag}`}
+            title="Badimo Developer"
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <a
+              href="https://roblox.com/communities/3059674/Badimo"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                const badimoFlag = sortedFlags.find(
+                  (f) => f.flag === "is_badimo",
+                );
+                toast(
+                  () => (
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+                        alt="Badimo"
+                        width={20}
+                        height={20}
+                        className="h-5 w-5 object-contain"
+                      />
+                      <span>
+                        {badimoFlag?.description ||
+                          "This user is an official Badimo developer"}
+                      </span>
+                    </div>
+                  ),
+                  {
+                    duration: 4000,
+                    style: {
+                      background: "linear-gradient(to right, #111827, #1F2937)",
+                      color: "white",
+                      fontWeight: "600",
+                    },
+                  },
+                );
+              }}
+            >
+              <Image
+                src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+                alt="Badimo"
+                width={badimoSize}
+                height={badimoSize}
+                className="object-contain cursor-pointer hover:opacity-90"
+              />
+            </a>
           </Tooltip>
         );
       default:

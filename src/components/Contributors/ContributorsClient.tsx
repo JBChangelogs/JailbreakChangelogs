@@ -29,6 +29,7 @@ export default function ContributorsClient({
       is_vt: "Value Team",
       is_contributor: "Contributor",
       is_tester: "Tester",
+      is_badimo: "Badimo",
     };
 
     const sortedFlags = enabledFlags.sort((a, b) => a.index - b.index);
@@ -48,6 +49,7 @@ export default function ContributorsClient({
       is_vt: "Value Team",
       is_contributor: "Contributor",
       is_tester: "Tester",
+      is_badimo: "Badimo",
     };
 
     return flagToRole[highestPriorityFlag.flag] || "Member";
@@ -60,6 +62,7 @@ export default function ContributorsClient({
   const valueTeam: (UserWithFlags & { role: string })[] = [];
   const testers: (UserWithFlags & { role: string })[] = [];
   const contributors: (UserWithFlags & { role: string })[] = [];
+  const badimo: (UserWithFlags & { role: string })[] = [];
 
   filteredUsers.forEach((user) => {
     const roles = getUserRoles(user);
@@ -88,6 +91,9 @@ export default function ContributorsClient({
           break;
         case "Contributor":
           contributors.push(userWithRole);
+          break;
+        case "Badimo":
+          badimo.push(userWithRole);
           break;
       }
     });
@@ -139,6 +145,7 @@ export default function ContributorsClient({
   const sortedValueTeam = sortByHierarchy(valueTeam);
   const sortedTesters = sortByHierarchy(testers);
   const sortedContributors = sortByHierarchy(contributors);
+  const sortedBadimo = sortByHierarchy(badimo);
 
   const allTeam = filteredUsers
     .map((user) => ({
@@ -164,6 +171,7 @@ export default function ContributorsClient({
     { key: "All", label: "All" },
     { key: "Owner", label: "Owner" },
     { key: "Developer", label: "Developer" },
+    { key: "Badimo", label: "Badimo" },
     { key: "Partner", label: "Partner" },
     { key: "Value List Manager", label: "Value List Manager" },
     { key: "Value Team", label: "Value Team" },
@@ -205,6 +213,9 @@ export default function ContributorsClient({
       case "Contributor":
         usersToShow = sortedContributors;
         staticContributorsToShow = staticContributors;
+        break;
+      case "Badimo":
+        usersToShow = sortedBadimo;
         break;
       default:
         usersToShow = allTeam;
