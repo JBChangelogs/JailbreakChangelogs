@@ -1,16 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
-import CookieConsentBanner from "./CookieConsentBanner";
+import dynamic from "next/dynamic";
 
-/**
- * Wrapper component to ensure CookieConsentBanner is rendered on the client
- * after all providers are initialized
- */
+const ClientCookieConsentBanner = dynamic(
+  () => import("./CookieConsentBanner"),
+  { ssr: false },
+);
+
 export default function ConsentBannerWrapper() {
-  return (
-    <Suspense fallback={null}>
-      <CookieConsentBanner />
-    </Suspense>
-  );
+  return <ClientCookieConsentBanner />;
 }

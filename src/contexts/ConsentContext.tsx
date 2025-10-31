@@ -39,11 +39,13 @@ interface InitState {
 interface ConsentProviderProps {
   children: ReactNode;
   initialConsent?: Partial<ConsentConfig> | null;
+  isRegulated?: boolean;
 }
 
 export function ConsentProvider({
   children,
   initialConsent,
+  isRegulated = false,
 }: ConsentProviderProps) {
   const [state, setState] = useState<InitState>(() => {
     // Initialize with server-provided consent to avoid hydration mismatch
@@ -76,8 +78,8 @@ export function ConsentProvider({
       state.consentState.ad_storage === "denied"
     : false;
 
-  // Show banner only if user hasn't made a choice yet
-  const showBanner = state.isInitialized && !state.hasUserChosen;
+  // Show banner only if user hasn't made a choice yet AND is in a regulated region
+  const showBanner = state.isInitialized && !state.hasUserChosen && isRegulated;
 
   const handleAcceptConsent = async () => {
     const consentConfig: Partial<ConsentConfig> = {

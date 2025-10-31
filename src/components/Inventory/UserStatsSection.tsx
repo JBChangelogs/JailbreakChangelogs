@@ -308,10 +308,11 @@ export default function UserStatsSection({
       />
 
       {/* Total Values */}
-      <div className="mt-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Inventory Value */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 text-sm">
-            Total Cash Value
+            Total Inventory Value
           </div>
           {isLoadingValues ? (
             <div className="text-secondary-text animate-pulse text-2xl font-bold">
@@ -340,6 +341,41 @@ export default function UserStatsSection({
             >
               <div className="text-primary-text cursor-help text-2xl font-bold">
                 {formatPreciseMoney(totalCashValue)}
+              </div>
+            </Tooltip>
+          )}
+        </div>
+
+        {/* Total Networth = Inventory Value + Money */}
+        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+          <div className="text-secondary-text mb-2 text-sm">Total Networth</div>
+          {isLoadingValues ? (
+            <div className="text-secondary-text animate-pulse text-2xl font-bold">
+              Loading...
+            </div>
+          ) : (
+            <Tooltip
+              title={`$${(totalCashValue + currentData.money).toLocaleString()}`}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <div className="text-primary-text cursor-help text-2xl font-bold">
+                {formatPreciseMoney(totalCashValue + currentData.money)}
               </div>
             </Tooltip>
           )}

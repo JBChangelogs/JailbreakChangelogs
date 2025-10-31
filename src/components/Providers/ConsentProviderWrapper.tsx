@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { ConsentProvider } from "@/contexts/ConsentContext";
 import { getServerConsent } from "@/utils/serverConsent";
+import { getGeolocation } from "@/utils/geolocation";
 
 interface ConsentProviderWrapperProps {
   children: ReactNode;
@@ -19,8 +20,11 @@ export async function ConsentProviderWrapper({
   // Read consent from server-side cookie
   // Only pass this if user has already made a choice
   const storedConsent = await getServerConsent();
+  const { isRegulated } = await getGeolocation();
 
   return (
-    <ConsentProvider initialConsent={storedConsent}>{children}</ConsentProvider>
+    <ConsentProvider isRegulated={isRegulated} initialConsent={storedConsent}>
+      {children}
+    </ConsentProvider>
   );
 }

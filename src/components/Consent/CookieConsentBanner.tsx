@@ -1,15 +1,12 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useConsent } from "@/contexts/ConsentContext";
 
 export default function CookieConsentBanner() {
   const { showBanner, acceptConsent, rejectConsent } = useConsent();
 
-  if (!showBanner) {
-    return null;
-  }
+  if (!showBanner) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-secondary-bg border-t border-border-primary shadow-lg">

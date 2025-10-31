@@ -5,6 +5,7 @@ import type { ConsentConfig } from "./googleConsentMode";
 import { getDefaultConsentByRegion } from "./geolocation";
 
 const CONSENT_COOKIE_NAME = "gcm-consent";
+const CONSENT_POLICY_VERSION = 2;
 
 /**
  * Server-side function to read consent from HttpOnly cookie
@@ -23,7 +24,19 @@ export async function getServerConsent(): Promise<Partial<ConsentConfig> | null>
     }
 
     try {
-      return JSON.parse(consentCookie) as Partial<ConsentConfig>;
+      const parsed = JSON.parse(consentCookie) as
+        | Partial<ConsentConfig>
+        | { v?: number; consent: Partial<ConsentConfig> };
+
+      // Support both v1 (raw consent) and v2+ (wrapped)
+      if (parsed && typeof parsed === "object" && "consent" in parsed) {
+        const v = (parsed as { v?: number }).v ?? 1;
+        if (v !== CONSENT_POLICY_VERSION) return null;
+        return (parsed as { consent: Partial<ConsentConfig> }).consent;
+      }
+
+      // v1 cookie has no version: treat as outdated
+      return null;
     } catch {
       return null;
     }
