@@ -14,6 +14,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
@@ -396,12 +397,17 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  const handleSearch = (e: React.FormEvent) => {
+  const { getId } = useUsernameToId();
+
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchId.trim()) return;
+    const input = searchId.trim();
+    if (!input) return;
 
     setInternalIsLoading(true);
-    router.push(`/inventories/${searchId.trim()}`);
+    const isNumeric = /^\d+$/.test(input);
+    const id = isNumeric ? input : await getId(input);
+    router.push(`/inventories/${id ?? input}`);
   };
 
   const handleItemClick = (item: InventoryItem) => {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { RobloxUser } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
@@ -153,12 +154,17 @@ export default function OGFinderResults({
   }, [robloxUsers, robloxAvatars]);
 
   // Handle search
+  const { getId } = useUsernameToId();
+
   const handleSearch = async (searchValue: string) => {
     if (!searchValue.trim()) return;
 
     setIsLoading(true);
     try {
-      router.push(`/og/${searchValue}`);
+      const input = searchValue.trim();
+      const isNumeric = /^\d+$/.test(input);
+      const id = isNumeric ? input : await getId(input);
+      router.push(`/og/${id ?? input}`);
     } catch (error) {
       logError("Search error", error, {
         component: "OGFinderResults",

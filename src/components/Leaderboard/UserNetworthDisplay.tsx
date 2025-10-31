@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   fetchUserNetworth,
@@ -133,12 +134,26 @@ export default function UserNetworthDisplay() {
               <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8" />
             )}
             <div className="flex min-w-0 flex-1 flex-col">
-              <div className="text-primary-text truncate text-sm font-medium sm:text-base">
+              <Link
+                href={`/inventories/${user.roblox_id}`}
+                prefetch={false}
+                className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 {displayName}
-              </div>
-              <div className="text-secondary-text truncate text-xs sm:text-sm">
+              </Link>
+              <Link
+                href={`/inventories/${user.roblox_id}`}
+                prefetch={false}
+                className="text-secondary-text hover:text-link cursor-pointer truncate text-xs transition-colors sm:text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 @{user.roblox_username || user.roblox_id}
-              </div>
+              </Link>
             </div>
           </div>
           <div className="flex items-center justify-center space-x-2 sm:ml-2 sm:justify-start">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 
 interface DupeSearchInputProps {
   initialValue?: string;
@@ -21,12 +22,17 @@ export default function DupeSearchInput({
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const { getId } = useUsernameToId();
+
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchId.trim()) return;
+    const input = searchId.trim();
+    if (!input) return;
 
     setIsSearching(true);
-    router.push(`/dupes/${searchId.trim()}`);
+    const isNumeric = /^\d+$/.test(input);
+    const id = isNumeric ? input : await getId(input);
+    router.push(`/dupes/${id ?? input}`);
   };
 
   // Use internal loading state or external loading state
