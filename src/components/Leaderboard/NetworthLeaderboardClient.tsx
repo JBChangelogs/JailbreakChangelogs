@@ -341,7 +341,7 @@ export default function NetworthLeaderboardClient({
                                   items
                                 </div>
                                 <div className="mt-1 flex justify-center sm:justify-end">
-                                  <div className="text-secondary-text bg-secondary-bg border-border-primary rounded border px-2 py-1 text-xs">
+                                  <div className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none">
                                     Click to view breakdown
                                   </div>
                                 </div>

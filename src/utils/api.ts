@@ -1667,6 +1667,9 @@ export interface UserNetworthData {
   snapshot_time: number;
   networth: number;
   inventory_count: number;
+  money?: number;
+  inventory_value?: number;
+  percentages?: Record<string, number>;
 }
 
 export async function fetchUserNetworth(

@@ -9,6 +9,7 @@ import {
   fetchRobloxAvatars,
 } from "@/utils/api";
 import { formatFullDate } from "@/utils/timestamp";
+import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
 
 export default function UserNetworthDisplay() {
   const { user, isAuthenticated } = useAuthContext();
@@ -17,6 +18,7 @@ export default function UserNetworthDisplay() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserNetworthData = async () => {
@@ -89,53 +91,88 @@ export default function UserNetworthDisplay() {
   };
 
   const latestData = userNetworth[0]; // Get the most recent data
+  const displayName =
+    user.roblox_display_name ||
+    user.roblox_username ||
+    `User ${user.roblox_id}`;
 
   return (
     <div className="mb-6">
-      <div className="mb-4">
+      <div className="mb-2">
         <h3 className="text-primary-text text-lg font-semibold">
           Your Networth
         </h3>
-        <p className="text-secondary-text text-sm">
+        <p className="text-secondary-text text-xs">
           Last Updated {formatFullDate(latestData.snapshot_time)}
         </p>
       </div>
 
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+      <div
+        className="mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg bg-secondary-bg border-border-primary hover:border-border-focus"
+        onClick={() => setIsBreakdownModalOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsBreakdownModalOpen(true);
+          }
+        }}
+      >
+        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
-                alt={`${user.roblox_display_name || user.roblox_username || `User ${user.roblox_id}`} avatar`}
+                alt={`${displayName} avatar`}
                 width={32}
                 height={32}
-                className="bg-tertiary-bg h-8 w-8 rounded-full"
+                className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
               />
             ) : (
-              <div className="bg-tertiary-bg h-8 w-8 rounded-full text-tertiary-bg" />
+              <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8" />
             )}
-            <div>
-              <div className="text-primary-text text-sm font-medium">
-                {user.roblox_display_name ||
-                  user.roblox_username ||
-                  `User ${user.roblox_id}`}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="text-primary-text truncate text-sm font-medium sm:text-base">
+                {displayName}
               </div>
-              <div className="text-secondary-text text-xs">
+              <div className="text-secondary-text truncate text-xs sm:text-sm">
                 @{user.roblox_username || user.roblox_id}
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-button-success text-lg font-bold">
-              ${formatNetworth(latestData.networth)}
-            </div>
-            <div className="text-secondary-text text-sm">
-              {formatInventoryCount(latestData.inventory_count)} items
+          <div className="flex items-center justify-center space-x-2 sm:ml-2 sm:justify-start">
+            <div className="text-center sm:text-right">
+              <span className="text-button-success text-sm font-bold sm:text-lg">
+                ${formatNetworth(latestData.networth)}
+              </span>
+              <div className="text-secondary-text text-xs">
+                {formatInventoryCount(latestData.inventory_count)} items
+              </div>
+              {(latestData.money !== undefined ||
+                latestData.inventory_value !== undefined ||
+                latestData.percentages) && (
+                <div className="mt-1 flex justify-center sm:justify-end">
+                  <div className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none">
+                    Click to view breakdown
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <InventoryBreakdownModal
+        isOpen={isBreakdownModalOpen}
+        onClose={() => setIsBreakdownModalOpen(false)}
+        username={displayName}
+        networth={latestData.networth}
+        inventoryCount={latestData.inventory_count}
+        percentages={latestData.percentages || {}}
+        money={latestData.money}
+        inventoryValue={latestData.inventory_value}
+      />
     </div>
   );
 }
