@@ -384,11 +384,11 @@ export default function OGFinderResults({
         <>
           {/* User Info with Side-by-Side Layout */}
           <div
-            className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
+            className={`grid gap-6 ${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
           >
             {/* User Information - Takes up full width for premium users, 2/3 for non-premium */}
             <div
-              className={`${currentUserPremiumType === 0 ? "lg:col-span-2" : ""}`}
+              className={`${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "lg:col-span-2" : ""}`}
             >
               <OGUserInfo
                 robloxId={robloxId}
@@ -401,8 +401,8 @@ export default function OGFinderResults({
               />
             </div>
 
-            {/* Ad - Takes up 1/3 of the space, only show for non-premium users */}
-            {currentUserPremiumType === 0 && (
+            {/* Ad - Takes up 1/3 of the space, only show for non-premium users (premium types 1-3 are valid) */}
+            {(currentUserPremiumType === 0 || currentUserPremiumType > 3) && (
               <div className="flex flex-col items-center lg:col-span-1">
                 <span className="text-secondary-text mb-2 block text-center text-xs">
                   ADVERTISEMENT

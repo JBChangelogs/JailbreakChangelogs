@@ -14,8 +14,10 @@ export default function InventoryAdSection({
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
 
-  // Only show ad for non-premium users
-  if (currentUserPremiumType !== 0) {
+  // Only show ad for non-premium users (premium types 1-3 are valid, anything else is treated as non-premium)
+  const isValidPremium =
+    currentUserPremiumType >= 1 && currentUserPremiumType <= 3;
+  if (isValidPremium) {
     return null;
   }
 

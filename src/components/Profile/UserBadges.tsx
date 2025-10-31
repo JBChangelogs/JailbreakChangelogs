@@ -247,6 +247,11 @@ export const UserBadges = ({
   };
 
   const handlePremiumBadgeClick = () => {
+    // Only handle clicks for valid premium types 1-3
+    if (!premiumType || premiumType < 1 || premiumType > 3) {
+      return;
+    }
+
     const premiumMessages = {
       1: "This user has Supporter Type 1!",
       2: "This user has Supporter Type 2!",
@@ -578,7 +583,8 @@ export const UserBadges = ({
     }
   });
 
-  if (premiumType) {
+  // Only show premium badges for types 1, 2, and 3
+  if (premiumType && premiumType >= 1 && premiumType <= 3) {
     const premiumStyles = {
       1: "var(--color-badge-premium-bronze)", // Bronze
       2: "var(--color-badge-premium-silver)", // Silver

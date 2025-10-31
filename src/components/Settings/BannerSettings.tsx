@@ -273,16 +273,22 @@ export const BannerSettings = ({
           sx={{
             mb: 1,
             color:
-              userData?.premiumtype && userData.premiumtype >= 2
+              userData?.premiumtype &&
+              userData.premiumtype >= 2 &&
+              userData.premiumtype <= 3
                 ? "var(--color-primary-text)"
                 : "var(--color-button-danger)",
             fontWeight:
-              userData?.premiumtype && userData.premiumtype >= 2
+              userData?.premiumtype &&
+              userData.premiumtype >= 2 &&
+              userData.premiumtype <= 3
                 ? "normal"
                 : 500,
           }}
         >
-          {userData?.premiumtype && userData.premiumtype >= 2
+          {userData?.premiumtype &&
+          userData.premiumtype >= 2 &&
+          userData.premiumtype <= 3
             ? "Upload an image file or enter a direct link to your image"
             : "🔒 Upgrade to Supporter Tier 2 to unlock custom banners"}
         </Typography>

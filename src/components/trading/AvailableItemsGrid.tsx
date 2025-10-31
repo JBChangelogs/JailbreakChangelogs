@@ -371,25 +371,26 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
       `}</style>
       <div className="space-y-4" data-component="available-items-grid">
         <div className="border-border-primary hover:border-border-focus hover:shadow-card-shadow bg-secondary-bg rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
-          {/* Ad Placement: Above the grid, only for non-premium users */}
-          {premiumStatusLoaded && currentUserPremiumType === 0 && (
-            <div className="mb-6 flex w-full flex-col items-center">
-              <span className="text-secondary-text mb-2 block text-center text-xs">
-                ADVERTISEMENT
-              </span>
-              <div
-                className="responsive-ad-container"
-                style={{ background: "transparent", border: "none" }}
-              >
-                <DisplayAd
-                  adSlot="4222990422"
-                  adFormat="auto"
-                  style={{ display: "block", width: "100%", height: "100%" }}
-                />
+          {/* Ad Placement: Above the grid, only for non-premium users (premium types 1-3 are valid) */}
+          {premiumStatusLoaded &&
+            (currentUserPremiumType === 0 || currentUserPremiumType > 3) && (
+              <div className="mb-6 flex w-full flex-col items-center">
+                <span className="text-secondary-text mb-2 block text-center text-xs">
+                  ADVERTISEMENT
+                </span>
+                <div
+                  className="responsive-ad-container"
+                  style={{ background: "transparent", border: "none" }}
+                >
+                  <DisplayAd
+                    adSlot="4222990422"
+                    adFormat="auto"
+                    style={{ display: "block", width: "100%", height: "100%" }}
+                  />
+                </div>
+                <AdRemovalNotice className="mt-2" />
               </div>
-              <AdRemovalNotice className="mt-2" />
-            </div>
-          )}
+            )}
 
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Search - Takes up full width on mobile, 1/3 on desktop */}

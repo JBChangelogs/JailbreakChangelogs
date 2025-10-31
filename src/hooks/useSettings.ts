@@ -34,7 +34,11 @@ export const useSettings = (
       (name === "avatar_discord" || name === "banner_discord") &&
       value === 0
     ) {
-      if (!userData.premiumtype || userData.premiumtype < 2) {
+      if (
+        !userData.premiumtype ||
+        userData.premiumtype < 2 ||
+        userData.premiumtype > 3
+      ) {
         // Show supporter modal instead of making API call
         if (openModal) {
           openModal({

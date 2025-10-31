@@ -39,7 +39,9 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
               ? user.global_name
               : user.username}
           </h2>
-          {user.premiumtype ? (
+          {user.premiumtype &&
+          user.premiumtype >= 1 &&
+          user.premiumtype <= 3 ? (
             <Tooltip
               title={`Supporter Type ${user.premiumtype}`}
               placement="top"

@@ -101,12 +101,14 @@ export const useSupporterModal = () => {
 
   const checkAvatarAccess = useCallback(
     (userTier: number) => {
-      if (userTier < 2) {
+      // Treat premium types > 3 as tier 0 (free)
+      const effectiveTier = userTier > 3 ? 0 : userTier;
+      if (effectiveTier < 2) {
         openModal({
           feature: "custom_avatar",
-          currentTier: userTier,
+          currentTier: effectiveTier,
           requiredTier: 2,
-          currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
+          currentLimit: TIER_NAMES[effectiveTier as keyof typeof TIER_NAMES],
           requiredLimit: "Supporter II",
         });
         return false; // Access denied
@@ -118,12 +120,14 @@ export const useSupporterModal = () => {
 
   const checkBannerAccess = useCallback(
     (userTier: number) => {
-      if (userTier < 2) {
+      // Treat premium types > 3 as tier 0 (free)
+      const effectiveTier = userTier > 3 ? 0 : userTier;
+      if (effectiveTier < 2) {
         openModal({
           feature: "custom_banner",
-          currentTier: userTier,
+          currentTier: effectiveTier,
           requiredTier: 2,
-          currentLimit: TIER_NAMES[userTier as keyof typeof TIER_NAMES],
+          currentLimit: TIER_NAMES[effectiveTier as keyof typeof TIER_NAMES],
           requiredLimit: "Supporter II",
         });
         return false; // Access denied
@@ -135,7 +139,7 @@ export const useSupporterModal = () => {
 
   const checkTradeAdDuration = useCallback(
     (selectedDuration: number, userTier: number) => {
-      // Map of max allowed duration per tier
+      // Map of max allowed duration per tier (only tiers 1-3 are valid premium)
       const tierMax = {
         0: 6,
         1: 12,
@@ -148,7 +152,10 @@ export const useSupporterModal = () => {
         2: "Supporter II",
         3: "Supporter III",
       };
-      const allowed = tierMax[userTier as keyof typeof tierMax];
+
+      // Treat premium types > 3 as tier 0 (free)
+      const effectiveTier = userTier > 3 ? 0 : userTier;
+      const allowed = tierMax[effectiveTier as keyof typeof tierMax];
       if (selectedDuration > allowed) {
         let requiredTier = 0;
         for (let t = 0; t <= 3; t++) {
@@ -159,9 +166,9 @@ export const useSupporterModal = () => {
         }
         openModal({
           feature: "trade_ad_duration",
-          currentTier: userTier,
+          currentTier: effectiveTier,
           requiredTier,
-          currentLimit: tierNames[userTier as keyof typeof tierNames],
+          currentLimit: tierNames[effectiveTier as keyof typeof tierNames],
           requiredLimit: tierNames[requiredTier as keyof typeof tierNames],
         });
         return false;

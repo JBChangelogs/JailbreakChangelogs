@@ -504,31 +504,33 @@ export default function ItemDetailsClient({
                 )}
               </div>
 
-              {/* Ad above the 'Don't agree with the value?' card */}
-              {premiumStatusLoaded && currentUserPremiumType === 0 && (
-                <div className="my-6 flex w-full justify-center">
-                  <div className="flex w-full max-w-[480px] flex-col items-center lg:w-[480px]">
-                    <span className="text-secondary-text mb-2 block text-center text-xs">
-                      ADVERTISEMENT
-                    </span>
-                    <div
-                      className="relative w-full overflow-hidden rounded-lg transition-all duration-300"
-                      style={{ minHeight: "250px" }}
-                    >
-                      <DisplayAd
-                        adSlot="7368028510"
-                        adFormat="auto"
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          height: "100%",
-                        }}
-                      />
+              {/* Ad above the 'Don't agree with the value?' card - show for non-premium users (premium types 1-3 are valid) */}
+              {premiumStatusLoaded &&
+                (currentUserPremiumType === 0 ||
+                  currentUserPremiumType > 3) && (
+                  <div className="my-6 flex w-full justify-center">
+                    <div className="flex w-full max-w-[480px] flex-col items-center lg:w-[480px]">
+                      <span className="text-secondary-text mb-2 block text-center text-xs">
+                        ADVERTISEMENT
+                      </span>
+                      <div
+                        className="relative w-full overflow-hidden rounded-lg transition-all duration-300"
+                        style={{ minHeight: "250px" }}
+                      >
+                        <DisplayAd
+                          adSlot="7368028510"
+                          adFormat="auto"
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      </div>
+                      <AdRemovalNotice className="mt-2" />
                     </div>
-                    <AdRemovalNotice className="mt-2" />
                   </div>
-                </div>
-              )}
+                )}
 
               <div
                 className="bg-secondary-bg mt-4 rounded-lg p-4 shadow-lg"
