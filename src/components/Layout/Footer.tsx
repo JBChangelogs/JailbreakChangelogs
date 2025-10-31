@@ -341,7 +341,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </Tooltip>
         </div>
 
-        <div className="pt-8">
+        <div className="pt-8 pb-8">
           <p className="text-secondary-text text-xs leading-relaxed">
             &copy; {new Date().getFullYear()} Jailbreak Changelogs LLC.
             Jailbreak Changelogs, JBCL, and any associated logos are trademarks,
@@ -349,21 +349,6 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
             LLC.
           </p>
         </div>
-      </div>
-      <div className="relative mx-auto w-full flex justify-center items-center">
-        <Image
-          src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.svg"
-          alt="Jailbreak Changelogs Logo"
-          width={1924}
-          height={76}
-          draggable={false}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "auto",
-            opacity: 0.7,
-          }}
-        />
       </div>
     </footer>
   );

@@ -5,7 +5,11 @@ import {
   ArrowTurnDownRightIcon,
 } from "@heroicons/react/24/outline";
 import { Inter } from "next/font/google";
-import { parseMarkdown } from "@/utils/changelogs";
+import {
+  parseMarkdown,
+  extractContentInfo,
+  getBadgeColor,
+} from "@/utils/changelogs";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -80,6 +84,9 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   // Parse markdown sections
   const parsedSections = parseMarkdown(sections);
 
+  // Extract content info for badges
+  const contentInfo = extractContentInfo(sections);
+
   useEffect(() => {
     // Listen for auth changes
     const handleAuthChange = () => {
@@ -141,11 +148,56 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
-          <h1
-            className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
-          >
-            {title}
-          </h1>
+          <div className="mb-8 border-b border-secondary-text pb-4">
+            <h1
+              className={`${inter.className} text-primary-text mb-3 text-3xl font-bold tracking-tighter sm:text-5xl`}
+            >
+              {title}
+            </h1>
+            {(contentInfo.mediaTypes.length > 0 ||
+              contentInfo.mentions.length > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {contentInfo.mediaTypeCounts.video > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("video")} text-white`}
+                  >
+                    {contentInfo.mediaTypeCounts.video}{" "}
+                    {contentInfo.mediaTypeCounts.video === 1
+                      ? "Video"
+                      : "Videos"}
+                  </span>
+                )}
+                {contentInfo.mediaTypeCounts.audio > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("audio")} text-white`}
+                  >
+                    {contentInfo.mediaTypeCounts.audio}{" "}
+                    {contentInfo.mediaTypeCounts.audio === 1
+                      ? "Audio"
+                      : "Audios"}
+                  </span>
+                )}
+                {contentInfo.mediaTypeCounts.image > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("image")} text-white`}
+                  >
+                    {contentInfo.mediaTypeCounts.image}{" "}
+                    {contentInfo.mediaTypeCounts.image === 1
+                      ? "Image"
+                      : "Images"}
+                  </span>
+                )}
+                {contentInfo.mentionCount > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
+                  >
+                    {contentInfo.mentionCount}{" "}
+                    {contentInfo.mentionCount === 1 ? "Mention" : "Mentions"}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* AI Summary */}
           {isFeatureEnabled("AI_SUMMARY") && (

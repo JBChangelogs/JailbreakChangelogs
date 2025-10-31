@@ -58,23 +58,34 @@ export function highlightText(text: string, query: string) {
 export function extractContentInfo(sections: string) {
   const mediaTypes = new Set<string>();
   const mentions = new Set<string>();
+  const mediaTypeCounts: Record<string, number> = {
+    video: 0,
+    audio: 0,
+    image: 0,
+  };
 
   // Check for media embeds
   const mediaRegex = /\((image|video|audio)\)/g;
   let match;
   while ((match = mediaRegex.exec(sections)) !== null) {
-    mediaTypes.add(match[1]);
+    const mediaType = match[1];
+    mediaTypes.add(mediaType);
+    mediaTypeCounts[mediaType] = (mediaTypeCounts[mediaType] || 0) + 1;
   }
 
   // Check for mentions
   const mentionRegex = /@(\w+)/g;
+  let mentionCount = 0;
   while ((match = mentionRegex.exec(sections)) !== null) {
     mentions.add(match[1]);
+    mentionCount++;
   }
 
   return {
     mediaTypes: Array.from(mediaTypes),
     mentions: Array.from(mentions),
+    mediaTypeCounts,
+    mentionCount,
   };
 }
 
@@ -107,8 +118,19 @@ export function getContentPreview(sections: string, query: string) {
   return cleanMarkdown(lines[0]); // Return first line if no match found
 }
 
-export function getBadgeColor() {
-  return "bg-button-info";
+export function getBadgeColor(type?: "video" | "audio" | "image" | "mentions") {
+  switch (type) {
+    case "video":
+      return "bg-[#ef4444] dark:bg-[#ef4444]";
+    case "audio":
+      return "bg-[#9333ea] dark:bg-[#9333ea]";
+    case "image":
+      return "bg-[#2563eb] dark:bg-[#2563eb]";
+    case "mentions":
+      return "bg-[#059669] dark:bg-[#059669]";
+    default:
+      return "bg-button-info";
+  }
 }
 
 export function parseDateFromTitle(title: string): Date | null {

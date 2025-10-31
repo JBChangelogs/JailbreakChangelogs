@@ -68,7 +68,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
               className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("video")} text-white`}
               >
                 Video
               </span>
@@ -79,7 +79,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
               className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("audio")} text-white`}
               >
                 Audio
               </span>
@@ -90,7 +90,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
               className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("image")} text-white`}
               >
                 Image
               </span>
@@ -101,7 +101,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
               className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
               >
                 Mentions
               </span>
@@ -134,11 +134,18 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
                   {item.mediaTypes.map((type) => (
                     <span
                       key={type}
-                      className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                      className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor(type as "video" | "audio" | "image")} text-white`}
                     >
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </span>
                   ))}
+                  {item.mentions.length > 0 && (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
+                    >
+                      Mentions
+                    </span>
+                  )}
                 </div>
                 {item.contentPreview && (
                   <p
@@ -156,7 +163,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
                     {item.mentions.map((mention) => (
                       <span
                         key={mention}
-                        className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor()} text-white`}
+                        className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
                       >
                         @{mention}
                       </span>

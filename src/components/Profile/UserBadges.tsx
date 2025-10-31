@@ -246,8 +246,6 @@ export const UserBadges = ({
     );
   };
 
-  // Removed Badimo toast in favor of direct external link
-
   const handlePremiumBadgeClick = () => {
     const premiumMessages = {
       1: "This user has Supporter Type 1!",
