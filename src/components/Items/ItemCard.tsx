@@ -20,14 +20,13 @@ import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/24/solid";
-import { StarIcon } from "@heroicons/react/24/outline";
-import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { PauseIcon } from "@heroicons/react/24/solid";
 import SubItemsDropdown from "./SubItemsDropdown";
 import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import { Icon } from "@/components/UI/IconWrapper";
 
 interface ItemCardProps {
   item: Item;
@@ -342,9 +341,16 @@ export default function ItemCard({
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
           >
             {isFavorited ? (
-              <StarIconSolid className="text-button-info h-4 w-4 sm:h-5 sm:w-5" />
+              <Icon
+                icon="mdi:heart"
+                className="h-4 w-4 sm:h-5 sm:w-5"
+                style={{ color: "#ff5a79" }}
+              />
             ) : (
-              <StarIcon className="text-primary-text h-4 w-4 sm:h-5 sm:w-5" />
+              <Icon
+                icon="mdi:heart-outline"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-primary-text"
+              />
             )}
           </button>
           {isHornItem(item.type) ? (

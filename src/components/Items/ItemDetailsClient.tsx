@@ -13,14 +13,12 @@ import { darkTheme } from "@/theme/darkTheme";
 
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
 import {
-  StarIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 import toast from "react-hot-toast";
 import { Inter } from "next/font/google";
@@ -418,9 +416,16 @@ export default function ItemDetailsClient({
                     }
                   >
                     {isFavorited ? (
-                      <StarIconSolid className="text-button-info h-5 w-5" />
+                      <Icon
+                        icon="mdi:heart"
+                        className="h-5 w-5"
+                        style={{ color: "#ff5a79" }}
+                      />
                     ) : (
-                      <StarIcon className="text-primary-text h-5 w-5" />
+                      <Icon
+                        icon="mdi:heart-outline"
+                        className="h-5 w-5 text-primary-text"
+                      />
                     )}
                     {favoriteCount > 0 && (
                       <span className="text-primary-text text-sm">
@@ -645,7 +650,8 @@ export default function ItemDetailsClient({
                 </div>
 
                 {/* Official Metrics from Badimo dataset */}
-                {currentItem.metadata &&
+                {currentItem.id !== 587 &&
+                  currentItem.metadata &&
                   Object.keys(currentItem.metadata).length > 0 && (
                     <div className="mt-3">
                       <div className="border-button-info/30 bg-button-info/10 rounded-md border px-2 py-2">
