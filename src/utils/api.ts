@@ -1569,6 +1569,14 @@ export interface NetworthLeaderboardEntry {
   inventory_count: number;
 }
 
+export interface SeasonLeaderboardEntry {
+  id: number;
+  total_exp: number;
+  name: string;
+  lvl: number;
+  exp: number;
+}
+
 export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
   try {
     const response = await fetch(`${INVENTORY_API_URL}/items/count`, {
@@ -1660,6 +1668,35 @@ export async function fetchNetworthLeaderboard(): Promise<
   } catch (err) {
     console.error("[SERVER] Error fetching networth leaderboard:", err);
     return [];
+  }
+}
+
+export interface SeasonLeaderboardResponse {
+  data: SeasonLeaderboardEntry[];
+  updated_at: number;
+}
+
+export async function fetchSeasonLeaderboard(): Promise<SeasonLeaderboardResponse> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch season leaderboard");
+    }
+
+    const data = await response.json();
+    return {
+      data: data.data as SeasonLeaderboardEntry[],
+      updated_at: data.updated_at,
+    };
+  } catch (err) {
+    console.error("[SERVER] Error fetching season leaderboard:", err);
+    return { data: [], updated_at: 0 };
   }
 }
 

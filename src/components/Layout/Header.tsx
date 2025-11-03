@@ -391,6 +391,20 @@ export default function Header() {
       </ListItem>
       <ListItem
         component={Link}
+        href="/seasons/leaderboard"
+        onClick={handleDrawerToggle}
+        className="cursor-pointer pl-4"
+      >
+        <ListItemText
+          primary={
+            <Box className="flex flex-wrap items-center gap-1">
+              <span>Season Leaderboard</span>
+            </Box>
+          }
+        />
+      </ListItem>
+      <ListItem
+        component={Link}
         href="/seasons/will-i-make-it"
         onClick={handleDrawerToggle}
         className="cursor-pointer pl-4"
@@ -715,6 +729,15 @@ export default function Header() {
                               onClick={handleSeasonsMenuClose}
                             >
                               Browse Seasons
+                            </Link>
+                            <Link
+                              href="/seasons/leaderboard"
+                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                              onClick={handleSeasonsMenuClose}
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span>Season Leaderboard</span>
+                              </div>
                             </Link>
                             <Link
                               href="/seasons/will-i-make-it"

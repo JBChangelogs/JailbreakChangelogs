@@ -257,6 +257,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/seasons" setActive={setActive}>
               Browse Seasons
             </HoveredLink>
+            <HoveredLink href="/seasons/leaderboard" setActive={setActive}>
+              <div className="flex items-center gap-2">
+                <span>Season Leaderboard</span>
+              </div>
+            </HoveredLink>
             <HoveredLink href="/seasons/will-i-make-it" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Will I Make It</span>
