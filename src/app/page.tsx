@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 import { Icon } from "../components/UI/IconWrapper";
+import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
 
 export default function Home() {
   const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
@@ -84,9 +85,9 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      <TestimonialsSection />
       {/* Features Section */}
-      <section className="py-16">
+      <section className="py-8">
         <div className="container mx-auto px-4">
           <h2 className="text-primary-text mb-12 text-center text-3xl font-bold">
             Features
