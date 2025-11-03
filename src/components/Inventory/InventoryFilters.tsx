@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "../UI/IconWrapper";
 
 type SortOrder =
   | "alpha-asc"
@@ -148,14 +145,10 @@ export default function InventoryFilters({
       {/* Advanced Filters Toggle Button */}
       <button
         onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        className="text-link0-hover flex cursor-pointer items-center gap-2 text-sm font-medium"
+        className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-fit cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
       >
-        <ChevronDownIcon
-          className={`h-4 w-4 transition-transform ${
-            showAdvancedFilters ? "rotate-180" : ""
-          }`}
-        />
-        Advanced Filters
+        <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
+        Filter
       </button>
 
       {/* Advanced Filters Section */}

@@ -7,10 +7,27 @@ interface Testimonial {
   name: string;
   role: string;
   quote: string;
+  url: string;
 }
 
 const TESTIMONIALS_BASE_URL =
   "https://assets.jailbreakchangelogs.xyz/assets/testimonials";
+
+const highlightBrandName = (text: string) => {
+  const regex = /(jailbreak\s*changelogs?|changelogs|JBCL)/gi;
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (regex.test(part)) {
+      return (
+        <span key={index} className="text-link font-semibold">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+};
 
 const testimonials: Testimonial[] = [
   {
@@ -18,24 +35,28 @@ const testimonials: Testimonial[] = [
     role: "Jailbreak Developers",
     quote:
       "We've been watching this place grow and we think it's absolutely wonderful. We even use Jailbreakchangelogs to check our own changelogs. Your search and filter settings make it so easy. Thank you for this incredible resource!",
+    url: "https://www.roblox.com/communities/3059674/Badimo",
   },
   {
     name: "bobthelog",
     role: "Jailbreak YouTuber",
     quote:
       "In my own experience jailbreak changelogs is the most reliable and accurate site to use for both trading and general jailbreak queries. 10/10 I recommend 👍",
+    url: "https://www.youtube.com/@bobdelog",
   },
   {
     name: "Felicityy",
     role: "Jailbreak YouTuber",
     quote:
       "Whenever I need a clear list of every change in an update, i look to changelogs. Whenever I need to see detailed graphs of the current trading market, I look at changelogs. Whenever I want to see if anyone has my long lost OG items, I use changelogs. There is no other website that can do what changelogs does. Use  jailbreakchangelogss!!!",
+    url: "https://www.youtube.com/@Felicityy-",
   },
   {
     name: "mrflyingpies",
     role: "Jailbreak YouTuber",
     quote:
-      "JBCL is the only site I trust to keep me ahead in Jailbreak. It’s clean, accurate, and packed with everything I need, from update news to value lists. This is a must have for anyone.",
+      "JBCL is the only site I trust to keep me ahead in Jailbreak. It's clean, accurate, and packed with everything I need, from update news to value lists. This is a must have for anyone.",
+    url: "https://www.youtube.com/@mrflyingpies",
   },
 ];
 
@@ -86,9 +107,12 @@ export default function TestimonialsSection() {
         {/* Mobile: Static Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:hidden">
           {testimonials.map((testimonial, index) => (
-            <div
+            <a
               key={index}
-              className="bg-secondary-bg border-border-primary rounded-xl border p-6 shadow-md"
+              href={testimonial.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-xl border p-6 shadow-md transition-all duration-200"
             >
               <div className="mb-4 flex items-start gap-4">
                 <div className="flex-shrink-0">
@@ -101,7 +125,7 @@ export default function TestimonialsSection() {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-card-headline mb-1 font-bold">
+                  <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
                     {testimonial.name}
                   </h3>
                   <p className="text-primary-text text-sm">
@@ -111,9 +135,9 @@ export default function TestimonialsSection() {
               </div>
 
               <blockquote className="text-card-paragraph text-sm leading-relaxed">
-                &ldquo;{testimonial.quote}&rdquo;
+                &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
               </blockquote>
-            </div>
+            </a>
           ))}
         </div>
 
@@ -130,9 +154,12 @@ export default function TestimonialsSection() {
             style={{ scrollBehavior: "auto" }}
           >
             {duplicatedTestimonials.map((testimonial, index) => (
-              <div
+              <a
                 key={index}
-                className="bg-secondary-bg border-border-primary flex-shrink-0 rounded-xl border p-6 shadow-md"
+                href={testimonial.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
                 style={{ width: "400px" }}
               >
                 <div className="mb-2 flex items-start gap-4">
@@ -146,7 +173,7 @@ export default function TestimonialsSection() {
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-card-headline mb-1 font-bold">
+                    <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
                       {testimonial.name}
                     </h3>
                     <p className="text-primary-text text-sm">
@@ -156,9 +183,9 @@ export default function TestimonialsSection() {
                 </div>
 
                 <blockquote className="text-card-paragraph text-sm leading-relaxed">
-                  &ldquo;{testimonial.quote}&rdquo;
+                  &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
                 </blockquote>
-              </div>
+              </a>
             ))}
           </div>
         </div>
