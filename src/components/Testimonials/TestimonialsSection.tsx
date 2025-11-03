@@ -58,6 +58,13 @@ const testimonials: Testimonial[] = [
       "JBCL is the only site I trust to keep me ahead in Jailbreak. It's clean, accurate, and packed with everything I need, from update news to value lists. This is a must have for anyone.",
     url: "https://www.youtube.com/@mrflyingpies",
   },
+  {
+    name: "C3T1C",
+    role: "Jailbreak YouTuber",
+    quote:
+      "JBCL is the website we were asking for. There are so many features that are not present on other jailbreak websites such as an OG finder and an inventory logger! The community aswell are very kind and welcoming, and I highly, HIGHLY reccomend joining their discord server for a positive experience!",
+    url: "https://www.youtube.com/@C3T1C",
+  },
 ];
 
 export default function TestimonialsSection() {
