@@ -191,25 +191,20 @@ export default function TradeHistoryModal({
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-primary-text text-lg font-semibold sm:text-xl">
-                  Ownership History
+                  {item.title}&apos;s Ownership History
                 </DialogTitle>
-                <div className="flex flex-col gap-1">
-                  {item.categoryTitle && (
-                    <span
-                      className="text-primary-text flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                      style={{
-                        borderColor: getCategoryColor(item.categoryTitle),
-                        backgroundColor:
-                          getCategoryColor(item.categoryTitle) + "20",
-                      }}
-                    >
-                      {item.categoryTitle}
-                    </span>
-                  )}
-                  <p className="text-primary-text truncate text-sm">
-                    {item.title}
-                  </p>
-                </div>
+                {item.categoryTitle && (
+                  <span
+                    className="text-primary-text mt-2 flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                    style={{
+                      borderColor: getCategoryColor(item.categoryTitle),
+                      backgroundColor:
+                        getCategoryColor(item.categoryTitle) + "20",
+                    }}
+                  >
+                    {item.categoryTitle}
+                  </span>
+                )}
               </div>
               <button
                 onClick={onClose}
@@ -256,40 +251,54 @@ export default function TradeHistoryModal({
                     return (
                       <div
                         key={`${userId}-${owner.TradeTime}-${index}`}
-                        className="border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border p-3"
+                        className="border-border-primary bg-primary-bg flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-3"
                       >
-                        <div className="flex-shrink-0">
-                          {getUserAvatar(userId) ? (
-                            <Image
-                              src={getUserAvatar(userId)!}
-                              alt="User Avatar"
-                              width={40}
-                              height={40}
-                              className="rounded-full bg-tertiary-bg"
-                            />
-                          ) : (
-                            <div className="bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full">
-                              <DefaultAvatar />
-                            </div>
-                          )}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="flex-shrink-0">
+                            {getUserAvatar(userId) ? (
+                              <Image
+                                src={getUserAvatar(userId)!}
+                                alt="User Avatar"
+                                width={40}
+                                height={40}
+                                className="rounded-full bg-tertiary-bg"
+                              />
+                            ) : (
+                              <div className="bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full">
+                                <DefaultAvatar />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <a
+                              href={`https://www.roblox.com/users/${userId}/profile`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block"
+                            >
+                              <div className="text-link hover:text-link-hover flex items-center gap-1.5 font-medium transition-colors">
+                                {getDisplayName(userId)}
+                                {getHasVerifiedBadge(userId) && (
+                                  <VerifiedBadgeIcon className="h-4 w-4" />
+                                )}
+                              </div>
+                              <div className="text-secondary-text text-sm">
+                                @{getUsername(userId)}
+                              </div>
+                            </a>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <a
-                            href={`https://www.roblox.com/users/${userId}/profile`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                          >
-                            <div className="text-link hover:text-link-hover flex items-center gap-1.5 font-medium transition-colors">
-                              {getDisplayName(userId)}
-                              {getHasVerifiedBadge(userId) && (
-                                <VerifiedBadgeIcon className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div className="text-secondary-text text-sm">
-                              @{getUsername(userId)}
-                            </div>
-                          </a>
+                        <div className="text-tertiary-text text-xs sm:text-sm sm:text-right sm:flex-shrink-0">
+                          {new Date(owner.TradeTime * 1000).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
                         </div>
                       </div>
                     );
