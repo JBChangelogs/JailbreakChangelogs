@@ -220,6 +220,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Preconnect to external asset domains */}
+        <link rel="preconnect" href="https://assets.jailbreakchangelogs.xyz" />
+        <link
+          rel="dns-prefetch"
+          href="https://assets.jailbreakchangelogs.xyz"
+        />
         {/* Google Consent Mode v2 - MUST be before Google Analytics */}
         <Script
           id="google-consent-mode"

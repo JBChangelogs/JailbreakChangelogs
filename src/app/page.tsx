@@ -1,56 +1,17 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
-import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
 import { Icon } from "../components/UI/IconWrapper";
 import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
+import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 
 export default function Home() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setBackgroundImages(generateShuffledBackgroundImages());
-    }, 0);
-  }, []);
-
-  // Function to cycle to the next image
-  const nextImage = useCallback(() => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex + 1 >= backgroundImages.length ? 0 : prevIndex + 1,
-    );
-  }, [backgroundImages.length]);
-
-  // Auto-cycle through images every 10 seconds
-  useEffect(() => {
-    if (backgroundImages.length === 0) return;
-
-    const interval = setInterval(nextImage, 10000);
-    return () => clearInterval(interval);
-  }, [backgroundImages.length, nextImage]);
-
-  const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
-
   return (
     <main className="bg-primary-bg min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          {currentBackgroundImage && (
-            <Image
-              src={currentBackgroundImage}
-              alt="Jailbreak Background"
-              fill
-              className="object-cover transition-opacity duration-1000"
-              style={{ objectPosition: "center 70%" }}
-              priority
-            />
-          )}
+          <HeroBackgroundCarousel />
           <div
             className="absolute inset-0 z-10"
             style={{ backgroundColor: "var(--color-hero-overlay)" }}

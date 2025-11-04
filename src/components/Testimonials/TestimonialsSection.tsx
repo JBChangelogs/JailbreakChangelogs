@@ -1,7 +1,5 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Image from "next/image";
+import TestimonialCarousel from "./TestimonialCarousel";
 
 interface Testimonial {
   name: string;
@@ -65,39 +63,16 @@ const testimonials: Testimonial[] = [
       "JBCL is the website we were asking for. There are so many features that are not present on other jailbreak websites such as an OG finder and an inventory logger! The community aswell are very kind and welcoming, and I highly, HIGHLY reccomend joining their discord server for a positive experience!",
     url: "https://www.youtube.com/@C3T1C",
   },
+  {
+    name: "ItsSpecter",
+    role: "Jailbreak YouTuber",
+    quote:
+      "JBCL is THE only site I use when checking values or any update changes in the game. It has active people updating the values so you know you're getting the right trades. It also has an inventory value checker, leaderboards, and so much more for the community to interact with than just a list of values. I easily recommend using JBCL over any other site because of how clean and accurate it is.",
+    url: "https://www.youtube.com/@ItsSpecter",
+  },
 ];
 
 export default function TestimonialsSection() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    // Only enable auto-scroll on desktop
-    const isDesktop = window.innerWidth >= 1024;
-    if (!isDesktop) return;
-
-    let animationId: number;
-    let scrollPosition = 0;
-
-    const scroll = () => {
-      scrollPosition += 0.5;
-
-      // Reset scroll position when we've scrolled past the first set
-      if (scrollPosition >= scrollContainer.scrollWidth / 2) {
-        scrollPosition = 0;
-      }
-
-      scrollContainer.scrollLeft = scrollPosition;
-      animationId = requestAnimationFrame(scroll);
-    };
-
-    animationId = requestAnimationFrame(scroll);
-
-    return () => cancelAnimationFrame(animationId);
-  }, []);
-
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
@@ -111,65 +86,23 @@ export default function TestimonialsSection() {
           themselves
         </p>
 
-        {/* Mobile: Static Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:hidden">
-          {testimonials.map((testimonial, index) => (
-            <a
-              key={index}
-              href={testimonial.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-xl border p-6 shadow-md transition-all duration-200"
-            >
-              <div className="mb-4 flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <Image
-                    src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
-                    alt={testimonial.name}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
-                    {testimonial.name}
-                  </h3>
-                  <p className="text-primary-text text-sm">
-                    {testimonial.role}
-                  </p>
-                </div>
-              </div>
+        {/* Mobile: Scrollable Container */}
+        <div className="relative lg:hidden">
+          {/* Gradient overlays for mobile */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-8 bg-gradient-to-r from-primary-bg to-transparent"></div>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-primary-bg to-transparent"></div>
 
-              <blockquote className="text-card-paragraph text-sm leading-relaxed">
-                &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
-              </blockquote>
-            </a>
-          ))}
-        </div>
-
-        {/* Desktop: Scrolling Carousel */}
-        <div className="relative hidden lg:block">
-          {/* Gradient overlays */}
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-primary-bg to-transparent"></div>
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-primary-bg to-transparent"></div>
-
-          {/* Scrolling container */}
-          <div
-            ref={scrollRef}
-            className="flex gap-6 overflow-x-hidden"
-            style={{ scrollBehavior: "auto" }}
-          >
-            {duplicatedTestimonials.map((testimonial, index) => (
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+            {testimonials.map((testimonial, index) => (
               <a
                 key={index}
                 href={testimonial.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
-                style={{ width: "400px" }}
+                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200 snap-center"
+                style={{ width: "85vw", maxWidth: "400px" }}
               >
-                <div className="mb-2 flex items-start gap-4">
+                <div className="mb-4 flex items-start gap-4">
                   <div className="flex-shrink-0">
                     <Image
                       src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
@@ -177,6 +110,7 @@ export default function TestimonialsSection() {
                       width={56}
                       height={56}
                       className="h-14 w-14 object-contain"
+                      loading="lazy"
                     />
                   </div>
                   <div className="flex-1">
@@ -195,6 +129,52 @@ export default function TestimonialsSection() {
               </a>
             ))}
           </div>
+        </div>
+
+        {/* Desktop: Scrolling Carousel */}
+        <div className="relative hidden lg:block">
+          {/* Gradient overlays */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-primary-bg to-transparent"></div>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-primary-bg to-transparent"></div>
+
+          {/* Scrolling container */}
+          <TestimonialCarousel>
+            {duplicatedTestimonials.map((testimonial, index) => (
+              <a
+                key={index}
+                href={testimonial.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+                style={{ width: "400px" }}
+              >
+                <div className="mb-2 flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
+                      alt={testimonial.name}
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-primary-text text-sm">
+                      {testimonial.role}
+                    </p>
+                  </div>
+                </div>
+
+                <blockquote className="text-card-paragraph text-sm leading-relaxed">
+                  &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
+                </blockquote>
+              </a>
+            ))}
+          </TestimonialCarousel>
         </div>
       </div>
     </section>
