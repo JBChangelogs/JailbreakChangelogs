@@ -29,7 +29,6 @@ export function useLeaderboardUserData(userIds: string[]) {
           avatarData: result.avatarData || {},
         };
       },
-      staleTime: 60 * 60 * 1000, // 1 hour cache
       enabled: batch.length > 0,
     })),
   });

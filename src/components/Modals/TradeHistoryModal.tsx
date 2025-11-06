@@ -94,8 +94,6 @@ export default function TradeHistoryModal({
       return processedAvatars;
     },
     enabled: tradeHistoryUserIds.length > 0 && isOpen,
-    staleTime: 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const { data: tradeHistoryUsers } = useQuery({
@@ -127,8 +125,6 @@ export default function TradeHistoryModal({
       return processedUsers;
     },
     enabled: tradeHistoryUserIds.length > 0 && isOpen,
-    staleTime: 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const getDisplayName = (userId: string) => {

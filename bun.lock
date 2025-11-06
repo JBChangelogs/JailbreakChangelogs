@@ -21,7 +21,6 @@
         "@radix-ui/react-slot": "^1.2.4",
         "@sentry/nextjs": "^10.23.0",
         "@tanstack/react-query": "^5.90.7",
-        "@tanstack/react-query-persist-client": "^5.90.9",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.12",
         "@types/canvas-confetti": "^1.9.0",
@@ -36,7 +35,6 @@
         "embla-carousel-autoplay": "^8.6.0",
         "embla-carousel-react": "^8.6.0",
         "framer-motion": "^12.23.24",
-        "idb-keyval": "^6.2.2",
         "lucide-react": "^0.552.0",
         "motion": "^12.23.24",
         "next": "^16.0.1",
@@ -521,11 +519,7 @@
 
     "@tanstack/query-core": ["@tanstack/query-core@5.90.7", "", {}, "sha512-6PN65csiuTNfBMXqQUxQhCNdtm1rV+9kC9YwWAIKcaxAauq3Wu7p18j3gQY3YIBJU70jT/wzCCZ2uqto/vQgiQ=="],
 
-    "@tanstack/query-persist-client-core": ["@tanstack/query-persist-client-core@5.91.6", "", { "dependencies": { "@tanstack/query-core": "5.90.7" } }, "sha512-VDnWKhXn4YD8fosh35oSEkwqvsO9vveOyswp4bL/L8SZuQukPFRjyNIq4xGHO/olQneudLt57MdA4mYLAp5P5g=="],
-
     "@tanstack/react-query": ["@tanstack/react-query@5.90.7", "", { "dependencies": { "@tanstack/query-core": "5.90.7" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-wAHc/cgKzW7LZNFloThyHnV/AX9gTg3w5yAv0gvQHPZoCnepwqCMtzbuPbb2UvfvO32XZ46e8bPOYbfZhzVnnQ=="],
-
-    "@tanstack/react-query-persist-client": ["@tanstack/react-query-persist-client@5.90.9", "", { "dependencies": { "@tanstack/query-persist-client-core": "5.91.6" }, "peerDependencies": { "@tanstack/react-query": "^5.90.7", "react": "^18 || ^19" } }, "sha512-rNisr2kq/WUvO8vBhNkfeK/QmLJ8w4cP1vVPB04ENFMW863Y9kDUuI21ryRheZBefFzicuBzOIQq9XdhzBRfGw=="],
 
     "@tanstack/react-table": ["@tanstack/react-table@8.21.3", "", { "dependencies": { "@tanstack/table-core": "8.21.3" }, "peerDependencies": { "react": ">=16.8", "react-dom": ">=16.8" } }, "sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww=="],
 
@@ -1048,8 +1042,6 @@
     "https-proxy-agent": ["https-proxy-agent@5.0.1", "", { "dependencies": { "agent-base": "6", "debug": "4" } }, "sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA=="],
 
     "husky": ["husky@9.1.7", "", { "bin": { "husky": "bin.js" } }, "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA=="],
-
-    "idb-keyval": ["idb-keyval@6.2.2", "", {}, "sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg=="],
 
     "ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
 
