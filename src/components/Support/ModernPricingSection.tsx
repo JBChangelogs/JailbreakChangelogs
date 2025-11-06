@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { TrophyIcon } from "@heroicons/react/24/solid";
 import { getAllowedFileExtensions } from "@/config/settings";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/UI/IconWrapper";
@@ -86,6 +85,8 @@ const CRYPTO_ADDRESSES = {
 } as const;
 
 export default function ModernPricingSection() {
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
   const [isYearly, setIsYearly] = useState(false);
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -224,18 +225,14 @@ export default function ModernPricingSection() {
                     Popular
                   </div>
                 )}
-                {tier.name !== "Free" && (
-                  <div
-                    className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${
-                      tier.name === "Supporter I"
-                        ? "bg-gradient-to-r from-[#CD7F32] to-[#B87333]" // Bronze
-                        : tier.name === "Supporter II"
-                          ? "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9]" // Silver
-                          : "bg-gradient-to-r from-[#FFD700] to-[#DAA520]" // Gold
-                    }`}
-                  >
-                    <TrophyIcon className="h-4 w-4 text-black" />
-                  </div>
+                {tier.name !== "Free" && tier.tierNumber && (
+                  <Image
+                    src={`${BADGE_BASE_URL}/jbcl_supporter_${tier.tierNumber}.svg`}
+                    alt={tier.name}
+                    width={24}
+                    height={24}
+                    className="object-contain"
+                  />
                 )}
               </div>
 

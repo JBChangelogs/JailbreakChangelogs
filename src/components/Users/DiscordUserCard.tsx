@@ -1,9 +1,9 @@
 import { UserAvatar } from "@/utils/avatar";
 import { UserSettings } from "@/types/auth";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { TrophyIcon } from "@heroicons/react/24/solid";
 
 interface DiscordUserCardProps {
   user: {
@@ -20,6 +20,9 @@ interface DiscordUserCardProps {
 }
 
 export default function DiscordUserCard({ user }: DiscordUserCardProps) {
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+
   return (
     <div className="flex items-center space-x-3">
       <UserAvatar
@@ -62,21 +65,13 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
                 },
               }}
             >
-              <div
-                className="inline-flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-black hover:opacity-90"
-                style={{
-                  minWidth: "1rem",
-                  minHeight: "1rem",
-                  background:
-                    user.premiumtype === 1
-                      ? "var(--color-badge-premium-bronze)"
-                      : user.premiumtype === 2
-                        ? "var(--color-badge-premium-silver)"
-                        : "var(--color-badge-premium-gold)",
-                }}
-              >
-                <TrophyIcon className="h-3 w-3" />
-              </div>
+              <Image
+                src={`${BADGE_BASE_URL}/jbcl_supporter_${user.premiumtype}.svg`}
+                alt={`Supporter Type ${user.premiumtype}`}
+                width={16}
+                height={16}
+                className="cursor-pointer hover:opacity-90 object-contain"
+              />
             </Tooltip>
           ) : null}
         </div>

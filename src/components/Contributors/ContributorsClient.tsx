@@ -24,6 +24,7 @@ export default function ContributorsClient({
     const flagToRole: Record<string, string> = {
       is_owner: "Owner",
       is_developer: "Developer",
+      is_designer: "Graphic Designer",
       is_partner: "Partner",
       is_vtm: "Value List Manager",
       is_vt: "Value Team",
@@ -44,6 +45,7 @@ export default function ContributorsClient({
     const flagToRole: Record<string, string> = {
       is_owner: "Owner",
       is_developer: "Developer",
+      is_designer: "Graphic Designer",
       is_partner: "Partner",
       is_vtm: "Value List Manager",
       is_vt: "Value Team",
@@ -57,6 +59,7 @@ export default function ContributorsClient({
 
   const owners: (UserWithFlags & { role: string })[] = [];
   const developers: (UserWithFlags & { role: string })[] = [];
+  const designers: (UserWithFlags & { role: string })[] = [];
   const partners: (UserWithFlags & { role: string })[] = [];
   const managers: (UserWithFlags & { role: string })[] = [];
   const valueTeam: (UserWithFlags & { role: string })[] = [];
@@ -76,6 +79,9 @@ export default function ContributorsClient({
           break;
         case "Developer":
           developers.push(userWithRole);
+          break;
+        case "Graphic Designer":
+          designers.push(userWithRole);
           break;
         case "Partner":
           partners.push(userWithRole);
@@ -140,6 +146,7 @@ export default function ContributorsClient({
 
   const sortedOwners = sortByHierarchy(owners);
   const sortedDevelopers = sortByHierarchy(developers);
+  const sortedDesigners = sortByHierarchy(designers);
   const sortedPartners = sortByHierarchy(partners);
   const sortedManagers = sortByHierarchy(managers);
   const sortedValueTeam = sortByHierarchy(valueTeam);
@@ -171,12 +178,13 @@ export default function ContributorsClient({
     { key: "All", label: "All" },
     { key: "Owner", label: "Owner" },
     { key: "Developer", label: "Developer" },
-    { key: "Badimo", label: "Badimo" },
     { key: "Partner", label: "Partner" },
+    { key: "Badimo", label: "Badimo" },
+    { key: "Tester", label: "Tester" },
+    { key: "Graphic Designer", label: "Graphic Designer" },
+    { key: "Contributor", label: "Contributor" },
     { key: "Value List Manager", label: "Value List Manager" },
     { key: "Value Team", label: "Value Team" },
-    { key: "Tester", label: "Tester" },
-    { key: "Contributor", label: "Contributor" },
   ];
 
   const getFilteredUsers = () => {
@@ -197,6 +205,9 @@ export default function ContributorsClient({
         break;
       case "Developer":
         usersToShow = sortedDevelopers;
+        break;
+      case "Graphic Designer":
+        usersToShow = sortedDesigners;
         break;
       case "Partner":
         usersToShow = sortedPartners;

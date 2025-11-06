@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { TrophyIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 import { Supporter } from "@/utils/api";
 import SupporterCarousel from "./SupporterCarousel";
@@ -21,6 +21,9 @@ const EXCLUDED_IDS = [
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+
   // Filter and separate supporters by tier using useMemo
   const { tier3Supporters, tier2Supporters, tier1Supporters } = useMemo(() => {
     // Filter supporters to only include valid premium types (1, 2, or 3)
@@ -78,23 +81,14 @@ export default function SupportersSection({
           <p className="text-secondary-text truncate text-sm">
             @{supporter.username}
           </p>
-          <div className="mt-3">
-            <div
-              className={`inline-flex items-center justify-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold ${
-                supporter.premiumtype === 1
-                  ? "bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black" // Bronze
-                  : supporter.premiumtype === 2
-                    ? "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9] text-black" // Silver
-                    : "bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-black" // Gold
-              }`}
-            >
-              <TrophyIcon className="h-3.5 w-3.5" />
-              {supporter.premiumtype === 1
-                ? "Supporter I"
-                : supporter.premiumtype === 2
-                  ? "Supporter II"
-                  : "Supporter III"}
-            </div>
+          <div className="mt-3 flex justify-center">
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_supporter_${supporter.premiumtype}.svg`}
+              alt={`Supporter ${supporter.premiumtype === 1 ? "I" : supporter.premiumtype === 2 ? "II" : "III"}`}
+              width={32}
+              height={32}
+              className="object-contain"
+            />
           </div>
         </div>
       </div>

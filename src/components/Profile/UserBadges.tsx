@@ -1,12 +1,4 @@
 import { Tooltip } from "@mui/material";
-import {
-  SparklesIcon,
-  BugAntIcon,
-  TrophyIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/solid";
-import { Icon } from "../UI/IconWrapper";
 import { toast } from "react-hot-toast";
 import type { UserFlag } from "@/types/auth";
 import Image from "next/image";
@@ -35,15 +27,11 @@ export const UserBadges = ({
 }: UserBadgesProps) => {
   const badges = [];
 
-  // Size configurations
-  const sizeConfig = {
-    sm: { container: "w-4 h-4", icon: "w-3 h-3" },
-    md: { container: "w-5 h-5", icon: "w-3.5 h-3.5" },
-    lg: { container: "w-6 h-6", icon: "w-4 h-4" },
-  };
-
-  const currentSize = sizeConfig[size];
+  // Size configurations for badge images
+  const badgeSize = { sm: 16, md: 20, lg: 24 }[size];
   const badimoSize = { sm: 24, md: 36, lg: 40 }[size];
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
 
   // Sort flags by index (1 as first badge)
   const sortedFlags = flags
@@ -52,140 +40,115 @@ export const UserBadges = ({
 
   const handleOwnerBadgeClick = () => {
     const ownerFlag = sortedFlags.find((f) => f.flag === "is_owner");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <span>👑</span>
-          <span>
-            {ownerFlag?.description ||
-              "This user created Jailbreak Changelogs!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      ownerFlag?.description || "This user created Jailbreak Changelogs!",
       {
-        style: {
-          background: "linear-gradient(to right, #8B5CF6, #4F46E5)",
-          color: "white",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_owner.svg`}
+            alt="Owner"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handleEarlyAdopterBadgeClick = () => {
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <SparklesIcon className="h-12 w-12 text-black" />
-          <span>
-            This badge is awarded to the first 100 people to sign up to
-            Jailbreak Changelogs!
-          </span>
-        </div>
-      ),
+    toast.success(
+      "This badge is awarded to the first 100 people to sign up to Jailbreak Changelogs!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #FBBF24, #EAB308)",
-          color: "black",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
+            alt="Early Adopter"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handleTesterBadgeClick = () => {
     const testerFlag = sortedFlags.find((f) => f.flag === "is_tester");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <BugAntIcon className="h-5 w-5 text-black" />
-          <span>
-            {testerFlag?.description ||
-              "This user is a trusted tester of Jailbreak Changelogs!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      testerFlag?.description ||
+        "This user is a trusted tester of Jailbreak Changelogs!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #8B5CF6, #6D28D9)",
-          color: "black",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_tester.svg`}
+            alt="Tester"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handleVTMBadgeClick = () => {
     const vtmFlag = sortedFlags.find((f) => f.flag === "is_vtm");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <ChartBarIcon className="h-5 w-5 text-emerald-100" />
-          <span>
-            {vtmFlag?.description ||
-              "This user is a Trading Core Value Team Manager!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      vtmFlag?.description || "This user is a Trading Core Value Team Manager!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #059669, #047857)",
-          color: "white",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_value_team_manager.svg`}
+            alt="Value Team Manager"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handleVTBadgeClick = () => {
     const vtFlag = sortedFlags.find((f) => f.flag === "is_vt");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <UserGroupIcon className="h-5 w-5 text-blue-100" />
-          <span>
-            {vtFlag?.description ||
-              "This user is a member of the Trading Core Value Team!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      vtFlag?.description ||
+        "This user is a member of the Trading Core Value Team!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #3B82F6, #2563EB)",
-          color: "white",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_value_team.svg`}
+            alt="Value Team"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handlePartnerBadgeClick = () => {
     const partnerFlag = sortedFlags.find((f) => f.flag === "is_partner");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <Icon
-            icon="fa7-solid:hands-helping"
-            className="h-10 w-10 text-orange-100"
-            inline={true}
-          />
-          <span>
-            {partnerFlag?.description ||
-              "This user is a partner of Jailbreak Changelogs!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      partnerFlag?.description ||
+        "This user is a partner of Jailbreak Changelogs!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #F97316, #EA580C)",
-          color: "white",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_partner.svg`}
+            alt="Partner"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
@@ -194,54 +157,60 @@ export const UserBadges = ({
     const contributorFlag = sortedFlags.find(
       (f) => f.flag === "is_contributor",
     );
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <Icon
-            icon="fa6-solid:screwdriver-wrench"
-            className="h-5 w-5 text-teal-100"
-            inline={true}
-          />
-          <span>
-            {contributorFlag?.description ||
-              "This user contributed to Jailbreak Changelogs!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      contributorFlag?.description ||
+        "This user contributed to Jailbreak Changelogs!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #0D9488, #0F766E)",
-          color: "white",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_contributor.svg`}
+            alt="Contributor"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
 
   const handleDeveloperBadgeClick = () => {
     const developerFlag = sortedFlags.find((f) => f.flag === "is_developer");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <Icon
-            icon="ri:code-s-slash-line"
-            className="h-5 w-5 text-black"
-            inline={true}
-          />
-          <span>
-            {developerFlag?.description ||
-              "This user is a developer for Jailbreak Changelogs!"}
-          </span>
-        </div>
-      ),
+    toast.success(
+      developerFlag?.description ||
+        "This user is a developer for Jailbreak Changelogs!",
       {
         duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #84CC16, #65A30D)",
-          color: "black",
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_developer.svg`}
+            alt="Developer"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
+      },
+    );
+  };
+
+  const handleDesignerBadgeClick = () => {
+    const designerFlag = sortedFlags.find((f) => f.flag === "is_designer");
+    toast.success(
+      designerFlag?.description ||
+        "This user is a graphic designer for Jailbreak Changelogs!",
+      {
+        duration: 4000,
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_designer.svg`}
+            alt="Designer"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
@@ -258,36 +227,25 @@ export const UserBadges = ({
       3: "This user has Supporter Type 3!",
     };
 
-    const premiumToastStyles = {
-      1: "linear-gradient(to right, #CD7F32, #B87333)", // Bronze
-      2: "linear-gradient(to right, #C0C0C0, #A9A9A9)", // Silver
-      3: "linear-gradient(to right, #FFD700, #DAA520)", // Gold
+    const premiumIcons = {
+      1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+      2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+      3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
     };
 
-    const premiumTextColors = {
-      1: "black", // Bronze - black text
-      2: "black", // Silver - black text
-      3: "black", // Gold - black text
-    };
-
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
-          <TrophyIcon className="h-5 w-5 text-black" />
-          <span>
-            {premiumMessages[premiumType as keyof typeof premiumMessages]}
-          </span>
-        </div>
-      ),
+    toast.success(
+      premiumMessages[premiumType as keyof typeof premiumMessages],
       {
         duration: 4000,
-        style: {
-          background:
-            premiumToastStyles[premiumType as keyof typeof premiumToastStyles],
-          color:
-            premiumTextColors[premiumType as keyof typeof premiumTextColors],
-          fontWeight: "600",
-        },
+        icon: (
+          <Image
+            src={premiumIcons[premiumType as keyof typeof premiumIcons]}
+            alt={`Supporter Type ${premiumType}`}
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
       },
     );
   };
@@ -314,17 +272,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full text-white hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-owner)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_owner.svg`}
+              alt="Owner"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleOwnerBadgeClick}
-            >
-              <Icon
-                icon="fa-solid:crown"
-                className={currentSize.icon}
-                inline={true}
-              />
-            </div>
+            />
           </Tooltip>
         );
       case "is_tester":
@@ -346,13 +301,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-tester)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_tester.svg`}
+              alt="Tester"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleTesterBadgeClick}
-            >
-              <BugAntIcon className={currentSize.icon} />
-            </div>
+            />
           </Tooltip>
         );
       case "is_vtm":
@@ -374,13 +330,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-vtm)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_value_team_manager.svg`}
+              alt="Value Team Manager"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleVTMBadgeClick}
-            >
-              <ChartBarIcon className={currentSize.icon} />
-            </div>
+            />
           </Tooltip>
         );
       case "is_vt":
@@ -402,13 +359,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-vt)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_value_team.svg`}
+              alt="Value Team Member"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleVTBadgeClick}
-            >
-              <UserGroupIcon className={currentSize.icon} />
-            </div>
+            />
           </Tooltip>
         );
       case "is_partner":
@@ -430,17 +388,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-partner)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_partner.svg`}
+              alt="Partner"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handlePartnerBadgeClick}
-            >
-              <Icon
-                icon="fa7-solid:hands-helping"
-                className={currentSize.icon}
-                inline={true}
-              />
-            </div>
+            />
           </Tooltip>
         );
       case "is_contributor":
@@ -462,17 +417,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`text-primary-text inline-flex cursor-help items-center justify-center rounded-full hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-contributor)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_contributor.svg`}
+              alt="Contributor"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleContributorBadgeClick}
-            >
-              <Icon
-                icon="fa6-solid:screwdriver-wrench"
-                className={currentSize.icon}
-                inline={true}
-              />
-            </div>
+            />
           </Tooltip>
         );
       case "is_developer":
@@ -494,17 +446,43 @@ export const UserBadges = ({
               },
             }}
           >
-            <div
-              className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
-              style={{ background: "var(--color-badge-developer)" }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_developer.svg`}
+              alt="Developer"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
               onClick={handleDeveloperBadgeClick}
-            >
-              <Icon
-                icon="ri:code-s-slash-line"
-                className={currentSize.icon}
-                inline={true}
-              />
-            </div>
+            />
+          </Tooltip>
+        );
+      case "is_designer":
+        return (
+          <Tooltip
+            key={`flag-${flag.flag}`}
+            title="Graphic Designer"
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_designer.svg`}
+              alt="Designer"
+              width={badgeSize}
+              height={badgeSize}
+              className="cursor-pointer hover:opacity-90 object-contain"
+              onClick={handleDesignerBadgeClick}
+            />
           </Tooltip>
         );
       case "is_badimo":
@@ -585,10 +563,10 @@ export const UserBadges = ({
 
   // Only show premium badges for types 1, 2, and 3
   if (premiumType && premiumType >= 1 && premiumType <= 3) {
-    const premiumStyles = {
-      1: "var(--color-badge-premium-bronze)", // Bronze
-      2: "var(--color-badge-premium-silver)", // Silver
-      3: "var(--color-badge-premium-gold)", // Gold
+    const premiumIcons = {
+      1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+      2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+      3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
     };
 
     badges.push(
@@ -609,16 +587,14 @@ export const UserBadges = ({
           },
         }}
       >
-        <div
-          className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
-          style={{
-            background:
-              premiumStyles[premiumType as keyof typeof premiumStyles],
-          }}
+        <Image
+          src={premiumIcons[premiumType as keyof typeof premiumIcons]}
+          alt={`Supporter Type ${premiumType}`}
+          width={badgeSize}
+          height={badgeSize}
+          className="cursor-pointer hover:opacity-90 object-contain"
           onClick={handlePremiumBadgeClick}
-        >
-          <TrophyIcon className={currentSize.icon} />
-        </div>
+        />
       </Tooltip>,
     );
   }
@@ -642,13 +618,14 @@ export const UserBadges = ({
           },
         }}
       >
-        <div
-          className={`inline-flex cursor-help items-center justify-center rounded-full text-black hover:opacity-90 ${currentSize.container}`}
-          style={{ background: "var(--color-badge-early-adopter)" }}
+        <Image
+          src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
+          alt="Early Adopter"
+          width={badgeSize}
+          height={badgeSize}
+          className="cursor-pointer hover:opacity-90 object-contain"
           onClick={handleEarlyAdopterBadgeClick}
-        >
-          <SparklesIcon className={currentSize.icon} />
-        </div>
+        />
       </Tooltip>,
     );
   }

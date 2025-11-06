@@ -176,6 +176,11 @@
     hsl(90, 100%, 50%),
     hsl(90, 100%, 45%)
   ); /* Lime gradient */
+  --color-badge-designer: linear-gradient(
+    to right,
+    hsl(290, 100%, 55%),
+    hsl(320, 100%, 50%)
+  ); /* Pink to magenta gradient */
   --color-badge-early-adopter: linear-gradient(
     to right,
     hsl(45, 100%, 50%),
@@ -391,6 +396,11 @@
     hsl(90, 100%, 50%),
     hsl(90, 100%, 45%)
   ); /* Lime gradient */
+  --color-badge-designer: linear-gradient(
+    to right,
+    hsl(290, 100%, 55%),
+    hsl(320, 100%, 50%)
+  ); /* Pink to magenta gradient */
   --color-badge-early-adopter: linear-gradient(
     to right,
     hsl(45, 100%, 50%),
