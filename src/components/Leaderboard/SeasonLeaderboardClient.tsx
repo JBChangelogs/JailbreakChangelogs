@@ -7,6 +7,9 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { DefaultAvatar } from "@/utils/avatar";
 import { fetchRobloxAvatars } from "@/utils/api";
+import { formatMessageDate } from "@/utils/timestamp";
+import { Season } from "@/types/seasons";
+import XpProgressBar from "@/components/Inventory/XpProgressBar";
 
 interface SeasonLeaderboardEntry {
   id: number;
@@ -18,10 +21,14 @@ interface SeasonLeaderboardEntry {
 
 interface SeasonLeaderboardClientProps {
   initialLeaderboard: SeasonLeaderboardEntry[];
+  updatedAt?: number;
+  season: Season | null;
 }
 
 export default function SeasonLeaderboardClient({
   initialLeaderboard,
+  updatedAt,
+  season,
 }: SeasonLeaderboardClientProps) {
   "use memo";
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,11 +37,6 @@ export default function SeasonLeaderboardClient({
   );
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-  // Helper function to format numbers
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("en-US").format(num);
-  };
 
   // Extract user IDs from leaderboard data
   const userIds = initialLeaderboard.map((user) => user.id.toString());
@@ -113,12 +115,13 @@ export default function SeasonLeaderboardClient({
     <>
       {initialLeaderboard && initialLeaderboard.length > 0 ? (
         <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-primary-text text-xl font-bold">
-              Season Leaderboard ({filteredLeaderboard.length} players
-              {searchTerm && ` of ${initialLeaderboard.length}`})
-            </h2>
-          </div>
+          {/* Last Updated */}
+          {updatedAt && updatedAt > 0 && (
+            <p className="text-secondary-text mb-4 text-sm">
+              <span className="font-semibold">Last Updated:</span>{" "}
+              {formatMessageDate(updatedAt)}
+            </p>
+          )}
 
           {/* Search Input */}
           <div className="relative mb-6">
@@ -232,7 +235,7 @@ export default function SeasonLeaderboardClient({
                             }),
                           }}
                         >
-                          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                          <div className="flex flex-col space-y-2">
                             <div className="flex items-center space-x-2 sm:space-x-3">
                               <div
                                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 ${
@@ -285,23 +288,15 @@ export default function SeasonLeaderboardClient({
                                 >
                                   {user.name}
                                 </a>
-                                <span className="text-secondary-text truncate text-xs sm:text-sm">
-                                  ID: {user.id}
-                                </span>
                               </div>
                             </div>
-                            <div className="flex items-center justify-center space-x-4 sm:ml-2 sm:justify-start">
-                              <div className="text-center sm:text-right">
-                                <div className="text-button-success text-sm font-bold sm:text-lg">
-                                  Level {user.lvl}
-                                </div>
-                                <div className="text-secondary-text text-xs">
-                                  {formatNumber(user.total_exp)} Total XP
-                                </div>
-                                <div className="text-secondary-text text-xs">
-                                  {formatNumber(user.exp)} Current XP
-                                </div>
-                              </div>
+                            <div className="w-full">
+                              <XpProgressBar
+                                currentLevel={user.lvl}
+                                currentXp={user.exp}
+                                season={season}
+                                bgStyle="secondary"
+                              />
                             </div>
                           </div>
                         </div>

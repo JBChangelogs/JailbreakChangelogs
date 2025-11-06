@@ -6,12 +6,14 @@ interface XpProgressBarProps {
   currentLevel: number;
   currentXp: number;
   season: Season | null;
+  bgStyle?: "primary" | "secondary";
 }
 
 export default function XpProgressBar({
   currentLevel,
   currentXp,
   season,
+  bgStyle = "primary",
 }: XpProgressBarProps) {
   // If no season data, don't show the progress bar
   if (!season || !season.xp_data || !season.xp_data.xp_rates) {
@@ -90,7 +92,9 @@ export default function XpProgressBar({
   return (
     <div className="mt-3">
       {/* Game-style Progress Bar - old design without rounded corners */}
-      <div className="border-button-info bg-primary-bg relative h-8 w-full border-2">
+      <div
+        className={`border-button-info relative h-8 w-full border-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : "bg-primary-bg"}`}
+      >
         {/* Progress Fill */}
         <div
           className="bg-button-info absolute top-0 left-0 h-full transition-all duration-500"

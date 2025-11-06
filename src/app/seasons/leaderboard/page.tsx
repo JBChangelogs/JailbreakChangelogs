@@ -1,14 +1,16 @@
-import { fetchSeasonLeaderboard } from "@/utils/api";
+import { fetchSeasonLeaderboard, fetchLatestSeason } from "@/utils/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-import { formatMessageDate } from "@/utils/timestamp";
 
-export const revalidate = 3600;
+export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function SeasonLeaderboardPage() {
-  const leaderboardResponse = await fetchSeasonLeaderboard();
+  const [leaderboardResponse, latestSeason] = await Promise.all([
+    fetchSeasonLeaderboard(),
+    fetchLatestSeason(),
+  ]);
 
   // Show fallback if no data
   if (!leaderboardResponse.data || leaderboardResponse.data.length === 0) {
@@ -82,29 +84,26 @@ export default async function SeasonLeaderboardPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <h1 className="text-primary-text text-3xl font-bold">
-              Season Leaderboard
+              {latestSeason
+                ? `Season ${latestSeason.season} / ${latestSeason.title} Season Leaderboard`
+                : "Season Leaderboard"}
             </h1>
           </div>
           <p className="text-secondary-text mt-2">
-            Top 25 players ranked by their total experience in the current
-            active season
+            Top 25 players ranked by their total xp
           </p>
           <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
             <p className="text-primary-text text-sm">
               <span className="font-semibold">Note:</span> Leaderboard updates
-              every hour.
+              every 1 hour.
             </p>
           </div>
-          {leaderboardResponse.updated_at > 0 && (
-            <p className="text-secondary-text mt-2 text-sm">
-              <span className="font-semibold">Last Updated:</span>{" "}
-              {formatMessageDate(leaderboardResponse.updated_at)}
-            </p>
-          )}
         </div>
 
         <SeasonLeaderboardClient
           initialLeaderboard={leaderboardResponse.data}
+          updatedAt={leaderboardResponse.updated_at}
+          season={latestSeason}
         />
       </div>
     </main>

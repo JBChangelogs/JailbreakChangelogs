@@ -34,6 +34,9 @@ export async function getWebsiteVersion() {
 
     const response = await fetch(
       `https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/${branch}`,
+      {
+        next: { revalidate: 3600 },
+      },
     );
     const data = await response.json();
     return {
