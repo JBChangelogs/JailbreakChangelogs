@@ -73,8 +73,6 @@ const testimonials: Testimonial[] = [
 ];
 
 export default function TestimonialsSection() {
-  const duplicatedTestimonials = [...testimonials, ...testimonials];
-
   return (
     <section className="py-8">
       <div className="container mx-auto px-6">
@@ -139,7 +137,7 @@ export default function TestimonialsSection() {
 
           {/* Scrolling container */}
           <TestimonialCarousel>
-            {duplicatedTestimonials.map((testimonial, index) => (
+            {testimonials.map((testimonial, index) => (
               <a
                 key={index}
                 href={testimonial.url}

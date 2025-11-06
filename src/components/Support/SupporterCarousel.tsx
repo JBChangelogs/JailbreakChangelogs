@@ -3,13 +3,15 @@
 import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
 import { useRef } from "react";
 
-interface TestimonialCarouselProps {
+interface SupporterCarouselProps {
   children: React.ReactNode;
+  speed?: number;
 }
 
-export default function TestimonialCarousel({
+export default function SupporterCarousel({
   children,
-}: TestimonialCarouselProps) {
+  speed = 0.5,
+}: SupporterCarouselProps) {
   const baseX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +21,7 @@ export default function TestimonialCarousel({
 
     const scrollWidth = container.scrollWidth / 2; // Half because we duplicate
 
-    let newX = baseX.get() - 0.5;
+    let newX = baseX.get() - speed;
 
     // Reset when we've scrolled past one full set
     if (newX <= -scrollWidth) {
@@ -30,7 +32,7 @@ export default function TestimonialCarousel({
   });
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-hidden">
       <motion.div
         ref={containerRef}
         className="flex gap-6"

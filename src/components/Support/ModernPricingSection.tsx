@@ -153,8 +153,25 @@ export default function ModernPricingSection() {
             <h2 className="text-primary-text text-2xl font-bold lg:text-3xl">
               Support Jailbreak Changelogs
             </h2>
-            <p className="text-secondary-text mt-4">
-              One-time purchases. No recurring fees. Keep perks forever.
+            <p className="text-secondary-text mt-4 text-base sm:text-lg">
+              <span className="relative inline-block font-bold text-button-info">
+                One-time purchase
+                <svg
+                  className="absolute left-0 -bottom-1 hidden w-full sm:block"
+                  viewBox="0 0 120 8"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 4 Q 6 1, 12 4 T 24 4 T 36 4 T 48 4 T 60 4 T 72 4 T 84 4 T 96 4 T 108 4 T 120 4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+              . No subscriptions. No recurring fees. Keep perks forever.
             </p>
           </div>
 

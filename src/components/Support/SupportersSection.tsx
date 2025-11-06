@@ -1,194 +1,185 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
+import { useMemo } from "react";
 import { TrophyIcon } from "@heroicons/react/24/solid";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 import { Supporter } from "@/utils/api";
+import SupporterCarousel from "./SupporterCarousel";
 
 interface SupportersSectionProps {
   supporters: Supporter[];
 }
 
+const EXCLUDED_IDS = [
+  "1019539798383398946",
+  "659865209741246514",
+  "1327206739665489930",
+  "1361726772374147112",
+];
+
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
-  const [sortedSupporters, setSortedSupporters] = useState<Supporter[]>([]);
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const excludedIds = [
-      "1019539798383398946",
-      "659865209741246514",
-      "1327206739665489930",
-      "1361726772374147112",
-    ];
-    const filteredSupporters = supporters.filter(
-      (supporter) => !excludedIds.includes(supporter.id),
+  // Filter and separate supporters by tier using useMemo
+  const { tier3Supporters, tier2Supporters, tier1Supporters } = useMemo(() => {
+    // Filter supporters to only include valid premium types (1, 2, or 3)
+    const validSupporters = supporters.filter(
+      (supporter) =>
+        !EXCLUDED_IDS.includes(supporter.id) &&
+        supporter.premiumtype >= 1 &&
+        supporter.premiumtype <= 3,
     );
 
-    const sorted = [...filteredSupporters].sort((a, b) => {
-      if (b.premiumtype !== a.premiumtype) {
-        return b.premiumtype - a.premiumtype;
-      }
-      return parseInt(b.created_at) - parseInt(a.created_at);
-    });
-    setSortedSupporters(sorted);
+    // Separate supporters by tier
+    const tier3 = validSupporters
+      .filter((s) => s.premiumtype === 3)
+      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+
+    const tier2 = validSupporters
+      .filter((s) => s.premiumtype === 2)
+      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+
+    const tier1 = validSupporters
+      .filter((s) => s.premiumtype === 1)
+      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+
+    return {
+      tier3Supporters: tier3,
+      tier2Supporters: tier2,
+      tier1Supporters: tier1,
+    };
   }, [supporters]);
 
-  const getSupportersPerRow = () => {
-    if (typeof window === "undefined") return 5;
-    const width = window.innerWidth;
-    if (width < 640) return 1;
-    if (width < 768) return 2;
-    if (width < 1024) return 3;
-    if (width < 1280) return 4;
-    return 5;
-  };
-
-  const supportersPerRow = getSupportersPerRow();
-
-  const rows: Supporter[][] = [];
-  for (let i = 0; i < sortedSupporters.length; i += supportersPerRow) {
-    rows.push(sortedSupporters.slice(i, i + supportersPerRow));
-  }
-
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 320,
-    overscan: 3,
-  });
-  useEffect(() => {
-    const handleResize = () => {
-      virtualizer.measure();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [virtualizer]);
-
-  if (sortedSupporters.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-4">
-      <h2 className="text-primary-text mb-8 text-center text-3xl font-bold">
-        Made possible by{" "}
-        <span className="text-button-info underline">supporters</span>
-      </h2>
-      <div className="p-8">
-        <div
-          ref={parentRef}
-          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[800px] overflow-auto"
-          style={{
-            contain: "strict",
-            scrollbarWidth: "thin",
-            scrollbarColor: "var(--color-border-primary) transparent",
-          }}
-        >
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <div
-                  key={virtualRow.key}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <div
-                    className={`grid gap-6 ${getGridColsClass(supportersPerRow)}`}
-                  >
-                    {row.map((supporter) => (
-                      <div key={supporter.id} className="group">
-                        <div className="flex flex-col items-center space-y-6 rounded-lg p-6 transition-all duration-200">
-                          <UserAvatar
-                            userId={supporter.id}
-                            avatarHash={supporter.avatar || null}
-                            username={supporter.username}
-                            size={48}
-                            showBadge={false}
-                            premiumType={supporter.premiumtype}
-                            settings={{ avatar_discord: 1 }}
-                          />
-                          <div className="min-w-0 flex-1 text-center">
-                            <Link
-                              href={`/users/${supporter.id}`}
-                              prefetch={false}
-                            >
-                              <h3 className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors">
-                                {supporter.global_name &&
-                                supporter.global_name !== "None"
-                                  ? supporter.global_name
-                                  : supporter.username}
-                              </h3>
-                            </Link>
-                            <p className="text-tertiary-text truncate text-xs">
-                              @{supporter.username}
-                            </p>
-                            {supporter.premiumtype > 0 && (
-                              <div className="mt-2">
-                                <div
-                                  className={`inline-flex items-center justify-center gap-1 rounded-full px-2 py-1 text-xs font-bold ${
-                                    supporter.premiumtype === 1
-                                      ? "bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black" // Bronze
-                                      : supporter.premiumtype === 2
-                                        ? "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9] text-black" // Silver
-                                        : "bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-black" // Gold
-                                  }`}
-                                >
-                                  <TrophyIcon className="h-3 w-3" />
-                                  {supporter.premiumtype === 1
-                                    ? "Supporter 1"
-                                    : supporter.premiumtype === 2
-                                      ? "Supporter 2"
-                                      : "Supporter 3"}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+  const renderSupporterCard = (supporter: Supporter) => (
+    <div
+      key={supporter.id}
+      className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+      style={{ width: "280px" }}
+    >
+      <div className="flex flex-col items-center space-y-4">
+        <UserAvatar
+          userId={supporter.id}
+          avatarHash={supporter.avatar || null}
+          username={supporter.username}
+          size={64}
+          showBadge={false}
+          premiumType={supporter.premiumtype}
+          settings={{ avatar_discord: 1 }}
+        />
+        <div className="min-w-0 flex-1 text-center">
+          <Link href={`/users/${supporter.id}`} prefetch={false}>
+            <h3 className="text-primary-text hover:text-link truncate text-base font-semibold transition-colors">
+              {supporter.global_name && supporter.global_name !== "None"
+                ? supporter.global_name
+                : supporter.username}
+            </h3>
+          </Link>
+          <p className="text-secondary-text truncate text-sm">
+            @{supporter.username}
+          </p>
+          <div className="mt-3">
+            <div
+              className={`inline-flex items-center justify-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold ${
+                supporter.premiumtype === 1
+                  ? "bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black" // Bronze
+                  : supporter.premiumtype === 2
+                    ? "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9] text-black" // Silver
+                    : "bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-black" // Gold
+              }`}
+            >
+              <TrophyIcon className="h-3.5 w-3.5" />
+              {supporter.premiumtype === 1
+                ? "Supporter I"
+                : supporter.premiumtype === 2
+                  ? "Supporter II"
+                  : "Supporter III"}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
 
-function getGridColsClass(supportersPerRow: number): string {
-  switch (supportersPerRow) {
-    case 1:
-      return "grid-cols-1";
-    case 2:
-      return "grid-cols-2";
-    case 3:
-      return "grid-cols-3";
-    case 4:
-      return "grid-cols-4";
-    case 5:
-      return "grid-cols-5";
-    default:
-      return "grid-cols-5";
+  const renderTierSection = (
+    tierSupporters: Supporter[],
+    tierName: string,
+    gradientClass: string,
+  ) => {
+    if (tierSupporters.length === 0) return null;
+
+    return (
+      <div className="mb-12">
+        <div className="mb-6 flex justify-center">
+          <h3
+            className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-2xl font-bold text-black ${gradientClass}`}
+          >
+            {tierName}
+          </h3>
+        </div>
+
+        {/* Mobile: Scrollable Container */}
+        <div className="relative lg:hidden">
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-8 bg-gradient-to-r from-primary-bg to-transparent"></div>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-primary-bg to-transparent"></div>
+
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+            {tierSupporters.map((supporter) => (
+              <div key={supporter.id} className="snap-center">
+                {renderSupporterCard(supporter)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Auto-scrolling Carousel */}
+        <div className="relative hidden lg:block">
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-primary-bg to-transparent"></div>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-primary-bg to-transparent"></div>
+
+          <SupporterCarousel speed={0.5}>
+            {tierSupporters.map((supporter) => (
+              <div key={supporter.id}>{renderSupporterCard(supporter)}</div>
+            ))}
+          </SupporterCarousel>
+        </div>
+      </div>
+    );
+  };
+
+  const hasAnySupporters =
+    tier3Supporters.length > 0 ||
+    tier2Supporters.length > 0 ||
+    tier1Supporters.length > 0;
+
+  if (!hasAnySupporters) {
+    return null;
   }
+
+  return (
+    <div id="supporters-section" className="mt-8 py-8">
+      <h2 className="text-primary-text mb-12 text-center text-3xl font-bold lg:text-4xl">
+        Made possible by our{" "}
+        <span className="text-button-info underline">supporters</span>
+      </h2>
+
+      <div className="container mx-auto px-4">
+        {renderTierSection(
+          tier3Supporters,
+          "Supporter III",
+          "bg-gradient-to-r from-[#FFD700] to-[#DAA520]",
+        )}
+        {renderTierSection(
+          tier2Supporters,
+          "Supporter II",
+          "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9]",
+        )}
+        {renderTierSection(
+          tier1Supporters,
+          "Supporter I",
+          "bg-gradient-to-r from-[#CD7F32] to-[#B87333]",
+        )}
+      </div>
+    </div>
+  );
 }

@@ -3,6 +3,7 @@
 import React from "react";
 import SupportersSection from "@/components/Support/SupportersSection";
 import ModernPricingSection from "@/components/Support/ModernPricingSection";
+import SupportersBanner from "@/components/Support/SupportersBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Supporter } from "@/utils/api";
 
@@ -20,6 +21,7 @@ export default function SupportingClient({
       </div>
       <ModernPricingSection />
       <SupportersSection supporters={supporters} />
+      <SupportersBanner targetId="supporters-section" />
     </div>
   );
 }
