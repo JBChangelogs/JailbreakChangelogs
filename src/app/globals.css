@@ -202,6 +202,28 @@
     hsl(45, 100%, 45%)
   ); /* Gold gradient */
 
+  /* Supporter Border Colors */
+  --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
+  --color-supporter-silver-border: #c0c0c0; /* Silver border for Supporter 2 */
+  --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
+
+  /* Supporter Card Backgrounds */
+  --color-supporter-bronze-bg: hsl(
+    30,
+    25%,
+    18%
+  ); /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: hsl(
+    210,
+    8%,
+    18%
+  ); /* Subtle silver tint for Supporter 2 */
+  --color-supporter-gold-bg: hsl(
+    45,
+    30%,
+    18%
+  ); /* Subtle gold tint for Supporter 3 */
+
   /* Opacity Variations */
   --color-overlay-light: hsl(240, 8%, 9%, 0.5); /* Light overlay */
   --color-overlay-medium: hsl(240, 8%, 9%, 0.7); /* Medium overlay */
@@ -421,6 +443,28 @@
     hsl(45, 100%, 50%),
     hsl(45, 100%, 45%)
   ); /* Gold gradient */
+
+  /* Supporter Border Colors - Light theme (same as dark) */
+  --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
+  --color-supporter-silver-border: #c0c0c0; /* Silver border for Supporter 2 */
+  --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
+
+  /* Supporter Card Backgrounds - Light theme */
+  --color-supporter-bronze-bg: hsl(
+    30,
+    35%,
+    94%
+  ); /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: hsl(
+    210,
+    15%,
+    94%
+  ); /* Subtle silver tint for Supporter 2 */
+  --color-supporter-gold-bg: hsl(
+    45,
+    45%,
+    94%
+  ); /* Subtle gold tint for Supporter 3 */
 
   /* Opacity Variations - Light theme */
   --color-overlay-light: hsl(0, 0%, 100%, 0.5); /* Light overlay - White */

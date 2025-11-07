@@ -92,11 +92,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
   return (
     <div
-      className={`hover:border-border-focus rounded-lg border p-4 transition-colors hover:cursor-pointer ${
-        side === "offering"
-          ? "bg-status-success/5 border-status-success/30 hover:bg-status-success/10"
-          : "bg-status-error/5 border-status-error/30 hover:bg-status-error/10"
-      }`}
+      className="hover:border-border-focus border-border-primary rounded-lg border p-4 transition-colors hover:cursor-pointer"
       onClick={toggleExpanded}
     >
       {/* Main Item Info */}
@@ -271,7 +267,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="bg-status-success/5 space-y-4 rounded-xl p-6">
+          <div className="space-y-4 rounded-xl p-6">
             {offeringItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}
@@ -283,7 +279,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Offering Total */}
-          <div className="bg-status-success/5 border-status-success/30 mt-4 rounded-lg border p-4">
+          <div className="bg-primary-bg mt-4 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <span className="text-primary-text font-semibold">Total</span>
               <div className="text-right">
@@ -323,7 +319,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="bg-status-error/5 space-y-4 rounded-xl p-6">
+          <div className="space-y-4 rounded-xl p-6">
             {requestingItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}
@@ -335,7 +331,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Requesting Total */}
-          <div className="bg-status-error/5 border-status-error/30 mt-4 rounded-lg border p-4">
+          <div className="bg-primary-bg mt-4 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <span className="text-primary-text font-semibold">Total</span>
               <div className="text-right">

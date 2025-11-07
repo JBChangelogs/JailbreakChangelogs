@@ -1,8 +1,8 @@
 import React from "react";
 
 interface TradeAdTabsProps {
-  activeTab: "view" | "create" | "edit";
-  onTabChange: (tab: "view" | "create" | "edit") => void;
+  activeTab: "view" | "supporter" | "create" | "myads";
+  onTabChange: (tab: "view" | "supporter" | "create" | "myads") => void;
   hasTradeAds?: boolean;
 }
 
@@ -25,6 +25,28 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
       </button>
       <button
         role="tab"
+        aria-selected={activeTab === "supporter"}
+        aria-controls="trading-tabpanel-supporter"
+        id="trading-tab-supporter"
+        onClick={() => onTabChange("supporter")}
+        className={`tab ${activeTab === "supporter" ? "tab-active" : ""}`}
+      >
+        Supporter Ads
+      </button>
+      {hasTradeAds && (
+        <button
+          role="tab"
+          aria-selected={activeTab === "myads"}
+          aria-controls="trading-tabpanel-myads"
+          id="trading-tab-myads"
+          onClick={() => onTabChange("myads")}
+          className={`tab ${activeTab === "myads" ? "tab-active" : ""}`}
+        >
+          My Trade Ads
+        </button>
+      )}
+      <button
+        role="tab"
         aria-selected={activeTab === "create"}
         aria-controls="trading-tabpanel-create"
         id="trading-tab-create"
@@ -33,18 +55,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
       >
         Create Trade Ad
       </button>
-      {hasTradeAds && (
-        <button
-          role="tab"
-          aria-selected={activeTab === "edit"}
-          aria-controls="trading-tabpanel-edit"
-          id="trading-tab-edit"
-          onClick={() => onTabChange("edit")}
-          className={`tab ${activeTab === "edit" ? "tab-active" : ""}`}
-        >
-          Edit Trade Ad
-        </button>
-      )}
     </div>
   </div>
 );

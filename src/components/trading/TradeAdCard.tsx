@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import dynamic from "next/dynamic";
 import { formatCustomDate } from "@/utils/timestamp";
+import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
@@ -72,9 +73,55 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
+
+  // Check if user is a Supporter (premium types 1-3)
+  const premiumType = trade.user?.premiumtype ?? 0;
+  const isSupporter = premiumType >= 1 && premiumType <= 3;
+  const supporterTier = isSupporter ? premiumType : null;
+
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+  const supporterIcons = {
+    1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+    2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+    3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
+  };
+
+  // Border colors for different supporter tiers
+  const getBorderClass = () => {
+    if (!isSupporter) return "border-border-primary";
+    switch (supporterTier) {
+      case 1:
+        return "border-[var(--color-supporter-bronze-border)]";
+      case 2:
+        return "border-[var(--color-supporter-silver-border)]";
+      case 3:
+        return "border-[var(--color-supporter-gold-border)]";
+      default:
+        return "border-border-primary";
+    }
+  };
+
+  // Background style for different supporter tiers
+  const getBackgroundStyle = (): React.CSSProperties => {
+    if (!isSupporter) return {};
+
+    switch (supporterTier) {
+      case 1:
+        return { backgroundColor: "var(--color-supporter-bronze-bg)" };
+      case 2:
+        return { backgroundColor: "var(--color-supporter-silver-bg)" };
+      case 3:
+        return { backgroundColor: "var(--color-supporter-gold-bg)" };
+      default:
+        return {};
+    }
+  };
+
   return (
     <div
-      className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4 transition-colors"
+      className={`${isSupporter ? "" : "bg-secondary-bg"} hover:border-border-focus rounded-lg border p-4 transition-colors ${getBorderClass()} ${isSupporter ? "shadow-lg" : ""}`}
+      style={getBackgroundStyle()}
       tabIndex={0}
       role="region"
     >
@@ -89,6 +136,40 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
           >
             Trade #{trade.id}
           </Link>
+          {isSupporter && supporterTier && (
+            <Tooltip
+              title={`Supporter Type ${supporterTier}`}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px var(--color-card-shadow)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <Link href="/supporting" className="flex items-center">
+                <Image
+                  src={
+                    supporterIcons[supporterTier as keyof typeof supporterIcons]
+                  }
+                  alt={`Supporter Type ${supporterTier}`}
+                  width={20}
+                  height={20}
+                  className="object-contain transition-opacity hover:opacity-80"
+                />
+              </Link>
+            </Tooltip>
+          )}
         </div>
 
         {/* User Info */}

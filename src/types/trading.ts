@@ -84,6 +84,7 @@ export interface TradeAd {
     roblox_avatar?: string;
     accent_color?: string;
     custom_avatar?: string;
+    premiumtype?: number;
     settings?: {
       avatar_discord: number;
     };

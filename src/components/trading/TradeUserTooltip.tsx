@@ -18,7 +18,7 @@ interface TradeUserTooltipProps {
     settings?: {
       avatar_discord: number;
     };
-    premiumtype?: string;
+    premiumtype?: number;
   };
 }
 
@@ -35,7 +35,7 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
           custom_avatar={user.custom_avatar}
           showBadge={false}
           settings={user.settings}
-          premiumType={user.premiumtype as unknown as number}
+          premiumType={user.premiumtype}
         />
 
         {/* User Details */}

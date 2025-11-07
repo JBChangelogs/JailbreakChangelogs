@@ -37,7 +37,7 @@ export default function RobloxTradeUser({
     <div className="flex items-center space-x-3">
       <div className="flex-shrink-0">
         {!imageError && user.roblox_avatar ? (
-          <div className="bg-primary-bg relative h-10 w-10 overflow-hidden rounded-full">
+          <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
             <Image
               src={user.roblox_avatar}
               alt={`${user.roblox_display_name || user.roblox_username || "Roblox"} user's profile picture`}
@@ -48,7 +48,7 @@ export default function RobloxTradeUser({
             />
           </div>
         ) : (
-          <div className="bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full">
+          <div className="bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full">
             <RobloxIcon className="h-6 w-6 text-white" />
           </div>
         )}

@@ -22,7 +22,7 @@ interface TradeUserProfileProps {
     settings?: {
       avatar_discord: number;
     };
-    premiumtype?: string;
+    premiumtype?: number;
   };
 }
 

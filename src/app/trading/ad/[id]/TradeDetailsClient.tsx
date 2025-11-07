@@ -17,7 +17,13 @@ import TradeUserProfile from "@/components/trading/TradeUserProfile";
 import TradeAdMetadata from "@/components/trading/TradeAdMetadata";
 import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 // Removed MUI Tabs in favor of calculator-style tabs
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
+  ssr: false,
+});
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
@@ -48,6 +54,19 @@ export default function TradeDetailsClient({
     success: false,
   });
   const [activeTab, setActiveTab] = useState<"items" | "comments">("items");
+
+  // Check if user is a Supporter (premium types 1-3)
+  const premiumType = trade.user?.premiumtype ?? 0;
+  const isSupporter = premiumType >= 1 && premiumType <= 3;
+  const supporterTier = isSupporter ? premiumType : null;
+
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+  const supporterIcons = {
+    1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+    2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+    3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
+  };
 
   const handleMakeOffer = async () => {
     try {
@@ -152,9 +171,48 @@ export default function TradeDetailsClient({
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <h1 className="text-primary-text text-2xl font-bold">
-                        Trade #{trade.id}
-                      </h1>
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-primary-text text-2xl font-bold">
+                          Trade #{trade.id}
+                        </h1>
+                        {isSupporter && supporterTier && (
+                          <Tooltip
+                            title={`Supporter Type ${supporterTier}`}
+                            placement="top"
+                            arrow
+                            slotProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: "var(--color-secondary-bg)",
+                                  color: "var(--color-primary-text)",
+                                  fontSize: "0.75rem",
+                                  padding: "8px 12px",
+                                  borderRadius: "8px",
+                                  boxShadow:
+                                    "0 4px 12px var(--color-card-shadow)",
+                                  "& .MuiTooltip-arrow": {
+                                    color: "var(--color-secondary-bg)",
+                                  },
+                                },
+                              },
+                            }}
+                          >
+                            <a href="/supporting" className="flex items-center">
+                              <Image
+                                src={
+                                  supporterIcons[
+                                    supporterTier as keyof typeof supporterIcons
+                                  ]
+                                }
+                                alt={`Supporter Type ${supporterTier}`}
+                                width={24}
+                                height={24}
+                                className="object-contain transition-opacity hover:opacity-80"
+                              />
+                            </a>
+                          </Tooltip>
+                        )}
+                      </div>
                       <div className="mt-4 flex flex-col gap-2 sm:mt-0 sm:flex-row">
                         {trade &&
                           trade.status === "Pending" &&

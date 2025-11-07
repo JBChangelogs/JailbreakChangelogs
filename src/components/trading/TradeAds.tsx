@@ -29,9 +29,9 @@ export default function TradeAds({
     useState<(TradeAd & { user: UserData | null })[]>(initialTradeAds);
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"view" | "create" | "edit">(
-    "view",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "view" | "supporter" | "create" | "myads"
+  >("view");
   const [offerStatuses, setOfferStatuses] = useState<
     Record<number, { loading: boolean; error: string | null; success: boolean }>
   >({});
@@ -76,7 +76,7 @@ export default function TradeAds({
     try {
       setError(null);
 
-      // Clear the hash before reloading to avoid staying on create/edit tabs
+      // Clear the hash before reloading to avoid staying on create/myads tabs
       window.location.hash = "";
       // Simple refresh - just reload the page to get fresh server-side data
       window.location.reload();
@@ -86,10 +86,22 @@ export default function TradeAds({
     }
   };
 
+  const userTradeAds = tradeAds.filter(
+    (trade) => trade.author === currentUserId,
+  );
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash === "create" || hash === "edit") {
+
+      // Redirect to view if trying to access myads without being logged in or having trade ads
+      if (hash === "myads" && (!currentUserId || userTradeAds.length === 0)) {
+        window.history.pushState(null, "", window.location.pathname);
+        setActiveTab("view");
+        return;
+      }
+
+      if (hash === "create" || hash === "myads" || hash === "supporter") {
         setActiveTab(hash);
       } else {
         setActiveTab("view");
@@ -103,10 +115,11 @@ export default function TradeAds({
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
-  }, []);
+  }, [currentUserId, userTradeAds.length]);
 
-  const handleTabChange = (tab: "view" | "create" | "edit") => {
+  const handleTabChange = (tab: "view" | "supporter" | "create" | "myads") => {
     setActiveTab(tab);
+    setPage(1); // Reset to first page when changing tabs
     if (tab === "view") {
       window.history.pushState(null, "", window.location.pathname);
     } else {
@@ -238,12 +251,8 @@ export default function TradeAds({
 
   const handleEditTrade = (trade: TradeAd) => {
     setSelectedTradeAd(trade);
-    setActiveTab("edit");
+    setActiveTab("myads");
   };
-
-  const userTradeAds = tradeAds.filter(
-    (trade) => trade.author === currentUserId,
-  );
 
   if (error) {
     return (
@@ -340,11 +349,23 @@ export default function TradeAds({
         : a.created_at - b.created_at;
     });
 
+  // Filter supporter trade ads (premium types 1-3)
+  const supporterTradeAds = sortedTradeAds.filter(
+    (trade) =>
+      trade.user?.premiumtype &&
+      trade.user.premiumtype >= 1 &&
+      trade.user.premiumtype <= 3,
+  );
+
+  // Determine which ads to show based on active tab
+  const displayTradeAds =
+    activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
+
   // Calculate pagination
-  const totalPages = Math.ceil(sortedTradeAds.length / itemsPerPage);
+  const totalPages = Math.ceil(displayTradeAds.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentPageItems = sortedTradeAds.slice(startIndex, endIndex);
+  const currentPageItems = displayTradeAds.slice(startIndex, endIndex);
 
   return (
     <div className="mt-8">
@@ -365,8 +386,8 @@ export default function TradeAds({
           <>
             <div className="mb-4 flex items-center justify-between">
               <p className="text-secondary-text">
-                Showing {sortedTradeAds.length}{" "}
-                {sortedTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                Showing {displayTradeAds.length}{" "}
+                {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
               </p>
               <button
                 onClick={toggleSortOrder}
@@ -443,6 +464,122 @@ export default function TradeAds({
         )}
       </div>
 
+      {/* Supporter Ads Tab */}
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "supporter"}
+        id="trading-tabpanel-supporter"
+        aria-labelledby="trading-tab-supporter"
+      >
+        {activeTab === "supporter" && (
+          <>
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-secondary-text">
+                Showing {displayTradeAds.length}{" "}
+                {displayTradeAds.length === 1
+                  ? "supporter trade ad"
+                  : "supporter trade ads"}
+              </p>
+              <button
+                onClick={toggleSortOrder}
+                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+              >
+                {sortOrder === "newest" ? (
+                  <ArrowDownIcon className="h-4 w-4" />
+                ) : (
+                  <ArrowUpIcon className="h-4 w-4" />
+                )}
+                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+              </button>
+            </div>
+            {displayTradeAds.length === 0 ? (
+              <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
+                <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                  No Supporter Trade Ads Available
+                </h3>
+                <p className="text-tertiary-text/70 mb-8">
+                  There are currently no trade ads from Supporters.
+                </p>
+                <Button
+                  variant="contained"
+                  onClick={() => handleTabChange("view")}
+                  sx={{
+                    backgroundColor: "var(--color-button-info)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-button-info-hover)",
+                    },
+                  }}
+                >
+                  View All Trade Ads
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Masonry
+                  columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                  spacing={2}
+                  sx={{ width: "auto", margin: 0 }}
+                >
+                  {currentPageItems.map((trade) => {
+                    const enrichedTrade: TradeAd = {
+                      ...trade,
+                      offering: trade.offering.map((it) => ({
+                        ...it,
+                        demand: getDemandForItem(it) || it.demand,
+                        trend: getTrendForItem(it) || it.trend,
+                      })),
+                      requesting: trade.requesting.map((it) => ({
+                        ...it,
+                        demand: getDemandForItem(it) || it.demand,
+                        trend: getTrendForItem(it) || it.trend,
+                      })),
+                    };
+                    return (
+                      <TradeAdCard
+                        key={trade.id}
+                        trade={enrichedTrade}
+                        onMakeOffer={() => handleOfferClick(trade.id)}
+                        offerStatus={offerStatuses[trade.id]}
+                        currentUserId={currentUserId}
+                        onDelete={() => handleDeleteTrade(trade.id)}
+                        onEdit={() => handleEditTrade(trade)}
+                      />
+                    );
+                  })}
+                </Masonry>
+                {totalPages > 1 && (
+                  <div className="mt-8 mb-8 flex justify-center">
+                    <Pagination
+                      count={totalPages}
+                      page={page}
+                      onChange={handlePageChange}
+                      sx={{
+                        "& .MuiPaginationItem-root": {
+                          color: "var(--color-primary-text)",
+                          "&.Mui-selected": {
+                            backgroundColor: "var(--color-button-info)",
+                            color: "var(--color-form-button-text)",
+                            "&:hover": {
+                              backgroundColor: "var(--color-button-info-hover)",
+                            },
+                          },
+                          "&:hover": {
+                            backgroundColor: "var(--color-quaternary-bg)",
+                          },
+                        },
+                        "& .MuiPaginationItem-icon": {
+                          color: "var(--color-primary-text)",
+                        },
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+
       <div
         role="tabpanel"
         hidden={activeTab !== "create"}
@@ -463,35 +600,16 @@ export default function TradeAds({
         )}
       </div>
 
+      {/* My Trade Ads Tab */}
       <div
         role="tabpanel"
-        hidden={activeTab !== "edit"}
-        id="trading-tabpanel-edit"
-        aria-labelledby="trading-tab-edit"
+        hidden={activeTab !== "myads"}
+        id="trading-tabpanel-myads"
+        aria-labelledby="trading-tab-myads"
       >
-        {activeTab === "edit" && (
+        {activeTab === "myads" && (
           <>
-            {!selectedTradeAd ? (
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
-                <p className="text-secondary-text mb-4">
-                  Please click the edit button on the trade ad you want to
-                  modify
-                </p>
-                <Button
-                  variant="contained"
-                  onClick={() => handleTabChange("view")}
-                  sx={{
-                    backgroundColor: "var(--color-button-info)",
-                    color: "var(--color-form-button-text)",
-                    "&:hover": {
-                      backgroundColor: "var(--color-button-info-hover)",
-                    },
-                  }}
-                >
-                  Back to View
-                </Button>
-              </div>
-            ) : (
+            {selectedTradeAd ? (
               <TradeAdForm
                 onSuccess={() => {
                   refreshTradeAds();
@@ -503,6 +621,81 @@ export default function TradeAds({
                 tradeAd={selectedTradeAd}
                 items={items}
               />
+            ) : (
+              <>
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-secondary-text">
+                    Showing {userTradeAds.length}{" "}
+                    {userTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                  </p>
+                  <button
+                    onClick={toggleSortOrder}
+                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                  >
+                    {sortOrder === "newest" ? (
+                      <ArrowDownIcon className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpIcon className="h-4 w-4" />
+                    )}
+                    {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+                  </button>
+                </div>
+                {userTradeAds.length === 0 ? (
+                  <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
+                    <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                      No Trade Ads Yet
+                    </h3>
+                    <p className="text-tertiary-text/70 mb-8">
+                      You haven&apos;t created any trade ads yet.
+                    </p>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleTabChange("create")}
+                      sx={{
+                        backgroundColor: "var(--color-button-info)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                        },
+                      }}
+                    >
+                      Create Your First Trade Ad
+                    </Button>
+                  </div>
+                ) : (
+                  <Masonry
+                    columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                    spacing={2}
+                    sx={{ width: "auto", margin: 0 }}
+                  >
+                    {userTradeAds.map((trade) => {
+                      const enrichedTrade: TradeAd = {
+                        ...trade,
+                        offering: trade.offering.map((it) => ({
+                          ...it,
+                          demand: getDemandForItem(it) || it.demand,
+                          trend: getTrendForItem(it) || it.trend,
+                        })),
+                        requesting: trade.requesting.map((it) => ({
+                          ...it,
+                          demand: getDemandForItem(it) || it.demand,
+                          trend: getTrendForItem(it) || it.trend,
+                        })),
+                      };
+                      return (
+                        <TradeAdCard
+                          key={trade.id}
+                          trade={enrichedTrade}
+                          onMakeOffer={() => handleOfferClick(trade.id)}
+                          offerStatus={offerStatuses[trade.id]}
+                          currentUserId={currentUserId}
+                          onDelete={() => handleDeleteTrade(trade.id)}
+                          onEdit={() => handleEditTrade(trade)}
+                        />
+                      );
+                    })}
+                  </Masonry>
+                )}
+              </>
             )}
           </>
         )}

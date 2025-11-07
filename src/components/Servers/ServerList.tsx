@@ -9,12 +9,21 @@ import AddServerModal from "./AddServerModal";
 import { Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
 import { UserAvatar } from "@/utils/avatar";
+
+const BADGE_BASE_URL =
+  "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+const supporterIcons = {
+  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
+};
 
 interface Server {
   id: number;
@@ -162,10 +171,23 @@ const ServerList: React.FC<{
           throw new Error("Failed to fetch servers");
         }
         const data = (await serversResponse.json()) as Server[];
-        setServers(data);
+
+        // Filter out expired servers (but keep servers with "Never" expiry)
+        const now = Date.now();
+        const filteredServers = data.filter((server) => {
+          if (server.expires === "Never") return true;
+          const expiryTimestamp = parseInt(server.expires);
+          const normalizedExpiry =
+            expiryTimestamp < 10000000000
+              ? expiryTimestamp * 1000
+              : expiryTimestamp;
+          return normalizedExpiry > now;
+        });
+
+        setServers(filteredServers);
 
         const uniqueOwnerIds = [
-          ...new Set(data.map((server: Server) => server.owner)),
+          ...new Set(filteredServers.map((server: Server) => server.owner)),
         ];
 
         if (uniqueOwnerIds.length > 0) {
@@ -242,10 +264,23 @@ const ServerList: React.FC<{
         throw new Error("Failed to fetch servers");
       }
       const data = (await serversResponse.json()) as Server[];
-      setServers(data);
+
+      // Filter out expired servers (but keep servers with "Never" expiry)
+      const now = Date.now();
+      const filteredServers = data.filter((server) => {
+        if (server.expires === "Never") return true;
+        const expiryTimestamp = parseInt(server.expires);
+        const normalizedExpiry =
+          expiryTimestamp < 10000000000
+            ? expiryTimestamp * 1000
+            : expiryTimestamp;
+        return normalizedExpiry > now;
+      });
+
+      setServers(filteredServers);
 
       const uniqueOwnerIds = [
-        ...new Set(data.map((server: Server) => server.owner)),
+        ...new Set(filteredServers.map((server: Server) => server.owner)),
       ];
       const newOwnerIds = uniqueOwnerIds.filter(
         (ownerId) => !(ownerId in userData),
@@ -579,7 +614,38 @@ const ServerList: React.FC<{
                   {row.map((server) => (
                     <div
                       key={server.id}
-                      className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6"
+                      className={`border-border-primary hover:border-border-focus rounded-lg border p-4 sm:p-6 ${
+                        userData[server.owner]?.premiumtype &&
+                        userData[server.owner].premiumtype >= 1 &&
+                        userData[server.owner].premiumtype <= 3
+                          ? ""
+                          : "bg-secondary-bg"
+                      }`}
+                      style={(() => {
+                        const premiumType =
+                          userData[server.owner]?.premiumtype ?? 0;
+                        const isSupporter =
+                          premiumType >= 1 && premiumType <= 3;
+                        if (!isSupporter) return {};
+                        switch (premiumType) {
+                          case 1:
+                            return {
+                              backgroundColor:
+                                "var(--color-supporter-bronze-bg)",
+                            };
+                          case 2:
+                            return {
+                              backgroundColor:
+                                "var(--color-supporter-silver-bg)",
+                            };
+                          case 3:
+                            return {
+                              backgroundColor: "var(--color-supporter-gold-bg)",
+                            };
+                          default:
+                            return {};
+                        }
+                      })()}
                     >
                       <div className="mb-4 flex flex-col gap-3">
                         <div className="flex items-center space-x-2">
@@ -590,6 +656,50 @@ const ServerList: React.FC<{
                           <span className="text-secondary-text">
                             Server #{serverNumberMap[server.id]}
                           </span>
+                          {userData[server.owner]?.premiumtype &&
+                            userData[server.owner].premiumtype >= 1 &&
+                            userData[server.owner].premiumtype <= 3 && (
+                              <Tooltip
+                                title={`Supporter Type ${userData[server.owner].premiumtype}`}
+                                placement="top"
+                                arrow
+                                slotProps={{
+                                  tooltip: {
+                                    sx: {
+                                      backgroundColor:
+                                        "var(--color-secondary-bg)",
+                                      color: "var(--color-primary-text)",
+                                      fontSize: "0.75rem",
+                                      padding: "8px 12px",
+                                      borderRadius: "8px",
+                                      boxShadow:
+                                        "0 4px 12px var(--color-card-shadow)",
+                                      "& .MuiTooltip-arrow": {
+                                        color: "var(--color-secondary-bg)",
+                                      },
+                                    },
+                                  },
+                                }}
+                              >
+                                <a
+                                  href="/supporting"
+                                  className="flex items-center"
+                                >
+                                  <Image
+                                    src={
+                                      supporterIcons[
+                                        userData[server.owner]
+                                          .premiumtype as keyof typeof supporterIcons
+                                      ]
+                                    }
+                                    alt={`Supporter Type ${userData[server.owner].premiumtype}`}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain transition-opacity hover:opacity-80"
+                                  />
+                                </a>
+                              </Tooltip>
+                            )}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {loggedInUserId && loggedInUserId === server.owner ? (
@@ -606,7 +716,7 @@ const ServerList: React.FC<{
                               </button>
                               <button
                                 onClick={() => handleEditServer(server)}
-                                className="border-button-warning bg-button-warning text-form-button-text hover:bg-button-warning-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 aria-label="Edit Server"
                               >
                                 <Icon
