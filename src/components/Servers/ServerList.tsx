@@ -611,56 +611,55 @@ const ServerList: React.FC<{
                 }}
               >
                 <div className="grid grid-cols-1 gap-4 gap-y-6 pb-4 md:grid-cols-2 xl:grid-cols-3">
-                  {row.map((server) => (
-                    <div
-                      key={server.id}
-                      className={`border-border-primary hover:border-border-focus rounded-lg border p-4 sm:p-6 ${
-                        userData[server.owner]?.premiumtype &&
-                        userData[server.owner].premiumtype >= 1 &&
-                        userData[server.owner].premiumtype <= 3
-                          ? ""
-                          : "bg-secondary-bg"
-                      }`}
-                      style={(() => {
-                        const premiumType =
-                          userData[server.owner]?.premiumtype ?? 0;
-                        const isSupporter =
-                          premiumType >= 1 && premiumType <= 3;
-                        if (!isSupporter) return {};
-                        switch (premiumType) {
-                          case 1:
-                            return {
-                              backgroundColor:
-                                "var(--color-supporter-bronze-bg)",
-                            };
-                          case 2:
-                            return {
-                              backgroundColor:
-                                "var(--color-supporter-silver-bg)",
-                            };
-                          case 3:
-                            return {
-                              backgroundColor: "var(--color-supporter-gold-bg)",
-                            };
-                          default:
-                            return {};
-                        }
-                      })()}
-                    >
-                      <div className="mb-4 flex flex-col gap-3">
-                        <div className="flex items-center space-x-2">
-                          <Icon
-                            icon="heroicons-outline:shield-check"
-                            className="text-button-info h-5 w-5"
-                          />
-                          <span className="text-secondary-text">
-                            Server #{serverNumberMap[server.id]}
-                          </span>
-                          {userData[server.owner]?.premiumtype &&
-                            userData[server.owner].premiumtype >= 1 &&
-                            userData[server.owner].premiumtype <= 3 && (
+                  {row.map((server) => {
+                    // Check if user is a Supporter (premium types 1-3)
+                    const premiumType =
+                      userData[server.owner]?.premiumtype ?? 0;
+                    const isSupporter = premiumType >= 1 && premiumType <= 3;
+                    const supporterTier = isSupporter ? premiumType : null;
+
+                    // Background style for different supporter tiers
+                    const getBackgroundStyle = (): React.CSSProperties => {
+                      if (!isSupporter) return {};
+
+                      switch (premiumType) {
+                        case 1:
+                          return {
+                            backgroundColor: "var(--color-supporter-bronze-bg)",
+                          };
+                        case 2:
+                          return {
+                            backgroundColor: "var(--color-supporter-silver-bg)",
+                          };
+                        case 3:
+                          return {
+                            backgroundColor: "var(--color-supporter-gold-bg)",
+                          };
+                        default:
+                          return {};
+                      }
+                    };
+
+                    return (
+                      <div
+                        key={server.id}
+                        className={`border-border-primary hover:border-border-focus rounded-lg border p-4 sm:p-6 ${
+                          isSupporter ? "" : "bg-secondary-bg"
+                        }`}
+                        style={getBackgroundStyle()}
+                      >
+                        <div className="mb-4 flex flex-col gap-3">
+                          <div className="flex items-center space-x-2">
+                            <Icon
+                              icon="heroicons-outline:shield-check"
+                              className="text-button-info h-5 w-5"
+                            />
+                            <span className="text-secondary-text">
+                              Server #{serverNumberMap[server.id]}
+                            </span>
+                            {isSupporter && supporterTier && (
                               <Tooltip
-                                title={`Supporter Type ${userData[server.owner].premiumtype}`}
+                                title={`Supporter Type ${supporterTier}`}
                                 placement="top"
                                 arrow
                                 slotProps={{
@@ -688,11 +687,10 @@ const ServerList: React.FC<{
                                   <Image
                                     src={
                                       supporterIcons[
-                                        userData[server.owner]
-                                          .premiumtype as keyof typeof supporterIcons
+                                        supporterTier as keyof typeof supporterIcons
                                       ]
                                     }
-                                    alt={`Supporter Type ${userData[server.owner].premiumtype}`}
+                                    alt={`Supporter Type ${supporterTier}`}
                                     width={20}
                                     height={20}
                                     className="object-contain transition-opacity hover:opacity-80"
@@ -700,178 +698,180 @@ const ServerList: React.FC<{
                                 </a>
                               </Tooltip>
                             )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {loggedInUserId && loggedInUserId === server.owner ? (
-                            <>
-                              <button
-                                onClick={() => handleCopyLink(server.link)}
-                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                aria-label="Copy Server Link"
-                              >
-                                <Icon
-                                  icon="heroicons:clipboard"
-                                  className="h-4 w-4"
-                                />
-                              </button>
-                              <button
-                                onClick={() => handleEditServer(server)}
-                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                aria-label="Edit Server"
-                              >
-                                <Icon
-                                  icon="heroicons:pencil"
-                                  className="h-4 w-4"
-                                />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteServer(server)}
-                                className="border-button-danger bg-button-danger text-form-button-text hover:bg-button-danger-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                aria-label="Delete Server"
-                              >
-                                <Icon
-                                  icon="heroicons:trash-solid"
-                                  className="h-4 w-4"
-                                />
-                              </button>
-                              <a
-                                href={server.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                              >
-                                Join Server
-                              </a>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => handleCopyLink(server.link)}
-                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                aria-label="Copy Server Link"
-                              >
-                                <Icon
-                                  icon="heroicons:clipboard"
-                                  className="h-4 w-4"
-                                />
-                              </button>
-                              <a
-                                href={server.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                              >
-                                Join Server
-                              </a>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <Icon
-                            icon="heroicons:user-solid"
-                            className="text-secondary-text h-5 w-5 flex-shrink-0"
-                          />
-                          <span className="text-secondary-text flex items-center gap-1 text-sm sm:text-base">
-                            Owner:{" "}
-                            {userData[server.owner] ? (
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {loggedInUserId &&
+                            loggedInUserId === server.owner ? (
                               <>
-                                {userData[server.owner] && (
-                                  <UserAvatar
-                                    userId={userData[server.owner].id}
-                                    avatarHash={userData[server.owner].avatar}
-                                    username={userData[server.owner].username}
-                                    size={8}
-                                    custom_avatar={
-                                      userData[server.owner].custom_avatar
-                                    }
-                                    showBadge={false}
-                                    settings={userData[server.owner].settings}
-                                    premiumType={
-                                      userData[server.owner].premiumtype
-                                    }
-                                  />
-                                )}
-                                <Tooltip
-                                  title={
-                                    <UserDetailsTooltip
-                                      user={userData[server.owner]}
-                                    />
-                                  }
-                                  arrow
-                                  disableTouchListener
-                                  slotProps={{
-                                    tooltip: {
-                                      sx: {
-                                        bgcolor: "var(--color-secondary-bg)",
-                                        maxWidth: "400px",
-                                        width: "auto",
-                                        minWidth: "300px",
-                                        "& .MuiTooltip-arrow": {
-                                          color: "var(--color-secondary-bg)",
-                                        },
-                                      },
-                                    },
-                                  }}
+                                <button
+                                  onClick={() => handleCopyLink(server.link)}
+                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  aria-label="Copy Server Link"
                                 >
-                                  <Link
-                                    href={`/users/${server.owner}`}
-                                    prefetch={false}
-                                    className="text-link hover:text-link-hover hover:underline"
-                                  >
-                                    @{userData[server.owner].username}
-                                  </Link>
-                                </Tooltip>
+                                  <Icon
+                                    icon="heroicons:clipboard"
+                                    className="h-4 w-4"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() => handleEditServer(server)}
+                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  aria-label="Edit Server"
+                                >
+                                  <Icon
+                                    icon="heroicons:pencil"
+                                    className="h-4 w-4"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteServer(server)}
+                                  className="border-button-danger bg-button-danger text-form-button-text hover:bg-button-danger-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  aria-label="Delete Server"
+                                >
+                                  <Icon
+                                    icon="heroicons:trash-solid"
+                                    className="h-4 w-4"
+                                  />
+                                </button>
+                                <a
+                                  href={server.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                >
+                                  Join Server
+                                </a>
                               </>
                             ) : (
-                              "Unknown"
+                              <>
+                                <button
+                                  onClick={() => handleCopyLink(server.link)}
+                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  aria-label="Copy Server Link"
+                                >
+                                  <Icon
+                                    icon="heroicons:clipboard"
+                                    className="h-4 w-4"
+                                  />
+                                </button>
+                                <a
+                                  href={server.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                >
+                                  Join Server
+                                </a>
+                              </>
                             )}
-                          </span>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Icon
-                              icon="heroicons:clock"
-                              className="text-secondary-text h-5 w-5"
-                            />
-                            <span className="text-secondary-text text-sm sm:text-base">
-                              Created: {formatProfileDate(server.created_at)}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Icon
-                              icon="heroicons:clock"
-                              className="text-secondary-text h-5 w-5"
-                            />
-                            <span className="text-secondary-text text-sm sm:text-base">
-                              Expires:{" "}
-                              {server.expires === "Never"
-                                ? "Never"
-                                : formatProfileDate(server.expires)}
-                            </span>
                           </div>
                         </div>
 
-                        <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
-                          <h3 className="text-primary-text mb-2 text-sm font-semibold">
-                            Server Rules
-                          </h3>
-                          <p
-                            className="text-secondary-text text-xs break-words whitespace-pre-wrap sm:text-sm"
-                            dangerouslySetInnerHTML={{
-                              __html:
-                                server.rules === "N/A"
-                                  ? "No Rules set by owner"
-                                  : processMentions(server.rules),
-                            }}
-                          />
+                        <div className="space-y-3 sm:space-y-4">
+                          <div className="flex items-center space-x-2">
+                            <Icon
+                              icon="heroicons:user-solid"
+                              className="text-secondary-text h-5 w-5 flex-shrink-0"
+                            />
+                            <span className="text-secondary-text flex items-center gap-1 text-sm sm:text-base">
+                              Owner:{" "}
+                              {userData[server.owner] ? (
+                                <>
+                                  {userData[server.owner] && (
+                                    <UserAvatar
+                                      userId={userData[server.owner].id}
+                                      avatarHash={userData[server.owner].avatar}
+                                      username={userData[server.owner].username}
+                                      size={8}
+                                      custom_avatar={
+                                        userData[server.owner].custom_avatar
+                                      }
+                                      showBadge={false}
+                                      settings={userData[server.owner].settings}
+                                      premiumType={
+                                        userData[server.owner].premiumtype
+                                      }
+                                    />
+                                  )}
+                                  <Tooltip
+                                    title={
+                                      <UserDetailsTooltip
+                                        user={userData[server.owner]}
+                                      />
+                                    }
+                                    arrow
+                                    disableTouchListener
+                                    slotProps={{
+                                      tooltip: {
+                                        sx: {
+                                          bgcolor: "var(--color-secondary-bg)",
+                                          maxWidth: "400px",
+                                          width: "auto",
+                                          minWidth: "300px",
+                                          "& .MuiTooltip-arrow": {
+                                            color: "var(--color-secondary-bg)",
+                                          },
+                                        },
+                                      },
+                                    }}
+                                  >
+                                    <Link
+                                      href={`/users/${server.owner}`}
+                                      prefetch={false}
+                                      className="text-link hover:text-link-hover hover:underline"
+                                    >
+                                      @{userData[server.owner].username}
+                                    </Link>
+                                  </Tooltip>
+                                </>
+                              ) : (
+                                "Unknown"
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Icon
+                                icon="heroicons:clock"
+                                className="text-secondary-text h-5 w-5"
+                              />
+                              <span className="text-secondary-text text-sm sm:text-base">
+                                Created: {formatProfileDate(server.created_at)}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Icon
+                                icon="heroicons:clock"
+                                className="text-secondary-text h-5 w-5"
+                              />
+                              <span className="text-secondary-text text-sm sm:text-base">
+                                Expires:{" "}
+                                {server.expires === "Never"
+                                  ? "Never"
+                                  : formatProfileDate(server.expires)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
+                            <h3 className="text-primary-text mb-2 text-sm font-semibold">
+                              Server Rules
+                            </h3>
+                            <p
+                              className="text-secondary-text text-xs break-words whitespace-pre-wrap sm:text-sm"
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  server.rules === "N/A"
+                                    ? "No Rules set by owner"
+                                    : processMentions(server.rules),
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
