@@ -7,12 +7,14 @@ interface VersionInfoProps {
   version: string;
   date: number;
   branch: string;
+  commitUrl: string;
 }
 
 export default function VersionInfo({
   version,
   date,
   branch,
+  commitUrl,
 }: VersionInfoProps) {
   const [formattedDate, setFormattedDate] = useState<string>("");
 
@@ -22,25 +24,20 @@ export default function VersionInfo({
   }, [date]);
 
   return (
-    <div className="space-y-2">
-      <div className="inline-flex items-center gap-2 px-2 py-1 bg-primary-bg rounded border border-border-primary">
-        <span className="text-xs font-mono text-primary-text">VER</span>
-        <span className="text-xs font-mono font-semibold text-tertiary-text">
+    <div className="text-secondary-text text-xs leading-relaxed space-y-1">
+      <p>
+        Version:{" "}
+        <a
+          href={commitUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
+        >
           {version}
-        </span>
-        <span className="text-xs font-mono text-primary-text">•</span>
-        <span className="text-xs font-mono text-primary-text">ENV</span>
-        <span className="text-xs font-mono font-semibold text-tertiary-text uppercase">
-          {branch}
-        </span>
-      </div>
-
-      <div className="inline-flex items-center gap-2 px-2 py-1 bg-primary-bg rounded border border-border-primary">
-        <span className="text-xs font-mono text-primary-text">UPD</span>
-        <span className="text-xs font-mono font-semibold text-tertiary-text">
-          {formattedDate || "Loading..."}
-        </span>
-      </div>
+        </a>
+      </p>
+      <p>Environment: {branch.charAt(0).toUpperCase() + branch.slice(1)}</p>
+      <p>Updated: {formattedDate || "Loading..."}</p>
     </div>
   );
 }

@@ -14,6 +14,7 @@ interface FooterProps {
     version: string;
     date: number;
     branch: string;
+    commitUrl: string;
   };
 }
 
@@ -138,6 +139,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 version={versionInfo.version}
                 date={versionInfo.date}
                 branch={versionInfo.branch}
+                commitUrl={versionInfo.commitUrl}
               />
             </div>
           </div>

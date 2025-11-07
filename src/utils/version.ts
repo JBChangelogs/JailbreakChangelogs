@@ -28,6 +28,7 @@ export async function getWebsiteVersion(): Promise<{
   version: string;
   date: number;
   branch: string;
+  commitUrl: string;
 }> {
   try {
     const branch = getGitBranch();
@@ -45,6 +46,7 @@ export async function getWebsiteVersion(): Promise<{
       version: data.sha.substring(0, 7),
       date: new Date(data.commit.committer.date).getTime(),
       branch: environment,
+      commitUrl: data.html_url,
     };
   } catch (error) {
     console.error("Failed to fetch version data:", error);
@@ -52,6 +54,7 @@ export async function getWebsiteVersion(): Promise<{
       version: "unknown",
       date: Date.now(),
       branch: "development",
+      commitUrl: "#",
     };
   }
 }
