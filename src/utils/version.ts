@@ -35,7 +35,7 @@ export async function getWebsiteVersion(): Promise<{
     const environment = railwayEnv || "development";
 
     const response = await fetch(
-      `https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/commits/${branch}`,
+      `${process.env.GITHUB_API_COMMITS_URL}/${branch}`,
       {
         next: { revalidate: 3600 },
       },
