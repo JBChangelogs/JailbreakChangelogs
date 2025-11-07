@@ -39,7 +39,7 @@ export default function TradeAds({
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | null>(null);
   const [showOfferConfirm, setShowOfferConfirm] = useState<number | null>(null);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   // Get current user ID from auth state
   const currentUserId = user?.id || null;

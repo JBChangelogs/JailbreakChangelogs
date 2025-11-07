@@ -114,7 +114,9 @@ export default function TestimonialsSection() {
                       alt={testimonial.name}
                       width={56}
                       height={56}
-                      className="h-14 w-14 object-contain"
+                      className={`h-14 w-14 object-contain ${
+                        testimonial.name !== "Badimo" ? "rounded-full" : ""
+                      }`}
                       loading="lazy"
                     />
                   </div>
@@ -160,7 +162,9 @@ export default function TestimonialsSection() {
                       alt={testimonial.name}
                       width={56}
                       height={56}
-                      className="h-14 w-14 object-contain"
+                      className={`h-14 w-14 object-contain ${
+                        testimonial.name !== "Badimo" ? "rounded-full" : ""
+                      }`}
                       loading="lazy"
                     />
                   </div>
