@@ -74,6 +74,36 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
               />
             </Tooltip>
           ) : null}
+          {user.usernumber <= 100 ? (
+            <Tooltip
+              title="Early Adopter"
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-primary-bg)",
+                    color: "var(--color-secondary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px var(--color-card-shadow)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-primary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <Image
+                src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
+                alt="Early Adopter"
+                width={16}
+                height={16}
+                className="cursor-pointer hover:opacity-90 object-contain"
+              />
+            </Tooltip>
+          ) : null}
         </div>
         <p className="text-secondary-text max-w-[180px] truncate text-sm sm:max-w-[250px]">
           @{user.username}

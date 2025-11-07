@@ -230,6 +230,25 @@ export default function UserSearchVirtual({
                   >
                     <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
                       {rowUsers.map((user: UserData) => {
+                        // Border color based on supporter tier
+                        const premiumType = user.premiumtype ?? 0;
+                        const isSupporter =
+                          premiumType >= 1 && premiumType <= 3;
+
+                        const getBorderClass = () => {
+                          if (!isSupporter) return "border-border-primary";
+                          switch (premiumType) {
+                            case 1:
+                              return "border-[var(--color-supporter-bronze-border)]";
+                            case 2:
+                              return "border-[var(--color-supporter-silver-border)]";
+                            case 3:
+                              return "border-[var(--color-supporter-gold-border)]";
+                            default:
+                              return "border-border-primary";
+                          }
+                        };
+
                         return (
                           <Tooltip
                             key={user.id}
@@ -260,7 +279,7 @@ export default function UserSearchVirtual({
                             <Link
                               href={`/users/${user.id}`}
                               prefetch={false}
-                              className="border-border-primary bg-primary-bg group hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors"
+                              className={`${getBorderClass()} bg-primary-bg group hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors`}
                             >
                               {user.settings?.hide_presence !== 1 &&
                                 user.presence?.status === "Online" && (
