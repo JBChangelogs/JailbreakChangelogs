@@ -191,6 +191,7 @@ const DupeTable: React.FC<DupeTableProps> = ({
               >
                 <Link
                   href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                  prefetch={false}
                   className="text-primary-text hover:text-link-hover font-medium transition-colors hover:underline"
                 >
                   {item.name}

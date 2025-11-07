@@ -5,7 +5,6 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { formatRelativeDate } from "@/utils/timestamp";
 import { UserAvatar } from "@/utils/avatar";
-import { UserBadges } from "@/components/Profile/UserBadges";
 
 interface UserDetailsTooltipProps {
   user: UserData;
@@ -45,12 +44,6 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
                     ? user.global_name
                     : user.username}
                 </h3>
-                <UserBadges
-                  usernumber={user.usernumber}
-                  premiumType={user.premiumtype}
-                  flags={user.flags}
-                  size="sm"
-                />
               </div>
               <p className="text-secondary-text text-sm">@{user.username}</p>
             </Link>

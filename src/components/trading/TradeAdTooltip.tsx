@@ -30,6 +30,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             />
             <Link
               href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${item.sub_name ? `?variant=${item.sub_name}` : ""}`}
+              prefetch={false}
               className="link-text hover:text-link-hover truncate text-lg font-semibold transition-colors"
             >
               {item.base_name && item.sub_name

@@ -578,6 +578,7 @@ export default function Header() {
       <ListItem
         component={Link}
         href="/users"
+        prefetch={false}
         onClick={handleDrawerToggle}
         className="cursor-pointer pl-4"
       >
@@ -966,6 +967,7 @@ export default function Header() {
                           <div className="flex flex-col gap-1 px-2 py-3">
                             <Link
                               href="/users"
+                              prefetch={false}
                               className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
                               onClick={handleCommunityMenuClose}
                             >

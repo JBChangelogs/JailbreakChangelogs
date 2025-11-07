@@ -100,6 +100,7 @@ export default function TradeItemsImages({
             >
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                prefetch={false}
                 className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
                 {isVideoItem(item.name) ? (
@@ -185,6 +186,7 @@ export default function TradeItemsImages({
             >
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                prefetch={false}
                 className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
                 {isVideoItem(item.name) ? (

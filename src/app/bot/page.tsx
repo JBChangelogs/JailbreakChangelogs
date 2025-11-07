@@ -246,6 +246,7 @@ export default function BotPage() {
               {" by "}
               <Link
                 href="/users/659865209741246514"
+                prefetch={false}
                 className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
               >
                 Jakobiis

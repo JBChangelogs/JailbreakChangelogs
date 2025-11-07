@@ -56,17 +56,6 @@ export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
 export const INVENTORY_API_SOURCE_HEADER =
   process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER || "JBCL-Frontend/1.0";
 
-export interface OnlineUser {
-  id: string;
-  username: string;
-  global_name: string;
-  avatar: string;
-  created_at: string;
-  premiumtype: number;
-  usernumber: number;
-  last_seen: number;
-}
-
 export const fetchUsers = async () => {
   const response = await fetch(`${BASE_API_URL}/users/list`, {
     headers: {
@@ -342,7 +331,6 @@ export const fetchUsersForList = async () => {
     "roblox_display_name",
     "roblox_avatar",
     "roblox_join_date",
-    "flags",
   ].join(",");
 
   const response = await fetch(
@@ -798,25 +786,6 @@ export async function fetchSeason(id: string) {
   } catch (err) {
     console.error("[SERVER] Error fetching season:", err);
     return null;
-  }
-}
-
-export async function fetchOnlineUsers(): Promise<OnlineUser[]> {
-  try {
-    const response = await fetch(`${BASE_API_URL}/users/list/online`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Presence/1.0",
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch online users");
-    }
-    const data = await response.json();
-    const list = Array.isArray(data) ? (data as OnlineUser[]) : [];
-    return list;
-  } catch (err) {
-    console.error("[SERVER] Error fetching online users:", err);
-    return [];
   }
 }
 

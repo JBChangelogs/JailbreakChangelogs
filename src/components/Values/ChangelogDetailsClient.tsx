@@ -641,6 +641,7 @@ export default function ChangelogDetailsClient({
                         <div className="mb-1">
                           <Link
                             href={`/item/${change.item.type}/${encodeURIComponent(change.item.name)}`}
+                            prefetch={false}
                             className="text-primary-text hover:text-link block font-semibold break-words whitespace-normal transition-colors lg:pr-24"
                           >
                             {change.item.name}

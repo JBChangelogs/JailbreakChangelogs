@@ -324,7 +324,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
           {/* Community */}
           <MenuItem setActive={setActive} active={active} item="Community">
-            <HoveredLink href="/users" setActive={setActive}>
+            <HoveredLink href="/users" setActive={setActive} prefetch={false}>
               User Search
             </HoveredLink>
             <HoveredLink href="/leaderboard/money" setActive={setActive}>

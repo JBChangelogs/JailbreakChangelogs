@@ -195,6 +195,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
               <Link
                 key={`${item.id}-${item.sub_name || "base"}`}
                 href={`/item/${item.type.toLowerCase()}/${item.name}${item.sub_name ? `?variant=${item.sub_name}` : ""}`}
+                prefetch={false}
                 className="group"
               >
                 <div className="bg-primary-bg overflow-hidden rounded-xl transition-all duration-200 hover:shadow-lg">

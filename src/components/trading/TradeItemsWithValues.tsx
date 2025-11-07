@@ -107,6 +107,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             <div className="flex items-center justify-between">
               <Link
                 href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                prefetch={false}
                 className="text-primary-text hover:text-link font-medium transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
