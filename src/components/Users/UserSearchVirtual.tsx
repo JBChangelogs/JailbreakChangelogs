@@ -38,35 +38,64 @@ export default function UserSearchVirtual({
     }
   }, [user]);
 
-  const filteredUsers = initialUsers.filter((user) => {
-    const searchLower = debouncedSearchQuery.trim().toLowerCase();
-    const isIdSearch = /^\d{18,19}$/.test(debouncedSearchQuery);
+  const filteredAndSortedUsers = initialUsers
+    .filter((user) => {
+      const searchLower = debouncedSearchQuery.trim().toLowerCase();
+      const isIdSearch = /^\d{18,19}$/.test(debouncedSearchQuery);
 
-    if (userType === "roblox") {
-      if (!user.roblox_id) return false;
+      if (userType === "roblox") {
+        if (!user.roblox_id) return false;
 
-      if (isIdSearch) {
-        return user.id === debouncedSearchQuery;
+        if (isIdSearch) {
+          return user.id === debouncedSearchQuery;
+        }
+
+        return (
+          (user.roblox_username &&
+            user.roblox_username.toLowerCase().includes(searchLower)) ||
+          (user.roblox_display_name &&
+            user.roblox_display_name.toLowerCase().includes(searchLower))
+        );
+      } else {
+        if (isIdSearch) {
+          return user.id === debouncedSearchQuery;
+        }
+
+        return (
+          user.username.toLowerCase().includes(searchLower) ||
+          (user.global_name &&
+            user.global_name.toLowerCase().includes(searchLower))
+        );
+      }
+    })
+    .sort((a, b) => {
+      // 1. Logged-in user first
+      if (currentUserId) {
+        if (a.id === currentUserId) return -1;
+        if (b.id === currentUserId) return 1;
       }
 
-      return (
-        (user.roblox_username &&
-          user.roblox_username.toLowerCase().includes(searchLower)) ||
-        (user.roblox_display_name &&
-          user.roblox_display_name.toLowerCase().includes(searchLower))
-      );
-    } else {
-      if (isIdSearch) {
-        return user.id === debouncedSearchQuery;
+      // 2. Online users (respecting hide_presence setting)
+      const aIsOnline =
+        a.settings?.hide_presence !== 1 && a.presence?.status === "Online";
+      const bIsOnline =
+        b.settings?.hide_presence !== 1 && b.presence?.status === "Online";
+
+      if (aIsOnline && !bIsOnline) return -1;
+      if (!aIsOnline && bIsOnline) return 1;
+
+      // 3. For online users, sort by most recently updated
+      if (aIsOnline && bIsOnline) {
+        const aLastUpdated = a.presence?.last_updated || 0;
+        const bLastUpdated = b.presence?.last_updated || 0;
+        if (aLastUpdated !== bLastUpdated) {
+          return bLastUpdated - aLastUpdated; // Most recent first
+        }
       }
 
-      return (
-        user.username.toLowerCase().includes(searchLower) ||
-        (user.global_name &&
-          user.global_name.toLowerCase().includes(searchLower))
-      );
-    }
-  });
+      // 4. Default sort by usernumber
+      return a.usernumber - b.usernumber;
+    });
 
   // Organize users into rows for grid virtualization
   // Each row contains multiple users based on screen size
@@ -80,8 +109,8 @@ export default function UserSearchVirtual({
 
   const usersPerRow = getUsersPerRow();
   const rows: UserData[][] = [];
-  for (let i = 0; i < filteredUsers.length; i += usersPerRow) {
-    rows.push(filteredUsers.slice(i, i + usersPerRow));
+  for (let i = 0; i < filteredAndSortedUsers.length; i += usersPerRow) {
+    rows.push(filteredAndSortedUsers.slice(i, i + usersPerRow));
   }
 
   // TanStack Virtual setup for performance with large user datasets
@@ -132,8 +161,8 @@ export default function UserSearchVirtual({
                   ? debouncedSearchQuery.slice(0, MAX_QUERY_DISPLAY) + "..."
                   : debouncedSearchQuery;
               return debouncedSearchQuery
-                ? `Found ${filteredUsers.length.toLocaleString()} ${userType === "roblox" ? "Roblox" : "Discord"} ${filteredUsers.length === 1 ? "user" : "users"} matching "${displayQuery}"`
-                : `Total ${userType === "roblox" ? "Roblox" : "Discord"} Users: ${filteredUsers.length.toLocaleString()}`;
+                ? `Found ${filteredAndSortedUsers.length.toLocaleString()} ${userType === "roblox" ? "Roblox" : "Discord"} ${filteredAndSortedUsers.length === 1 ? "user" : "users"} matching "${displayQuery}"`
+                : `Total ${userType === "roblox" ? "Roblox" : "Discord"} Users: ${filteredAndSortedUsers.length.toLocaleString()}`;
             })()}
           </span>
         </div>
@@ -149,7 +178,7 @@ export default function UserSearchVirtual({
             scrollbarColor: "var(--color-border-primary) transparent",
           }}
         >
-          {filteredUsers.length === 0 ? (
+          {filteredAndSortedUsers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="relative mb-6">
                 <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
@@ -231,8 +260,19 @@ export default function UserSearchVirtual({
                             <Link
                               href={`/users/${user.id}`}
                               prefetch={false}
-                              className="border-border-primary bg-primary-bg group hover:border-border-focus block rounded-lg border p-4 shadow-md transition-colors"
+                              className="border-border-primary bg-primary-bg group hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors"
                             >
+                              {user.settings?.hide_presence !== 1 &&
+                                user.presence?.status === "Online" && (
+                                  <div
+                                    className="absolute top-2 right-2 h-3 w-3 rounded-full border-2 z-10"
+                                    style={{
+                                      backgroundColor:
+                                        "var(--color-status-success-vibrant)",
+                                      borderColor: "var(--color-primary-bg)",
+                                    }}
+                                  />
+                                )}
                               <div className="flex items-center space-x-3">
                                 {userType === "roblox" ? (
                                   <RobloxUserCard user={user} />

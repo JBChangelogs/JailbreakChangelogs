@@ -1,5 +1,5 @@
 import { UserAvatar } from "@/utils/avatar";
-import { UserSettings } from "@/types/auth";
+import { UserSettings, UserPresence } from "@/types/auth";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 
@@ -12,10 +12,10 @@ interface DiscordUserCardProps {
     avatar: string;
     global_name: string;
     usernumber: number;
-    accent_color: string;
     custom_avatar?: string;
     settings?: UserSettings;
     premiumtype?: number;
+    presence?: UserPresence;
   };
 }
 
@@ -37,7 +37,7 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">
-          <h2 className="text-primary-text hover:text-border-focus max-w-[180px] truncate text-base font-semibold transition-colors sm:max-w-[250px]">
+          <h2 className="text-primary-text group-hover:text-link max-w-[180px] truncate text-base font-semibold transition-colors sm:max-w-[250px]">
             {user.global_name && user.global_name !== "None"
               ? user.global_name
               : user.username}

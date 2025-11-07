@@ -333,7 +333,6 @@ export const fetchUsersForList = async () => {
     "global_name",
     "avatar",
     "usernumber",
-    "accent_color",
     "custom_avatar",
     "settings",
     "premiumtype",
@@ -343,6 +342,7 @@ export const fetchUsersForList = async () => {
     "roblox_display_name",
     "roblox_avatar",
     "roblox_join_date",
+    "flags",
   ].join(",");
 
   const response = await fetch(
@@ -354,7 +354,7 @@ export const fetchUsersForList = async () => {
     },
   );
   const data = await response.json();
-  return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
+  return data;
 };
 
 export async function fetchItems() {

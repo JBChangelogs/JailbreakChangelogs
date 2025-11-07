@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { UserAvatar, DefaultAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import dynamic from "next/dynamic";
@@ -413,7 +413,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                     transition={menuTransition}
                   >
                     {/* User info */}
-                    <div className="border-border-secondary border-b px-4 py-3">
+                    <Link
+                      href={`/users/${userData.id}`}
+                      className="border-border-secondary hover:bg-button-info-hover/10 block border-b px-4 py-3 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         <UserAvatar
                           userId={userData.id}
@@ -426,7 +429,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                           premiumType={userData.premiumtype}
                         />
                         <div>
-                          <div className="text-primary-text font-semibold">
+                          <div className="text-primary-text hover:text-link font-semibold transition-colors">
                             {userData.username}
                           </div>
                           <div className="text-secondary-text text-sm">
@@ -434,20 +437,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Menu items */}
                     <div className="py-1">
-                      <Link
-                        href={`/users/${userData.id}`}
-                        className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
-                      >
-                        <div className="h-6 w-6 flex-shrink-0">
-                          <DefaultAvatar premiumType={userData.premiumtype} />
-                        </div>
-                        My Account
-                      </Link>
-
                       {!userData.roblox_id && (
                         <button
                           className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors"

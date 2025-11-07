@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 interface TestimonialCarouselProps {
   children: React.ReactNode;
@@ -12,10 +12,14 @@ export default function TestimonialCarousel({
 }: TestimonialCarouselProps) {
   const baseX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useAnimationFrame(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Pause animation when hovered
+    if (isHovered) return;
 
     const scrollWidth = container.scrollWidth / 2; // Half because we duplicate
 
@@ -30,7 +34,11 @@ export default function TestimonialCarousel({
   });
 
   return (
-    <div className="overflow-x-hidden">
+    <div
+      className="overflow-x-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <motion.div
         ref={containerRef}
         className="flex gap-6 items-start"

@@ -35,7 +35,7 @@ import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/escapeLogin";
-import { UserAvatar, DefaultAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 // import { PUBLIC_API_URL } from '@/utils/api';
 import { useRef } from "react";
@@ -269,14 +269,32 @@ export default function Header() {
             component={Link}
             href={`/users/${userData?.id}`}
             onClick={handleDrawerToggle}
-            className="cursor-pointer"
+            className="cursor-pointer hover:bg-button-info-hover/10"
+            sx={{
+              padding: "12px 16px",
+              borderBottom: "1px solid var(--color-border-secondary)",
+            }}
           >
-            <ListItemIcon>
-              <div className="h-6 w-6">
-                <DefaultAvatar premiumType={userData.premiumtype} />
+            <div className="flex items-center gap-3">
+              <UserAvatar
+                userId={userData.id}
+                avatarHash={userData.avatar}
+                username={userData.username}
+                size={10}
+                custom_avatar={userData.custom_avatar}
+                showBadge={false}
+                settings={userData.settings}
+                premiumType={userData.premiumtype}
+              />
+              <div>
+                <div className="text-primary-text font-semibold">
+                  {userData.username}
+                </div>
+                <div className="text-secondary-text text-sm">
+                  @{userData.username}
+                </div>
               </div>
-            </ListItemIcon>
-            <ListItemText primary="My account" />
+            </div>
           </ListItem>
           {!userData.roblox_id && (
             <ListItem
