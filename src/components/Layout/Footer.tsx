@@ -12,7 +12,7 @@ interface FooterProps {
   githubUrl: string;
   versionInfo: {
     version: string;
-    date: string;
+    date: number;
     branch: string;
   };
 }

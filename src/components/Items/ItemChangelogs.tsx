@@ -171,7 +171,7 @@ const doesSuggestionTypeApplyToKey = (
   return false;
 };
 
-// Return a human-friendly label for the suggestion type (or fallback to 'Value')
+// Return a human-friendly label for the suggestion type (or fallback based on key)
 const formatSuggestionTypeLabel = (
   suggestionType?: string,
   changeKey?: string,
@@ -186,6 +186,19 @@ const formatSuggestionTypeLabel = (
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
   }
+
+  // Fallback to key-specific labels when no suggestion type applies
+  if (changeKey) {
+    const key = changeKey.toLowerCase();
+    if (key === "cash_value") return "Cash Value";
+    if (key === "duped_value") return "Duped Value";
+    if (key === "notes" || key === "note") return "Notes";
+    if (key === "creator") return "Creator";
+    if (key === "description") return "Description";
+    if (key === "demand") return "Demand";
+    if (key === "trend") return "Trend";
+  }
+
   return "Value";
 };
 
@@ -728,20 +741,13 @@ export default function ItemChangelogs({
                       <div className="flex items-start gap-2 overflow-hidden">
                         <div className="min-w-0 flex-1">
                           <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                            {doesSuggestionTypeApplyToKey(
-                              change.suggestion_data?.metadata?.suggestion_type,
-                              key,
-                            ) ? (
-                              <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
-                                {formatSuggestionTypeLabel(
-                                  change.suggestion_data?.metadata
-                                    ?.suggestion_type,
-                                  key,
-                                )}
-                              </span>
-                            ) : (
-                              <>{key.replace(/_/g, " ")}:</>
-                            )}
+                            <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                              {formatSuggestionTypeLabel(
+                                change.suggestion_data?.metadata
+                                  ?.suggestion_type,
+                                key,
+                              )}
+                            </span>
                           </div>
                           <div className="grid grid-cols-2 gap-6">
                             <div className="min-w-0">

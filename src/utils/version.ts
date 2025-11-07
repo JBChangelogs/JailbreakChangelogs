@@ -1,5 +1,3 @@
-import { formatFullDate } from "./timestamp";
-
 /**
  * Determines which GitHub branch to fetch version data from based on Railway environment
  */
@@ -26,7 +24,11 @@ export function getGitHubUrl(): string {
   return "https://github.com/JBChangelogs/JailbreakChangelogs/tree/testing";
 }
 
-export async function getWebsiteVersion() {
+export async function getWebsiteVersion(): Promise<{
+  version: string;
+  date: number;
+  branch: string;
+}> {
   try {
     const branch = getGitBranch();
     const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
@@ -41,14 +43,14 @@ export async function getWebsiteVersion() {
     const data = await response.json();
     return {
       version: data.sha.substring(0, 7),
-      date: formatFullDate(new Date(data.commit.committer.date).getTime()),
+      date: new Date(data.commit.committer.date).getTime(),
       branch: environment,
     };
   } catch (error) {
     console.error("Failed to fetch version data:", error);
     return {
       version: "unknown",
-      date: "unknown",
+      date: Date.now(),
       branch: "development",
     };
   }

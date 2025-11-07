@@ -33,7 +33,7 @@ export default function TestimonialCarousel({
     <div className="overflow-x-hidden">
       <motion.div
         ref={containerRef}
-        className="flex gap-6"
+        className="flex gap-6 items-start"
         style={{ x: baseX }}
       >
         {children}
