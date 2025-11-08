@@ -81,7 +81,7 @@ export default function DuplicatesTab({
   const getUserDisplay = (userId: string) => {
     const user = localRobloxUsers[userId];
     if (!user) return userId;
-    return user.displayName || user.name || userId;
+    return user.name || user.displayName || userId;
   };
 
   const getUserAvatar = (userId: string) => {
