@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -9,6 +9,7 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 
 interface DuplicatesTabProps {
   initialData: { data: InventoryItem[]; user_id: string };
@@ -92,10 +93,16 @@ export default function DuplicatesTab({
     return Boolean(user?.hasVerifiedBadge);
   };
 
+  // Merge inventory data with live metadata from item/list endpoint
+  const mergedInventoryData = useMemo(
+    () => mergeInventoryArrayWithMetadata(initialData.data, itemsData),
+    [initialData.data, itemsData],
+  );
+
   // Count duplicates across entire inventory
   const duplicateCounts = (() => {
     const counts = new Map<string, number>();
-    initialData.data.forEach((item) => {
+    mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
@@ -104,7 +111,7 @@ export default function DuplicatesTab({
 
   // Filter to only show items with multiple copies
   const itemsWithMultipleCopies = (() => {
-    return initialData.data.filter((item) => {
+    return mergedInventoryData.filter((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       return (duplicateCounts.get(key) || 0) > 1;
     });

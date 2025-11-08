@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
@@ -8,6 +8,7 @@ import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../UI/IconWrapper";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -25,7 +26,6 @@ export default function InventoryItems({
   onItemClick,
   itemsData: propItemsData,
 }: InventoryItemsProps) {
-  "use memo";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
@@ -188,9 +188,17 @@ export default function InventoryItems({
     }, 300);
   };
 
-  const currentItemsData = propItemsData || [];
+  const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
   const currentRobloxUsers = mergedRobloxUsers;
   const currentRobloxAvatars = robloxAvatars;
+
+  // Merge inventory data with metadata from item/list endpoint
+  // This ensures fields like timesTraded and uniqueCirculation
+  // reflect the latest state from metadata, not stale snapshots
+  const mergedInventoryData = useMemo(
+    () => mergeInventoryArrayWithMetadata(initialData.data, currentItemsData),
+    [initialData.data, currentItemsData],
+  );
 
   const getUserDisplay = (userId: string) => {
     const user = currentRobloxUsers[userId];
@@ -210,7 +218,7 @@ export default function InventoryItems({
   // Count duplicates across entire inventory for consistent numbering
   const duplicateCounts = (() => {
     const counts = new Map<string, number>();
-    initialData.data.forEach((item) => {
+    mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
@@ -224,7 +232,7 @@ export default function InventoryItems({
     const counts = new Map<string, number>();
     const seenItems = new Set<string>();
 
-    initialData.data.forEach((item) => {
+    mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       if (!seenItems.has(key)) {
         seenItems.add(key);
@@ -250,7 +258,7 @@ export default function InventoryItems({
   const filteredAndSortedItems = (() => {
     if (showMissingItems) {
       const ownedItemIds = new Set(
-        initialData.data.map((item) => item.item_id),
+        mergedInventoryData.map((item) => item.item_id),
       );
 
       /*
@@ -369,7 +377,7 @@ export default function InventoryItems({
     }
 
     // Original logic for showing owned items
-    const filtered = initialData.data.filter((item) => {
+    const filtered = mergedInventoryData.filter((item) => {
       const itemData = currentItemsData.find(
         (data) => data.id === item.item_id,
       );
@@ -520,7 +528,7 @@ export default function InventoryItems({
 
     // Group items by name using ALL items from full inventory
     const itemGroups = new Map<string, InventoryItem[]>();
-    initialData.data.forEach((item) => {
+    mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       if (!itemGroups.has(key)) {
         itemGroups.set(key, []);

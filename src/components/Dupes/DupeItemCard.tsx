@@ -200,6 +200,29 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
+          <div className="text-secondary-text text-sm">TIMES TRADED</div>
+          <Tooltip
+            title={item.timesTraded.toLocaleString()}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <div className="text-primary-text cursor-help text-xl font-bold">
+              {formatNumber(item.timesTraded)}
+            </div>
+          </Tooltip>
+        </div>
+        <div>
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
             <a

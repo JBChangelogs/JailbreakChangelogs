@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
@@ -17,6 +17,7 @@ import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
+import { mergeDupeFinderArrayWithMetadata } from "@/utils/inventoryMerge";
 
 // Move pure function outside component to avoid dependency issues
 const getDupedValueForItem = (
@@ -82,7 +83,6 @@ export default function DupeFinderResults({
   userConnectionData,
   items,
 }: DupeFinderResultsProps) {
-  "use memo";
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -103,6 +103,13 @@ export default function DupeFinderResults({
   const [itemsData] = useState<Item[]>(items);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
+
+  // Merge dupe finder data with metadata from item/list endpoint
+  // This ensures fields like timesTraded and uniqueCirculation reflect the latest state
+  const mergedDupeData = useMemo(
+    () => mergeDupeFinderArrayWithMetadata(initialData, itemsData),
+    [initialData, itemsData],
+  );
 
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
@@ -175,7 +182,7 @@ export default function DupeFinderResults({
         let totalDuped = 0;
         const itemMap = new Map(itemsData.map((item) => [item.id, item]));
 
-        initialData.forEach((dupeItem) => {
+        mergedDupeData.forEach((dupeItem) => {
           const itemData = itemMap.get(dupeItem.item_id);
           if (itemData) {
             const dupedValue = getDupedValueForItem(itemData, dupeItem);
@@ -196,11 +203,11 @@ export default function DupeFinderResults({
     };
 
     calculateTotalDupedValue();
-  }, [initialData, itemsData]);
+  }, [mergedDupeData, itemsData]);
 
   // Filter and sort logic
   const filteredData = (() => {
-    return initialData.filter((item) => {
+    return mergedDupeData.filter((item) => {
       const itemData = itemsData.find((data) => data.id === item.item_id);
       if (!itemData) return false;
 
@@ -277,7 +284,7 @@ export default function DupeFinderResults({
   // Pre-calculate duplicate counts from FULL inventory (not paginated) for consistent numbering
   const duplicateCounts = (() => {
     const counts = new Map<string, number>();
-    initialData.forEach((item) => {
+    mergedDupeData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
@@ -292,7 +299,7 @@ export default function DupeFinderResults({
     const itemGroups = new Map<string, DupeFinderItem[]>();
 
     // Group items by name using ALL items from full inventory
-    initialData.forEach((item) => {
+    mergedDupeData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       if (!itemGroups.has(key)) {
         itemGroups.set(key, []);
@@ -347,7 +354,7 @@ export default function DupeFinderResults({
             getUsername={getUsername}
             getUserAvatar={getUserAvatar}
             getHasVerifiedBadge={getHasVerifiedBadge}
-            dupeItemsCount={initialData.length}
+            dupeItemsCount={mergedDupeData.length}
             totalDupedValue={totalDupedValue}
           />
         </div>
