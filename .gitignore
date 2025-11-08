@@ -9,6 +9,7 @@ node_modules
 # TypeScript build info
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+next-env.d.ts
 
 # OS/Editor
 .DS_Store
