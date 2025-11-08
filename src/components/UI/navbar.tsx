@@ -345,6 +345,9 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/contributors" setActive={setActive}>
               Meet the team
             </HoveredLink>
+            <HoveredLink href="/testimonials" setActive={setActive}>
+              Testimonials
+            </HoveredLink>
           </MenuItem>
         </div>
 

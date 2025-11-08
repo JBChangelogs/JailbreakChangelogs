@@ -632,6 +632,14 @@ export default function Header() {
       >
         <ListItemText primary="Meet the team" />
       </ListItem>
+      <ListItem
+        component={Link}
+        href="/testimonials"
+        onClick={handleDrawerToggle}
+        className="cursor-pointer pl-4"
+      >
+        <ListItemText primary="Testimonials" />
+      </ListItem>
 
       <Divider className="my-4" />
     </List>

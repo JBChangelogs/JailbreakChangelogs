@@ -115,25 +115,28 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 This project is NOT affiliated with Badimo.
               </p>
 
-              <p className="text-secondary-text">
-                Maintained by{" "}
-                <a
-                  href="https://github.com/Jakobiis"
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <p className="text-secondary-text flex items-center gap-1">
+                Crafted with{" "}
+                <Icon
+                  icon="line-md:heart-filled"
+                  className="inline h-4 w-4"
+                  style={{ color: "#1d80e2" }}
+                  inline={true}
+                />{" "}
+                by{" "}
+                <Link
+                  href="/users/659865209741246514"
                   className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
                 >
                   Jakobiis
-                </a>{" "}
-                and{" "}
-                <a
-                  href="https://github.com/Jalenzzz"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                </Link>{" "}
+                &{" "}
+                <Link
+                  href="/users/1019539798383398946"
                   className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
                 >
                   Jalenzz16
-                </a>
+                </Link>
               </p>
               <VersionInfo
                 version={versionInfo.version}

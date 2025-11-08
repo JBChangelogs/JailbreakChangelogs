@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
-import TestimonialCarousel from "./TestimonialCarousel";
+import { Masonry } from "@mui/lab";
+import { useMediaQuery } from "@mui/material";
 
 interface Testimonial {
   name: string;
@@ -80,111 +83,53 @@ const testimonials: Testimonial[] = [
 ];
 
 export default function TestimonialsSection() {
+  const isAtLeast1024 = useMediaQuery("(min-width: 1024px)");
+  const isAtLeast768 = useMediaQuery("(min-width: 768px)");
+
+  const columns = isAtLeast1024 ? 3 : isAtLeast768 ? 2 : 1;
+
   return (
     <section className="py-8">
       <div className="container mx-auto px-6">
-        <h2 className="text-primary-text mb-3 text-center text-3xl font-bold lg:text-4xl">
-          What Our Community Says
-        </h2>
-        <p className="text-secondary-text mx-auto mb-8 max-w-2xl text-center">
-          Trusted by thousands of Jailbreak players and even the developers
-          themselves
-        </p>
-
-        {/* Mobile: Scrollable Container */}
-        <div className="relative lg:hidden">
-          {/* Gradient overlays for mobile */}
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-8 bg-gradient-to-r from-primary-bg to-transparent"></div>
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-primary-bg to-transparent"></div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-            {testimonials.map((testimonial, index) => (
-              <a
-                key={index}
-                href={testimonial.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200 snap-center"
-                style={{ width: "85vw", maxWidth: "400px" }}
-              >
-                <div className="mb-4 flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
-                      alt={testimonial.name}
-                      width={56}
-                      height={56}
-                      className={`h-14 w-14 object-contain ${
-                        testimonial.name !== "Badimo" ? "rounded-full" : ""
-                      }`}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
-                      {testimonial.name}
-                    </h3>
-                    <p className="text-primary-text text-sm">
-                      {testimonial.role}
-                    </p>
-                  </div>
+        {/* Masonry Layout */}
+        <Masonry columns={columns} spacing={3} sx={{ width: "100%" }}>
+          {testimonials.map((testimonial, index) => (
+            <a
+              key={index}
+              href={testimonial.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
+            >
+              <div className="mb-4 flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <Image
+                    src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
+                    alt={testimonial.name}
+                    width={56}
+                    height={56}
+                    className={`h-14 w-14 object-contain ${
+                      testimonial.name !== "Badimo" ? "rounded-full" : ""
+                    }`}
+                    loading="lazy"
+                  />
                 </div>
-
-                <blockquote className="text-card-paragraph text-sm leading-relaxed">
-                  &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
-                </blockquote>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop: Scrolling Carousel */}
-        <div className="relative hidden lg:block">
-          {/* Gradient overlays */}
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-primary-bg to-transparent"></div>
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-primary-bg to-transparent"></div>
-
-          {/* Scrolling container */}
-          <TestimonialCarousel>
-            {testimonials.map((testimonial, index) => (
-              <a
-                key={index}
-                href={testimonial.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
-                style={{ width: "400px" }}
-              >
-                <div className="mb-2 flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
-                      alt={testimonial.name}
-                      width={56}
-                      height={56}
-                      className={`h-14 w-14 object-contain ${
-                        testimonial.name !== "Badimo" ? "rounded-full" : ""
-                      }`}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
-                      {testimonial.name}
-                    </h3>
-                    <p className="text-primary-text text-sm">
-                      {testimonial.role}
-                    </p>
-                  </div>
+                <div className="flex-1">
+                  <h3 className="text-card-headline mb-1 font-bold hover:text-link transition-colors">
+                    {testimonial.name}
+                  </h3>
+                  <p className="text-primary-text text-sm">
+                    {testimonial.role}
+                  </p>
                 </div>
+              </div>
 
-                <blockquote className="text-card-paragraph text-sm leading-relaxed">
-                  &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
-                </blockquote>
-              </a>
-            ))}
-          </TestimonialCarousel>
-        </div>
+              <blockquote className="text-card-paragraph text-sm leading-relaxed">
+                &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
+              </blockquote>
+            </a>
+          ))}
+        </Masonry>
       </div>
     </section>
   );
