@@ -2,6 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 interface XpImportantDatesProps {
   season: number;
   title: string;
@@ -19,31 +26,29 @@ export default function XpImportantDates({
   doubleXpStart,
   seasonEnds,
 }: XpImportantDatesProps) {
-  const [doubleXpTimeLeft, setDoubleXpTimeLeft] = useState<string>("");
-  const [seasonEndTimeLeft, setSeasonEndTimeLeft] = useState<string>("");
+  const [doubleXpTimeLeft, setDoubleXpTimeLeft] = useState<TimeLeft | null>(
+    null,
+  );
+  const [seasonEndTimeLeft, setSeasonEndTimeLeft] = useState<TimeLeft | null>(
+    null,
+  );
   const [doubleXpStatus, setDoubleXpStatus] = useState<string>("");
   const [seasonEndStatus, setSeasonEndStatus] = useState<string>("");
 
-  const formatTime = (seconds: number): string => {
+  const formatTime = (seconds: number): TimeLeft => {
     const days = Math.floor(seconds / (24 * 60 * 60));
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
     const minutes = Math.floor((seconds % (60 * 60)) / 60);
     const secs = seconds % 60;
+    return { days, hours, minutes, seconds: secs };
+  };
 
-    const dLabel = days === 1 ? "day" : "days";
-    const hLabel = hours === 1 ? "hour" : "hours";
-    const mLabel = minutes === 1 ? "minute" : "minutes";
-    const sLabel = secs === 1 ? "second" : "seconds";
-
-    if (days > 0) {
-      return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else if (hours > 0) {
-      return `${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else if (minutes > 0) {
-      return `${minutes} ${mLabel} ${secs} ${sLabel}`;
-    } else {
-      return `${secs} ${sLabel}`;
-    }
+  const pluralize = (
+    value: number,
+    singular: string,
+    plural: string,
+  ): string => {
+    return value === 1 ? singular : plural;
   };
 
   useEffect(() => {
@@ -63,7 +68,7 @@ export default function XpImportantDates({
         setDoubleXpTimeLeft(formatTime(timeToDoubleXp));
       } else {
         setDoubleXpStatus("Double XP is now active!");
-        setDoubleXpTimeLeft("");
+        setDoubleXpTimeLeft(null);
       }
 
       // Season end countdown
@@ -81,7 +86,7 @@ export default function XpImportantDates({
         setSeasonEndTimeLeft(formatTime(timeToEnd));
       } else {
         setSeasonEndStatus("Season has ended");
-        setSeasonEndTimeLeft("");
+        setSeasonEndTimeLeft(null);
       }
     };
 
@@ -128,10 +133,79 @@ export default function XpImportantDates({
                 </span>
               </div>
               {doubleXpTimeLeft && (
-                <div className="text-center">
-                  <span className="text-primary-text text-3xl font-bold">
-                    {doubleXpTimeLeft}
-                  </span>
+                <div className="flex justify-center gap-4">
+                  <div>
+                    <span className="countdown text-primary-text text-4xl font-semibold">
+                      <span
+                        style={
+                          {
+                            "--value": doubleXpTimeLeft.days,
+                          } as React.CSSProperties
+                        }
+                        aria-live="polite"
+                        aria-label={`${doubleXpTimeLeft.days} days`}
+                      >
+                        {doubleXpTimeLeft.days}
+                      </span>
+                    </span>
+                    <span className="text-primary-text ml-1">
+                      {pluralize(doubleXpTimeLeft.days, "day", "days")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="countdown text-primary-text text-4xl font-semibold">
+                      <span
+                        style={
+                          {
+                            "--value": doubleXpTimeLeft.hours,
+                          } as React.CSSProperties
+                        }
+                        aria-live="polite"
+                        aria-label={`${doubleXpTimeLeft.hours} hours`}
+                      >
+                        {doubleXpTimeLeft.hours}
+                      </span>
+                    </span>
+                    <span className="text-primary-text ml-1">
+                      {pluralize(doubleXpTimeLeft.hours, "hour", "hours")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="countdown text-primary-text text-4xl font-semibold">
+                      <span
+                        style={
+                          {
+                            "--value": doubleXpTimeLeft.minutes,
+                          } as React.CSSProperties
+                        }
+                        aria-live="polite"
+                        aria-label={`${doubleXpTimeLeft.minutes} minutes`}
+                      >
+                        {doubleXpTimeLeft.minutes}
+                      </span>
+                    </span>
+                    <span className="text-primary-text ml-1">
+                      {pluralize(doubleXpTimeLeft.minutes, "min", "mins")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="countdown text-primary-text text-4xl font-semibold">
+                      <span
+                        style={
+                          {
+                            "--value": doubleXpTimeLeft.seconds,
+                          } as React.CSSProperties
+                        }
+                        aria-live="polite"
+                        aria-label={`${doubleXpTimeLeft.seconds} seconds`}
+                      >
+                        {doubleXpTimeLeft.seconds}
+                      </span>
+                    </span>
+                    <span className="text-primary-text ml-1">
+                      {pluralize(doubleXpTimeLeft.seconds, "sec", "secs")}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -147,10 +221,79 @@ export default function XpImportantDates({
               </span>
             </div>
             {seasonEndTimeLeft && (
-              <div className="text-center">
-                <span className="text-primary-text text-3xl font-bold">
-                  {seasonEndTimeLeft}
-                </span>
+              <div className="flex justify-center gap-4">
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": seasonEndTimeLeft.days,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${seasonEndTimeLeft.days} days`}
+                    >
+                      {seasonEndTimeLeft.days}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(seasonEndTimeLeft.days, "day", "days")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": seasonEndTimeLeft.hours,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${seasonEndTimeLeft.hours} hours`}
+                    >
+                      {seasonEndTimeLeft.hours}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(seasonEndTimeLeft.hours, "hour", "hours")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": seasonEndTimeLeft.minutes,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${seasonEndTimeLeft.minutes} minutes`}
+                    >
+                      {seasonEndTimeLeft.minutes}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(seasonEndTimeLeft.minutes, "min", "mins")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": seasonEndTimeLeft.seconds,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${seasonEndTimeLeft.seconds} seconds`}
+                    >
+                      {seasonEndTimeLeft.seconds}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(seasonEndTimeLeft.seconds, "sec", "secs")}
+                  </span>
+                </div>
               </div>
             )}
           </div>

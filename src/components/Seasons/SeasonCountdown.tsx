@@ -26,30 +26,42 @@ interface SeasonCountdownProps {
   nextSeason: Season | null;
 }
 
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
   currentSeason,
   nextSeason,
 }) => {
-  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const [status, setStatus] = useState<string>("");
   const [statusColor, setStatusColor] = useState<string>("");
-  const [nextSeasonTimeLeft, setNextSeasonTimeLeft] = useState<string>("");
+  const [nextSeasonTimeLeft, setNextSeasonTimeLeft] = useState<TimeLeft | null>(
+    null,
+  );
   const [nextSeasonStatus, setNextSeasonStatus] = useState<string>("");
   const [nextSeasonStatusColor, setNextSeasonStatusColor] =
     useState<string>("");
 
-  const formatTime = (seconds: number): string => {
+  const formatTime = (seconds: number): TimeLeft => {
     const days = Math.floor(seconds / (24 * 60 * 60));
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
     const minutes = Math.floor((seconds % (60 * 60)) / 60);
     const secs = seconds % 60;
 
-    const dLabel = days === 1 ? "day" : "days";
-    const hLabel = hours === 1 ? "hour" : "hours";
-    const mLabel = minutes === 1 ? "minute" : "minutes";
-    const sLabel = secs === 1 ? "second" : "seconds";
+    return { days, hours, minutes, seconds: secs };
+  };
 
-    return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
+  const pluralize = (
+    value: number,
+    singular: string,
+    plural: string,
+  ): string => {
+    return value === 1 ? singular : plural;
   };
 
   useEffect(() => {
@@ -60,7 +72,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
       if (!currentSeason) {
         setStatus("No Season Data");
         setStatusColor("var(--color-secondary-text)");
-        setTimeLeft("00:00:00:00");
+        setTimeLeft(null);
       } else if (currentSeason.start_date && now < currentSeason.start_date) {
         const timeToStart = currentSeason.start_date - now;
         setStatus(
@@ -94,7 +106,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
           `Season ${currentSeason.season} / ${currentSeason.title} has ended`,
         );
         setStatusColor("var(--color-secondary-text)");
-        setTimeLeft("");
+        setTimeLeft(null);
       }
 
       // Handle next season
@@ -134,7 +146,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
             `Submissions for Season ${nextSeason.season} / ${nextSeason.title} are closed`,
           );
           setNextSeasonStatusColor("var(--color-secondary-text)");
-          setNextSeasonTimeLeft("");
+          setNextSeasonTimeLeft(null);
         }
       }
     };
@@ -158,13 +170,67 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
             </span>
           </div>
           {timeLeft && (
-            <div className="flex items-center gap-2">
-              <span
-                className="text-2xl font-bold"
-                style={{ color: statusColor }}
-              >
-                {timeLeft}
-              </span>
+            <div className="flex gap-4">
+              <div>
+                <span className="countdown text-primary-text text-4xl font-semibold">
+                  <span
+                    style={{ "--value": timeLeft.days } as React.CSSProperties}
+                    aria-live="polite"
+                    aria-label={`${timeLeft.days} days`}
+                  >
+                    {timeLeft.days}
+                  </span>
+                </span>
+                <span className="text-primary-text ml-1">
+                  {pluralize(timeLeft.days, "day", "days")}
+                </span>
+              </div>
+              <div>
+                <span className="countdown text-primary-text text-4xl font-semibold">
+                  <span
+                    style={{ "--value": timeLeft.hours } as React.CSSProperties}
+                    aria-live="polite"
+                    aria-label={`${timeLeft.hours} hours`}
+                  >
+                    {timeLeft.hours}
+                  </span>
+                </span>
+                <span className="text-primary-text ml-1">
+                  {pluralize(timeLeft.hours, "hour", "hours")}
+                </span>
+              </div>
+              <div>
+                <span className="countdown text-primary-text text-4xl font-semibold">
+                  <span
+                    style={
+                      { "--value": timeLeft.minutes } as React.CSSProperties
+                    }
+                    aria-live="polite"
+                    aria-label={`${timeLeft.minutes} minutes`}
+                  >
+                    {timeLeft.minutes}
+                  </span>
+                </span>
+                <span className="text-primary-text ml-1">
+                  {pluralize(timeLeft.minutes, "min", "mins")}
+                </span>
+              </div>
+              <div>
+                <span className="countdown text-primary-text text-4xl font-semibold">
+                  <span
+                    style={
+                      { "--value": timeLeft.seconds } as React.CSSProperties
+                    }
+                    aria-live="polite"
+                    aria-label={`${timeLeft.seconds} seconds`}
+                  >
+                    {timeLeft.seconds}
+                  </span>
+                </span>
+                <span className="text-primary-text ml-1">
+                  {pluralize(timeLeft.seconds, "sec", "secs")}
+                </span>
+              </div>
             </div>
           )}
         </div>
@@ -182,13 +248,79 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
               </span>
             </div>
             {nextSeasonTimeLeft && (
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-2xl font-bold"
-                  style={{ color: nextSeasonStatusColor }}
-                >
-                  {nextSeasonTimeLeft}
-                </span>
+              <div className="flex gap-4">
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": nextSeasonTimeLeft.days,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${nextSeasonTimeLeft.days} days`}
+                    >
+                      {nextSeasonTimeLeft.days}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(nextSeasonTimeLeft.days, "day", "days")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": nextSeasonTimeLeft.hours,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${nextSeasonTimeLeft.hours} hours`}
+                    >
+                      {nextSeasonTimeLeft.hours}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(nextSeasonTimeLeft.hours, "hour", "hours")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": nextSeasonTimeLeft.minutes,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${nextSeasonTimeLeft.minutes} minutes`}
+                    >
+                      {nextSeasonTimeLeft.minutes}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(nextSeasonTimeLeft.minutes, "min", "mins")}
+                  </span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-4xl font-semibold">
+                    <span
+                      style={
+                        {
+                          "--value": nextSeasonTimeLeft.seconds,
+                        } as React.CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${nextSeasonTimeLeft.seconds} seconds`}
+                    >
+                      {nextSeasonTimeLeft.seconds}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">
+                    {pluralize(nextSeasonTimeLeft.seconds, "sec", "secs")}
+                  </span>
+                </div>
               </div>
             )}
             {nextSeasonStatus.includes("Submissions") && (

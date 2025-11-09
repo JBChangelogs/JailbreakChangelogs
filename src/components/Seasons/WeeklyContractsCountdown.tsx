@@ -64,16 +64,23 @@ function getNextDailyResetTimestamp(now: Date): number {
   return Math.floor(next.getTime() / 1000);
 }
 
-function formatTime(seconds: number): string {
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function formatTime(seconds: number): TimeLeft {
   const days = Math.floor(seconds / (24 * 60 * 60));
   const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
   const minutes = Math.floor((seconds % (60 * 60)) / 60);
   const secs = seconds % 60;
-  const dLabel = days === 1 ? "day" : "days";
-  const hLabel = hours === 1 ? "hour" : "hours";
-  const mLabel = minutes === 1 ? "minute" : "minutes";
-  const sLabel = secs === 1 ? "second" : "seconds";
-  return `${days} ${dLabel} ${hours} ${hLabel} ${minutes} ${mLabel} ${secs} ${sLabel}`;
+  return { days, hours, minutes, seconds: secs };
+}
+
+function pluralize(value: number, singular: string, plural: string): string {
+  return value === 1 ? singular : plural;
 }
 
 interface WeeklyContractsCountdownProps {
@@ -190,10 +197,78 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                   New Contracts In
                 </span>
               </div>
-              <div className="mb-3 rounded-lg p-3">
-                <span className="text-primary-text text-2xl font-bold">
-                  {formatTime(secondsLeft)}
-                </span>
+              <div className="mb-3 flex justify-center gap-4 rounded-lg p-3">
+                {(() => {
+                  const time = formatTime(secondsLeft);
+                  return (
+                    <>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.days } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.days} days`}
+                          >
+                            {time.days}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.days, "day", "days")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.hours } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.hours} hours`}
+                          >
+                            {time.hours}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.hours, "hour", "hours")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.minutes } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.minutes} minutes`}
+                          >
+                            {time.minutes}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.minutes, "min", "mins")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.seconds } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.seconds} seconds`}
+                          >
+                            {time.seconds}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.seconds, "sec", "secs")}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               <div className="text-secondary-text text-xs">
                 Resets every Monday at {localResetTime}
@@ -209,10 +284,78 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                   Daily XP Resets In
                 </span>
               </div>
-              <div className="mb-3 rounded-lg p-3">
-                <span className="text-primary-text text-2xl font-bold">
-                  {formatTime(dailySecondsLeft)}
-                </span>
+              <div className="mb-3 flex justify-center gap-4 rounded-lg p-3">
+                {(() => {
+                  const time = formatTime(dailySecondsLeft);
+                  return (
+                    <>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.days } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.days} days`}
+                          >
+                            {time.days}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.days, "day", "days")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.hours } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.hours} hours`}
+                          >
+                            {time.hours}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.hours, "hour", "hours")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.minutes } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.minutes} minutes`}
+                          >
+                            {time.minutes}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.minutes, "min", "mins")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="countdown text-primary-text text-4xl font-semibold">
+                          <span
+                            style={
+                              { "--value": time.seconds } as React.CSSProperties
+                            }
+                            aria-live="polite"
+                            aria-label={`${time.seconds} seconds`}
+                          >
+                            {time.seconds}
+                          </span>
+                        </span>
+                        <span className="text-primary-text ml-1">
+                          {pluralize(time.seconds, "sec", "secs")}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               <div className="text-secondary-text text-xs">
                 Resets daily at {localDailyResetTime}
