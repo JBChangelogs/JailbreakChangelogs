@@ -12,6 +12,7 @@ import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -96,6 +97,7 @@ export default function InventoryCheckerClient({
     initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
 
   const router = useRouter();
+  const { getId } = useUsernameToId();
 
   // Auth context and scan functionality
   const { user, isAuthenticated } = useAuthContext();
@@ -401,21 +403,10 @@ export default function InventoryCheckerClient({
     const input = searchId.trim();
     if (!input) return;
 
-    // Check if input is a username (not numeric) and block it
-    const isNumeric = /^\d+$/.test(input);
-    if (!isNumeric) {
-      toast.error(
-        "Username searches are temporarily unavailable. Please use User ID instead.",
-        {
-          duration: 5000,
-          position: "bottom-right",
-        },
-      );
-      return;
-    }
-
     setInternalIsLoading(true);
-    router.push(`/inventories/${input}`);
+    const isNumeric = /^\d+$/.test(input);
+    const id = isNumeric ? input : await getId(input);
+    router.push(`/inventories/${id ?? input}`);
   };
 
   const handleItemClick = (item: InventoryItem) => {

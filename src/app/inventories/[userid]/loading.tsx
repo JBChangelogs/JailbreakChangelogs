@@ -15,12 +15,8 @@ export default function Loading() {
       <div className="bg-button-secondary mb-6 h-12 w-full animate-pulse rounded-lg"></div>
 
       {/* Search form skeleton */}
-      <div className="border-border-primary mb-6 animate-pulse rounded-lg border p-6 shadow-sm">
-        <div className="bg-button-secondary mb-4 h-6 w-48 rounded"></div>
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <div className="bg-button-secondary h-12 flex-1 rounded"></div>
-          <div className="bg-button-secondary h-12 w-full rounded sm:w-32"></div>
-        </div>
+      <div className="mb-6 animate-pulse">
+        <div className="bg-button-secondary h-12 w-full rounded-lg"></div>
       </div>
 
       {/* Stats skeleton */}

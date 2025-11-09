@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import toast from "react-hot-toast";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import {
@@ -62,11 +63,12 @@ export default function OGFinderClient({
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const { isAuthenticated, setShowLoginModal } = useAuthContext();
+  const { getId } = useUsernameToId();
 
   // Compute loading state during render
   const isLoading = externalIsLoading || isSearching;
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
@@ -81,88 +83,86 @@ export default function OGFinderClient({
       return;
     }
 
-    // Check if input is a username (not numeric) and block it
-    const isNumeric = /^\d+$/.test(input);
-    if (!isNumeric) {
-      toast.error(
-        "Username searches are temporarily unavailable. Please use User ID instead.",
-        {
-          duration: 5000,
-          position: "bottom-right",
-        },
-      );
-      return;
-    }
-
     setIsSearching(true);
-    router.push(`/og/${input}`);
+    const isNumeric = /^\d+$/.test(input);
+    const id = isNumeric ? input : await getId(input);
+    router.push(`/og/${id ?? input}`);
   };
 
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex-1">
-          <div className="relative">
-            <input
-              type="text"
-              id="searchId"
-              value={searchId}
-              onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Enter Roblox ID or username..."
-              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-              disabled={isLoading}
-              required
-            />
-            <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+      <form onSubmit={handleSearch}>
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            id="searchId"
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            placeholder="Search by ID or username..."
+            className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
+            disabled={isLoading}
+            required
+          />
+
+          {/* Right side controls container */}
+          <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+            {/* Clear button - only show when there's text */}
             {searchId && (
               <button
                 type="button"
                 onClick={() => setSearchId("")}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                className="hover:text-primary-text text-secondary-text cursor-pointer transition-colors"
                 aria-label="Clear search"
               >
-                <XMarkIcon />
+                <XMarkIcon className="h-5 w-5" />
               </button>
             )}
-          </div>
-        </div>
-        <div className="flex items-end">
-          <button
-            type="submit"
-            disabled={isLoading || externalIsLoading || !searchId.trim()}
-            className={`flex h-10 min-w-[100px] items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium transition-all duration-200 ${
-              isLoading || externalIsLoading
-                ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
-                : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-            }`}
-          >
-            {(isLoading || externalIsLoading) && (
-              <svg
-                className="h-4 w-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+
+            {/* Vertical divider - only show when there's text to clear */}
+            {searchId && (
+              <div className="border-primary-text h-6 border-l opacity-30"></div>
             )}
-            <span className="whitespace-nowrap">
-              {isLoading || externalIsLoading ? "Searching..." : "Search"}
-            </span>
-          </button>
+
+            {/* Search button */}
+            <button
+              type="submit"
+              disabled={isLoading || externalIsLoading || !searchId.trim()}
+              className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-200 ${
+                isLoading || externalIsLoading
+                  ? "text-secondary-text cursor-progress"
+                  : !searchId.trim()
+                    ? "text-secondary-text cursor-not-allowed opacity-50"
+                    : "text-button-info hover:bg-button-info/10 cursor-pointer"
+              }`}
+              aria-label="Search"
+            >
+              {isLoading || externalIsLoading ? (
+                <svg
+                  className="h-5 w-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </form>
 

@@ -27,14 +27,8 @@ export default function Loading() {
       </div>
 
       {/* Search Form */}
-      <div className="mb-8 rounded-lg border p-6 shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div>
-            <div className="mb-2 h-4 w-32 rounded bg-gray-600"></div>
-            <div className="h-10 w-full rounded bg-gray-600"></div>
-          </div>
-          <div className="h-10 w-24 rounded bg-gray-600"></div>
-        </div>
+      <div className="mb-8 animate-pulse">
+        <div className="h-12 w-full rounded-lg bg-gray-600"></div>
       </div>
 
       {/* FAQ Section */}
