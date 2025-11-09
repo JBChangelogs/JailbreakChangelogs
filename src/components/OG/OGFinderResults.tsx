@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { RobloxUser } from "@/types";
+import toast from "react-hot-toast";
 import { UserConnectionData } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import DisplayAd from "@/components/Ads/DisplayAd";
@@ -154,17 +154,27 @@ export default function OGFinderResults({
   }, [robloxUsers, robloxAvatars]);
 
   // Handle search
-  const { getId } = useUsernameToId();
-
   const handleSearch = async (searchValue: string) => {
     if (!searchValue.trim()) return;
 
+    const input = searchValue.trim();
+    const isNumeric = /^\d+$/.test(input);
+
+    // Check if input is a username (not numeric) and block it
+    if (!isNumeric) {
+      toast.error(
+        "Username searches are temporarily unavailable. Please use User ID instead.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const input = searchValue.trim();
-      const isNumeric = /^\d+$/.test(input);
-      const id = isNumeric ? input : await getId(input);
-      router.push(`/og/${id ?? input}`);
+      router.push(`/og/${input}`);
     } catch (error) {
       logError("Search error", error, {
         component: "OGFinderResults",

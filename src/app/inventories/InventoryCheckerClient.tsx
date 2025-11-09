@@ -14,7 +14,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
@@ -397,17 +396,26 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  const { getId } = useUsernameToId();
-
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    setInternalIsLoading(true);
+    // Check if input is a username (not numeric) and block it
     const isNumeric = /^\d+$/.test(input);
-    const id = isNumeric ? input : await getId(input);
-    router.push(`/inventories/${id ?? input}`);
+    if (!isNumeric) {
+      toast.error(
+        "Username searches are temporarily unavailable. Please use User ID instead.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+      return;
+    }
+
+    setInternalIsLoading(true);
+    router.push(`/inventories/${input}`);
   };
 
   const handleItemClick = (item: InventoryItem) => {

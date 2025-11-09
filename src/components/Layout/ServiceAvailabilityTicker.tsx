@@ -20,10 +20,10 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex flex-col items-center gap-2 lg:flex-row lg:gap-3">
             <span className="text-primary-text text-center text-xs lg:text-sm">
-              <strong>Infrastructure Upgrades:</strong> Inventory logging will
-              be down as we perform infrastructure upgrades. The following are
-              affected - OG Finder, Dupe Finder, polling bots, inventories and
-              contracts.
+              <strong>Proxy Services Unavailable:</strong> Username searches are
+              temporarily unavailable for OG Finder, Dupe Finder, and
+              Inventories. Please use <strong>User ID</strong> instead to search
+              during this time.
             </span>
           </div>
         </div>

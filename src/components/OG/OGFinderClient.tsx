@@ -68,7 +68,8 @@ export default function OGFinderClient({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchId.trim()) return;
+    const input = searchId.trim();
+    if (!input) return;
 
     // Check if user is authenticated before navigation
     if (!isAuthenticated) {
@@ -80,8 +81,21 @@ export default function OGFinderClient({
       return;
     }
 
+    // Check if input is a username (not numeric) and block it
+    const isNumeric = /^\d+$/.test(input);
+    if (!isNumeric) {
+      toast.error(
+        "Username searches are temporarily unavailable. Please use User ID instead.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+      return;
+    }
+
     setIsSearching(true);
-    router.push(`/og/${searchId.trim()}`);
+    router.push(`/og/${input}`);
   };
 
   return (

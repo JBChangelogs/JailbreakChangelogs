@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
+import toast from "react-hot-toast";
 
 interface DupeSearchInputProps {
   initialValue?: string;
@@ -22,17 +22,26 @@ export default function DupeSearchInput({
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
-  const { getId } = useUsernameToId();
-
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    setIsSearching(true);
+    // Check if input is a username (not numeric) and block it
     const isNumeric = /^\d+$/.test(input);
-    const id = isNumeric ? input : await getId(input);
-    router.push(`/dupes/${id ?? input}`);
+    if (!isNumeric) {
+      toast.error(
+        "Username searches are temporarily unavailable. Please use User ID instead.",
+        {
+          duration: 5000,
+          position: "bottom-right",
+        },
+      );
+      return;
+    }
+
+    setIsSearching(true);
+    router.push(`/dupes/${input}`);
   };
 
   // Use internal loading state or external loading state
