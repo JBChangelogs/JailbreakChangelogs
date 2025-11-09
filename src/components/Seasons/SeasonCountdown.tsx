@@ -39,13 +39,10 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
 }) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const [status, setStatus] = useState<string>("");
-  const [statusColor, setStatusColor] = useState<string>("");
   const [nextSeasonTimeLeft, setNextSeasonTimeLeft] = useState<TimeLeft | null>(
     null,
   );
   const [nextSeasonStatus, setNextSeasonStatus] = useState<string>("");
-  const [nextSeasonStatusColor, setNextSeasonStatusColor] =
-    useState<string>("");
 
   const formatTime = (seconds: number): TimeLeft => {
     const days = Math.floor(seconds / (24 * 60 * 60));
@@ -71,14 +68,12 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
       // Handle current season
       if (!currentSeason) {
         setStatus("No Season Data");
-        setStatusColor("var(--color-secondary-text)");
         setTimeLeft(null);
       } else if (currentSeason.start_date && now < currentSeason.start_date) {
         const timeToStart = currentSeason.start_date - now;
         setStatus(
           `Season ${currentSeason.season} / ${currentSeason.title} starts in`,
         );
-        setStatusColor("var(--color-button-success)");
         setTimeLeft(formatTime(timeToStart));
       } else if (
         currentSeason.start_date &&
@@ -89,12 +84,10 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
         const daysLeft = Math.floor(timeToEnd / (24 * 60 * 60));
 
         if (daysLeft < 5) {
-          setStatusColor("var(--color-secondary-text)");
           setStatus(
             `Season ${currentSeason.season} / ${currentSeason.title} ends in (Double XP Active!)`,
           );
         } else {
-          setStatusColor("var(--color-secondary-text)");
           setStatus(
             `Season ${currentSeason.season} / ${currentSeason.title} ends in`,
           );
@@ -105,7 +98,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
         setStatus(
           `Season ${currentSeason.season} / ${currentSeason.title} has ended`,
         );
-        setStatusColor("var(--color-secondary-text)");
         setTimeLeft(null);
       }
 
@@ -118,8 +110,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
         ) {
           const timeToEnd = nextSeason.end_date - now;
 
-          setNextSeasonStatusColor("var(--color-secondary-text)");
-
           setNextSeasonStatus(
             `Submissions for Season ${nextSeason.season} / ${nextSeason.title} close in`,
           );
@@ -130,9 +120,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
           now < nextSeason.start_date
         ) {
           const timeToStart = nextSeason.start_date - now;
-
-          // Use consistent color for season start countdown
-          setNextSeasonStatusColor("var(--color-secondary-text)");
 
           setNextSeasonStatus(
             `Season ${nextSeason.season} / ${nextSeason.title} starts in`,
@@ -145,7 +132,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
           setNextSeasonStatus(
             `Submissions for Season ${nextSeason.season} / ${nextSeason.title} are closed`,
           );
-          setNextSeasonStatusColor("var(--color-secondary-text)");
           setNextSeasonTimeLeft(null);
         }
       }
@@ -162,10 +148,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
       <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span
-              className="text-lg font-semibold"
-              style={{ color: statusColor }}
-            >
+            <span className="text-primary-text text-lg font-semibold">
               {status}
             </span>
           </div>
@@ -240,10 +223,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
         <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <span
-                className="text-lg font-semibold"
-                style={{ color: nextSeasonStatusColor }}
-              >
+              <span className="text-primary-text text-lg font-semibold">
                 {nextSeasonStatus}
               </span>
             </div>

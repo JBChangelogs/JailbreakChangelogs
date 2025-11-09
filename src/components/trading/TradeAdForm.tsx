@@ -765,8 +765,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               icon="emojione:light-bulb"
               className="text-sm text-yellow-500"
             />
-            Pro tip: Hold Shift while clicking Clear to clear both sides
-            instantly without confirmation
+            Pro tip: Hold{" "}
+            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+              Shift
+            </kbd>{" "}
+            while clicking Clear to clear both sides instantly without
+            confirmation
           </div>
         </div>
 

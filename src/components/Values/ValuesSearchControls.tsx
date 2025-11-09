@@ -351,7 +351,15 @@ export default function ValuesSearchControls({
               icon="emojione:light-bulb"
               className="text-sm text-yellow-500"
             />
-            Pro tip: Press Ctrl+F to quickly focus the search
+            Pro tip: Press{" "}
+            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+              Ctrl
+            </kbd>
+            {" + "}
+            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+              F
+            </kbd>{" "}
+            to quickly focus the search
           </div>
         </div>
       </div>
