@@ -52,10 +52,10 @@ export const MenuItem = ({
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
       <motion.span
-        className={`flex cursor-pointer items-center transition-colors duration-200 ${
+        className={`flex cursor-pointer items-center gap-1 rounded-lg py-1 pl-3 pr-2 transition-colors duration-200 ${
           active === item
-            ? "bg-button-info text-form-button-text rounded-lg px-3 py-1"
-            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active rounded-lg px-3 py-1"
+            ? "bg-button-info text-form-button-text"
+            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -65,9 +65,10 @@ export const MenuItem = ({
         <motion.div
           animate={{ rotate: active === item ? 180 : 0 }}
           transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="flex-shrink-0"
         >
           <svg
-            className={`ml-1 text-lg ${
+            className={`text-lg ${
               active === item ? "text-form-button-text" : "text-secondary-text"
             }`}
             width="16"
@@ -88,7 +89,7 @@ export const MenuItem = ({
         >
           {active === item && (
             <div
-              className="absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
+              className="absolute left-1/2 z-[1300] mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
               style={{ top: "100%" }}
             >
               <motion.div
@@ -215,7 +216,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "bg-primary-bg/75 border-border-primary sticky top-0 z-[1200] border-b backdrop-blur-lg",
+        "bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg",
         className,
       )}
     >
@@ -409,7 +410,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="bg-secondary-bg border-border-primary absolute right-0 z-50 mt-2 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
+                    className="bg-secondary-bg border-border-primary absolute right-0 z-[1300] mt-2 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
                     initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.85, y: 10 }}

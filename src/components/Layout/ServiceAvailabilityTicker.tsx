@@ -9,17 +9,17 @@ export default function ServiceAvailabilityTicker() {
   if (!shouldShowTicker) return null;
 
   return (
-    <div className="from-status-warning/10 to-status-warning/5 bg-gradient-to-r">
-      <div className="container mx-auto px-4 py-3">
-        <div className="relative flex flex-col items-center justify-center gap-3 lg:flex-row lg:gap-4 lg:pr-12">
+    <div className="from-status-warning/20 to-status-warning/10 bg-gradient-to-r backdrop-blur-lg">
+      <div className="container mx-auto px-4 py-2">
+        <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-status-warning text-xs font-semibold lg:text-sm">
+            <span className="text-status-warning text-xs font-semibold">
               SERVICE ALERT
             </span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 lg:flex-row lg:gap-3">
-            <span className="text-primary-text text-center text-xs lg:text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-primary-text text-center text-xs">
               <strong>Proxy Services Unavailable:</strong> Username searches are
               temporarily unavailable for OG Finder, Dupe Finder, and
               Inventories. Please use <strong>User ID</strong> instead to search

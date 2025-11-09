@@ -55,6 +55,129 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Popular Pages CTA Section */}
+      <section className="bg-secondary-bg/50 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <h2 className="text-primary-text mb-4 text-3xl font-bold">
+              Getting Started
+            </h2>
+            <p className="text-secondary-text mx-auto max-w-2xl">
+              Jump right into the most popular features
+            </p>
+          </div>
+          <div className="mx-auto grid max-w-4xl gap-4 md:grid-cols-2">
+            <Link
+              href="/values"
+              prefetch={false}
+              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+                <Icon
+                  icon="mdi:chart-line"
+                  className="text-link h-7 w-7"
+                  inline={true}
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                  Item Values
+                </h3>
+                <p className="text-card-paragraph text-sm">
+                  Check current trading values
+                </p>
+              </div>
+              <Icon
+                icon="mdi:arrow-right"
+                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
+                inline={true}
+              />
+            </Link>
+
+            <Link
+              href="/trading"
+              prefetch={false}
+              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+                <Icon
+                  icon="mdi:swap-horizontal"
+                  className="text-link h-7 w-7"
+                  inline={true}
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                  Trade Ads
+                </h3>
+                <p className="text-card-paragraph text-sm">
+                  Post and browse trade offers
+                </p>
+              </div>
+              <Icon
+                icon="mdi:arrow-right"
+                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
+                inline={true}
+              />
+            </Link>
+
+            <Link
+              href="/calculators"
+              prefetch={false}
+              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+                <Icon
+                  icon="mdi:calculator"
+                  className="text-link h-7 w-7"
+                  inline={true}
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                  Calculators
+                </h3>
+                <p className="text-card-paragraph text-sm">
+                  XP, value, and trading tools
+                </p>
+              </div>
+              <Icon
+                icon="mdi:arrow-right"
+                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
+                inline={true}
+              />
+            </Link>
+
+            <Link
+              href="/dupes"
+              prefetch={false}
+              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+                <Icon
+                  icon="mdi:shield-alert"
+                  className="text-link h-7 w-7"
+                  inline={true}
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                  Dupe Finder
+                </h3>
+                <p className="text-card-paragraph text-sm">
+                  Check for duplicated items
+                </p>
+              </div>
+              <Icon
+                icon="mdi:arrow-right"
+                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
+                inline={true}
+              />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -426,129 +549,6 @@ export default function Home() {
                   inline={true}
                 />
               </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Pages CTA Section */}
-      <section className="bg-secondary-bg/50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="text-primary-text mb-4 text-3xl font-bold">
-              Getting Started
-            </h2>
-            <p className="text-tertiary-text mx-auto max-w-2xl">
-              Jump right into the most popular features
-            </p>
-          </div>
-          <div className="mx-auto grid max-w-4xl gap-4 md:grid-cols-2">
-            <Link
-              href="/values"
-              prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
-            >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
-                <Icon
-                  icon="mdi:chart-line"
-                  className="text-link h-7 w-7"
-                  inline={true}
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
-                  Item Values
-                </h3>
-                <p className="text-card-paragraph text-sm">
-                  Check current trading values
-                </p>
-              </div>
-              <Icon
-                icon="mdi:arrow-right"
-                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
-                inline={true}
-              />
-            </Link>
-
-            <Link
-              href="/trading"
-              prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
-            >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
-                <Icon
-                  icon="mdi:swap-horizontal"
-                  className="text-link h-7 w-7"
-                  inline={true}
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
-                  Trade Ads
-                </h3>
-                <p className="text-card-paragraph text-sm">
-                  Post and browse trade offers
-                </p>
-              </div>
-              <Icon
-                icon="mdi:arrow-right"
-                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
-                inline={true}
-              />
-            </Link>
-
-            <Link
-              href="/seasons"
-              prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
-            >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
-                <Icon
-                  icon="mdi:trophy"
-                  className="text-link h-7 w-7"
-                  inline={true}
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
-                  Season Rewards
-                </h3>
-                <p className="text-card-paragraph text-sm">
-                  View all seasonal content
-                </p>
-              </div>
-              <Icon
-                icon="mdi:arrow-right"
-                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
-                inline={true}
-              />
-            </Link>
-
-            <Link
-              href="/leaderboard/money"
-              prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
-            >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
-                <Icon
-                  icon="mdi:podium"
-                  className="text-link h-7 w-7"
-                  inline={true}
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
-                  Leaderboards
-                </h3>
-                <p className="text-card-paragraph text-sm">
-                  See top players and rankings
-                </p>
-              </div>
-              <Icon
-                icon="mdi:arrow-right"
-                className="text-tertiary-text group-hover:text-link h-5 w-5 transition-colors"
-                inline={true}
-              />
             </Link>
           </div>
         </div>

@@ -5,7 +5,6 @@ import Image from "next/image";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
 // import NewsTicker from "@/components/Layout/NewsTicker";
-import ServiceAvailabilityTicker from "@/components/Layout/ServiceAvailabilityTicker";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
 import OfflineDetector from "@/components/OfflineDetector";
@@ -182,7 +181,6 @@ export default async function RootLayout({
                             >
                               <Header />
                             </Suspense>
-                            <ServiceAvailabilityTicker />
                             {/* <NewsTicker /> */}
                             <main className="flex-1">{children}</main>
                             <Footer
@@ -362,7 +360,6 @@ export default async function RootLayout({
                         >
                           <Header />
                         </Suspense>
-                        <ServiceAvailabilityTicker />
                         {/* <NewsTicker /> */}
                         <main className="flex-1">{children}</main>
                         <Footer

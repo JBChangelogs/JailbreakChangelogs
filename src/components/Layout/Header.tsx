@@ -59,6 +59,7 @@ const AnimatedThemeToggler = dynamic(
   },
 );
 import { NavbarModern } from "@/components/UI/navbar";
+import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 
 import { Icon } from "../UI/IconWrapper";
 
@@ -655,382 +656,541 @@ export default function Header() {
   return (
     <>
       {/* Desktop: Use new navbar */}
-      {!isMobile && <NavbarModern />}
+      {!isMobile && (
+        <div className="sticky top-0 z-[1300]">
+          <ServiceAvailabilityTicker />
+          <div className="relative z-10">
+            <NavbarModern />
+          </div>
+        </div>
+      )}
 
       {/* Mobile: Use original header with drawer */}
       {isMobile && (
-        <AppBar
-          position="sticky"
-          color="transparent"
-          elevation={0}
-          className="bg-primary-bg/75 border-border-primary top-0 z-[1200] border-b backdrop-blur-lg"
-        >
-          <Toolbar className="flex items-center justify-between">
-            <Box className="flex items-center">
-              <Link href="/" style={{ display: "block" }}>
-                <Image
-                  src={
-                    isCollabPage
-                      ? `https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
-                      : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
-                  }
-                  alt="Jailbreak Changelogs Logo"
-                  width={isSmallScreen ? 150 : 200}
-                  height={isSmallScreen ? 36 : 48}
-                  quality={90}
-                  priority
-                  style={{
-                    height: isSmallScreen ? "36px" : "48px",
-                    width: "auto",
-                  }}
-                />
-              </Link>
-            </Box>
-            {mounted && !isMobile && (
-              <>
-                <Box className="absolute left-1/2 flex -translate-x-1/2 transform items-center gap-2">
-                  <Button
-                    component={Link}
-                    href="/changelogs"
-                    className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active active:text-form-button-text hover:text-form-button-text rounded-lg transition-colors duration-200"
-                  >
-                    <Typography variant="button" className="font-bold">
-                      Changelogs
-                    </Typography>
-                  </Button>
-
-                  {/* Seasons Dropdown */}
-                  <Box
-                    className="relative inline-block"
-                    onMouseEnter={handleSeasonsMenuOpen}
-                    onMouseLeave={handleSeasonsMenuClose}
-                    ref={seasonsMenuButtonRef}
-                  >
+        <div className="sticky top-0 z-[1300]">
+          <ServiceAvailabilityTicker />
+          <AppBar
+            position="static"
+            color="transparent"
+            elevation={0}
+            className="bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg"
+          >
+            <Toolbar className="flex items-center justify-between">
+              <Box className="flex items-center">
+                <Link href="/" style={{ display: "block" }}>
+                  <Image
+                    src={
+                      isCollabPage
+                        ? `https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
+                        : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
+                    }
+                    alt="Jailbreak Changelogs Logo"
+                    width={isSmallScreen ? 150 : 200}
+                    height={isSmallScreen ? 36 : 48}
+                    quality={90}
+                    priority
+                    style={{
+                      height: isSmallScreen ? "36px" : "48px",
+                      width: "auto",
+                    }}
+                  />
+                </Link>
+              </Box>
+              {mounted && !isMobile && (
+                <>
+                  <Box className="absolute left-1/2 flex -translate-x-1/2 transform items-center gap-2">
                     <Button
-                      type="button"
-                      className={`rounded-lg transition-colors duration-200 ${
-                        seasonsMenuOpen
-                          ? "bg-button-info text-form-button-text"
-                          : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
-                      }`}
+                      component={Link}
+                      href="/changelogs"
+                      className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active active:text-form-button-text hover:text-form-button-text rounded-lg transition-colors duration-200"
                     >
-                      <Typography
-                        variant="button"
-                        className={`font-bold ${seasonsMenuOpen ? "text-form-button-text" : ""}`}
-                      >
-                        Seasons
+                      <Typography variant="button" className="font-bold">
+                        Changelogs
                       </Typography>
-                      <motion.div
-                        animate={{ rotate: seasonsMenuOpen ? 180 : 0 }}
-                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                      >
-                        <KeyboardArrowDownIcon
-                          className={`ml-0.5 text-xl ${
-                            seasonsMenuOpen
-                              ? "text-form-button-text"
-                              : "text-secondary-text"
-                          }`}
-                        />
-                      </motion.div>
                     </Button>
 
-                    <AnimatePresence>
-                      {seasonsMenuOpen && (
-                        <motion.div
-                          className="bg-secondary-bg border-border-primary shadow-card-shadow absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl border shadow-lg"
-                          style={{
-                            top: "100%",
-                          }}
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{
-                            duration: 0.2,
-                            ease: [0.4, 0, 0.2, 1],
-                          }}
-                        >
-                          <div className="flex flex-col gap-1 px-2 py-3">
-                            <Link
-                              href="/seasons"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleSeasonsMenuClose}
-                            >
-                              Browse Seasons
-                            </Link>
-                            <Link
-                              href="/seasons/leaderboard"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleSeasonsMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Season Leaderboard</span>
-                              </div>
-                            </Link>
-                            <Link
-                              href="/seasons/will-i-make-it"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleSeasonsMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Will I Make It</span>
-                              </div>
-                            </Link>
-                            <Link
-                              href="/seasons/contracts"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleSeasonsMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Weekly Contracts</span>
-                              </div>
-                            </Link>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Box>
-
-                  {/* Values Dropdown */}
-                  <Box
-                    className="relative inline-block"
-                    onMouseEnter={handleNavMenuOpen}
-                    onMouseLeave={handleNavMenuClose}
-                    ref={navMenuButtonRef}
-                  >
-                    <Button
-                      type="button"
-                      className={`rounded-lg ${
-                        navMenuOpen
-                          ? "bg-button-info text-white"
-                          : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
-                      }`}
+                    {/* Seasons Dropdown */}
+                    <Box
+                      className="relative inline-block"
+                      onMouseEnter={handleSeasonsMenuOpen}
+                      onMouseLeave={handleSeasonsMenuClose}
+                      ref={seasonsMenuButtonRef}
                     >
-                      <Typography
-                        variant="button"
-                        className={`font-bold ${navMenuOpen ? "text-white" : ""}`}
+                      <Button
+                        type="button"
+                        className={`rounded-lg transition-colors duration-200 ${
+                          seasonsMenuOpen
+                            ? "bg-button-info text-form-button-text"
+                            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
+                        }`}
                       >
-                        Values
-                      </Typography>
-                      <motion.div
-                        animate={{ rotate: navMenuOpen ? 180 : 0 }}
-                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                      >
-                        <KeyboardArrowDownIcon
-                          className={`ml-0.5 text-xl ${
-                            navMenuOpen ? "text-white" : "text-secondary-text"
-                          }`}
-                        />
-                      </motion.div>
-                    </Button>
-
-                    <AnimatePresence>
-                      {navMenuOpen && (
-                        <motion.div
-                          className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
-                          style={{
-                            top: "100%",
-                          }}
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{
-                            duration: 0.2,
-                            ease: [0.4, 0, 0.2, 1],
-                          }}
+                        <Typography
+                          variant="button"
+                          className={`font-bold ${seasonsMenuOpen ? "text-form-button-text" : ""}`}
                         >
-                          <div className="flex flex-col gap-1 px-2 py-3">
-                            <Link
-                              href="/values"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              Value List
-                            </Link>
-                            <Link
-                              href="/values/changelogs"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              Value Changelogs
-                            </Link>
-                            <Link
-                              href="/values/calculator"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              Value Calculator
-                            </Link>
-                            <Link
-                              href="/dupes"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Dupe Finder</span>
-                                {!isFeatureEnabled("DUPE_FINDER") && (
-                                  <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    Coming Soon
-                                  </span>
-                                )}
-                              </div>
-                            </Link>
-                            <Link
-                              href="/dupes/calculator"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              Dupe Calculator
-                            </Link>
-                            <Link
-                              href="/trading"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              Trade Ads
-                            </Link>
-                            <Link
-                              href="/inventories"
-                              className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>Inventory Checker</span>
-                                {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
-                                  <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    Coming Soon
-                                  </span>
-                                )}
-                              </div>
-                            </Link>
-                            <Link
-                              href="/og"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleNavMenuClose}
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span>OG Finder</span>
-                                {!isFeatureEnabled("OG_FINDER") && (
-                                  <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                    Coming Soon
-                                  </span>
-                                )}
-                              </div>
-                            </Link>
-                          </div>
+                          Seasons
+                        </Typography>
+                        <motion.div
+                          animate={{ rotate: seasonsMenuOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                          <KeyboardArrowDownIcon
+                            className={`ml-0.5 text-xl ${
+                              seasonsMenuOpen
+                                ? "text-form-button-text"
+                                : "text-secondary-text"
+                            }`}
+                          />
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Box>
+                      </Button>
 
-                  {/* Community Dropdown */}
-                  <Box
-                    className="relative inline-block"
-                    onMouseEnter={handleCommunityMenuOpen}
-                    onMouseLeave={handleCommunityMenuClose}
-                    ref={communityMenuButtonRef}
-                  >
-                    <Button
-                      type="button"
-                      className={`rounded-lg ${
-                        communityMenuOpen
-                          ? "bg-button-info text-white"
-                          : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
-                      }`}
+                      <AnimatePresence>
+                        {seasonsMenuOpen && (
+                          <motion.div
+                            className="bg-secondary-bg border-border-primary shadow-card-shadow absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl border shadow-lg"
+                            style={{
+                              top: "100%",
+                            }}
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{
+                              duration: 0.2,
+                              ease: [0.4, 0, 0.2, 1],
+                            }}
+                          >
+                            <div className="flex flex-col gap-1 px-2 py-3">
+                              <Link
+                                href="/seasons"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleSeasonsMenuClose}
+                              >
+                                Browse Seasons
+                              </Link>
+                              <Link
+                                href="/seasons/leaderboard"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleSeasonsMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>Season Leaderboard</span>
+                                </div>
+                              </Link>
+                              <Link
+                                href="/seasons/will-i-make-it"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleSeasonsMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>Will I Make It</span>
+                                </div>
+                              </Link>
+                              <Link
+                                href="/seasons/contracts"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleSeasonsMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>Weekly Contracts</span>
+                                </div>
+                              </Link>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Box>
+
+                    {/* Values Dropdown */}
+                    <Box
+                      className="relative inline-block"
+                      onMouseEnter={handleNavMenuOpen}
+                      onMouseLeave={handleNavMenuClose}
+                      ref={navMenuButtonRef}
                     >
-                      <Typography
-                        variant="button"
-                        className={`font-bold ${communityMenuOpen ? "text-white" : ""}`}
+                      <Button
+                        type="button"
+                        className={`rounded-lg ${
+                          navMenuOpen
+                            ? "bg-button-info text-white"
+                            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
+                        }`}
                       >
-                        Community
-                      </Typography>
-                      <motion.div
-                        animate={{ rotate: communityMenuOpen ? 180 : 0 }}
-                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                      >
-                        <KeyboardArrowDownIcon
-                          className={`ml-0.5 text-xl ${
-                            communityMenuOpen
-                              ? "text-white"
-                              : "text-secondary-text"
-                          }`}
-                        />
-                      </motion.div>
-                    </Button>
-
-                    <AnimatePresence>
-                      {communityMenuOpen && (
-                        <motion.div
-                          className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
-                          style={{
-                            top: "100%",
-                          }}
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{
-                            duration: 0.2,
-                            ease: [0.4, 0, 0.2, 1],
-                          }}
+                        <Typography
+                          variant="button"
+                          className={`font-bold ${navMenuOpen ? "text-white" : ""}`}
                         >
-                          <div className="flex flex-col gap-1 px-2 py-3">
-                            <Link
-                              href="/users"
-                              prefetch={false}
-                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              User Search
-                            </Link>
-                            <Link
-                              href="/leaderboard/money"
-                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Money Leaderboard
-                            </Link>
-                            <Link
-                              href="/inventories/networth"
-                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Networth Leaderboard
-                            </Link>
-                            <Link
-                              href="/servers"
-                              className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Private Servers
-                            </Link>
-                            <Link
-                              href="/bot"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Discord Bot
-                            </Link>
-                            <Link
-                              href="/faq"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              FAQ
-                            </Link>
-                            <Link
-                              href="/contributors"
-                              className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                              onClick={handleCommunityMenuClose}
-                            >
-                              Meet the team
-                            </Link>
-                          </div>
+                          Values
+                        </Typography>
+                        <motion.div
+                          animate={{ rotate: navMenuOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                          <KeyboardArrowDownIcon
+                            className={`ml-0.5 text-xl ${
+                              navMenuOpen ? "text-white" : "text-secondary-text"
+                            }`}
+                          />
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Box>
-                </Box>
+                      </Button>
 
-                <Box className="ml-auto flex items-center gap-2">
+                      <AnimatePresence>
+                        {navMenuOpen && (
+                          <motion.div
+                            className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
+                            style={{
+                              top: "100%",
+                            }}
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{
+                              duration: 0.2,
+                              ease: [0.4, 0, 0.2, 1],
+                            }}
+                          >
+                            <div className="flex flex-col gap-1 px-2 py-3">
+                              <Link
+                                href="/values"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                Value List
+                              </Link>
+                              <Link
+                                href="/values/changelogs"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                Value Changelogs
+                              </Link>
+                              <Link
+                                href="/values/calculator"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                Value Calculator
+                              </Link>
+                              <Link
+                                href="/dupes"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>Dupe Finder</span>
+                                  {!isFeatureEnabled("DUPE_FINDER") && (
+                                    <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                                      Coming Soon
+                                    </span>
+                                  )}
+                                </div>
+                              </Link>
+                              <Link
+                                href="/dupes/calculator"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                Dupe Calculator
+                              </Link>
+                              <Link
+                                href="/trading"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                Trade Ads
+                              </Link>
+                              <Link
+                                href="/inventories"
+                                className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>Inventory Checker</span>
+                                  {!isFeatureEnabled(
+                                    "INVENTORY_CALCULATOR",
+                                  ) && (
+                                    <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                                      Coming Soon
+                                    </span>
+                                  )}
+                                </div>
+                              </Link>
+                              <Link
+                                href="/og"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleNavMenuClose}
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span>OG Finder</span>
+                                  {!isFeatureEnabled("OG_FINDER") && (
+                                    <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                                      Coming Soon
+                                    </span>
+                                  )}
+                                </div>
+                              </Link>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Box>
+
+                    {/* Community Dropdown */}
+                    <Box
+                      className="relative inline-block"
+                      onMouseEnter={handleCommunityMenuOpen}
+                      onMouseLeave={handleCommunityMenuClose}
+                      ref={communityMenuButtonRef}
+                    >
+                      <Button
+                        type="button"
+                        className={`rounded-lg ${
+                          communityMenuOpen
+                            ? "bg-button-info text-white"
+                            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
+                        }`}
+                      >
+                        <Typography
+                          variant="button"
+                          className={`font-bold ${communityMenuOpen ? "text-white" : ""}`}
+                        >
+                          Community
+                        </Typography>
+                        <motion.div
+                          animate={{ rotate: communityMenuOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                          <KeyboardArrowDownIcon
+                            className={`ml-0.5 text-xl ${
+                              communityMenuOpen
+                                ? "text-white"
+                                : "text-secondary-text"
+                            }`}
+                          />
+                        </motion.div>
+                      </Button>
+
+                      <AnimatePresence>
+                        {communityMenuOpen && (
+                          <motion.div
+                            className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
+                            style={{
+                              top: "100%",
+                            }}
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{
+                              duration: 0.2,
+                              ease: [0.4, 0, 0.2, 1],
+                            }}
+                          >
+                            <div className="flex flex-col gap-1 px-2 py-3">
+                              <Link
+                                href="/users"
+                                prefetch={false}
+                                className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                User Search
+                              </Link>
+                              <Link
+                                href="/leaderboard/money"
+                                className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                Money Leaderboard
+                              </Link>
+                              <Link
+                                href="/inventories/networth"
+                                className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                Networth Leaderboard
+                              </Link>
+                              <Link
+                                href="/servers"
+                                className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                Private Servers
+                              </Link>
+                              <Link
+                                href="/bot"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                Discord Bot
+                              </Link>
+                              <Link
+                                href="/faq"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                FAQ
+                              </Link>
+                              <Link
+                                href="/contributors"
+                                className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
+                                onClick={handleCommunityMenuClose}
+                              >
+                                Meet the team
+                              </Link>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Box>
+                  </Box>
+
+                  <Box className="ml-auto flex items-center gap-2">
+                    <Tooltip
+                      title="Support us"
+                      arrow
+                      placement="bottom"
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: "var(--color-secondary-bg)",
+                            color: "var(--color-primary-text)",
+                            "& .MuiTooltip-arrow": {
+                              color: "var(--color-secondary-bg)",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <Link href="/supporting">
+                        <IconButton
+                          className="hover:bg-quaternary-bg text-tertiary-text transition-colors duration-200"
+                          aria-label="Support us"
+                        >
+                          <Image
+                            src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                            alt="Ko-fi"
+                            width={22}
+                            height={22}
+                            style={{ display: "block" }}
+                          />
+                        </IconButton>
+                      </Link>
+                    </Tooltip>
+
+                    <AnimatedThemeToggler />
+
+                    {userData ? (
+                      <>
+                        <Box
+                          className="relative inline-block"
+                          onMouseEnter={handleMenuOpen}
+                          onMouseLeave={handleMenuClose}
+                        >
+                          <UserAvatar
+                            userId={userData.id}
+                            avatarHash={userData.avatar}
+                            username={userData.username}
+                            size={10}
+                            custom_avatar={userData.custom_avatar}
+                            showBadge={false}
+                            settings={userData.settings}
+                            premiumType={userData.premiumtype}
+                          />
+
+                          <AnimatePresence>
+                            {Boolean(anchorEl) && (
+                              <motion.div
+                                className="bg-secondary-bg absolute right-0 z-50 mt-0 min-w-[280px] rounded-2xl border border-white/[0.12] shadow-2xl"
+                                style={{
+                                  top: "100%",
+                                }}
+                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                transition={{
+                                  duration: 0.2,
+                                  ease: [0.4, 0, 0.2, 1],
+                                  staggerChildren: 0.05,
+                                }}
+                              >
+                                <div className="flex flex-col gap-1 px-2 py-3">
+                                  <Link
+                                    href={`/users/${String(userData?.id).replace(/\D/g, "")}`}
+                                    className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors"
+                                    onClick={handleMenuClose}
+                                  >
+                                    <div className="ml-3">
+                                      <div className="font-bold">
+                                        {userData.username}
+                                      </div>
+                                      <div className="text-secondary-text group-hover:text-form-button-text text-sm">
+                                        @{userData.username}
+                                      </div>
+                                    </div>
+                                  </Link>
+
+                                  <div className="border-secondary-text my-1 border-t"></div>
+
+                                  {!userData.roblox_id && (
+                                    <button
+                                      className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
+                                      onClick={() => {
+                                        handleMenuClose();
+                                        setShowLoginModal(true);
+                                        const event = new CustomEvent(
+                                          "setLoginTab",
+                                          { detail: 1 },
+                                        );
+                                        window.dispatchEvent(event);
+                                      }}
+                                    >
+                                      <RobloxIcon className="group-hover:text-form-button-text mr-3 h-5 w-5" />
+                                      Connect Roblox
+                                    </button>
+                                  )}
+
+                                  <Link
+                                    href="/settings"
+                                    className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
+                                    onClick={handleMenuClose}
+                                  >
+                                    <Icon
+                                      icon="material-symbols:settings"
+                                      className="text-primary-text group-hover:text-form-button-text mr-3 text-xl"
+                                      inline={true}
+                                    />
+                                    Settings
+                                  </Link>
+
+                                  <button
+                                    className="text-button-danger hover:bg-button-danger/10 hover:text-button-danger flex w-full cursor-pointer items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
+                                    onClick={handleLogout}
+                                  >
+                                    <Icon
+                                      icon="material-symbols:logout"
+                                      className="text-button-danger mr-3 text-xl"
+                                      inline={true}
+                                    />
+                                    Logout
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </Box>
+                      </>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        onClick={() => setShowLoginModal(true)}
+                        className="bg-button-info active:bg-button-info-active text-form-button-text cursor-pointer transition-colors duration-200"
+                      >
+                        <Typography variant="button">Login</Typography>
+                      </Button>
+                    )}
+                  </Box>
+                </>
+              )}
+              {isMobile && (
+                <Box className="flex items-center gap-1">
                   <Tooltip
                     title="Support us"
                     arrow
@@ -1049,7 +1209,7 @@ export default function Header() {
                   >
                     <Link href="/supporting">
                       <IconButton
-                        className="hover:bg-quaternary-bg text-tertiary-text transition-colors duration-200"
+                        className="text-tertiary-text hover:bg-quaternary-bg transition-colors duration-200"
                         aria-label="Support us"
                       >
                         <Image
@@ -1064,175 +1224,28 @@ export default function Header() {
                   </Tooltip>
 
                   <AnimatedThemeToggler />
-
-                  {userData ? (
-                    <>
-                      <Box
-                        className="relative inline-block"
-                        onMouseEnter={handleMenuOpen}
-                        onMouseLeave={handleMenuClose}
-                      >
-                        <UserAvatar
-                          userId={userData.id}
-                          avatarHash={userData.avatar}
-                          username={userData.username}
-                          size={10}
-                          custom_avatar={userData.custom_avatar}
-                          showBadge={false}
-                          settings={userData.settings}
-                          premiumType={userData.premiumtype}
-                        />
-
-                        <AnimatePresence>
-                          {Boolean(anchorEl) && (
-                            <motion.div
-                              className="bg-secondary-bg absolute right-0 z-50 mt-0 min-w-[280px] rounded-2xl border border-white/[0.12] shadow-2xl"
-                              style={{
-                                top: "100%",
-                              }}
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              transition={{
-                                duration: 0.2,
-                                ease: [0.4, 0, 0.2, 1],
-                                staggerChildren: 0.05,
-                              }}
-                            >
-                              <div className="flex flex-col gap-1 px-2 py-3">
-                                <Link
-                                  href={`/users/${String(userData?.id).replace(/\D/g, "")}`}
-                                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors"
-                                  onClick={handleMenuClose}
-                                >
-                                  <div className="ml-3">
-                                    <div className="font-bold">
-                                      {userData.username}
-                                    </div>
-                                    <div className="text-secondary-text group-hover:text-form-button-text text-sm">
-                                      @{userData.username}
-                                    </div>
-                                  </div>
-                                </Link>
-
-                                <div className="border-secondary-text my-1 border-t"></div>
-
-                                {!userData.roblox_id && (
-                                  <button
-                                    className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                    onClick={() => {
-                                      handleMenuClose();
-                                      setShowLoginModal(true);
-                                      const event = new CustomEvent(
-                                        "setLoginTab",
-                                        { detail: 1 },
-                                      );
-                                      window.dispatchEvent(event);
-                                    }}
-                                  >
-                                    <RobloxIcon className="group-hover:text-form-button-text mr-3 h-5 w-5" />
-                                    Connect Roblox
-                                  </button>
-                                )}
-
-                                <Link
-                                  href="/settings"
-                                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                  onClick={handleMenuClose}
-                                >
-                                  <Icon
-                                    icon="material-symbols:settings"
-                                    className="text-primary-text group-hover:text-form-button-text mr-3 text-xl"
-                                    inline={true}
-                                  />
-                                  Settings
-                                </Link>
-
-                                <button
-                                  className="text-button-danger hover:bg-button-danger/10 hover:text-button-danger flex w-full cursor-pointer items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                  onClick={handleLogout}
-                                >
-                                  <Icon
-                                    icon="material-symbols:logout"
-                                    className="text-button-danger mr-3 text-xl"
-                                    inline={true}
-                                  />
-                                  Logout
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </Box>
-                    </>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      onClick={() => setShowLoginModal(true)}
-                      className="bg-button-info active:bg-button-info-active text-form-button-text cursor-pointer transition-colors duration-200"
-                    >
-                      <Typography variant="button">Login</Typography>
-                    </Button>
-                  )}
-                </Box>
-              </>
-            )}
-            {isMobile && (
-              <Box className="flex items-center gap-1">
-                <Tooltip
-                  title="Support us"
-                  arrow
-                  placement="bottom"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <Link href="/supporting">
-                    <IconButton
-                      className="text-tertiary-text hover:bg-quaternary-bg transition-colors duration-200"
-                      aria-label="Support us"
-                    >
-                      <Image
-                        src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-                        alt="Ko-fi"
-                        width={22}
-                        height={22}
-                        style={{ display: "block" }}
-                      />
-                    </IconButton>
-                  </Link>
-                </Tooltip>
-
-                <AnimatedThemeToggler />
-                <IconButton
-                  aria-label="open drawer"
-                  edge="end"
-                  onClick={handleDrawerToggle}
-                  sx={{
-                    color: "var(--color-primary-text) !important",
-                    "& .MuiSvgIcon-root": {
+                  <IconButton
+                    aria-label="open drawer"
+                    edge="end"
+                    onClick={handleDrawerToggle}
+                    sx={{
                       color: "var(--color-primary-text) !important",
-                    },
-                  }}
-                >
-                  <Icon
-                    icon="material-symbols:menu"
-                    className="h-6 w-6"
-                    inline={true}
-                  />
-                </IconButton>
-              </Box>
-            )}
-          </Toolbar>
-        </AppBar>
+                      "& .MuiSvgIcon-root": {
+                        color: "var(--color-primary-text) !important",
+                      },
+                    }}
+                  >
+                    <Icon
+                      icon="material-symbols:menu"
+                      className="h-6 w-6"
+                      inline={true}
+                    />
+                  </IconButton>
+                </Box>
+              )}
+            </Toolbar>
+          </AppBar>
+        </div>
       )}
 
       {/* Mobile Drawer */}
