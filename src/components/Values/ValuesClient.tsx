@@ -66,9 +66,46 @@ export default function ValuesClient({
       safeLocalStorage.setItem("valuesValueSort", urlValueSort);
       return urlValueSort as ValueSort;
     }
-    return (
-      (safeLocalStorage.getItem("valuesValueSort") as ValueSort) || "cash-desc"
-    );
+    const savedSort = safeLocalStorage.getItem("valuesValueSort");
+    // Validate that the saved sort is a valid ValueSort option
+    const validSorts: ValueSort[] = [
+      "random",
+      "alpha-asc",
+      "alpha-desc",
+      "cash-desc",
+      "cash-asc",
+      "duped-desc",
+      "duped-asc",
+      "demand-desc",
+      "demand-asc",
+      "last-updated-desc",
+      "last-updated-asc",
+      "times-traded-desc",
+      "times-traded-asc",
+      "unique-circulation-desc",
+      "unique-circulation-asc",
+      "demand-multiple-desc",
+      "demand-multiple-asc",
+      "demand-close-to-none",
+      "demand-very-low",
+      "demand-low",
+      "demand-medium",
+      "demand-decent",
+      "demand-high",
+      "demand-very-high",
+      "demand-extremely-high",
+      "trend-stable",
+      "trend-rising",
+      "trend-hyped",
+      "trend-dropping",
+      "trend-unstable",
+      "trend-hoarded",
+      "trend-manipulated",
+      "trend-recovering",
+    ];
+    return savedSort && validSorts.includes(savedSort as ValueSort)
+      ? (savedSort as ValueSort)
+      : "cash-desc";
   };
 
   const [filterSort, setFilterSort] =

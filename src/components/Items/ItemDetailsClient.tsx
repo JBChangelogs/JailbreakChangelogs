@@ -798,6 +798,7 @@ export default function ItemDetailsClient({
                     price={currentItem.price}
                     health={currentItem.health}
                     type={currentItem.type}
+                    recentChanges={item.recent_changes}
                   />
                 </>
               )}

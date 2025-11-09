@@ -16,7 +16,7 @@ import {
 } from "@/utils/images";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatFullValue } from "@/utils/values";
+import { formatFullValue, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/24/solid";
@@ -66,6 +66,9 @@ export default function ItemCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedSubItem, setSelectedSubItem] = useState<SubItem | null>(null);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -74,6 +77,12 @@ export default function ItemCard({
   const searchParams = useSearchParams();
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -465,30 +474,163 @@ export default function ItemCard({
                   Non-Tradable
                 </span>
               )}
+              {isValuesPage &&
+                !selectedSubItem &&
+                (() => {
+                  const cashChange = getValueChange(
+                    item.recent_changes,
+                    "cash_value",
+                  );
+                  const dupedChange = getValueChange(
+                    item.recent_changes,
+                    "duped_value",
+                  );
+                  const badges = [];
+
+                  // Add cash value badge if it has changed
+                  if (cashChange && cashChange.difference !== 0) {
+                    const isPositive = cashChange.difference > 0;
+                    const diff = Math.abs(cashChange.difference);
+                    const formattedDiff =
+                      windowWidth <= 640
+                        ? (() => {
+                            if (diff >= 1000000)
+                              return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
+                            if (diff >= 1000)
+                              return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
+                            return diff.toString();
+                          })()
+                        : diff.toLocaleString();
+
+                    badges.push(
+                      <Tooltip
+                        key="cash-change"
+                        title={`Cash Value ${isPositive ? "increased" : "decreased"} by ${formattedDiff}`}
+                        arrow
+                        placement="top"
+                      >
+                        <span
+                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                            isPositive
+                              ? "bg-status-success text-white"
+                              : "bg-status-error text-white"
+                          }`}
+                        >
+                          {isPositive ? "+" : "-"}
+                          {formattedDiff}
+                        </span>
+                      </Tooltip>,
+                    );
+                  }
+
+                  // Add duped value badge if it has changed
+                  if (dupedChange && dupedChange.difference !== 0) {
+                    const isPositive = dupedChange.difference > 0;
+                    const diff = Math.abs(dupedChange.difference);
+                    const formattedDiff =
+                      windowWidth <= 640
+                        ? (() => {
+                            if (diff >= 1000000)
+                              return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
+                            if (diff >= 1000)
+                              return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
+                            return diff.toString();
+                          })()
+                        : diff.toLocaleString();
+
+                    badges.push(
+                      <Tooltip
+                        key="duped-change"
+                        title={`Duped Value ${isPositive ? "increased" : "decreased"} by ${formattedDiff}`}
+                        arrow
+                        placement="top"
+                      >
+                        <span
+                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                            isPositive
+                              ? "bg-status-success text-white"
+                              : "bg-status-error text-white"
+                          }`}
+                        >
+                          {isPositive ? "+" : "-"}
+                          {formattedDiff}
+                        </span>
+                      </Tooltip>,
+                    );
+                  }
+
+                  return badges;
+                })()}
             </div>
 
             <div className="space-y-1 pb-2 sm:space-y-2">
               <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
-                    <span className="sm:hidden">Cash</span>
-                    <span className="hidden sm:inline">Cash Value</span>
+                    Cash Value
                   </span>
+                  {isValuesPage &&
+                    !selectedSubItem &&
+                    (() => {
+                      const cashChange = getValueChange(
+                        item.recent_changes,
+                        "cash_value",
+                      );
+                      if (cashChange && cashChange.difference !== 0) {
+                        const isPositive = cashChange.difference > 0;
+                        return (
+                          <Icon
+                            icon={
+                              isPositive
+                                ? "mingcute:arrow-up-fill"
+                                : "mingcute:arrow-down-fill"
+                            }
+                            className={`h-4 w-4 ${isPositive ? "text-status-success" : "text-status-error"}`}
+                          />
+                        );
+                      }
+                      return null;
+                    })()}
                 </div>
                 <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
-                  {formatFullValue(currentItemData.cash_value)}
+                  {windowWidth <= 640
+                    ? currentItemData.cash_value
+                    : formatFullValue(currentItemData.cash_value)}
                 </span>
               </div>
 
               <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
-                    <span className="sm:hidden">Duped</span>
-                    <span className="hidden sm:inline">Duped Value</span>
+                    Duped Value
                   </span>
+                  {isValuesPage &&
+                    !selectedSubItem &&
+                    (() => {
+                      const dupedChange = getValueChange(
+                        item.recent_changes,
+                        "duped_value",
+                      );
+                      if (dupedChange && dupedChange.difference !== 0) {
+                        const isPositive = dupedChange.difference > 0;
+                        return (
+                          <Icon
+                            icon={
+                              isPositive
+                                ? "mingcute:arrow-up-fill"
+                                : "mingcute:arrow-down-fill"
+                            }
+                            className={`h-4 w-4 ${isPositive ? "text-status-success" : "text-status-error"}`}
+                          />
+                        );
+                      }
+                      return null;
+                    })()}
                 </div>
                 <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
-                  {formatFullValue(currentItemData.duped_value)}
+                  {windowWidth <= 640
+                    ? currentItemData.duped_value
+                    : formatFullValue(currentItemData.duped_value)}
                 </span>
               </div>
 

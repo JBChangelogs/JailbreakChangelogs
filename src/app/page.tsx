@@ -197,16 +197,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:book-open-page-variant"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:book-open-page-variant"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Changelogs
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Changelogs
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Access the complete history of Jailbreak updates since 2017.
                 Track every change, update, and addition to the game.
@@ -227,16 +229,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:trophy"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:trophy"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Seasons & Rewards
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Seasons & Rewards
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Browse seasonal rewards, contracts, and use XP calculators to
                 track your progress and plan your season journey.
@@ -257,16 +261,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:chart-line"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:chart-line"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Item Values
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Item Values
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 View accurate item values and trading statistics. Stay updated
                 with value changelogs and market trends.
@@ -287,16 +293,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:swap-horizontal"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:swap-horizontal"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Trade Ads
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Trade Ads
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Create and browse trade ads. Find the perfect trading partner
                 and negotiate deals with the community.
@@ -317,16 +325,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:package-variant"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:package-variant"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Inventory Checker
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Inventory Checker
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Check player inventories and calculate total networth. Track
                 item ownership and collection progress.
@@ -347,16 +357,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:shield-alert"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:shield-alert"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Dupe Detection
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Dupe Detection
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Find duped items and check item authenticity. Protect yourself
                 from trading for duplicated items.
@@ -377,16 +389,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:crown"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:crown"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  OG Finder
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                OG Finder
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Discover original owners of limited items. Track item history
                 and verify ownership authenticity.
@@ -407,16 +421,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:podium"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:podium"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Leaderboards
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Leaderboards
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 View money and networth leaderboards. See top players and
                 compare your progress with the community.
@@ -437,16 +453,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:calculator"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:calculator"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Calculators
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Calculators
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Access XP calculators, value calculators, and trading worth
                 tools. Plan your progression efficiently.
@@ -467,16 +485,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:server-network"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:server-network"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Private Servers
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Private Servers
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Browse and submit private servers for grinding, trading, and
                 hanging out. Connect with fellow players.
@@ -497,16 +517,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:account-group"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:account-group"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  User Profiles
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                User Profiles
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Search users, create profiles, and engage with the community.
                 Connect your Roblox account securely.
@@ -527,16 +549,18 @@ export default function Home() {
               prefetch={false}
               className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 inline-flex rounded-lg bg-button-info/10 p-3">
-                <Icon
-                  icon="mdi:robot"
-                  className="text-link h-8 w-8"
-                  inline={true}
-                />
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                  <Icon
+                    icon="mdi:robot"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline text-xl font-bold">
+                  Discord Bot
+                </h3>
               </div>
-              <h3 className="text-card-headline mb-3 text-xl font-bold">
-                Discord Bot
-              </h3>
               <p className="text-card-paragraph mb-4 leading-relaxed">
                 Add our Discord bot to your server. Get changelogs, values, and
                 updates directly in Discord.

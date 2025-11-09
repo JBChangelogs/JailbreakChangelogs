@@ -108,7 +108,7 @@ export default function TradingGuides({
       case "Hoarded":
         return "#7c3aed";
       case "Manipulated":
-        return "#fcd34d";
+        return "#ca8a04";
       case "Stable":
         return "#6b7280";
       case "Recovering":

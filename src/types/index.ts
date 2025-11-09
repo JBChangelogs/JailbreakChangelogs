@@ -73,6 +73,16 @@ export interface DupedOwner {
   created_at: number;
 }
 
+export interface RecentChange {
+  change_id: number;
+  changed_by: string;
+  changes: {
+    old: Record<string, string | number | null>;
+    new: Record<string, string | number | null>;
+  };
+  created_at: number;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -91,6 +101,7 @@ export interface Item {
   health: number;
   tradable: number;
   last_updated: number;
+  recent_changes?: RecentChange[] | null;
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
@@ -172,6 +183,7 @@ export interface ItemDetails {
   health: number;
   tradable: boolean | number;
   last_updated: number;
+  recent_changes?: RecentChange[] | null;
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;

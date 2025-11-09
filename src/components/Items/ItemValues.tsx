@@ -1,8 +1,9 @@
 import React from "react";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { formatFullValue, formatPrice } from "@/utils/values";
+import { formatFullValue, formatPrice, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { RecentChange } from "@/types";
 
 interface ItemValuesProps {
   cashValue: string | null;
@@ -13,6 +14,7 @@ interface ItemValuesProps {
   price: string;
   health: number;
   type: string;
+  recentChanges?: RecentChange[] | null;
 }
 
 export default function ItemValues({
@@ -24,6 +26,7 @@ export default function ItemValues({
   price,
   health,
   type,
+  recentChanges,
 }: ItemValuesProps) {
   const isRobuxPrice = price.toLowerCase().includes("robux");
   const isUSDPrice = price.includes("$");
@@ -45,6 +48,25 @@ export default function ItemValues({
             <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
               Cash Value
             </h4>
+            {(() => {
+              const cashChange = getValueChange(recentChanges, "cash_value");
+              if (cashChange && cashChange.difference !== 0) {
+                const isPositive = cashChange.difference > 0;
+                return (
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                      isPositive
+                        ? "bg-status-success text-white"
+                        : "bg-status-error text-white"
+                    }`}
+                  >
+                    {isPositive ? "+" : "-"}
+                    {Math.abs(cashChange.difference).toLocaleString()}
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </div>
           <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(cashValue)}
@@ -57,6 +79,25 @@ export default function ItemValues({
             <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
               Duped Value
             </h4>
+            {(() => {
+              const dupedChange = getValueChange(recentChanges, "duped_value");
+              if (dupedChange && dupedChange.difference !== 0) {
+                const isPositive = dupedChange.difference > 0;
+                return (
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                      isPositive
+                        ? "bg-status-success text-white"
+                        : "bg-status-error text-white"
+                    }`}
+                  >
+                    {isPositive ? "+" : "-"}
+                    {Math.abs(dupedChange.difference).toLocaleString()}
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </div>
           <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(dupedValue)}

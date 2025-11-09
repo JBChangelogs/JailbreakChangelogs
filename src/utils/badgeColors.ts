@@ -77,7 +77,7 @@ export const getTrendColor = (trend: string): string => {
     case "Hoarded":
       return "bg-violet-600 text-white";
     case "Manipulated":
-      return "bg-amber-300 text-white";
+      return "bg-yellow-600 text-black";
     case "Stable":
       return "bg-gray-500 text-white";
     case "Recovering":
