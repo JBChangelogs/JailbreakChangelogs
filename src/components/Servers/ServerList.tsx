@@ -16,6 +16,7 @@ import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
 import { UserAvatar } from "@/utils/avatar";
+import DOMPurify from "dompurify";
 
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
@@ -43,6 +44,13 @@ type SortOption =
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
     return `<span class="text-link-hover">@${username}</span>`;
+  });
+};
+
+const sanitizeHTML = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["span", "br"],
+    ALLOWED_ATTR: ["class"],
   });
 };
 
@@ -864,7 +872,9 @@ const ServerList: React.FC<{
                                 __html:
                                   server.rules === "N/A"
                                     ? "No Rules set by owner"
-                                    : processMentions(server.rules),
+                                    : sanitizeHTML(
+                                        processMentions(server.rules),
+                                      ),
                               }}
                             />
                           </div>

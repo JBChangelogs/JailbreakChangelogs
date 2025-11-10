@@ -32,7 +32,6 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import ReportCommentModal from "./ReportCommentModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
 import SupporterModal from "../Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
@@ -40,6 +39,7 @@ import { UserBadges } from "@/components/Profile/UserBadges";
 import CommentTimestamp from "./CommentTimestamp";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import DOMPurify from "dompurify";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -89,6 +89,47 @@ const cleanCommentText = (text: string): string => {
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
     return `<span class="text-link-hover">@${username}</span>`;
+  });
+};
+
+const escapeHtml = (text: string): string => {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+};
+
+const convertUrlsToLinksHTML = (text: string): string => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, (url) => {
+    try {
+      const urlObj = new URL(url);
+      if (
+        urlObj.hostname === "roblox.com" ||
+        urlObj.hostname.endsWith(".roblox.com") ||
+        urlObj.hostname === "reddit.com" ||
+        urlObj.hostname.endsWith(".reddit.com") ||
+        urlObj.hostname === "amazon.com" ||
+        urlObj.hostname.endsWith(".amazon.com") ||
+        urlObj.hostname === "jailbreakchangelogs.xyz" ||
+        urlObj.hostname.endsWith(".jailbreakchangelogs.xyz")
+      ) {
+        // Escape the URL to prevent attribute injection
+        const escapedUrl = escapeHtml(url);
+        return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 transition-colors duration-200 hover:text-blue-300 hover:underline">${escapedUrl}</a>`;
+      }
+      return url;
+    } catch {
+      return url;
+    }
+  });
+};
+
+const sanitizeHTML = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["a", "span", "br"],
+    ALLOWED_ATTR: ["href", "target", "rel", "class"],
+    ALLOWED_URI_REGEXP:
+      /^https?:\/\/(www\.)?(roblox\.com|reddit\.com|amazon\.com|jailbreakchangelogs\.xyz)/,
   });
 };
 
@@ -1036,9 +1077,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                             <p
                                               className="text-primary-text text-sm leading-relaxed break-words whitespace-pre-wrap"
                                               dangerouslySetInnerHTML={{
-                                                __html: convertUrlsToLinks(
-                                                  processMentions(
-                                                    visibleContent,
+                                                __html: sanitizeHTML(
+                                                  convertUrlsToLinksHTML(
+                                                    processMentions(
+                                                      visibleContent,
+                                                    ),
                                                   ),
                                                 ),
                                               }}
