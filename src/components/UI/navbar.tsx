@@ -410,7 +410,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="bg-secondary-bg border-border-primary absolute right-0 z-[1300] mt-2 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
+                    className="bg-secondary-bg border-border-primary absolute right-0 z-[1300] mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
                     initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.85, y: 10 }}
@@ -434,7 +434,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         />
                         <div>
                           <div className="text-primary-text hover:text-link font-semibold transition-colors">
-                            {userData.username}
+                            {userData.global_name || userData.username}
                           </div>
                           <div className="text-secondary-text text-sm">
                             @{userData.username}

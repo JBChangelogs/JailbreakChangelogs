@@ -21,8 +21,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import dynamic from "next/dynamic";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   logout,
   trackLogoutSource,
@@ -37,8 +36,6 @@ import { useEscapeLogin } from "@/utils/escapeLogin";
 import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 // import { PUBLIC_API_URL } from '@/utils/api';
-import { useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -83,39 +80,7 @@ export default function Header() {
   } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [navMenuAnchorEl, setNavMenuAnchorEl] = useState<null | HTMLElement>(
-    null,
-  );
-  const [communityMenuAnchorEl, setCommunityMenuAnchorEl] =
-    useState<null | HTMLElement>(null);
-  const [seasonsMenuAnchorEl, setSeasonsMenuAnchorEl] =
-    useState<null | HTMLElement>(null);
-
-  const [navMenuCloseTimeout, setNavMenuCloseTimeout] =
-    useState<NodeJS.Timeout | null>(null);
-  const [communityMenuCloseTimeout, setCommunityMenuCloseTimeout] =
-    useState<NodeJS.Timeout | null>(null);
-  const [seasonsMenuCloseTimeout, setSeasonsMenuCloseTimeout] =
-    useState<NodeJS.Timeout | null>(null);
   useEscapeLogin();
-
-  const navMenuButtonRef = useRef<HTMLDivElement | null>(null);
-  const seasonsMenuButtonRef = useRef<HTMLDivElement | null>(null);
-  const communityMenuButtonRef = useRef<HTMLDivElement | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleLogout = async () => {
     let loadingToast: string | undefined;
@@ -126,7 +91,6 @@ export default function Header() {
 
       trackLogoutSource("Header Component");
       await logout();
-      handleMenuClose();
 
       // Dismiss loading toast and show success
       toast.dismiss(loadingToast);
@@ -147,120 +111,6 @@ export default function Header() {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleNavMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    // Close other menus immediately if they're open
-    if (communityMenuAnchorEl) {
-      if (communityMenuCloseTimeout) {
-        clearTimeout(communityMenuCloseTimeout);
-        setCommunityMenuCloseTimeout(null);
-      }
-      setCommunityMenuAnchorEl(null);
-    }
-    if (seasonsMenuAnchorEl) {
-      if (seasonsMenuCloseTimeout) {
-        clearTimeout(seasonsMenuCloseTimeout);
-        setSeasonsMenuCloseTimeout(null);
-      }
-      setSeasonsMenuAnchorEl(null);
-    }
-
-    if (navMenuCloseTimeout) {
-      clearTimeout(navMenuCloseTimeout);
-      setNavMenuCloseTimeout(null);
-    }
-    setNavMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleNavMenuClose = () => {
-    const timeout = setTimeout(() => {
-      setNavMenuAnchorEl(null);
-    }, 150);
-    setNavMenuCloseTimeout(timeout);
-  };
-
-  const navMenuOpen = Boolean(navMenuAnchorEl);
-
-  const handleCommunityMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    // Close other menus immediately if they're open
-    if (navMenuAnchorEl) {
-      if (navMenuCloseTimeout) {
-        clearTimeout(navMenuCloseTimeout);
-        setNavMenuCloseTimeout(null);
-      }
-      setNavMenuAnchorEl(null);
-    }
-    if (seasonsMenuAnchorEl) {
-      if (seasonsMenuCloseTimeout) {
-        clearTimeout(seasonsMenuCloseTimeout);
-        setSeasonsMenuCloseTimeout(null);
-      }
-      setSeasonsMenuAnchorEl(null);
-    }
-
-    if (communityMenuCloseTimeout) {
-      clearTimeout(communityMenuCloseTimeout);
-      setCommunityMenuCloseTimeout(null);
-    }
-    setCommunityMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleCommunityMenuClose = () => {
-    const timeout = setTimeout(() => {
-      setCommunityMenuAnchorEl(null);
-    }, 150);
-    setCommunityMenuCloseTimeout(timeout);
-  };
-
-  const communityMenuOpen = Boolean(communityMenuAnchorEl);
-
-  const handleSeasonsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    // Close other menus immediately if they're open
-    if (navMenuAnchorEl) {
-      if (navMenuCloseTimeout) {
-        clearTimeout(navMenuCloseTimeout);
-        setNavMenuCloseTimeout(null);
-      }
-      setNavMenuAnchorEl(null);
-    }
-    if (communityMenuAnchorEl) {
-      if (communityMenuCloseTimeout) {
-        clearTimeout(communityMenuCloseTimeout);
-        setCommunityMenuCloseTimeout(null);
-      }
-      setCommunityMenuAnchorEl(null);
-    }
-
-    if (seasonsMenuCloseTimeout) {
-      clearTimeout(seasonsMenuCloseTimeout);
-      setSeasonsMenuCloseTimeout(null);
-    }
-    setSeasonsMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleSeasonsMenuClose = () => {
-    const timeout = setTimeout(() => {
-      setSeasonsMenuAnchorEl(null);
-    }, 150);
-    setSeasonsMenuCloseTimeout(timeout);
-  };
-
-  const seasonsMenuOpen = Boolean(seasonsMenuAnchorEl);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (navMenuCloseTimeout) {
-        clearTimeout(navMenuCloseTimeout);
-      }
-      if (communityMenuCloseTimeout) {
-        clearTimeout(communityMenuCloseTimeout);
-      }
-      if (seasonsMenuCloseTimeout) {
-        clearTimeout(seasonsMenuCloseTimeout);
-      }
-    };
-  }, [navMenuCloseTimeout, communityMenuCloseTimeout, seasonsMenuCloseTimeout]);
-
   const drawer = (
     <List>
       {userData ? (
@@ -275,7 +125,7 @@ export default function Header() {
               borderBottom: "1px solid var(--color-border-secondary)",
             }}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 w-full pr-8">
               <UserAvatar
                 userId={userData.id}
                 avatarHash={userData.avatar}
@@ -287,10 +137,10 @@ export default function Header() {
                 premiumType={userData.premiumtype}
               />
               <div className="min-w-0 flex-1">
-                <div className="text-primary-text font-semibold truncate">
-                  {userData.username}
+                <div className="text-primary-text font-semibold truncate max-w-[120px]">
+                  {userData.global_name || userData.username}
                 </div>
-                <div className="text-secondary-text text-sm truncate">
+                <div className="text-secondary-text text-sm">
                   @{userData.username}
                 </div>
               </div>
@@ -634,13 +484,6 @@ export default function Header() {
     </List>
   );
 
-  // Avoid SSR/client mismatch flicker by rendering a placeholder until mounted
-  if (!mounted) {
-    return (
-      <div className="bg-primary-bg/75 border-border-primary sticky top-0 z-[1200] h-[64px] border-b backdrop-blur-lg" />
-    );
-  }
-
   return (
     <>
       {/* Desktop: Use new navbar */}
@@ -658,7 +501,7 @@ export default function Header() {
         <>
           {/* Fixed menu toggle button */}
           <label
-            className="swap swap-rotate cursor-pointer fixed top-3 right-4 z-[1500]"
+            className="swap swap-rotate cursor-pointer fixed top-[14px] right-4 z-[1500]"
             aria-label="toggle menu"
           >
             <input
@@ -719,510 +562,6 @@ export default function Header() {
                     />
                   </Link>
                 </Box>
-                {mounted && !isMobile && (
-                  <>
-                    <Box className="absolute left-1/2 flex -translate-x-1/2 transform items-center gap-2">
-                      <Button
-                        component={Link}
-                        href="/changelogs"
-                        className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active active:text-form-button-text hover:text-form-button-text rounded-lg transition-colors duration-200"
-                      >
-                        <Typography variant="button" className="font-bold">
-                          Changelogs
-                        </Typography>
-                      </Button>
-
-                      {/* Seasons Dropdown */}
-                      <Box
-                        className="relative inline-block"
-                        onMouseEnter={handleSeasonsMenuOpen}
-                        onMouseLeave={handleSeasonsMenuClose}
-                        ref={seasonsMenuButtonRef}
-                      >
-                        <Button
-                          type="button"
-                          className={`rounded-lg transition-colors duration-200 ${
-                            seasonsMenuOpen
-                              ? "bg-button-info text-form-button-text"
-                              : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
-                          }`}
-                        >
-                          <Typography
-                            variant="button"
-                            className={`font-bold ${seasonsMenuOpen ? "text-form-button-text" : ""}`}
-                          >
-                            Seasons
-                          </Typography>
-                          <motion.div
-                            animate={{ rotate: seasonsMenuOpen ? 180 : 0 }}
-                            transition={{
-                              duration: 0.2,
-                              ease: [0.4, 0, 0.2, 1],
-                            }}
-                          >
-                            <KeyboardArrowDownIcon
-                              className={`ml-0.5 text-xl ${
-                                seasonsMenuOpen
-                                  ? "text-form-button-text"
-                                  : "text-secondary-text"
-                              }`}
-                            />
-                          </motion.div>
-                        </Button>
-
-                        <AnimatePresence>
-                          {seasonsMenuOpen && (
-                            <motion.div
-                              className="bg-secondary-bg border-border-primary shadow-card-shadow absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl border shadow-lg"
-                              style={{
-                                top: "100%",
-                              }}
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              transition={{
-                                duration: 0.2,
-                                ease: [0.4, 0, 0.2, 1],
-                              }}
-                            >
-                              <div className="flex flex-col gap-1 px-2 py-3">
-                                <Link
-                                  href="/seasons"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleSeasonsMenuClose}
-                                >
-                                  Browse Seasons
-                                </Link>
-                                <Link
-                                  href="/seasons/leaderboard"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleSeasonsMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>Season Leaderboard</span>
-                                  </div>
-                                </Link>
-                                <Link
-                                  href="/seasons/will-i-make-it"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleSeasonsMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>Will I Make It</span>
-                                  </div>
-                                </Link>
-                                <Link
-                                  href="/seasons/contracts"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleSeasonsMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>Weekly Contracts</span>
-                                  </div>
-                                </Link>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </Box>
-
-                      {/* Values Dropdown */}
-                      <Box
-                        className="relative inline-block"
-                        onMouseEnter={handleNavMenuOpen}
-                        onMouseLeave={handleNavMenuClose}
-                        ref={navMenuButtonRef}
-                      >
-                        <Button
-                          type="button"
-                          className={`rounded-lg ${
-                            navMenuOpen
-                              ? "bg-button-info text-white"
-                              : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
-                          }`}
-                        >
-                          <Typography
-                            variant="button"
-                            className={`font-bold ${navMenuOpen ? "text-white" : ""}`}
-                          >
-                            Values
-                          </Typography>
-                          <motion.div
-                            animate={{ rotate: navMenuOpen ? 180 : 0 }}
-                            transition={{
-                              duration: 0.2,
-                              ease: [0.4, 0, 0.2, 1],
-                            }}
-                          >
-                            <KeyboardArrowDownIcon
-                              className={`ml-0.5 text-xl ${
-                                navMenuOpen
-                                  ? "text-white"
-                                  : "text-secondary-text"
-                              }`}
-                            />
-                          </motion.div>
-                        </Button>
-
-                        <AnimatePresence>
-                          {navMenuOpen && (
-                            <motion.div
-                              className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
-                              style={{
-                                top: "100%",
-                              }}
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              transition={{
-                                duration: 0.2,
-                                ease: [0.4, 0, 0.2, 1],
-                              }}
-                            >
-                              <div className="flex flex-col gap-1 px-2 py-3">
-                                <Link
-                                  href="/values"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  Value List
-                                </Link>
-                                <Link
-                                  href="/values/changelogs"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  Value Changelogs
-                                </Link>
-                                <Link
-                                  href="/values/calculator"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  Value Calculator
-                                </Link>
-                                <Link
-                                  href="/dupes"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>Dupe Finder</span>
-                                    {!isFeatureEnabled("DUPE_FINDER") && (
-                                      <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                        Coming Soon
-                                      </span>
-                                    )}
-                                  </div>
-                                </Link>
-                                <Link
-                                  href="/dupes/calculator"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  Dupe Calculator
-                                </Link>
-                                <Link
-                                  href="/trading"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  Trade Ads
-                                </Link>
-                                <Link
-                                  href="/inventories"
-                                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>Inventory Checker</span>
-                                    {!isFeatureEnabled(
-                                      "INVENTORY_CALCULATOR",
-                                    ) && (
-                                      <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                        Coming Soon
-                                      </span>
-                                    )}
-                                  </div>
-                                </Link>
-                                <Link
-                                  href="/og"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleNavMenuClose}
-                                >
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span>OG Finder</span>
-                                    {!isFeatureEnabled("OG_FINDER") && (
-                                      <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                                        Coming Soon
-                                      </span>
-                                    )}
-                                  </div>
-                                </Link>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </Box>
-
-                      {/* Community Dropdown */}
-                      <Box
-                        className="relative inline-block"
-                        onMouseEnter={handleCommunityMenuOpen}
-                        onMouseLeave={handleCommunityMenuClose}
-                        ref={communityMenuButtonRef}
-                      >
-                        <Button
-                          type="button"
-                          className={`rounded-lg ${
-                            communityMenuOpen
-                              ? "bg-button-info text-white"
-                              : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text"
-                          }`}
-                        >
-                          <Typography
-                            variant="button"
-                            className={`font-bold ${communityMenuOpen ? "text-white" : ""}`}
-                          >
-                            Community
-                          </Typography>
-                          <motion.div
-                            animate={{ rotate: communityMenuOpen ? 180 : 0 }}
-                            transition={{
-                              duration: 0.2,
-                              ease: [0.4, 0, 0.2, 1],
-                            }}
-                          >
-                            <KeyboardArrowDownIcon
-                              className={`ml-0.5 text-xl ${
-                                communityMenuOpen
-                                  ? "text-white"
-                                  : "text-secondary-text"
-                              }`}
-                            />
-                          </motion.div>
-                        </Button>
-
-                        <AnimatePresence>
-                          {communityMenuOpen && (
-                            <motion.div
-                              className="bg-secondary-bg absolute left-1/2 z-50 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl shadow-2xl"
-                              style={{
-                                top: "100%",
-                              }}
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              transition={{
-                                duration: 0.2,
-                                ease: [0.4, 0, 0.2, 1],
-                              }}
-                            >
-                              <div className="flex flex-col gap-1 px-2 py-3">
-                                <Link
-                                  href="/users"
-                                  prefetch={false}
-                                  className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  User Search
-                                </Link>
-                                <Link
-                                  href="/leaderboard/money"
-                                  className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  Money Leaderboard
-                                </Link>
-                                <Link
-                                  href="/inventories/networth"
-                                  className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  Networth Leaderboard
-                                </Link>
-                                <Link
-                                  href="/servers"
-                                  className="text-primary-text hover:bg-button-info-hover active:bg-button-info-active hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors duration-200"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  Private Servers
-                                </Link>
-                                <Link
-                                  href="/bot"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  Discord Bot
-                                </Link>
-                                <Link
-                                  href="/faq"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  FAQ
-                                </Link>
-                                <Link
-                                  href="/contributors"
-                                  className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold"
-                                  onClick={handleCommunityMenuClose}
-                                >
-                                  Meet the team
-                                </Link>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </Box>
-                    </Box>
-
-                    <Box className="ml-auto flex items-center gap-2">
-                      <Tooltip
-                        title="Support us"
-                        arrow
-                        placement="bottom"
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-secondary-bg)",
-                              color: "var(--color-primary-text)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-secondary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <Link href="/supporting">
-                          <IconButton
-                            className="hover:bg-quaternary-bg text-tertiary-text transition-colors duration-200"
-                            aria-label="Support us"
-                          >
-                            <Image
-                              src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-                              alt="Ko-fi"
-                              width={22}
-                              height={22}
-                              style={{ display: "block" }}
-                            />
-                          </IconButton>
-                        </Link>
-                      </Tooltip>
-
-                      <AnimatedThemeToggler />
-
-                      {userData ? (
-                        <>
-                          <Box
-                            className="relative inline-block"
-                            onMouseEnter={handleMenuOpen}
-                            onMouseLeave={handleMenuClose}
-                          >
-                            <UserAvatar
-                              userId={userData.id}
-                              avatarHash={userData.avatar}
-                              username={userData.username}
-                              size={10}
-                              custom_avatar={userData.custom_avatar}
-                              showBadge={false}
-                              settings={userData.settings}
-                              premiumType={userData.premiumtype}
-                            />
-
-                            <AnimatePresence>
-                              {Boolean(anchorEl) && (
-                                <motion.div
-                                  className="bg-secondary-bg absolute right-0 z-50 mt-0 min-w-[280px] rounded-2xl border border-white/[0.12] shadow-2xl"
-                                  style={{
-                                    top: "100%",
-                                  }}
-                                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                  transition={{
-                                    duration: 0.2,
-                                    ease: [0.4, 0, 0.2, 1],
-                                    staggerChildren: 0.05,
-                                  }}
-                                >
-                                  <div className="flex flex-col gap-1 px-2 py-3">
-                                    <Link
-                                      href={`/users/${String(userData?.id).replace(/\D/g, "")}`}
-                                      className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-3 text-base font-bold transition-colors"
-                                      onClick={handleMenuClose}
-                                    >
-                                      <div className="ml-3">
-                                        <div className="font-bold">
-                                          {userData.username}
-                                        </div>
-                                        <div className="text-secondary-text group-hover:text-form-button-text text-sm">
-                                          @{userData.username}
-                                        </div>
-                                      </div>
-                                    </Link>
-
-                                    <div className="border-secondary-text my-1 border-t"></div>
-
-                                    {!userData.roblox_id && (
-                                      <button
-                                        className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                        onClick={() => {
-                                          handleMenuClose();
-                                          setShowLoginModal(true);
-                                          const event = new CustomEvent(
-                                            "setLoginTab",
-                                            { detail: 1 },
-                                          );
-                                          window.dispatchEvent(event);
-                                        }}
-                                      >
-                                        <RobloxIcon className="group-hover:text-form-button-text mr-3 h-5 w-5" />
-                                        Connect Roblox
-                                      </button>
-                                    )}
-
-                                    <Link
-                                      href="/settings"
-                                      className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                      onClick={handleMenuClose}
-                                    >
-                                      <Icon
-                                        icon="material-symbols:settings"
-                                        className="text-primary-text group-hover:text-form-button-text mr-3 text-xl"
-                                        inline={true}
-                                      />
-                                      Settings
-                                    </Link>
-
-                                    <button
-                                      className="text-button-danger hover:bg-button-danger/10 hover:text-button-danger flex w-full cursor-pointer items-center rounded-lg px-4 py-2 text-base font-bold transition-colors"
-                                      onClick={handleLogout}
-                                    >
-                                      <Icon
-                                        icon="material-symbols:logout"
-                                        className="text-button-danger mr-3 text-xl"
-                                        inline={true}
-                                      />
-                                      Logout
-                                    </button>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </Box>
-                        </>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          onClick={() => setShowLoginModal(true)}
-                          className="bg-button-info active:bg-button-info-active text-form-button-text cursor-pointer transition-colors duration-200"
-                        >
-                          <Typography variant="button">Login</Typography>
-                        </Button>
-                      )}
-                    </Box>
-                  </>
-                )}
                 {isMobile && (
                   <Box className="flex items-center gap-1">
                     <Tooltip
