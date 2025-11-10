@@ -34,6 +34,7 @@ import {
 import dynamic from "next/dynamic";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
+import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 
 const ChangelogComments = dynamic(
   () => import("@/components/PageComments/ChangelogComments"),
@@ -136,8 +137,10 @@ export default function InventoryCheckerClient({
 
       if (hash === "copies" && hasDuplicates) {
         setActiveTab(1);
-      } else if (hash === "comments" && hasComments) {
+      } else if (hash === "money" && robloxId) {
         setActiveTab(hasDuplicates ? 2 : 1);
+      } else if (hash === "comments" && hasComments) {
+        setActiveTab(hasDuplicates ? 3 : robloxId ? 2 : 1);
       } else {
         setActiveTab(0);
       }
@@ -304,8 +307,14 @@ export default function InventoryCheckerClient({
     } else if (newValue === 1 && hasDuplicates) {
       window.location.hash = "copies";
     } else if (
-      (hasDuplicates && newValue === 2) ||
-      (!hasDuplicates && newValue === 1)
+      (hasDuplicates && newValue === 2 && robloxId) ||
+      (!hasDuplicates && newValue === 1 && robloxId)
+    ) {
+      window.location.hash = "money";
+    } else if (
+      (hasDuplicates && newValue === 3) ||
+      (!hasDuplicates && !robloxId && newValue === 1) ||
+      (robloxId && !hasDuplicates && newValue === 2)
     ) {
       window.location.hash = "comments";
     }
@@ -756,6 +765,7 @@ export default function InventoryCheckerClient({
                 }
                 hasComments={Boolean(robloxId)}
                 hasDuplicates={hasDuplicates}
+                robloxId={robloxId}
               />
 
               {/* Tab Content */}
@@ -783,6 +793,10 @@ export default function InventoryCheckerClient({
 
                 {((hasDuplicates && effectiveActiveTab === 2) ||
                   (!hasDuplicates && effectiveActiveTab === 1)) &&
+                  robloxId && <MoneyHistoryChart userId={robloxId} />}
+
+                {((hasDuplicates && effectiveActiveTab === 3) ||
+                  (!hasDuplicates && effectiveActiveTab === 2)) &&
                   robloxId && (
                     <ChangelogComments
                       changelogId={robloxId}
@@ -827,15 +841,18 @@ function InventoryOverflowTabs({
   onChange,
   hasComments,
   hasDuplicates,
+  robloxId,
 }: {
   value: number;
   onChange: (e: React.SyntheticEvent, v: number) => void;
   hasComments: boolean;
   hasDuplicates: boolean;
+  robloxId?: string;
 }) {
   const labels = [
     "Inventory Items",
     ...(hasDuplicates ? ["Multiple Copies"] : []),
+    ...(robloxId ? ["Money Graph"] : []),
     ...(hasComments ? ["Comments"] : []),
   ];
 

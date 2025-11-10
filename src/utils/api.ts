@@ -1728,6 +1728,37 @@ export async function fetchUserMoneyRank(robloxId: string) {
   }
 }
 
+export interface MoneyHistory {
+  money: number;
+  updated_at: number;
+}
+
+export async function fetchUserMoneyHistory(
+  userId: string,
+): Promise<MoneyHistory[]> {
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/money/history?user_id=${userId}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-MoneyHistory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch money history");
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("[CLIENT] Error fetching money history:", err);
+    return [];
+  }
+}
+
 // Official scan bots
 export interface OfficialBotUser {
   userId: number;

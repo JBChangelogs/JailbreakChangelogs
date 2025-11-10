@@ -441,8 +441,7 @@ const ItemValueChart = ({
             if (y === null || y === undefined) {
               return `${context.dataset.label}: N/A`;
             }
-            // Prefer formatted compact value (e.g. 1.2m / 5k) for readability
-            return `${context.dataset.label}: ${formatValue(Number(y))}`;
+            return `${context.dataset.label}: ${y.toLocaleString()}`;
           },
         },
       },
