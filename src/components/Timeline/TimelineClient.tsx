@@ -33,7 +33,7 @@ export default function TimelineClient({ changelogs }: TimelineClientProps) {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <TimelineHeader />
+      <TimelineHeader changelogs={changelogs} />
       <TimelineContent changelogs={changelogs} />
 
       {showBackToTop && (

@@ -262,7 +262,7 @@ export default function ChangelogDetailsClient({
       <main className="min-h-screen">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
-          <ChangelogHeader />
+          <ChangelogHeader changelogs={changelogList} />
           <ChangelogFilter
             changelogList={changelogList}
             selectedId={selectedId}
