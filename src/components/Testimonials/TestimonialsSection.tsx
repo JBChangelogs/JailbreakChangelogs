@@ -80,6 +80,13 @@ const testimonials: Testimonial[] = [
       "JBCL is THE only site I use when checking values or any update changes in the game. It has active people updating the values so you know you're getting the right trades. It also has an inventory value checker, leaderboards, and so much more for the community to interact with than just a list of values. I easily recommend using JBCL over any other site because of how clean and accurate it is.",
     url: "https://www.youtube.com/@ItsSpecter",
   },
+  {
+    name: "Locked3",
+    role: "Jailbreak YouTuber",
+    quote:
+      "This site has definitely, definitely, at most helped jailbreak and keep the game alive for me, it's a great website, and this has changed the way jailbreak will be forever, it has a bunch of features! Including OG item finder, Dupe list, Values list, duped values list, and much more! Thank You so much JBCL for making me an affiliate i couldn't feel happier at the moment, Thank you.",
+    url: "https://www.youtube.com/@Unversed-loch3",
+  },
 ];
 
 export default function TestimonialsSection() {
