@@ -1852,6 +1852,7 @@ interface InventoryItem {
 
 export interface QueueInfo {
   queue_length: number;
+  worker_count: number;
   current_delay: number;
   last_dequeue: {
     user_id: string;

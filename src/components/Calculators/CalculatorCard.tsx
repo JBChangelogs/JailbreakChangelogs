@@ -31,7 +31,7 @@ export default function CalculatorCard({ calculator }: CalculatorCardProps) {
               inline={true}
             />
           </div>
-          <h3 className="text-card-headline text-xl font-semibold">
+          <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors duration-200">
             {calculator.title}
           </h3>
         </div>

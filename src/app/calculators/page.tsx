@@ -4,6 +4,22 @@ import CalculatorCard from "@/components/Calculators/CalculatorCard";
 
 const calculators = [
   {
+    id: "inventory",
+    title: "Inventory Calculator",
+    description:
+      "Check any player's Jailbreak inventory. View items, calculate net worth, and track inventory changes over time.",
+    href: "/inventories",
+    icon: "material-symbols:inventory-2",
+    category: "Inventory",
+    features: [
+      "Search by username or Roblox ID",
+      "View complete inventory details",
+      "Calculate total net worth",
+      "Track your money trends over time",
+    ],
+    color: "bg-orange-500",
+  },
+  {
     id: "values",
     title: "Values Calculator",
     description:

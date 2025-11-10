@@ -12,6 +12,7 @@ import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
 import RetryErrorDisplay from "./RetryErrorDisplay";
+import { Icon } from "@iconify/react";
 
 export default function ConnectedBotsPolling() {
   "use memo";
@@ -81,7 +82,10 @@ export default function ConnectedBotsPolling() {
             Connected Bots
           </h2>
           <div className="flex items-center gap-2">
-            <div className="bg-status-neutral h-2 w-2 rounded-full"></div>
+            <Icon
+              icon="fluent:live-off-24-filled"
+              className="text-status-neutral h-4 w-4"
+            />
             <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
@@ -105,7 +109,10 @@ export default function ConnectedBotsPolling() {
             Connected Bots
           </h2>
           <div className="flex items-center gap-2">
-            <div className="bg-warning h-2 w-2 animate-pulse rounded-full"></div>
+            <Icon
+              icon="fluent:live-off-24-filled"
+              className="text-warning h-4 w-4"
+            />
             <span className="text-warning text-xs font-medium tracking-wide uppercase">
               CONNECTING
             </span>
@@ -131,7 +138,10 @@ export default function ConnectedBotsPolling() {
             Connected Bots
           </h2>
           <div className="flex items-center gap-2">
-            <div className="bg-status-neutral h-2 w-2 rounded-full"></div>
+            <Icon
+              icon="fluent:live-off-24-filled"
+              className="text-status-neutral h-4 w-4"
+            />
             <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
@@ -160,8 +170,8 @@ export default function ConnectedBotsPolling() {
           Connected Bots
         </h2>
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
-          <span className="text-secondary-text text-xs font-medium tracking-wide uppercase">
+          <Icon icon="fluent:live-24-filled" className="text-red-500 h-4 w-4" />
+          <span className="text-red-500 text-xs font-medium tracking-wide uppercase">
             LIVE
           </span>
         </div>
@@ -182,6 +192,12 @@ export default function ConnectedBotsPolling() {
                   <span className="text-secondary-text">Queue Length:</span>
                   <span className="text-primary-text font-bold">
                     {queueInfo.queue_length.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-secondary-text">Worker Count:</span>
+                  <span className="text-primary-text font-bold">
+                    {queueInfo.worker_count.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
