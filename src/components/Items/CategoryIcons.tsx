@@ -103,9 +103,6 @@ export default function CategoryIcons({
               }`}
               style={
                 {
-                  backgroundColor: isSelected
-                    ? category.bgColor
-                    : category.bgColor,
                   borderColor: category.iconColor,
                   "--tw-ring-color": isSelected
                     ? category.iconColor

@@ -16,15 +16,16 @@ export async function GET() {
     },
   );
 
+  // Handle 204 No Content (cooldown) - cannot have a body per HTTP spec
+  if (upstream.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const text = await upstream.text();
 
   if (!upstream.ok) {
-    // Don't log 204, 404 or 403 as errors
-    if (
-      upstream.status !== 204 &&
-      upstream.status !== 404 &&
-      upstream.status !== 403
-    ) {
+    // Don't log 404 or 403 as errors
+    if (upstream.status !== 404 && upstream.status !== 403) {
       console.error("Survey request failed:", text);
     }
     return NextResponse.json({ survey: null }, { status: 200 });

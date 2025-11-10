@@ -619,7 +619,7 @@ export default function ItemChangelogs({
                             onClick={() =>
                               handleVotersClick("up", change.suggestion_data)
                             }
-                            className="bg-button-success/10 hover:bg-button-success/20 flex items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
+                            className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                             aria-label="View voters"
                           >
                             <span className="text-button-success text-lg font-bold">
@@ -634,7 +634,7 @@ export default function ItemChangelogs({
                             onClick={() =>
                               handleVotersClick("down", change.suggestion_data)
                             }
-                            className="bg-button-danger/10 hover:bg-button-danger/20 flex items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
+                            className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                             aria-label="View voters"
                           >
                             <span className="text-button-danger text-lg font-bold">

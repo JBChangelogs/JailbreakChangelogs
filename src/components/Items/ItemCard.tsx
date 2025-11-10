@@ -453,7 +453,7 @@ export default function ItemCard({
         <Link href={itemUrl} className="block" prefetch={false}>
           <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-primary-text hover:text-link-hover text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
+              <h3 className="text-primary-text group-hover:text-link text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
                 {item.name}
               </h3>
             </div>

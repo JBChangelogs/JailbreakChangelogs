@@ -47,6 +47,9 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       if (!response.ok) return;
 
+      // 204 No Content means user is on cooldown - no survey available
+      if (response.status === 204) return;
+
       const data = await response.json();
       if (data && data.id) {
         setSurvey(data);
