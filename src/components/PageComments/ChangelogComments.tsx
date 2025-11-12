@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   CircularProgress,

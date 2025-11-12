@@ -8,7 +8,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/UI/carousel";
+} from "@/components/ui/carousel";
 
 interface Reward {
   id: number;

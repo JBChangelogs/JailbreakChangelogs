@@ -12,7 +12,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import { TradeAdForm } from "./TradeAdForm";
-import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 interface TradeAdsProps {

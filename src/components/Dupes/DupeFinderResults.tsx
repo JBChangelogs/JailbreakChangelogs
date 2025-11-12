@@ -11,7 +11,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useAdReloader } from "@/hooks/useAdReloader";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { logError } from "@/services/logger";
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";

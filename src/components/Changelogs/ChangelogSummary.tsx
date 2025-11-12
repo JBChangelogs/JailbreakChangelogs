@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { cleanMarkdown } from "@/utils/changelogs";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";

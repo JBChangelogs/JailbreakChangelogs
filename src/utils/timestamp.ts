@@ -195,3 +195,25 @@ export const formatCustomDate = (timestamp: string | number): string => {
 
   return `${weekday} ${day} ${month} ${year} at ${hours12}:${minutes} ${period}`;
 };
+
+/**
+ * Formats a Unix timestamp in compact format: "11/9/2025 8:51 PM"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string in compact format
+ */
+export const formatCompactDateTime = (timestamp: string | number): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+
+  const month = date.getMonth() + 1; // getMonth() is 0-indexed
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const hours24 = date.getHours();
+  const minutes = date.getMinutes();
+  const period = hours24 >= 12 ? "PM" : "AM";
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+
+  return `${month}/${day}/${year} ${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
+};

@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 
 interface CategoryIconsProps {
   onSelect: (filter: FilterSort) => void;

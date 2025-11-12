@@ -7,7 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import {
   CustomButtonGroup,
   CustomButton,
-} from "@/components/UI/CustomButtonGroup";
+} from "@/components/ui/CustomButtonGroup";
 import {
   Chart as ChartJS,
   CategoryScale,

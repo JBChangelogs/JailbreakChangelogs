@@ -15,7 +15,7 @@ import TradeItemsWithValues from "@/components/trading/TradeItemsWithValues";
 import { TradeAd } from "@/types/trading";
 import TradeUserProfile from "@/components/trading/TradeUserProfile";
 import TradeAdMetadata from "@/components/trading/TradeAdMetadata";
-import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import dynamic from "next/dynamic";

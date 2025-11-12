@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 
 type SortOrder =
   | "alpha-asc"

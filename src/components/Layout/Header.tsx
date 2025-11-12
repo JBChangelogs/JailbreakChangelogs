@@ -19,6 +19,7 @@ import {
   ListItemIcon,
   Divider,
   Tooltip,
+  Pagination,
 } from "@mui/material";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -42,7 +43,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 const AnimatedThemeToggler = dynamic(
   () =>
-    import("@/components/UI/animated-theme-toggler").then((mod) => ({
+    import("@/components/ui/animated-theme-toggler").then((mod) => ({
       default: mod.AnimatedThemeToggler,
     })),
   {
@@ -54,10 +55,24 @@ const AnimatedThemeToggler = dynamic(
     ),
   },
 );
-import { NavbarModern } from "@/components/UI/navbar";
+import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  fetchNotificationHistory,
+  fetchUnreadNotifications,
+  markNotificationAsSeen,
+  clearUnreadNotifications,
+  clearNotificationHistory,
+  NotificationHistory,
+} from "@/utils/api";
+import { formatCompactDateTime } from "@/utils/timestamp";
 
 export default function Header() {
   const pathname = usePathname();
@@ -67,6 +82,15 @@ export default function Header() {
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
+    "unread",
+  );
+  const [notifications, setNotifications] =
+    useState<NotificationHistory | null>(null);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [notificationPage, setNotificationPage] = useState(1);
+  const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("lg"), {
     noSsr: true,
@@ -564,6 +588,360 @@ export default function Header() {
                 </Box>
                 {isMobile && (
                   <Box className="flex items-center gap-1">
+                    {/* Notification icon */}
+                    <Popover
+                      open={notificationMenuOpen}
+                      onOpenChange={async (open) => {
+                        setNotificationMenuOpen(open);
+                        if (open && isAuthenticated) {
+                          // Reset to unread tab when opening
+                          setNotificationTab("unread");
+                          setNotificationPage(1);
+                          setIsLoadingNotifications(true);
+                          const data = await fetchUnreadNotifications(1, 5);
+                          setNotifications(data);
+                          setIsLoadingNotifications(false);
+                        }
+                      }}
+                    >
+                      <Tooltip
+                        title="Notifications"
+                        arrow
+                        placement="top"
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "var(--color-secondary-bg)",
+                              color: "var(--color-primary-text)",
+                              "& .MuiTooltip-arrow": {
+                                color: "var(--color-secondary-bg)",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <PopoverTrigger asChild>
+                          <IconButton
+                            className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg transition-colors duration-200"
+                            aria-label="Notifications"
+                          >
+                            <Icon
+                              icon="streamline-plump:mail-notification-remix"
+                              className="h-5 w-5"
+                              inline={true}
+                            />
+                          </IconButton>
+                        </PopoverTrigger>
+                      </Tooltip>
+
+                      <PopoverContent
+                        align="center"
+                        side="bottom"
+                        className="w-[calc(100vw-1rem)] max-w-md p-0"
+                      >
+                        {/* Header */}
+                        <div className="border-border-secondary border-b px-4 py-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-primary-text font-semibold">
+                              {notifications
+                                ? `${notifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${notifications.total !== 1 ? "s" : ""}`
+                                : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
+                            </h3>
+                            {notifications && notifications.total > 0 && (
+                              <Tooltip
+                                title={
+                                  notificationTab === "unread"
+                                    ? "Clear Unread"
+                                    : "Clear History"
+                                }
+                                arrow
+                              >
+                                <button
+                                  onClick={async () => {
+                                    const success =
+                                      notificationTab === "unread"
+                                        ? await clearUnreadNotifications()
+                                        : await clearNotificationHistory();
+                                    if (success) {
+                                      toast.success(
+                                        notificationTab === "unread"
+                                          ? "Cleared all unread notifications"
+                                          : "Cleared notification history",
+                                        {
+                                          duration: 2000,
+                                          position: "bottom-right",
+                                        },
+                                      );
+                                      // Refetch to update the list
+                                      setIsLoadingNotifications(true);
+                                      const data =
+                                        notificationTab === "unread"
+                                          ? await fetchUnreadNotifications(1, 5)
+                                          : await fetchNotificationHistory(
+                                              1,
+                                              5,
+                                            );
+                                      setNotifications(data);
+                                      setNotificationPage(1);
+                                      setIsLoadingNotifications(false);
+                                    } else {
+                                      toast.error(
+                                        notificationTab === "unread"
+                                          ? "Failed to clear unread notifications"
+                                          : "Failed to clear notification history",
+                                        {
+                                          duration: 3000,
+                                          position: "bottom-right",
+                                        },
+                                      );
+                                    }
+                                  }}
+                                  className="text-secondary-text hover:text-red-500 transition-colors cursor-pointer"
+                                >
+                                  <Icon
+                                    icon="si:bin-fill"
+                                    className="h-5 w-5"
+                                    inline={true}
+                                  />
+                                </button>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Tabs */}
+                        {isAuthenticated && (
+                          <div className="border-border-secondary border-b px-2">
+                            <div role="tablist" className="tabs">
+                              <button
+                                role="tab"
+                                aria-selected={notificationTab === "unread"}
+                                onClick={async () => {
+                                  setNotificationTab("unread");
+                                  setNotificationPage(1);
+                                  setIsLoadingNotifications(true);
+                                  const data = await fetchUnreadNotifications(
+                                    1,
+                                    5,
+                                  );
+                                  setNotifications(data);
+                                  setIsLoadingNotifications(false);
+                                }}
+                                className={`tab ${notificationTab === "unread" ? "tab-active" : ""}`}
+                              >
+                                Unread
+                              </button>
+                              <button
+                                role="tab"
+                                aria-selected={notificationTab === "history"}
+                                onClick={async () => {
+                                  setNotificationTab("history");
+                                  setNotificationPage(1);
+                                  setIsLoadingNotifications(true);
+                                  const data = await fetchNotificationHistory(
+                                    1,
+                                    5,
+                                  );
+                                  setNotifications(data);
+                                  setIsLoadingNotifications(false);
+                                }}
+                                className={`tab ${notificationTab === "history" ? "tab-active" : ""}`}
+                              >
+                                History
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Content */}
+                        <div className="max-h-96 overflow-y-auto">
+                          {isLoadingNotifications ? (
+                            <div className="flex flex-col items-center justify-center py-8 px-4">
+                              <div className="loading loading-spinner loading-md text-primary-text"></div>
+                              <p className="text-secondary-text text-sm text-center mt-3">
+                                Loading notifications...
+                              </p>
+                            </div>
+                          ) : !isAuthenticated ? (
+                            <div className="flex flex-col items-center justify-center py-8 px-4">
+                              <p className="text-secondary-text text-sm text-center">
+                                You must be logged in to view notifications
+                              </p>
+                            </div>
+                          ) : notifications &&
+                            notifications.items.length > 0 ? (
+                            <>
+                              <div className="py-2">
+                                {notifications.items.map((notif) => {
+                                  // Check if link domain is whitelisted
+                                  const isWhitelistedDomain = (() => {
+                                    try {
+                                      const url = new URL(notif.link);
+                                      return (
+                                        url.hostname ===
+                                          "jailbreakchangelogs.xyz" ||
+                                        url.hostname ===
+                                          "www.jailbreakchangelogs.xyz" ||
+                                        url.hostname === "google.com" ||
+                                        url.hostname === "www.google.com"
+                                      );
+                                    } catch {
+                                      return false;
+                                    }
+                                  })();
+
+                                  return (
+                                    <div
+                                      key={notif.id}
+                                      className="border-border-secondary hover:bg-secondary-bg block px-4 py-3 border-b last:border-b-0 transition-colors"
+                                    >
+                                      <div className="flex-1">
+                                        <div className="flex items-start justify-between gap-2">
+                                          <p className="text-primary-text text-sm font-semibold flex-1">
+                                            {notif.title}
+                                          </p>
+                                          {notificationTab === "unread" && (
+                                            <Tooltip
+                                              title="Mark As Read"
+                                              arrow
+                                              placement="top"
+                                            >
+                                              <button
+                                                onClick={async () => {
+                                                  const success =
+                                                    await markNotificationAsSeen(
+                                                      notif.id,
+                                                    );
+                                                  if (success) {
+                                                    setMarkedAsSeen((prev) =>
+                                                      new Set(prev).add(
+                                                        notif.id,
+                                                      ),
+                                                    );
+                                                    toast.success(
+                                                      "Marked as read",
+                                                      {
+                                                        duration: 2000,
+                                                        position:
+                                                          "bottom-right",
+                                                      },
+                                                    );
+                                                    // Refetch notifications to update the list
+                                                    setIsLoadingNotifications(
+                                                      true,
+                                                    );
+                                                    const data =
+                                                      await fetchUnreadNotifications(
+                                                        notificationPage,
+                                                        5,
+                                                      );
+                                                    setNotifications(data);
+                                                    setIsLoadingNotifications(
+                                                      false,
+                                                    );
+                                                  }
+                                                }}
+                                                className={`flex-shrink-0 rounded-full p-1 transition-all cursor-pointer ${
+                                                  markedAsSeen.has(notif.id)
+                                                    ? "bg-green-500/20 text-green-500"
+                                                    : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
+                                                }`}
+                                                aria-label="Mark as seen"
+                                              >
+                                                <Icon
+                                                  icon="proicons:checkmark"
+                                                  className="h-4 w-4"
+                                                  inline={true}
+                                                />
+                                              </button>
+                                            </Tooltip>
+                                          )}
+                                        </div>
+                                        <p className="text-secondary-text text-xs mt-1">
+                                          {notif.description}
+                                        </p>
+                                        {isWhitelistedDomain ? (
+                                          <a
+                                            href={notif.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                          >
+                                            View
+                                          </a>
+                                        ) : (
+                                          <p className="text-secondary-text text-xs mt-1 break-all">
+                                            {notif.link}
+                                          </p>
+                                        )}
+                                        <p className="text-secondary-text text-xs mt-1">
+                                          {formatCompactDateTime(
+                                            notif.last_updated,
+                                          )}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {notifications.total_pages > 1 && (
+                                <div className="border-border-secondary flex justify-center border-t py-3">
+                                  <Pagination
+                                    count={notifications.total_pages}
+                                    page={notificationPage}
+                                    onChange={async (_event, value) => {
+                                      setNotificationPage(value);
+                                      setIsLoadingNotifications(true);
+                                      const data =
+                                        await fetchNotificationHistory(
+                                          value,
+                                          5,
+                                        );
+                                      setNotifications(data);
+                                      setIsLoadingNotifications(false);
+                                    }}
+                                    size="small"
+                                    sx={{
+                                      "& .MuiPaginationItem-root": {
+                                        color: "var(--color-primary-text)",
+                                        "&.Mui-selected": {
+                                          backgroundColor:
+                                            "var(--color-button-info)",
+                                          color:
+                                            "var(--color-form-button-text)",
+                                          "&:hover": {
+                                            backgroundColor:
+                                              "var(--color-button-info-hover)",
+                                          },
+                                        },
+                                        "&:hover": {
+                                          backgroundColor:
+                                            "var(--color-quaternary-bg)",
+                                        },
+                                      },
+                                      "& .MuiPaginationItem-icon": {
+                                        color: "var(--color-primary-text)",
+                                      },
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-8 px-4">
+                              <Icon
+                                icon="streamline-plump:mail-notification-remix"
+                                className="text-secondary-text h-12 w-12 mb-3"
+                                inline={true}
+                              />
+                              <p className="text-secondary-text text-sm text-center">
+                                No new notifications
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                     <Tooltip
                       title="Support us"
                       arrow

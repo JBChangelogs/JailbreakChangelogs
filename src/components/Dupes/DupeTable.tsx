@@ -11,7 +11,7 @@ import {
   SortingState,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { Tooltip } from "@mui/material";
 import { TradeAdTooltip } from "../trading/TradeAdTooltip";

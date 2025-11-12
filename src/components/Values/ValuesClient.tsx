@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
-import { Icon } from "@/components/UI/IconWrapper";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
 import toast from "react-hot-toast";

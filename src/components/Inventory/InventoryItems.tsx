@@ -6,7 +6,7 @@ import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 

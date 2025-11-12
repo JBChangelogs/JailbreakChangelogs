@@ -3,7 +3,7 @@
 import React from "react";
 import { formatMessageDate } from "@/utils/timestamp";
 import localFont from "next/font/local";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 
 const bangers = localFont({
   src: "../../../public/fonts/Bangers.ttf",

@@ -15,7 +15,7 @@ import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { logError } from "@/services/logger";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";

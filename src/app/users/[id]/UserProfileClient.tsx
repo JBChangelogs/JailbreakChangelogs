@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { UserAvatar } from "@/utils/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button, Skeleton } from "@mui/material";
-import { Icon } from "../../../components/UI/IconWrapper";
+import { Icon } from "../../../components/ui/IconWrapper";
 import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";

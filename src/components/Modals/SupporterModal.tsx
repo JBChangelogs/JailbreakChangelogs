@@ -5,7 +5,7 @@ import {
   TrophyIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import Link from "next/link";
 import { getAllowedFileExtensions } from "@/config/settings";
 

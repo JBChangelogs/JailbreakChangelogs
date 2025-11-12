@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Icon } from "../components/UI/IconWrapper";
+import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 
 export default function Home() {

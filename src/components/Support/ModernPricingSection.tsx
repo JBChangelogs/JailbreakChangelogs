@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getAllowedFileExtensions } from "@/config/settings";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Icon } from "@/components/UI/IconWrapper";
-import ImageModal from "@/components/UI/ImageModal";
+import { Icon } from "@/components/ui/IconWrapper";
+import ImageModal from "@/components/ui/ImageModal";
 
 interface SupporterTier {
   name: string;

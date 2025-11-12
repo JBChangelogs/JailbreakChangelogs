@@ -10,7 +10,7 @@ import {
 import { TradeAd } from "@/types/trading";
 import { ItemGrid } from "./ItemGrid";
 import RobloxTradeUser from "./RobloxTradeUser";
-import { ConfirmDialog } from "@/components/UI/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import dynamic from "next/dynamic";
 import { formatCustomDate } from "@/utils/timestamp";

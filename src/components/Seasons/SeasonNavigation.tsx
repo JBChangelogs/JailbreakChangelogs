@@ -2,7 +2,7 @@
 
 import React from "react";
 import { toast } from "react-hot-toast";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;

@@ -1,5 +1,5 @@
 import { CalculationResults, Season } from "@/types/seasons";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
 import { useState, useEffect } from "react";
 

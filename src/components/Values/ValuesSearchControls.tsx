@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";

@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
-import { Icon } from "@/components/UI/IconWrapper";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ItemCardProps {
   item: Item;

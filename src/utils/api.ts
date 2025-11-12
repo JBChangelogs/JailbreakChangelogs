@@ -39,6 +39,26 @@ export interface Season {
   rewards: Reward[];
 }
 
+export interface NotificationItem {
+  id: number;
+  user_id: string;
+  title: string;
+  description: string;
+  link: string;
+  metadata: Record<string, unknown> | null;
+  seen: number;
+  seen_at: number;
+  last_updated: number;
+}
+
+export interface NotificationHistory {
+  items: NotificationItem[];
+  total: number;
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
 import { Item, ItemDetails, RobloxUser } from "@/types";
 import { UserData } from "@/types/auth";
 
@@ -53,8 +73,8 @@ export const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
 export const INVENTORY_WS_URL = process.env
   .NEXT_PUBLIC_INVENTORY_WS_URL as string;
 export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
-export const INVENTORY_API_SOURCE_HEADER =
-  process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER || "JBCL-Frontend/1.0";
+export const INVENTORY_API_SOURCE_HEADER = process.env
+  .NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER as string;
 
 export const fetchUsers = async () => {
   const response = await fetch(`${BASE_API_URL}/users/list`, {
@@ -2158,5 +2178,162 @@ export async function fetchSupporters(): Promise<Supporter[]> {
   } catch (err) {
     console.error("[SERVER] Error fetching supporters:", err);
     return [];
+  }
+}
+
+/**
+ * Fetches notification history for the current user
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function fetchNotificationHistory(
+  page: number = 1,
+  size: number = 5,
+): Promise<NotificationHistory> {
+  try {
+    const response = await fetch(
+      `/api/notifications/history?page=${page}&size=${size}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      // Return empty notification history on error
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        total_pages: 0,
+        size: 10,
+      };
+    }
+
+    const data = await response.json();
+    return data as NotificationHistory;
+  } catch (error) {
+    console.error("Error fetching notification history:", error);
+    // Return empty notification history on error
+    return {
+      items: [],
+      total: 0,
+      page: 1,
+      total_pages: 0,
+      size: 10,
+    };
+  }
+}
+
+/**
+ * Fetches unread notifications for the current user
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function fetchUnreadNotifications(
+  page: number = 1,
+  size: number = 5,
+): Promise<NotificationHistory> {
+  try {
+    const response = await fetch(
+      `/api/notifications?page=${page}&size=${size}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      // Return empty notification history on error
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        total_pages: 0,
+        size: 10,
+      };
+    }
+
+    const data = await response.json();
+    return data as NotificationHistory;
+  } catch (error) {
+    console.error("Error fetching unread notifications:", error);
+    // Return empty notification history on error
+    return {
+      items: [],
+      total: 0,
+      page: 1,
+      total_pages: 0,
+      size: 10,
+    };
+  }
+}
+
+/**
+ * Marks a notification as seen
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function markNotificationAsSeen(
+  notificationId: number,
+): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/notifications/seen`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: notificationId,
+      }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error marking notification as seen:", error);
+    return false;
+  }
+}
+
+/**
+ * Clears all unread notifications
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function clearUnreadNotifications(): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/notifications/clear`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error clearing unread notifications:", error);
+    return false;
+  }
+}
+
+/**
+ * Clears all notification history
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function clearNotificationHistory(): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/notifications/history/clear`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error clearing notification history:", error);
+    return false;
   }
 }

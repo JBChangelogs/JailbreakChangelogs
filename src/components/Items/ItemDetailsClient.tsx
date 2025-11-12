@@ -84,7 +84,7 @@ import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import type { UserData } from "@/types/auth";
-import { Icon } from "@/components/UI/IconWrapper";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ItemDetailsClientProps {
   item: ItemDetails;

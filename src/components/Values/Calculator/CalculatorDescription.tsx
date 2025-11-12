@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Button } from "@/components/UI/button";
+import { Button } from "@/components/ui/button";
 
 const CalculatorDescription: React.FC = () => {
   return (

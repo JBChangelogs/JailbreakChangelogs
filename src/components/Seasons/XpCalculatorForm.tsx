@@ -1,5 +1,5 @@
-import ImageModal from "@/components/UI/ImageModal";
-import { Icon } from "@/components/UI/IconWrapper";
+import ImageModal from "@/components/ui/ImageModal";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Season } from "@/types/seasons";
 
 interface XpCalculatorFormProps {

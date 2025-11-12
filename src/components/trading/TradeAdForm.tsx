@@ -13,7 +13,7 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 import {
   safeLocalStorage,
   safeGetJSON,

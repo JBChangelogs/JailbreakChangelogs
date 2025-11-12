@@ -1,11 +1,11 @@
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import ExperimentalFeatureBanner from "@/components/UI/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/UI/ComingSoon";
-import ConnectedBotsPolling from "@/components/UI/ConnectedBotsPolling";
-import OfficialBotsSection from "@/components/UI/OfficialBotsSection";
-import StatsPolling, { StatsSkeleton } from "@/components/UI/StatsPolling";
+import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import ComingSoon from "@/components/ui/ComingSoon";
+import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
+import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
+import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";

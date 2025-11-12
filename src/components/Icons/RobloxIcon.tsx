@@ -1,4 +1,4 @@
-import { Icon } from "../UI/IconWrapper";
+import { Icon } from "../ui/IconWrapper";
 
 export const RobloxIcon = ({ className }: { className?: string }) => (
   <Icon

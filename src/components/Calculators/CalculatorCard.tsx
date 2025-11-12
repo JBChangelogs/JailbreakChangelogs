@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Icon } from "@/components/UI/IconWrapper";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface Calculator {
   id: string;
