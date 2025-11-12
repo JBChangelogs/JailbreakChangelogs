@@ -783,7 +783,7 @@ export default function ChangelogDetailsClient({
                             </div>
                           </div>
                         </div>
-                        <div className="text-tertiary-text mb-4 text-sm leading-relaxed font-medium">
+                        <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
                           <ReactMarkdown
                             components={{
                               strong: (props) => <b {...props} />,

@@ -91,6 +91,40 @@ export default function Header() {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const [notificationPage, setNotificationPage] = useState(1);
   const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
+  const [notificationTimeoutId, setNotificationTimeoutId] =
+    useState<NodeJS.Timeout | null>(null);
+
+  // Debounced notification fetching functions
+  const fetchUnreadWithDebounce = (page: number, limit: number) => {
+    if (notificationTimeoutId) {
+      clearTimeout(notificationTimeoutId);
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingNotifications(true);
+      const data = await fetchUnreadNotifications(page, limit);
+      setNotifications(data);
+      setIsLoadingNotifications(false);
+    }, 300);
+
+    setNotificationTimeoutId(timeoutId);
+  };
+
+  const fetchHistoryWithDebounce = (page: number, limit: number) => {
+    if (notificationTimeoutId) {
+      clearTimeout(notificationTimeoutId);
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingNotifications(true);
+      const data = await fetchNotificationHistory(page, limit);
+      setNotifications(data);
+      setIsLoadingNotifications(false);
+    }, 300);
+
+    setNotificationTimeoutId(timeoutId);
+  };
+
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("lg"), {
     noSsr: true,
@@ -591,16 +625,13 @@ export default function Header() {
                     {/* Notification icon */}
                     <Popover
                       open={notificationMenuOpen}
-                      onOpenChange={async (open) => {
+                      onOpenChange={(open) => {
                         setNotificationMenuOpen(open);
                         if (open && isAuthenticated) {
                           // Reset to unread tab when opening
                           setNotificationTab("unread");
                           setNotificationPage(1);
-                          setIsLoadingNotifications(true);
-                          const data = await fetchUnreadNotifications(1, 5);
-                          setNotifications(data);
-                          setIsLoadingNotifications(false);
+                          fetchUnreadWithDebounce(1, 5);
                         }
                       }}
                     >
@@ -716,16 +747,10 @@ export default function Header() {
                               <button
                                 role="tab"
                                 aria-selected={notificationTab === "unread"}
-                                onClick={async () => {
+                                onClick={() => {
                                   setNotificationTab("unread");
                                   setNotificationPage(1);
-                                  setIsLoadingNotifications(true);
-                                  const data = await fetchUnreadNotifications(
-                                    1,
-                                    5,
-                                  );
-                                  setNotifications(data);
-                                  setIsLoadingNotifications(false);
+                                  fetchUnreadWithDebounce(1, 5);
                                 }}
                                 className={`tab ${notificationTab === "unread" ? "tab-active" : ""}`}
                               >
@@ -734,16 +759,10 @@ export default function Header() {
                               <button
                                 role="tab"
                                 aria-selected={notificationTab === "history"}
-                                onClick={async () => {
+                                onClick={() => {
                                   setNotificationTab("history");
                                   setNotificationPage(1);
-                                  setIsLoadingNotifications(true);
-                                  const data = await fetchNotificationHistory(
-                                    1,
-                                    5,
-                                  );
-                                  setNotifications(data);
-                                  setIsLoadingNotifications(false);
+                                  fetchHistoryWithDebounce(1, 5);
                                 }}
                                 className={`tab ${notificationTab === "history" ? "tab-active" : ""}`}
                               >
@@ -889,16 +908,13 @@ export default function Header() {
                                   <Pagination
                                     count={notifications.total_pages}
                                     page={notificationPage}
-                                    onChange={async (_event, value) => {
+                                    onChange={(_event, value) => {
                                       setNotificationPage(value);
-                                      setIsLoadingNotifications(true);
-                                      const data =
-                                        await fetchNotificationHistory(
-                                          value,
-                                          5,
-                                        );
-                                      setNotifications(data);
-                                      setIsLoadingNotifications(false);
+                                      if (notificationTab === "history") {
+                                        fetchHistoryWithDebounce(value, 5);
+                                      } else {
+                                        fetchUnreadWithDebounce(value, 5);
+                                      }
                                     }}
                                     size="small"
                                     sx={{

@@ -316,11 +316,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   }, [changelogId, type, itemType, fetchUserData]);
 
-  // Refresh comments when changelogId changes (e.g., when switching between changelogs)
+  // Refresh comments when changelogId changes with simple debouncing
   useEffect(() => {
-    if (changelogId) {
+    if (!changelogId) return;
+
+    const timeoutId = setTimeout(() => {
       refreshCommentsFromServer();
-    }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [changelogId, refreshCommentsFromServer]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
