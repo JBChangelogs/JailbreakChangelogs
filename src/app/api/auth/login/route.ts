@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const isProd = process.env.NODE_ENV === "production";
     const response = NextResponse.json(user, { status: 200 });
     response.cookies.set("token", token, {
-      httpOnly: true,
+      httpOnly: false, // Allow client-side access for WebSocket connection
       secure: isProd,
       sameSite: "lax",
       path: "/",

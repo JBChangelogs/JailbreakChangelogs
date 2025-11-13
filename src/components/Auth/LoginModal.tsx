@@ -40,7 +40,8 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [joinDiscord, setJoinDiscord] = useState(false);
   const tokenProcessedRef = useRef(false);
-  const { login, showLoginModal, setShowLoginModal } = useAuthContext();
+  const { login, user, isAuthenticated, showLoginModal, setShowLoginModal } =
+    useAuthContext();
   const { resolvedTheme } = useTheme();
   const searchParams = useSearchParams();
   const campaign = searchParams.get("campaign");
@@ -463,12 +464,8 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 return;
                               }
 
-                              // Get current session to verify authentication
-                              const sessionResponse =
-                                await fetch("/api/session");
-                              const sessionData = await sessionResponse.json();
-
-                              if (!sessionData.user) {
+                              // Check if user is authenticated via centralized auth
+                              if (!isAuthenticated || !user) {
                                 toast.error(
                                   "Please log in with Discord first",
                                   {

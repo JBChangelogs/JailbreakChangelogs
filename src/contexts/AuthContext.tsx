@@ -11,7 +11,6 @@ import React, {
 } from "react";
 import { AuthState, AuthResponse, UserData } from "@/types/auth";
 import {
-  validateAuth,
   logout as authLogout,
   handleTokenAuth,
   trackLogoutSource,
@@ -19,6 +18,7 @@ import {
   showLogoutLoadingToast,
   dismissLogoutLoadingToast,
 } from "@/utils/auth";
+import { useSession, clientSession } from "@/utils/clientSession";
 // Removed hasValidToken import - using session API instead
 import {
   getStoredCampaign,
@@ -67,52 +67,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const isUserActiveRef = useRef(true);
 
+  // Use WebSocket session for real-time user data
+  const { user: wsUser } = useSession();
+
   const initializeAuth = useCallback(async () => {
     try {
       // Check if we have user data in localStorage first
       const userData = safeGetJSON("user", null);
       if (userData) {
-        // Validate the session to ensure it's still valid
-        const isValid = await validateAuth();
-        if (isValid) {
-          setAuthState({
-            isAuthenticated: true,
-            user: userData,
-            isLoading: false,
-            error: null,
-          });
+        // Trust localStorage data since WebSocket will validate and update it
+        setAuthState({
+          isAuthenticated: true,
+          user: userData,
+          isLoading: false,
+          error: null,
+        });
 
-          // Track user status in Clarity
-          trackUserStatus(true);
+        // Track user status in Clarity
+        trackUserStatus(true);
 
-          // Clear any stored campaign data
-          clearStoredCampaign();
-          return;
-        }
+        // Clear any stored campaign data
+        clearStoredCampaign();
+        return;
       }
 
-      // If no user data or validation failed, try to validate auth anyway
-      // This will check the HttpOnly cookie via the session API
-      const isValid = await validateAuth();
-      if (isValid) {
-        const freshUserData = safeGetJSON("user", null);
-        if (freshUserData) {
-          setAuthState({
-            isAuthenticated: true,
-            user: freshUserData,
-            isLoading: false,
-            error: null,
-          });
-
-          // Track user status in Clarity
-          trackUserStatus(true);
-
-          // Clear any stored campaign data
-          clearStoredCampaign();
-          return;
-        }
-      }
-
+      // No user data in localStorage - user is not authenticated
       setAuthState({
         isAuthenticated: false,
         user: null,
@@ -138,7 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: false,
         user: null,
         isLoading: false,
-        error: "Failed to initialize auth",
+        error: null,
       });
 
       // Track user status in Clarity
@@ -178,12 +157,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       authInterval = setInterval(() => {
         const now = new Date().toISOString();
         if (isUserActiveRef.current) {
-          console.log(`[${now}] Running auth validation...`);
-          validateAuth().catch((error) => {
-            console.error("Auth validation error:", error);
-          });
+          console.log(`[${now}] Sending keepalive ping via WebSocket...`);
+          // Just send a ping to keep connection alive, don't fetch user data
+          if (clientSession.isConnected()) {
+            clientSession.sendPing();
+          }
         } else {
-          console.log(`[${now}] Skipping auth validation - user is idle`);
+          console.log(`[${now}] Skipping keepalive ping - user is idle`);
         }
       }, 600000); // Check every 10 minutes when active (reduced frequency)
     };
@@ -254,6 +234,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
     };
   }, [initializeAuth]);
+
+  // Sync WebSocket user data with AuthContext
+  useEffect(() => {
+    if (wsUser) {
+      setAuthState({
+        isAuthenticated: true,
+        user: wsUser,
+        isLoading: false,
+        error: null,
+      });
+      trackUserStatus(true);
+    } else {
+      // Only set to unauthenticated if we're not loading
+      // This prevents clearing auth state during initial load
+      setAuthState((prev) =>
+        prev.isLoading
+          ? prev
+          : {
+              isAuthenticated: false,
+              user: null,
+              isLoading: false,
+              error: null,
+            },
+      );
+      trackUserStatus(false);
+    }
+  }, [wsUser]);
 
   // Separate effect for campaign detection
   useEffect(() => {

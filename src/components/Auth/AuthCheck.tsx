@@ -2,20 +2,19 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { validateAuth } from "@/utils/auth";
 
 /**
  * This component checks authentication status on route changes
  * It doesn't render anything, but ensures auth state is consistent
+ * Now uses WebSocket instead of HTTP for better performance
  */
 export default function AuthCheck() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Always validate auth on route changes
-    // The validateAuth function will check the session API
-    validateAuth().catch((error) => {
-      console.error("Auth validation error:", error);
+    // Dynamic import for client-side only execution
+    import("@/utils/clientSession").then(({ clientSession }) => {
+      clientSession.refreshUserData();
     });
   }, [pathname]);
 
