@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Maintenance from "@/theme/Maintenance";
 import Header from "./Header";
-import { canBypassMaintenance } from "@/utils/maintenance";
+import { canBypassMaintenance } from "@/utils/config/maintenance";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 interface MaintenanceBypassProps {

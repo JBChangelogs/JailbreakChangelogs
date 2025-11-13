@@ -9,11 +9,11 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
 });
 import { Icon } from "../ui/IconWrapper";
 import EditIcon from "@mui/icons-material/Edit";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { toast } from "react-hot-toast";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 
 interface AboutTabProps {
   user: {

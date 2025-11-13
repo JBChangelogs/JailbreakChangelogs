@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export default function NewsTicker() {
   // Initialize state based on localStorage

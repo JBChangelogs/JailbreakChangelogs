@@ -5,7 +5,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { useConsent } from "@/contexts/ConsentContext";
-import type { ConsentConfig } from "@/utils/googleConsentMode";
+import type { ConsentConfig } from "@/utils/external/googleConsentMode";
 
 interface CookieSettingsModalProps {
   open: boolean;

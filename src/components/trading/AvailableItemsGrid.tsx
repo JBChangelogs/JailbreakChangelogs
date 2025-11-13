@@ -18,11 +18,15 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { sortByCashValue, sortByDemand, formatFullValue } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+} from "@/utils/media/images";
+import {
+  sortByCashValue,
+  sortByDemand,
+  formatFullValue,
+} from "@/utils/data/values";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import { CategoryIconBadge, getCategoryColor } from "@/utils/ui/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
 import Image from "next/image";
 import { FilterSort, ValueSort } from "@/types";

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Icon } from "../../components/ui/IconWrapper";
-import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
+import { generateShuffledBackgroundImages } from "@/utils/helpers/fisherYatesShuffle";
 
 export default function BotPage() {
   const [backgroundImages, setBackgroundImages] = useState<string[]>([]);

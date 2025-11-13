@@ -5,7 +5,7 @@ import {
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
   fetchUserByRobloxId,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
 

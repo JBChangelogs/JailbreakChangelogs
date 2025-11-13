@@ -2,7 +2,10 @@ import { Box, Typography, Divider, Chip, Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+import {
+  formatRelativeDate,
+  formatCustomDate,
+} from "@/utils/helpers/timestamp";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,10 +13,10 @@ import {
   isVideoItem,
   handleImageError,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/media/images";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 import { ItemDetails } from "@/types";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 
 interface CommentProps {
   id: number;

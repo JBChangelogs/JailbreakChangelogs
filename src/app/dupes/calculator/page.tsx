@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import DupeTable from "@/components/Dupes/DupeTable";
-import { fetchItems, fetchDupes } from "@/utils/api";
-import { formatTimestamp } from "@/utils/timestamp";
+import { fetchItems, fetchDupes } from "@/utils/api/api";
+import { formatTimestamp } from "@/utils/helpers/timestamp";
 import Loading from "./loading";
 import { Item, DupeResult } from "@/types";
 

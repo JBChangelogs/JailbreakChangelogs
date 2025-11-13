@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { BASE_API_URL, Changelog } from "@/utils/api";
+import { BASE_API_URL, Changelog } from "@/utils/api/api";
 
 const BASE_URL = "https://jailbreakchangelogs.xyz";
 const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";

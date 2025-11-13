@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import TradingDescription from "@/components/trading/TradingDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
-import { fetchTradeAds, fetchUsersBatch, fetchItems } from "@/utils/api";
+import { fetchTradeAds, fetchUsersBatch, fetchItems } from "@/utils/api/api";
 import type { TradeAd } from "@/types/trading";
 import Loading from "./loading";
 

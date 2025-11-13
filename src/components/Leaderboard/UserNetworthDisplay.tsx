@@ -8,8 +8,8 @@ import {
   fetchUserNetworth,
   UserNetworthData,
   fetchRobloxAvatars,
-} from "@/utils/api";
-import { formatFullDate } from "@/utils/timestamp";
+} from "@/utils/api/api";
+import { formatFullDate } from "@/utils/helpers/timestamp";
 import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
 
 export default function UserNetworthDisplay() {

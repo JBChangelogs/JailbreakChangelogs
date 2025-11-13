@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { fetchSeasonsList, Season, Reward } from "@/utils/api";
+import { fetchSeasonsList, Season, Reward } from "@/utils/api/api";
 
 const BASE_URL = "https://jailbreakchangelogs.xyz";
 const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";

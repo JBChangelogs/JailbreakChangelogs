@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { INVENTORY_API_URL } from "@/utils/api";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
-import { fetchItem } from "@/utils/api";
-import { getItemImagePath } from "@/utils/images";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
-import { formatFullValue, formatPrice } from "@/utils/values";
+import { fetchItem } from "@/utils/api/api";
+import { getItemImagePath } from "@/utils/media/images";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
+import { formatFullValue, formatPrice } from "@/utils/data/values";
 import { WithContext, FAQPage, BreadcrumbList, ListItem } from "schema-dts";
 import type { ItemDetails } from "@/types/index";
 

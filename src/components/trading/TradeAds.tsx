@@ -9,7 +9,7 @@ import { TradeAdTabs } from "./TradeAdTabs";
 import { Pagination, Button } from "@mui/material";
 import { Masonry } from "@mui/lab";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
-import { deleteTradeAd } from "@/utils/trading";
+import { deleteTradeAd } from "@/utils/api/trading";
 import toast from "react-hot-toast";
 import { TradeAdForm } from "./TradeAdForm";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";

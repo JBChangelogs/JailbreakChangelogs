@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { Inter } from "next/font/google";
 

@@ -1,16 +1,16 @@
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUserScansLeaderboard, UserScan } from "@/utils/api";
+import { fetchUserScansLeaderboard, UserScan } from "@/utils/api/api";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
-import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
+import { checkInventoryMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
 

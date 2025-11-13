@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { fetchItemHistory } from "@/utils/api";
+import { fetchItemHistory } from "@/utils/api/api";
 import { Skeleton } from "@mui/material";
 import toast from "react-hot-toast";
 import { useTheme } from "@/contexts/ThemeContext";

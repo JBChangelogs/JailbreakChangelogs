@@ -3,8 +3,8 @@ import Link from "next/link";
 import { UserData } from "@/types/auth";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
-import { formatRelativeDate } from "@/utils/timestamp";
-import { UserAvatar } from "@/utils/avatar";
+import { formatRelativeDate } from "@/utils/helpers/timestamp";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 
 interface UserDetailsTooltipProps {

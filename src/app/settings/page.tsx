@@ -24,7 +24,7 @@ import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-import { safeSetJSON } from "@/utils/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();

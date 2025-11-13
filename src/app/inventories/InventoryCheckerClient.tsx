@@ -7,7 +7,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
-import { ENABLE_WS_SCAN } from "@/utils/api";
+import { ENABLE_WS_SCAN } from "@/utils/api/api";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -30,9 +30,9 @@ import {
   dismissScanLoadingToast,
   showScanSuccessToast,
   showScanErrorToast,
-} from "@/utils/scanToasts";
+} from "@/utils/notifications/scanToasts";
 import dynamic from "next/dynamic";
-import { CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 

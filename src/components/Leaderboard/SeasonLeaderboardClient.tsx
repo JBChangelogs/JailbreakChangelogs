@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
-import { DefaultAvatar } from "@/utils/avatar";
-import { fetchRobloxAvatars } from "@/utils/api";
-import { formatMessageDate } from "@/utils/timestamp";
+import { DefaultAvatar } from "@/utils/ui/avatar";
+import { fetchRobloxAvatars } from "@/utils/api/api";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { Season } from "@/types/seasons";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
 

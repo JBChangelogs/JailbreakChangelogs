@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import {
   getYearStatistics,
   isCurrentYear,
   getCurrentDateString,
-} from "@/utils/changelogStats";
+} from "@/utils/data/changelogStats";
 
 interface ChangelogHeaderProps {
   changelogs?: Changelog[];

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { pollBotsData } from "@/app/api/bots/actions";
-import { type ConnectedBotsResponse, type QueueInfo } from "@/utils/api";
+import { type ConnectedBotsResponse, type QueueInfo } from "@/utils/api/api";
 
 interface BotsPollingData {
   botsData: ConnectedBotsResponse | null;

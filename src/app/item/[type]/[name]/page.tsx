@@ -6,7 +6,7 @@ import {
   fetchUsersBatch,
   fetchComments,
   type CommentData,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import { notFound } from "next/navigation";
 import type { Change } from "@/components/Items/ItemChangelogs";

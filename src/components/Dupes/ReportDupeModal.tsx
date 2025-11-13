@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { getItemImagePath, handleImageError } from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getItemImagePath, handleImageError } from "@/utils/media/images";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 import toast from "react-hot-toast";
 
 interface ReportDupeModalProps {

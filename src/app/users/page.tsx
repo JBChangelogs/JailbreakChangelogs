@@ -1,6 +1,6 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUsersForList } from "@/utils/api";
+import { fetchUsersForList } from "@/utils/api/api";
 import UserSearchVirtual from "@/components/Users/UserSearchVirtual";
 
 export const dynamic = "force-dynamic";

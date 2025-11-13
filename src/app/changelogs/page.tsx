@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { fetchLatestChangelog } from "@/utils/api";
+import { fetchLatestChangelog } from "@/utils/api/api";
 
 export const revalidate = 60;
 

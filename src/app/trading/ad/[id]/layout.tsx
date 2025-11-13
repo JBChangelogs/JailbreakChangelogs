@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
 
 interface Props {
   params: Promise<{

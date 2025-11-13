@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { ENABLE_WS_SCAN } from "@/utils/api";
+import { ENABLE_WS_SCAN } from "@/utils/api/api";
 
 interface ScanOptionSectionProps {
   variant?: "main" | "embedded";

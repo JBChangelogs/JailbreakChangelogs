@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";

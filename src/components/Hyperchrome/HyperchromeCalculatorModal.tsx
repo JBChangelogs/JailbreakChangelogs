@@ -7,7 +7,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
-} from "@/utils/hyperchrome";
+} from "@/utils/data/hyperchrome";
 
 interface HyperchromeCalculatorModalProps {
   open: boolean;

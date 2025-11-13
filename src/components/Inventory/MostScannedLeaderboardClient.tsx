@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 import CopyButton from "@/app/inventories/CopyButton";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 
 interface UserScan {
   user_id: string;

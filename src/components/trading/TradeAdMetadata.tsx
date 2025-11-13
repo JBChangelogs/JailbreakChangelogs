@@ -1,7 +1,7 @@
 import React from "react";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import dynamic from "next/dynamic";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,

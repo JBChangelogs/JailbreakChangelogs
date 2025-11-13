@@ -1,19 +1,19 @@
 import { useState, useCallback, use, useMemo } from "react";
 
 import { ItemDetails } from "@/types";
-import { demandOrder } from "@/utils/values";
+import { demandOrder } from "@/utils/data/values";
 import Image from "next/image";
 import {
   handleImageError,
   getItemImagePath,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/media/images";
 import Link from "next/link";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import { formatFullValue } from "@/utils/values";
-import { getCategoryColor } from "@/utils/categoryIcons";
-import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
+import { formatFullValue } from "@/utils/data/values";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
+import { getTrendColor, getDemandColor } from "@/utils/ui/badgeColors";
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;

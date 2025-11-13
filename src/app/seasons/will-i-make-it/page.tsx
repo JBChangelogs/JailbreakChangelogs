@@ -1,7 +1,7 @@
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
-import { fetchLatestSeason } from "@/utils/api";
+import { fetchLatestSeason } from "@/utils/api/api";
 import XpCalculator from "@/components/Seasons/XpCalculator";
 import XpImportantDates from "@/components/Seasons/XpImportantDates";
 import XpLevelRequirements from "@/components/Seasons/XpLevelRequirements";

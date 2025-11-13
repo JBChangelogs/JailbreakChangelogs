@@ -4,11 +4,11 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
-import { sortAndFilterItems } from "@/utils/values";
+import { sortAndFilterItems } from "@/utils/data/values";
 import toast from "react-hot-toast";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
+import { fetchUserFavorites, fetchRandomItem } from "@/utils/api/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAdReloader } from "@/hooks/useAdReloader";
@@ -21,7 +21,7 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;

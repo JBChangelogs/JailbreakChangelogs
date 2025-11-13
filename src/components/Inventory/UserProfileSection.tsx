@@ -7,20 +7,20 @@ import dynamic from "next/dynamic";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
-import { ENABLE_WS_SCAN } from "@/utils/api";
+import { ENABLE_WS_SCAN } from "@/utils/api/api";
 import {
   showScanLoadingToast,
   updateScanLoadingToast,
   dismissScanLoadingToast,
   showScanSuccessToast,
   showScanErrorToast,
-} from "@/utils/scanToasts";
+} from "@/utils/notifications/scanToasts";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 

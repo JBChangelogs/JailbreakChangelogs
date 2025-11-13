@@ -3,8 +3,8 @@ import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonContractsClient from "@/components/Seasons/SeasonContractsClient";
 import WeeklyContractsCountdown from "@/components/Seasons/WeeklyContractsCountdown";
-import { fetchLatestSeason } from "@/utils/api";
-import { fetchSeasonContracts } from "@/utils/api";
+import { fetchLatestSeason } from "@/utils/api/api";
+import { fetchSeasonContracts } from "@/utils/api/api";
 import { Icon } from "@iconify/react";
 
 export const revalidate = 300; // Revalidate every 5 minutes

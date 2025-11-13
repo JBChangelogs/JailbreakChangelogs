@@ -3,9 +3,9 @@ import InventoryCheckerClient from "./InventoryCheckerClient";
 import { InventoryData } from "./types";
 import { Season } from "@/types/seasons";
 import { UserDataService } from "@/services/userDataService";
-import { fetchUserByRobloxId } from "@/utils/api";
+import { fetchUserByRobloxId } from "@/utils/api/api";
 import { logError } from "@/services/logger";
-import { CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { Item } from "@/types";
 

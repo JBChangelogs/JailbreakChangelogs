@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { UserData, UserFlag } from "@/types/auth";
-import { safeGetJSON } from "@/utils/safeStorage";
+import { safeGetJSON } from "@/utils/storage/safeStorage";
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;

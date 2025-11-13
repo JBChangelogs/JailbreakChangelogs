@@ -5,7 +5,7 @@ import {
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
   fetchItems,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import type { RobloxUser } from "@/types";
 import DupeFinderClient from "./DupeFinderClient";
 import DupeUserDataStreamer from "./DupeUserDataStreamer";

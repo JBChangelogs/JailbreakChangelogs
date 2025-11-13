@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import Image from "next/image";
 import UserAvatar from "@/components/Users/UserAvatarClient";
-import { Supporter } from "@/utils/api";
+import { Supporter } from "@/utils/api/api";
 import SupporterCarousel from "./SupporterCarousel";
 
 interface SupportersSectionProps {

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export default function DupeConfetti() {
   useEffect(() => {

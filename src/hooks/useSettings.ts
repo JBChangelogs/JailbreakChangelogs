@@ -2,7 +2,7 @@ import { useState } from "react";
 import { UserData, UserSettings } from "@/types/auth";
 import { updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
-import { safeSetJSON } from "@/utils/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 
 export const useSettings = (
   userData: UserData | null,

@@ -13,10 +13,10 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/media/images";
+import { getCategoryIcon, getCategoryColor } from "@/utils/ui/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { formatFullValue } from "@/utils/values";
+import { formatFullValue } from "@/utils/data/values";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 
 export async function GET(request: NextRequest) {
   try {

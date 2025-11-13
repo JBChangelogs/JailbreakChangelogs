@@ -11,12 +11,12 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api/api";
 import {
   refreshComments,
   fetchUsersBatchAction,
 } from "@/app/api/comments/actions";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import {
   PencilIcon,
   TrashIcon,

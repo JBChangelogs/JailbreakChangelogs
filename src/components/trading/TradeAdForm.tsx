@@ -18,7 +18,7 @@ import {
   safeLocalStorage,
   safeGetJSON,
   safeSetJSON,
-} from "@/utils/safeStorage";
+} from "@/utils/storage/safeStorage";
 
 interface TradeAdFormProps {
   onSuccess?: () => void;

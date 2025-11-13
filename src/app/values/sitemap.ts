@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { BASE_API_URL } from "@/utils/api";
+import { BASE_API_URL } from "@/utils/api/api";
 import {
   getItemImagePath,
   isVideoItem,
   getVideoThumbnailPath,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/media/images";
 
 const BASE_URL = "https://jailbreakchangelogs.xyz";
 

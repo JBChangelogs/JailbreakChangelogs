@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api";
+import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api/api";
 
 /**
  * WebSocket hook for managing inventory scan operations

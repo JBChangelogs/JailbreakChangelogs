@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
-import { getEffectiveCashValue } from "@/utils/values";
+import { getEffectiveCashValue } from "@/utils/data/values";
 import React from "react";
 
 interface ValuesItemsGridProps {

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
-import { parseCurrencyValue } from "@/utils/currency";
+import { parseCurrencyValue } from "@/utils/helpers/currency";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import DisplayAd from "@/components/Ads/DisplayAd";
@@ -17,7 +17,7 @@ import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
-import { mergeDupeFinderArrayWithMetadata } from "@/utils/inventoryMerge";
+import { mergeDupeFinderArrayWithMetadata } from "@/utils/data/inventoryMerge";
 
 // Move pure function outside component to avoid dependency issues
 const getDupedValueForItem = (

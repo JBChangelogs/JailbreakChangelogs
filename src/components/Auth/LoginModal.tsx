@@ -5,15 +5,15 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, Tab, Box, Dialog, DialogContent } from "@mui/material";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { storeCampaign } from "@/utils/campaign";
+import { storeCampaign } from "@/utils/notifications/campaign";
 import { useSearchParams } from "next/navigation";
 import {
   showProcessingAuthToast,
   dismissProcessingAuthToast,
-} from "@/utils/auth";
+} from "@/utils/auth/auth";
 
 interface TabPanelProps {
   children?: React.ReactNode;

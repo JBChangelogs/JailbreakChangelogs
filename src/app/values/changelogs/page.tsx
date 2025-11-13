@@ -6,9 +6,9 @@ import React from "react";
 import { ThemeProvider, Skeleton } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import Link from "next/link";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { useVirtualizer } from "@tanstack/react-virtual";
 

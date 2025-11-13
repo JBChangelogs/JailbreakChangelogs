@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getOGFinderMaintenanceMetadata } from "@/utils/maintenance";
+import { getOGFinderMaintenanceMetadata } from "@/utils/config/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getOGFinderMaintenanceMetadata();

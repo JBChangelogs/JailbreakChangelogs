@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
 import { CalculatorForm } from "@/components/Values/Calculator/CalculatorForm";
-import { fetchItems } from "@/utils/api";
+import { fetchItems } from "@/utils/api/api";
 import Loading from "./loading";
 
 export const revalidate = 120; // Revalidate every 2 minutes

@@ -4,12 +4,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import {
   getYearStatistics,
   isCurrentYear,
   getCurrentDateString,
-} from "@/utils/changelogStats";
+} from "@/utils/data/changelogStats";
 
 interface TimelineHeaderProps {
   changelogs: Changelog[];

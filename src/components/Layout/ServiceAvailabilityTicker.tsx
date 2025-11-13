@@ -1,6 +1,6 @@
 "use client";
 
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 
 export default function ServiceAvailabilityTicker() {
   // Check if service availability ticker should be shown using feature flags

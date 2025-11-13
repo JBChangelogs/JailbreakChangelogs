@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getMoneyLeaderboardMaintenanceMetadata } from "@/utils/maintenance";
+import { getMoneyLeaderboardMaintenanceMetadata } from "@/utils/config/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getMoneyLeaderboardMaintenanceMetadata();

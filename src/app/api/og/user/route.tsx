@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
-import { fetchUserByIdForOG } from "@/utils/api";
+import { fetchUserByIdForOG } from "@/utils/api/api";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { UserData } from "@/types/auth";

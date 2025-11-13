@@ -6,7 +6,7 @@ import { darkTheme } from "@/theme/darkTheme";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import TimelineHeader from "./TimelineHeader";
 import TimelineContent from "./TimelineContent";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 
 interface TimelineClientProps {
   changelogs: Changelog[];

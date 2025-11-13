@@ -1,8 +1,12 @@
 import React from "react";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { formatFullValue, formatPrice, getValueChange } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import {
+  formatFullValue,
+  formatPrice,
+  getValueChange,
+} from "@/utils/data/values";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 import { RecentChange } from "@/types";
 
 interface ItemValuesProps {

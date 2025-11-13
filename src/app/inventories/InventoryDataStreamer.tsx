@@ -5,8 +5,8 @@ import {
   fetchLatestSeason,
   fetchComments,
   fetchItems,
-} from "@/utils/api";
-import { CommentData } from "@/utils/api";
+} from "@/utils/api/api";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import UserDataStreamer from "./UserDataStreamer";

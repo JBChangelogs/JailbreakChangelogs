@@ -1,4 +1,4 @@
-import { fetchUserMoneyRank } from "@/utils/api";
+import { fetchUserMoneyRank } from "@/utils/api/api";
 
 export async function GET(request: Request) {
   try {

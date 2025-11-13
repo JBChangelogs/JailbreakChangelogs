@@ -29,15 +29,15 @@ import {
   showLogoutToast,
   showLogoutLoadingToast,
   dismissLogoutLoadingToast,
-} from "@/utils/auth";
+} from "@/utils/auth/auth";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
-import { useEscapeLogin } from "@/utils/escapeLogin";
-import { UserAvatar } from "@/utils/avatar";
+import { useEscapeLogin } from "@/utils/auth/escapeLogin";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 // import { PUBLIC_API_URL } from '@/utils/api';
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -71,8 +71,8 @@ import {
   clearUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
-} from "@/utils/api";
-import { formatCompactDateTime } from "@/utils/timestamp";
+} from "@/utils/api/api";
+import { formatCompactDateTime } from "@/utils/helpers/timestamp";
 
 export default function Header() {
   const pathname = usePathname();

@@ -22,12 +22,12 @@ import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
-} from "@/utils/maintenance";
-import { getWebsiteVersion, getGitHubUrl } from "@/utils/version";
+} from "@/utils/config/maintenance";
+import { getWebsiteVersion, getGitHubUrl } from "@/utils/config/version";
 import { Suspense } from "react";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
-import { getDefaultConsent } from "@/utils/serverConsent";
+import { getDefaultConsent } from "@/utils/storage/serverConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {

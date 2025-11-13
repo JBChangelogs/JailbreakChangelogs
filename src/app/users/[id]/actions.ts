@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchChangelog, fetchItemById, BASE_API_URL } from "@/utils/api";
+import { fetchChangelog, fetchItemById, BASE_API_URL } from "@/utils/api/api";
 
 async function fetchSeason(id: string) {
   try {

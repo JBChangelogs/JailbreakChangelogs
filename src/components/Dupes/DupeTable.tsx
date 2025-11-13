@@ -12,7 +12,7 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import { Icon } from "../ui/IconWrapper";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 import { Tooltip } from "@mui/material";
 import { TradeAdTooltip } from "../trading/TradeAdTooltip";
 import Link from "next/link";
@@ -22,7 +22,7 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/media/images";
 import type { Item, DupeResult } from "@/types";
 
 interface DupeTableProps {

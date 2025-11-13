@@ -7,7 +7,7 @@ import {
   denyAllConsent,
   storeConsent,
   ConsentConfig,
-} from "@/utils/googleConsentMode";
+} from "@/utils/external/googleConsentMode";
 
 interface ConsentContextType {
   consentGiven: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { formatRelativeDate } from "@/utils/timestamp";
+import { formatRelativeDate } from "@/utils/helpers/timestamp";
 
 /**
  * React hook for real-time relative timestamp updates

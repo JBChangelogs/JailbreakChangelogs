@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatFullDate } from "@/utils/timestamp";
+import { formatFullDate } from "@/utils/helpers/timestamp";
 
 interface VersionInfoProps {
   version: string;

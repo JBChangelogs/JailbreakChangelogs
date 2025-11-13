@@ -7,7 +7,7 @@ import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 const Slider = dynamic(() => import("@mui/material/Slider"), {
   ssr: false,

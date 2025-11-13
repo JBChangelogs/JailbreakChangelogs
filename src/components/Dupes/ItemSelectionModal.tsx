@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 
 interface Item {
   id: number;

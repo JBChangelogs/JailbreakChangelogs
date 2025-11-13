@@ -5,9 +5,9 @@ import { Dialog, DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { fetchRobloxAvatars, fetchRobloxUsersBatch } from "@/utils/api";
+import { fetchRobloxAvatars, fetchRobloxUsersBatch } from "@/utils/api/api";
 
 interface TradeHistoryEntry {
   UserId: number;

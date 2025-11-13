@@ -1,6 +1,6 @@
 import React from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { getBadgeColor, highlightText } from "@/utils/changelogs";
+import { getBadgeColor, highlightText } from "@/utils/api/changelogs";
 
 interface SearchResult {
   id: number;

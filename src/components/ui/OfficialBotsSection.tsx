@@ -4,7 +4,7 @@ import { useOfficialBotsQuery } from "@/hooks/useOfficialBotsQuery";
 import { Icon } from "./IconWrapper";
 import Image from "next/image";
 import CopyButton from "@/app/inventories/CopyButton";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 
 // Skeleton loader for official bots section
 function OfficialBotsSkeleton() {

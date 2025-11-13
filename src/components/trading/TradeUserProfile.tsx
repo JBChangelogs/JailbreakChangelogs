@@ -3,7 +3,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { TradeUserTooltip } from "./TradeUserTooltip";
 import RobloxTradeUser from "./RobloxTradeUser";
 

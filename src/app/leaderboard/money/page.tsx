@@ -1,7 +1,7 @@
-import { fetchMoneyLeaderboard } from "@/utils/api";
+import { fetchMoneyLeaderboard } from "@/utils/api/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import MoneyLeaderboardClient from "@/components/Leaderboard/MoneyLeaderboardClient";
-import { checkMoneyLeaderboardMaintenanceMode } from "@/utils/maintenance";
+import { checkMoneyLeaderboardMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 // Cache this page for 30 minutes

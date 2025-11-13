@@ -9,7 +9,7 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
-import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import { mergeInventoryArrayWithMetadata } from "@/utils/data/inventoryMerge";
 
 interface DuplicatesTabProps {
   initialData: { data: InventoryItem[]; user_id: string };

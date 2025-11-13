@@ -7,17 +7,17 @@ import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme } from "@/theme/darkTheme";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import {
   getItemImagePath,
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
-import { formatMessageDate } from "@/utils/timestamp";
-import { formatFullValue } from "@/utils/values";
+} from "@/utils/media/images";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
+import { formatFullValue } from "@/utils/data/values";
 import ReactMarkdown from "react-markdown";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import DisplayAd from "@/components/Ads/DisplayAd";

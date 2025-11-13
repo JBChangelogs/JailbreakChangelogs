@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, CircularProgress, Button } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { UserAvatar } from "@/utils/avatar";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { UserSettings } from "@/types/auth";

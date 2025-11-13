@@ -3,7 +3,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
-import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
+import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
 import { UserData } from "@/types/auth";
 
 interface RobloxConnectionProps {

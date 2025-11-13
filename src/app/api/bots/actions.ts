@@ -5,7 +5,7 @@ import {
   fetchQueueInfo,
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
-} from "@/utils/api";
+} from "@/utils/api/api";
 
 export async function pollBotsData() {
   try {

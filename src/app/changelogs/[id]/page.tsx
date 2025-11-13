@@ -1,4 +1,4 @@
-import { fetchChangelogList, fetchComments } from "@/utils/api";
+import { fetchChangelogList, fetchComments } from "@/utils/api/api";
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
 import { notFound } from "next/navigation";
 

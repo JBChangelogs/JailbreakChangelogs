@@ -1,12 +1,9 @@
 import toast from "react-hot-toast";
-import { AuthResponse } from "../types/auth";
-import { safeLocalStorage } from "./safeStorage";
+import { AuthResponse } from "../../types/auth";
+import { safeLocalStorage } from "../storage/safeStorage";
 import { clientSession } from "./clientSession";
-// Pure WebSocket-based authentication - no HTTP API calls needed
 
 let lastLogoutSource: string = "Unknown";
-
-// Track active toasts to prevent duplicates
 let activeWelcomeToast: string | null = null;
 let activeLogoutToast: string | null = null;
 let activeLoginLoadingToast: string | null = null;

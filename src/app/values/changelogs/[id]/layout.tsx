@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
 
 export async function generateMetadata({
   params,

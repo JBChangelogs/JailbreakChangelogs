@@ -9,12 +9,12 @@ import ImageGallery from "@/components/Seasons/ImageGallery";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import { formatProfileDate } from "@/utils/timestamp";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useAdReloader } from "@/hooks/useAdReloader";
-import { Season, CommentData } from "@/utils/api";
+import { Season, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });

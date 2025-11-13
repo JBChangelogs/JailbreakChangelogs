@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 
 interface InventoryBreakdownModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 import type { Viewport, Metadata } from "next";
-import { fetchUserByIdForMetadata } from "@/utils/api";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
+import { fetchUserByIdForMetadata } from "@/utils/api/api";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
 
 function formatAccentColor(color: number | string | null | undefined): string {
   if (!color || color === "None" || color === "0") return "#2462CD";

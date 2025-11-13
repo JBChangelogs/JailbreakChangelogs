@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeProvider } from "@mui/material";
-import { extractContentInfo, getContentPreview } from "@/utils/changelogs";
+import { extractContentInfo, getContentPreview } from "@/utils/api/changelogs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAdReloader } from "@/hooks/useAdReloader";
 import { darkTheme } from "@/theme/darkTheme";
 import { Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Changelog, CommentData } from "@/utils/api";
+import { Changelog, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 
 // Dynamic imports for heavy components

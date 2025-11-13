@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { TradeItem } from "@/types/trading";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { getCategoryColor } from "@/utils/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 
 interface TradeItemsWithValuesProps {
   offering: TradeItem[];

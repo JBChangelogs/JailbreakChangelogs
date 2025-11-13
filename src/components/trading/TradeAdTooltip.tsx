@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
-import { formatFullValue } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { CategoryIconBadge, getCategoryColor } from "@/utils/ui/categoryIcons";
+import { formatFullValue } from "@/utils/data/values";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 
 interface TradeAdTooltipProps {
   item: TradeItem;

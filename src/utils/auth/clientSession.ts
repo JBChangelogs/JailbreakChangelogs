@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import type { UserData } from "@/types/auth";
-import { safeLocalStorage, safeSetJSON } from "./safeStorage";
-import { wsKeepalive } from "./wsKeepalive";
+import { safeLocalStorage, safeSetJSON } from "../storage/safeStorage";
+import { idleDetection } from "./idleDetection";
+import { wsKeepalive } from "../auth/wsKeepalive";
 
 // WebSocket message types
 interface ConnectionIdMessage {
@@ -93,6 +94,7 @@ class ClientSessionManager {
     // Load user from localStorage first
     this.loadUserFromStorage();
     this.connect();
+    this.setupIdleDetection();
   }
 
   private getToken(): string | null {
@@ -202,6 +204,27 @@ class ClientSessionManager {
     // Start the ping cycle after initial connection is established
     console.log("[SESSION] Starting ping cycle");
     wsKeepalive.startInitialPing();
+  }
+
+  private setupIdleDetection(): void {
+    // Set idle time to 5 minutes
+    idleDetection.setIdleTime(5 * 60 * 1000);
+
+    // When user goes idle, disconnect WebSocket to save resources
+    idleDetection.onIdle(() => {
+      if (this.isConnected()) {
+        console.log("[SESSION] User went idle - disconnecting WebSocket");
+        this.disconnect();
+      }
+    });
+
+    // When user becomes active, reconnect WebSocket
+    idleDetection.onActive(() => {
+      if (!this.isConnected() && this.getToken()) {
+        console.log("[SESSION] User became active - reconnecting WebSocket");
+        this.connect();
+      }
+    });
   }
 
   public isConnected(): boolean {

@@ -9,7 +9,7 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/media/images";
 import { TradeAdTooltip } from "./TradeAdTooltip";
 
 interface ItemGridProps {

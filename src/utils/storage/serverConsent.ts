@@ -1,8 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import type { ConsentConfig } from "./googleConsentMode";
-import { getDefaultConsentByRegion } from "./geolocation";
+import type { ConsentConfig } from "../external/googleConsentMode";
+import { getDefaultConsentByRegion } from "../external/geolocation";
 
 const CONSENT_COOKIE_NAME = "gcm-consent";
 const CONSENT_POLICY_VERSION = 2;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api";
+import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api/api";
 
 export function useOfficialBotsQuery() {
   return useQuery({

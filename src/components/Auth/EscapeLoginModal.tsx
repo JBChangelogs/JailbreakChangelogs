@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { useEscapeLogin } from "@/utils/escapeLogin";
+import { useEscapeLogin } from "@/utils/auth/escapeLogin";
 
 export default function EscapeLoginModal() {
   const { showModal, setShowModal, handleTokenSubmit } = useEscapeLogin();

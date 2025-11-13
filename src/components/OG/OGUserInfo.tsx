@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });

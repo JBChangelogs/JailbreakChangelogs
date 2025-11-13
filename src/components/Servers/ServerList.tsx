@@ -1,7 +1,7 @@
 import React from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { Icon } from "@iconify/react";
-import { formatProfileDate } from "@/utils/timestamp";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -15,7 +15,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import DOMPurify from "dompurify";
 
 const BADGE_BASE_URL =

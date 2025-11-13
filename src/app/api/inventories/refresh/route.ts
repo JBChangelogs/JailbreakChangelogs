@@ -1,4 +1,4 @@
-import { fetchInventoryDataRefresh } from "@/utils/api";
+import { fetchInventoryDataRefresh } from "@/utils/api/api";
 
 export async function POST(request: Request) {
   try {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { BASE_API_URL } from "@/utils/api";
+import { BASE_API_URL } from "@/utils/api/api";
 
 export async function POST(request: Request) {
   const { comment_id, reason } = (await request.json()) as {

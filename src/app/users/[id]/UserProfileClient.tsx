@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Error from "next/error";
 import { notFound } from "next/navigation";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button, Skeleton } from "@mui/material";
 import { Icon } from "../../../components/ui/IconWrapper";
@@ -13,7 +13,7 @@ import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
 import { toast } from "react-hot-toast";
 import dynamic from "next/dynamic";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
@@ -29,7 +29,7 @@ const UserBadges = dynamic(
     loading: () => <div className="h-6 w-6" />, // Placeholder with same size as lg badge
   },
 );
-import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
+import { formatShortDate, formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";

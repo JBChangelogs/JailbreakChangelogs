@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchItemsChangelog, fetchUsersBatch } from "@/utils/api";
+import { fetchItemsChangelog, fetchUsersBatch } from "@/utils/api/api";
 import ChangelogDetailsClient from "@/components/Values/ChangelogDetailsClient";
 import Loading from "./loading";
 

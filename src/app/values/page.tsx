@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchItems, fetchLastUpdated } from "@/utils/api";
+import { fetchItems, fetchLastUpdated } from "@/utils/api/api";
 import ValuesClient from "@/components/Values/ValuesClient";
 import Loading from "./loading";
 

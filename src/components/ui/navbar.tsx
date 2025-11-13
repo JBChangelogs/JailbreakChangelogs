@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 import dynamic from "next/dynamic";
 import { Tooltip, Pagination } from "@mui/material";
 import {
@@ -19,8 +19,8 @@ import {
   clearUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
-} from "@/utils/api";
-import { formatCompactDateTime } from "@/utils/timestamp";
+} from "@/utils/api/api";
+import { formatCompactDateTime } from "@/utils/helpers/timestamp";
 import toast from "react-hot-toast";
 
 const AnimatedThemeToggler = dynamic(

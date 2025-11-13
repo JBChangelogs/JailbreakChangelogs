@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchRobloxUsersBatch, fetchRobloxAvatars } from "@/utils/api";
+import { fetchRobloxUsersBatch, fetchRobloxAvatars } from "@/utils/api/api";
 
 export async function fetchMissingRobloxData(userIds: string[]) {
   try {

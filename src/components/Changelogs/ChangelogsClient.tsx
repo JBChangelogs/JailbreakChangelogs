@@ -5,7 +5,7 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import Image from "next/image";
 
 interface ChangelogsClientProps {

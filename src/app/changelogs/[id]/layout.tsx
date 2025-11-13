@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { fetchChangelog } from "@/utils/api";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
+import { fetchChangelog } from "@/utils/api/api";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
 
 export async function generateMetadata({
   params,

@@ -14,18 +14,18 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
 import Image from "next/image";
-import { getItemImagePath, handleImageError } from "@/utils/images";
+import { getItemImagePath, handleImageError } from "@/utils/media/images";
 import { Icon } from "../../ui/IconWrapper";
 import { TradeAdTooltip } from "../../trading/TradeAdTooltip";
-import { getCategoryColor } from "@/utils/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 import TotalSimilarItems from "./TotalSimilarItems";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import {
   safeLocalStorage,
   safeGetJSON,
   safeSetJSON,
-} from "@/utils/safeStorage";
+} from "@/utils/storage/safeStorage";
 
 /**
  * Parses numeric strings like "1.2m", "450k", "12,345", or "N/A".

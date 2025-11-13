@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { UserWithFlags } from "@/utils/api";
+import { UserWithFlags } from "@/utils/api/api";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 
 interface ContributorsClientProps {

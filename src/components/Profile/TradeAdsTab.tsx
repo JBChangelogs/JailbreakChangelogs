@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,8 +18,8 @@ import {
   getItemImagePath,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/media/images";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 interface TradeItem {

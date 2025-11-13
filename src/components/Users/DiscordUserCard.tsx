@@ -1,4 +1,4 @@
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { UserSettings, UserPresence } from "@/types/auth";
 import dynamic from "next/dynamic";
 import Image from "next/image";

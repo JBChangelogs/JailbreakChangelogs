@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { fetchUserById } from "@/utils/api";
+import { fetchUserById } from "@/utils/api/api";
 import UserProfileClient from "./UserProfileClient";
 import { UserSettings, UserFlag } from "@/types/auth";
 import { ProfileDataService } from "@/services/profileDataService";

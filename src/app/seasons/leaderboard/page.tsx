@@ -1,4 +1,4 @@
-import { fetchSeasonLeaderboard, fetchLatestSeason } from "@/utils/api";
+import { fetchSeasonLeaderboard, fetchLatestSeason } from "@/utils/api/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
 import Link from "next/link";

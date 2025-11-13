@@ -17,16 +17,16 @@ import {
   showLogoutToast,
   showLogoutLoadingToast,
   dismissLogoutLoadingToast,
-} from "@/utils/auth";
-import { useSession, clientSession } from "@/utils/clientSession";
+} from "@/utils/auth/auth";
+import { useSession, clientSession } from "@/utils/auth/clientSession";
 // Removed hasValidToken import - using session API instead
 import {
   getStoredCampaign,
   clearStoredCampaign,
   countCampaignVisit,
   storeCampaign,
-} from "@/utils/campaign";
-import { safeGetJSON } from "@/utils/safeStorage";
+} from "@/utils/notifications/campaign";
+import { safeGetJSON } from "@/utils/storage/safeStorage";
 import toast from "react-hot-toast";
 
 // Helper function to track user status in Clarity

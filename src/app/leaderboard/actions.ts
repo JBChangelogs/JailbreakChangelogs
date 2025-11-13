@@ -3,7 +3,7 @@
 import {
   fetchRobloxUsersBatchLeaderboard,
   fetchRobloxAvatars,
-} from "@/utils/api";
+} from "@/utils/api/api";
 
 export async function fetchLeaderboardUserData(userIds: string[]) {
   try {

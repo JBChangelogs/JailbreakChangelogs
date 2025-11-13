@@ -13,7 +13,7 @@ export default function AuthCheck() {
 
   useEffect(() => {
     // Dynamic import for client-side only execution
-    import("@/utils/clientSession").then(({ clientSession }) => {
+    import("@/utils/auth/clientSession").then(({ clientSession }) => {
       clientSession.refreshUserData();
     });
   }, [pathname]);

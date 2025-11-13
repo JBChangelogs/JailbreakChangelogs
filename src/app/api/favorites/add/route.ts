@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { BASE_API_URL } from "@/utils/api";
+import { BASE_API_URL } from "@/utils/api/api";
 
 export async function POST(request: Request) {
   const { item_id } = (await request.json()) as { item_id?: string };

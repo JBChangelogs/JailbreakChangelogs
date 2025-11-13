@@ -1,7 +1,7 @@
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TimelineClient from "@/components/Timeline/TimelineClient";
-import { fetchChangelogList } from "@/utils/api";
+import { fetchChangelogList } from "@/utils/api/api";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;

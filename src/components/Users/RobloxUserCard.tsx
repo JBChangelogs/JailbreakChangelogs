@@ -2,7 +2,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { CircularProgress } from "@mui/material";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { formatShortDate } from "@/utils/timestamp";
+import { formatShortDate } from "@/utils/helpers/timestamp";
 import { UserSettings, UserPresence } from "@/types/auth";
 import dynamic from "next/dynamic";
 

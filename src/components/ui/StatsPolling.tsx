@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
+import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api/api";
 
 export default function StatsPolling() {
   const { data: stats } = useSuspenseQuery({

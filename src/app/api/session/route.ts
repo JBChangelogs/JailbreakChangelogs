@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/utils/serverSession";
+import { getCurrentUser } from "@/utils/auth/serverSession";
 
 export async function GET() {
   const user = await getCurrentUser();

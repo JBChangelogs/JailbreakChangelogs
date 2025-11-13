@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { fetchSeasonsList, Season, Reward } from "@/utils/api";
-import { getMaintenanceMetadata } from "@/utils/maintenance";
+import { fetchSeasonsList, Season, Reward } from "@/utils/api/api";
+import { getMaintenanceMetadata } from "@/utils/config/maintenance";
 
 interface Props {
   params: Promise<{ id: string }>;

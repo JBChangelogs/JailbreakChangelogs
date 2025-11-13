@@ -1,7 +1,7 @@
-import { fetchNetworthLeaderboard } from "@/utils/api";
+import { fetchNetworthLeaderboard } from "@/utils/api/api";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import NetworthLeaderboardClient from "@/components/Leaderboard/NetworthLeaderboardClient";
-import { checkNetworthLeaderboardMaintenanceMode } from "@/utils/maintenance";
+import { checkNetworthLeaderboardMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const revalidate = 1800;

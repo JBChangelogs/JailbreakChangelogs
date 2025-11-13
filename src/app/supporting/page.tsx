@@ -1,5 +1,5 @@
 import React from "react";
-import { fetchSupporters } from "@/utils/api";
+import { fetchSupporters } from "@/utils/api/api";
 import SupportingClient from "@/components/Support/SupportingClient";
 
 export default async function SupportingPage() {

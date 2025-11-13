@@ -5,8 +5,8 @@ import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
+import { checkDupeFinderMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";

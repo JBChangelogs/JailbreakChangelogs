@@ -5,9 +5,9 @@ import InventoryDataStreamer from "../InventoryDataStreamer";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { fetchComments } from "@/utils/api";
-import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
+import { fetchComments } from "@/utils/api/api";
+import { checkInventoryMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";

@@ -4,9 +4,9 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 import OGAuthWrapper from "@/components/OG/OGAuthWrapper";
-import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
+import { checkOGFinderMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
 export const dynamic = "force-dynamic";

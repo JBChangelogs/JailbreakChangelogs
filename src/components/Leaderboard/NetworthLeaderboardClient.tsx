@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import NetworthLeaderboardSearch from "./NetworthLeaderboardSearch";
 import UserNetworthDisplay from "./UserNetworthDisplay";
 import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 
 interface NetworthLeaderboardEntry {

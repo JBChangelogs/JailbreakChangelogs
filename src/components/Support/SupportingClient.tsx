@@ -5,7 +5,7 @@ import SupportersSection from "@/components/Support/SupportersSection";
 import ModernPricingSection from "@/components/Support/ModernPricingSection";
 import SupportersBanner from "@/components/Support/SupportersBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Supporter } from "@/utils/api";
+import { Supporter } from "@/utils/api/api";
 
 interface SupportingClientProps {
   supporters: Supporter[];

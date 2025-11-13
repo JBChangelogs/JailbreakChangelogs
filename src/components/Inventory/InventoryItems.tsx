@@ -8,7 +8,7 @@ import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
-import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import { mergeInventoryArrayWithMetadata } from "@/utils/data/inventoryMerge";
 
 interface InventoryItemsProps {
   initialData: InventoryData;

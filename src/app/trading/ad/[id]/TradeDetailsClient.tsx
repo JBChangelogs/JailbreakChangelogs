@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
-import { deleteTradeAd } from "@/utils/trading";
+import { deleteTradeAd } from "@/utils/api/trading";
 import toast from "react-hot-toast";
 import TradeItemsImages from "@/components/trading/TradeItemsImages";
 import TradeItemsWithValues from "@/components/trading/TradeItemsWithValues";

@@ -2,7 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 
 interface CommentTimestampProps {

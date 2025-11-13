@@ -7,7 +7,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import MoneyLeaderboardSearch from "./MoneyLeaderboardSearch";
 import UserRankDisplay from "./UserRankDisplay";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 
 interface MoneyLeaderboardEntry {

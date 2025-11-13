@@ -13,11 +13,11 @@ import {
   getHornAudioPath,
   getDriftVideoPath,
   getVideoPath,
-} from "@/utils/images";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/media/images";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatFullValue, getValueChange } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { formatFullValue, getValueChange } from "@/utils/data/values";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import { PauseIcon } from "@heroicons/react/24/solid";
@@ -25,7 +25,7 @@ import SubItemsDropdown from "./SubItemsDropdown";
 import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname, useSearchParams } from "next/navigation";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import { CategoryIconBadge, getCategoryColor } from "@/utils/ui/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface ItemCardProps {

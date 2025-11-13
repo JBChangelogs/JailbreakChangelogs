@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ConsentProvider } from "@/contexts/ConsentContext";
-import { getServerConsent } from "@/utils/serverConsent";
-import { getGeolocation } from "@/utils/geolocation";
+import { getServerConsent } from "@/utils/storage/serverConsent";
+import { getGeolocation } from "@/utils/external/geolocation";
 
 interface ConsentProviderWrapperProps {
   children: ReactNode;

@@ -5,12 +5,12 @@ import {
   useRobloxBotsDataQuery,
   useRobloxUserDataQuery,
 } from "@/hooks/useRobloxDataQuery";
-import { type ConnectedBot } from "@/utils/api";
+import { type ConnectedBot } from "@/utils/api/api";
 import { type RobloxUser, type RobloxAvatar } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
 

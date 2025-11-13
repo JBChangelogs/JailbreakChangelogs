@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { BASE_API_URL } from "@/utils/api";
+import { BASE_API_URL } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
 
 /**

@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchComments, fetchUsersBatch } from "@/utils/api";
+import { fetchComments, fetchUsersBatch } from "@/utils/api/api";
 
 export async function refreshComments(
   type: string,

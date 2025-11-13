@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { fetchTradeAd, fetchUsersBatch, fetchComments } from "@/utils/api";
-import { fetchItems } from "@/utils/api";
+import { fetchTradeAd, fetchUsersBatch, fetchComments } from "@/utils/api/api";
+import { fetchItems } from "@/utils/api/api";
 import type { Item } from "@/types";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";

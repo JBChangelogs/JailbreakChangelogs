@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
+import { formatShortDate, formatCustomDate } from "@/utils/helpers/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
 import { CircularProgress, Skeleton } from "@mui/material";
 

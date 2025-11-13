@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { clientSession } from "@/utils/clientSession";
+import { clientSession } from "@/utils/auth/clientSession";
 
 const ESCAPE_COUNT_THRESHOLD = 5;
 const ESCAPE_TIMEOUT = 2000; // 2 seconds

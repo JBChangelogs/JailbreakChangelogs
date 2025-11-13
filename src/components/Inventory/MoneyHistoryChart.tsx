@@ -25,7 +25,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
-import { fetchUserMoneyHistory, MoneyHistory } from "@/utils/api";
+import { fetchUserMoneyHistory, MoneyHistory } from "@/utils/api/api";
 
 // Register ChartJS components
 ChartJS.register(

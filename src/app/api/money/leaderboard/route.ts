@@ -1,4 +1,4 @@
-import { fetchMoneyLeaderboard } from "@/utils/api";
+import { fetchMoneyLeaderboard } from "@/utils/api/api";
 
 export async function GET() {
   try {

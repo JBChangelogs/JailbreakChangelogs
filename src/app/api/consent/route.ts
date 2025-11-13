@@ -2,8 +2,8 @@
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import type { ConsentConfig } from "@/utils/googleConsentMode";
-import { getDefaultConsentByRegion } from "@/utils/geolocation";
+import type { ConsentConfig } from "@/utils/external/googleConsentMode";
+import { getDefaultConsentByRegion } from "@/utils/external/geolocation";
 
 const CONSENT_COOKIE_NAME = "gcm-consent";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year

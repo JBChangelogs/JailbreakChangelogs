@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import localFont from "next/font/local";
 import { Icon } from "../ui/IconWrapper";
 

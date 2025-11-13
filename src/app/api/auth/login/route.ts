@@ -1,4 +1,4 @@
-import { BASE_API_URL } from "@/utils/api";
+import { BASE_API_URL } from "@/utils/api/api";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {

@@ -7,8 +7,8 @@ import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
+import { checkOGFinderMaintenanceMode } from "@/utils/config/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 

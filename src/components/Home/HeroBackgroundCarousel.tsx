@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
-import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
+import { generateShuffledBackgroundImages } from "@/utils/helpers/fisherYatesShuffle";
 
 export default function HeroBackgroundCarousel() {
   const [backgroundImages, setBackgroundImages] = useState<string[]>([]);

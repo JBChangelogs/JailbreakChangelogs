@@ -28,7 +28,7 @@ import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
 import ItemVariantDropdown from "@/components/Items/ItemVariantDropdown";
 import { Change as ItemChange } from "@/components/Items/ItemChangelogs";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -62,7 +62,7 @@ const ChangelogComments = dynamic(
 
 import SimilarItems from "@/components/Items/SimilarItems";
 
-import { fetchUserFavorites, CommentData } from "@/utils/api";
+import { fetchUserFavorites, CommentData } from "@/utils/api/api";
 import {
   handleImageError,
   getItemImagePath,
@@ -72,13 +72,13 @@ import {
   getHornAudioPath,
   getDriftVideoPath,
   getVideoPath,
-} from "@/utils/images";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/media/images";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAdReloader } from "@/hooks/useAdReloader";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { CategoryIconBadge } from "@/utils/categoryIcons";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { CategoryIconBadge } from "@/utils/ui/categoryIcons";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails, DupedOwner } from "@/types";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";

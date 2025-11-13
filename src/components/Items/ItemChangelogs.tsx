@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { Button } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Dialog, DialogPanel } from "@headlessui/react";
@@ -12,10 +12,10 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { formatFullValue } from "@/utils/values";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatFullValue } from "@/utils/data/values";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
 import { Icon } from "../ui/IconWrapper";
 

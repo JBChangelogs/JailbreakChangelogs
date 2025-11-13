@@ -7,7 +7,7 @@ import { YouTubeEmbed } from "@next/third-parties/google";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { demandOrder, trendOrder } from "@/utils/values";
+import { demandOrder, trendOrder } from "@/utils/data/values";
 import { ValueSort } from "@/types";
 
 interface TradingGuidesProps {

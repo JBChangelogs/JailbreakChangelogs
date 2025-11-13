@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { canBypassMaintenance } from "@/utils/maintenance";
+import { canBypassMaintenance } from "@/utils/config/maintenance";
 import Image from "next/image";
 import localFont from "next/font/local";
 

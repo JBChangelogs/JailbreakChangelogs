@@ -4,11 +4,11 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { TradeItem } from "@/types/trading";
-import { getItemImagePath, handleImageError } from "@/utils/images";
+import { getItemImagePath, handleImageError } from "@/utils/media/images";
 import { Icon } from "../../ui/IconWrapper";
-import { formatFullValue, demandOrder } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { formatFullValue, demandOrder } from "@/utils/data/values";
+import { getDemandColor, getTrendColor } from "@/utils/ui/badgeColors";
+import { getCategoryColor } from "@/utils/ui/categoryIcons";
 
 interface TotalSimilarItemsProps {
   targetValue: number;

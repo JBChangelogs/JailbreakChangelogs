@@ -3,7 +3,7 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 
 interface ScanHistoryEntry {
   scan_id: string;

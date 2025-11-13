@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Icon } from "../ui/IconWrapper";
-import { cleanMarkdown } from "@/utils/changelogs";
+import { cleanMarkdown } from "@/utils/api/changelogs";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/config/featureFlags";
 
 interface ChangelogSummaryProps {
   changelogId: number;

@@ -4,7 +4,7 @@ import {
   ClockIcon,
   ClipboardIcon,
 } from "@heroicons/react/24/outline";
-import { formatProfileDate } from "@/utils/timestamp";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
 import Link from "next/link";
 import toast from "react-hot-toast";
 

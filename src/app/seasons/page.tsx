@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { fetchLatestSeason } from "@/utils/api";
+import { fetchLatestSeason } from "@/utils/api/api";
 
 export const revalidate = 60;
 

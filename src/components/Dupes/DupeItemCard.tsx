@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import { DupeFinderItem, Item } from "@/types";
-import { formatCurrencyValue } from "@/utils/currency";
+import { formatCurrencyValue } from "@/utils/helpers/currency";
 import {
   getItemImagePath,
   isVideoItem,
@@ -13,8 +13,8 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/media/images";
+import { getCategoryIcon, getCategoryColor } from "@/utils/ui/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });

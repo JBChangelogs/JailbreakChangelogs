@@ -1,4 +1,4 @@
-import { fetchUsersWithFlags } from "@/utils/api";
+import { fetchUsersWithFlags } from "@/utils/api/api";
 import ContributorsClient from "@/components/Contributors/ContributorsClient";
 
 export const revalidate = 300; // Revalidate every 5 minutes
