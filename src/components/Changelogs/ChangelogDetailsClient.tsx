@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ThemeProvider } from "@mui/material";
 import { extractContentInfo, getContentPreview } from "@/utils/changelogs";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useAdReloader } from "@/hooks/useAdReloader";
 import { darkTheme } from "@/theme/darkTheme";
 import { Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";
@@ -113,9 +112,6 @@ export default function ChangelogDetailsClient({
   initialUserMap = {},
 }: ChangelogDetailsClientProps) {
   const router = useRouter();
-
-  // Initialize ad reloader for route changes
-  useAdReloader();
 
   // Use state to manage the current changelog
   const [currentChangelogState, setCurrentChangelogState] =

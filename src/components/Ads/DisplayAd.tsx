@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface DisplayAdProps {
   adSlot: string;
@@ -20,26 +21,57 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
   showFallback = true,
 }) => {
   const adRef = useRef<HTMLModElement>(null);
-  const [showSupportMessage, setShowSupportMessage] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Create a unique key for route changes (similar to router.asPath in Pages Router)
+  const routeKey = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
+  // Derive fallback state from route changes instead of using setState in effect
+  const [showSupportMessage, setShowSupportMessage] = useState(false);
+  const [lastRouteKey, setLastRouteKey] = useState(routeKey);
+
+  // Reset fallback state when route changes (derived state pattern)
+  if (routeKey !== lastRouteKey) {
+    setShowSupportMessage(false);
+    setLastRouteKey(routeKey);
+  }
 
   useEffect(() => {
     const element = adRef.current;
     if (!element) return;
 
-    try {
+    const doPush = () => {
       if (typeof window !== "undefined" && window.adsbygoogle) {
         window.adsbygoogle.push({});
       }
-    } catch (error) {
-      console.warn("Failed to initialize ad:", error);
-    }
+    };
 
+    const pushAds = () => {
+      try {
+        doPush();
+      } catch (error) {
+        console.warn("Failed to initialize ad:", error);
+        // Retry mechanism - critical for SPA navigation
+        setTimeout(() => {
+          try {
+            doPush();
+          } catch (retryError) {
+            console.error("AdSense push retry failed:", retryError);
+          }
+        }, 750);
+      }
+    };
+
+    pushAds();
+
+    // Fallback timeout - only show if ad truly fails to load
     timeoutRef.current = setTimeout(() => {
-      if (showFallback && !element.querySelector("iframe")) {
+      if (showFallback && element && !element.querySelector("iframe")) {
         setShowSupportMessage(true);
       }
-    }, 10000);
+    }, 8000); // Reduced from 10s to 8s
 
     return () => {
       if (timeoutRef.current) {
@@ -47,7 +79,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
         timeoutRef.current = null;
       }
     };
-  }, [showFallback]);
+  }, [routeKey, showFallback]); // Key dependency: re-run on route changes
 
   // Fallback: Show branded support message when ad fails to load
   if (showSupportMessage && showFallback) {
@@ -95,6 +127,7 @@ const DisplayAd: React.FC<DisplayAdProps> = ({
 
   return (
     <ins
+      key={routeKey} // Critical: Forces re-render on route changes
       ref={adRef}
       className={`adsbygoogle ${className}`}
       style={{

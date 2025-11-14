@@ -11,7 +11,6 @@ import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useAdReloader } from "@/hooks/useAdReloader";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
 import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorModal";
@@ -34,9 +33,6 @@ export default function ValuesClient({
 }: ValuesClientProps) {
   const router = useRouter();
   const { user } = useAuthContext();
-
-  // Initialize ad reloader for route changes
-  useAdReloader();
 
   const items = use(itemsPromise);
   const lastUpdated = use(lastUpdatedPromise);

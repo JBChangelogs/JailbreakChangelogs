@@ -13,7 +13,6 @@ import { formatProfileDate } from "@/utils/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useAdReloader } from "@/hooks/useAdReloader";
 import { Season, CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 
@@ -37,9 +36,6 @@ export default function SeasonDetailsClient({
 }: SeasonDetailsClientProps) {
   const router = useRouter();
   const { user } = useAuthContext();
-
-  // Initialize ad reloader for route changes
-  useAdReloader();
 
   // Use state to manage the current season
   const [currentSeasonState, setCurrentSeasonState] = useState(currentSeason);
