@@ -10,7 +10,6 @@ import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useAdReloader } from "@/hooks/useAdReloader";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -69,9 +68,6 @@ export default function OGFinderResults({
   const { user } = useAuthContext();
   const currentUserPremiumType = user?.premiumtype || 0;
   const { getId } = useUsernameToId();
-
-  // Initialize ad reloader for route changes
-  useAdReloader();
 
   // State management
   const [searchId, setSearchId] = useState(robloxId || "");

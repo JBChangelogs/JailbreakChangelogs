@@ -10,13 +10,14 @@ node_modules
 tsconfig.tsbuildinfo
 *.tsbuildinfo
 
-# OS/Editor
+# OS/Code Editors
 .DS_Store
 .idea
 .eslintcache
 .vscode
 .cursor
 .augment
+.windsurf
 
 # Build artifacts
 coverage/
