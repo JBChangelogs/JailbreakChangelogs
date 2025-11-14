@@ -915,12 +915,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               offeringItems.length === 0 &&
               requestingItems.length === 0
             }
-            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 rounded border-none bg-transparent px-4 py-2 text-sm font-medium transition-colors ${
               !editMode &&
               offeringItems.length === 0 &&
               requestingItems.length === 0
-                ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
-                : "bg-button-secondary text-secondary-text border-button-secondary hover:bg-button-secondary-hover cursor-pointer"
+                ? "text-secondary-text cursor-not-allowed"
+                : "text-secondary-text hover:text-primary-text cursor-pointer"
             }`}
           >
             {editMode ? "Cancel" : "Clear Trade Ad"}

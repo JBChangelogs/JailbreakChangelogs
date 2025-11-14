@@ -213,6 +213,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
@@ -254,6 +255,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
+
+  // Handle hydration mismatch by ensuring consistent rendering
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isCollabPage =
     pathname === "/values" ||
@@ -754,7 +760,15 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           <AnimatedThemeToggler />
 
           {/* User menu or login button */}
-          {userData ? (
+          {!mounted ? (
+            // Show login button during SSR and initial hydration to prevent mismatch
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
+            >
+              Login
+            </button>
+          ) : userData ? (
             <div
               className="relative"
               onMouseEnter={() => setUserMenuOpen(true)}
