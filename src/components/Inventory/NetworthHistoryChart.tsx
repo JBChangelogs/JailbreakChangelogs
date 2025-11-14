@@ -25,7 +25,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
-import { MoneyHistory } from "@/utils/api/api";
+import { UserNetworthData } from "@/utils/api/api";
 
 // Register ChartJS components
 ChartJS.register(
@@ -40,13 +40,20 @@ ChartJS.register(
   Filler,
 );
 
-interface MoneyHistoryChartProps {
+interface NetworthHistoryChartProps {
   userId: string;
-  initialData?: MoneyHistory[];
+  initialData?: UserNetworthData[];
 }
 
-const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
-  const [history] = useState<MoneyHistory[]>(initialData);
+const NetworthHistoryChart = ({
+  initialData = [],
+}: NetworthHistoryChartProps) => {
+  // Filter to only include entries with both snapshot_time and networth
+  const filteredInitialData = initialData.filter(
+    (item) => item.snapshot_time && item.networth !== undefined,
+  );
+
+  const [history] = useState<UserNetworthData[]>(filteredInitialData);
   const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
     "all",
   );
@@ -148,7 +155,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
           No Data Available
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          This user doesn&apos;t have any recorded money history yet. Charts
+          This user doesn&apos;t have any recorded networth history yet. Charts
           will appear here once data becomes available.
         </p>
       </div>
@@ -167,11 +174,11 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
 
   // Sort history by date
   const sortedHistory = [...history].sort(
-    (a, b) => a.updated_at - b.updated_at,
+    (a, b) => a.snapshot_time - b.snapshot_time,
   );
 
   // Get the oldest date in the history
-  const oldestDate = new Date(sortedHistory[0].updated_at * 1000);
+  const oldestDate = new Date(sortedHistory[0].snapshot_time * 1000);
   const now = new Date();
 
   // Calculate available ranges
@@ -201,27 +208,27 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   // Filter data based on date range
   const getFilteredData = () => {
     return sortedHistory.filter(
-      (item) => new Date(item.updated_at * 1000) >= ranges[dateRange],
+      (item) => new Date(item.snapshot_time * 1000) >= ranges[dateRange],
     );
   };
 
   const filteredData = getFilteredData();
 
   const chartData: ChartData<"line"> = {
-    labels: filteredData.map((item) => new Date(item.updated_at * 1000)),
+    labels: filteredData.map((item) => new Date(item.snapshot_time * 1000)),
     datasets: [
       {
-        label: "Money",
-        data: filteredData.map((item) => item.money),
-        borderColor: "#10b981",
-        backgroundColor: "rgba(16, 185, 129, 0.2)",
+        label: "Networth",
+        data: filteredData.map((item) => item.networth),
+        borderColor: "#8b5cf6",
+        backgroundColor: "rgba(139, 92, 246, 0.2)",
         borderWidth: 4,
         fill: true,
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
         pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#10b981",
+        pointHoverBorderColor: "#8b5cf6",
         pointHoverBorderWidth: 2,
         spanGaps: false,
       },
@@ -399,4 +406,4 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   );
 };
 
-export default MoneyHistoryChart;
+export default NetworthHistoryChart;

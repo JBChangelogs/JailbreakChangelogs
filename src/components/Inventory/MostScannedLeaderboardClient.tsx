@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
-import CopyButton from "@/app/inventories/CopyButton";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
@@ -25,6 +26,7 @@ export default function MostScannedLeaderboardClient({
   "use memo";
   const [searchTerm, setSearchTerm] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Extract user IDs from leaderboard data
@@ -247,11 +249,14 @@ export default function MostScannedLeaderboardClient({
                     }}
                   >
                     <div
-                      className={`mb-3 flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
+                      className={`mb-3 flex flex-col gap-3 rounded-lg border p-3 transition-all duration-200 cursor-pointer hover:shadow-lg sm:flex-row sm:items-center ${
                         index <= 2
                           ? ""
                           : "border-border-primary bg-primary-bg hover:border-border-focus"
                       }`}
+                      onClick={() =>
+                        router.push(`/inventories/${user.user_id}`)
+                      }
                       style={{
                         ...(index === 0 && {
                           background:
@@ -325,23 +330,31 @@ export default function MostScannedLeaderboardClient({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start gap-2">
                           <div className="min-w-0 flex-1">
-                            <a
-                              href={`https://www.roblox.com/users/${user.user_id}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover break-words font-medium transition-colors"
+                            <Link
+                              href={`/inventories/${user.user_id}`}
+                              prefetch={false}
+                              className="text-primary-text hover:text-link break-words font-medium transition-colors"
                             >
                               {displayName}
-                            </a>
+                            </Link>
                             <div className="text-secondary-text break-words text-sm">
-                              @{username} • {user.upsert_count.toLocaleString()}{" "}
-                              scans
+                              <Link
+                                href={`/inventories/${user.user_id}`}
+                                prefetch={false}
+                                className="hover:text-link transition-colors"
+                              >
+                                @{username}
+                              </Link>{" "}
+                              • {user.upsert_count.toLocaleString()} scans
                             </div>
                           </div>
-                          <CopyButton
-                            text={user.user_id}
-                            className="mt-1 flex-shrink-0"
-                          />
+                          <Link
+                            href={`/inventories/${user.user_id}`}
+                            prefetch={false}
+                            className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus mt-1 flex-shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                          >
+                            View Inventory
+                          </Link>
                         </div>
                       </div>
                     </div>

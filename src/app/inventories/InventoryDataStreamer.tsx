@@ -5,6 +5,8 @@ import {
   fetchLatestSeason,
   fetchComments,
   fetchItems,
+  fetchUserNetworth,
+  fetchUserMoneyHistory,
 } from "@/utils/api/api";
 import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
@@ -71,15 +73,20 @@ async function InventoryDataFetcher({
         error={usernameError}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
 
-  const [result, currentSeason, items] = await Promise.all([
-    fetchInventoryData(actualRobloxId),
-    fetchLatestSeason(),
-    fetchItems(),
-  ]);
+  const [result, currentSeason, items, networthData, moneyHistoryData] =
+    await Promise.all([
+      fetchInventoryData(actualRobloxId),
+      fetchLatestSeason(),
+      fetchItems(),
+      fetchUserNetworth(actualRobloxId),
+      fetchUserMoneyHistory(actualRobloxId),
+    ]);
 
   // Check if the result contains an error
   if (
@@ -96,6 +103,8 @@ async function InventoryDataFetcher({
         error={errorMessage}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
@@ -108,6 +117,8 @@ async function InventoryDataFetcher({
         error="Failed to fetch inventory data. Please try again."
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
@@ -121,6 +132,8 @@ async function InventoryDataFetcher({
           isLoading={true}
           initialComments={initialComments}
           initialCommentUserMap={initialCommentUserMap}
+          initialNetworthData={networthData}
+          initialMoneyHistoryData={moneyHistoryData}
         />
       }
     >
@@ -131,6 +144,8 @@ async function InventoryDataFetcher({
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
         items={items}
+        initialNetworthData={networthData}
+        initialMoneyHistoryData={moneyHistoryData}
       />
     </Suspense>
   );
