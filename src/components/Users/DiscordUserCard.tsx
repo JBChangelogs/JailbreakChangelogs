@@ -1,9 +1,6 @@
 import { UserAvatar } from "@/utils/ui/avatar";
-import { UserSettings, UserPresence } from "@/types/auth";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { UserSettings, UserPresence, UserFlag } from "@/types/auth";
+import { UserBadges } from "@/components/Profile/UserBadges";
 
 interface DiscordUserCardProps {
   user: {
@@ -16,13 +13,11 @@ interface DiscordUserCardProps {
     settings?: UserSettings;
     premiumtype?: number;
     presence?: UserPresence;
+    flags?: UserFlag[];
   };
 }
 
 export default function DiscordUserCard({ user }: DiscordUserCardProps) {
-  const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
-
   return (
     <div className="flex items-center space-x-3">
       <UserAvatar
@@ -42,68 +37,12 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
               ? user.global_name
               : user.username}
           </h2>
-          {user.premiumtype &&
-          user.premiumtype >= 1 &&
-          user.premiumtype <= 3 ? (
-            <Tooltip
-              title={`Supporter Type ${user.premiumtype}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Image
-                src={`${BADGE_BASE_URL}/jbcl_supporter_${user.premiumtype}.svg`}
-                alt={`Supporter Type ${user.premiumtype}`}
-                width={16}
-                height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
-              />
-            </Tooltip>
-          ) : null}
-          {user.usernumber <= 100 ? (
-            <Tooltip
-              title="Early Adopter"
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Image
-                src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
-                alt="Early Adopter"
-                width={16}
-                height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
-              />
-            </Tooltip>
-          ) : null}
+          <UserBadges
+            usernumber={user.usernumber}
+            premiumType={user.premiumtype}
+            flags={user.flags}
+            size="sm"
+          />
         </div>
         <p className="text-secondary-text max-w-[180px] truncate text-sm sm:max-w-[250px]">
           @{user.username}

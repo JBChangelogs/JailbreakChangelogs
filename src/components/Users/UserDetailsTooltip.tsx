@@ -48,6 +48,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
                 <UserBadges
                   usernumber={user.usernumber}
                   premiumType={user.premiumtype}
+                  flags={user.flags}
                   size="sm"
                 />
               </div>

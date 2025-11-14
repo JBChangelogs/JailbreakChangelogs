@@ -59,6 +59,14 @@ export interface NotificationHistory {
   size: number;
 }
 
+export interface PaginatedUsers {
+  items: UserData[];
+  total: number;
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
 import { Item, ItemDetails, RobloxUser } from "@/types";
 import { UserData } from "@/types/auth";
 
@@ -2270,6 +2278,87 @@ export async function fetchUnreadNotifications(
       total_pages: 0,
       size: 10,
     };
+  }
+}
+
+/**
+ * Fetches paginated users
+ * Uses the Next.js API route which calls the backend API
+ */
+export async function fetchPaginatedUsers(
+  page: number = 1,
+  size: number = 21,
+): Promise<PaginatedUsers> {
+  try {
+    const url = new URL("/api/users/paginated", window.location.origin);
+    url.searchParams.set("page", page.toString());
+    url.searchParams.set("size", size.toString());
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      // Return empty paginated users on error
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        total_pages: 0,
+        size: 21,
+      };
+    }
+
+    const data = await response.json();
+    return data as PaginatedUsers;
+  } catch (error) {
+    console.error("Error fetching paginated users:", error);
+    // Return empty paginated users on error
+    return {
+      items: [],
+      total: 0,
+      page: 1,
+      total_pages: 0,
+      size: 21,
+    };
+  }
+}
+
+/**
+ * Searches users by username
+ * Uses the Next.js API route which calls the backend API
+ */
+export async function searchUsers(
+  username: string,
+  limit: number = 21,
+): Promise<UserData[]> {
+  try {
+    const url = new URL("/api/users/search", window.location.origin);
+    url.searchParams.set("username", username);
+    url.searchParams.set("limit", limit.toString());
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      // Return empty array on error
+      return [];
+    }
+
+    const data = await response.json();
+    return data as UserData[];
+  } catch (error) {
+    console.error("Error searching users:", error);
+    return [];
   }
 }
 
