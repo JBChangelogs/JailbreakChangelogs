@@ -20,7 +20,7 @@ import {
   Pagination,
 } from "@mui/material";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   logout,
   trackLogoutSource,
@@ -72,6 +72,18 @@ import {
 } from "@/utils/api/api";
 import { formatCompactDateTime } from "@/utils/helpers/timestamp";
 
+const UnreadNotificationBadge = ({ count }: { count: number }) => {
+  if (count === 0) return null;
+
+  const displayCount = count > 99 ? "99+" : count.toString();
+
+  return (
+    <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+      {displayCount}
+    </span>
+  );
+};
+
 export default function Header() {
   const pathname = usePathname();
   const isCollabPage =
@@ -91,6 +103,8 @@ export default function Header() {
   const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
     if (notificationTimeoutId) {
@@ -131,6 +145,38 @@ export default function Header() {
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/notifications/unread", {
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.unread_count || 0);
+      } else {
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      setUnreadCount(0);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUnreadCount();
+    }
+  }, [pathname, isAuthenticated, fetchUnreadCount]);
 
   const handleLogout = async () => {
     let loadingToast: string | undefined;
@@ -639,14 +685,17 @@ export default function Header() {
                     >
                       <PopoverTrigger asChild>
                         <IconButton
-                          className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg transition-colors duration-200"
+                          className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg relative transition-colors duration-200"
                           aria-label="Notifications"
                         >
                           <Icon
-                            icon="streamline-plump:mail-notification-remix"
+                            icon="mingcute:notification-line"
                             className="h-5 w-5"
                             inline={true}
                           />
+                          {isAuthenticated && (
+                            <UnreadNotificationBadge count={unreadCount} />
+                          )}
                         </IconButton>
                       </PopoverTrigger>
                     </Tooltip>
@@ -698,6 +747,8 @@ export default function Header() {
                                     setNotifications(data);
                                     setNotificationPage(1);
                                     setIsLoadingNotifications(false);
+                                    // Refresh unread count
+                                    fetchUnreadCount();
                                   } else {
                                     toast.error(
                                       notificationTab === "unread"
@@ -774,20 +825,40 @@ export default function Header() {
                           <>
                             <div className="py-2">
                               {notifications.items.map((notif) => {
-                                // Check if link domain is whitelisted
-                                const isWhitelistedDomain = (() => {
+                                // Check if link domain is whitelisted and extract URL info
+                                const urlInfo = (() => {
                                   try {
                                     const url = new URL(notif.link);
-                                    return (
+                                    const isJailbreakChangelogs =
                                       url.hostname ===
                                         "jailbreakchangelogs.xyz" ||
-                                      url.hostname ===
-                                        "www.jailbreakchangelogs.xyz" ||
+                                      url.hostname.endsWith(
+                                        ".jailbreakchangelogs.xyz",
+                                      );
+                                    const isWhitelisted =
+                                      isJailbreakChangelogs ||
                                       url.hostname === "google.com" ||
-                                      url.hostname === "www.google.com"
-                                    );
+                                      url.hostname.endsWith(".google.com");
+
+                                    if (isJailbreakChangelogs) {
+                                      // Extract relative path (pathname + search + hash)
+                                      const relativePath =
+                                        url.pathname + url.search + url.hash;
+                                      return {
+                                        isWhitelisted: true,
+                                        isJailbreakChangelogs: true,
+                                        relativePath,
+                                      };
+                                    } else if (isWhitelisted) {
+                                      return {
+                                        isWhitelisted: true,
+                                        isJailbreakChangelogs: false,
+                                        href: notif.link,
+                                      };
+                                    }
+                                    return { isWhitelisted: false };
                                   } catch {
-                                    return false;
+                                    return { isWhitelisted: false };
                                   }
                                 })();
 
@@ -837,6 +908,8 @@ export default function Header() {
                                                   setIsLoadingNotifications(
                                                     false,
                                                   );
+                                                  // Refresh unread count
+                                                  fetchUnreadCount();
                                                 }
                                               }}
                                               className={`flex-shrink-0 rounded-full p-1 transition-all cursor-pointer ${
@@ -858,15 +931,26 @@ export default function Header() {
                                       <p className="text-secondary-text text-xs mt-1">
                                         {notif.description}
                                       </p>
-                                      {isWhitelistedDomain ? (
-                                        <a
-                                          href={notif.link}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
-                                        >
-                                          View
-                                        </a>
+                                      {urlInfo.isWhitelisted ? (
+                                        urlInfo.isJailbreakChangelogs &&
+                                        urlInfo.relativePath ? (
+                                          <Link
+                                            href={urlInfo.relativePath}
+                                            prefetch={false}
+                                            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                          >
+                                            View
+                                          </Link>
+                                        ) : urlInfo.href ? (
+                                          <a
+                                            href={urlInfo.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                          >
+                                            View
+                                          </a>
+                                        ) : null
                                       ) : (
                                         <p className="text-secondary-text text-xs mt-1 break-all">
                                           {notif.link}
@@ -924,7 +1008,7 @@ export default function Header() {
                         ) : (
                           <div className="flex flex-col items-center justify-center py-8 px-4">
                             <Icon
-                              icon="streamline-plump:mail-notification-remix"
+                              icon="mingcute:notification-line"
                               className="text-secondary-text h-12 w-12 mb-3"
                               inline={true}
                             />
