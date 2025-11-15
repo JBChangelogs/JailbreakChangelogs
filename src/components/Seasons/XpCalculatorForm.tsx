@@ -172,6 +172,9 @@ export default function XpCalculatorForm({
       </div>
 
       <div className="mb-6 rounded-lg border border-border-primary bg-primary-bg p-4">
+        <p className="text-secondary-text mb-3 text-xs">
+          These options apply to the entire remaining season.
+        </p>
         <div className="space-y-3">
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
             <input
@@ -182,10 +185,6 @@ export default function XpCalculatorForm({
             />
             <div className="flex-1">
               <span className="font-medium">Include Daily XP</span>
-              <p className="text-secondary-text text-xs">
-                Adds XP from your daily activities to the calculation. Season
-                Pass owners earn more daily XP.
-              </p>
             </div>
           </label>
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
@@ -197,10 +196,6 @@ export default function XpCalculatorForm({
             />
             <div className="flex-1">
               <span className="font-medium">Include Weekly Contracts</span>
-              <p className="text-secondary-text text-xs">
-                Adds XP earned by completing contracts to the calculation.
-                Season Pass owners get 2 extra contracts per week.
-              </p>
             </div>
           </label>
         </div>
