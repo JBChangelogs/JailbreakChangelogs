@@ -4,7 +4,7 @@ import { BASE_API_URL } from "@/utils/api/api";
 
 export async function POST() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_auth_token")?.value;
 
   if (token) {
     try {
@@ -22,7 +22,7 @@ export async function POST() {
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set("token", "", {
+  response.cookies.set("jbcl_auth_token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

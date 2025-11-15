@@ -5,7 +5,7 @@ import { BASE_API_URL } from "@/utils/api/api";
 export async function POST(request: Request) {
   const { id } = (await request.json()) as { id?: number };
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_auth_token")?.value;
   if (!token || !id) {
     return NextResponse.json(
       { message: "Unauthorized or missing id" },

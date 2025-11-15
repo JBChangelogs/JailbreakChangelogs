@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     const isProd = process.env.NODE_ENV === "production";
     const response = NextResponse.json(user, { status: 200 });
-    response.cookies.set("token", token, {
+    response.cookies.set("jbcl_auth_token", token, {
       httpOnly: false, // Allow client-side access for WebSocket connection
       secure: isProd,
       sameSite: "lax",

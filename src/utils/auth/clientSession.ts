@@ -102,7 +102,7 @@ class ClientSessionManager {
     const cookies = document.cookie.split(";");
     for (const cookie of cookies) {
       const [name, value] = cookie.trim().split("=");
-      if (name === "token") {
+      if (name === "jbcl_auth_token") {
         return decodeURIComponent(value);
       }
     }
@@ -238,7 +238,7 @@ class ClientSessionManager {
 
     // Clear token from cookies
     document.cookie =
-      "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
+      "jbcl_auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
 
     // Clear user data from localStorage
     safeLocalStorage.removeItem("user");
@@ -305,7 +305,7 @@ class ClientSessionManager {
       // Set new token cookie
       const expires = new Date();
       expires.setDate(expires.getDate() + 30); // 30 days
-      document.cookie = `token=${encodeURIComponent(token)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+      document.cookie = `jbcl_auth_token=${encodeURIComponent(token)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
 
       // Reconnect WebSocket to pick up new token
       this.reconnect();
@@ -350,7 +350,7 @@ class ClientSessionManager {
 
       // Clear the token cookie if authentication failed
       document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
+        "jbcl_auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
 
       return {
         success: false,
@@ -397,7 +397,7 @@ class ClientSessionManager {
 
     // Clear token cookie
     document.cookie =
-      "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
+      "jbcl_auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
 
     // Set user to null and notify listeners
     this.setUser(null);

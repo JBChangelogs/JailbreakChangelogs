@@ -5,7 +5,7 @@ import { BASE_API_URL } from "@/utils/api/api";
 export async function DELETE() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("jbcl_auth_token")?.value;
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
@@ -29,7 +29,7 @@ export async function DELETE() {
 
     // Clear auth cookie too
     const res = NextResponse.json({ ok: true });
-    res.cookies.set("token", "", {
+    res.cookies.set("jbcl_auth_token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

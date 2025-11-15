@@ -11,7 +11,7 @@ import type { UserData } from "@/types/auth";
 export async function getCurrentUser(): Promise<UserData | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("jbcl_auth_token")?.value;
     if (!token || token === "undefined") return null;
 
     const response = await fetch(
