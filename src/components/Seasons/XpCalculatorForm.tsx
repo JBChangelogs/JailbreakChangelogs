@@ -1,5 +1,4 @@
 import ImageModal from "@/components/ui/ImageModal";
-import { Icon } from "@/components/ui/IconWrapper";
 import { Season } from "@/types/seasons";
 
 interface XpCalculatorFormProps {
@@ -9,7 +8,11 @@ interface XpCalculatorFormProps {
   onLevelChange: (level: number) => void;
   onXpChange: (xp: number) => void;
   onCalculate: () => void;
-  season: Season; // Add season prop to access XP data
+  season: Season;
+  includeDailyXp: boolean;
+  includeContracts: boolean;
+  onIncludeDailyXpChange: (include: boolean) => void;
+  onIncludeContractsChange: (include: boolean) => void;
 }
 
 export default function XpCalculatorForm({
@@ -20,6 +23,10 @@ export default function XpCalculatorForm({
   onXpChange,
   onCalculate,
   season,
+  includeDailyXp,
+  includeContracts,
+  onIncludeDailyXpChange,
+  onIncludeContractsChange,
 }: XpCalculatorFormProps) {
   // Calculate max XP for the current level (XP needed to reach the NEXT level)
   const getMaxXpForLevel = (level: number) => {
@@ -99,11 +106,7 @@ export default function XpCalculatorForm({
           className="mx-auto w-full max-w-sm"
           priority
         />
-        <p className="text-secondary-text mt-2 flex items-center gap-2 text-sm">
-          <Icon
-            icon="emojione:light-bulb"
-            className="text-lg text-yellow-500"
-          />
+        <p className="text-secondary-text mt-2 flex items-center justify-center gap-2 text-sm text-center">
           Use this image as a reference to find your current level and XP
           progress
         </p>
@@ -168,12 +171,52 @@ export default function XpCalculatorForm({
         </div>
       </div>
 
+      <div className="mb-6 rounded-lg border border-border-primary bg-primary-bg p-4">
+        <div className="space-y-3">
+          <label className="text-primary-text flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={includeDailyXp}
+              onChange={(e) => onIncludeDailyXpChange(e.target.checked)}
+              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+            />
+            <div className="flex-1">
+              <span className="font-medium">Include Daily XP</span>
+              <p className="text-secondary-text text-xs">
+                Adds XP from your daily activities to the calculation. Season
+                Pass owners earn more daily XP.
+              </p>
+            </div>
+          </label>
+          <label className="text-primary-text flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={includeContracts}
+              onChange={(e) => onIncludeContractsChange(e.target.checked)}
+              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+            />
+            <div className="flex-1">
+              <span className="font-medium">Include Weekly Contracts</span>
+              <p className="text-secondary-text text-xs">
+                Adds XP earned by completing contracts to the calculation.
+                Season Pass owners get 2 extra contracts per week.
+              </p>
+            </div>
+          </label>
+        </div>
+        {!includeDailyXp && !includeContracts && (
+          <p className="text-button-danger mt-3 text-xs">
+            At least one XP source must be enabled
+          </p>
+        )}
+      </div>
+
       <div className="flex justify-center">
         <button
           onClick={onCalculate}
-          disabled={!currentLevel}
+          disabled={!currentLevel || (!includeDailyXp && !includeContracts)}
           className={`flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-            !currentLevel
+            !currentLevel || (!includeDailyXp && !includeContracts)
               ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
               : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
           }`}

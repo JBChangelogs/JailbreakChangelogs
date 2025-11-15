@@ -398,6 +398,12 @@ export default function XpResultsSummary({
             </div>
           </div>
         </div>
+
+        {/* Inputs summary */}
+        <div className="text-secondary-text text-center text-xs mt-4">
+          Based on Level {results.currentLevel},{" "}
+          {getXpWithinCurrentLevel().toLocaleString()} XP in current level
+        </div>
       </div>
 
       {/* Important Dates */}
