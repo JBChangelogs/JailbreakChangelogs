@@ -14,6 +14,8 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   "use memo";
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentXp, setCurrentXp] = useState(0);
+  const [includeDailyXp, setIncludeDailyXp] = useState(true);
+  const [includeContracts, setIncludeContracts] = useState(true);
   const [results, setResults] = useState<CalculationResults | null>(null);
   const [currentTime, setCurrentTime] = useState(() =>
     Math.floor(Date.now() / 1000),
@@ -39,6 +41,11 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     }
 
     if (currentLevel >= season.xp_data.targetLevel) {
+      return;
+    }
+
+    if (!includeDailyXp && !includeContracts) {
+      toast.error("Please enable at least one XP source");
       return;
     }
 
@@ -98,28 +105,39 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
 
     // Calculate XP per week
     const expPerWeek = (hasGamePass: boolean) => {
-      if (hasGamePass) {
-        return (
-          constants.MAX_DAILY_EXP_SEASON_PASS * 7 +
-          constants.AVG_EXP_PER_CONTRACT * 6
-        );
-      } else {
-        return constants.MAX_DAILY_EXP * 7 + constants.AVG_EXP_PER_CONTRACT * 4;
+      let weeklyXp = 0;
+
+      if (includeDailyXp) {
+        weeklyXp += hasGamePass
+          ? constants.MAX_DAILY_EXP_SEASON_PASS * 7
+          : constants.MAX_DAILY_EXP * 7;
       }
+
+      if (includeContracts) {
+        weeklyXp += hasGamePass
+          ? constants.AVG_EXP_PER_CONTRACT * 6
+          : constants.AVG_EXP_PER_CONTRACT * 4;
+      }
+
+      return weeklyXp;
     };
 
     const expPerWeekDouble = (hasGamePass: boolean) => {
-      if (hasGamePass) {
-        return (
-          constants.MAX_DAILY_EXP_SEASON_PASS * 2 * 7 +
-          constants.AVG_EXP_PER_CONTRACT * 2 * 6
-        );
-      } else {
-        return (
-          constants.MAX_DAILY_EXP * 2 * 7 +
-          constants.AVG_EXP_PER_CONTRACT * 2 * 4
-        );
+      let weeklyXp = 0;
+
+      if (includeDailyXp) {
+        weeklyXp += hasGamePass
+          ? constants.MAX_DAILY_EXP_SEASON_PASS * 2 * 7
+          : constants.MAX_DAILY_EXP * 2 * 7;
       }
+
+      if (includeContracts) {
+        weeklyXp += hasGamePass
+          ? constants.AVG_EXP_PER_CONTRACT * 2 * 6
+          : constants.AVG_EXP_PER_CONTRACT * 2 * 4;
+      }
+
+      return weeklyXp;
     };
 
     // Current progress
@@ -157,27 +175,54 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       withPass: DoubleXpResult;
     } | null = null;
 
-    // Calculate Double XP days using the old method
-    const newDaysNoPass = Math.max(
-      0,
-      (targetLevelExp - myExp) / expPerWeek(false) -
-        1 +
-        (targetLevelExp - myExp) / expPerWeekDouble(false),
-    );
-    const newLvlDateNoPass = Math.ceil(newDaysNoPass * 7) * 86400;
-    const newDaysWithPass = Math.max(
-      0,
-      (targetLevelExp - myExp) / expPerWeek(true) -
-        1 +
-        (targetLevelExp - myExp) / expPerWeekDouble(true),
-    );
-    const newLvlDateWithPass = Math.ceil(newDaysWithPass * 7) * 86400;
+    // Calculate Double XP completion times
+    // Double XP happens at the end of the season, so we need to:
+    // 1. Calculate XP earned before double XP period
+    // 2. Calculate remaining XP needed
+    // 3. Calculate days during double XP period to earn remaining XP
+    const calculateDoubleXpTime = (hasGamePass: boolean) => {
+      const daysBeforeDoubleXp = Math.max(
+        0,
+        Math.floor((doubleXpStart - currentTime) / 86400),
+      );
+      const expPerDay = expPerWeek(hasGamePass) / 7;
+      const expPerDayDouble = expPerWeekDouble(hasGamePass) / 7;
+
+      // XP earned before double XP period
+      const xpEarnedBeforeDoubleXp = daysBeforeDoubleXp * expPerDay;
+
+      // If we can finish before double XP starts, use normal calculation
+      if (xpEarnedBeforeDoubleXp >= xpNeeded) {
+        const daysNeeded = Math.ceil(xpNeeded / expPerDay);
+        return {
+          days: daysNeeded,
+          completionDate: currentTime + daysNeeded * 86400,
+        };
+      }
+
+      // Calculate remaining XP after normal period
+      const xpRemaining = xpNeeded - xpEarnedBeforeDoubleXp;
+
+      // Days needed during double XP period
+      const daysDuringDoubleXp = Math.ceil(xpRemaining / expPerDayDouble);
+
+      // Total days = days before double XP + days during double XP
+      const totalDays = daysBeforeDoubleXp + daysDuringDoubleXp;
+
+      return {
+        days: totalDays,
+        completionDate: currentTime + totalDays * 86400,
+      };
+    };
+
+    const doubleXpNoPass = calculateDoubleXpTime(false);
+    const doubleXpWithPass = calculateDoubleXpTime(true);
 
     doubleXpResults = {
       noPass: {
-        achievable: currentTime + newLvlDateNoPass < constants.SEASON_ENDS,
+        achievable: doubleXpNoPass.completionDate < constants.SEASON_ENDS,
         completionDate: new Date(
-          (currentTime + newLvlDateNoPass) * 1000,
+          doubleXpNoPass.completionDate * 1000,
         ).toLocaleDateString("en-US", {
           weekday: "short",
           year: "numeric",
@@ -186,9 +231,9 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
         }),
       },
       withPass: {
-        achievable: currentTime + newLvlDateWithPass < constants.SEASON_ENDS,
+        achievable: doubleXpWithPass.completionDate < constants.SEASON_ENDS,
         completionDate: new Date(
-          (currentTime + newLvlDateWithPass) * 1000,
+          doubleXpWithPass.completionDate * 1000,
         ).toLocaleDateString("en-US", {
           weekday: "short",
           year: "numeric",
@@ -327,6 +372,10 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
         onXpChange={setCurrentXp}
         onCalculate={handleCalculate}
         season={season}
+        includeDailyXp={includeDailyXp}
+        includeContracts={includeContracts}
+        onIncludeDailyXpChange={setIncludeDailyXp}
+        onIncludeContractsChange={setIncludeContracts}
       />
 
       <div ref={resultsRef}>
