@@ -165,6 +165,14 @@ export default function UserSearch() {
       window.location.hash = value.toString();
     }
   };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value.trim() === "" && activeSearchQuery) {
+      setActiveSearchQuery("");
+      setPage(1);
+    }
+  };
 
   return (
     <div className="mb-8 flex flex-col gap-4">
@@ -174,7 +182,7 @@ export default function UserSearch() {
             type="text"
             id="searchInput"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Search by ID or username..."
             className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
             disabled={isLoading}

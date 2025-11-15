@@ -307,6 +307,40 @@ export default function SettingsPage() {
                       }
                     }}
                   >
+                    {category === "Appearance Settings" &&
+                      key === "avatar_discord" && (
+                        <Typography
+                          variant="subtitle1"
+                          component="h3"
+                          sx={{
+                            mt: 2,
+                            mb: 1.5,
+                            fontWeight: 600,
+                            color: "var(--color-primary-text)",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          Avatar Settings
+                        </Typography>
+                      )}
+                    {category === "Appearance Settings" &&
+                      key === "banner_discord" && (
+                        <>
+                          <Divider sx={{ my: 3 }} />
+                          <Typography
+                            variant="subtitle1"
+                            component="h3"
+                            sx={{
+                              mb: 1.5,
+                              fontWeight: 600,
+                              color: "var(--color-primary-text)",
+                              fontSize: "1rem",
+                            }}
+                          >
+                            Banner Settings
+                          </Typography>
+                        </>
+                      )}
                     <SettingToggle
                       name={typedKey}
                       value={settings[typedKey]}

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Box, TextField, Button, Typography, Chip } from "@mui/material";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { TrophyIcon } from "@heroicons/react/24/solid";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
 import { updateAvatar } from "@/services/settingsService";
@@ -250,9 +250,12 @@ export const AvatarSettings = ({
           >
             <Chip
               icon={
-                <TrophyIcon
-                  className="h-4 w-4"
-                  style={{ color: "var(--color-primary-text)" }}
+                <Image
+                  src="https://assets.jailbreakchangelogs.xyz/assets/website_icons/jbcl_supporter_2.svg"
+                  alt="Supporter Tier 2"
+                  width={16}
+                  height={16}
+                  className="object-contain"
                 />
               }
               label="Supporter Tier 2"

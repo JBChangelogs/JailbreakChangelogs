@@ -76,8 +76,6 @@ export const DeleteAccount = () => {
     <Box
       sx={{
         mt: 2,
-        p: 2,
-        borderRadius: 1,
       }}
     >
       <Box sx={{ mb: 2 }}>

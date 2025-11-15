@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
@@ -73,8 +74,8 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div>
+      <div className="mb-4">
         <h3 className="text-primary-text mb-2 text-lg font-bold">
           Roblox Connection
         </h3>
@@ -87,25 +88,15 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                   href={`https://www.roblox.com/users/${userData.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover inline-flex items-center gap-1 font-bold hover:underline"
+                  className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
                 >
+                  <Icon icon="akar-icons:link-out" className="h-4 w-4" />
                   {userData.roblox_username}
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
                 </a>
               ) : (
-                <span className="font-bold">{userData.roblox_username}</span>
+                <span className="font-semibold">
+                  {userData.roblox_username}
+                </span>
               )}
             </>
           ) : (
