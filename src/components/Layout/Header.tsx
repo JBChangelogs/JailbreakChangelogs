@@ -6,19 +6,12 @@ import { usePathname } from "next/navigation";
 import {
   AppBar,
   Toolbar,
-  Button,
   Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
   Typography,
-  ListItemIcon,
-  Divider,
   Tooltip,
   Pagination,
 } from "@mui/material";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useCallback, useEffect } from "react";
 import {
@@ -76,9 +69,14 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
 
   const displayCount = count > 99 ? "99+" : count.toString();
+  const isDoubleDigit = count > 9 && count <= 99;
 
   return (
-    <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+    <span
+      className={`absolute top-0 right-0 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white z-10 translate-x-1/4 -translate-y-1/2 ${
+        isDoubleDigit || count > 99 ? "h-4 px-1 min-w-[16px]" : "h-4 w-4"
+      }`}
+    >
       {displayCount}
     </span>
   );
@@ -208,376 +206,297 @@ export default function Header() {
   };
 
   const drawer = (
-    <List>
+    <div className="flex flex-col h-full">
       {userData ? (
         <>
-          <ListItem
-            component={Link}
+          <Link
             href={`/users/${userData?.id}`}
             onClick={handleDrawerToggle}
-            className="cursor-pointer hover:bg-button-info-hover/10"
-            sx={{
-              padding: "12px 16px",
-              borderBottom: "1px solid var(--color-border-secondary)",
-            }}
+            className="flex items-center gap-3 min-w-0 w-full pr-8 px-4 py-3 border-b border-border-secondary cursor-pointer hover:bg-button-info-hover/10 transition-colors"
           >
-            <div className="flex items-center gap-3 min-w-0 w-full pr-8">
-              <UserAvatar
-                userId={userData.id}
-                avatarHash={userData.avatar}
-                username={userData.username}
-                size={10}
-                custom_avatar={userData.custom_avatar}
-                showBadge={false}
-                settings={userData.settings}
-                premiumType={userData.premiumtype}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="text-primary-text font-semibold truncate max-w-[120px]">
-                  {userData.global_name || userData.username}
-                </div>
-                <div className="text-secondary-text text-sm">
-                  @{userData.username}
-                </div>
+            <UserAvatar
+              userId={userData.id}
+              avatarHash={userData.avatar}
+              username={userData.username}
+              size={10}
+              custom_avatar={userData.custom_avatar}
+              showBadge={false}
+              settings={userData.settings}
+              premiumType={userData.premiumtype}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="text-primary-text font-semibold truncate max-w-[120px]">
+                {userData.global_name || userData.username}
+              </div>
+              <div className="text-secondary-text text-sm">
+                @{userData.username}
               </div>
             </div>
-          </ListItem>
+          </Link>
           {!userData.roblox_id && (
-            <ListItem
-              component="div"
+            <div
               onClick={() => {
                 handleDrawerToggle();
                 setShowLoginModal(true);
                 const event = new CustomEvent("setLoginTab", { detail: 1 });
                 window.dispatchEvent(event);
               }}
-              className="cursor-pointer"
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
             >
-              <ListItemIcon
-                sx={{ color: "var(--color-primary-text) !important" }}
-              >
-                <RobloxIcon className="h-5 w-5" />
-              </ListItemIcon>
-              <ListItemText primary="Connect Roblox" />
-            </ListItem>
+              <RobloxIcon className="h-5 w-5 text-primary-text" />
+              <span className="text-primary-text">Connect Roblox</span>
+            </div>
           )}
-          <ListItem
-            component={Link}
+          <Link
             href="/settings"
             onClick={handleDrawerToggle}
-            className="cursor-pointer"
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
           >
-            <ListItemIcon>
-              <Icon
-                icon="material-symbols:settings"
-                className="text-primary-text"
-                inline={true}
-              />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ color: "var(--color-primary-text)" }}>
-                  Settings
-                </Typography>
-              }
+            <Icon
+              icon="material-symbols:settings"
+              className="text-primary-text h-5 w-5"
+              inline={true}
             />
-          </ListItem>
-          <ListItem
-            component="div"
+            <span className="text-primary-text">Settings</span>
+          </Link>
+          <div
             onClick={handleLogout}
-            className="cursor-pointer"
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
           >
-            <ListItemIcon>
-              <Icon
-                icon="material-symbols:logout"
-                className="text-button-danger"
-                inline={true}
-              />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ color: "var(--color-button-danger)" }}>
-                  Logout
-                </Typography>
-              }
+            <Icon
+              icon="material-symbols:logout"
+              className="text-button-danger h-5 w-5"
+              inline={true}
             />
-          </ListItem>
+            <span className="text-button-danger">Logout</span>
+          </div>
         </>
       ) : (
-        <>
-          <ListItem>
-            <Button
-              variant="contained"
-              onClick={() => {
-                setShowLoginModal(true);
-                handleDrawerToggle();
-              }}
-              className="bg-button-info text-form-button-text"
-            >
-              Login
-            </Button>
-          </ListItem>
-        </>
+        <div className="px-4 py-3">
+          <button
+            onClick={() => {
+              setShowLoginModal(true);
+              handleDrawerToggle();
+            }}
+            className="bg-button-info hover:bg-button-info-hover text-form-button-text cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
+          >
+            Login
+          </button>
+        </div>
       )}
 
-      <ListItem>
+      <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Game & Updates
         </Typography>
-      </ListItem>
+      </div>
 
-      <ListItem
-        component={Link}
+      <Link
         href="/changelogs"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Changelogs" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Changelogs
+      </Link>
+      <Link
         href="/seasons"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Browse Seasons" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Browse Seasons
+      </Link>
+      <Link
         href="/seasons/leaderboard"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Season Leaderboard</span>
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem
-        component={Link}
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Season Leaderboard</span>
+        </Box>
+      </Link>
+      <Link
         href="/seasons/will-i-make-it"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Will I Make It</span>
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem
-        component={Link}
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Will I Make It</span>
+        </Box>
+      </Link>
+      <Link
         href="/seasons/contracts"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Weekly Contracts</span>
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem>
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Weekly Contracts</span>
+        </Box>
+      </Link>
+      <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Calculators
         </Typography>
-      </ListItem>
-      <ListItem
-        component={Link}
+      </div>
+      <Link
         href="/calculators"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="All Calculators" />
-      </ListItem>
-      <ListItem>
+        All Calculators
+      </Link>
+      <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Values
         </Typography>
-      </ListItem>
-      <ListItem
-        component={Link}
+      </div>
+      <Link
         href="/values"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Value List" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Value List
+      </Link>
+      <Link
         href="/values/changelogs"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Value Changelogs" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Value Changelogs
+      </Link>
+      <Link
         href="/values/calculator"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Value Calculator" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Value Calculator
+      </Link>
+      <Link
         href="/dupes"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Dupe Finder</span>
-              {isFeatureEnabled("DUPE_FINDER") ? (
-                <></>
-              ) : (
-                <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  Coming Soon
-                </span>
-              )}
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem
-        component={Link}
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Dupe Finder</span>
+          {isFeatureEnabled("DUPE_FINDER") ? (
+            <></>
+          ) : (
+            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+              Coming Soon
+            </span>
+          )}
+        </Box>
+      </Link>
+      <Link
         href="/dupes/calculator"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Dupe Calculator" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Dupe Calculator
+      </Link>
+      <Link
         href="/trading"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Trade Ads" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Trade Ads
+      </Link>
+      <Link
         href="/inventories"
         onClick={handleDrawerToggle}
-        className="group cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text group"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>Inventory Checker</span>
-              {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-                <></>
-              ) : (
-                <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  Coming Soon
-                </span>
-              )}
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem
-        component={Link}
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Inventory Checker</span>
+          {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
+            <></>
+          ) : (
+            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+              Coming Soon
+            </span>
+          )}
+        </Box>
+      </Link>
+      <Link
         href="/og"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText
-          primary={
-            <Box className="flex flex-wrap items-center gap-1">
-              <span>OG Finder</span>
-              {isFeatureEnabled("OG_FINDER") ? (
-                <></>
-              ) : (
-                <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-                  Coming Soon
-                </span>
-              )}
-            </Box>
-          }
-        />
-      </ListItem>
-      <ListItem>
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>OG Finder</span>
+          {isFeatureEnabled("OG_FINDER") ? (
+            <></>
+          ) : (
+            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+              Coming Soon
+            </span>
+          )}
+        </Box>
+      </Link>
+      <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Community
         </Typography>
-      </ListItem>
-      <ListItem
-        component={Link}
+      </div>
+      <Link
         href="/users"
         prefetch={false}
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="User Search" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        User Search
+      </Link>
+      <Link
         href="/leaderboard/money"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Money Leaderboard" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Money Leaderboard
+      </Link>
+      <Link
         href="/inventories/networth"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Networth Leaderboard" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Networth Leaderboard
+      </Link>
+      <Link
         href="/servers"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Private Servers" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Private Servers
+      </Link>
+      <Link
         href="/bot"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Discord Bot" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Discord Bot
+      </Link>
+      <Link
         href="/faq"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="FAQ" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        FAQ
+      </Link>
+      <Link
         href="/contributors"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Meet the team" />
-      </ListItem>
-      <ListItem
-        component={Link}
+        Meet the team
+      </Link>
+      <Link
         href="/testimonials"
         onClick={handleDrawerToggle}
-        className="cursor-pointer pl-4"
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
-        <ListItemText primary="Testimonials" />
-      </ListItem>
+        Testimonials
+      </Link>
 
-      <Divider className="my-4" />
-    </List>
+      <div className="border-t border-border-primary my-4" />
+    </div>
   );
 
   return (
@@ -591,44 +510,10 @@ export default function Header() {
       </div>
 
       {/* Mobile header - hidden on desktop via CSS */}
-      <div className="block xl:hidden">
+      <div className="sticky top-0 z-[1400] block xl:hidden">
         <>
-          {/* Fixed menu toggle button */}
-          <label
-            className="swap swap-rotate cursor-pointer fixed top-[14px] right-4 z-[1500]"
-            aria-label="toggle menu"
-          >
-            <input
-              type="checkbox"
-              checked={mobileOpen}
-              onChange={handleDrawerToggle}
-            />
-
-            {/* hamburger icon */}
-            <svg
-              className="swap-off fill-current text-primary-text"
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 512 512"
-            >
-              <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
-            </svg>
-
-            {/* close icon */}
-            <svg
-              className="swap-on fill-current text-primary-text"
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 512 512"
-            >
-              <polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
-            </svg>
-          </label>
-
-          <div className="sticky top-0 z-[1400]">
-            <ServiceAvailabilityTicker />
+          <ServiceAvailabilityTicker />
+          <div className="relative z-10">
             <AppBar
               position="static"
               color="transparent"
@@ -653,7 +538,7 @@ export default function Header() {
                     />
                   </Link>
                 </Box>
-                <Box className="flex items-center gap-1">
+                <Box className="flex items-center gap-2">
                   {/* Notification icon */}
                   <Popover
                     open={notificationMenuOpen}
@@ -667,38 +552,21 @@ export default function Header() {
                       }
                     }}
                   >
-                    <Tooltip
-                      title="Notifications"
-                      arrow
-                      placement="top"
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            "& .MuiTooltip-arrow": {
-                              color: "var(--color-secondary-bg)",
-                            },
-                          },
-                        },
-                      }}
-                    >
-                      <PopoverTrigger asChild>
-                        <IconButton
-                          className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg relative transition-colors duration-200"
-                          aria-label="Notifications"
-                        >
-                          <Icon
-                            icon="mingcute:notification-line"
-                            className="h-5 w-5"
-                            inline={true}
-                          />
-                          {isAuthenticated && (
-                            <UnreadNotificationBadge count={unreadCount} />
-                          )}
-                        </IconButton>
-                      </PopoverTrigger>
-                    </Tooltip>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="relative flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 p-1"
+                        aria-label="Notifications"
+                      >
+                        <Icon
+                          icon="mingcute:notification-line"
+                          className="h-5 w-5 text-primary-text"
+                          inline={true}
+                        />
+                        {isAuthenticated && (
+                          <UnreadNotificationBadge count={unreadCount} />
+                        )}
+                      </button>
+                    </PopoverTrigger>
 
                     <PopoverContent
                       align="center"
@@ -1020,74 +888,53 @@ export default function Header() {
                       </div>
                     </PopoverContent>
                   </Popover>
-                  <Tooltip
-                    title="Support us"
-                    arrow
-                    placement="bottom"
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          "& .MuiTooltip-arrow": {
-                            color: "var(--color-secondary-bg)",
-                          },
-                        },
-                      },
-                    }}
+                  <Link
+                    href="/supporting"
+                    className="flex items-center justify-center"
                   >
-                    <Link href="/supporting">
-                      <IconButton
-                        className="text-tertiary-text hover:bg-quaternary-bg transition-colors duration-200"
-                        aria-label="Support us"
-                      >
-                        <Image
-                          src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
-                          alt="Ko-fi"
-                          width={22}
-                          height={22}
-                          style={{ display: "block" }}
-                        />
-                      </IconButton>
-                    </Link>
-                  </Tooltip>
-                  <AnimatedThemeToggler />
-                  <div className="w-8 h-8" /> {/* Spacer for layout */}
+                    <button
+                      className="flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                      aria-label="Support us"
+                    >
+                      <Image
+                        src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                        alt="Ko-fi"
+                        width={20}
+                        height={20}
+                        style={{ display: "block" }}
+                      />
+                    </button>
+                  </Link>
+                  <div className="flex items-center justify-center">
+                    <AnimatedThemeToggler />
+                  </div>
+                  <button
+                    onClick={handleDrawerToggle}
+                    className="flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                    aria-label="toggle menu"
+                  >
+                    <svg
+                      className="h-5 w-5 fill-current text-primary-text"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 512"
+                    >
+                      <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
+                    </svg>
+                  </button>
                 </Box>
               </Toolbar>
             </AppBar>
           </div>
 
           {/* Mobile Drawer */}
-          <Drawer
-            variant="temporary"
-            anchor="right"
-            open={mobileOpen}
-            onClose={handleDrawerToggle}
-            ModalProps={{
-              keepMounted: true,
-            }}
-            slotProps={{
-              paper: {
-                sx: {
-                  backdropFilter: "blur(12px)",
-                  backgroundImage: "none",
-                  color: "var(--color-primary-text)",
-                  borderLeft: "1px solid var(--color-border-primary)",
-                  width: "15rem",
-                  boxSizing: "border-box",
-                  boxShadow: "none",
-                  zIndex: 1450,
-                },
-              },
-            }}
-            sx={{
-              zIndex: 1450,
-            }}
-            className="[&_.MuiDrawer-paper]:bg-primary-bg/75 [&_.MuiDrawer-paper]:border-border-primary [&_.MuiDrawer-paper]:text-primary-text [&_.MuiDrawer-paper]:supports-[backdrop-filter]:bg-primary-bg/75 [&_.MuiDrawer-paper]:box-border [&_.MuiDrawer-paper]:w-60 [&_.MuiDrawer-paper]:border-l [&_.MuiDrawer-paper]:backdrop-blur-lg"
-          >
-            {drawer}
-          </Drawer>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetContent
+              side="right"
+              className="w-60 p-0 overflow-y-auto z-[1450]"
+            >
+              {drawer}
+            </SheetContent>
+          </Sheet>
         </>
       </div>
 
