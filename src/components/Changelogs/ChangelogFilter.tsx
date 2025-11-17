@@ -3,7 +3,6 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { ClockIcon as ClockIconSolid } from "@heroicons/react/24/solid";
-import { Icon } from "../ui/IconWrapper";
 import ChangelogSearchInput from "./ChangelogSearchInput";
 
 interface SearchResult {
@@ -102,8 +101,8 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
               selectedId
             }
           >
-            <span>Go to Latest Update</span>
             <ClockIcon className="h-4 w-4" />
+            <span>Go to Latest Update</span>
           </button>
         )}
 
@@ -112,31 +111,9 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
           href="/changelogs/timeline"
           className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
         >
-          <span>View Timeline</span>
           <ClockIconSolid className="h-4 w-4" />
+          <span>View Timeline</span>
         </Link>
-
-        {/* Random Changelog Button */}
-        <button
-          onClick={() => {
-            const randomIndex = Math.floor(
-              Math.random() * changelogList.length,
-            );
-            const randomChangelog = changelogList[randomIndex];
-            onChangelogSelect(randomChangelog.id.toString());
-            toast.success(
-              `Navigated to random changelog: ${randomChangelog.title}`,
-            );
-          }}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
-        >
-          <span>Random Changelog</span>
-          <Icon
-            icon="streamline-ultimate:dice-bold"
-            className="h-4 w-4"
-            inline={true}
-          />
-        </button>
       </div>
     </div>
   );
