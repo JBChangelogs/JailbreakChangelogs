@@ -34,29 +34,7 @@ interface ItemCardProps {
   onFavoriteChange: (isFavorited: boolean) => void;
 }
 
-interface SubItem {
-  id: number;
-  parent: number;
-  sub_name: string;
-  created_at: number;
-  data: {
-    name: string;
-    type: string;
-    creator: string;
-    is_seasonal: number | null;
-    cash_value: string;
-    duped_value: string;
-    price: string;
-    is_limited: number | null;
-    duped_owners: string;
-    notes: string;
-    demand: string;
-    description: string;
-    health: number;
-    tradable: boolean;
-    last_updated: number;
-  };
-}
+type SubItem = NonNullable<Item["children"]>[number];
 
 export default function ItemCard({
   item,
@@ -322,11 +300,10 @@ export default function ItemCard({
         {hasChildren && item.children && (
           <div className="absolute top-2 right-2 z-20">
             <SubItemsDropdown
+              items={item.children}
               onSelect={setSelectedSubItem}
               selectedSubItem={selectedSubItem}
-            >
-              {item.children}
-            </SubItemsDropdown>
+            />
           </div>
         )}
         <div
@@ -657,11 +634,12 @@ export default function ItemCard({
                     </span>
                   </div>
                   <span
-                    className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5`}
+                    className={`${getTrendColor(currentItemData.trend || "N/A")} rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5`}
                   >
-                    {item.trend === null || item.trend === "N/A"
+                    {currentItemData.trend === null ||
+                    currentItemData.trend === "N/A"
                       ? "Unknown"
-                      : item.trend}
+                      : currentItemData.trend}
                   </span>
                 </div>
               )}

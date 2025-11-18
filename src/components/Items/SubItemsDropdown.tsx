@@ -1,45 +1,23 @@
 import { useEffect, useRef } from "react";
 import FloatingDropdown from "@/components/common/FloatingDropdown";
 
-interface SubItem {
-  id: number;
-  parent: number;
-  sub_name: string;
-  created_at: number;
-  data: {
-    name: string;
-    type: string;
-    creator: string;
-    is_seasonal: number | null;
-    cash_value: string;
-    duped_value: string;
-    price: string;
-    is_limited: number | null;
-    duped_owners: string;
-    notes: string;
-    demand: string;
-    description: string;
-    health: number;
-    tradable: boolean;
-    last_updated: number;
-  };
-}
+type SubItem = NonNullable<import("@/types").Item["children"]>[number];
 
 interface SubItemsDropdownProps {
-  children: SubItem[];
+  items: SubItem[];
   onSelect: (subItem: SubItem | null) => void;
   selectedSubItem: SubItem | null;
 }
 
 export default function SubItemsDropdown({
-  children,
+  items,
   onSelect,
   selectedSubItem,
 }: SubItemsDropdownProps) {
   const hasInitialized = useRef(false);
 
-  // Sort children by sub_name in descending order (newest first)
-  const sortedChildren = [...children].sort((a, b) => {
+  // Sort items by sub_name in descending order (newest first)
+  const sortedChildren = [...items].sort((a, b) => {
     return parseInt(b.sub_name) - parseInt(a.sub_name);
   });
 

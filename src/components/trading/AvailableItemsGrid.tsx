@@ -312,6 +312,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           cash_value: selectedChild.data.cash_value,
           duped_value: selectedChild.data.duped_value,
           demand: selectedChild.data.demand,
+          trend: selectedChild.data.trend,
           sub_name: selectedVariant,
           base_name: item.name,
           side,
@@ -806,11 +807,33 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                           Trend
                                         </span>
                                         <span
-                                          className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
+                                          className={`${getTrendColor(
+                                            selectedVariants[item.id] &&
+                                              selectedVariants[item.id] !==
+                                                "2025"
+                                              ? item.children?.find(
+                                                  (child) =>
+                                                    child.sub_name ===
+                                                    selectedVariants[item.id],
+                                                )?.data.trend || "N/A"
+                                              : item.trend || "N/A",
+                                          )} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
                                         >
-                                          {!item.trend || item.trend === "N/A"
-                                            ? "Unknown"
-                                            : item.trend}
+                                          {(() => {
+                                            const trend =
+                                              selectedVariants[item.id] &&
+                                              selectedVariants[item.id] !==
+                                                "2025"
+                                                ? item.children?.find(
+                                                    (child) =>
+                                                      child.sub_name ===
+                                                      selectedVariants[item.id],
+                                                  )?.data.trend
+                                                : item.trend;
+                                            return !trend || trend === "N/A"
+                                              ? "Unknown"
+                                              : trend;
+                                          })()}
                                         </span>
                                       </div>
                                     </div>

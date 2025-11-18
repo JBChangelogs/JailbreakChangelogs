@@ -29,6 +29,7 @@ export default function ItemVariantDropdown({
           cash_value: matchingChild.data.cash_value,
           duped_value: matchingChild.data.duped_value,
           demand: matchingChild.data.demand,
+          trend: matchingChild.data.trend,
           notes: matchingChild.data.notes,
           last_updated: matchingChild.data.last_updated,
         };
@@ -71,6 +72,7 @@ export default function ItemVariantDropdown({
           cash_value: selectedChild.data.cash_value,
           duped_value: selectedChild.data.duped_value,
           demand: selectedChild.data.demand,
+          trend: selectedChild.data.trend,
           notes: selectedChild.data.notes,
           last_updated: selectedChild.data.last_updated,
         };
