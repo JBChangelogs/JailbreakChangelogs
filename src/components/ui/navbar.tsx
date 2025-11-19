@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -199,6 +199,18 @@ export const Badge = ({
   return <span className={`${baseClasses} ${variantClasses}`}>{children}</span>;
 };
 
+const UnreadNotificationBadge = ({ count }: { count: number }) => {
+  if (count === 0) return null;
+
+  const displayCount = count > 99 ? "99+" : count.toString();
+
+  return (
+    <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+      {displayCount}
+    </span>
+  );
+};
+
 export const NavbarModern = ({ className }: { className?: string }) => {
   const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -213,6 +225,8 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
@@ -252,8 +266,46 @@ export const NavbarModern = ({ className }: { className?: string }) => {
     isAuthenticated,
     logout,
   } = useAuthContext();
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/notifications/unread", {
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.unread_count || 0);
+      } else {
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      setUnreadCount(0);
+    }
+  }, [isAuthenticated]);
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (mounted) {
+      fetchUnreadCount();
+    }
+  }, [mounted, isAuthenticated, fetchUnreadCount]);
+
+  React.useEffect(() => {
+    if (mounted && isAuthenticated) {
+      fetchUnreadCount();
+    }
+  }, [pathname, mounted, isAuthenticated, fetchUnreadCount]);
 
   const isCollabPage =
     pathname === "/values" ||
@@ -441,12 +493,15 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               }}
             >
               <PopoverTrigger asChild>
-                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200">
+                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200">
                   <Icon
-                    icon="streamline-plump:mail-notification-remix"
+                    icon="mingcute:notification-line"
                     className="h-5 w-5"
                     inline={true}
                   />
+                  {isAuthenticated && (
+                    <UnreadNotificationBadge count={unreadCount} />
+                  )}
                 </button>
               </PopoverTrigger>
             </Tooltip>
@@ -494,6 +549,8 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             setNotifications(data);
                             setNotificationPage(1);
                             setIsLoadingNotifications(false);
+                            // Refresh unread count
+                            fetchUnreadCount();
                           } else {
                             toast.error(
                               notificationTab === "unread"
@@ -570,18 +627,37 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                   <>
                     <div className="py-2">
                       {notifications.items.map((notif) => {
-                        // Check if link domain is whitelisted
-                        const isWhitelistedDomain = (() => {
+                        // Check if link domain is whitelisted and extract URL info
+                        const urlInfo = (() => {
                           try {
                             const url = new URL(notif.link);
-                            return (
+                            const isJailbreakChangelogs =
                               url.hostname === "jailbreakchangelogs.xyz" ||
-                              url.hostname === "www.jailbreakchangelogs.xyz" ||
+                              url.hostname.endsWith(".jailbreakchangelogs.xyz");
+                            const isWhitelisted =
+                              isJailbreakChangelogs ||
                               url.hostname === "google.com" ||
-                              url.hostname === "www.google.com"
-                            );
+                              url.hostname.endsWith(".google.com");
+
+                            if (isJailbreakChangelogs) {
+                              // Extract relative path (pathname + search + hash)
+                              const relativePath =
+                                url.pathname + url.search + url.hash;
+                              return {
+                                isWhitelisted: true,
+                                isJailbreakChangelogs: true,
+                                relativePath,
+                              };
+                            } else if (isWhitelisted) {
+                              return {
+                                isWhitelisted: true,
+                                isJailbreakChangelogs: false,
+                                href: notif.link,
+                              };
+                            }
+                            return { isWhitelisted: false };
                           } catch {
-                            return false;
+                            return { isWhitelisted: false };
                           }
                         })();
 
@@ -624,6 +700,8 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                             );
                                           setNotifications(data);
                                           setIsLoadingNotifications(false);
+                                          // Refresh unread count
+                                          fetchUnreadCount();
                                         }
                                       }}
                                       className={`flex-shrink-0 rounded-full p-1 transition-all cursor-pointer ${
@@ -645,15 +723,26 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                               <p className="text-secondary-text text-xs mt-1">
                                 {notif.description}
                               </p>
-                              {isWhitelistedDomain ? (
-                                <a
-                                  href={notif.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
-                                >
-                                  View
-                                </a>
+                              {urlInfo.isWhitelisted ? (
+                                urlInfo.isJailbreakChangelogs &&
+                                urlInfo.relativePath ? (
+                                  <Link
+                                    href={urlInfo.relativePath}
+                                    prefetch={false}
+                                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                  >
+                                    View
+                                  </Link>
+                                ) : urlInfo.href ? (
+                                  <a
+                                    href={urlInfo.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                  >
+                                    View
+                                  </a>
+                                ) : null
                               ) : (
                                 <p className="text-secondary-text text-xs mt-1 break-all">
                                   {notif.link}
@@ -707,7 +796,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 px-4">
                     <Icon
-                      icon="streamline-plump:mail-notification-remix"
+                      icon="mingcute:notification-line"
                       className="text-secondary-text h-12 w-12 mb-3"
                       inline={true}
                     />
@@ -754,7 +843,15 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           <AnimatedThemeToggler />
 
           {/* User menu or login button */}
-          {userData ? (
+          {!mounted ? (
+            // Show login button during SSR and initial hydration to prevent mismatch
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
+            >
+              Login
+            </button>
+          ) : userData ? (
             <div
               className="relative"
               onMouseEnter={() => setUserMenuOpen(true)}
