@@ -9,6 +9,7 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { fetchComments } from "@/utils/api";
 import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
+import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
@@ -65,15 +66,19 @@ export default async function InventoryCheckerPage({
       </div>
       <ExperimentalFeatureBanner className="mb-6" />
 
-      <Suspense
-        fallback={<InventoryCheckerClient robloxId={userid} isLoading={true} />}
-      >
-        <InventoryDataStreamer
-          robloxId={userid}
-          initialComments={commentsData.comments}
-          initialCommentUserMap={commentsData.userMap}
-        />
-      </Suspense>
+      <PremiumAwareLayout>
+        <Suspense
+          fallback={
+            <InventoryCheckerClient robloxId={userid} isLoading={true} />
+          }
+        >
+          <InventoryDataStreamer
+            robloxId={userid}
+            initialComments={commentsData.comments}
+            initialCommentUserMap={commentsData.userMap}
+          />
+        </Suspense>
+      </PremiumAwareLayout>
     </div>
   );
 }

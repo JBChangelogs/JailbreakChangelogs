@@ -19,7 +19,6 @@ import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
@@ -752,9 +751,6 @@ export default function InventoryCheckerClient({
               onRefresh={handleDataRefresh}
               currentSeason={currentSeason}
             />
-
-            {/* Ad Section - Only show for non-premium users */}
-            <InventoryAdSection className="my-6" />
 
             {/* Tabbed Interface */}
             <div className="mt-6">

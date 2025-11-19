@@ -7,9 +7,6 @@ import { RobloxUser, Item } from "@/types";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { useAuthContext } from "@/contexts/AuthContext";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -67,8 +64,6 @@ export default function OGFinderResults({
 }: OGFinderResultsProps) {
   "use memo";
   const router = useRouter();
-  const { user } = useAuthContext();
-  const currentUserPremiumType = user?.premiumtype || 0;
   const { getId } = useUsernameToId();
 
   // State management
@@ -431,45 +426,16 @@ export default function OGFinderResults({
       {/* User Info and Results - Only show when no error and has data */}
       {!error && initialData?.results && initialData.results.length > 0 && (
         <>
-          {/* User Info with Side-by-Side Layout */}
-          <div
-            className={`grid gap-6 ${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
-          >
-            {/* User Information - Takes up full width for premium users, 2/3 for non-premium */}
-            <div
-              className={`${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "lg:col-span-2" : ""}`}
-            >
-              <OGUserInfo
-                robloxId={robloxId}
-                userConnectionData={userConnectionData}
-                getUserDisplay={getUserDisplay}
-                getUsername={getUsername}
-                getUserAvatar={getUserAvatar}
-                getHasVerifiedBadge={getHasVerifiedBadge}
-                originalItemsCount={initialData?.count || 0}
-              />
-            </div>
-
-            {/* Ad - Takes up 1/3 of the space, only show for non-premium users (premium types 1-3 are valid) */}
-            {(currentUserPremiumType === 0 || currentUserPremiumType > 3) && (
-              <div className="flex flex-col items-center lg:col-span-1">
-                <span className="text-secondary-text mb-2 block text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div
-                  className="relative h-full overflow-hidden rounded-lg transition-all duration-300"
-                  style={{ minHeight: "250px" }}
-                >
-                  <DisplayAd
-                    adSlot="2726163589"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            )}
-          </div>
+          {/* User Info */}
+          <OGUserInfo
+            robloxId={robloxId}
+            userConnectionData={userConnectionData}
+            getUserDisplay={getUserDisplay}
+            getUsername={getUsername}
+            getUserAvatar={getUserAvatar}
+            getHasVerifiedBadge={getHasVerifiedBadge}
+            originalItemsCount={initialData?.count || 0}
+          />
 
           {/* Filters */}
           <OGFilters

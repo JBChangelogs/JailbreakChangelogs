@@ -7,9 +7,6 @@ import { UserConnectionData } from "@/app/inventories/types";
 import { parseCurrencyValue } from "@/utils/currency";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "../ui/IconWrapper";
 import { logError } from "@/services/logger";
 import DupeUserInfo from "./DupeUserInfo";
@@ -109,9 +106,6 @@ export default function DupeFinderResults({
     () => mergeDupeFinderArrayWithMetadata(initialData, itemsData),
     [initialData, itemsData],
   );
-
-  const { user } = useAuthContext();
-  const currentUserPremiumType = user?.premiumtype || 0;
 
   // Filter out user IDs we already have data for
   const missingUserIds = visibleUserIds.filter(
@@ -355,44 +349,16 @@ export default function DupeFinderResults({
       <DupeSearchInput initialValue={robloxId} />
 
       {/* User Info */}
-      <div
-        className={`grid gap-6 ${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
-      >
-        <div
-          className={`${currentUserPremiumType === 0 || currentUserPremiumType > 3 ? "lg:col-span-2" : ""}`}
-        >
-          <DupeUserInfo
-            robloxId={robloxId}
-            userConnectionData={userConnectionData}
-            getUserDisplay={getUserDisplay}
-            getUsername={getUsername}
-            getUserAvatar={getUserAvatar}
-            getHasVerifiedBadge={getHasVerifiedBadge}
-            dupeItemsCount={mergedDupeData.length}
-            totalDupedValue={totalDupedValue}
-          />
-        </div>
-
-        {/* Ad - Takes up 1/3 of the space, only show for non-premium users (premium types 1-3 are valid) */}
-        {(currentUserPremiumType === 0 || currentUserPremiumType > 3) && (
-          <div className="flex flex-col items-center lg:col-span-1">
-            <span className="text-secondary-text mb-2 block text-center text-xs">
-              ADVERTISEMENT
-            </span>
-            <div
-              className="relative h-full overflow-hidden rounded-lg transition-all duration-300"
-              style={{ minHeight: "250px" }}
-            >
-              <DisplayAd
-                adSlot="9566904102"
-                adFormat="auto"
-                style={{ display: "block", width: "100%", height: "100%" }}
-              />
-            </div>
-            <AdRemovalNotice className="mt-2" />
-          </div>
-        )}
-      </div>
+      <DupeUserInfo
+        robloxId={robloxId}
+        userConnectionData={userConnectionData}
+        getUserDisplay={getUserDisplay}
+        getUsername={getUsername}
+        getUserAvatar={getUserAvatar}
+        getHasVerifiedBadge={getHasVerifiedBadge}
+        dupeItemsCount={mergedDupeData.length}
+        totalDupedValue={totalDupedValue}
+      />
 
       {/* Filters */}
       <DupeFilters

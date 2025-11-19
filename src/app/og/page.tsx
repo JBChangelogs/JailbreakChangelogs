@@ -11,6 +11,7 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
+import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
@@ -39,17 +40,19 @@ export default async function OGFinderPage() {
 
       <OGFinderDescription />
 
-      <OGFinderClient />
+      <PremiumAwareLayout>
+        <OGFinderClient />
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsPolling />
-      </Suspense>
+        <Suspense fallback={<StatsSkeleton />}>
+          <StatsPolling />
+        </Suspense>
 
-      <ConnectedBotsPolling />
+        <ConnectedBotsPolling />
 
-      <OfficialBotsSection />
+        <OfficialBotsSection />
 
-      <OGFinderFAQ />
+        <OGFinderFAQ />
+      </PremiumAwareLayout>
     </div>
   );
 }

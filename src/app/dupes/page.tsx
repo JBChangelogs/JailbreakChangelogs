@@ -10,6 +10,7 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
+import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
@@ -45,17 +46,19 @@ export default async function DupeFinderPage() {
         with that name.
       </p>
 
-      <DupeFinderClient />
+      <PremiumAwareLayout>
+        <DupeFinderClient />
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsPolling />
-      </Suspense>
+        <Suspense fallback={<StatsSkeleton />}>
+          <StatsPolling />
+        </Suspense>
 
-      <ConnectedBotsPolling />
+        <ConnectedBotsPolling />
 
-      <OfficialBotsSection />
+        <OfficialBotsSection />
 
-      <DupeFinderFAQ />
+        <DupeFinderFAQ />
+      </PremiumAwareLayout>
     </div>
   );
 }

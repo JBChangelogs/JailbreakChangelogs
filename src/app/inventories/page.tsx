@@ -9,10 +9,10 @@ import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
-import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
+import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
@@ -51,22 +51,21 @@ export default async function InventoriesPage() {
       {/* Want on-demand scans section */}
       <ScanOptionSection variant="main" />
 
-      <InventoryCheckerClient />
+      <PremiumAwareLayout>
+        <InventoryCheckerClient />
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsPolling />
-      </Suspense>
+        <Suspense fallback={<StatsSkeleton />}>
+          <StatsPolling />
+        </Suspense>
 
-      {/* Ad Section - Only show for non-premium users */}
-      <InventoryAdSection className="mt-8" />
+        <ConnectedBotsPolling />
 
-      <ConnectedBotsPolling />
+        <OfficialBotsSection />
 
-      <OfficialBotsSection />
-
-      <Suspense fallback={<LeaderboardSkeleton />}>
-        <LeaderboardSection />
-      </Suspense>
+        <Suspense fallback={<LeaderboardSkeleton />}>
+          <LeaderboardSection />
+        </Suspense>
+      </PremiumAwareLayout>
     </div>
   );
 }

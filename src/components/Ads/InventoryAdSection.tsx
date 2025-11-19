@@ -25,42 +25,31 @@ export default function InventoryAdSection({
     <>
       <style jsx>{`
         .responsive-ad-container-inventory {
-          width: 100%;
-          max-width: 320px;
+          width: 320px;
           height: 100px;
-          min-width: 250px;
           border-radius: 8px;
           overflow: hidden;
-          display: block;
+          transition: all 0.3s ease;
         }
 
         @media (min-width: 500px) {
           .responsive-ad-container-inventory {
-            width: 100%;
-            max-width: 336px;
+            width: 336px;
             height: 280px;
-            min-width: 250px;
-            display: block;
           }
         }
 
-        @media (min-width: 700px) {
+        @media (min-width: 768px) {
           .responsive-ad-container-inventory {
-            width: 100%;
-            max-width: 300px;
+            width: 300px;
             height: 250px;
-            min-width: 250px;
-            display: block;
           }
         }
 
-        @media (min-width: 800px) {
+        @media (min-width: 1024px) {
           .responsive-ad-container-inventory {
-            width: 100%;
-            max-width: 728px;
-            height: 90px;
-            min-width: 250px;
-            display: block;
+            width: 300px;
+            height: 600px;
           }
         }
       `}</style>
@@ -71,8 +60,8 @@ export default function InventoryAdSection({
           </span>
           <div className="responsive-ad-container-inventory">
             <DisplayAd
-              adSlot="3210934616"
-              adFormat="fluid"
+              adSlot="2685160663"
+              adFormat="auto"
               style={{ display: "block", width: "100%", height: "100%" }}
             />
           </div>

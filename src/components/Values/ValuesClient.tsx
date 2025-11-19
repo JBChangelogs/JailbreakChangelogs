@@ -435,7 +435,7 @@ export default function ValuesClient({
 
         {premiumStatusLoaded && currentUserPremiumType === 0 && (
           <div className="pl-2 lg:col-span-1 xl:col-span-1 2xl:col-span-1">
-            <div className="sticky top-6">
+            <div className="sticky top-20">
               <div className="flex flex-col items-center">
                 <span className="text-secondary-text mb-2 block w-full text-center text-xs">
                   ADVERTISEMENT
