@@ -5,8 +5,9 @@ import {
   fetchRobloxUsersBatch,
   fetchRobloxAvatars,
   fetchUserByRobloxId,
+  fetchItems,
 } from "@/utils/api";
-import { RobloxUser } from "@/types";
+import { RobloxUser, Item } from "@/types";
 import OGFinderResults from "./OGFinderResults";
 
 interface OGSearchData {
@@ -44,6 +45,7 @@ interface OGFinderDataStreamerProps {
   robloxAvatars?: Record<string, string>;
   error?: string;
   isLoading?: boolean;
+  items?: Item[];
 }
 
 // Loading fallback component
@@ -145,6 +147,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
             robloxUsers={{}}
             robloxAvatars={{}}
             userConnectionData={null}
+            items={[]}
           />
         );
       }
@@ -168,6 +171,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
           robloxUsers={{}}
           robloxAvatars={{}}
           userConnectionData={null}
+          items={[]}
         />
       );
     }
@@ -185,6 +189,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         robloxUsers={{}}
         robloxAvatars={{}}
         userConnectionData={null}
+        items={[]}
       />
     );
   }
@@ -199,6 +204,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         robloxUsers={{}}
         robloxAvatars={{}}
         userConnectionData={null}
+        items={[]}
       />
     );
   }
@@ -239,21 +245,26 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     }
   }
 
-  // Get the main user's data (the one being searched) and connection data
-  const [mainUserData, mainUserAvatar, userConnectionData] = await Promise.all([
-    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
-      console.error("Failed to fetch main user data:", error);
-      return {};
-    }),
-    fetchRobloxAvatars([actualRobloxId]).catch((error) => {
-      console.error("Failed to fetch main user avatar:", error);
-      return {};
-    }),
-    fetchUserByRobloxId(actualRobloxId).catch((error) => {
-      console.error("Failed to fetch user connection data:", error);
-      return null;
-    }),
-  ]);
+  // Get the main user's data (the one being searched), connection data, and items metadata
+  const [mainUserData, mainUserAvatar, userConnectionData, items] =
+    await Promise.all([
+      fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
+        console.error("Failed to fetch main user data:", error);
+        return {};
+      }),
+      fetchRobloxAvatars([actualRobloxId]).catch((error) => {
+        console.error("Failed to fetch main user avatar:", error);
+        return {};
+      }),
+      fetchUserByRobloxId(actualRobloxId).catch((error) => {
+        console.error("Failed to fetch user connection data:", error);
+        return null;
+      }),
+      fetchItems().catch((error) => {
+        console.error("Failed to fetch items metadata:", error);
+        return [];
+      }),
+    ]);
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, RobloxUser> = {};
@@ -310,6 +321,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       robloxUsers={robloxUsers}
       robloxAvatars={robloxAvatars}
       userConnectionData={userConnectionData}
+      items={items}
     />
   );
 }

@@ -79,7 +79,19 @@ export default function DupeItemCard({
 
       {/* Title */}
       <div className="mb-4 text-left">
-        <div className="mb-1 flex items-center gap-2">
+        <h2
+          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
+        >
+          <Link
+            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:text-link-hover transition-colors"
+            prefetch={false}
+          >
+            {item.title}
+          </Link>
+        </h2>
+        <div className="flex items-center gap-2">
           <span
             className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
             style={{
@@ -99,18 +111,6 @@ export default function DupeItemCard({
             {item.categoryTitle}
           </span>
         </div>
-        <h2
-          className={`${bangers.className} text-primary-text text-2xl tracking-wide break-words`}
-        >
-          <Link
-            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="hover:text-link-hover transition-colors"
-            prefetch={false}
-          >
-            {item.title}
-          </Link>
-        </h2>
       </div>
 
       {/* Item Image */}

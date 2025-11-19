@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { RobloxUser } from "@/types";
+import { RobloxUser, Item } from "@/types";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
 import { fetchMissingRobloxData } from "@/app/inventories/actions";
@@ -53,6 +53,7 @@ interface OGFinderResultsProps {
   robloxAvatars: Record<string, string>;
   userConnectionData: UserConnectionData | null;
   error?: string;
+  items?: Item[];
 }
 
 export default function OGFinderResults({
@@ -62,6 +63,7 @@ export default function OGFinderResults({
   robloxAvatars,
   userConnectionData,
   error,
+  items = [],
 }: OGFinderResultsProps) {
   "use memo";
   const router = useRouter();
@@ -77,11 +79,13 @@ export default function OGFinderResults({
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
-    | "traded-desc"
-    | "unique-desc"
     | "created-asc"
     | "created-desc"
     | "duplicates"
+    | "cash-desc"
+    | "cash-asc"
+    | "duped-desc"
+    | "duped-asc"
   >("created-desc");
 
   const [localRobloxUsers, setLocalRobloxUsers] =
@@ -121,6 +125,23 @@ export default function OGFinderResults({
   const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
     setVisibleUserIds(userIds);
   }, []);
+
+  // Create items map for quick lookup of cash values - map by type and name since OG items use instance IDs
+  const itemsMap = new Map(
+    items.map((item) => [`${item.type}-${item.name}`, item]),
+  );
+
+  // Parse values like "23.4m" -> 23400000
+  const parseNumericValue = (value: string | null): number => {
+    if (!value || value === "N/A") return -1;
+    const lower = value.toLowerCase();
+    const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
+    if (Number.isNaN(num)) return -1;
+    if (lower.includes("k")) return num * 1_000;
+    if (lower.includes("m")) return num * 1_000_000;
+    if (lower.includes("b")) return num * 1_000_000_000;
+    return num;
+  };
 
   // Helper functions
   const getUserDisplay = (userId: string) => {
@@ -219,14 +240,46 @@ export default function OGFinderResults({
           return a.title.localeCompare(b.title);
         case "alpha-desc":
           return b.title.localeCompare(a.title);
-        case "traded-desc":
-          return b.timesTraded - a.timesTraded;
-        case "unique-desc":
-          return b.uniqueCirculation - a.uniqueCirculation;
         case "created-asc":
           return a.logged_at - b.logged_at;
         case "created-desc":
           return b.logged_at - a.logged_at;
+        case "cash-desc": {
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+          const aItemData = itemsMap.get(aKey);
+          const bItemData = itemsMap.get(bKey);
+          const aCashValue = parseNumericValue(aItemData?.cash_value || null);
+          const bCashValue = parseNumericValue(bItemData?.cash_value || null);
+          return bCashValue - aCashValue;
+        }
+        case "cash-asc": {
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+          const aItemData = itemsMap.get(aKey);
+          const bItemData = itemsMap.get(bKey);
+          const aCashValue = parseNumericValue(aItemData?.cash_value || null);
+          const bCashValue = parseNumericValue(bItemData?.cash_value || null);
+          return aCashValue - bCashValue;
+        }
+        case "duped-desc": {
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+          const aItemData = itemsMap.get(aKey);
+          const bItemData = itemsMap.get(bKey);
+          const aDupedValue = parseNumericValue(aItemData?.duped_value || null);
+          const bDupedValue = parseNumericValue(bItemData?.duped_value || null);
+          return bDupedValue - aDupedValue;
+        }
+        case "duped-asc": {
+          const aKey = `${a.categoryTitle}-${a.title}`;
+          const bKey = `${b.categoryTitle}-${b.title}`;
+          const aItemData = itemsMap.get(aKey);
+          const bItemData = itemsMap.get(bKey);
+          const aDupedValue = parseNumericValue(aItemData?.duped_value || null);
+          const bDupedValue = parseNumericValue(bItemData?.duped_value || null);
+          return aDupedValue - bDupedValue;
+        }
         default:
           return 0;
       }
@@ -460,6 +513,7 @@ export default function OGFinderResults({
               itemCounts={itemCounts}
               duplicateOrders={duplicateOrders}
               onVisibleUserIdsChange={handleVisibleUserIdsChange}
+              items={items}
             />
           </div>
         </>

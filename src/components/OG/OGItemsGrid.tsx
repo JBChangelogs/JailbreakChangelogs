@@ -3,6 +3,7 @@
 import { useRef, useEffect, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import OGItemCard from "./OGItemCard";
+import { Item } from "@/types";
 
 interface OGItem {
   tradePopularMetric: number;
@@ -33,6 +34,7 @@ interface OGItemsGridProps {
   itemCounts?: Map<string, number>;
   duplicateOrders?: Map<string, number>;
   onVisibleUserIdsChange?: (userIds: string[]) => void;
+  items?: Item[];
 }
 
 export default function OGItemsGrid({
@@ -45,10 +47,21 @@ export default function OGItemsGrid({
   itemCounts = new Map(),
   duplicateOrders = new Map(),
   onVisibleUserIdsChange,
+  items = [],
 }: OGItemsGridProps) {
   "use memo";
   const parentRef = useRef<HTMLDivElement>(null);
   const previousUserIdsRef = useRef<string>("");
+
+  // Create items map for quick lookup - map by type and name since OG items use instance IDs
+  const itemsMap = useMemo(() => {
+    const map = new Map<string, Item>();
+    items.forEach((item) => {
+      const key = `${item.type}-${item.name}`;
+      map.set(key, item);
+    });
+    return map;
+  }, [items]);
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -189,10 +202,14 @@ export default function OGItemsGrid({
                   const uniqueKey = `${item.id}-${item.user_id}-${item.logged_at}`;
                   const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
 
+                  // Lookup item metadata by type and name
+                  const itemData = itemsMap.get(itemKey);
+
                   return (
                     <OGItemCard
                       key={`${item.id}-${item.user_id}-${item.timesTraded}-${item.uniqueCirculation}-${index}`}
                       item={item}
+                      itemData={itemData}
                       getUserDisplay={getUserDisplay}
                       getUserAvatar={getUserAvatar}
                       getHasVerifiedBadge={getHasVerifiedBadge}

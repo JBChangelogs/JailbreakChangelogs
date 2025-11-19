@@ -14,6 +14,8 @@ import {
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { formatFullValue } from "@/utils/values";
+import { Item } from "@/types";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -57,6 +59,7 @@ interface OGItem {
 
 interface OGItemCardProps {
   item: OGItem;
+  itemData?: Item;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge?: (userId: string) => boolean;
@@ -67,6 +70,7 @@ interface OGItemCardProps {
 
 export default function OGItemCard({
   item,
+  itemData,
   getUserDisplay,
   // getUserAvatar,
   getHasVerifiedBadge,
@@ -102,7 +106,19 @@ export default function OGItemCard({
 
       {/* Title */}
       <div className="mb-4 text-left">
-        <div className="mb-1 flex items-center gap-2">
+        <h2
+          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
+        >
+          <Link
+            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:text-link-hover transition-colors"
+            prefetch={false}
+          >
+            {item.title}
+          </Link>
+        </h2>
+        <div className="flex items-center gap-2">
           <span
             className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
             style={{
@@ -122,18 +138,6 @@ export default function OGItemCard({
             {item.categoryTitle}
           </span>
         </div>
-        <h2
-          className={`${bangers.className} text-primary-text text-2xl tracking-wide break-words`}
-        >
-          <Link
-            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="hover:text-link-hover transition-colors"
-            prefetch={false}
-          >
-            {item.title}
-          </Link>
-        </h2>
       </div>
 
       {/* Item Image - Always show container for consistent layout */}
@@ -222,29 +226,76 @@ export default function OGItemCard({
             </div>
           </Tooltip>
         </div>
-        <div>
-          <div className="text-secondary-text text-sm">TIMES TRADED</div>
-          <Tooltip
-            title={item.timesTraded.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
+
+        {/* Cash Value */}
+        {itemData && (
+          <div>
+            <div className="text-secondary-text text-sm">CASH VALUE</div>
+            <Tooltip
+              title={formatFullValue(itemData.cash_value)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
                   },
                 },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
-              {formatNumber(item.timesTraded)}
-            </div>
-          </Tooltip>
-        </div>
+              }}
+            >
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                <span className="sm:hidden">
+                  {itemData.cash_value === null || itemData.cash_value === "N/A"
+                    ? "N/A"
+                    : itemData.cash_value}
+                </span>
+                <span className="hidden sm:inline">
+                  {formatFullValue(itemData.cash_value)}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* Duped Value */}
+        {itemData && (
+          <div>
+            <div className="text-secondary-text text-sm">DUPED VALUE</div>
+            <Tooltip
+              title={formatFullValue(itemData.duped_value)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                <span className="sm:hidden">
+                  {itemData.duped_value === null ||
+                  itemData.duped_value === "N/A"
+                    ? "N/A"
+                    : itemData.duped_value}
+                </span>
+                <span className="hidden sm:inline">
+                  {formatFullValue(itemData.duped_value)}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
         <div>
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
