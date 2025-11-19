@@ -136,8 +136,8 @@ export default function InventoryFilters({
             <option value="duped-desc">Duped Value (High to Low)</option>
             <option value="duped-asc">Duped Value (Low to High)</option>
             <option disabled>Alphabetically</option>
-            <option value="alpha-asc">A-Z</option>
-            <option value="alpha-desc">Z-A</option>
+            <option value="alpha-asc">Name (A to Z)</option>
+            <option value="alpha-desc">Name (Z to A)</option>
           </select>
         </div>
       </div>

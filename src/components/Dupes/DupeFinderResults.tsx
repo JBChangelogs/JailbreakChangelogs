@@ -89,10 +89,10 @@ export default function DupeFinderResults({
     | "duplicates"
     | "alpha-asc"
     | "alpha-desc"
-    | "traded-desc"
-    | "unique-desc"
     | "created-asc"
     | "created-desc"
+    | "duped-desc"
+    | "duped-asc"
   >("duplicates");
 
   const [localRobloxAvatars, setLocalRobloxAvatars] =
@@ -243,14 +243,32 @@ export default function DupeFinderResults({
           return a.title.localeCompare(b.title);
         case "alpha-desc":
           return b.title.localeCompare(a.title);
-        case "traded-desc":
-          return b.timesTraded - a.timesTraded;
-        case "unique-desc":
-          return b.uniqueCirculation - a.uniqueCirculation;
         case "created-asc":
           return a.logged_at - b.logged_at;
         case "created-desc":
           return b.logged_at - a.logged_at;
+        case "duped-desc": {
+          const aItemData = itemsData.find((data) => data.id === a.item_id);
+          const bItemData = itemsData.find((data) => data.id === b.item_id);
+          const aDupedValue = aItemData
+            ? getDupedValueForItem(aItemData, a)
+            : 0;
+          const bDupedValue = bItemData
+            ? getDupedValueForItem(bItemData, b)
+            : 0;
+          return bDupedValue - aDupedValue;
+        }
+        case "duped-asc": {
+          const aItemData = itemsData.find((data) => data.id === a.item_id);
+          const bItemData = itemsData.find((data) => data.id === b.item_id);
+          const aDupedValue = aItemData
+            ? getDupedValueForItem(aItemData, a)
+            : 0;
+          const bDupedValue = bItemData
+            ? getDupedValueForItem(bItemData, b)
+            : 0;
+          return aDupedValue - bDupedValue;
+        }
         default:
           return 0;
       }

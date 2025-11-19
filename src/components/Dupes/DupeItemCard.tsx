@@ -200,49 +200,6 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
-          <div className="text-secondary-text text-sm">TIMES TRADED</div>
-          <Tooltip
-            title={item.timesTraded.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
-              {formatNumber(item.timesTraded)}
-            </div>
-          </Tooltip>
-        </div>
-        <div>
-          <div className="text-secondary-text text-sm">CURRENT OWNER</div>
-          <div className="text-xl font-bold">
-            <a
-              href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="inline-flex items-center gap-2">
-                {getUserDisplay(item.latest_owner)}
-                {getHasVerifiedBadge &&
-                  getHasVerifiedBadge(item.latest_owner) && (
-                    <VerifiedBadgeIcon className="h-4 w-4" />
-                  )}
-              </span>
-            </a>
-          </div>
-        </div>
-        <div>
           <div className="text-secondary-text text-sm">DUPED VALUE</div>
           <Tooltip
             title={dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
@@ -272,6 +229,26 @@ export default function DupeItemCard({
               </span>
             </div>
           </Tooltip>
+        </div>
+        <div>
+          <div className="text-secondary-text text-sm">CURRENT OWNER</div>
+          <div className="text-xl font-bold">
+            <a
+              href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="inline-flex items-center gap-2">
+                {getUserDisplay(item.latest_owner)}
+                {getHasVerifiedBadge &&
+                  getHasVerifiedBadge(item.latest_owner) && (
+                    <VerifiedBadgeIcon className="h-4 w-4" />
+                  )}
+              </span>
+            </a>
+          </div>
         </div>
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
