@@ -110,7 +110,7 @@ export default function OGFinderResults({
     enabled: missingUserIds.length > 0,
   });
 
-  // Merge fetched user data with existing data
+  // Merge fetched user data with the existing data
   useEffect(() => {
     if (fetchedUserData && "userData" in fetchedUserData) {
       setLocalRobloxUsers((prev) => ({

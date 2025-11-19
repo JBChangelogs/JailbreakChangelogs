@@ -1,58 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
 export default function NewsTicker() {
-  // Initialize state based on localStorage
-  const [isVisible, setIsVisible] = useState(() => {
+  const shouldShowTicker = isFeatureEnabled("NEWS_TICKER");
+  const [isVisible, setIsVisible] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Only run on client after mount - check localStorage
     const dismissed = safeLocalStorage.getItem(
-      "inventory-release-announcement-dismissed",
+      "giveaway-announcement-dismissed",
     );
-    return dismissed !== "true";
-  });
+    // eslint-disable-next-line
+    setIsVisible(dismissed !== "true");
+  }, []);
 
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem(
-      "inventory-release-announcement-dismissed",
-      "true",
-    );
+    safeLocalStorage.setItem("giveaway-announcement-dismissed", "true");
   };
 
-  if (!isVisible) return null;
+  if (!shouldShowTicker || isVisible !== true) return null;
 
   return (
-    <div className="from-button-info/10 to-button-info/5 bg-gradient-to-r">
-      <div className="container mx-auto px-4 py-3">
-        <div className="relative flex flex-col items-center justify-center gap-3 pr-8 lg:flex-row lg:gap-4 lg:pr-12">
+    <div className="from-blue-500/20 to-purple-500/20 bg-gradient-to-r backdrop-blur-lg">
+      <div className="container mx-auto px-4 py-2">
+        <div className="relative flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           <div className="flex items-center gap-2">
-            <div className="bg-button-info flex h-5 w-5 items-center justify-center rounded-full lg:h-6 lg:w-6">
-              <svg
-                className="text-form-button-text h-3 w-3 lg:h-4 lg:w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <span className="text-button-info text-xs font-semibold lg:text-sm">
-              NEW FEATURE
+            <span className="text-blue-400 text-xs font-semibold">
+              🎉 ACTIVE GIVEAWAY
             </span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 lg:flex-row lg:gap-3">
-            <span className="text-primary-text text-center text-xs lg:text-sm">
-              <strong>Inventory Checker!</strong> Check your own inventory or
-              browse other players&apos; inventories to see their items and
-              values
+          <div className="flex items-center gap-2">
+            <span className="text-primary-text text-center text-xs">
+              We&apos;re giving away a{" "}
+              <Link
+                href="/item/hyperchrome/HyperBlue%20Level%205"
+                className="text-blue-400 hover:text-blue-300 underline font-semibold"
+              >
+                Hyperblue Level 5
+              </Link>
+              ! Enter in our{" "}
+              <a
+                href="https://discord.jailbreakchangelogs.xyz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline font-semibold"
+              >
+                Discord #giveaway channel
+              </a>
+              !
             </span>
           </div>
 

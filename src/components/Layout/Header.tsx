@@ -57,6 +57,7 @@ const AnimatedThemeToggler = dynamic(
 );
 import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
+import NewsTicker from "./NewsTicker";
 
 import { Icon } from "../ui/IconWrapper";
 import {
@@ -548,6 +549,7 @@ export default function Header() {
       {!isMobile && (
         <div className="sticky top-0 z-[1300]">
           <ServiceAvailabilityTicker />
+          <NewsTicker />
           <div className="relative z-10">
             <NavbarModern />
           </div>
@@ -593,6 +595,7 @@ export default function Header() {
 
           <div className="sticky top-0 z-[1400]">
             <ServiceAvailabilityTicker />
+            <NewsTicker />
             <AppBar
               position="static"
               color="transparent"

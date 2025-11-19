@@ -4,7 +4,6 @@ import Script from "next/script";
 import Image from "next/image";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
-// import NewsTicker from "@/components/Layout/NewsTicker";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
 import OfflineDetector from "@/components/OfflineDetector";
@@ -181,7 +180,6 @@ export default async function RootLayout({
                             >
                               <Header />
                             </Suspense>
-                            {/* <NewsTicker /> */}
                             <main className="flex-1">{children}</main>
                             <Footer
                               githubUrl={githubUrl}
@@ -360,7 +358,6 @@ export default async function RootLayout({
                         >
                           <Header />
                         </Suspense>
-                        {/* <NewsTicker /> */}
                         <main className="flex-1">{children}</main>
                         <Footer
                           githubUrl={githubUrl}
