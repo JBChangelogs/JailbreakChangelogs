@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatFullDate } from "@/utils/timestamp";
+import RailwayBadge from "./RailwayBadge";
 
 interface VersionInfoProps {
   version: string;
@@ -38,6 +39,9 @@ export default function VersionInfo({
       </p>
       <p>Environment: {branch.charAt(0).toUpperCase() + branch.slice(1)}</p>
       <p>Updated: {formattedDate || "Loading..."}</p>
+      <div className="pt-1">
+        <RailwayBadge />
+      </div>
     </div>
   );
 }

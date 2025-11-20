@@ -673,7 +673,7 @@ export default function ChangelogDetailsClient({
                     {change.suggestion && (
                       <div className="bg-primary-bg border-border-primary hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
                             {change.suggestion.metadata?.avatar_hash && (
                               <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                                 <DefaultAvatar />
@@ -692,7 +692,7 @@ export default function ChangelogDetailsClient({
                                 />
                               </div>
                             )}
-                            <div className="flex flex-col">
+                            <div className="flex flex-col min-w-0">
                               <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
                                 Suggested by
                               </span>
@@ -700,13 +700,13 @@ export default function ChangelogDetailsClient({
                                 href={`https://discord.com/users/${change.suggestion.user_id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline"
+                                className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline break-words"
                               >
                                 {change.suggestion.suggestor_name}
                               </a>
                             </div>
                           </div>
-                          <div className="flex items-center justify-center">
+                          <div className="flex items-center justify-center flex-shrink-0">
                             <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
                               <button
                                 type="button"
@@ -786,7 +786,9 @@ export default function ChangelogDetailsClient({
                         <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
                           <ReactMarkdown
                             components={{
-                              strong: (props) => <b {...props} />,
+                              strong: (props) => (
+                                <b className="text-primary-text" {...props} />
+                              ),
                             }}
                           >
                             {change.suggestion.data.reason?.replace(
@@ -1064,7 +1066,7 @@ export default function ChangelogDetailsClient({
           {/* Sidebar - Responsive width, only show for non-premium users */}
           {currentUserPremiumType === 0 && (
             <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-1">
-              <div className="sticky top-6">
+              <div className="sticky top-20">
                 <div className="flex flex-col items-center">
                   <span className="text-secondary-text mb-2 block text-center text-xs">
                     ADVERTISEMENT

@@ -721,7 +721,12 @@ export default function ItemChangelogs({
                                   <>
                                     <ReactMarkdown
                                       components={{
-                                        strong: (props) => <b {...props} />,
+                                        strong: (props) => (
+                                          <b
+                                            className="text-primary-text"
+                                            {...props}
+                                          />
+                                        ),
                                       }}
                                     >
                                       {(isExpanded ? reason : text).replace(
