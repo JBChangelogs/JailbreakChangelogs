@@ -26,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
       changeFrequency: "daily",
     },
+    {
+      url: `${BASE_URL}/seasons/leaderboard`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: "daily",
+    },
   ];
 
   const dynamicSeasonEntries = data

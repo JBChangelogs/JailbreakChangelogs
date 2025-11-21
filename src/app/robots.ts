@@ -9,6 +9,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/*?page=",
           "/*?filter=",
+          "/*?username=",
+          "/*?sort=",
           "/api/",
           "/cdn-cgi/",
           "/dupes/calculator",
@@ -22,6 +24,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/*?page=",
           "/*?filter=",
+          "/*?username=",
+          "/*?sort=",
           "/api/",
           "/cdn-cgi/",
           "/dupes/calculator",
@@ -35,7 +39,7 @@ export default function robots(): MetadataRoute.Robots {
       "https://jailbreakchangelogs.xyz/changelogs/sitemap.xml",
       "https://jailbreakchangelogs.xyz/seasons/sitemap.xml",
       "https://jailbreakchangelogs.xyz/values/sitemap.xml",
+      "https://jailbreakchangelogs.xyz/values/changelogs/sitemap.xml",
     ],
-    host: "https://jailbreakchangelogs.xyz",
   };
 }

@@ -91,10 +91,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly" as const,
     },
     {
+      url: `${BASE_URL}/values/changelogs`,
+      lastModified: new Date().toISOString(),
+      priority: 0.7,
+      changeFrequency: "daily" as const,
+    },
+    {
+      url: `${BASE_URL}/calculators`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: "monthly" as const,
+    },
+    {
       url: `${BASE_URL}/users`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
       changeFrequency: "daily" as const,
+    },
+    {
+      url: `${BASE_URL}/testimonials`,
+      lastModified: new Date().toISOString(),
+      priority: 0.6,
+      changeFrequency: "weekly" as const,
     },
     {
       url: `${BASE_URL}/leaderboard/money`,
@@ -156,6 +174,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/values/sitemap.xml`,
+      lastModified: new Date().toISOString(),
+      priority: 0.8,
+      changeFrequency: "daily" as const,
+    },
+    {
+      url: `${BASE_URL}/values/changelogs/sitemap.xml`,
       lastModified: new Date().toISOString(),
       priority: 0.8,
       changeFrequency: "daily" as const,
