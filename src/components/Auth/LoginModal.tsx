@@ -470,12 +470,14 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                               if (!sessionData.user) {
                                 toast.error(
-                                  "Please log in with Discord first",
+                                  "Your session has expired. Please log in with Discord again.",
                                   {
-                                    duration: 3000,
+                                    duration: 4000,
                                     position: "bottom-right",
                                   },
                                 );
+                                // Auto-redirect to Discord tab (index 0)
+                                setTabValue(0);
                                 return;
                               }
 
@@ -497,10 +499,12 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                               toast.error(
                                 "Failed to start Roblox authentication",
                                 {
-                                  duration: 3000,
+                                  duration: 4000,
                                   position: "bottom-right",
                                 },
                               );
+                              // Auto-redirect to Discord tab on error
+                              setTabValue(0);
                               setIsRedirecting(false);
                             }
                           }}

@@ -75,9 +75,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Validate the session to ensure it's still valid
         const isValid = await validateAuth();
         if (isValid) {
+          // Re-read user data after validateAuth() to get any updates (e.g., Roblox fields)
+          const freshUserData = safeGetJSON("user", null);
           setAuthState({
             isAuthenticated: true,
-            user: userData,
+            user: freshUserData || userData,
             isLoading: false,
             error: null,
           });
