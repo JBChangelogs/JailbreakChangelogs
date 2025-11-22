@@ -1,6 +1,8 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import UserSearch from "@/components/Users/UserSearch";
+import { Suspense } from "react";
+import UserCardSkeleton from "@/components/Users/UserCardSkeleton";
 
 export default function UsersPage() {
   return (
@@ -18,7 +20,17 @@ export default function UsersPage() {
           Find users by their username or display name
         </p>
 
-        <UserSearch />
+        <Suspense
+          fallback={
+            <div className="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 21 }).map((_, index) => (
+                <UserCardSkeleton key={index} />
+              ))}
+            </div>
+          }
+        >
+          <UserSearch />
+        </Suspense>
       </div>
     </div>
   );
