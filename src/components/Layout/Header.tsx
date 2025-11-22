@@ -648,16 +648,19 @@ export default function Header() {
                       {/* Tabs */}
                       {isAuthenticated && (
                         <div className="border-border-secondary border-b px-2">
-                          <div role="tablist" className="tabs">
+                          <div role="tablist" className="tabs flex w-full">
                             <button
                               role="tab"
                               aria-selected={notificationTab === "unread"}
                               onClick={() => {
                                 setNotificationTab("unread");
                                 setNotificationPage(1);
+                                setMarkedAsSeen(new Set()); // Clear marked state
+                                setIsLoadingNotifications(true); // Show loading immediately
+                                setNotifications(null); // Clear old notifications
                                 fetchUnreadWithDebounce(1, 5);
                               }}
-                              className={`tab ${notificationTab === "unread" ? "tab-active" : ""}`}
+                              className={`tab flex-1 ${notificationTab === "unread" ? "tab-active" : ""}`}
                             >
                               Unread
                             </button>
@@ -667,9 +670,12 @@ export default function Header() {
                               onClick={() => {
                                 setNotificationTab("history");
                                 setNotificationPage(1);
+                                setMarkedAsSeen(new Set()); // Clear marked state
+                                setIsLoadingNotifications(true); // Show loading immediately
+                                setNotifications(null); // Clear old notifications
                                 fetchHistoryWithDebounce(1, 5);
                               }}
-                              className={`tab ${notificationTab === "history" ? "tab-active" : ""}`}
+                              className={`tab flex-1 ${notificationTab === "history" ? "tab-active" : ""}`}
                             >
                               History
                             </button>
@@ -680,7 +686,7 @@ export default function Header() {
                       {/* Content */}
                       <div className="max-h-96 overflow-y-auto">
                         {isLoadingNotifications ? (
-                          <div className="flex flex-col items-center justify-center py-8 px-4">
+                          <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
                             <div className="loading loading-spinner loading-md text-primary-text"></div>
                             <p className="text-secondary-text text-sm text-center mt-3">
                               Loading notifications...
@@ -751,35 +757,58 @@ export default function Header() {
                                           >
                                             <button
                                               onClick={async () => {
+                                                // Optimistically remove from UI
+                                                setNotifications((prev) => {
+                                                  if (!prev) return prev;
+                                                  return {
+                                                    ...prev,
+                                                    items: prev.items.filter(
+                                                      (n) => n.id !== notif.id,
+                                                    ),
+                                                    total: prev.total - 1,
+                                                  };
+                                                });
+
+                                                // Update unread count immediately
+                                                setUnreadCount((prev) =>
+                                                  Math.max(0, prev - 1),
+                                                );
+
+                                                // Mark as seen for visual feedback
+                                                setMarkedAsSeen((prev) =>
+                                                  new Set(prev).add(notif.id),
+                                                );
+
+                                                toast.success(
+                                                  "Marked as read",
+                                                  {
+                                                    duration: 2000,
+                                                    position: "bottom-right",
+                                                  },
+                                                );
+
+                                                // Call API in background
                                                 const success =
                                                   await markNotificationAsSeen(
                                                     notif.id,
                                                   );
-                                                if (success) {
-                                                  setMarkedAsSeen((prev) =>
-                                                    new Set(prev).add(notif.id),
-                                                  );
-                                                  toast.success(
-                                                    "Marked as read",
+
+                                                if (!success) {
+                                                  // Revert on failure
+                                                  toast.error(
+                                                    "Failed to mark as read",
                                                     {
                                                       duration: 2000,
                                                       position: "bottom-right",
                                                     },
                                                   );
-                                                  // Refetch notifications to update the list
-                                                  setIsLoadingNotifications(
-                                                    true,
-                                                  );
+                                                  // Refetch to restore state
                                                   const data =
                                                     await fetchUnreadNotifications(
                                                       notificationPage,
                                                       5,
                                                     );
                                                   setNotifications(data);
-                                                  setIsLoadingNotifications(
-                                                    false,
-                                                  );
-                                                  // Refresh unread count
                                                   fetchUnreadCount();
                                                 }
                                               }}
@@ -877,7 +906,7 @@ export default function Header() {
                             )}
                           </>
                         ) : (
-                          <div className="flex flex-col items-center justify-center py-8 px-4">
+                          <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
                             <Icon
                               icon="mingcute:notification-line"
                               className="text-secondary-text h-12 w-12 mb-3"

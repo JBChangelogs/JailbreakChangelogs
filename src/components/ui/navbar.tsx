@@ -104,7 +104,7 @@ export const MenuItem = ({
         >
           {active === item && (
             <div
-              className="absolute left-1/2 z-[1300] mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
+              className="absolute left-1/2 z-1300 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
               style={{ top: "100%" }}
             >
               <motion.div
@@ -579,16 +579,19 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               {/* Tabs */}
               {isAuthenticated && (
                 <div className="border-border-secondary border-b px-2">
-                  <div role="tablist" className="tabs">
+                  <div role="tablist" className="tabs flex w-full">
                     <button
                       role="tab"
                       aria-selected={notificationTab === "unread"}
                       onClick={() => {
                         setNotificationTab("unread");
                         setNotificationPage(1);
+                        setMarkedAsSeen(new Set()); // Clear marked state
+                        setIsLoadingNotifications(true); // Show loading immediately
+                        setNotifications(null); // Clear old notifications
                         fetchUnreadWithDebounce(1, 5);
                       }}
-                      className={`tab ${notificationTab === "unread" ? "tab-active" : ""}`}
+                      className={`tab flex-1 ${notificationTab === "unread" ? "tab-active" : ""}`}
                     >
                       Unread
                     </button>
@@ -598,9 +601,12 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                       onClick={() => {
                         setNotificationTab("history");
                         setNotificationPage(1);
+                        setMarkedAsSeen(new Set()); // Clear marked state
+                        setIsLoadingNotifications(true); // Show loading immediately
+                        setNotifications(null); // Clear old notifications
                         fetchHistoryWithDebounce(1, 5);
                       }}
-                      className={`tab ${notificationTab === "history" ? "tab-active" : ""}`}
+                      className={`tab flex-1 ${notificationTab === "history" ? "tab-active" : ""}`}
                     >
                       History
                     </button>
@@ -611,7 +617,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               {/* Content */}
               <div className="max-h-96 overflow-y-auto">
                 {isLoadingNotifications ? (
-                  <div className="flex flex-col items-center justify-center py-8 px-4">
+                  <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
                     <div className="loading loading-spinner loading-md text-primary-text"></div>
                     <p className="text-secondary-text text-sm text-center mt-3">
                       Loading notifications...
@@ -679,32 +685,59 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                   >
                                     <button
                                       onClick={async () => {
+                                        // Optimistically remove from UI
+                                        setNotifications((prev) => {
+                                          if (!prev) return prev;
+                                          return {
+                                            ...prev,
+                                            items: prev.items.filter(
+                                              (n) => n.id !== notif.id,
+                                            ),
+                                            total: prev.total - 1,
+                                          };
+                                        });
+
+                                        // Update unread count immediately
+                                        setUnreadCount((prev) =>
+                                          Math.max(0, prev - 1),
+                                        );
+
+                                        // Mark as seen for visual feedback
+                                        setMarkedAsSeen((prev) =>
+                                          new Set(prev).add(notif.id),
+                                        );
+
+                                        toast.success("Marked as read", {
+                                          duration: 2000,
+                                          position: "bottom-right",
+                                        });
+
+                                        // Call API in background
                                         const success =
                                           await markNotificationAsSeen(
                                             notif.id,
                                           );
-                                        if (success) {
-                                          setMarkedAsSeen((prev) =>
-                                            new Set(prev).add(notif.id),
+
+                                        if (!success) {
+                                          // Revert on failure
+                                          toast.error(
+                                            "Failed to mark as read",
+                                            {
+                                              duration: 2000,
+                                              position: "bottom-right",
+                                            },
                                           );
-                                          toast.success("Marked as read", {
-                                            duration: 2000,
-                                            position: "bottom-right",
-                                          });
-                                          // Refetch notifications to update the list
-                                          setIsLoadingNotifications(true);
+                                          // Refetch to restore state
                                           const data =
                                             await fetchUnreadNotifications(
                                               notificationPage,
                                               5,
                                             );
                                           setNotifications(data);
-                                          setIsLoadingNotifications(false);
-                                          // Refresh unread count
                                           fetchUnreadCount();
                                         }
                                       }}
-                                      className={`flex-shrink-0 rounded-full p-1 transition-all cursor-pointer ${
+                                      className={`shrink-0 rounded-full p-1 transition-all cursor-pointer ${
                                         markedAsSeen.has(notif.id)
                                           ? "bg-green-500/20 text-green-500"
                                           : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
@@ -794,7 +827,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                     )}
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 px-4">
+                  <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
                     <Icon
                       icon="mingcute:notification-line"
                       className="text-secondary-text h-12 w-12 mb-3"
@@ -873,7 +906,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="bg-secondary-bg border-border-primary absolute right-0 z-[1300] mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
+                    className="bg-secondary-bg border-border-primary absolute right-0 z-1300 mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
                     initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.85, y: 10 }}

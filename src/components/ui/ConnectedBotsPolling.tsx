@@ -273,8 +273,8 @@ export default function ConnectedBotsPolling() {
                       const botUserData = botRobloxData?.usersData?.[botId];
                       if (botUserData) {
                         const botDisplayName =
-                          botUserData.displayName ||
                           botUserData.name ||
+                          botUserData.displayName ||
                           `Bot ${botId}`;
                         return (
                           <span className="text-secondary-text text-xs">
