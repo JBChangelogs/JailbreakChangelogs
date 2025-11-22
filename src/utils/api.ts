@@ -86,6 +86,43 @@ export const fetchUsers = async () => {
   return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
 };
 
+export const fetchPaginatedUsers = async (
+  page: number = 1,
+  size: number = 21,
+) => {
+  const response = await fetch(
+    `/api/users/paginated?page=${page}&size=${size}`,
+    {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
+      },
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch paginated users");
+  }
+  const data = await response.json();
+  return data;
+};
+
+export const searchUsers = async (username: string, limit: number = 21) => {
+  const response = await fetch(
+    `/api/users/search?username=${encodeURIComponent(username)}&limit=${limit}`,
+    {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
+      },
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Failed to search users");
+  }
+  const data = await response.json();
+  return data;
+};
+
 export async function fetchUserById(id: string) {
   try {
     const response = await fetch(

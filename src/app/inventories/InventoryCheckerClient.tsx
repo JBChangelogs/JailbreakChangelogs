@@ -31,9 +31,10 @@ import {
   showScanErrorToast,
 } from "@/utils/scanToasts";
 import dynamic from "next/dynamic";
-import { CommentData } from "@/utils/api";
+import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
+import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
 
 const ChangelogComments = dynamic(
   () => import("@/components/PageComments/ChangelogComments"),
@@ -57,6 +58,8 @@ interface InventoryCheckerClientProps {
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
   items?: Item[]; // Items data passed from server
+  initialNetworthData?: UserNetworthData[];
+  initialMoneyHistoryData?: MoneyHistory[];
 }
 
 export default function InventoryCheckerClient({
@@ -74,6 +77,7 @@ export default function InventoryCheckerClient({
   initialComments = [],
   initialCommentUserMap = {},
   items = [],
+  initialNetworthData = [],
 }: InventoryCheckerClientProps) {
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
@@ -138,8 +142,10 @@ export default function InventoryCheckerClient({
         setActiveTab(1);
       } else if (hash === "money" && robloxId) {
         setActiveTab(hasDuplicates ? 2 : 1);
+      } else if (hash === "networth" && robloxId) {
+        setActiveTab(hasDuplicates ? 3 : 2);
       } else if (hash === "comments" && hasComments) {
-        setActiveTab(hasDuplicates ? 3 : robloxId ? 2 : 1);
+        setActiveTab(hasDuplicates ? 4 : robloxId ? 3 : 1);
       } else {
         setActiveTab(0);
       }
@@ -311,9 +317,14 @@ export default function InventoryCheckerClient({
     ) {
       window.location.hash = "money";
     } else if (
-      (hasDuplicates && newValue === 3) ||
+      (hasDuplicates && newValue === 3 && robloxId) ||
+      (!hasDuplicates && newValue === 2 && robloxId)
+    ) {
+      window.location.hash = "networth";
+    } else if (
+      (hasDuplicates && newValue === 4) ||
       (!hasDuplicates && !robloxId && newValue === 1) ||
-      (robloxId && !hasDuplicates && newValue === 2)
+      (robloxId && !hasDuplicates && newValue === 3)
     ) {
       window.location.hash = "comments";
     }
@@ -794,6 +805,15 @@ export default function InventoryCheckerClient({
                 {((hasDuplicates && effectiveActiveTab === 3) ||
                   (!hasDuplicates && effectiveActiveTab === 2)) &&
                   robloxId && (
+                    <NetworthHistoryChart
+                      userId={robloxId}
+                      initialData={initialNetworthData}
+                    />
+                  )}
+
+                {((hasDuplicates && effectiveActiveTab === 4) ||
+                  (!hasDuplicates && effectiveActiveTab === 3)) &&
+                  robloxId && (
                     <ChangelogComments
                       changelogId={robloxId}
                       changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
@@ -849,6 +869,7 @@ function InventoryOverflowTabs({
     "Inventory Items",
     ...(hasDuplicates ? ["Multiple Copies"] : []),
     ...(robloxId ? ["Money Graph"] : []),
+    ...(robloxId ? ["Networth Graph"] : []),
     ...(hasComments ? ["Comments"] : []),
   ];
 

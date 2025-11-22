@@ -5,6 +5,7 @@ import {
   fetchLatestSeason,
   fetchComments,
   fetchItems,
+  fetchUserNetworth,
 } from "@/utils/api";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -71,14 +72,17 @@ async function InventoryDataFetcher({
         error={usernameError}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
 
-  const [result, currentSeason, items] = await Promise.all([
+  const [result, currentSeason, items, networthData] = await Promise.all([
     fetchInventoryData(actualRobloxId),
     fetchLatestSeason(),
     fetchItems(),
+    fetchUserNetworth(actualRobloxId),
   ]);
 
   // Check if the result contains an error
@@ -96,6 +100,8 @@ async function InventoryDataFetcher({
         error={errorMessage}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
@@ -108,6 +114,8 @@ async function InventoryDataFetcher({
         error="Failed to fetch inventory data. Please try again."
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
+        initialNetworthData={[]}
+        initialMoneyHistoryData={[]}
       />
     );
   }
@@ -121,6 +129,8 @@ async function InventoryDataFetcher({
           isLoading={true}
           initialComments={initialComments}
           initialCommentUserMap={initialCommentUserMap}
+          initialNetworthData={networthData}
+          initialMoneyHistoryData={[]}
         />
       }
     >
@@ -131,6 +141,7 @@ async function InventoryDataFetcher({
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
         items={items}
+        networthData={networthData}
       />
     </Suspense>
   );

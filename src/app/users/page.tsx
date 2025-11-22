@@ -1,13 +1,8 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUsersForList } from "@/utils/api";
-import UserSearchVirtual from "@/components/Users/UserSearchVirtual";
+import UserSearch from "@/components/Users/UserSearch";
 
-export const dynamic = "force-dynamic";
-
-export default async function UsersPage() {
-  const users = await fetchUsersForList();
-
+export default function UsersPage() {
   return (
     <div className="min-h-screen px-4 pb-8">
       <div className="mx-auto max-w-7xl">
@@ -23,7 +18,7 @@ export default async function UsersPage() {
           Find users by their username or display name
         </p>
 
-        <UserSearchVirtual initialUsers={users} />
+        <UserSearch />
       </div>
     </div>
   );
