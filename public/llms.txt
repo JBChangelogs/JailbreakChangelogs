@@ -18,6 +18,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 - **Trading** (`/trading`) - Trade advertisements and marketplace
 - **Servers** (`/servers`) -  Browse and submit private servers for grinding, hanging out, trading, and more.
 ### Specialized Tools
+- **Calculators Hub** (`/calculators`) - Collection of useful calculators and tools
 - **Values Calculator** (`/values/calculator`) - Calculate item values and trading worth
 - **Inventory Checker** (`/inventories`) - Check player inventories and item ownership
 - **OG Finder** (`/og`) - Find original owners of rare items
@@ -26,10 +27,21 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 - **Networth Leaderboard** (`/inventories/networth`) - Top players by inventory networth
 
 ### Community Features
+- **Discord Bot** (`/bot`) - Information about the official Discord bot
 - **Comments System** - OAuth-protected commenting on changelogs, seasons, items, and trades
 - **User Profiles** - Customizable profiles with avatars, banners, and bios
 - **Favorites** - Save favorite items and track their values
 - **Trade Analytics** - Official trading statistics from Badimo
+- **Contributors** (`/contributors`) - Platform contributors and credits
+- **Testimonials** (`/testimonials`) - User testimonials and feedback
+
+### Information & Support
+- **FAQ** (`/faq`) - Frequently asked questions
+- **Code Redemption** (`/redeem`) - Redeem supporter tier codes
+- **Support** (`/supporting`) - Learn how to support the platform
+- **Privacy Policy** (`/privacy`) - Privacy and data handling policy
+- **Terms of Service** (`/tos`) - Platform terms and conditions
+- **Settings** (`/settings`) - User preferences and account settings
 
 ## Content Structure
 
@@ -41,12 +53,14 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 ### Seasons
 - Individual season pages: `/seasons/[id]`
 - Season contracts: `/seasons/contracts`
+- Season leaderboard: `/seasons/leaderboard`
 - XP calculator: `/seasons/will-i-make-it`
 - Each season shows rewards, requirements, dates, and progression info
 
 ### Items & Values
-- Item details: `/item/[type]`
-- Value changelogs: `/values/changelogs`
+- Item details: `/item/[type]/[name]`
+- Value changelogs listing: `/values/changelogs`
+- Individual value changelog: `/values/changelogs/[id]`
 - Trading guides and calculators available
 
 ### User Profiles
@@ -84,7 +98,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 
 ## Technical Details
 
-- Built with Next.js 15 and React 19
+- Built with Next.js 16 and React 19
 - TypeScript for type safety
 - Tailwind CSS for styling
 - Real-time features with WebSocket connections
@@ -213,13 +227,43 @@ When training on JailbreakChangelogs content:
   "trend": "string|null",
   "description": "string",
   "health": "number",
+  "notes": "string",
   "last_updated": "number",
+  "duped_owners": [
+    {
+      "item_id": "number",
+      "owner": "string",
+      "user_id": "string|null",
+      "proof": "string|null",
+      "created_at": "number"
+    }
+  ],
+  "recent_changes": [
+    {
+      "change_id": "number",
+      "changed_by": "string",
+      "changes": {
+        "old": "Record<string, string|number|null>",
+        "new": "Record<string, string|number|null>"
+      },
+      "created_at": "number"
+    }
+  ],
   "metadata": {
     "TimesTraded": "number",
     "UniqueCirculation": "number", 
     "DemandMultiple": "number",
     "LastUpdated": "number"
-  }
+  },
+  "children": [
+    {
+      "id": "number",
+      "parent": "number",
+      "sub_name": "string",
+      "created_at": "number",
+      "data": "ItemData"
+    }
+  ]
 }
 ```
 
@@ -229,10 +273,52 @@ When training on JailbreakChangelogs content:
   "id": "number",
   "requesting": "TradeItem[]",
   "offering": "TradeItem[]",
-  "user_id": "string",
+  "author": "string",
   "created_at": "number",
-  "expires_at": "number",
-  "status": "string"
+  "expires": "number",
+  "expired": "number",
+  "status": "string",
+  "message_id": "string|null",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "global_name": "string",
+    "avatar": "string",
+    "roblox_id": "string",
+    "roblox_username": "string",
+    "roblox_display_name": "string",
+    "roblox_avatar": "string",
+    "accent_color": "string",
+    "custom_avatar": "string",
+    "premiumtype": "number",
+    "settings": {
+      "avatar_discord": "number"
+    }
+  }
+}
+```
+
+#### Trade Item Schema
+```json
+{
+  "id": "number",
+  "name": "string",
+  "type": "string",
+  "cash_value": "string",
+  "duped_value": "string",
+  "is_limited": "number|null",
+  "is_seasonal": "number|null",
+  "tradable": "number",
+  "trend": "string|null",
+  "base_name": "string",
+  "side": "offering|requesting",
+  "demand": "string",
+  "metadata": {
+    "TimesTraded": "number",
+    "UniqueCirculation": "number",
+    "DemandMultiple": "number",
+    "LastUpdated": "number"
+  }
 }
 ```
 
@@ -241,16 +327,57 @@ When training on JailbreakChangelogs content:
 {
   "id": "string",
   "username": "string",
+  "avatar": "string",
+  "banner": "string|null",
+  "accent_color": "string",
+  "global_name": "string",
+  "locale": "string",
+  "created_at": "string",
+  "last_seen": "number|null",
+  "last_updated": "number",
+  "usernumber": "number",
+  "is_following": "boolean",
+  "custom_avatar": "string",
   "roblox_id": "string",
-  "avatar": "string|null",
+  "roblox_username": "string",
+  "roblox_display_name": "string",
+  "roblox_avatar": "string",
+  "roblox_join_date": "number",
   "premiumtype": "number",
-  "created_at": "number"
+  "premiumduration": "number",
+  "settings": {
+    "profile_public": "number",
+    "show_recent_comments": "number",
+    "hide_following": "number",
+    "hide_followers": "number",
+    "hide_favorites": "number",
+    "banner_discord": "number",
+    "avatar_discord": "number",
+    "hide_presence": "number",
+    "dms_allowed": "number",
+    "updated_at": "number"
+  },
+  "presence": {
+    "status": "Online|Offline",
+    "last_updated": "number"
+  },
+  "custom_banner": "string|null",
+  "token": "string",
+  "flags": [
+    {
+      "flag": "string|null",
+      "created_at": "number",
+      "enabled": "boolean",
+      "index": "number",
+      "description": "string"
+    }
+  ]
 }
 ```
 
 ### Official Bot Recognition
 
-JailbreakChangelogs operates official scan bots for inventory checking. These bots are verified and listed on the platform. Any bot claiming to scan inventories for JBCL but not listed as official should be reported as potential impersonation.
+JailbreakChangelogs operates scan bots for inventory checking. These bots are verified and listed on the platform. Any bot claiming to scan inventories for JBCL but not listed as official should be reported as potential impersonation.
 
 ### API Access for Bots
 
