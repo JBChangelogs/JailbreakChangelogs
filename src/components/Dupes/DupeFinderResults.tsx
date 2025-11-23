@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { parseCurrencyValue } from "@/utils/currency";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { useBatchUserData } from "@/hooks/useBatchUserData";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "../ui/IconWrapper";
 import { logError } from "@/services/logger";
@@ -92,13 +91,10 @@ export default function DupeFinderResults({
     | "duped-asc"
   >("duplicates");
 
-  const [localRobloxAvatars, setLocalRobloxAvatars] =
-    useState<Record<string, string>>(robloxAvatars);
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [itemsData] = useState<Item[]>(items);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
-  const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
 
   // Merge dupe finder data with metadata from item/list endpoint
   // This ensures fields like timesTraded and uniqueCirculation reflect the latest state
@@ -107,37 +103,48 @@ export default function DupeFinderResults({
     [initialData, itemsData],
   );
 
-  // Filter out user IDs we already have data for
-  const missingUserIds = visibleUserIds.filter(
-    (userId) => !robloxUsers[userId],
-  );
+  // Extract all unique user IDs from dupe data
+  const allUserIds = useMemo(() => {
+    const userIds = new Set<string>();
 
-  // Fetch user data for visible items only using TanStack Query
-  const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", [...missingUserIds].sort().join(",")],
-    queryFn: () => fetchMissingRobloxData(missingUserIds),
-    enabled: missingUserIds.length > 0,
-  });
+    // Add main user
+    userIds.add(robloxId);
 
-  // Transform data during render instead of using useEffect
-  const localRobloxUsers: Record<string, RobloxUser> = (() => {
-    if (
-      fetchedUserData &&
-      "userData" in fetchedUserData &&
-      typeof fetchedUserData.userData === "object"
-    ) {
-      return {
-        ...robloxUsers,
-        ...fetchedUserData.userData,
-      } as Record<string, RobloxUser>;
-    }
-    return robloxUsers;
-  })();
+    // Add all current owners and original owners
+    mergedDupeData.forEach((item) => {
+      // Get current owner from info array
+      const currentOwnerInfo = item.info?.find(
+        (info) => info.title === "Current Owner",
+      );
+      if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
+        userIds.add(currentOwnerInfo.value);
+      }
 
-  // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
-    setVisibleUserIds(userIds);
-  }, []);
+      // Also check latest_owner field directly (primary source for current owner)
+      if (item.latest_owner && /^\d+$/.test(String(item.latest_owner))) {
+        userIds.add(String(item.latest_owner));
+      }
+
+      // Get original owner from info array
+      const originalOwnerInfo = item.info?.find(
+        (info) => info.title === "Original Owner",
+      );
+      if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
+        userIds.add(originalOwnerInfo.value);
+      }
+    });
+
+    return Array.from(userIds);
+  }, [mergedDupeData, robloxId]);
+
+  // Use batch fetcher to progressively load user data
+  const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
+
+  // Merge initial users with batched users
+  const localRobloxUsers: Record<string, RobloxUser> = {
+    ...robloxUsers,
+    ...batchedUsers,
+  };
 
   // Helper functions
   const getUserDisplay = (userId: string) => {
@@ -152,18 +159,13 @@ export default function DupeFinderResults({
   };
 
   const getUserAvatar = (userId: string) => {
-    return localRobloxAvatars[userId] || "";
+    return robloxAvatars[userId] || "";
   };
 
   const getHasVerifiedBadge = (userId: string) => {
     const user = localRobloxUsers[userId];
     return Boolean(user?.hasVerifiedBadge);
   };
-
-  // Effects
-  useEffect(() => {
-    setLocalRobloxAvatars(robloxAvatars);
-  }, [robloxAvatars]);
 
   // Calculate total duped value
   useEffect(() => {
@@ -215,9 +217,23 @@ export default function DupeFinderResults({
     });
   })();
 
+  // Check if there are any duplicates
+  const hasDuplicates = (() => {
+    const itemCounts = new Map<string, number>();
+    filteredData.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
+    });
+    return Array.from(itemCounts.values()).some((count) => count > 1);
+  })();
+
+  // Derive effective sort order (fall back if duplicates is selected but none exist)
+  const effectiveSortOrder =
+    sortOrder === "duplicates" && !hasDuplicates ? "created-desc" : sortOrder;
+
   const sortedData = (() => {
     return [...filteredData].sort((a, b) => {
-      switch (sortOrder) {
+      switch (effectiveSortOrder) {
         case "duplicates":
           const aKey = `${a.categoryTitle}-${a.title}`;
           const bKey = `${b.categoryTitle}-${b.title}`;
@@ -271,23 +287,6 @@ export default function DupeFinderResults({
 
   // Use sortedData directly instead of pagination
   const filteredAndSortedItems = sortedData;
-
-  // Check if there are any duplicates
-  const hasDuplicates = (() => {
-    const itemCounts = new Map<string, number>();
-    filteredData.forEach((item) => {
-      const key = `${item.categoryTitle}-${item.title}`;
-      itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
-    });
-    return Array.from(itemCounts.values()).some((count) => count > 1);
-  })();
-
-  // Reset sort order if duplicates option is selected but no duplicates exist
-  useEffect(() => {
-    if (sortOrder === "duplicates" && !hasDuplicates) {
-      setSortOrder("created-desc");
-    }
-  }, [sortOrder, hasDuplicates]);
 
   // Pre-calculate duplicate counts from FULL inventory (not paginated) for consistent numbering
   const duplicateCounts = (() => {
@@ -403,7 +402,6 @@ export default function DupeFinderResults({
           itemCounts={itemCounts}
           duplicateOrders={duplicateOrders}
           itemsData={itemsData}
-          onVisibleUserIdsChange={handleVisibleUserIdsChange}
         />
       </div>
 

@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 
 interface DuplicatesTabProps {
@@ -41,45 +39,12 @@ export default function DuplicatesTab({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
-  const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const MAX_SEARCH_LENGTH = 50;
 
-  // Filter out user IDs we already have data for
-  const missingUserIds = visibleUserIds.filter(
-    (userId) => !robloxUsers[userId],
-  );
-
-  // Fetch user data for visible items only using TanStack Query
-  const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", [...missingUserIds].sort().join(",")],
-    queryFn: () => fetchMissingRobloxData(missingUserIds),
-    enabled: missingUserIds.length > 0,
-  });
-
-  // Transform data during render instead of using useEffect
-  const localRobloxUsers: Record<string, RobloxUser> = (() => {
-    if (
-      fetchedUserData &&
-      "userData" in fetchedUserData &&
-      typeof fetchedUserData.userData === "object"
-    ) {
-      return {
-        ...robloxUsers,
-        ...fetchedUserData.userData,
-      } as Record<string, RobloxUser>;
-    }
-    return robloxUsers;
-  })();
-
-  // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
-    setVisibleUserIds(userIds);
-  }, []);
-
-  // Helper functions - use localRobloxUsers which includes fetched data
+  // Helper functions - use robloxUsers from props
   const getUserDisplay = (userId: string) => {
-    const user = localRobloxUsers[userId];
+    const user = robloxUsers[userId];
     if (!user) return userId;
     return user.name || user.displayName || userId;
   };
@@ -89,7 +54,7 @@ export default function DuplicatesTab({
   };
 
   const getHasVerifiedBadge = (userId: string) => {
-    const user = localRobloxUsers[userId];
+    const user = robloxUsers[userId];
     return Boolean(user?.hasVerifiedBadge);
   };
 
@@ -129,14 +94,10 @@ export default function DuplicatesTab({
       itemGroups.set(key, [...existing, item]);
     });
 
-    // For each group, sort by creation date and assign order numbers
+    // For each group, sort by ID for consistent ordering
     itemGroups.forEach((items) => {
-      const sortedItems = [...items].sort((a, b) => {
-        const aTime =
-          a.info.find((i) => i.title === "Created At")?.value || "0";
-        const bTime =
-          b.info.find((i) => i.title === "Created At")?.value || "0";
-        return aTime.localeCompare(bTime);
+      const sortedItems = items.sort((a, b) => {
+        return a.id.localeCompare(b.id);
       });
 
       sortedItems.forEach((item, index) => {
@@ -466,7 +427,6 @@ export default function DuplicatesTab({
           duplicateOrders={duplicateOrders}
           userId={initialData.user_id}
           isLoading={false}
-          onVisibleUserIdsChange={handleVisibleUserIdsChange}
         />
       </div>
     </div>

@@ -1,13 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { fetchRobloxAvatars, fetchRobloxUsersBatch } from "@/utils/api";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -58,77 +56,126 @@ export default function TradeHistoryModal({
     return Array.from(userIds);
   }, [item]);
 
-  const { data: tradeHistoryAvatars } = useQuery({
-    queryKey: ["tradeHistoryAvatars", tradeHistoryUserIds.sort()],
-    queryFn: async () => {
-      if (tradeHistoryUserIds.length === 0) {
-        return {};
-      }
+  const [tradeHistoryAvatars, setTradeHistoryAvatars] = useState<
+    Record<string, string>
+  >({});
 
-      const avatarData = await fetchRobloxAvatars(tradeHistoryUserIds);
-      if (!avatarData) {
-        return {};
-      }
+  useEffect(() => {
+    if (!isOpen || tradeHistoryUserIds.length === 0) {
+      return;
+    }
 
-      const processedAvatars: Record<string, string> = {};
-      Object.values(avatarData).forEach((avatar) => {
-        if (
-          avatar &&
-          typeof avatar === "object" &&
-          "targetId" in avatar &&
-          "state" in avatar &&
-          "imageUrl" in avatar
-        ) {
-          const typedAvatar = avatar as AvatarData;
+    const fetchAvatars = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/avatar-headshot?userIds=${tradeHistoryUserIds.join(",")}`,
+          {
+            headers: {
+              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+              "X-Source":
+                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const avatarData = await response.json();
+        const processedAvatars: Record<string, string> = {};
+
+        Object.values(avatarData).forEach((avatar) => {
           if (
-            typedAvatar.targetId &&
-            typedAvatar.state === "Completed" &&
-            typedAvatar.imageUrl
+            avatar &&
+            typeof avatar === "object" &&
+            "targetId" in avatar &&
+            "state" in avatar &&
+            "imageUrl" in avatar
           ) {
-            processedAvatars[typedAvatar.targetId.toString()] =
-              typedAvatar.imageUrl;
+            const typedAvatar = avatar as AvatarData;
+            if (
+              typedAvatar.targetId &&
+              typedAvatar.state === "Completed" &&
+              typedAvatar.imageUrl
+            ) {
+              processedAvatars[typedAvatar.targetId.toString()] =
+                typedAvatar.imageUrl;
+            }
           }
-        }
-      });
+        });
 
-      return processedAvatars;
-    },
-    enabled: tradeHistoryUserIds.length > 0 && isOpen,
-  });
-
-  const { data: tradeHistoryUsers } = useQuery({
-    queryKey: ["tradeHistoryUsers", tradeHistoryUserIds.sort()],
-    queryFn: async () => {
-      if (tradeHistoryUserIds.length === 0) {
-        return {};
+        setTradeHistoryAvatars(processedAvatars);
+      } catch (error) {
+        console.error("Failed to fetch avatars:", error);
       }
+    };
 
-      const userData = await fetchRobloxUsersBatch(tradeHistoryUserIds);
-      if (!userData) {
-        return {};
-      }
+    fetchAvatars();
+  }, [isOpen, tradeHistoryUserIds]);
 
-      const processedUsers: Record<
-        string,
-        { name: string; displayName: string; hasVerifiedBadge: boolean }
-      > = {};
-      Object.values(userData).forEach((user: UserData) => {
-        if (user && user.id) {
-          processedUsers[user.id.toString()] = {
-            name: user.name || user.id.toString(),
-            displayName: user.displayName || user.name || user.id.toString(),
-            hasVerifiedBadge: Boolean(user.hasVerifiedBadge),
-          };
+  const [tradeHistoryUsers, setTradeHistoryUsers] = useState<
+    Record<
+      string,
+      { name: string; displayName: string; hasVerifiedBadge: boolean }
+    >
+  >({});
+
+  useEffect(() => {
+    if (!isOpen || tradeHistoryUserIds.length === 0) {
+      return;
+    }
+
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users?userIds=${tradeHistoryUserIds.join(",")}`,
+          {
+            headers: {
+              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+              "X-Source":
+                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          return;
         }
-      });
 
-      return processedUsers;
-    },
-    enabled: tradeHistoryUserIds.length > 0 && isOpen,
-  });
+        const userData = await response.json();
+        const processedUsers: Record<
+          string,
+          { name: string; displayName: string; hasVerifiedBadge: boolean }
+        > = {};
+
+        Object.values(userData).forEach((user) => {
+          if (user && typeof user === "object" && "id" in user) {
+            const typedUser = user as UserData;
+            if (typedUser.id) {
+              processedUsers[typedUser.id.toString()] = {
+                name: typedUser.name || typedUser.id.toString(),
+                displayName:
+                  typedUser.displayName ||
+                  typedUser.name ||
+                  typedUser.id.toString(),
+                hasVerifiedBadge: Boolean(typedUser.hasVerifiedBadge),
+              };
+            }
+          }
+        });
+
+        setTradeHistoryUsers(processedUsers);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [isOpen, tradeHistoryUserIds]);
 
   const getDisplayName = (userId: string) => {
-    const cachedUser = tradeHistoryUsers?.[userId];
+    const cachedUser = tradeHistoryUsers[userId];
     if (cachedUser) {
       return cachedUser.displayName;
     }
@@ -137,7 +184,7 @@ export default function TradeHistoryModal({
   };
 
   const getUsername = (userId: string) => {
-    const cachedUser = tradeHistoryUsers?.[userId];
+    const cachedUser = tradeHistoryUsers[userId];
     if (cachedUser) {
       return cachedUser.name;
     }
@@ -146,7 +193,7 @@ export default function TradeHistoryModal({
   };
 
   const getHasVerifiedBadge = (userId: string) => {
-    const cachedUser = tradeHistoryUsers?.[userId];
+    const cachedUser = tradeHistoryUsers[userId];
     if (cachedUser) {
       return cachedUser.hasVerifiedBadge;
     }

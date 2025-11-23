@@ -53,9 +53,6 @@ interface OGFinderClientProps {
 export default function OGFinderClient({
   initialData,
   robloxId,
-  originalSearchTerm,
-  robloxUsers: initialRobloxUsers,
-  robloxAvatars: initialRobloxAvatars,
   error,
   isLoading: externalIsLoading,
 }: OGFinderClientProps) {
@@ -167,17 +164,7 @@ export default function OGFinderClient({
       </form>
 
       {/* Results */}
-      {robloxId && (
-        <OGFinderDataStreamer
-          robloxId={robloxId}
-          originalSearchTerm={originalSearchTerm}
-          initialData={initialData}
-          robloxUsers={initialRobloxUsers || {}}
-          robloxAvatars={initialRobloxAvatars || {}}
-          error={error}
-          isLoading={isLoading}
-        />
-      )}
+      {robloxId && <OGFinderDataStreamer robloxId={robloxId} />}
 
       {/* Error Display */}
       {error && !initialData && (

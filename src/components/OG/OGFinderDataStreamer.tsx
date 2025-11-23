@@ -7,7 +7,7 @@ import {
   fetchUserByRobloxId,
   fetchItems,
 } from "@/utils/api";
-import { RobloxUser, Item } from "@/types";
+import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
 
 interface OGSearchData {
@@ -39,13 +39,6 @@ interface OGSearchData {
 
 interface OGFinderDataStreamerProps {
   robloxId: string;
-  originalSearchTerm?: string;
-  initialData?: OGSearchData;
-  robloxUsers?: Record<string, RobloxUser>;
-  robloxAvatars?: Record<string, string>;
-  error?: string;
-  isLoading?: boolean;
-  items?: Item[];
 }
 
 // Loading fallback component
@@ -245,7 +238,8 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     }
   }
 
-  // Get the main user's data (the one being searched), connection data, and items metadata
+  // Fetch main user data, avatar, connection data, and items metadata
+  // Item owners will be fetched client-side in batches
   const [mainUserData, mainUserAvatar, userConnectionData, items] =
     await Promise.all([
       fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
@@ -307,10 +301,8 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         avatarData.state === "Completed" &&
         avatarData.imageUrl
       ) {
-        // Only add completed avatars to the data
         robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
       }
-      // For blocked avatars, don't add them to the data so components can use their own fallback
     });
   }
 

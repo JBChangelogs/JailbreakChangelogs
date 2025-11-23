@@ -45,8 +45,9 @@ export default function DupeFinderClient({
 
   return (
     <div className="space-y-6">
-      {/* Search Form */}
-      <DupeSearchInput initialValue={robloxId || ""} isLoading={isLoading} />
+      {!initialData && (
+        <DupeSearchInput initialValue={robloxId || ""} isLoading={isLoading} />
+      )}
 
       {/* Results */}
       {initialData && (

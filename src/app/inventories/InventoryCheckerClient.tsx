@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
@@ -13,6 +13,7 @@ import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
+import { useBatchUserData } from "@/hooks/useBatchUserData";
 import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -114,6 +115,47 @@ export default function InventoryCheckerClient({
 
   // Use refreshed data if available, otherwise use initial data
   const currentData = refreshedData || initialData;
+
+  // Extract all user IDs from inventory data for batch fetching
+  const allUserIds = useMemo(() => {
+    if (!currentData) return [];
+
+    const userIds = new Set<string>();
+
+    // Add main user if available
+    if (robloxId) {
+      userIds.add(robloxId);
+    }
+
+    // Add all item owners from inventory
+    currentData.data.forEach((item) => {
+      // Check info array for Current Owner
+      const currentOwnerInfo = item.info?.find(
+        (info) => info.title === "Current Owner",
+      );
+      if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
+        userIds.add(currentOwnerInfo.value);
+      }
+
+      // Check info array for Original Owner
+      const originalOwnerInfo = item.info?.find(
+        (info) => info.title === "Original Owner",
+      );
+      if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
+        userIds.add(originalOwnerInfo.value);
+      }
+    });
+
+    return Array.from(userIds);
+  }, [currentData, robloxId]);
+
+  // Fetch all user data in batches and merge with initial data
+  const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
+
+  const mergedRobloxUsers = useMemo(
+    () => ({ ...robloxUsers, ...batchedUsers }),
+    [robloxUsers, batchedUsers],
+  );
 
   // Function to handle data refresh
   const handleDataRefresh = async (newData: InventoryData) => {
@@ -780,7 +822,7 @@ export default function InventoryCheckerClient({
                 {effectiveActiveTab === 0 && (
                   <InventoryItems
                     initialData={currentData}
-                    robloxUsers={robloxUsers}
+                    robloxUsers={mergedRobloxUsers}
                     robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
                     itemsData={itemsData}
@@ -791,7 +833,7 @@ export default function InventoryCheckerClient({
                 {effectiveActiveTab === 1 && hasDuplicates && (
                   <DuplicatesTab
                     initialData={currentData}
-                    robloxUsers={robloxUsers}
+                    robloxUsers={mergedRobloxUsers}
                     robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
                     itemsData={itemsData}

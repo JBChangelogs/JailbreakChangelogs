@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 
 interface InventoryItemsProps {
@@ -35,7 +33,6 @@ export default function InventoryItems({
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-  const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
@@ -47,30 +44,14 @@ export default function InventoryItems({
     | "duped-asc"
   >("created-desc");
 
-  // Filter out user IDs we already have data for
-  const missingUserIds = visibleUserIds.filter(
-    (userId) => !robloxUsers[userId],
+  // Merge inventory data with metadata from item/list endpoint
+  // This ensures fields like timesTraded and uniqueCirculation
+  // reflect the latest state from metadata, not stale snapshots
+  const mergedInventoryData = useMemo(
+    () =>
+      mergeInventoryArrayWithMetadata(initialData.data, propItemsData || []),
+    [initialData.data, propItemsData],
   );
-
-  // Fetch user data for visible items only using TanStack Query
-  const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", [...missingUserIds].sort().join(",")],
-    queryFn: () => fetchMissingRobloxData(missingUserIds),
-    enabled: missingUserIds.length > 0,
-  });
-
-  // Merge fetched user data with existing data during render
-  const mergedRobloxUsers: Record<string, RobloxUser> = {
-    ...robloxUsers,
-    ...(fetchedUserData && "userData" in fetchedUserData
-      ? fetchedUserData.userData
-      : {}),
-  };
-
-  // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
-    setVisibleUserIds(userIds);
-  }, []);
 
   // Get variant-specific values (e.g., different hyperchrome colors by year)
   const getVariantSpecificValues = (
@@ -189,19 +170,10 @@ export default function InventoryItems({
   };
 
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
-  const currentRobloxUsers = mergedRobloxUsers;
   const currentRobloxAvatars = robloxAvatars;
 
-  // Merge inventory data with metadata from item/list endpoint
-  // This ensures fields like timesTraded and uniqueCirculation
-  // reflect the latest state from metadata, not stale snapshots
-  const mergedInventoryData = useMemo(
-    () => mergeInventoryArrayWithMetadata(initialData.data, currentItemsData),
-    [initialData.data, currentItemsData],
-  );
-
   const getUserDisplay = (userId: string) => {
-    const user = currentRobloxUsers[userId];
+    const user = robloxUsers[userId];
     if (!user) return userId;
     return user.name || user.displayName || userId;
   };
@@ -211,7 +183,7 @@ export default function InventoryItems({
   };
 
   const getHasVerifiedBadge = (userId: string) => {
-    const user = currentRobloxUsers[userId];
+    const user = robloxUsers[userId];
     return Boolean(user?.hasVerifiedBadge);
   };
 
@@ -650,7 +622,6 @@ export default function InventoryItems({
         userId={initialData.user_id}
         itemCounts={itemCounts}
         duplicateOrders={duplicateOrders}
-        onVisibleUserIdsChange={handleVisibleUserIdsChange}
       />
 
       {/* Action Modal */}

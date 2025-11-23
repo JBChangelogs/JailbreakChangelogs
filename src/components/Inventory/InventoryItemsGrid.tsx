@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import InventoryItemCard from "./InventoryItemCard";
 import { Item } from "@/types";
@@ -19,7 +19,6 @@ interface InventoryItemsGridProps {
   userId: string;
   itemCounts?: Map<string, number>;
   duplicateOrders?: Map<string, number>;
-  onVisibleUserIdsChange?: (userIds: string[]) => void;
 }
 
 export default function InventoryItemsGrid({
@@ -32,10 +31,8 @@ export default function InventoryItemsGrid({
   userId,
   itemCounts = new Map(),
   duplicateOrders = new Map(),
-  onVisibleUserIdsChange,
 }: InventoryItemsGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const previousUserIdsRef = useRef<string>("");
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -67,43 +64,7 @@ export default function InventoryItemsGrid({
     overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
   });
 
-  // Extract user IDs from ONLY the visible items
-  const virtualItems = virtualizer.getVirtualItems();
-  const visibleUserIds = useMemo(() => {
-    const userIds = new Set<string>();
-
-    virtualItems.forEach((virtualRow) => {
-      const rowItems = rows[virtualRow.index];
-      if (rowItems) {
-        rowItems.forEach(({ item }) => {
-          // Extract user IDs from this specific item
-          // Look for original owner in the item info
-          const originalOwnerInfo = item.info.find(
-            (info: { title: string; value: string }) =>
-              info.title === "Original Owner",
-          );
-          if (originalOwnerInfo && originalOwnerInfo.value) {
-            userIds.add(originalOwnerInfo.value);
-          }
-        });
-      }
-    });
-
-    return Array.from(userIds).sort(); // Sort for consistent comparison
-  }, [virtualItems, rows]);
-
-  // Notify parent component when visible user IDs change
-  useEffect(() => {
-    if (onVisibleUserIdsChange) {
-      const currentUserIdsKey = visibleUserIds.join(",");
-
-      // Only call the callback if the user IDs have actually changed
-      if (currentUserIdsKey !== previousUserIdsRef.current) {
-        previousUserIdsRef.current = currentUserIdsKey;
-        onVisibleUserIdsChange(visibleUserIds);
-      }
-    }
-  }, [visibleUserIds, onVisibleUserIdsChange]);
+  // User data is now loaded in batches upfront, no need for viewport-based fetching
 
   if (isLoading) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import OGItemCard from "./OGItemCard";
 import { Item } from "@/types";
@@ -33,7 +33,6 @@ interface OGItemsGridProps {
   isLoading?: boolean;
   itemCounts?: Map<string, number>;
   duplicateOrders?: Map<string, number>;
-  onVisibleUserIdsChange?: (userIds: string[]) => void;
   items?: Item[];
 }
 
@@ -46,12 +45,10 @@ export default function OGItemsGrid({
   isLoading = false,
   itemCounts = new Map(),
   duplicateOrders = new Map(),
-  onVisibleUserIdsChange,
   items = [],
 }: OGItemsGridProps) {
   "use memo";
   const parentRef = useRef<HTMLDivElement>(null);
-  const previousUserIdsRef = useRef<string>("");
 
   // Create items map for quick lookup - map by type and name since OG items use instance IDs
   const itemsMap = useMemo(() => {
@@ -92,39 +89,6 @@ export default function OGItemsGrid({
     estimateSize: () => 300, // Estimate height for each row
     overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
   });
-
-  // Extract user IDs from ONLY the visible items
-  const virtualItems = virtualizer.getVirtualItems();
-  const visibleUserIds = useMemo(() => {
-    const userIds = new Set<string>();
-
-    virtualItems.forEach((virtualRow) => {
-      const rowItems = rows[virtualRow.index];
-      if (rowItems) {
-        rowItems.forEach((item) => {
-          // Extract user IDs from this specific item
-          if (item.user_id && /^\d+$/.test(item.user_id)) {
-            userIds.add(item.user_id);
-          }
-        });
-      }
-    });
-
-    return Array.from(userIds).sort(); // Sort for consistent comparison
-  }, [virtualItems, rows]);
-
-  // Notify parent component when visible user IDs change
-  useEffect(() => {
-    if (onVisibleUserIdsChange) {
-      const currentUserIdsKey = visibleUserIds.join(",");
-
-      // Only call the callback if the user IDs have actually changed
-      if (currentUserIdsKey !== previousUserIdsRef.current) {
-        previousUserIdsRef.current = currentUserIdsKey;
-        onVisibleUserIdsChange(visibleUserIds);
-      }
-    }
-  }, [visibleUserIds, onVisibleUserIdsChange]);
 
   if (isLoading) {
     return (

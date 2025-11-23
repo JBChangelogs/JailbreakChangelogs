@@ -6,9 +6,7 @@ import {
   fetchRobloxAvatars,
   fetchItems,
 } from "@/utils/api";
-import type { RobloxUser } from "@/types";
 import DupeFinderClient from "./DupeFinderClient";
-import DupeUserDataStreamer from "./DupeUserDataStreamer";
 
 interface DupeFinderDataStreamerProps {
   robloxId: string;
@@ -125,8 +123,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  // Get the main user's data (the one being searched) and connection data
-  const [mainUserData, mainUserAvatar] = await Promise.all([
+  const [mainUserData, mainUserAvatar, items] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user data:", error);
       return {};
@@ -135,10 +132,14 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       console.error("Failed to fetch main user avatar:", error);
       return {};
     }),
+    fetchItems().catch((error) => {
+      console.error("Failed to fetch items metadata:", error);
+      return [];
+    }),
   ]);
 
   // Build the user data objects with just the main user
-  const robloxUsers: Record<string, RobloxUser> = {};
+  const robloxUsers: Record<string, import("@/types").RobloxUser> = {};
   const robloxAvatars: Record<string, string> = {};
 
   // Add main user data
@@ -178,20 +179,18 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
         avatarData.state === "Completed" &&
         avatarData.imageUrl
       ) {
-        // Only add completed avatars to the data
         robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
       }
-      // For blocked avatars, don't add them to the data so components can use their own fallback
     });
   }
 
-  // Fetch items data server-side to avoid client-side refetching
-  const items = await fetchItems();
-
   return (
-    <DupeUserDataStreamer
+    <DupeFinderClient
       robloxId={actualRobloxId}
-      dupeData={result}
+      initialData={result}
+      isUserFound={true}
+      robloxUsers={robloxUsers}
+      robloxAvatars={robloxAvatars}
       items={items}
     />
   );

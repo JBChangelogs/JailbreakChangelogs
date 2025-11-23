@@ -2,13 +2,10 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
-
-      {/* Header skeleton */}
       <div className="mb-6 flex items-center gap-3">
         <div className="bg-button-secondary h-9 w-64 animate-pulse rounded"></div>
-        <div className="bg-button-secondary h-6 w-12 animate-pulse rounded"></div>
       </div>
 
       {/* Experimental banner skeleton */}

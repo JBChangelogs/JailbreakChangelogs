@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { RobloxUser, Item } from "@/types";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
-import { fetchMissingRobloxData } from "@/app/inventories/actions";
+import { useBatchUserData } from "@/hooks/useBatchUserData";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -62,7 +61,6 @@ export default function OGFinderResults({
   error,
   items = [],
 }: OGFinderResultsProps) {
-  "use memo";
   const router = useRouter();
   const { getId } = useUsernameToId();
 
@@ -83,43 +81,36 @@ export default function OGFinderResults({
     | "duped-asc"
   >("created-desc");
 
-  const [localRobloxUsers, setLocalRobloxUsers] =
-    useState<Record<string, RobloxUser>>(robloxUsers);
-  const [localRobloxAvatars, setLocalRobloxAvatars] =
-    useState<Record<string, string>>(robloxAvatars);
-  const localRobloxUsersRef = useRef(localRobloxUsers);
-  const localRobloxAvatarsRef = useRef(localRobloxAvatars);
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
 
-  // Filter out user IDs we already have data for
-  const missingUserIds = visibleUserIds.filter(
-    (userId) => !localRobloxUsers[userId],
-  );
+  // Extract all unique user IDs from OG data
+  const allUserIds = useMemo(() => {
+    const userIds = new Set<string>();
 
-  // Fetch user data for visible items only using TanStack Query
-  const { data: fetchedUserData } = useQuery({
-    queryKey: ["userData", [...missingUserIds].sort().join(",")],
-    queryFn: () => fetchMissingRobloxData(missingUserIds),
-    enabled: missingUserIds.length > 0,
-  });
+    // Add main user
+    userIds.add(robloxId);
 
-  // Merge fetched user data with the existing data
-  useEffect(() => {
-    if (fetchedUserData && "userData" in fetchedUserData) {
-      setLocalRobloxUsers((prev) => ({
-        ...prev,
-        ...fetchedUserData.userData,
-      }));
-      // Note: avatarData is empty for original owners since they're not displayed
+    // Add all current owners (user_id field in OG items)
+    if (initialData?.results) {
+      initialData.results.forEach((item) => {
+        if (item.user_id && /^\d+$/.test(item.user_id)) {
+          userIds.add(item.user_id);
+        }
+      });
     }
-  }, [fetchedUserData]);
 
-  // Handle visible user IDs changes from virtual scrolling
-  const handleVisibleUserIdsChange = useCallback((userIds: string[]) => {
-    setVisibleUserIds(userIds);
-  }, []);
+    return Array.from(userIds);
+  }, [initialData, robloxId]);
+
+  // Use batch fetcher to progressively load user data
+  const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
+
+  // Merge initial users with batched users
+  const localRobloxUsers: Record<string, RobloxUser> = {
+    ...robloxUsers,
+    ...batchedUsers,
+  };
 
   // Create items map for quick lookup of cash values - map by type and name since OG items use instance IDs
   const itemsMap = new Map(
@@ -150,21 +141,13 @@ export default function OGFinderResults({
   };
 
   const getUserAvatar = (userId: string) => {
-    return localRobloxAvatars[userId] || "";
+    return robloxAvatars[userId] || "";
   };
 
   const getHasVerifiedBadge = (userId: string) => {
     const user = localRobloxUsers[userId];
     return Boolean(user?.hasVerifiedBadge);
   };
-
-  // Effects
-  useEffect(() => {
-    setLocalRobloxUsers(robloxUsers);
-    setLocalRobloxAvatars(robloxAvatars);
-    localRobloxUsersRef.current = robloxUsers;
-    localRobloxAvatarsRef.current = robloxAvatars;
-  }, [robloxUsers, robloxAvatars]);
 
   // Handle search
   const handleSearch = async (searchValue: string) => {
@@ -300,12 +283,6 @@ export default function OGFinderResults({
       setSortOrder("created-desc");
     }
   }, [sortOrder, hasDuplicates]);
-
-  // Update local state when props change
-  useEffect(() => {
-    setLocalRobloxUsers(robloxUsers);
-    setLocalRobloxAvatars(robloxAvatars);
-  }, [robloxUsers, robloxAvatars]);
 
   // Event handlers
   const handleCardClick = (item: OGItem) => {
@@ -478,7 +455,6 @@ export default function OGFinderResults({
               onCardClick={handleCardClick}
               itemCounts={itemCounts}
               duplicateOrders={duplicateOrders}
-              onVisibleUserIdsChange={handleVisibleUserIdsChange}
               items={items}
             />
           </div>

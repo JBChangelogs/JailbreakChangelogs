@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
@@ -16,7 +16,6 @@ interface DupeItemsGridProps {
   itemCounts: Map<string, number>;
   duplicateOrders: Map<string, number>;
   itemsData: Item[];
-  onVisibleUserIdsChange?: (userIds: string[]) => void;
 }
 
 export default function DupeItemsGrid({
@@ -30,10 +29,8 @@ export default function DupeItemsGrid({
   itemCounts,
   duplicateOrders,
   itemsData,
-  onVisibleUserIdsChange,
 }: DupeItemsGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const previousUserIdsRef = useRef<string>("");
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -64,39 +61,6 @@ export default function DupeItemsGrid({
     estimateSize: () => 300, // Estimate height for each row
     overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
   });
-
-  // Extract user IDs from ONLY the visible items
-  const virtualItems = virtualizer.getVirtualItems();
-  const visibleUserIds = useMemo(() => {
-    const userIds = new Set<string>();
-
-    virtualItems.forEach((virtualRow) => {
-      const rowItems = rows[virtualRow.index];
-      if (rowItems) {
-        rowItems.forEach((item) => {
-          // Extract user IDs from this specific item
-          if (item.latest_owner && /^\d+$/.test(item.latest_owner)) {
-            userIds.add(item.latest_owner);
-          }
-        });
-      }
-    });
-
-    return Array.from(userIds).sort(); // Sort for consistent comparison
-  }, [virtualItems, rows]);
-
-  // Notify parent component when visible user IDs change
-  useEffect(() => {
-    if (onVisibleUserIdsChange) {
-      const currentUserIdsKey = visibleUserIds.join(",");
-
-      // Only call the callback if the user IDs have actually changed
-      if (currentUserIdsKey !== previousUserIdsRef.current) {
-        previousUserIdsRef.current = currentUserIdsKey;
-        onVisibleUserIdsChange(visibleUserIds);
-      }
-    }
-  }, [visibleUserIds, onVisibleUserIdsChange]);
 
   if (isLoading) {
     return (
