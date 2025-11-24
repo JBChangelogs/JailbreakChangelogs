@@ -215,6 +215,35 @@ export const UserBadges = ({
     );
   };
 
+  const handleBadimoBadgeClick = () => {
+    const badimoFlag = sortedFlags.find((f) => f.flag === "is_badimo");
+    toast(
+      () => (
+        <div className="flex items-center gap-2">
+          <Image
+            src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+            alt="Badimo"
+            width={20}
+            height={20}
+            className="h-5 w-5 object-contain"
+          />
+          <span>
+            {badimoFlag?.description ||
+              "This user is an official Badimo developer"}
+          </span>
+        </div>
+      ),
+      {
+        duration: 4000,
+        style: {
+          background: "linear-gradient(to right, #111827, #1F2937)",
+          color: "white",
+          fontWeight: "600",
+        },
+      },
+    );
+  };
+
   const handlePremiumBadgeClick = () => {
     // Only handle clicks for valid premium types 1-3
     if (!premiumType || premiumType < 1 || premiumType > 3) {
@@ -504,49 +533,14 @@ export const UserBadges = ({
               },
             }}
           >
-            <a
-              href="https://roblox.com/communities/3059674/Badimo"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                const badimoFlag = sortedFlags.find(
-                  (f) => f.flag === "is_badimo",
-                );
-                toast(
-                  () => (
-                    <div className="flex items-center gap-2">
-                      <Image
-                        src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
-                        alt="Badimo"
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 object-contain"
-                      />
-                      <span>
-                        {badimoFlag?.description ||
-                          "This user is an official Badimo developer"}
-                      </span>
-                    </div>
-                  ),
-                  {
-                    duration: 4000,
-                    style: {
-                      background: "linear-gradient(to right, #111827, #1F2937)",
-                      color: "white",
-                      fontWeight: "600",
-                    },
-                  },
-                );
-              }}
-            >
-              <Image
-                src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
-                alt="Badimo"
-                width={badimoSize}
-                height={badimoSize}
-                className="object-contain cursor-pointer hover:opacity-90"
-              />
-            </a>
+            <Image
+              src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+              alt="Badimo"
+              width={badimoSize}
+              height={badimoSize}
+              className="object-contain cursor-pointer hover:opacity-90"
+              onClick={handleBadimoBadgeClick}
+            />
           </Tooltip>
         );
       default:

@@ -19,6 +19,9 @@ import {
   safeGetJSON,
   safeSetJSON,
 } from "@/utils/safeStorage";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { DroppableZone } from "@/components/dnd/DroppableZone";
+import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
 
 interface TradeAdFormProps {
   onSuccess?: () => void;
@@ -65,6 +68,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
+
+  // Drag and drop state
+  const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
 
   const parseValueString = (valStr: string | number | undefined): number => {
     if (valStr === undefined || valStr === null) return 0;
@@ -204,6 +210,42 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       saveItemsToLocalStorage(offeringItems, newRequestingItems);
     }
     return true;
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (active.data.current?.type === "item-card") {
+      setActiveItem(active.data.current.item as TradeItem);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItem(null);
+
+    if (!over) return;
+
+    const item = active.data.current?.item as TradeItem;
+    if (!item) return;
+
+    // Determine which side to add to based on drop zone
+    let side: "offering" | "requesting" | null = null;
+    if (over.id === "offering-drop-zone") {
+      side = "offering";
+    } else if (over.id === "requesting-drop-zone") {
+      side = "requesting";
+    }
+
+    if (side) {
+      const success = handleAddItem(item, side);
+      if (success) {
+        const itemName = item.sub_name
+          ? `${item.name} (${item.sub_name})`
+          : item.name;
+        toast.success(`Added ${itemName} to ${side} items`);
+      }
+    }
   };
 
   const handleRemoveItem = (
@@ -531,437 +573,452 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   }
 
   return (
-    <>
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
-      <div className="space-y-6">
-        <CustomConfirmationModal
-          open={showRestoreModal}
-          onClose={() => setShowRestoreModal(false)}
-          title="Restore Trade Ad?"
-          message="Do you want to restore your previously added items or start a new trade ad?"
-          confirmText="Restore"
-          cancelText="Start New"
-          onConfirm={handleRestoreItems}
-          onCancel={handleStartNewTradeAd}
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <>
+        <LoginModalWrapper
+          open={loginModalOpen}
+          onClose={() => setLoginModalOpen(false)}
         />
+        <div className="space-y-6">
+          <CustomConfirmationModal
+            open={showRestoreModal}
+            onClose={() => setShowRestoreModal(false)}
+            title="Restore Trade Ad?"
+            message="Do you want to restore your previously added items or start a new trade ad?"
+            confirmText="Restore"
+            cancelText="Start New"
+            onConfirm={handleRestoreItems}
+            onCancel={handleStartNewTradeAd}
+          />
 
-        <CustomConfirmationModal
-          open={showSuccessModal}
-          onClose={handleSuccessModalClose}
-          title="Trade Ad Created!"
-          message="Want to know when someone wants to trade with you? Turn on bot DMs to get notifications on Discord."
-          confirmText="Enable Bot DMs"
-          cancelText="Not Now"
-          onConfirm={handleEnableBotDMs}
-          onCancel={handleSuccessModalClose}
-        />
+          <CustomConfirmationModal
+            open={showSuccessModal}
+            onClose={handleSuccessModalClose}
+            title="Trade Ad Created!"
+            message="Want to know when someone wants to trade with you? Turn on bot DMs to get notifications on Discord."
+            confirmText="Enable Bot DMs"
+            cancelText="Not Now"
+            onConfirm={handleEnableBotDMs}
+            onCancel={handleSuccessModalClose}
+          />
 
-        {/* Clear Confirmation Modal - Multi-option like calculator */}
-        {showClearConfirmModal && (
-          <div className="fixed inset-0 z-50">
-            <div
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-              aria-hidden="true"
-              onClick={() => setShowClearConfirmModal(false)}
-            />
-            <div className="fixed inset-0 flex items-center justify-center p-4">
-              <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
-                <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
-                  Clear Trade Ad?
-                </div>
-                <div className="modal-content mb-6">
-                  <p className="text-secondary-text">
-                    Choose what to clear. This action cannot be undone.
-                  </p>
-                </div>
-                <div className="mb-4 grid grid-cols-1 gap-3">
-                  <button
-                    onClick={() => {
-                      setOfferingItems([]);
-                      if (requestingItems.length === 0) {
-                        safeLocalStorage.removeItem("tradeAdFormItems");
-                      } else {
-                        saveItemsToLocalStorage([], requestingItems);
-                      }
-                      setShowClearConfirmModal(false);
-                    }}
-                    className="border-button-success bg-button-success/10 text-button-success hover:bg-button-success/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
-                  >
-                    Clear Offering
-                  </button>
-                  <button
-                    onClick={() => {
-                      setRequestingItems([]);
-                      if (offeringItems.length === 0) {
-                        safeLocalStorage.removeItem("tradeAdFormItems");
-                      } else {
-                        saveItemsToLocalStorage(offeringItems, []);
-                      }
-                      setShowClearConfirmModal(false);
-                    }}
-                    className="border-button-danger bg-button-danger/10 text-button-danger hover:bg-button-danger/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
-                  >
-                    Clear Requesting
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleStartNewTradeAd();
-                    }}
-                    className="bg-button-danger text-form-button-text hover:bg-button-danger-hover w-full rounded-md px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
-                  >
-                    Clear Both
-                  </button>
-                </div>
-                <div className="modal-footer flex justify-end">
-                  <button
-                    onClick={() => setShowClearConfirmModal(false)}
-                    className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
-                  >
-                    Cancel
-                  </button>
+          {/* Clear Confirmation Modal - Multi-option like calculator */}
+          {showClearConfirmModal && (
+            <div className="fixed inset-0 z-50">
+              <div
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                aria-hidden="true"
+                onClick={() => setShowClearConfirmModal(false)}
+              />
+              <div className="fixed inset-0 flex items-center justify-center p-4">
+                <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+                  <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
+                    Clear Trade Ad?
+                  </div>
+                  <div className="modal-content mb-6">
+                    <p className="text-secondary-text">
+                      Choose what to clear. This action cannot be undone.
+                    </p>
+                  </div>
+                  <div className="mb-4 grid grid-cols-1 gap-3">
+                    <button
+                      onClick={() => {
+                        setOfferingItems([]);
+                        if (requestingItems.length === 0) {
+                          safeLocalStorage.removeItem("tradeAdFormItems");
+                        } else {
+                          saveItemsToLocalStorage([], requestingItems);
+                        }
+                        setShowClearConfirmModal(false);
+                      }}
+                      className="border-button-success bg-button-success/10 text-button-success hover:bg-button-success/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                    >
+                      Clear Offering
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRequestingItems([]);
+                        if (offeringItems.length === 0) {
+                          safeLocalStorage.removeItem("tradeAdFormItems");
+                        } else {
+                          saveItemsToLocalStorage(offeringItems, []);
+                        }
+                        setShowClearConfirmModal(false);
+                      }}
+                      className="border-button-danger bg-button-danger/10 text-button-danger hover:bg-button-danger/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                    >
+                      Clear Requesting
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleStartNewTradeAd();
+                      }}
+                      className="bg-button-danger text-form-button-text hover:bg-button-danger-hover w-full rounded-md px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                    >
+                      Clear Both
+                    </button>
+                  </div>
+                  <div className="modal-footer flex justify-end">
+                    <button
+                      onClick={() => setShowClearConfirmModal(false)}
+                      className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <SupporterModal
-          isOpen={modalState.isOpen}
-          onClose={closeModal}
-          feature={modalState.feature}
-          currentTier={modalState.currentTier}
-          requiredTier={modalState.requiredTier}
-          currentLimit={modalState.currentLimit}
-          requiredLimit={modalState.requiredLimit}
-        />
+          <SupporterModal
+            isOpen={modalState.isOpen}
+            onClose={closeModal}
+            feature={modalState.feature}
+            currentTier={modalState.currentTier}
+            requiredTier={modalState.requiredTier}
+            currentLimit={modalState.currentLimit}
+            requiredLimit={modalState.requiredLimit}
+          />
 
-        {/* Expiration Time Selection */}
-        {!editMode && (
-          <div className="border-border-primary bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
-            <div className="relative z-10">
-              <span className="text-primary-text text-base font-bold">
-                Trade Ad Expiration
-              </span>
-              <div className="text-secondary-text mt-1">
-                How long should your trade ad be visible? Supporters can choose
-                longer durations!
-                <br />
-                <Link
-                  href="/supporting"
-                  className="hover:text-button-info underline transition-colors"
-                >
-                  Become a Supporter
-                </Link>
-              </div>
-              <div className="mt-3">
-                <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
-                  value={expirationHours || ""}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const value = e.target.value;
-                    if (value === "") {
-                      setExpirationHours(null);
-                    } else {
-                      setExpirationHours(parseInt(value));
-                    }
-                  }}
-                >
-                  <option value="" disabled>
-                    Select expiration...
-                  </option>
-                  <option value="6">6 hours</option>
-                  <option value="12">12 hours</option>
-                  <option value="24">24 hours</option>
-                  <option value="48">48 hours</option>
-                </select>
+          {/* Expiration Time Selection */}
+          {!editMode && (
+            <div className="border-border-primary bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+              <div className="relative z-10">
+                <span className="text-primary-text text-base font-bold">
+                  Trade Ad Expiration
+                </span>
+                <div className="text-secondary-text mt-1">
+                  How long should your trade ad be visible? Supporters can
+                  choose longer durations!
+                  <br />
+                  <Link
+                    href="/supporting"
+                    className="hover:text-button-info underline transition-colors"
+                  >
+                    Become a Supporter
+                  </Link>
+                </div>
+                <div className="mt-3">
+                  <select
+                    className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                    value={expirationHours || ""}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        setExpirationHours(null);
+                      } else {
+                        setExpirationHours(parseInt(value));
+                      }
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select expiration...
+                    </option>
+                    <option value="6">6 hours</option>
+                    <option value="12">12 hours</option>
+                    <option value="24">24 hours</option>
+                    <option value="48">48 hours</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Status Selection (Edit Mode Only) */}
-        {editMode && tradeAd && (
-          <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
-            <h3 className="text-tertiary-text mb-4 font-medium">
-              Trade Status
-            </h3>
-            <select
-              className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
-              value={selectedTradeAd?.status || tradeAd.status}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                const status = e.target.value;
-                setSelectedTradeAd((prev) =>
-                  prev ? { ...prev, status } : { ...tradeAd, status },
-                );
+          {/* Status Selection (Edit Mode Only) */}
+          {editMode && tradeAd && (
+            <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
+              <h3 className="text-tertiary-text mb-4 font-medium">
+                Trade Status
+              </h3>
+              <select
+                className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                value={selectedTradeAd?.status || tradeAd.status}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  const status = e.target.value;
+                  setSelectedTradeAd((prev) =>
+                    prev ? { ...prev, status } : { ...tradeAd, status },
+                  );
+                }}
+              >
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-3">
+            <Tooltip
+              title="Swap sides"
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
               }}
             >
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-center gap-3">
-          <Tooltip
-            title="Swap sides"
-            arrow
-            placement="top"
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleSwapSides}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover"
-            >
-              <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
-              Swap Sides
-            </Button>
-          </Tooltip>
-          <Tooltip
-            title="Clear all items (hold Shift to clear both sides instantly)"
-            arrow
-            placement="top"
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleClearSides}
-              className="bg-status-error text-form-button-text hover:bg-status-error-hover"
-            >
-              <TrashIcon className="mr-1 h-5 w-5" />
-              Clear
-            </Button>
-          </Tooltip>
-        </div>
-
-        {/* Pro tip about Shift+Clear */}
-        <div className="text-center">
-          <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
-            <Icon
-              icon="emojione:light-bulb"
-              className="text-sm text-yellow-500"
-            />
-            Pro tip: Hold{" "}
-            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
-              Shift
-            </kbd>{" "}
-            while clicking Clear to clear both sides instantly without
-            confirmation
-          </div>
-        </div>
-
-        {/* Offering Items */}
-        <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-          <div className="border-status-success bg-secondary-bg flex-1 rounded-lg border p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h3 className="text-secondary-text font-medium">Offering</h3>
-                <span className="text-secondary-text/70 text-sm">
-                  ({offeringItems.length}/8)
-                </span>
-              </div>
-              <Tooltip
-                title="Mirror to requesting"
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
+              <Button
+                variant="contained"
+                onClick={handleSwapSides}
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover"
+              >
+                <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
+                Swap Sides
+              </Button>
+            </Tooltip>
+            <Tooltip
+              title="Clear all items (hold Shift to clear both sides instantly)"
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
                     },
                   },
-                }}
+                },
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={handleClearSides}
+                className="bg-status-error text-form-button-text hover:bg-status-error-hover"
               >
-                <Button
-                  variant="outlined"
-                  onClick={() => handleMirrorItems("offering")}
-                  size="small"
-                  className="border-status-success text-primary-text bg-status-success/15 hover:border-status-success hover:bg-status-success/25"
-                >
-                  <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
-                  Mirror
-                </Button>
-              </Tooltip>
+                <TrashIcon className="mr-1 h-5 w-5" />
+                Clear
+              </Button>
+            </Tooltip>
+          </div>
+
+          {/* Pro tip about Shift+Clear */}
+          <div className="text-center">
+            <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
+              <Icon
+                icon="emojione:light-bulb"
+                className="text-sm text-yellow-500"
+              />
+              Pro tip: Hold{" "}
+              <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+                Shift
+              </kbd>{" "}
+              while clicking Clear to clear both sides instantly without
+              confirmation
             </div>
-            <ItemGrid
-              items={offeringItems}
-              title="Offering"
-              onRemove={(id, subName) =>
-                handleRemoveItem(id, "offering", subName)
-              }
-            />
-            <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
-              <span>
-                Total:{" "}
-                <span className="text-secondary-text font-bold">
+          </div>
+
+          {/* Offering Items */}
+          <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
+            <DroppableZone
+              id="offering-drop-zone"
+              className="border-status-success bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
+              activeClassName="border-status-success/80 bg-status-success/5 ring-2 ring-status-success/50"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-secondary-text font-medium">Offering</h3>
+                  <span className="text-secondary-text/70 text-sm">
+                    ({offeringItems.length}/8)
+                  </span>
+                </div>
+                <Tooltip
+                  title="Mirror to requesting"
+                  arrow
+                  placement="top"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        "& .MuiTooltip-arrow": {
+                          color: "var(--color-secondary-bg)",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleMirrorItems("offering")}
+                    size="small"
+                    className="border-status-success text-primary-text bg-status-success/15 hover:border-status-success hover:bg-status-success/25"
+                  >
+                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    Mirror
+                  </Button>
+                </Tooltip>
+              </div>
+              <ItemGrid
+                items={offeringItems}
+                title="Offering"
+                onRemove={(id, subName) =>
+                  handleRemoveItem(id, "offering", subName)
+                }
+              />
+              <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
+                <span>
+                  Total:{" "}
+                  <span className="text-secondary-text font-bold">
+                    {calculateTotals(offeringItems).cashValue}
+                  </span>
+                </span>
+                <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                  {offeringItems.length} clean •{" "}
                   {calculateTotals(offeringItems).cashValue}
                 </span>
-              </span>
-              <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                {offeringItems.length} clean •{" "}
-                {calculateTotals(offeringItems).cashValue}
-              </span>
-              <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                0 duped • 0
-              </span>
-            </div>
-          </div>
-
-          {/* Requesting Items */}
-          <div className="border-status-error bg-secondary-bg flex-1 rounded-lg border p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h3 className="text-secondary-text font-medium">Requesting</h3>
-                <span className="text-secondary-text/70 text-sm">
-                  ({requestingItems.length}/8)
+                <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                  0 duped • 0
                 </span>
               </div>
-              <Tooltip
-                title="Mirror to offering"
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
+            </DroppableZone>
+
+            {/* Requesting Items */}
+            <DroppableZone
+              id="requesting-drop-zone"
+              className="bg-secondary-bg border-status-error flex-1 rounded-lg border p-4 transition-colors"
+              activeClassName="border-status-error/80 bg-status-error/5 ring-2 ring-status-error/50"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-secondary-text font-medium">
+                    Requesting
+                  </h3>
+                  <span className="text-secondary-text/70 text-sm">
+                    ({requestingItems.length}/8)
+                  </span>
+                </div>
+                <Tooltip
+                  title="Mirror to offering"
+                  arrow
+                  placement="top"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        "& .MuiTooltip-arrow": {
+                          color: "var(--color-secondary-bg)",
+                        },
                       },
                     },
-                  },
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  onClick={() => handleMirrorItems("requesting")}
-                  size="small"
-                  className="border-status-error text-primary-text bg-status-error/15 hover:border-status-error hover:bg-status-error/25"
+                  }}
                 >
-                  <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
-                  Mirror
-                </Button>
-              </Tooltip>
-            </div>
-            <ItemGrid
-              items={requestingItems}
-              title="Requesting"
-              onRemove={(id, subName) =>
-                handleRemoveItem(id, "requesting", subName)
-              }
-            />
-            <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
-              <span>
-                Total:{" "}
-                <span className="text-secondary-text font-bold">
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleMirrorItems("requesting")}
+                    size="small"
+                    className="border-status-error text-primary-text bg-status-error/15 hover:border-status-error hover:bg-status-error/25"
+                  >
+                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    Mirror
+                  </Button>
+                </Tooltip>
+              </div>
+              <ItemGrid
+                items={requestingItems}
+                title="Requesting"
+                onRemove={(id, subName) =>
+                  handleRemoveItem(id, "requesting", subName)
+                }
+              />
+              <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
+                <span>
+                  Total:{" "}
+                  <span className="text-secondary-text font-bold">
+                    {calculateTotals(requestingItems).cashValue}
+                  </span>
+                </span>
+                <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                  {requestingItems.length} clean •{" "}
                   {calculateTotals(requestingItems).cashValue}
                 </span>
-              </span>
-              <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                {requestingItems.length} clean •{" "}
-                {calculateTotals(requestingItems).cashValue}
-              </span>
-              <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                0 duped • 0
-              </span>
-            </div>
+                <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+                  0 duped • 0
+                </span>
+              </div>
+            </DroppableZone>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex flex-col justify-end gap-3 sm:flex-row">
+            <button
+              onClick={() => {
+                if (editMode) {
+                  window.history.pushState(null, "", window.location.pathname);
+                  window.location.hash = "view";
+                } else if (
+                  offeringItems.length > 0 ||
+                  requestingItems.length > 0
+                ) {
+                  setShowClearConfirmModal(true);
+                }
+              }}
+              disabled={
+                !editMode &&
+                offeringItems.length === 0 &&
+                requestingItems.length === 0
+              }
+              className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                !editMode &&
+                offeringItems.length === 0 &&
+                requestingItems.length === 0
+                  ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
+                  : "bg-button-secondary text-secondary-text border-button-secondary hover:bg-button-secondary-hover cursor-pointer"
+              }`}
+            >
+              {editMode ? "Cancel" : "Clear Trade Ad"}
+            </button>
+            <button
+              onClick={() => {
+                if (!editMode && expirationHours === null) {
+                  toast.error(
+                    "Please select a trade ad expiration before creating your ad.",
+                  );
+                  return;
+                }
+                handleSubmit();
+              }}
+              disabled={submitting}
+              className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                submitting
+                  ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                  : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+              }`}
+            >
+              {submitting
+                ? editMode
+                  ? "Updating Trade Ad..."
+                  : "Creating Trade Ad..."
+                : editMode
+                  ? "Update Trade Ad"
+                  : "Create Trade Ad"}
+            </button>
+          </div>
+
+          {/* Available Items Grid */}
+          <div className="mb-8">
+            <AvailableItemsGrid
+              items={items}
+              onSelect={handleAddItem}
+              selectedItems={[...offeringItems, ...requestingItems]}
+              onCreateTradeAd={handleSubmit}
+            />
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex flex-col justify-end gap-3 sm:flex-row">
-          <button
-            onClick={() => {
-              if (editMode) {
-                window.history.pushState(null, "", window.location.pathname);
-                window.location.hash = "view";
-              } else if (
-                offeringItems.length > 0 ||
-                requestingItems.length > 0
-              ) {
-                setShowClearConfirmModal(true);
-              }
-            }}
-            disabled={
-              !editMode &&
-              offeringItems.length === 0 &&
-              requestingItems.length === 0
-            }
-            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-              !editMode &&
-              offeringItems.length === 0 &&
-              requestingItems.length === 0
-                ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
-                : "bg-button-secondary text-secondary-text border-button-secondary hover:bg-button-secondary-hover cursor-pointer"
-            }`}
-          >
-            {editMode ? "Cancel" : "Clear Trade Ad"}
-          </button>
-          <button
-            onClick={() => {
-              if (!editMode && expirationHours === null) {
-                toast.error(
-                  "Please select a trade ad expiration before creating your ad.",
-                );
-                return;
-              }
-              handleSubmit();
-            }}
-            disabled={submitting}
-            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-              submitting
-                ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
-                : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
-            }`}
-          >
-            {submitting
-              ? editMode
-                ? "Updating Trade Ad..."
-                : "Creating Trade Ad..."
-              : editMode
-                ? "Update Trade Ad"
-                : "Create Trade Ad"}
-          </button>
-        </div>
-
-        {/* Available Items Grid */}
-        <div className="mb-8">
-          <AvailableItemsGrid
-            items={items}
-            onSelect={handleAddItem}
-            selectedItems={[...offeringItems, ...requestingItems]}
-            onCreateTradeAd={handleSubmit}
-          />
-        </div>
-      </div>
-    </>
+        {/* Drag Overlay */}
+        <CustomDragOverlay item={activeItem} />
+      </>
+    </DndContext>
   );
 };

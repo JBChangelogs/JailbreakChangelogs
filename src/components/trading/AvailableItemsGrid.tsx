@@ -24,15 +24,17 @@ import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
+import { Icon } from "../ui/IconWrapper";
 import Image from "next/image";
+import Link from "next/link";
 import { FilterSort, ValueSort } from "@/types";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import FloatingDropdown from "@/components/common/FloatingDropdown";
+import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -86,7 +88,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
   const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
-  const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
@@ -337,6 +338,34 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     }
   };
 
+  // Get the correct item to drag based on selected variant
+  const getItemForDrag = (item: TradeItem): TradeItem => {
+    const selectedVariant = selectedVariants[item.id];
+    if (selectedVariant && selectedVariant !== "2025") {
+      // If a specific variant is selected, create item with variant data
+      const selectedChild = item.children?.find(
+        (child) => child.sub_name === selectedVariant,
+      );
+      if (selectedChild) {
+        return {
+          ...item,
+          cash_value: selectedChild.data.cash_value,
+          duped_value: selectedChild.data.duped_value,
+          demand: selectedChild.data.demand,
+          trend: selectedChild.data.trend,
+          sub_name: selectedVariant,
+          base_name: item.name,
+        };
+      }
+    }
+    // For current year or no variant selected, return parent item
+    return {
+      ...item,
+      sub_name: undefined,
+      base_name: item.name,
+    };
+  };
+
   return (
     <>
       <style jsx>{`
@@ -494,7 +523,26 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             </div>
           </div>
 
-          {/* Virtualized items container with fixed height for performance */}
+          {/* Pro tip about drag and drop */}
+          <div className="text-center mb-4">
+            <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
+              <Icon
+                icon="emojione:light-bulb"
+                className="text-sm text-yellow-500"
+              />
+              Pro tip: Drag and drop items to{" "}
+              <span className="text-status-success font-semibold">
+                Offering
+              </span>{" "}
+              or{" "}
+              <span className="text-status-error font-semibold">
+                Requesting
+              </span>{" "}
+              sides
+            </div>
+          </div>
+
+          {/* Results count */}
           <div
             ref={parentRef}
             className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-[60rem] overflow-y-auto"
@@ -553,319 +601,322 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                         }}
                       >
                         {rowItems.map((item) => (
-                          <div
+                          <DraggableItemCard
                             key={item.id}
-                            className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
-                              item.tradable === 1
-                                ? "hover:border-border-focus"
-                                : "cursor-not-allowed opacity-50"
-                            }`}
-                            tabIndex={0}
-                            role="button"
-                            style={{ cursor: "pointer" }}
-                            onClick={(e) => {
-                              // Only navigate if not clicking a button or dropdown
-                              if (
-                                e.target instanceof HTMLElement &&
-                                !e.target.closest("button") &&
-                                !e.target.closest("a") &&
-                                !e.target.closest(".dropdown")
-                              ) {
-                                router.push(
-                                  `/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`,
-                                );
-                              }
-                            }}
+                            item={getItemForDrag(item)}
+                            disabled={item.tradable !== 1}
                           >
-                            <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
-                              {isVideoItem(item.name) ? (
-                                <video
-                                  src={getVideoPath(item.type, item.name)}
-                                  className="h-full w-full object-cover"
-                                  muted
-                                  playsInline
-                                  loop
-                                  autoPlay
-                                  onError={(e) => {
-                                    console.log("Video error:", e);
-                                  }}
-                                  onAbort={(e) => {
-                                    console.log(
-                                      "Video aborted by browser power saving:",
-                                      e,
-                                    );
-                                  }}
-                                  onPause={(e) => {
-                                    console.log("Video paused:", e);
-                                  }}
-                                  onPlay={(e) => {
-                                    console.log("Video play attempted:", e);
-                                  }}
-                                />
-                              ) : (
-                                <Image
-                                  src={getItemImagePath(
-                                    item.type,
-                                    item.name,
-                                    true,
-                                  )}
-                                  alt={item.name}
-                                  className="h-full w-full object-cover"
-                                  onError={handleImageError}
-                                  fill
-                                />
-                              )}
-                              <div className="absolute top-2 right-2 z-5">
-                                <CategoryIconBadge
-                                  type={item.type}
-                                  isLimited={item.is_limited === 1}
-                                  isSeasonal={item.is_seasonal === 1}
-                                  hasChildren={!!item.children?.length}
-                                  showCategoryForVariants={true}
-                                  className="h-4 w-4"
-                                />
-                              </div>
-                            </div>
-                            <div className="flex flex-grow flex-col p-2">
-                              <div className="space-y-1.5">
-                                <span className="text-primary-text hover:text-link max-w-full text-sm font-semibold transition-colors">
-                                  {item.name}
-                                </span>
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  <span
-                                    className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                                    style={{
-                                      borderColor: getCategoryColor(item.type),
-                                      backgroundColor:
-                                        getCategoryColor(item.type) + "20", // Add 20% opacity
+                            <div
+                              className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
+                                item.tradable === 1
+                                  ? "hover:border-border-focus"
+                                  : "cursor-not-allowed opacity-50"
+                              }`}
+                            >
+                              <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
+                                {isVideoItem(item.name) ? (
+                                  <video
+                                    src={getVideoPath(item.type, item.name)}
+                                    className="h-full w-full object-cover"
+                                    muted
+                                    playsInline
+                                    loop
+                                    autoPlay
+                                    onError={(e) => {
+                                      console.log("Video error:", e);
                                     }}
-                                  >
-                                    {item.type}
-                                  </span>
-                                  {item.is_limited === 1 && (
-                                    <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                                      Limited
-                                    </span>
-                                  )}
-                                  {item.is_seasonal === 1 && (
-                                    <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                                      Seasonal
-                                    </span>
-                                  )}
-                                  {item.tradable !== 1 && (
-                                    <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
-                                      Not Tradable
-                                    </span>
-                                  )}
-                                </div>
-                                {item.children && item.children.length > 0 && (
-                                  <FloatingDropdown
-                                    options={[
-                                      { value: "2025", label: "2025" },
-                                      ...item.children.map((child) => ({
-                                        value: child.sub_name,
-                                        label: child.sub_name,
-                                      })),
-                                    ]}
-                                    value={selectedVariants[item.id] || "2025"}
-                                    onChange={(value) => {
-                                      handleVariantSelect(item.id, value);
+                                    onAbort={(e) => {
+                                      console.log(
+                                        "Video aborted by browser power saving:",
+                                        e,
+                                      );
                                     }}
-                                    className="relative"
-                                    buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer border-border-primary hover:border-border-focus"
-                                    stopPropagation={true}
+                                    onPause={(e) => {
+                                      console.log("Video paused:", e);
+                                    }}
+                                    onPlay={(e) => {
+                                      console.log("Video play attempted:", e);
+                                    }}
+                                  />
+                                ) : (
+                                  <Image
+                                    src={getItemImagePath(
+                                      item.type,
+                                      item.name,
+                                      true,
+                                    )}
+                                    alt={item.name}
+                                    className="h-full w-full object-cover"
+                                    onError={handleImageError}
+                                    fill
                                   />
                                 )}
-                                {item.tradable === 1 && (
-                                  <>
-                                    <div className="text-secondary-text space-y-1 text-xs">
-                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                          Cash
-                                        </span>
-                                        <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                          {selectedVariants[item.id] &&
-                                          selectedVariants[item.id] !== "2025"
-                                            ? item.children?.find(
-                                                (child) =>
-                                                  child.sub_name ===
-                                                  selectedVariants[item.id],
-                                              )?.data.cash_value === null ||
-                                              item.children?.find(
-                                                (child) =>
-                                                  child.sub_name ===
-                                                  selectedVariants[item.id],
-                                              )?.data.cash_value === "N/A"
-                                              ? "N/A"
-                                              : (() => {
-                                                  const value =
-                                                    item.children?.find(
-                                                      (child) =>
-                                                        child.sub_name ===
-                                                        selectedVariants[
-                                                          item.id
-                                                        ],
-                                                    )?.data.cash_value ?? null;
-                                                  if (
-                                                    value === null ||
-                                                    value === "N/A"
-                                                  )
-                                                    return "N/A";
-                                                  return windowWidth <= 640
-                                                    ? value
-                                                    : formatFullValue(value);
-                                                })()
-                                            : (() => {
-                                                if (
-                                                  item.cash_value === null ||
-                                                  item.cash_value === "N/A"
-                                                )
-                                                  return "N/A";
-                                                return windowWidth <= 640
-                                                  ? item.cash_value
-                                                  : formatFullValue(
-                                                      item.cash_value,
-                                                    );
-                                              })()}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                          Duped
-                                        </span>
-                                        <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                          {selectedVariants[item.id] &&
-                                          selectedVariants[item.id] !== "2025"
-                                            ? item.children?.find(
-                                                (child) =>
-                                                  child.sub_name ===
-                                                  selectedVariants[item.id],
-                                              )?.data.duped_value === null ||
-                                              item.children?.find(
-                                                (child) =>
-                                                  child.sub_name ===
-                                                  selectedVariants[item.id],
-                                              )?.data.duped_value === "N/A"
-                                              ? "N/A"
-                                              : (() => {
-                                                  const value =
-                                                    item.children?.find(
-                                                      (child) =>
-                                                        child.sub_name ===
-                                                        selectedVariants[
-                                                          item.id
-                                                        ],
-                                                    )?.data.duped_value ?? null;
-                                                  if (
-                                                    value === null ||
-                                                    value === "N/A"
-                                                  )
-                                                    return "N/A";
-                                                  return windowWidth <= 640
-                                                    ? value
-                                                    : formatFullValue(value);
-                                                })()
-                                            : (() => {
-                                                if (
-                                                  item.duped_value === null ||
-                                                  item.duped_value === "N/A"
-                                                )
-                                                  return "N/A";
-                                                return windowWidth <= 640
-                                                  ? item.duped_value
-                                                  : formatFullValue(
-                                                      item.duped_value,
-                                                    );
-                                              })()}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                          Demand
-                                        </span>
-                                        {(() => {
-                                          const d =
-                                            selectedVariants[item.id] &&
+                                <div className="absolute top-2 right-2 z-5">
+                                  <CategoryIconBadge
+                                    type={item.type}
+                                    isLimited={item.is_limited === 1}
+                                    isSeasonal={item.is_seasonal === 1}
+                                    hasChildren={!!item.children?.length}
+                                    showCategoryForVariants={true}
+                                    className="h-4 w-4"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex flex-grow flex-col p-2">
+                                <div className="space-y-1.5">
+                                  <Link
+                                    href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                    prefetch={false}
+                                    className="text-primary-text hover:text-link max-w-full text-sm font-semibold transition-colors cursor-pointer"
+                                  >
+                                    {item.name}
+                                  </Link>
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span
+                                      className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                                      style={{
+                                        borderColor: getCategoryColor(
+                                          item.type,
+                                        ),
+                                        backgroundColor:
+                                          getCategoryColor(item.type) + "20", // Add 20% opacity
+                                      }}
+                                    >
+                                      {item.type}
+                                    </span>
+                                    {item.is_limited === 1 && (
+                                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+                                        Limited
+                                      </span>
+                                    )}
+                                    {item.is_seasonal === 1 && (
+                                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+                                        Seasonal
+                                      </span>
+                                    )}
+                                    {item.tradable !== 1 && (
+                                      <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+                                        Not Tradable
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.children &&
+                                    item.children.length > 0 && (
+                                      <FloatingDropdown
+                                        options={[
+                                          { value: "2025", label: "2025" },
+                                          ...item.children.map((child) => ({
+                                            value: child.sub_name,
+                                            label: child.sub_name,
+                                          })),
+                                        ]}
+                                        value={
+                                          selectedVariants[item.id] || "2025"
+                                        }
+                                        onChange={(value) => {
+                                          handleVariantSelect(item.id, value);
+                                        }}
+                                        className="relative"
+                                        buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer border-border-primary hover:border-border-focus"
+                                        stopPropagation={true}
+                                      />
+                                    )}
+                                  {item.tradable === 1 && (
+                                    <>
+                                      <div className="text-secondary-text space-y-1 text-xs">
+                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                            Cash
+                                          </span>
+                                          <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
+                                            {selectedVariants[item.id] &&
                                             selectedVariants[item.id] !== "2025"
-                                              ? (item.children?.find(
-                                                  (child) =>
-                                                    child.sub_name ===
-                                                    selectedVariants[item.id],
-                                                )?.data.demand ?? "N/A")
-                                              : (item.demand ?? "N/A");
-                                          return (
-                                            <span
-                                              className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                                            >
-                                              {d === "N/A" ? "Unknown" : d}
-                                            </span>
-                                          );
-                                        })()}
-                                      </div>
-                                      <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
-                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                          Trend
-                                        </span>
-                                        <span
-                                          className={`${getTrendColor(
-                                            selectedVariants[item.id] &&
-                                              selectedVariants[item.id] !==
-                                                "2025"
                                               ? item.children?.find(
                                                   (child) =>
                                                     child.sub_name ===
                                                     selectedVariants[item.id],
-                                                )?.data.trend || "N/A"
-                                              : item.trend || "N/A",
-                                          )} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                                        >
+                                                )?.data.cash_value === null ||
+                                                item.children?.find(
+                                                  (child) =>
+                                                    child.sub_name ===
+                                                    selectedVariants[item.id],
+                                                )?.data.cash_value === "N/A"
+                                                ? "N/A"
+                                                : (() => {
+                                                    const value =
+                                                      item.children?.find(
+                                                        (child) =>
+                                                          child.sub_name ===
+                                                          selectedVariants[
+                                                            item.id
+                                                          ],
+                                                      )?.data.cash_value ??
+                                                      null;
+                                                    if (
+                                                      value === null ||
+                                                      value === "N/A"
+                                                    )
+                                                      return "N/A";
+                                                    return windowWidth <= 640
+                                                      ? value
+                                                      : formatFullValue(value);
+                                                  })()
+                                              : (() => {
+                                                  if (
+                                                    item.cash_value === null ||
+                                                    item.cash_value === "N/A"
+                                                  )
+                                                    return "N/A";
+                                                  return windowWidth <= 640
+                                                    ? item.cash_value
+                                                    : formatFullValue(
+                                                        item.cash_value,
+                                                      );
+                                                })()}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                            Duped
+                                          </span>
+                                          <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
+                                            {selectedVariants[item.id] &&
+                                            selectedVariants[item.id] !== "2025"
+                                              ? item.children?.find(
+                                                  (child) =>
+                                                    child.sub_name ===
+                                                    selectedVariants[item.id],
+                                                )?.data.duped_value === null ||
+                                                item.children?.find(
+                                                  (child) =>
+                                                    child.sub_name ===
+                                                    selectedVariants[item.id],
+                                                )?.data.duped_value === "N/A"
+                                                ? "N/A"
+                                                : (() => {
+                                                    const value =
+                                                      item.children?.find(
+                                                        (child) =>
+                                                          child.sub_name ===
+                                                          selectedVariants[
+                                                            item.id
+                                                          ],
+                                                      )?.data.duped_value ??
+                                                      null;
+                                                    if (
+                                                      value === null ||
+                                                      value === "N/A"
+                                                    )
+                                                      return "N/A";
+                                                    return windowWidth <= 640
+                                                      ? value
+                                                      : formatFullValue(value);
+                                                  })()
+                                              : (() => {
+                                                  if (
+                                                    item.duped_value === null ||
+                                                    item.duped_value === "N/A"
+                                                  )
+                                                    return "N/A";
+                                                  return windowWidth <= 640
+                                                    ? item.duped_value
+                                                    : formatFullValue(
+                                                        item.duped_value,
+                                                      );
+                                                })()}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                            Demand
+                                          </span>
                                           {(() => {
-                                            const trend =
+                                            const d =
                                               selectedVariants[item.id] &&
                                               selectedVariants[item.id] !==
                                                 "2025"
+                                                ? (item.children?.find(
+                                                    (child) =>
+                                                      child.sub_name ===
+                                                      selectedVariants[item.id],
+                                                  )?.data.demand ?? "N/A")
+                                                : (item.demand ?? "N/A");
+                                            return (
+                                              <span
+                                                className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
+                                              >
+                                                {d === "N/A" ? "Unknown" : d}
+                                              </span>
+                                            );
+                                          })()}
+                                        </div>
+                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                            Trend
+                                          </span>
+                                          <span
+                                            className={`${getTrendColor(
+                                              selectedVariants[item.id] &&
+                                                selectedVariants[item.id] !==
+                                                  "2025"
                                                 ? item.children?.find(
                                                     (child) =>
                                                       child.sub_name ===
                                                       selectedVariants[item.id],
-                                                  )?.data.trend
-                                                : item.trend;
-                                            return !trend || trend === "N/A"
-                                              ? "Unknown"
-                                              : trend;
-                                          })()}
-                                        </span>
+                                                  )?.data.trend || "N/A"
+                                                : item.trend || "N/A",
+                                            )} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
+                                          >
+                                            {(() => {
+                                              const trend =
+                                                selectedVariants[item.id] &&
+                                                selectedVariants[item.id] !==
+                                                  "2025"
+                                                  ? item.children?.find(
+                                                      (child) =>
+                                                        child.sub_name ===
+                                                        selectedVariants[
+                                                          item.id
+                                                        ],
+                                                    )?.data.trend
+                                                  : item.trend;
+                                              return !trend || trend === "N/A"
+                                                ? "Unknown"
+                                                : trend;
+                                            })()}
+                                          </span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  </>
+                                    </>
+                                  )}
+                                </div>
+                                {item.tradable === 1 && (
+                                  <div className="mt-auto flex gap-2 pt-2">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        handleAddItem(item, "offering");
+                                      }}
+                                      className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
+                                    >
+                                      Offer
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        handleAddItem(item, "requesting");
+                                      }}
+                                      className="bg-status-error/80 text-form-button-text flex-1 rounded-md px-2 py-1 text-xs transition-colors hover:cursor-pointer hover:bg-red-600"
+                                    >
+                                      Request
+                                    </button>
+                                  </div>
                                 )}
                               </div>
-                              {item.tradable === 1 && (
-                                <div className="mt-auto flex gap-2 pt-2">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      handleAddItem(item, "offering");
-                                    }}
-                                    className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
-                                  >
-                                    Offer
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      handleAddItem(item, "requesting");
-                                    }}
-                                    className="bg-status-error/80 text-form-button-text flex-1 rounded-md px-2 py-1 text-xs transition-colors hover:cursor-pointer hover:bg-red-600"
-                                  >
-                                    Request
-                                  </button>
-                                </div>
-                              )}
                             </div>
-                          </div>
+                          </DraggableItemCard>
                         ))}
                       </div>
                     </div>

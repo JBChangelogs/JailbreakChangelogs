@@ -320,6 +320,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   useEffect(() => {
     if (!changelogId) return;
 
+    // Clear comments immediately when changelogId changes
+    setComments([]);
+
     const timeoutId = setTimeout(() => {
       refreshCommentsFromServer();
     }, 300);

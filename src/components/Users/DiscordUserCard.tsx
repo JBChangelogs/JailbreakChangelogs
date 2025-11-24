@@ -1,9 +1,12 @@
-import { UserAvatar } from "@/utils/avatar";
-import { UserSettings, UserPresence } from "@/types/auth";
-import dynamic from "next/dynamic";
-import Image from "next/image";
+"use client";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { UserBadges } from "@/components/Profile/UserBadges";
+import { UserAvatar } from "@/utils/avatar";
+import {
+  type UserSettings,
+  type UserPresence,
+  type UserFlag,
+} from "@/types/auth";
 
 interface DiscordUserCardProps {
   user: {
@@ -16,13 +19,11 @@ interface DiscordUserCardProps {
     settings?: UserSettings;
     premiumtype?: number;
     presence?: UserPresence;
+    flags?: UserFlag[];
   };
 }
 
 export default function DiscordUserCard({ user }: DiscordUserCardProps) {
-  const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
-
   return (
     <div className="flex items-center space-x-3">
       <UserAvatar
@@ -36,74 +37,19 @@ export default function DiscordUserCard({ user }: DiscordUserCardProps) {
         premiumType={user.premiumtype}
       />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1">
-          <h2 className="text-primary-text group-hover:text-link max-w-[180px] truncate text-base font-semibold transition-colors sm:max-w-[250px]">
+        <div className="flex flex-wrap items-center gap-1">
+          <h2 className="text-primary-text group-hover:text-link max-w-full truncate text-base font-semibold transition-colors sm:max-w-[250px]">
             {user.global_name && user.global_name !== "None"
               ? user.global_name
               : user.username}
           </h2>
-          {user.premiumtype &&
-          user.premiumtype >= 1 &&
-          user.premiumtype <= 3 ? (
-            <Tooltip
-              title={`Supporter Type ${user.premiumtype}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Image
-                src={`${BADGE_BASE_URL}/jbcl_supporter_${user.premiumtype}.svg`}
-                alt={`Supporter Type ${user.premiumtype}`}
-                width={16}
-                height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
-              />
-            </Tooltip>
-          ) : null}
-          {user.usernumber <= 100 ? (
-            <Tooltip
-              title="Early Adopter"
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Image
-                src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
-                alt="Early Adopter"
-                width={16}
-                height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
-              />
-            </Tooltip>
-          ) : null}
+          <UserBadges
+            usernumber={user.usernumber}
+            premiumType={user.premiumtype}
+            flags={user.flags}
+            size="sm"
+            className="flex flex-wrap gap-1"
+          />
         </div>
         <p className="text-secondary-text max-w-[180px] truncate text-sm sm:max-w-[250px]">
           @{user.username}

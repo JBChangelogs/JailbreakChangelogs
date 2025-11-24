@@ -83,6 +83,28 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
   );
 };
 
+const NotificationTimestamp = ({
+  timestamp,
+}: {
+  timestamp: string | number;
+}) => {
+  const timestampString =
+    typeof timestamp === "string" ? timestamp : timestamp.toString();
+  const timestampNumber =
+    typeof timestamp === "number" ? timestamp : Number.parseInt(timestamp, 10);
+  const hasValidNumber = Number.isFinite(timestampNumber);
+
+  const absoluteTime = hasValidNumber
+    ? formatCompactDateTime(timestampNumber)
+    : timestampString;
+
+  return (
+    <p className="text-secondary-text text-xs mt-1 text-right">
+      <span>{absoluteTime}</span>
+    </p>
+  );
+};
+
 export default function Header() {
   const pathname = usePathname();
   const isCollabPage =
@@ -551,7 +573,15 @@ export default function Header() {
                         // Reset to unread tab when opening
                         setNotificationTab("unread");
                         setNotificationPage(1);
+                        setMarkedAsSeen(new Set()); // Clear marked state
+                        setIsLoadingNotifications(true); // Show loading immediately
+                        setNotifications(null); // Clear old notifications
                         fetchUnreadWithDebounce(1, 5);
+                      } else if (!open) {
+                        // Reset state when closing
+                        setNotifications(null);
+                        setIsLoadingNotifications(false);
+                        setMarkedAsSeen(new Set());
                       }
                     }}
                   >
@@ -856,11 +886,9 @@ export default function Header() {
                                           {notif.link}
                                         </p>
                                       )}
-                                      <p className="text-secondary-text text-xs mt-1">
-                                        {formatCompactDateTime(
-                                          notif.last_updated,
-                                        )}
-                                      </p>
+                                      <NotificationTimestamp
+                                        timestamp={notif.last_updated}
+                                      />
                                     </div>
                                   </div>
                                 );

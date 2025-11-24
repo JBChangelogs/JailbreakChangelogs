@@ -20,7 +20,8 @@ import {
   clearNotificationHistory,
   NotificationHistory,
 } from "@/utils/api";
-import { formatCompactDateTime } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/timestamp";
+import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import toast from "react-hot-toast";
 
 const AnimatedThemeToggler = dynamic(
@@ -208,6 +209,54 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
     <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
       {displayCount}
     </span>
+  );
+};
+
+const NotificationTimestamp = ({
+  timestamp,
+  notificationId,
+}: {
+  timestamp: string | number;
+  notificationId: number;
+}) => {
+  const timestampString =
+    typeof timestamp === "string" ? timestamp : timestamp.toString();
+  const timestampNumber =
+    typeof timestamp === "number" ? timestamp : Number.parseInt(timestamp, 10);
+  const hasValidNumber = Number.isFinite(timestampNumber);
+
+  const relativeTime = useOptimizedRealTimeRelativeDate(
+    timestampString,
+    `notification-${notificationId}`,
+  );
+
+  return (
+    <p className="text-secondary-text text-xs mt-1 text-right">
+      <Tooltip
+        title={
+          hasValidNumber ? formatCustomDate(timestampNumber) : timestampString
+        }
+        placement="top"
+        arrow
+        slotProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
+              fontSize: "0.75rem",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              "& .MuiTooltip-arrow": {
+                color: "var(--color-secondary-bg)",
+              },
+            },
+          },
+        }}
+      >
+        <span className="cursor-help">{relativeTime}</span>
+      </Tooltip>
+    </p>
   );
 };
 
@@ -472,7 +521,15 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 // Reset to unread tab when opening
                 setNotificationTab("unread");
                 setNotificationPage(1);
+                setMarkedAsSeen(new Set()); // Clear marked state
+                setIsLoadingNotifications(true); // Show loading immediately
+                setNotifications(null); // Clear old notifications
                 fetchUnreadWithDebounce(1, 5);
+              } else if (!open) {
+                // Reset state when closing
+                setNotifications(null);
+                setIsLoadingNotifications(false);
+                setMarkedAsSeen(new Set());
               }
             }}
           >
@@ -672,119 +729,113 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             key={notif.id}
                             className="border-border-secondary hover:bg-secondary-bg block px-4 py-3 border-b last:border-b-0 transition-colors"
                           >
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="text-primary-text text-sm font-semibold flex-1">
-                                  {notif.title}
-                                </p>
-                                {notificationTab === "unread" && (
-                                  <Tooltip
-                                    title="Mark As Read"
-                                    arrow
-                                    placement="top"
-                                  >
-                                    <button
-                                      onClick={async () => {
-                                        // Optimistically remove from UI
-                                        setNotifications((prev) => {
-                                          if (!prev) return prev;
-                                          return {
-                                            ...prev,
-                                            items: prev.items.filter(
-                                              (n) => n.id !== notif.id,
-                                            ),
-                                            total: prev.total - 1,
-                                          };
-                                        });
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-primary-text text-sm font-semibold flex-1">
+                                {notif.title}
+                              </p>
+                              {notificationTab === "unread" && (
+                                <Tooltip
+                                  title="Mark As Read"
+                                  arrow
+                                  placement="top"
+                                >
+                                  <button
+                                    onClick={async () => {
+                                      // Optimistically remove from UI
+                                      setNotifications((prev) => {
+                                        if (!prev) return prev;
+                                        return {
+                                          ...prev,
+                                          items: prev.items.filter(
+                                            (n) => n.id !== notif.id,
+                                          ),
+                                          total: prev.total - 1,
+                                        };
+                                      });
 
-                                        // Update unread count immediately
-                                        setUnreadCount((prev) =>
-                                          Math.max(0, prev - 1),
-                                        );
+                                      // Update unread count immediately
+                                      setUnreadCount((prev) =>
+                                        Math.max(0, prev - 1),
+                                      );
 
-                                        // Mark as seen for visual feedback
-                                        setMarkedAsSeen((prev) =>
-                                          new Set(prev).add(notif.id),
-                                        );
+                                      // Mark as seen for visual feedback
+                                      setMarkedAsSeen((prev) =>
+                                        new Set(prev).add(notif.id),
+                                      );
 
-                                        toast.success("Marked as read", {
+                                      toast.success("Marked as read", {
+                                        duration: 2000,
+                                        position: "bottom-right",
+                                      });
+
+                                      // Call API in background
+                                      const success =
+                                        await markNotificationAsSeen(notif.id);
+
+                                      if (!success) {
+                                        // Revert on failure
+                                        toast.error("Failed to mark as read", {
                                           duration: 2000,
                                           position: "bottom-right",
                                         });
-
-                                        // Call API in background
-                                        const success =
-                                          await markNotificationAsSeen(
-                                            notif.id,
+                                        // Refetch to restore state
+                                        const data =
+                                          await fetchUnreadNotifications(
+                                            notificationPage,
+                                            5,
                                           );
-
-                                        if (!success) {
-                                          // Revert on failure
-                                          toast.error(
-                                            "Failed to mark as read",
-                                            {
-                                              duration: 2000,
-                                              position: "bottom-right",
-                                            },
-                                          );
-                                          // Refetch to restore state
-                                          const data =
-                                            await fetchUnreadNotifications(
-                                              notificationPage,
-                                              5,
-                                            );
-                                          setNotifications(data);
-                                          fetchUnreadCount();
-                                        }
-                                      }}
-                                      className={`shrink-0 rounded-full p-1 transition-all cursor-pointer ${
-                                        markedAsSeen.has(notif.id)
-                                          ? "bg-green-500/20 text-green-500"
-                                          : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
-                                      }`}
-                                      aria-label="Mark as seen"
-                                    >
-                                      <Icon
-                                        icon="proicons:checkmark"
-                                        className="h-4 w-4"
-                                        inline={true}
-                                      />
-                                    </button>
-                                  </Tooltip>
-                                )}
-                              </div>
-                              <p className="text-secondary-text text-xs mt-1">
-                                {notif.description}
-                              </p>
-                              {urlInfo.isWhitelisted ? (
-                                urlInfo.isJailbreakChangelogs &&
-                                urlInfo.relativePath ? (
-                                  <Link
-                                    href={urlInfo.relativePath}
-                                    prefetch={false}
-                                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                        setNotifications(data);
+                                        fetchUnreadCount();
+                                      }
+                                    }}
+                                    className={`shrink-0 rounded-full p-1 transition-all cursor-pointer ${
+                                      markedAsSeen.has(notif.id)
+                                        ? "bg-green-500/20 text-green-500"
+                                        : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
+                                    }`}
+                                    aria-label="Mark as seen"
                                   >
-                                    View
-                                  </Link>
-                                ) : urlInfo.href ? (
-                                  <a
-                                    href={urlInfo.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
-                                  >
-                                    View
-                                  </a>
-                                ) : null
-                              ) : (
-                                <p className="text-secondary-text text-xs mt-1 break-all">
-                                  {notif.link}
-                                </p>
+                                    <Icon
+                                      icon="proicons:checkmark"
+                                      className="h-4 w-4"
+                                      inline={true}
+                                    />
+                                  </button>
+                                </Tooltip>
                               )}
-                              <p className="text-secondary-text text-xs mt-1">
-                                {formatCompactDateTime(notif.last_updated)}
-                              </p>
                             </div>
+                            <p className="text-secondary-text text-xs mt-1">
+                              {notif.description}
+                            </p>
+                            {urlInfo.isWhitelisted ? (
+                              urlInfo.isJailbreakChangelogs &&
+                              urlInfo.relativePath ? (
+                                <Link
+                                  href={urlInfo.relativePath}
+                                  prefetch={false}
+                                  className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                >
+                                  View
+                                </Link>
+                              ) : urlInfo.href ? (
+                                <a
+                                  href={urlInfo.href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                >
+                                  View
+                                </a>
+                              ) : null
+                            ) : (
+                              <p className="text-secondary-text text-xs mt-1 break-all">
+                                {notif.link}
+                              </p>
+                            )}
+                            <NotificationTimestamp
+                              timestamp={notif.last_updated}
+                              notificationId={notif.id}
+                            />
                           </div>
                         );
                       })}

@@ -141,7 +141,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({ items, title }) => {
           No items selected
         </p>
         <p className="text-secondary-text/70 mt-1 text-xs">
-          Click to browse items
+          Browse items or drop items here
         </p>
       </div>
     );

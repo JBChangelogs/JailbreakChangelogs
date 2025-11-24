@@ -27,7 +27,7 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
  * @returns Array of shuffled background image URLs
  */
 export function generateShuffledBackgroundImages(
-  count: number = 30,
+  count: number = 34,
   baseUrl: string = "https://assets.jailbreakchangelogs.xyz/assets/backgrounds",
 ): string[] {
   // Generate array of image URLs

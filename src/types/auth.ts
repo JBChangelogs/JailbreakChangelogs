@@ -18,6 +18,13 @@ export interface UserPresence {
 
 export type CustomBanner = string;
 
+export interface UserPrimaryGuild {
+  tag: string | null;
+  badge: string | null;
+  identity_enabled: boolean;
+  identity_guild_id: string | null;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -32,6 +39,7 @@ export interface User {
   usernumber: number;
   is_following?: boolean;
   custom_avatar?: string; // Optional custom avatar URL
+  primary_guild?: UserPrimaryGuild | null;
 }
 
 export interface UserFlag {
@@ -60,6 +68,7 @@ export interface UserData extends User {
   custom_banner: CustomBanner | null;
   token: string;
   flags?: UserFlag[];
+  primary_guild?: UserPrimaryGuild | null;
 }
 
 export interface AuthResponse {
