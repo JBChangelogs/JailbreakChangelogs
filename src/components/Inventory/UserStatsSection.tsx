@@ -180,7 +180,7 @@ export default function UserStatsSection({
     <div className="space-y-4">
       {/* Basic Stats */}
       <div
-        className={`grid grid-cols-2 gap-4 ${currentData.dupe_count && currentData.dupe_count > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}
+        className={`grid grid-cols-2 gap-4 ${(currentData.dupe_count ?? 0) > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}
       >
         <div className="text-center">
           <p className="text-secondary-text text-sm">Total Items</p>
@@ -298,11 +298,11 @@ export default function UserStatsSection({
           </Tooltip>
         </div>
         {/* Total Duped Items - Only show if dupe_count > 0 */}
-        {currentData.dupe_count && currentData.dupe_count > 0 && (
+        {(currentData.dupe_count ?? 0) > 0 && (
           <div className="text-center">
             <p className="text-secondary-text text-sm">Duped Items</p>
             <Tooltip
-              title={currentData.dupe_count.toLocaleString()}
+              title={(currentData.dupe_count ?? 0).toLocaleString()}
               placement="top"
               arrow
               slotProps={{
@@ -323,7 +323,7 @@ export default function UserStatsSection({
               }}
             >
               <p className="text-primary-text cursor-help text-2xl font-bold">
-                {formatNumber(currentData.dupe_count)}
+                {formatNumber(currentData.dupe_count ?? 0)}
               </p>
             </Tooltip>
           </div>
@@ -367,7 +367,7 @@ export default function UserStatsSection({
 
       {/* Total Values */}
       <div
-        className={`mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ${currentData && currentData.duplicates && currentData.duplicates.length > 0 ? "lg:grid-cols-3" : ""}`}
+        className={`mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ${(currentData.duplicates?.length ?? 0) > 0 ? "lg:grid-cols-3" : ""}`}
       >
         {/* Inventory Value */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
