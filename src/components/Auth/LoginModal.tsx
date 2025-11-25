@@ -454,33 +454,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         <motion.button
                           onClick={async () => {
                             try {
-                              // Check if user is authenticated via AuthContext
-                              if (!login) {
-                                toast.error("Authentication not available", {
-                                  duration: 3000,
-                                  position: "bottom-right",
-                                });
-                                return;
-                              }
-
-                              // Get current session to verify authentication
-                              const sessionResponse =
-                                await fetch("/api/session");
-                              const sessionData = await sessionResponse.json();
-
-                              if (!sessionData.user) {
-                                toast.error(
-                                  "Your session has expired. Please log in with Discord again.",
-                                  {
-                                    duration: 4000,
-                                    position: "bottom-right",
-                                  },
-                                );
-                                // Auto-redirect to Discord tab (index 0)
-                                setTabValue(0);
-                                return;
-                              }
-
                               setIsRedirecting(true);
                               const currentURL = window.location.href;
                               const oauthRedirect = `/api/oauth/roblox/redirect?redirect=${encodeURIComponent(currentURL)}`;
@@ -503,8 +476,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                   position: "bottom-right",
                                 },
                               );
-                              // Auto-redirect to Discord tab on error
-                              setTabValue(0);
                               setIsRedirecting(false);
                             }
                           }}
