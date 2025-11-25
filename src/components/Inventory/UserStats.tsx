@@ -45,6 +45,7 @@ export default function UserStats({
   onRefresh,
 }: UserStatsProps) {
   const [totalCashValue, setTotalCashValue] = useState<number>(0);
+  const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -85,13 +86,15 @@ export default function UserStats({
     [robloxUsers],
   );
 
-  // Calculate cash value
+  // Calculate cash value and duped value
   useEffect(() => {
-    const calculateCashValue = () => {
+    const calculateValues = () => {
       try {
         let totalCash = 0;
+        let totalDuped = 0;
         const itemMap = new Map(itemsData.map((item) => [item.id, item]));
 
+        // Calculate cash value from regular inventory items
         initialData.data.forEach((inventoryItem) => {
           const itemData = itemMap.get(inventoryItem.item_id);
           if (itemData) {
@@ -102,18 +105,40 @@ export default function UserStats({
           }
         });
 
+        // Include duplicates in total cash value calculation
+        if (initialData.duplicates && initialData.duplicates.length > 0) {
+          initialData.duplicates.forEach((inventoryItem) => {
+            const itemData = itemMap.get(inventoryItem.item_id);
+            if (itemData) {
+              const cashValue = parseCashValueForTotal(itemData.cash_value);
+              if (!isNaN(cashValue) && cashValue > 0) {
+                totalCash += cashValue;
+              }
+
+              // Calculate duped value for duplicated items
+              // Only use duped_value if it exists in the API response
+              const dupedValue = parseCashValueForTotal(itemData.duped_value);
+              if (!isNaN(dupedValue) && dupedValue > 0) {
+                totalDuped += dupedValue;
+              }
+            }
+          });
+        }
+
         setTotalCashValue(totalCash);
+        setTotalDupedValue(totalDuped);
       } catch (error) {
-        logError("Error calculating cash value", error, {
+        logError("Error calculating values", error, {
           component: "UserStats",
-          action: "calculateTotalCashValue",
+          action: "calculateTotalValues",
         });
         setTotalCashValue(0);
+        setTotalDupedValue(0);
       }
     };
 
-    calculateCashValue();
-  }, [initialData.data, itemsData]);
+    calculateValues();
+  }, [initialData.data, initialData.duplicates, itemsData]);
 
   // Handle refresh
   const handleRefresh = async () => {
@@ -191,6 +216,7 @@ export default function UserStats({
         currentData={initialData}
         currentSeason={currentSeason}
         totalCashValue={totalCashValue}
+        totalDupedValue={totalDupedValue}
         isLoadingValues={isLoadingValues}
         userId={initialData.user_id}
       />

@@ -47,11 +47,11 @@ export default function InventoryItems({
   // Merge inventory data with metadata from item/list endpoint
   // This ensures fields like timesTraded and uniqueCirculation
   // reflect the latest state from metadata, not stale snapshots
-  const mergedInventoryData = useMemo(
-    () =>
-      mergeInventoryArrayWithMetadata(initialData.data, propItemsData || []),
-    [initialData.data, propItemsData],
-  );
+  // Also include duplicates from the API response
+  const mergedInventoryData = useMemo(() => {
+    const allItems = [...initialData.data, ...(initialData.duplicates || [])];
+    return mergeInventoryArrayWithMetadata(allItems, propItemsData || []);
+  }, [initialData.data, initialData.duplicates, propItemsData]);
 
   // Get variant-specific values (e.g., different hyperchrome colors by year)
   const getVariantSpecificValues = (

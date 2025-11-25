@@ -28,6 +28,7 @@ export interface InventoryData {
   data: InventoryItem[];
   duplicates?: InventoryItem[];
   item_count: number;
+  dupe_count?: number;
   level: number;
   money: number;
   xp: number;

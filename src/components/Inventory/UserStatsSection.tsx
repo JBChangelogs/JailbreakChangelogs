@@ -63,6 +63,7 @@ interface UserStatsSectionProps {
   currentData: InventoryData | null;
   currentSeason: Season | null;
   totalCashValue: number;
+  totalDupedValue: number;
   isLoadingValues: boolean;
   userId: string;
 }
@@ -122,6 +123,7 @@ export default function UserStatsSection({
   currentData,
   currentSeason,
   totalCashValue,
+  totalDupedValue,
   isLoadingValues,
   userId,
 }: UserStatsSectionProps) {
@@ -177,41 +179,15 @@ export default function UserStatsSection({
   return (
     <div className="space-y-4">
       {/* Basic Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div
+        className={`grid grid-cols-2 gap-4 ${currentData.dupe_count && currentData.dupe_count > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}
+      >
         <div className="text-center">
           <p className="text-secondary-text text-sm">Total Items</p>
           <Tooltip
-            title={currentData.item_count.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatNumber(currentData.item_count)}
-            </p>
-          </Tooltip>
-        </div>
-        <div className="text-center">
-          <p className="text-secondary-text text-sm">Original Items</p>
-          <Tooltip
-            title={currentData.data
-              .filter((item) => item.isOriginalOwner)
-              .length.toLocaleString()}
+            title={(
+              currentData.item_count + (currentData.dupe_count || 0)
+            ).toLocaleString()}
             placement="top"
             arrow
             slotProps={{
@@ -233,7 +209,48 @@ export default function UserStatsSection({
           >
             <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(
-                currentData.data.filter((item) => item.isOriginalOwner).length,
+                currentData.item_count + (currentData.dupe_count || 0),
+              )}
+            </p>
+          </Tooltip>
+        </div>
+        <div className="text-center">
+          <p className="text-secondary-text text-sm">Original Items</p>
+          <Tooltip
+            title={(() => {
+              const regularOriginal = currentData.data.filter(
+                (item) => item.isOriginalOwner,
+              ).length;
+              const dupeOriginal = (currentData.duplicates || []).filter(
+                (item) => item.isOriginalOwner,
+              ).length;
+              return (regularOriginal + dupeOriginal).toLocaleString();
+            })()}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  fontSize: "0.75rem",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <p className="text-primary-text cursor-help text-2xl font-bold">
+              {formatNumber(
+                currentData.data.filter((item) => item.isOriginalOwner).length +
+                  (currentData.duplicates || []).filter(
+                    (item) => item.isOriginalOwner,
+                  ).length,
               )}
             </p>
           </Tooltip>
@@ -241,9 +258,15 @@ export default function UserStatsSection({
         <div className="text-center">
           <p className="text-secondary-text text-sm">Non-Original</p>
           <Tooltip
-            title={currentData.data
-              .filter((item) => !item.isOriginalOwner)
-              .length.toLocaleString()}
+            title={(() => {
+              const regularNonOriginal = currentData.data.filter(
+                (item) => !item.isOriginalOwner,
+              ).length;
+              const dupeNonOriginal = (currentData.duplicates || []).filter(
+                (item) => !item.isOriginalOwner,
+              ).length;
+              return (regularNonOriginal + dupeNonOriginal).toLocaleString();
+            })()}
             placement="top"
             arrow
             slotProps={{
@@ -265,11 +288,46 @@ export default function UserStatsSection({
           >
             <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(
-                currentData.data.filter((item) => !item.isOriginalOwner).length,
+                currentData.data.filter((item) => !item.isOriginalOwner)
+                  .length +
+                  (currentData.duplicates || []).filter(
+                    (item) => !item.isOriginalOwner,
+                  ).length,
               )}
             </p>
           </Tooltip>
         </div>
+        {/* Total Duped Items - Only show if dupe_count > 0 */}
+        {currentData.dupe_count && currentData.dupe_count > 0 && (
+          <div className="text-center">
+            <p className="text-secondary-text text-sm">Duped Items</p>
+            <Tooltip
+              title={currentData.dupe_count.toLocaleString()}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <p className="text-primary-text cursor-help text-2xl font-bold">
+                {formatNumber(currentData.dupe_count)}
+              </p>
+            </Tooltip>
+          </div>
+        )}
         <div className="text-center">
           <p className="text-secondary-text text-sm">Money</p>
           <Tooltip
@@ -308,7 +366,9 @@ export default function UserStatsSection({
       />
 
       {/* Total Values */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div
+        className={`mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ${currentData && currentData.duplicates && currentData.duplicates.length > 0 ? "lg:grid-cols-3" : ""}`}
+      >
         {/* Inventory Value */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 text-sm">
@@ -380,6 +440,47 @@ export default function UserStatsSection({
             </Tooltip>
           )}
         </div>
+
+        {/* Total Duped Value - Only show if user has duplicates */}
+        {currentData &&
+          currentData.duplicates &&
+          currentData.duplicates.length > 0 && (
+            <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+              <div className="text-secondary-text mb-2 text-sm">
+                Total Duped Value
+              </div>
+              {isLoadingValues ? (
+                <div className="text-secondary-text animate-pulse text-2xl font-bold">
+                  Loading...
+                </div>
+              ) : (
+                <Tooltip
+                  title={`$${totalDupedValue.toLocaleString()}`}
+                  placement="top"
+                  arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        fontSize: "0.75rem",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        "& .MuiTooltip-arrow": {
+                          color: "var(--color-secondary-bg)",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <div className="text-primary-text cursor-help text-2xl font-bold">
+                    {formatPreciseMoney(totalDupedValue)}
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+          )}
       </div>
 
       {/* Gamepasses */}
@@ -416,7 +517,7 @@ export default function UserStatsSection({
 
                 const GamepassContent = () => (
                   <div className="group border-border-primary bg-primary-bg hover:border-primary/50 hover:bg-primary/5 flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
-                    <div className="relative h-8 w-8 flex-shrink-0">
+                    <div className="relative h-8 w-8 shrink-0">
                       <Image
                         src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
                         alt={gamepass}
