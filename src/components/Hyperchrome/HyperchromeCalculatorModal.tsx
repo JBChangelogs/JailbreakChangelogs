@@ -156,8 +156,8 @@ export default function HyperchromeCalculatorModal({
                         className="text-warning text-3xl"
                       />
                       <div className="text-secondary-text text-xs leading-relaxed">
-                        <span className="font-semibold">Pro tip:</span> After{" "}
-                        {robberiesNeeded} robberies, pity reaches{" "}
+                        <span className="font-semibold">Helpful tip:</span>{" "}
+                        After {robberiesNeeded} robberies, pity reaches{" "}
                         <span className="text-primary-text font-bold">
                           66.6%
                         </span>{" "}

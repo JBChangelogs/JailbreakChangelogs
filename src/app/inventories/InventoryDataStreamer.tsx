@@ -6,6 +6,7 @@ import {
   fetchComments,
   fetchItems,
   fetchUserNetworth,
+  fetchUserMoneyHistory,
 } from "@/utils/api";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -78,12 +79,14 @@ async function InventoryDataFetcher({
     );
   }
 
-  const [result, currentSeason, items, networthData] = await Promise.all([
-    fetchInventoryData(actualRobloxId),
-    fetchLatestSeason(),
-    fetchItems(),
-    fetchUserNetworth(actualRobloxId),
-  ]);
+  const [result, currentSeason, items, networthData, moneyHistoryData] =
+    await Promise.all([
+      fetchInventoryData(actualRobloxId),
+      fetchLatestSeason(),
+      fetchItems(),
+      fetchUserNetworth(actualRobloxId),
+      fetchUserMoneyHistory(actualRobloxId),
+    ]);
 
   // Check if the result contains an error
   if (
@@ -130,7 +133,7 @@ async function InventoryDataFetcher({
           initialComments={initialComments}
           initialCommentUserMap={initialCommentUserMap}
           initialNetworthData={networthData}
-          initialMoneyHistoryData={[]}
+          initialMoneyHistoryData={moneyHistoryData}
         />
       }
     >
@@ -142,6 +145,7 @@ async function InventoryDataFetcher({
         initialCommentUserMap={initialCommentUserMap}
         items={items}
         networthData={networthData}
+        moneyHistoryData={moneyHistoryData}
       />
     </Suspense>
   );

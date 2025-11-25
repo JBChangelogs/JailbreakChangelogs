@@ -8,6 +8,7 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import { Icon } from "../ui/IconWrapper";
 
 interface DuplicatesTabProps {
   initialData: { data: InventoryItem[]; user_id: string };
@@ -308,7 +309,7 @@ export default function DuplicatesTab({
                     className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-primary-text font-bold text-sm w-6 flex-shrink-0">
+                      <span className="text-primary-text font-bold text-sm w-6 shrink-0">
                         #{rank}
                       </span>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -410,6 +411,21 @@ export default function DuplicatesTab({
             : ""}
         </p>
       </div>
+
+      {/* Helpful Tip */}
+      {filteredAndSortedItems.length > 0 && (
+        <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+          <div className="text-primary-text flex items-start gap-2 text-sm">
+            <Icon
+              icon="emojione:light-bulb"
+              className="text-button-info shrink-0 text-lg"
+            />
+            <span className="font-medium">
+              Helpful Tip: This tab shows items you have multiple copies of.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Cards container with secondary background */}
       <div className="bg-secondary-bg rounded-lg p-4">

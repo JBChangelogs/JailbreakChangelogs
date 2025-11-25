@@ -63,8 +63,8 @@ export default async function SeasonLeaderboardPage() {
                       className="text-button-info flex-shrink-0 text-base sm:text-lg"
                     />
                     <span className="font-medium leading-relaxed">
-                      Pro Tip: The leaderboard updates every hour during active
-                      seasons.
+                      Helpful Tip: The leaderboard updates every hour during
+                      active seasons.
                     </span>
                   </div>
                 </div>

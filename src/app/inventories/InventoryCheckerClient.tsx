@@ -19,6 +19,7 @@ import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
 import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
+import DupedItemsTab from "@/components/Inventory/DupedItemsTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -79,6 +80,7 @@ export default function InventoryCheckerClient({
   initialCommentUserMap = {},
   items = [],
   initialNetworthData = [],
+  initialMoneyHistoryData = [],
 }: InventoryCheckerClientProps) {
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
@@ -146,6 +148,27 @@ export default function InventoryCheckerClient({
       }
     });
 
+    // Add all item owners from duplicate items
+    if (currentData.duplicates) {
+      currentData.duplicates.forEach((item) => {
+        // Check info array for Current Owner
+        const currentOwnerInfo = item.info?.find(
+          (info) => info.title === "Current Owner",
+        );
+        if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
+          userIds.add(currentOwnerInfo.value);
+        }
+
+        // Check info array for Original Owner
+        const originalOwnerInfo = item.info?.find(
+          (info) => info.title === "Original Owner",
+        );
+        if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
+          userIds.add(originalOwnerInfo.value);
+        }
+      });
+    }
+
     return Array.from(userIds);
   }, [currentData, robloxId]);
 
@@ -174,6 +197,11 @@ export default function InventoryCheckerClient({
       })()
     : false;
 
+  // Check if there are duped items from the API
+  const hasDupedItems = Boolean(
+    currentData && currentData.duplicates && currentData.duplicates.length > 0,
+  );
+
   // Hash navigation
   useEffect(() => {
     const handleHashChange = () => {
@@ -182,12 +210,38 @@ export default function InventoryCheckerClient({
 
       if (hash === "copies" && hasDuplicates) {
         setActiveTab(1);
-      } else if (hash === "money" && robloxId) {
+      } else if (hash === "dupes" && hasDupedItems) {
         setActiveTab(hasDuplicates ? 2 : 1);
+      } else if (hash === "money" && robloxId) {
+        const moneyTab =
+          hasDuplicates && hasDupedItems
+            ? 3
+            : hasDuplicates && !hasDupedItems
+              ? 2
+              : !hasDuplicates && hasDupedItems
+                ? 2
+                : 1;
+        setActiveTab(moneyTab);
       } else if (hash === "networth" && robloxId) {
-        setActiveTab(hasDuplicates ? 3 : 2);
+        const networthTab =
+          hasDuplicates && hasDupedItems
+            ? 4
+            : hasDuplicates && !hasDupedItems
+              ? 3
+              : !hasDuplicates && hasDupedItems
+                ? 3
+                : 2;
+        setActiveTab(networthTab);
       } else if (hash === "comments" && hasComments) {
-        setActiveTab(hasDuplicates ? 4 : robloxId ? 3 : 1);
+        const commentsTab =
+          hasDuplicates && hasDupedItems
+            ? 5
+            : hasDuplicates && !hasDupedItems
+              ? 4
+              : !hasDuplicates && hasDupedItems
+                ? 4
+                : 3;
+        setActiveTab(commentsTab);
       } else {
         setActiveTab(0);
       }
@@ -199,7 +253,7 @@ export default function InventoryCheckerClient({
     // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [robloxId, hasDuplicates]);
+  }, [robloxId, hasDuplicates, hasDupedItems]);
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = !robloxId && activeTab === 1 ? 0 : activeTab;
@@ -354,19 +408,29 @@ export default function InventoryCheckerClient({
     } else if (newValue === 1 && hasDuplicates) {
       window.location.hash = "copies";
     } else if (
-      (hasDuplicates && newValue === 2 && robloxId) ||
-      (!hasDuplicates && newValue === 1 && robloxId)
+      (hasDuplicates && newValue === 2 && hasDupedItems) ||
+      (!hasDuplicates && newValue === 1 && hasDupedItems)
+    ) {
+      window.location.hash = "dupes";
+    } else if (
+      (hasDuplicates && hasDupedItems && newValue === 3 && robloxId) ||
+      (hasDuplicates && !hasDupedItems && newValue === 2 && robloxId) ||
+      (!hasDuplicates && hasDupedItems && newValue === 2 && robloxId) ||
+      (!hasDuplicates && !hasDupedItems && newValue === 1 && robloxId)
     ) {
       window.location.hash = "money";
     } else if (
-      (hasDuplicates && newValue === 3 && robloxId) ||
-      (!hasDuplicates && newValue === 2 && robloxId)
+      (hasDuplicates && hasDupedItems && newValue === 4 && robloxId) ||
+      (hasDuplicates && !hasDupedItems && newValue === 3 && robloxId) ||
+      (!hasDuplicates && hasDupedItems && newValue === 3 && robloxId) ||
+      (!hasDuplicates && !hasDupedItems && newValue === 2 && robloxId)
     ) {
       window.location.hash = "networth";
     } else if (
-      (hasDuplicates && newValue === 4) ||
-      (!hasDuplicates && !robloxId && newValue === 1) ||
-      (robloxId && !hasDuplicates && newValue === 3)
+      (hasDuplicates && hasDupedItems && newValue === 5) ||
+      (hasDuplicates && !hasDupedItems && newValue === 4) ||
+      (!hasDuplicates && hasDupedItems && newValue === 4) ||
+      (!hasDuplicates && !hasDupedItems && newValue === 3)
     ) {
       window.location.hash = "comments";
     }
@@ -814,6 +878,7 @@ export default function InventoryCheckerClient({
                 }
                 hasComments={Boolean(robloxId)}
                 hasDuplicates={hasDuplicates}
+                hasDupedItems={hasDupedItems}
                 robloxId={robloxId}
               />
 
@@ -842,10 +907,49 @@ export default function InventoryCheckerClient({
 
                 {((hasDuplicates && effectiveActiveTab === 2) ||
                   (!hasDuplicates && effectiveActiveTab === 1)) &&
-                  robloxId && <MoneyHistoryChart userId={robloxId} />}
+                  hasDupedItems &&
+                  currentData.duplicates && (
+                    <DupedItemsTab
+                      duplicates={currentData.duplicates}
+                      robloxUsers={mergedRobloxUsers}
+                      robloxAvatars={robloxAvatars}
+                      onItemClick={handleItemClick}
+                      itemsData={itemsData}
+                      userId={currentData.user_id}
+                    />
+                  )}
 
-                {((hasDuplicates && effectiveActiveTab === 3) ||
-                  (!hasDuplicates && effectiveActiveTab === 2)) &&
+                {((hasDuplicates &&
+                  hasDupedItems &&
+                  effectiveActiveTab === 3) ||
+                  (hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 2) ||
+                  (!hasDuplicates &&
+                    hasDupedItems &&
+                    effectiveActiveTab === 2) ||
+                  (!hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 1)) &&
+                  robloxId && (
+                    <MoneyHistoryChart
+                      userId={robloxId}
+                      initialData={initialMoneyHistoryData}
+                    />
+                  )}
+
+                {((hasDuplicates &&
+                  hasDupedItems &&
+                  effectiveActiveTab === 4) ||
+                  (hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 3) ||
+                  (!hasDuplicates &&
+                    hasDupedItems &&
+                    effectiveActiveTab === 3) ||
+                  (!hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 2)) &&
                   robloxId && (
                     <NetworthHistoryChart
                       userId={robloxId}
@@ -853,8 +957,18 @@ export default function InventoryCheckerClient({
                     />
                   )}
 
-                {((hasDuplicates && effectiveActiveTab === 4) ||
-                  (!hasDuplicates && effectiveActiveTab === 3)) &&
+                {((hasDuplicates &&
+                  hasDupedItems &&
+                  effectiveActiveTab === 5) ||
+                  (hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 4) ||
+                  (!hasDuplicates &&
+                    hasDupedItems &&
+                    effectiveActiveTab === 4) ||
+                  (!hasDuplicates &&
+                    !hasDupedItems &&
+                    effectiveActiveTab === 3)) &&
                   robloxId && (
                     <ChangelogComments
                       changelogId={robloxId}
@@ -899,17 +1013,20 @@ function InventoryOverflowTabs({
   onChange,
   hasComments,
   hasDuplicates,
+  hasDupedItems,
   robloxId,
 }: {
   value: number;
   onChange: (e: React.SyntheticEvent, v: number) => void;
   hasComments: boolean;
   hasDuplicates: boolean;
+  hasDupedItems: boolean;
   robloxId?: string;
 }) {
   const labels = [
     "Inventory Items",
     ...(hasDuplicates ? ["Multiple Copies"] : []),
+    ...(hasDupedItems ? ["Duplicate Items"] : []),
     ...(robloxId ? ["Money Graph"] : []),
     ...(robloxId ? ["Networth Graph"] : []),
     ...(hasComments ? ["Comments"] : []),

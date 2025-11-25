@@ -597,16 +597,16 @@ export default function InventoryItems({
       </div>
 
       {/* Items Grid */}
-      {/* Pro Tip - Only show when there are results and not filtering */}
+      {/* Helpful Tip - Only show when there are results and not filtering */}
       {!isFiltering && filteredAndSortedItems.length > 0 && (
         <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
           <div className="text-primary-text flex items-start gap-2 text-sm">
             <Icon
               icon="emojione:light-bulb"
-              className="text-button-info flex-shrink-0 text-lg"
+              className="text-button-info shrink-0 text-lg"
             />
             <span className="font-medium">
-              Pro Tip: Click on any item card to view its ownership history.
+              Helpful Tip: Click on any item card to view its ownership history.
             </span>
           </div>
         </div>

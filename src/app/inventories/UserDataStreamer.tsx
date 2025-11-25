@@ -5,7 +5,7 @@ import { Season } from "@/types/seasons";
 import { UserDataService } from "@/services/userDataService";
 import { fetchUserByRobloxId } from "@/utils/api";
 import { logError } from "@/services/logger";
-import { CommentData, UserNetworthData } from "@/utils/api";
+import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import { Item } from "@/types";
 
@@ -17,6 +17,7 @@ interface UserDataStreamerProps {
   initialCommentUserMap?: Record<string, UserData>;
   items: Item[]; // Items data passed from server
   networthData: UserNetworthData[];
+  moneyHistoryData: MoneyHistory[];
 }
 
 // Loading component for user data - shows inventory immediately
@@ -28,6 +29,7 @@ function UserDataLoadingFallback({
   initialCommentUserMap,
   items,
   networthData,
+  moneyHistoryData,
 }: UserDataStreamerProps) {
   return (
     <InventoryCheckerClient
@@ -41,7 +43,7 @@ function UserDataLoadingFallback({
       initialCommentUserMap={initialCommentUserMap}
       items={items}
       initialNetworthData={networthData}
-      initialMoneyHistoryData={[]}
+      initialMoneyHistoryData={moneyHistoryData}
     />
   );
 }
@@ -55,6 +57,7 @@ async function UserDataFetcher({
   initialCommentUserMap,
   items,
   networthData,
+  moneyHistoryData,
 }: UserDataStreamerProps) {
   // Extract user IDs from inventory data (only main user since original owner avatars are no longer needed)
   const userIds = UserDataService.extractUserIdsFromInventory(
@@ -98,7 +101,7 @@ async function UserDataFetcher({
       initialCommentUserMap={initialCommentUserMap}
       items={items}
       initialNetworthData={networthData}
-      initialMoneyHistoryData={[]}
+      initialMoneyHistoryData={moneyHistoryData}
     />
   );
 }
@@ -111,6 +114,7 @@ export default function UserDataStreamer({
   initialCommentUserMap,
   items,
   networthData,
+  moneyHistoryData,
 }: UserDataStreamerProps) {
   return (
     <Suspense
@@ -123,6 +127,7 @@ export default function UserDataStreamer({
           initialCommentUserMap={initialCommentUserMap}
           items={items}
           networthData={networthData}
+          moneyHistoryData={moneyHistoryData}
         />
       }
     >
@@ -134,6 +139,7 @@ export default function UserDataStreamer({
         initialCommentUserMap={initialCommentUserMap}
         items={items}
         networthData={networthData}
+        moneyHistoryData={moneyHistoryData}
       />
     </Suspense>
   );

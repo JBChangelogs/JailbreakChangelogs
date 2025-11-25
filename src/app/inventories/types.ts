@@ -26,6 +26,7 @@ export interface InventoryItem {
 export interface InventoryData {
   user_id: string;
   data: InventoryItem[];
+  duplicates?: InventoryItem[];
   item_count: number;
   level: number;
   money: number;

@@ -1488,14 +1488,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             </Tooltip>
           </div>
 
-          {/* Pro tip about Shift+Clear */}
+          {/* Helpful tip about Shift+Clear */}
           <div className="text-center">
             <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
               <Icon
                 icon="emojione:light-bulb"
                 className="text-sm text-yellow-500"
               />
-              Pro tip: Hold{" "}
+              Helpful tip: Hold{" "}
               <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
                 Shift
               </kbd>{" "}

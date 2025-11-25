@@ -523,14 +523,14 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             </div>
           </div>
 
-          {/* Pro tip about drag and drop */}
+          {/* Helpful tip about drag and drop */}
           <div className="text-center mb-4">
             <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
               <Icon
                 icon="emojione:light-bulb"
                 className="text-sm text-yellow-500"
               />
-              Pro tip: Drag and drop items to{" "}
+              Helpful tip: Drag and drop items to{" "}
               <span className="text-status-success font-semibold">
                 Offering
               </span>{" "}

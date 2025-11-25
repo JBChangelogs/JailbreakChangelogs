@@ -74,7 +74,7 @@ export default async function SeasonContractsPage() {
                       className="text-button-info flex-shrink-0 text-base sm:text-lg"
                     />
                     <span className="font-medium leading-relaxed">
-                      Pro Tip: New seasons typically start shortly after the
+                      Helpful Tip: New seasons typically start shortly after the
                       previous one ends.
                     </span>
                   </div>
@@ -140,7 +140,7 @@ export default async function SeasonContractsPage() {
                       className="text-button-info flex-shrink-0 text-base sm:text-lg"
                     />
                     <span className="font-medium leading-relaxed">
-                      Pro Tip: Contracts are updated weekly during active
+                      Helpful Tip: Contracts are updated weekly during active
                       seasons.
                     </span>
                   </div>

@@ -345,13 +345,13 @@ export default function ValuesSearchControls({
             </div>
           </div>
 
-          {/* Pro tip about Ctrl+F */}
+          {/* Helpful tip about Ctrl+F */}
           <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
             <Icon
               icon="emojione:light-bulb"
               className="text-sm text-yellow-500"
             />
-            Pro tip: Press{" "}
+            Helpful tip: Press{" "}
             <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
               Ctrl
             </kbd>

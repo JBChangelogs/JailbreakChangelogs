@@ -2,12 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Skeleton } from "@mui/material";
-import toast from "react-hot-toast";
 import { useTheme } from "@/contexts/ThemeContext";
-import {
-  CustomButtonGroup,
-  CustomButton,
-} from "@/components/ui/CustomButtonGroup";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -54,9 +49,6 @@ const NetworthHistoryChart = ({
   );
 
   const [history] = useState<UserNetworthData[]>(filteredInitialData);
-  const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
-    "all",
-  );
   const [loading] = useState(false);
   const chartRef = useRef<ChartJS<"line">>(null);
   const { theme } = useTheme();
@@ -177,42 +169,8 @@ const NetworthHistoryChart = ({
     (a, b) => a.snapshot_time - b.snapshot_time,
   );
 
-  // Get the oldest date in the history
-  const oldestDate = new Date(sortedHistory[0].snapshot_time * 1000);
-  const now = new Date();
-
-  // Calculate available ranges
-  const ranges = {
-    "1w": new Date(now.setDate(now.getDate() - 7)),
-    "1m": new Date(now.setMonth(now.getMonth() - 1)),
-    "6m": new Date(now.setMonth(now.getMonth() - 6)),
-    "1y": new Date(now.setFullYear(now.getFullYear() - 1)),
-    all: new Date(0),
-  };
-
-  // Check if each range has data
-  const hasDataForRange = (range: keyof typeof ranges) => {
-    if (range === "all") return true;
-    return oldestDate <= ranges[range];
-  };
-
-  // Handle date range change
-  const handleDateRangeChange = (range: "1w" | "1m" | "6m" | "1y" | "all") => {
-    if (!hasDataForRange(range)) {
-      toast.error("No data available for this time range");
-      return;
-    }
-    setDateRange(range);
-  };
-
-  // Filter data based on date range
-  const getFilteredData = () => {
-    return sortedHistory.filter(
-      (item) => new Date(item.snapshot_time * 1000) >= ranges[dateRange],
-    );
-  };
-
-  const filteredData = getFilteredData();
+  // Use all data without filtering
+  const filteredData = sortedHistory;
 
   const chartData: ChartData<"line"> = {
     labels: filteredData.map((item) => new Date(item.snapshot_time * 1000)),
@@ -351,45 +309,6 @@ const NetworthHistoryChart = ({
           </div>
         </div>
 
-        <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <CustomButtonGroup>
-            <CustomButton
-              onClick={() => handleDateRangeChange("1w")}
-              selected={dateRange === "1w"}
-              disabled={!hasDataForRange("1w")}
-            >
-              1W
-            </CustomButton>
-            <CustomButton
-              onClick={() => handleDateRangeChange("1m")}
-              selected={dateRange === "1m"}
-              disabled={!hasDataForRange("1m")}
-            >
-              1M
-            </CustomButton>
-            <CustomButton
-              onClick={() => handleDateRangeChange("6m")}
-              selected={dateRange === "6m"}
-              disabled={!hasDataForRange("6m")}
-            >
-              6M
-            </CustomButton>
-            <CustomButton
-              onClick={() => handleDateRangeChange("1y")}
-              selected={dateRange === "1y"}
-              disabled={!hasDataForRange("1y")}
-            >
-              1Y
-            </CustomButton>
-            <CustomButton
-              onClick={() => handleDateRangeChange("all")}
-              selected={dateRange === "all"}
-              disabled={!hasDataForRange("all")}
-            >
-              All
-            </CustomButton>
-          </CustomButtonGroup>
-        </div>
         <div className="h-[350px]">
           <Line ref={chartRef} data={chartData} options={options} />
         </div>
