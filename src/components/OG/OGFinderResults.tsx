@@ -132,7 +132,7 @@ export default function OGFinderResults({
   // Helper functions
   const getUserDisplay = (userId: string) => {
     const user = localRobloxUsers[userId];
-    return user?.name || user?.displayName || userId;
+    return user?.displayName || user?.name || userId;
   };
 
   const getUsername = (userId: string) => {

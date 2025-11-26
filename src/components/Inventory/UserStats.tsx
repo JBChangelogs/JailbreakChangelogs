@@ -57,7 +57,7 @@ export default function UserStats({
     (userId: string) => {
       const user = robloxUsers[userId];
       if (!user) return userId;
-      return user.name || user.displayName || userId;
+      return user.displayName || user.name || userId;
     },
     [robloxUsers],
   );

@@ -455,7 +455,7 @@ export default function InventoryCheckerClient({
   const getUserDisplay = useCallback(
     (userId: string) => {
       const user = robloxUsers[userId] || initialRobloxUsers?.[userId];
-      return user?.name || user?.displayName || userId;
+      return user?.displayName || user?.name || userId;
     },
     [robloxUsers, initialRobloxUsers],
   );

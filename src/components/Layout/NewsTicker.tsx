@@ -11,9 +11,7 @@ export default function NewsTicker() {
 
   useEffect(() => {
     // Only run on client after mount - check localStorage
-    const dismissed = safeLocalStorage.getItem(
-      "giveaway-announcement-dismissed",
-    );
+    const dismissed = safeLocalStorage.getItem("javelin-giveaway-dismissed");
     // eslint-disable-next-line
     setIsVisible(dismissed !== "true");
   }, []);
@@ -21,7 +19,7 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem("giveaway-announcement-dismissed", "true");
+    safeLocalStorage.setItem("javelin-giveaway-dismissed", "true");
   };
 
   if (!shouldShowTicker || isVisible !== true) return null;
@@ -38,16 +36,16 @@ export default function NewsTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              We&apos;re giving away a{" "}
+              We&apos;re giving out a{" "}
               <Link
-                href="/item/hyperchrome/HyperBlue%20Level%205"
+                href="/item/vehicle/Javelin"
                 className="text-blue-400 hover:text-blue-300 underline font-semibold"
               >
-                Hyperblue Level 5
+                Javelin vehicle
               </Link>
               ! Enter in our{" "}
               <a
-                href="https://discord.jailbreakchangelogs.xyz/"
+                href="https://discord.com/channels/1286064050135896064/1361921979036471476/1443305617241407569"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline font-semibold"
